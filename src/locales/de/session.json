@@ -463,7 +463,7 @@
       "removed": "Aus Meine Übungen entfernt.",
       "undo": "Rückgängig",
       "notSaved": "Meine Übungen konnten gerade nicht gelesen oder gespeichert werden, deshalb hat sich nichts geändert.",
-      "undoFull": "Meine Übungen ist voll (50). Entferne eine Übung, dann holt Rückgängig diese zurück.",
+      "undoFull": "Meine Übungen ist voll (50), deshalb kann Rückgängig diese nicht zurückholen.",
       "undoAlready": "Diese Übung ist schon wieder in Meine Übungen.",
       "cantBuild": "Diese Übung lässt sich nicht mehr bauen: Diese Version von Yames erstellt sie nicht mehr. Sie bleibt hier, bis du sie entfernst.",
       "howTo": "Spiel sie wie notiert, mit dem Klick."

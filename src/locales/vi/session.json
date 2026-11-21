@@ -463,7 +463,7 @@
       "removed": "Đã xóa khỏi Bài của tôi.",
       "undo": "Hoàn tác",
       "notSaved": "Không thể đọc hoặc lưu Bài của tôi lúc này, nên không có gì thay đổi.",
-      "undoFull": "Bài của tôi đã đầy (50). Hãy xóa một bài, rồi Hoàn tác sẽ đưa bài này trở lại.",
+      "undoFull": "Bài của tôi đã đầy (50), nên Hoàn tác không thể đưa bài này trở lại.",
       "undoAlready": "Bài này đã có lại trong Bài của tôi.",
       "cantBuild": "Bài này không thể dựng lại nữa: phiên bản Yames này không còn tạo ra nó. Nó vẫn ở đây cho đến khi bạn xóa.",
       "howTo": "Chơi đúng như đã viết, theo click."

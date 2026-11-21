@@ -142,16 +142,20 @@
       },
       "notNow": {
         "noTake": "Bu alıştırmanın henüz yanıt verebileceğim bir denemesi yok.",
+        "notSaved": "{{take}}. deneme henüz kaydedilmedi, bu yüzden ondan önceki denemeleri okuyamıyorum.",
         "ungraded": "Değerlendirmesiz çalıyorsun, bu yüzden buna yanıt verecek hiçbir şey ölçmedim."
       },
       "history": {
         "leftOut": "Adil değil diye işaretlediğin {{count}} denemeyi dışarıda bıraktım.",
-        "leftOut_other": "Adil değil diye işaretlediğin {{count}} denemeyi dışarıda bıraktım."
+        "leftOut_other": "Adil değil diye işaretlediğin {{count}} denemeyi dışarıda bıraktım.",
+        "otherNotes": "Bu alıştırmanın başka bir varyantında çalınan {{count}} denemeyi dışarıda bıraktım.",
+        "otherNotes_other": "Bu alıştırmanın başka bir varyantında çalınan {{count}} denemeyi dışarıda bıraktım."
       },
       "changed": {
         "first": "Bu alıştırmanın {{take}}. denemeden önce ölçülmüş denemesi yok, bu yüzden karşılaştıracak bir şey yok.",
         "onlyUnfair": "Bu alıştırmanın {{take}}. denemeden önce ölçülmüş tek denemeleri adil değil diye işaretlediklerin, bu yüzden onlarla karşılaştırmıyorum.",
         "thisUnfair": "{{take}}. denemenin değerlendirmesini adil değil diye işaretledin, bu yüzden diğer denemelerle karşılaştırmıyorum.",
+        "noneAlike": "Alıştırmanın bu varyantının {{take}}. denemeden önce ölçülmüş, karşılaştırabileceğim bir denemesi yok.",
         "sameTempo": "{{take}}. deneme ve ondan önceki son ölçülmüş deneme ikisi de {{bpm}} BPM'deydi.",
         "tempo": "{{take}}. denemeden önceki son ölçülmüş deneme {{before}} BPM'deydi; {{take}}. deneme {{bpm}} BPM'deydi.",
         "metric": {
@@ -180,8 +184,9 @@
         "clean": "Bunlardan {{count}} tanesi temiz tempo kazandı, {{bpm}} BPM'de.",
         "clean_other": "Bunlardan {{count}} tanesi temiz tempo kazandı; en hızlısı {{bpm}} BPM'ydi.",
         "cleanNone": "Bunlardan hiçbiri temiz tempo kazanmadı.",
-        "even": "Düzgünlük, bunu tutan {{count}} tanesinde: en eskisinde %{{first}}, en yenisinde %{{last}}, en iyisinde %{{best}}.",
-        "even_other": "Düzgünlük, bunu tutan {{count}} tanesinde: en eskisinde %{{first}}, en yenisinde %{{last}}, en iyisinde %{{best}}.",
+        "cleanUnknown": "Kazandıkları temiz tempoları sayamıyorum: bazıları kazanıp kazanmadığını kaydetmemiş.",
+        "even": "Düzgünlük, bunu tutan {{count}} tanesinde: bunların en eskisinde %{{first}}, {{firstBpm}} BPM'de; bunların en yenisinde %{{last}}, {{lastBpm}} BPM'de; en iyisinde %{{best}}, {{bestBpm}} BPM'de.",
+        "even_other": "Düzgünlük, bunu tutan {{count}} tanesinde: bunların en eskisinde %{{first}}, {{firstBpm}} BPM'de; bunların en yenisinde %{{last}}, {{lastBpm}} BPM'de; en iyisinde %{{best}}, {{bestBpm}} BPM'de.",
         "evenNone": "Bunlardan ikiden azında düzgünlük değeri vardı, bu yüzden karşılaştırmıyorum."
       },
       "made": {
@@ -195,7 +200,9 @@
           "notes": "Doğru nota: ses yüksekliğini belirleyebildiğim notalarda yazılı olanların oranı en az %{{bar}}.",
           "hold": "Sona kadar korunan düzgünlük: değerlendirilen kesitin son ölçülerinde en az %{{bar}}."
         },
-        "clean": "Bir deneme art arda {{need}} temiz ölçüye sahip olduğunda temiz tempon değişir.",
+        "unnamed": "Bunlardan {{count}} tanesi henüz tarif edemediğim bir kontrol.",
+        "unnamed_other": "Bunlardan {{count}} tanesi henüz tarif edemediğim bir kontrol.",
+        "clean": "Geçen bir deneme, art arda {{need}} temiz ölçüyle kendi temposunda temiz tempo kazanır ve daha hızlıysa temiz tempoyu yukarı taşır.",
         "tempo": "{{passAt}} BPM veya daha hızlı temiz bir deneme alıştırmayı geçer.",
         "ungraded": {
           "selfChecked": "Bu alıştırmayı kendin kontrol ediyorsun: uygulama değerlendirmiyor, bu yüzden dökülecek bir puan yok.",
@@ -219,13 +226,27 @@
       },
       "distance": {
         "short": {
-          "even": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{gap}} puan altında.",
-          "heard": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{gap}} puan altında.",
+          "even": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "even_other": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "heard": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "heard_other": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
           "extras": "Fazla nota: {{take}}. denemede {{value}}, çıtanın izin verdiğinden {{gap}} fazla ({{over}} ölçüde {{bar}} veya daha az).",
-          "accents": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{gap}} puan altında.",
-          "notes": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{gap}} puan altında.",
-          "hold": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{gap}} puan altında."
+          "accents": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "accents_other": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "notes": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "notes_other": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "hold": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "hold_other": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında."
         },
+        "under": {
+          "even": "Düzgünlük, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "heard": "Duyulan nota, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "accents": "Oturan aksan, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "notes": "Doğru nota, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "hold": "Sona kadar korunan düzgünlük, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında."
+        },
+        "unnamed": "Çıtanın tarif edemediğim {{count}} kontrolü daha var, bu yüzden {{take}}. denemenin onda nasıl olduğunu söyleyemem.",
+        "unnamed_other": "Çıtanın tarif edemediğim {{count}} kontrolü daha var, bu yüzden {{take}}. denemenin onlarda nasıl olduğunu söyleyemem.",
         "met": {
           "even": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
           "heard": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",

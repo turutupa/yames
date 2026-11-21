@@ -475,7 +475,7 @@
       "removed": "Rimosso da I miei esercizi.",
       "undo": "Annulla",
       "notSaved": "I miei esercizi non si sono potuti leggere o salvare in questo momento, quindi non è cambiato nulla.",
-      "undoFull": "I miei esercizi è pieno (50). Rimuovine uno, poi Annulla rimette questo.",
+      "undoFull": "I miei esercizi è pieno (50), quindi Annulla non può rimettere questo.",
       "undoAlready": "Questo è già tornato in I miei esercizi.",
       "cantBuild": "Questo non si può più costruire: questa versione di Yames non lo crea più. Resta qui finché non lo rimuovi.",
       "howTo": "Suonalo come scritto, con il click."

@@ -144,17 +144,22 @@
       },
       "notNow": {
         "noTake": "Ainda não há nenhuma tomada deste exercício para responder.",
+        "notSaved": "A tomada {{take}} ainda não foi salva, então não consigo ler as tomadas anteriores a ela.",
         "ungraded": "Você está tocando sem avaliação, então eu não medi nada para responder a isso."
       },
       "history": {
         "leftOut": "Deixei de fora {{count}} tomada que você marcou como não justa.",
         "leftOut_many": "Deixei de fora {{count}} tomadas que você marcou como não justas.",
-        "leftOut_other": "Deixei de fora {{count}} tomadas que você marcou como não justas."
+        "leftOut_other": "Deixei de fora {{count}} tomadas que você marcou como não justas.",
+        "otherNotes": "Deixei de fora {{count}} tomada tocada em outra variante deste exercício.",
+        "otherNotes_many": "Deixei de fora {{count}} tomadas tocadas em outras variantes deste exercício.",
+        "otherNotes_other": "Deixei de fora {{count}} tomadas tocadas em outras variantes deste exercício."
       },
       "changed": {
         "first": "Não tenho nenhuma tomada medida deste exercício antes da tomada {{take}}, então não há com o que compará-la.",
         "onlyUnfair": "As únicas tomadas medidas deste exercício antes da tomada {{take}} são tomadas que você marcou como não justas, então não a comparo com elas.",
         "thisUnfair": "Você marcou a avaliação da tomada {{take}} como não justa, então não a comparo com outras tomadas.",
+        "noneAlike": "Não tenho nenhuma tomada medida desta variante do exercício antes da tomada {{take}} com a qual eu possa compará-la.",
         "sameTempo": "A tomada {{take}} e a última tomada medida antes dela estavam as duas a {{bpm}} BPM.",
         "tempo": "A última tomada medida antes da tomada {{take}} estava a {{before}} BPM; a tomada {{take}} estava a {{bpm}} BPM.",
         "metric": {
@@ -187,9 +192,10 @@
         "clean_many": "{{count}} delas conseguiram um andamento limpo; a mais rápida foi a {{bpm}} BPM.",
         "clean_other": "{{count}} delas conseguiram um andamento limpo; a mais rápida foi a {{bpm}} BPM.",
         "cleanNone": "Nenhuma delas conseguiu um andamento limpo.",
-        "even": "Regularidade, nas {{count}} que a mantiveram: {{first}}% na mais antiga, {{last}}% na mais recente, {{best}}% no melhor caso.",
-        "even_many": "Regularidade, nas {{count}} que a mantiveram: {{first}}% na mais antiga, {{last}}% na mais recente, {{best}}% no melhor caso.",
-        "even_other": "Regularidade, nas {{count}} que a mantiveram: {{first}}% na mais antiga, {{last}}% na mais recente, {{best}}% no melhor caso.",
+        "cleanUnknown": "Não consigo contar os andamentos limpos que elas conseguiram: algumas delas não guardaram se conseguiram um.",
+        "even": "Regularidade, nas {{count}} delas que a mantiveram: {{first}}% na mais antiga dessas, a {{firstBpm}} BPM; {{last}}% na mais recente dessas, a {{lastBpm}} BPM; {{best}}% no melhor caso, a {{bestBpm}} BPM.",
+        "even_many": "Regularidade, nas {{count}} delas que a mantiveram: {{first}}% na mais antiga dessas, a {{firstBpm}} BPM; {{last}}% na mais recente dessas, a {{lastBpm}} BPM; {{best}}% no melhor caso, a {{bestBpm}} BPM.",
+        "even_other": "Regularidade, nas {{count}} delas que a mantiveram: {{first}}% na mais antiga dessas, a {{firstBpm}} BPM; {{last}}% na mais recente dessas, a {{lastBpm}} BPM; {{best}}% no melhor caso, a {{bestBpm}} BPM.",
         "evenNone": "Menos de duas delas mantiveram um número de regularidade, então não o comparo."
       },
       "made": {
@@ -204,7 +210,10 @@
           "notes": "Notas certas: pelo menos {{bar}}% das notas cuja altura consigo identificar são as escritas.",
           "hold": "Regularidade mantida até o fim: pelo menos {{bar}}% nos últimos compassos do trecho avaliado."
         },
-        "clean": "Uma tomada mexe no seu andamento limpo quando tem {{need}} compassos limpos seguidos.",
+        "unnamed": "{{count}} delas é uma verificação que ainda não sei descrever.",
+        "unnamed_many": "{{count}} delas são verificações que ainda não sei descrever.",
+        "unnamed_other": "{{count}} delas são verificações que ainda não sei descrever.",
+        "clean": "Uma tomada que passa, com {{need}} compassos limpos seguidos, conquista um andamento limpo no seu próprio andamento e sobe o seu andamento limpo quando é mais rápida.",
         "tempo": "Uma tomada limpa a {{passAt}} BPM ou mais rápida passa no exercício.",
         "ungraded": {
           "selfChecked": "Este exercício é um que você mesmo confere: o app não o avalia, então não há pontuação para detalhar.",
@@ -228,13 +237,33 @@
       },
       "distance": {
         "short": {
-          "even": "Regular: {{value}}% na tomada {{take}}, a {{gap}} pontos da meta de {{bar}}%.",
-          "heard": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{gap}} pontos da meta de {{bar}}%.",
+          "even": "Regular: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "even_many": "Regular: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "even_other": "Regular: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "heard": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "heard_many": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "heard_other": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
           "extras": "Notas a mais: {{value}} na tomada {{take}}, {{gap}} a mais do que a meta permite ({{bar}} ou menos em {{over}} compassos).",
-          "accents": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{gap}} pontos da meta de {{bar}}%.",
-          "notes": "Notas certas: {{value}}% na tomada {{take}}, a {{gap}} pontos da meta de {{bar}}%.",
-          "hold": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, a {{gap}} pontos da meta de {{bar}}%."
+          "accents": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "accents_many": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "accents_other": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "notes": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "notes_many": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "notes_other": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "hold": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "hold_many": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "hold_other": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%."
         },
+        "under": {
+          "even": "Regular na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "heard": "Notas ouvidas na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "accents": "Acentos certeiros na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "notes": "Notas certas na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "hold": "Regularidade mantida até o fim na tomada {{take}}: a menos de um ponto da meta de {{bar}}%."
+        },
+        "unnamed": "A meta também tem {{count}} verificação que ainda não sei descrever, então não consigo dizer como a tomada {{take}} se saiu nela.",
+        "unnamed_many": "A meta também tem {{count}} verificações que ainda não sei descrever, então não consigo dizer como a tomada {{take}} se saiu nelas.",
+        "unnamed_other": "A meta também tem {{count}} verificações que ainda não sei descrever, então não consigo dizer como a tomada {{take}} se saiu nelas.",
         "met": {
           "even": "Regular: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
           "heard": "Notas ouvidas: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",

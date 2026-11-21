@@ -142,16 +142,20 @@
       },
       "notNow": {
         "noTake": "Er is nog geen take van deze oefening om uit te antwoorden.",
+        "notSaved": "Take {{take}} is nog niet opgeslagen, dus ik kan de takes ervoor niet lezen.",
         "ungraded": "Je speelt zonder beoordeling, dus ik heb niets gemeten om dat uit te beantwoorden."
       },
       "history": {
         "leftOut": "Ik heb {{count}} take weggelaten die je als niet eerlijk hebt gemarkeerd.",
-        "leftOut_other": "Ik heb {{count}} takes weggelaten die je als niet eerlijk hebt gemarkeerd."
+        "leftOut_other": "Ik heb {{count}} takes weggelaten die je als niet eerlijk hebt gemarkeerd.",
+        "otherNotes": "Ik heb {{count}} take weggelaten die op een andere variant van deze oefening is gespeeld.",
+        "otherNotes_other": "Ik heb {{count}} takes weggelaten die op andere varianten van deze oefening zijn gespeeld."
       },
       "changed": {
         "first": "Ik heb geen gemeten take van deze oefening vóór take {{take}}, dus er is niets om mee te vergelijken.",
         "onlyUnfair": "De enige gemeten takes van deze oefening vóór take {{take}} zijn takes die je als niet eerlijk hebt gemarkeerd, dus ik vergelijk hem er niet mee.",
         "thisUnfair": "Je hebt de beoordeling van take {{take}} als niet eerlijk gemarkeerd, dus ik vergelijk hem niet met andere takes.",
+        "noneAlike": "Ik heb vóór take {{take}} geen gemeten take van deze variant van de oefening waarmee ik hem kan vergelijken.",
         "sameTempo": "Take {{take}} en de laatste gemeten take ervoor stonden allebei op {{bpm}} BPM.",
         "tempo": "De laatste gemeten take vóór take {{take}} stond op {{before}} BPM; take {{take}} stond op {{bpm}} BPM.",
         "metric": {
@@ -180,8 +184,9 @@
         "clean": "{{count}} ervan haalde een schoon tempo, op {{bpm}} BPM.",
         "clean_other": "{{count}} ervan haalden een schoon tempo; het snelste was {{bpm}} BPM.",
         "cleanNone": "Geen ervan haalde een schoon tempo.",
-        "even": "Gelijkmatigheid, in {{count}} ervan die haar bewaarde: {{first}}% in de oudste, {{last}}% in de nieuwste, {{best}}% op zijn best.",
-        "even_other": "Gelijkmatigheid, in de {{count}} ervan die haar bewaarden: {{first}}% in de oudste, {{last}}% in de nieuwste, {{best}}% op zijn best.",
+        "cleanUnknown": "Ik kan de schone tempo's die ze haalden niet tellen: sommige ervan hebben niet bewaard of ze er een haalden.",
+        "even": "Gelijkmatigheid, in {{count}} ervan die haar bewaarde: {{first}}% in de oudste daarvan, op {{firstBpm}} BPM; {{last}}% in de nieuwste daarvan, op {{lastBpm}} BPM; {{best}}% op zijn best, op {{bestBpm}} BPM.",
+        "even_other": "Gelijkmatigheid, in de {{count}} ervan die haar bewaarden: {{first}}% in de oudste daarvan, op {{firstBpm}} BPM; {{last}}% in de nieuwste daarvan, op {{lastBpm}} BPM; {{best}}% op zijn best, op {{bestBpm}} BPM.",
         "evenNone": "Minder dan twee ervan bewaarden een gelijkmatigheidscijfer, dus ik vergelijk dat niet."
       },
       "made": {
@@ -195,7 +200,9 @@
           "notes": "Juiste noten: minstens {{bar}}% van de noten waarvan ik de toonhoogte kan bepalen is de genoteerde.",
           "hold": "Gelijkmatigheid tot het einde volgehouden: minstens {{bar}}% over de laatste maten van het beoordeelde stuk."
         },
-        "clean": "Een take verschuift je schone tempo als hij {{need}} schone maten achter elkaar heeft.",
+        "unnamed": "{{count}} ervan is een controle die ik nog niet kan beschrijven.",
+        "unnamed_other": "{{count}} ervan zijn controles die ik nog niet kan beschrijven.",
+        "clean": "Een take die de lat haalt, met {{need}} schone maten achter elkaar, haalt een schoon tempo op zijn eigen tempo en verschuift je schone tempo omhoog als hij sneller is.",
         "tempo": "Een schone take op {{passAt}} BPM of sneller haalt de oefening.",
         "ungraded": {
           "selfChecked": "Deze oefening controleer je zelf: de app beoordeelt haar niet, dus er is geen score om op te splitsen.",
@@ -219,13 +226,27 @@
       },
       "distance": {
         "short": {
-          "even": "Gelijkmatig: {{value}}% in take {{take}}, {{gap}} punten onder de lat van {{bar}}%.",
-          "heard": "Gehoorde noten: {{value}}% in take {{take}}, {{gap}} punten onder de lat van {{bar}}%.",
+          "even": "Gelijkmatig: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
+          "even_other": "Gelijkmatig: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
+          "heard": "Gehoorde noten: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
+          "heard_other": "Gehoorde noten: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
           "extras": "Extra noten: {{value}} in take {{take}}, {{gap}} meer dan de lat toestaat ({{bar}} of minder in {{over}} maten).",
-          "accents": "Accenten raak: {{value}}% in take {{take}}, {{gap}} punten onder de lat van {{bar}}%.",
-          "notes": "Juiste noten: {{value}}% in take {{take}}, {{gap}} punten onder de lat van {{bar}}%.",
-          "hold": "Gelijkmatigheid tot het einde volgehouden: {{value}}% in take {{take}}, {{gap}} punten onder de lat van {{bar}}%."
+          "accents": "Accenten raak: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
+          "accents_other": "Accenten raak: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
+          "notes": "Juiste noten: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
+          "notes_other": "Juiste noten: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
+          "hold": "Gelijkmatigheid tot het einde volgehouden: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
+          "hold_other": "Gelijkmatigheid tot het einde volgehouden: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%."
         },
+        "under": {
+          "even": "Gelijkmatig in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
+          "heard": "Gehoorde noten in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
+          "accents": "Accenten raak in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
+          "notes": "Juiste noten in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
+          "hold": "Gelijkmatigheid tot het einde volgehouden in take {{take}}: minder dan een punt onder de lat van {{bar}}%."
+        },
+        "unnamed": "De lat heeft ook {{count}} controle die ik nog niet kan beschrijven, dus ik kan niet zeggen hoe take {{take}} daarop scoorde.",
+        "unnamed_other": "De lat heeft ook {{count}} controles die ik nog niet kan beschrijven, dus ik kan niet zeggen hoe take {{take}} daarop scoorde.",
         "met": {
           "even": "Gelijkmatig: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt.",
           "heard": "Gehoorde noten: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt.",

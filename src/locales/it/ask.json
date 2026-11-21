@@ -144,17 +144,22 @@
       },
       "notNow": {
         "noTake": "Non c'è ancora nessun take di questo esercizio da cui rispondere.",
+        "notSaved": "Il take {{take}} non è ancora salvato, quindi non posso leggere i take precedenti.",
         "ungraded": "Stai suonando senza valutazione, quindi non ho misurato nulla da cui rispondere a questo."
       },
       "history": {
         "leftOut": "Ho escluso {{count}} take che hai segnato come non equo.",
         "leftOut_many": "Ho escluso {{count}} take che hai segnato come non equi.",
-        "leftOut_other": "Ho escluso {{count}} take che hai segnato come non equi."
+        "leftOut_other": "Ho escluso {{count}} take che hai segnato come non equi.",
+        "otherNotes": "Ho escluso {{count}} take suonato su un'altra variante di questo esercizio.",
+        "otherNotes_many": "Ho escluso {{count}} take suonati su altre varianti di questo esercizio.",
+        "otherNotes_other": "Ho escluso {{count}} take suonati su altre varianti di questo esercizio."
       },
       "changed": {
         "first": "Non ho nessun take misurato di questo esercizio prima del take {{take}}, quindi non c'è nulla con cui confrontarlo.",
         "onlyUnfair": "Gli unici take misurati di questo esercizio prima del take {{take}} sono take che hai segnato come non equi, quindi non lo confronto con loro.",
         "thisUnfair": "Hai segnato la valutazione del take {{take}} come non equa, quindi non lo confronto con altri take.",
+        "noneAlike": "Non ho nessun take misurato di questa variante dell'esercizio prima del take {{take}} con cui possa confrontarlo.",
         "sameTempo": "Il take {{take}} e l'ultimo take misurato prima di esso erano entrambi a {{bpm}} BPM.",
         "tempo": "L'ultimo take misurato prima del take {{take}} era a {{before}} BPM; il take {{take}} era a {{bpm}} BPM.",
         "metric": {
@@ -187,9 +192,10 @@
         "clean_many": "{{count}} di essi hanno ottenuto un tempo pulito; il più veloce era a {{bpm}} BPM.",
         "clean_other": "{{count}} di essi hanno ottenuto un tempo pulito; il più veloce era a {{bpm}} BPM.",
         "cleanNone": "Nessuno di essi ha ottenuto un tempo pulito.",
-        "even": "Regolarità, nei {{count}} che l'hanno conservata: {{first}}% nel più vecchio, {{last}}% nel più recente, {{best}}% al massimo.",
-        "even_many": "Regolarità, nei {{count}} che l'hanno conservata: {{first}}% nel più vecchio, {{last}}% nel più recente, {{best}}% al massimo.",
-        "even_other": "Regolarità, nei {{count}} che l'hanno conservata: {{first}}% nel più vecchio, {{last}}% nel più recente, {{best}}% al massimo.",
+        "cleanUnknown": "Non posso contare i tempi puliti che hanno ottenuto: alcuni di essi non hanno conservato se ne hanno ottenuto uno.",
+        "even": "Regolarità, nei {{count}} di essi che l'hanno conservata: {{first}}% nel più vecchio di questi, a {{firstBpm}} BPM; {{last}}% nel più recente di questi, a {{lastBpm}} BPM; {{best}}% al massimo, a {{bestBpm}} BPM.",
+        "even_many": "Regolarità, nei {{count}} di essi che l'hanno conservata: {{first}}% nel più vecchio di questi, a {{firstBpm}} BPM; {{last}}% nel più recente di questi, a {{lastBpm}} BPM; {{best}}% al massimo, a {{bestBpm}} BPM.",
+        "even_other": "Regolarità, nei {{count}} di essi che l'hanno conservata: {{first}}% nel più vecchio di questi, a {{firstBpm}} BPM; {{last}}% nel più recente di questi, a {{lastBpm}} BPM; {{best}}% al massimo, a {{bestBpm}} BPM.",
         "evenNone": "Meno di due di essi hanno conservato un dato di regolarità, quindi non lo confronto."
       },
       "made": {
@@ -204,7 +210,10 @@
           "notes": "Note giuste: almeno il {{bar}}% delle note di cui posso riconoscere l'altezza sono quelle scritte.",
           "hold": "Regolarità mantenuta fino alla fine: almeno {{bar}}% sulle ultime battute del tratto giudicato."
         },
-        "clean": "Un take sposta il tuo tempo pulito quando ha {{need}} battute pulite di fila.",
+        "unnamed": "{{count}} di essi è un controllo che non so ancora descrivere.",
+        "unnamed_many": "{{count}} di essi sono controlli che non so ancora descrivere.",
+        "unnamed_other": "{{count}} di essi sono controlli che non so ancora descrivere.",
+        "clean": "Un take che supera l'asticella, con {{need}} battute pulite di fila, ottiene un tempo pulito al suo stesso tempo, e sposta in alto il tuo tempo pulito quando è più veloce.",
         "tempo": "Un take pulito a {{passAt}} BPM o più veloce supera l'esercizio.",
         "ungraded": {
           "selfChecked": "Questo esercizio lo controlli tu: l'app non lo valuta, quindi non c'è un punteggio da scomporre.",
@@ -228,13 +237,33 @@
       },
       "distance": {
         "short": {
-          "even": "Regolare: {{value}}% nel take {{take}}, a {{gap}} punti dall'asticella del {{bar}}%.",
-          "heard": "Note sentite: {{value}}% nel take {{take}}, a {{gap}} punti dall'asticella del {{bar}}%.",
+          "even": "Regolare: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
+          "even_many": "Regolare: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "even_other": "Regolare: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "heard": "Note sentite: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
+          "heard_many": "Note sentite: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "heard_other": "Note sentite: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
           "extras": "Note in più: {{value}} nel take {{take}}, {{gap}} in più di quante ne ammetta l'asticella ({{bar}} o meno in {{over}} battute).",
-          "accents": "Accenti a segno: {{value}}% nel take {{take}}, a {{gap}} punti dall'asticella del {{bar}}%.",
-          "notes": "Note giuste: {{value}}% nel take {{take}}, a {{gap}} punti dall'asticella del {{bar}}%.",
-          "hold": "Regolarità mantenuta fino alla fine: {{value}}% nel take {{take}}, a {{gap}} punti dall'asticella del {{bar}}%."
+          "accents": "Accenti a segno: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
+          "accents_many": "Accenti a segno: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "accents_other": "Accenti a segno: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "notes": "Note giuste: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
+          "notes_many": "Note giuste: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "notes_other": "Note giuste: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "hold": "Regolarità mantenuta fino alla fine: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
+          "hold_many": "Regolarità mantenuta fino alla fine: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "hold_other": "Regolarità mantenuta fino alla fine: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%."
         },
+        "under": {
+          "even": "Regolare nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
+          "heard": "Note sentite nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
+          "accents": "Accenti a segno nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
+          "notes": "Note giuste nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
+          "hold": "Regolarità mantenuta fino alla fine nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%."
+        },
+        "unnamed": "L'asticella ha anche {{count}} controllo che non so ancora descrivere, quindi non posso dire come è andato il take {{take}} su di esso.",
+        "unnamed_many": "L'asticella ha anche {{count}} controlli che non so ancora descrivere, quindi non posso dire come è andato il take {{take}} su di essi.",
+        "unnamed_other": "L'asticella ha anche {{count}} controlli che non so ancora descrivere, quindi non posso dire come è andato il take {{take}} su di essi.",
         "met": {
           "even": "Regolare: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%.",
           "heard": "Note sentite: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%.",

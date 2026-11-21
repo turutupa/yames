@@ -142,16 +142,20 @@
       },
       "notNow": {
         "noTake": "Chưa có lượt nào của bài này để trả lời.",
+        "notSaved": "Lượt {{take}} chưa được lưu, nên tôi không đọc được các lượt trước nó.",
         "ungraded": "Bạn đang chơi không chấm điểm, nên tôi không đo gì để trả lời điều đó."
       },
       "history": {
         "leftOut": "Tôi đã bỏ ra {{count}} lượt bạn đánh dấu là không công bằng.",
-        "leftOut_other": "Tôi đã bỏ ra {{count}} lượt bạn đánh dấu là không công bằng."
+        "leftOut_other": "Tôi đã bỏ ra {{count}} lượt bạn đánh dấu là không công bằng.",
+        "otherNotes": "Tôi đã bỏ ra {{count}} lượt chơi ở một biến thể khác của bài này.",
+        "otherNotes_other": "Tôi đã bỏ ra {{count}} lượt chơi ở các biến thể khác của bài này."
       },
       "changed": {
         "first": "Tôi không có lượt nào của bài này được đo trước lượt {{take}}, nên không có gì để so sánh.",
         "onlyUnfair": "Các lượt của bài này được đo trước lượt {{take}} chỉ là những lượt bạn đánh dấu là không công bằng, nên tôi không so sánh với chúng.",
         "thisUnfair": "Bạn đã đánh dấu điểm của lượt {{take}} là không công bằng, nên tôi không so sánh nó với các lượt khác.",
+        "noneAlike": "Tôi không có lượt nào được đo của biến thể này của bài trước lượt {{take}} để so sánh với nó.",
         "sameTempo": "Lượt {{take}} và lượt được đo gần nhất trước đó đều ở {{bpm}} BPM.",
         "tempo": "Lượt được đo gần nhất trước lượt {{take}} ở {{before}} BPM; lượt {{take}} ở {{bpm}} BPM.",
         "metric": {
@@ -180,8 +184,9 @@
         "clean": "{{count}} trong số đó đạt tempo sạch, ở {{bpm}} BPM.",
         "clean_other": "{{count}} trong số đó đạt tempo sạch; nhanh nhất là {{bpm}} BPM.",
         "cleanNone": "Không lượt nào trong số đó đạt tempo sạch.",
-        "even": "Độ đều, trong {{count}} lượt trong số đó có giữ số này: {{first}}% ở lượt cũ nhất, {{last}}% ở lượt mới nhất, {{best}}% là cao nhất.",
-        "even_other": "Độ đều, trong {{count}} lượt trong số đó có giữ số này: {{first}}% ở lượt cũ nhất, {{last}}% ở lượt mới nhất, {{best}}% là cao nhất.",
+        "cleanUnknown": "Tôi không đếm được số tempo sạch chúng đạt: một số lượt không lưu lại việc có đạt hay không.",
+        "even": "Độ đều, trong {{count}} lượt trong số đó có giữ số này: {{first}}% ở lượt cũ nhất trong các lượt ấy, ở {{firstBpm}} BPM; {{last}}% ở lượt mới nhất trong các lượt ấy, ở {{lastBpm}} BPM; {{best}}% là cao nhất, ở {{bestBpm}} BPM.",
+        "even_other": "Độ đều, trong {{count}} lượt trong số đó có giữ số này: {{first}}% ở lượt cũ nhất trong các lượt ấy, ở {{firstBpm}} BPM; {{last}}% ở lượt mới nhất trong các lượt ấy, ở {{lastBpm}} BPM; {{best}}% là cao nhất, ở {{bestBpm}} BPM.",
         "evenNone": "Ít hơn hai lượt trong số đó có số đo độ đều, nên tôi không so sánh."
       },
       "made": {
@@ -195,7 +200,9 @@
           "notes": "Đúng nốt: ít nhất {{bar}}% số nốt tôi xác định được cao độ là nốt đã viết.",
           "hold": "Độ đều giữ đến cuối: ít nhất {{bar}}% trên các ô nhịp cuối của đoạn được đánh giá."
         },
-        "clean": "Một lượt làm đổi tempo sạch của bạn khi nó có {{need}} ô nhịp sạch liên tiếp.",
+        "unnamed": "{{count}} trong số đó là một phép kiểm tra mà tôi chưa mô tả được.",
+        "unnamed_other": "{{count}} trong số đó là các phép kiểm tra mà tôi chưa mô tả được.",
+        "clean": "Một lượt đạt, với {{need}} ô nhịp sạch liên tiếp, được tempo sạch ở đúng tempo của nó, và đẩy tempo sạch của bạn lên khi nó nhanh hơn.",
         "tempo": "Một lượt sạch ở {{passAt}} BPM trở lên là đạt bài.",
         "ungraded": {
           "selfChecked": "Bài này là bài bạn tự kiểm tra: ứng dụng không chấm điểm, nên không có điểm nào để chia nhỏ.",
@@ -219,13 +226,27 @@
       },
       "distance": {
         "short": {
-          "even": "Độ đều: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
-          "heard": "Số nốt nghe được: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
+          "even": "Độ đều: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "even_other": "Độ đều: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "heard": "Số nốt nghe được: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "heard_other": "Số nốt nghe được: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
           "extras": "Nốt thừa: {{value}} ở lượt {{take}}, nhiều hơn mức đạt cho phép {{gap}} ({{bar}} hoặc ít hơn trong {{over}} ô nhịp).",
-          "accents": "Nhấn đúng: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
-          "notes": "Đúng nốt: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%.",
-          "hold": "Độ đều giữ đến cuối: {{value}}% ở lượt {{take}}, thiếu {{gap}} điểm so với mức đạt {{bar}}%."
+          "accents": "Nhấn đúng: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "accents_other": "Nhấn đúng: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "notes": "Đúng nốt: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "notes_other": "Đúng nốt: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "hold": "Độ đều giữ đến cuối: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "hold_other": "Độ đều giữ đến cuối: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%."
         },
+        "under": {
+          "even": "Độ đều ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
+          "heard": "Số nốt nghe được ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
+          "accents": "Nhấn đúng ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
+          "notes": "Đúng nốt ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
+          "hold": "Độ đều giữ đến cuối ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%."
+        },
+        "unnamed": "Mức đạt còn có {{count}} phép kiểm tra mà tôi chưa mô tả được, nên tôi không nói được lượt {{take}} làm được gì ở phép đó.",
+        "unnamed_other": "Mức đạt còn có {{count}} phép kiểm tra mà tôi chưa mô tả được, nên tôi không nói được lượt {{take}} làm được gì ở các phép đó.",
         "met": {
           "even": "Độ đều: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
           "heard": "Số nốt nghe được: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",

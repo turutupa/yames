@@ -146,18 +146,24 @@
       },
       "notNow": {
         "noTake": "Nie ma jeszcze podejścia do tego ćwiczenia, z którego mógłbym odpowiedzieć.",
+        "notSaved": "Podejście {{take}} nie jest jeszcze zapisane, więc nie mogę odczytać podejść sprzed niego.",
         "ungraded": "Grasz bez oceny, więc nic nie zmierzyłem, z czego mógłbym na to odpowiedzieć."
       },
       "history": {
         "leftOut": "Pominąłem {{count}} podejście, które oznaczono jako niesprawiedliwe.",
         "leftOut_few": "Pominąłem {{count}} podejścia, które oznaczono jako niesprawiedliwe.",
         "leftOut_many": "Pominąłem {{count}} podejść, które oznaczono jako niesprawiedliwe.",
-        "leftOut_other": "Pominąłem {{count}} podejścia, które oznaczono jako niesprawiedliwe."
+        "leftOut_other": "Pominąłem {{count}} podejścia, które oznaczono jako niesprawiedliwe.",
+        "otherNotes": "Pominąłem {{count}} podejście zagrane w innym wariancie tego ćwiczenia.",
+        "otherNotes_few": "Pominąłem {{count}} podejścia zagrane w innych wariantach tego ćwiczenia.",
+        "otherNotes_many": "Pominąłem {{count}} podejść zagranych w innych wariantach tego ćwiczenia.",
+        "otherNotes_other": "Pominąłem {{count}} podejścia zagranego w innych wariantach tego ćwiczenia."
       },
       "changed": {
         "first": "Nie mam zmierzonego podejścia do tego ćwiczenia sprzed podejścia {{take}}, więc nie ma z czym go porównać.",
         "onlyUnfair": "Jedyne zmierzone podejścia do tego ćwiczenia sprzed podejścia {{take}} to te, które oznaczono jako niesprawiedliwe, więc nie porównuję go z nimi.",
         "thisUnfair": "Ocena podejścia {{take}} została oznaczona jako niesprawiedliwa, więc nie porównuję go z innymi podejściami.",
+        "noneAlike": "Nie mam zmierzonego podejścia do tego wariantu ćwiczenia sprzed podejścia {{take}}, z którym mógłbym je porównać.",
         "sameTempo": "Podejście {{take}} i ostatnie zmierzone podejście przed nim były oba przy {{bpm}} BPM.",
         "tempo": "Ostatnie zmierzone podejście przed podejściem {{take}} było przy {{before}} BPM; podejście {{take}} było przy {{bpm}} BPM.",
         "metric": {
@@ -194,10 +200,11 @@
         "clean_many": "{{count}} z nich dało czyste tempo; najszybsze miało {{bpm}} BPM.",
         "clean_other": "{{count}} z nich dało czyste tempo; najszybsze miało {{bpm}} BPM.",
         "cleanNone": "Żadne z nich nie dało czystego tempa.",
-        "even": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
-        "even_few": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
-        "even_many": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
-        "even_other": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym, {{last}}% w najnowszym, {{best}}% w najlepszym.",
+        "cleanUnknown": "Nie mogę policzyć czystych temp, które dały: część z nich nie zachowała, czy dały czyste tempo.",
+        "even": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym z tych, przy {{firstBpm}} BPM; {{last}}% w najnowszym z tych, przy {{lastBpm}} BPM; {{best}}% w najlepszym, przy {{bestBpm}} BPM.",
+        "even_few": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym z tych, przy {{firstBpm}} BPM; {{last}}% w najnowszym z tych, przy {{lastBpm}} BPM; {{best}}% w najlepszym, przy {{bestBpm}} BPM.",
+        "even_many": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym z tych, przy {{firstBpm}} BPM; {{last}}% w najnowszym z tych, przy {{lastBpm}} BPM; {{best}}% w najlepszym, przy {{bestBpm}} BPM.",
+        "even_other": "Równość w {{count}} z nich, w których ją zachowano: {{first}}% w najstarszym z tych, przy {{firstBpm}} BPM; {{last}}% w najnowszym z tych, przy {{lastBpm}} BPM; {{best}}% w najlepszym, przy {{bestBpm}} BPM.",
         "evenNone": "Mniej niż dwa z nich zachowały wartość równości, więc jej nie porównuję."
       },
       "made": {
@@ -213,7 +220,11 @@
           "notes": "Właściwe nuty: co najmniej {{bar}}% nut, których wysokość mogę określić, to zapisane.",
           "hold": "Równość utrzymana do końca: co najmniej {{bar}}% w ostatnich taktach ocenianego odcinka."
         },
-        "clean": "Podejście rusza twoje czyste tempo, gdy ma {{need}} czystych taktów z rzędu.",
+        "unnamed": "{{count}} z nich to kontrola, której jeszcze nie umiem opisać.",
+        "unnamed_few": "{{count}} z nich to kontrole, których jeszcze nie umiem opisać.",
+        "unnamed_many": "{{count}} z nich to kontrole, których jeszcze nie umiem opisać.",
+        "unnamed_other": "{{count}} z nich to kontrole, których jeszcze nie umiem opisać.",
+        "clean": "Podejście, które zalicza poprzeczkę, z {{need}} czystymi taktami z rzędu, daje czyste tempo przy własnym tempie i przesuwa twoje czyste tempo w górę, gdy jest szybsze.",
         "tempo": "Czyste podejście przy {{passAt}} BPM lub szybciej zalicza ćwiczenie.",
         "ungraded": {
           "selfChecked": "To ćwiczenie sprawdzasz sam: aplikacja go nie ocenia, więc nie ma wyniku do rozłożenia.",
@@ -237,13 +248,39 @@
       },
       "distance": {
         "short": {
-          "even": "Równo: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
-          "heard": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
+          "even": "Równo: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
+          "even_few": "Równo: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
+          "even_many": "Równo: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
+          "even_other": "Równo: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%.",
+          "heard": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
+          "heard_few": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
+          "heard_many": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
+          "heard_other": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%.",
           "extras": "Dodatkowe nuty: {{value}} w podejściu {{take}}, o {{gap}} więcej, niż dopuszcza poprzeczka ({{bar}} lub mniej w {{over}} taktach).",
-          "accents": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
-          "notes": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%.",
-          "hold": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, {{gap}} punktów poniżej poprzeczki {{bar}}%."
+          "accents": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
+          "accents_few": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
+          "accents_many": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
+          "accents_other": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%.",
+          "notes": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
+          "notes_few": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
+          "notes_many": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
+          "notes_other": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%.",
+          "hold": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
+          "hold_few": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
+          "hold_many": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
+          "hold_other": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%."
         },
+        "under": {
+          "even": "Równo w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
+          "heard": "Usłyszane nuty w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
+          "accents": "Akcenty trafione w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
+          "notes": "Właściwe nuty w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
+          "hold": "Równość utrzymana do końca w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%."
+        },
+        "unnamed": "Poprzeczka ma też {{count}} kontrolę, której jeszcze nie umiem opisać, więc nie mogę powiedzieć, jak poradziło sobie z nią podejście {{take}}.",
+        "unnamed_few": "Poprzeczka ma też {{count}} kontrole, których jeszcze nie umiem opisać, więc nie mogę powiedzieć, jak poradziło sobie z nimi podejście {{take}}.",
+        "unnamed_many": "Poprzeczka ma też {{count}} kontroli, których jeszcze nie umiem opisać, więc nie mogę powiedzieć, jak poradziło sobie z nimi podejście {{take}}.",
+        "unnamed_other": "Poprzeczka ma też {{count}} kontroli, których jeszcze nie umiem opisać, więc nie mogę powiedzieć, jak poradziło sobie z nimi podejście {{take}}.",
         "met": {
           "even": "Równo: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
           "heard": "Usłyszane nuty: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",

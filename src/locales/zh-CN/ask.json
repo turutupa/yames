@@ -142,16 +142,20 @@
       },
       "notNow": {
         "noTake": "这个练习还没有可以用来回答的一遍。",
+        "notSaved": "第{{take}}遍还没有保存，所以我读不到它之前的几遍。",
         "ungraded": "你现在是不评分地弹，所以我没有测量任何可以用来回答这个问题的数据。"
       },
       "history": {
         "leftOut": "我略去了 {{count}} 遍你标记为不公平的演奏。",
-        "leftOut_other": "我略去了 {{count}} 遍你标记为不公平的演奏。"
+        "leftOut_other": "我略去了 {{count}} 遍你标记为不公平的演奏。",
+        "otherNotes": "我略去了 {{count}} 遍在这个练习的其他变体上弹的演奏。",
+        "otherNotes_other": "我略去了 {{count}} 遍在这个练习的其他变体上弹的演奏。"
       },
       "changed": {
         "first": "这个练习在第{{take}}遍之前没有我测量过的一遍，所以没有可以比较的对象。",
         "onlyUnfair": "这个练习在第{{take}}遍之前我测量过的几遍都是你标记为不公平的，所以我不拿它和它们比较。",
         "thisUnfair": "你把第{{take}}遍的评分标记为不公平，所以我不拿它和其他几遍比较。",
+        "noneAlike": "这个练习的这个变体在第{{take}}遍之前没有我测量过的一遍，所以没有可以拿来比较的对象。",
         "sameTempo": "第{{take}}遍和它之前最近一次测量的那一遍，都是 {{bpm}} BPM。",
         "tempo": "第{{take}}遍之前最近一次测量的那一遍是 {{before}} BPM；第{{take}}遍是 {{bpm}} BPM。",
         "metric": {
@@ -180,8 +184,9 @@
         "clean": "其中 {{count}} 遍获得了干净速度，是 {{bpm}} BPM。",
         "clean_other": "其中 {{count}} 遍获得了干净速度；最快的是 {{bpm}} BPM。",
         "cleanNone": "其中没有一遍获得干净速度。",
-        "even": "均匀度，在其中保留了该数字的 {{count}} 遍里：最早一遍 {{first}}%，最新一遍 {{last}}%，最高 {{best}}%。",
-        "even_other": "均匀度，在其中保留了该数字的 {{count}} 遍里：最早一遍 {{first}}%，最新一遍 {{last}}%，最高 {{best}}%。",
+        "cleanUnknown": "我数不出其中获得干净速度的遍数：有几遍没有保留是否获得过。",
+        "even": "均匀度，在其中保留了该数字的 {{count}} 遍里：这几遍中最早的一遍 {{first}}%，速度 {{firstBpm}} BPM；这几遍中最新的一遍 {{last}}%，速度 {{lastBpm}} BPM；最高 {{best}}%，速度 {{bestBpm}} BPM。",
+        "even_other": "均匀度，在其中保留了该数字的 {{count}} 遍里：这几遍中最早的一遍 {{first}}%，速度 {{firstBpm}} BPM；这几遍中最新的一遍 {{last}}%，速度 {{lastBpm}} BPM；最高 {{best}}%，速度 {{bestBpm}} BPM。",
         "evenNone": "其中保留了均匀度数字的不到两遍，所以我不做比较。"
       },
       "made": {
@@ -195,7 +200,9 @@
           "notes": "正确的音：我能判定音高的音中，至少 {{bar}}% 是谱上写的音。",
           "hold": "保持到最后的均匀度：在所判断那一段的最后几个小节里至少 {{bar}}%。"
         },
-        "clean": "一遍有连续 {{need}} 个干净的小节时，会让你的干净速度提升。",
+        "unnamed": "其中有 {{count}} 项是我还说不清的检查。",
+        "unnamed_other": "其中有 {{count}} 项是我还说不清的检查。",
+        "clean": "通过的一遍，若有连续 {{need}} 个干净的小节，就会按它自己的速度获得干净速度；它更快时，会把你的干净速度提上去。",
         "tempo": "{{passAt}} BPM 或更快的一遍干净演奏，就通过这个练习。",
         "ungraded": {
           "selfChecked": "这个练习由你自己检查：应用不给它评分，所以没有可以拆开看的分数。",
@@ -219,13 +226,27 @@
       },
       "distance": {
         "short": {
-          "even": "均匀度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{gap}} 个百分点。",
-          "heard": "听到的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{gap}} 个百分点。",
+          "even": "均匀度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "even_other": "均匀度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "heard": "听到的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "heard_other": "听到的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
           "extras": "多余的音：第{{take}}遍 {{value}} 个，比及格线允许的多 {{gap}} 个（{{over}} 个小节里 {{bar}} 个或更少）。",
-          "accents": "重音命中：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{gap}} 个百分点。",
-          "notes": "正确的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{gap}} 个百分点。",
-          "hold": "保持到最后的均匀度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{gap}} 个百分点。"
+          "accents": "重音命中：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "accents_other": "重音命中：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "notes": "正确的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "notes_other": "正确的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "hold": "保持到最后的均匀度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。",
+          "hold_other": "保持到最后的均匀度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格线低 {{count}} 个百分点。"
         },
+        "under": {
+          "even": "均匀度：第{{take}}遍比 {{bar}}% 的及格线低不到 1 个百分点。",
+          "heard": "听到的音：第{{take}}遍比 {{bar}}% 的及格线低不到 1 个百分点。",
+          "accents": "重音命中：第{{take}}遍比 {{bar}}% 的及格线低不到 1 个百分点。",
+          "notes": "正确的音：第{{take}}遍比 {{bar}}% 的及格线低不到 1 个百分点。",
+          "hold": "保持到最后的均匀度：第{{take}}遍比 {{bar}}% 的及格线低不到 1 个百分点。"
+        },
+        "unnamed": "及格线还有 {{count}} 项我说不清的检查，所以我说不出第{{take}}遍在这些检查上的表现。",
+        "unnamed_other": "及格线还有 {{count}} 项我说不清的检查，所以我说不出第{{take}}遍在这些检查上的表现。",
         "met": {
           "even": "均匀度：第{{take}}遍 {{value}}%，达到了 {{bar}}% 的及格线。",
           "heard": "听到的音：第{{take}}遍 {{value}}%，达到了 {{bar}}% 的及格线。",

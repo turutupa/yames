@@ -475,7 +475,7 @@
       "removed": "Retiré de Mes exercices.",
       "undo": "Annuler",
       "notSaved": "Mes exercices n'ont pas pu être lus ou enregistrés à l'instant, rien n'a donc changé.",
-      "undoFull": "Mes exercices est plein (50). Retirez-en un, puis Annuler remet celui-ci.",
+      "undoFull": "Mes exercices est plein (50), donc Annuler ne peut pas remettre celui-ci.",
       "undoAlready": "Celui-ci est déjà de retour dans Mes exercices.",
       "cantBuild": "Celui-ci ne peut plus être construit : cette version de Yames ne le propose plus. Il reste ici jusqu'à ce que vous le retiriez.",
       "howTo": "Jouez-le tel qu'il est écrit, avec le clic."

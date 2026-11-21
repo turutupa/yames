@@ -475,7 +475,7 @@
       "removed": "Removido de Meus exercícios.",
       "undo": "Desfazer",
       "notSaved": "Não foi possível ler ou salvar Meus exercícios agora, então nada mudou.",
-      "undoFull": "Meus exercícios está cheio (50). Remova um e, depois, Desfazer coloca este de volta.",
+      "undoFull": "Meus exercícios está cheio (50), então Desfazer não pode colocar este de volta.",
       "undoAlready": "Este já voltou para Meus exercícios.",
       "cantBuild": "Este não pode mais ser montado: esta versão do Yames não o gera mais. Ele fica aqui até você removê-lo.",
       "howTo": "Toque como está escrito, com o click."

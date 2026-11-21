@@ -142,16 +142,20 @@
       },
       "notNow": {
         "noTake": "Es gibt noch keinen Take dieser Übung, aus dem ich antworten könnte.",
+        "notSaved": "Take {{take}} ist noch nicht gespeichert, deshalb kann ich die Takes davor nicht lesen.",
         "ungraded": "Du spielst ohne Bewertung, deshalb habe ich nichts gemessen, woraus ich das beantworten könnte."
       },
       "history": {
         "leftOut": "Ich habe {{count}} Take weggelassen, den du als nicht fair markiert hast.",
-        "leftOut_other": "Ich habe {{count}} Takes weggelassen, die du als nicht fair markiert hast."
+        "leftOut_other": "Ich habe {{count}} Takes weggelassen, die du als nicht fair markiert hast.",
+        "otherNotes": "Ich habe {{count}} Take weggelassen, der auf einer anderen Version dieser Übung gespielt wurde.",
+        "otherNotes_other": "Ich habe {{count}} Takes weggelassen, die auf anderen Versionen dieser Übung gespielt wurden."
       },
       "changed": {
         "first": "Ich habe keinen gemessenen Take dieser Übung vor Take {{take}}, deshalb gibt es nichts zum Vergleichen.",
         "onlyUnfair": "Die einzigen gemessenen Takes dieser Übung vor Take {{take}} sind welche, die du als nicht fair markiert hast, deshalb vergleiche ich ihn nicht mit ihnen.",
         "thisUnfair": "Du hast die Bewertung von Take {{take}} als nicht fair markiert, deshalb vergleiche ich ihn nicht mit anderen Takes.",
+        "noneAlike": "Ich habe vor Take {{take}} keinen gemessenen Take dieser Version der Übung, mit dem ich ihn vergleichen kann.",
         "sameTempo": "Take {{take}} und der letzte gemessene Take davor lagen beide bei {{bpm}} BPM.",
         "tempo": "Der letzte gemessene Take vor Take {{take}} lag bei {{before}} BPM; Take {{take}} lag bei {{bpm}} BPM.",
         "metric": {
@@ -180,8 +184,9 @@
         "clean": "{{count}} davon hat ein sauberes Tempo erspielt, bei {{bpm}} BPM.",
         "clean_other": "{{count}} davon haben ein sauberes Tempo erspielt; das schnellste war {{bpm}} BPM.",
         "cleanNone": "Keiner davon hat ein sauberes Tempo erspielt.",
-        "even": "Gleichmäßigkeit, in {{count}} davon, das sie behalten hat: {{first}} % im ältesten, {{last}} % im neuesten, {{best}} % am besten.",
-        "even_other": "Gleichmäßigkeit, in den {{count}} davon, die sie behalten haben: {{first}} % im ältesten, {{last}} % im neuesten, {{best}} % am besten.",
+        "cleanUnknown": "Ich kann die sauberen Tempos, die sie erspielt haben, nicht zählen: Bei einigen davon wurde nicht festgehalten, ob sie eins erspielt haben.",
+        "even": "Gleichmäßigkeit, in den {{count}} davon, die sie behalten haben: {{first}} % im ältesten davon, bei {{firstBpm}} BPM; {{last}} % im neuesten davon, bei {{lastBpm}} BPM; {{best}} % am besten, bei {{bestBpm}} BPM.",
+        "even_other": "Gleichmäßigkeit, in den {{count}} davon, die sie behalten haben: {{first}} % im ältesten davon, bei {{firstBpm}} BPM; {{last}} % im neuesten davon, bei {{lastBpm}} BPM; {{best}} % am besten, bei {{bestBpm}} BPM.",
         "evenNone": "Weniger als zwei davon haben einen Wert für die Gleichmäßigkeit behalten, deshalb vergleiche ich ihn nicht."
       },
       "made": {
@@ -195,7 +200,9 @@
           "notes": "Richtige Töne: mindestens {{bar}} % der Töne, deren Tonhöhe ich bestimmen kann, sind die notierten.",
           "hold": "Gleichmäßigkeit bis zum Ende gehalten: mindestens {{bar}} % über die letzten Takte des beurteilten Abschnitts."
         },
-        "clean": "Ein Take verschiebt dein sauberes Tempo, wenn er {{need}} saubere Takte in Folge hat.",
+        "unnamed": "{{count}} davon ist eine Prüfung, die ich noch nicht beschreiben kann.",
+        "unnamed_other": "{{count}} davon sind Prüfungen, die ich noch nicht beschreiben kann.",
+        "clean": "Ein Take, der besteht, mit {{need}} sauberen Takten in Folge, erspielt ein sauberes Tempo bei seinem eigenen Tempo und schiebt dein sauberes Tempo nach oben, wenn er schneller ist.",
         "tempo": "Ein sauberer Take bei {{passAt}} BPM oder schneller besteht die Übung.",
         "ungraded": {
           "selfChecked": "Diese Übung prüfst du selbst: Die App bewertet sie nicht, deshalb gibt es keine Wertung, die ich aufschlüsseln könnte.",
@@ -219,13 +226,27 @@
       },
       "distance": {
         "short": {
-          "even": "Gleichmäßig: {{value}} % in Take {{take}}, {{gap}} Punkte unter der Messlatte von {{bar}} %.",
-          "heard": "Gehörte Töne: {{value}} % in Take {{take}}, {{gap}} Punkte unter der Messlatte von {{bar}} %.",
+          "even": "Gleichmäßig: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
+          "even_other": "Gleichmäßig: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
+          "heard": "Gehörte Töne: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
+          "heard_other": "Gehörte Töne: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
           "extras": "Zusätzliche Töne: {{value}} in Take {{take}}, {{gap}} mehr, als die Messlatte erlaubt ({{bar}} oder weniger in {{over}} Takten).",
-          "accents": "Akzente getroffen: {{value}} % in Take {{take}}, {{gap}} Punkte unter der Messlatte von {{bar}} %.",
-          "notes": "Richtige Töne: {{value}} % in Take {{take}}, {{gap}} Punkte unter der Messlatte von {{bar}} %.",
-          "hold": "Gleichmäßigkeit bis zum Ende gehalten: {{value}} % in Take {{take}}, {{gap}} Punkte unter der Messlatte von {{bar}} %."
+          "accents": "Akzente getroffen: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
+          "accents_other": "Akzente getroffen: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
+          "notes": "Richtige Töne: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
+          "notes_other": "Richtige Töne: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
+          "hold": "Gleichmäßigkeit bis zum Ende gehalten: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
+          "hold_other": "Gleichmäßigkeit bis zum Ende gehalten: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %."
         },
+        "under": {
+          "even": "Gleichmäßig in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
+          "heard": "Gehörte Töne in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
+          "accents": "Akzente getroffen in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
+          "notes": "Richtige Töne in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
+          "hold": "Gleichmäßigkeit bis zum Ende gehalten in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %."
+        },
+        "unnamed": "Die Messlatte hat außerdem {{count}} Prüfung, die ich noch nicht beschreiben kann, deshalb kann ich nicht sagen, wie Take {{take}} dabei abgeschnitten hat.",
+        "unnamed_other": "Die Messlatte hat außerdem {{count}} Prüfungen, die ich noch nicht beschreiben kann, deshalb kann ich nicht sagen, wie Take {{take}} dabei abgeschnitten hat.",
         "met": {
           "even": "Gleichmäßig: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht.",
           "heard": "Gehörte Töne: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht.",

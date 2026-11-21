@@ -144,17 +144,22 @@
       },
       "notNow": {
         "noTake": "Il n'y a pas encore de prise de cet exercice pour répondre.",
+        "notSaved": "La prise {{take}} n'est pas encore enregistrée, donc je ne peux pas lire les prises d'avant.",
         "ungraded": "Tu joues sans évaluation, donc je n'ai rien mesuré pour répondre à cela."
       },
       "history": {
         "leftOut": "J'ai laissé de côté {{count}} prise que tu as marquée comme non équitable.",
         "leftOut_many": "J'ai laissé de côté {{count}} prises que tu as marquées comme non équitables.",
-        "leftOut_other": "J'ai laissé de côté {{count}} prises que tu as marquées comme non équitables."
+        "leftOut_other": "J'ai laissé de côté {{count}} prises que tu as marquées comme non équitables.",
+        "otherNotes": "J'ai laissé de côté {{count}} prise jouée sur une autre variante de cet exercice.",
+        "otherNotes_many": "J'ai laissé de côté {{count}} prises jouées sur d'autres variantes de cet exercice.",
+        "otherNotes_other": "J'ai laissé de côté {{count}} prises jouées sur d'autres variantes de cet exercice."
       },
       "changed": {
         "first": "Je n'ai aucune prise mesurée de cet exercice avant la prise {{take}}, donc il n'y a rien à comparer.",
         "onlyUnfair": "Les seules prises mesurées de cet exercice avant la prise {{take}} sont des prises que tu as marquées comme non équitables, donc je ne la compare pas avec elles.",
         "thisUnfair": "Tu as marqué l'évaluation de la prise {{take}} comme non équitable, donc je ne la compare pas avec d'autres prises.",
+        "noneAlike": "Je n'ai aucune prise mesurée de cette variante de l'exercice avant la prise {{take}} avec laquelle je puisse la comparer.",
         "sameTempo": "La prise {{take}} et la dernière prise mesurée avant elle étaient toutes deux à {{bpm}} BPM.",
         "tempo": "La dernière prise mesurée avant la prise {{take}} était à {{before}} BPM ; la prise {{take}} était à {{bpm}} BPM.",
         "metric": {
@@ -187,9 +192,10 @@
         "clean_many": "{{count}} d'entre elles ont obtenu un tempo propre ; la plus rapide était à {{bpm}} BPM.",
         "clean_other": "{{count}} d'entre elles ont obtenu un tempo propre ; la plus rapide était à {{bpm}} BPM.",
         "cleanNone": "Aucune d'entre elles n'a obtenu un tempo propre.",
-        "even": "Régularité, dans les {{count}} qui l'ont gardée : {{first}} % dans la plus ancienne, {{last}} % dans la plus récente, {{best}} % au mieux.",
-        "even_many": "Régularité, dans les {{count}} qui l'ont gardée : {{first}} % dans la plus ancienne, {{last}} % dans la plus récente, {{best}} % au mieux.",
-        "even_other": "Régularité, dans les {{count}} qui l'ont gardée : {{first}} % dans la plus ancienne, {{last}} % dans la plus récente, {{best}} % au mieux.",
+        "cleanUnknown": "Je ne peux pas compter les tempos propres qu'elles ont obtenus : certaines n'ont pas gardé si elles en ont obtenu un.",
+        "even": "Régularité, dans les {{count}} d'entre elles qui l'ont gardée : {{first}} % dans la plus ancienne de celles-ci, à {{firstBpm}} BPM ; {{last}} % dans la plus récente de celles-ci, à {{lastBpm}} BPM ; {{best}} % au mieux, à {{bestBpm}} BPM.",
+        "even_many": "Régularité, dans les {{count}} d'entre elles qui l'ont gardée : {{first}} % dans la plus ancienne de celles-ci, à {{firstBpm}} BPM ; {{last}} % dans la plus récente de celles-ci, à {{lastBpm}} BPM ; {{best}} % au mieux, à {{bestBpm}} BPM.",
+        "even_other": "Régularité, dans les {{count}} d'entre elles qui l'ont gardée : {{first}} % dans la plus ancienne de celles-ci, à {{firstBpm}} BPM ; {{last}} % dans la plus récente de celles-ci, à {{lastBpm}} BPM ; {{best}} % au mieux, à {{bestBpm}} BPM.",
         "evenNone": "Moins de deux d'entre elles ont gardé un chiffre de régularité, donc je ne le compare pas."
       },
       "made": {
@@ -204,7 +210,10 @@
           "notes": "Bonnes notes : au moins {{bar}} % des notes dont je peux reconnaître la hauteur sont celles écrites.",
           "hold": "Régularité tenue jusqu'à la fin : au moins {{bar}} % sur les dernières mesures du passage jugé."
         },
-        "clean": "Une prise fait bouger ton tempo propre quand elle a {{need}} mesures propres de suite.",
+        "unnamed": "{{count}} d'entre elles est une vérification que je ne sais pas encore décrire.",
+        "unnamed_many": "{{count}} d'entre elles sont des vérifications que je ne sais pas encore décrire.",
+        "unnamed_other": "{{count}} d'entre elles sont des vérifications que je ne sais pas encore décrire.",
+        "clean": "Une prise réussie, avec {{need}} mesures propres de suite, obtient un tempo propre à son propre tempo, et fait monter ton tempo propre quand elle est plus rapide.",
         "tempo": "Une prise propre à {{passAt}} BPM ou plus vite réussit l'exercice.",
         "ungraded": {
           "selfChecked": "Cet exercice, c'est toi qui le vérifies : l'appli ne l'évalue pas, donc il n'y a pas de score à détailler.",
@@ -228,13 +237,33 @@
       },
       "distance": {
         "short": {
-          "even": "Régulier : {{value}} % dans la prise {{take}}, à {{gap}} points du seuil de {{bar}} %.",
-          "heard": "Notes entendues : {{value}} % dans la prise {{take}}, à {{gap}} points du seuil de {{bar}} %.",
+          "even": "Régulier : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
+          "even_many": "Régulier : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "even_other": "Régulier : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "heard": "Notes entendues : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
+          "heard_many": "Notes entendues : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "heard_other": "Notes entendues : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
           "extras": "Notes en trop : {{value}} dans la prise {{take}}, {{gap}} de plus que le seuil n'en permet ({{bar}} ou moins sur {{over}} mesures).",
-          "accents": "Accents placés : {{value}} % dans la prise {{take}}, à {{gap}} points du seuil de {{bar}} %.",
-          "notes": "Bonnes notes : {{value}} % dans la prise {{take}}, à {{gap}} points du seuil de {{bar}} %.",
-          "hold": "Régularité tenue jusqu'à la fin : {{value}} % dans la prise {{take}}, à {{gap}} points du seuil de {{bar}} %."
+          "accents": "Accents placés : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
+          "accents_many": "Accents placés : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "accents_other": "Accents placés : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "notes": "Bonnes notes : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
+          "notes_many": "Bonnes notes : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "notes_other": "Bonnes notes : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "hold": "Régularité tenue jusqu'à la fin : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
+          "hold_many": "Régularité tenue jusqu'à la fin : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "hold_other": "Régularité tenue jusqu'à la fin : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %."
         },
+        "under": {
+          "even": "Régulier dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
+          "heard": "Notes entendues dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
+          "accents": "Accents placés dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
+          "notes": "Bonnes notes dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
+          "hold": "Régularité tenue jusqu'à la fin dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %."
+        },
+        "unnamed": "Le seuil comporte aussi {{count}} vérification que je ne sais pas encore décrire, donc je ne peux pas dire comment la prise {{take}} s'y est comportée.",
+        "unnamed_many": "Le seuil comporte aussi {{count}} vérifications que je ne sais pas encore décrire, donc je ne peux pas dire comment la prise {{take}} s'y est comportée.",
+        "unnamed_other": "Le seuil comporte aussi {{count}} vérifications que je ne sais pas encore décrire, donc je ne peux pas dire comment la prise {{take}} s'y est comportée.",
         "met": {
           "even": "Régulier : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %.",
           "heard": "Notes entendues : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %.",

@@ -487,7 +487,7 @@
       "removed": "Usunięto z Moich ćwiczeń.",
       "undo": "Cofnij",
       "notSaved": "Moje ćwiczenia nie mogły zostać teraz odczytane ani zapisane, więc nic się nie zmieniło.",
-      "undoFull": "Moje ćwiczenia są pełne (50). Usuń jedno, a potem Cofnij przywróci to ćwiczenie.",
+      "undoFull": "Moje ćwiczenia są pełne (50), więc Cofnij nie może przywrócić tego ćwiczenia.",
       "undoAlready": "To ćwiczenie jest już z powrotem w Moich ćwiczeniach.",
       "cantBuild": "Tego nie da się już zbudować: ta wersja Yames już go nie tworzy. Zostaje tutaj, dopóki go nie usuniesz.",
       "howTo": "Zagraj to tak, jak zapisano, z metronomem."

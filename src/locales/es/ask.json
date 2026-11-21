@@ -144,17 +144,22 @@
       },
       "notNow": {
         "noTake": "Todavía no hay ninguna toma de este ejercicio con la que responder.",
+        "notSaved": "La toma {{take}} aún no está guardada, así que no puedo leer las tomas anteriores.",
         "ungraded": "Estás tocando sin evaluación, así que no medí nada con lo que responder a eso."
       },
       "history": {
         "leftOut": "Dejé fuera {{count}} toma que marcaste como no justa.",
         "leftOut_many": "Dejé fuera {{count}} tomas que marcaste como no justas.",
-        "leftOut_other": "Dejé fuera {{count}} tomas que marcaste como no justas."
+        "leftOut_other": "Dejé fuera {{count}} tomas que marcaste como no justas.",
+        "otherNotes": "Dejé fuera {{count}} toma tocada en otra variante de este ejercicio.",
+        "otherNotes_many": "Dejé fuera {{count}} tomas tocadas en otras variantes de este ejercicio.",
+        "otherNotes_other": "Dejé fuera {{count}} tomas tocadas en otras variantes de este ejercicio."
       },
       "changed": {
         "first": "No tengo ninguna toma medida de este ejercicio antes de la toma {{take}}, así que no hay con qué compararla.",
         "onlyUnfair": "Las únicas tomas medidas de este ejercicio antes de la toma {{take}} son tomas que marcaste como no justas, así que no la comparo con ellas.",
         "thisUnfair": "Marcaste la evaluación de la toma {{take}} como no justa, así que no la comparo con otras tomas.",
+        "noneAlike": "No tengo ninguna toma medida de esta variante del ejercicio antes de la toma {{take}} con la que pueda compararla.",
         "sameTempo": "La toma {{take}} y la última toma medida anterior estaban las dos a {{bpm}} BPM.",
         "tempo": "La última toma medida antes de la toma {{take}} estaba a {{before}} BPM; la toma {{take}} estaba a {{bpm}} BPM.",
         "metric": {
@@ -187,9 +192,10 @@
         "clean_many": "{{count}} de ellas lograron un tempo limpio; la más rápida fue de {{bpm}} BPM.",
         "clean_other": "{{count}} de ellas lograron un tempo limpio; la más rápida fue de {{bpm}} BPM.",
         "cleanNone": "Ninguna de ellas logró un tempo limpio.",
-        "even": "Regularidad, en las {{count}} que la conservaron: {{first}}% en la más antigua, {{last}}% en la más reciente, {{best}}% como mejor cifra.",
-        "even_many": "Regularidad, en las {{count}} que la conservaron: {{first}}% en la más antigua, {{last}}% en la más reciente, {{best}}% como mejor cifra.",
-        "even_other": "Regularidad, en las {{count}} que la conservaron: {{first}}% en la más antigua, {{last}}% en la más reciente, {{best}}% como mejor cifra.",
+        "cleanUnknown": "No puedo contar los tempos limpios que lograron: algunas de ellas no conservaron si lograron uno.",
+        "even": "Regularidad, en las {{count}} de ellas que la conservaron: {{first}}% en la más antigua de esas, a {{firstBpm}} BPM; {{last}}% en la más reciente de esas, a {{lastBpm}} BPM; {{best}}% como mejor cifra, a {{bestBpm}} BPM.",
+        "even_many": "Regularidad, en las {{count}} de ellas que la conservaron: {{first}}% en la más antigua de esas, a {{firstBpm}} BPM; {{last}}% en la más reciente de esas, a {{lastBpm}} BPM; {{best}}% como mejor cifra, a {{bestBpm}} BPM.",
+        "even_other": "Regularidad, en las {{count}} de ellas que la conservaron: {{first}}% en la más antigua de esas, a {{firstBpm}} BPM; {{last}}% en la más reciente de esas, a {{lastBpm}} BPM; {{best}}% como mejor cifra, a {{bestBpm}} BPM.",
         "evenNone": "Menos de dos de ellas conservaron una cifra de regularidad, así que no la comparo."
       },
       "made": {
@@ -204,7 +210,10 @@
           "notes": "Notas correctas: al menos el {{bar}}% de las notas cuya altura puedo determinar son las escritas.",
           "hold": "Regularidad mantenida hasta el final: al menos {{bar}}% en los últimos compases del tramo evaluado."
         },
-        "clean": "Una toma mueve tu tempo limpio cuando tiene {{need}} compases limpios seguidos.",
+        "unnamed": "{{count}} de ellas es una comprobación que aún no puedo describir.",
+        "unnamed_many": "{{count}} de ellas son comprobaciones que aún no puedo describir.",
+        "unnamed_other": "{{count}} de ellas son comprobaciones que aún no puedo describir.",
+        "clean": "Una toma que pasa, con {{need}} compases limpios seguidos, logra un tempo limpio a su propio tempo, y sube tu tempo limpio cuando es más rápido.",
         "tempo": "Una toma limpia a {{passAt}} BPM o más rápido supera el ejercicio.",
         "ungraded": {
           "selfChecked": "Este ejercicio es de los que compruebas tú: la app no lo evalúa, así que no hay puntuación que desglosar.",
@@ -228,13 +237,33 @@
       },
       "distance": {
         "short": {
-          "even": "Regular: {{value}}% en la toma {{take}}, a {{gap}} puntos del listón del {{bar}}%.",
-          "heard": "Notas oídas: {{value}}% en la toma {{take}}, a {{gap}} puntos del listón del {{bar}}%.",
+          "even": "Regular: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
+          "even_many": "Regular: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "even_other": "Regular: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "heard": "Notas oídas: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
+          "heard_many": "Notas oídas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "heard_other": "Notas oídas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
           "extras": "Notas de más: {{value}} en la toma {{take}}, {{gap}} más de las que permite el listón ({{bar}} o menos en {{over}} compases).",
-          "accents": "Acentos clavados: {{value}}% en la toma {{take}}, a {{gap}} puntos del listón del {{bar}}%.",
-          "notes": "Notas correctas: {{value}}% en la toma {{take}}, a {{gap}} puntos del listón del {{bar}}%.",
-          "hold": "Regularidad mantenida hasta el final: {{value}}% en la toma {{take}}, a {{gap}} puntos del listón del {{bar}}%."
+          "accents": "Acentos clavados: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
+          "accents_many": "Acentos clavados: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "accents_other": "Acentos clavados: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "notes": "Notas correctas: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
+          "notes_many": "Notas correctas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "notes_other": "Notas correctas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "hold": "Regularidad mantenida hasta el final: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
+          "hold_many": "Regularidad mantenida hasta el final: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "hold_other": "Regularidad mantenida hasta el final: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%."
         },
+        "under": {
+          "even": "Regular en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
+          "heard": "Notas oídas en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
+          "accents": "Acentos clavados en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
+          "notes": "Notas correctas en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
+          "hold": "Regularidad mantenida hasta el final en la toma {{take}}: a menos de un punto del listón del {{bar}}%."
+        },
+        "unnamed": "El listón tiene además {{count}} comprobación que aún no puedo describir, así que no puedo decir cómo le fue a la toma {{take}} en ella.",
+        "unnamed_many": "El listón tiene además {{count}} comprobaciones que aún no puedo describir, así que no puedo decir cómo le fue a la toma {{take}} en ellas.",
+        "unnamed_other": "El listón tiene además {{count}} comprobaciones que aún no puedo describir, así que no puedo decir cómo le fue a la toma {{take}} en ellas.",
         "met": {
           "even": "Regular: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%.",
           "heard": "Notas oídas: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%.",
