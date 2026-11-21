@@ -576,7 +576,8 @@ export function judgeCard(card: string, args: ToolArgs, situation: Situation, la
   const what = argString(checked.call.args, "what");
   const aboutExercise = ctx.exercise !== undefined && ((tool.name === "why_not_counted" && what !== undefined && what !== "take") || tool.name === "score_made_of");
   if (!tool.when(ctx) && !cardAboutLastTake(ctx) && !aboutExercise) return { expect: { kind: "none" }, tags: ["card-near", "no-take"] };
-  const tags = ["card", ...Object.keys(args).map((k) => `card-${k}`)];
+  // Not the tag "card": `countRecords` counts kinds and tags in one row.
+  const tags = ["card-answer", ...Object.keys(args).map((k) => `card-${k}`)];
   return { expect: { kind: "card", card, ...(Object.keys(args).length > 0 ? { args } : {}) }, tags };
 }
 

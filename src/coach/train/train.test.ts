@@ -164,7 +164,7 @@ describe("the generator (en, a small wordings file)", () => {
     };
     // A Take there (the result screen): the card, with the words' argument.
     expect(expectOf("early_or_late", { premise: "late" }, session("result"))).toMatchObject({ kind: "card", card: "early_or_late", args: { premise: "late" } });
-    expect(expectOf("where_slipped", {}, session("result"))).toEqual({ kind: "card", card: "where_slipped", tags: ["card"] });
+    expect(expectOf("where_slipped", {}, session("result"))).toEqual({ kind: "card", card: "where_slipped", tags: ["card-answer"] });
     // No Take to read: none; but the Exercise-reading cards answer on the ready screen.
     expect(expectOf("where_slipped", {}, session("ready"))).toMatchObject({ kind: "none", tags: ["card-near", "no-take"] });
     expect(expectOf("score_made_of", {}, session("ready"))).toMatchObject({ kind: "card" });
