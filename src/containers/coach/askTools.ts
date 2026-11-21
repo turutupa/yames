@@ -25,6 +25,7 @@ import type { ResolvedBlock } from "../../coach/blocks/resolve";
 import { commandFacts, type CommandFacts } from "../../coach/ask/router";
 import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
 import { resolveStepCall } from "../../coach/tools/go";
+import { exerciseGenerator, loadExerciseGenerator } from "../../coach/tools/make";
 import { findTool } from "../../coach/tools/registry";
 import { resolvePath, wholeTitleWords } from "../../coach/tools/resolve";
 import {
@@ -58,8 +59,12 @@ export type UndoState = {
   view: MainView | null;
   /** A confirmed change's Undo is offered until then (ms since the epoch); a way back has no end. */
   until: number | null;
-  /** live: offered. gone: no longer offered. done: pressed, and it worked. refused: pressed, and the app said no. */
-  state: "live" | "gone" | "done" | "refused";
+  /**
+   * live: offered. gone: no longer offered. settling: pressed, and the app is
+   * still finding out (the store's write; no "Undone." yet). done: pressed, and
+   * it worked. refused: pressed, and the app said no.
+   */
+  state: "live" | "gone" | "settling" | "done" | "refused";
   /**
    * A suggestion chip's change (leg chip1): the player saw no proposal, so
    * its Undo has no clock. It is offered until the value is changed again
@@ -83,6 +88,8 @@ export type ToolBody =
       /** The app is still finding out (a preset being re-read): the receipt says it is at it. */
       settling?: boolean;
       blocks?: readonly ResolvedBlock[];
+      /** Where to go next (`ToolDone.next`, leg t2c: "Open Paths"). */
+      next?: readonly ToolChoice[];
       undo: UndoState | null;
     }
   | {
@@ -222,9 +229,23 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext, chi
     receipt: outcome.receipt,
     ...(outcome.later ? { settling: true } : {}),
     ...(outcome.blocks ? { blocks: outcome.blocks } : {}),
+    ...(outcome.next && outcome.next.length > 0 ? { next: outcome.next } : {}),
     // The step as `useAskHost` says it to `noteAskToolView`: null outside a running Session.
     undo: undoOf(outcome, host, Date.now(), chip ? { step: ctx.run && ctx.run.phase !== "idle" ? ctx.run.stepIndex : null } : undefined),
   };
+}
+
+/**
+ * The Undos whose receipt's `later` decides whether there is anything to undo
+ * (leg t2c: the store's answer to an add). Only these are hidden while the
+ * receipt settles and withdrawn when it settles as a refusal (review t2c,
+ * finding 7): another tool's Undo with a `later` joins this list on purpose.
+ */
+const UNDO_AFTER_LATER: ReadonlySet<string> = new Set(["undo_make_exercise"]);
+
+/** Whether a receipt's Undo waits for, and may be withdrawn by, the receipt's `later`. */
+export function laterDecidesUndo(undo: UndoState | null): boolean {
+  return !!undo && UNDO_AFTER_LATER.has(undo.call.tool);
 }
 
 /** A receipt the app learns the end of a moment later: say so when it does (held during a Take). */
@@ -233,10 +254,38 @@ function followLater(id: string, outcome: RunOutcome): void {
   void outcome.later.then((settled) => {
     // Only the settled line, applied to the turn as it is when written (it may be
     // held through a Take, and the turn may have changed meanwhile).
-    settleAskTurn(id, (turn) =>
-      turn.kind === "tool" && turn.body.kind === "receipt" ? { ...turn, body: { ...turn.body, receipt: settled, settling: false } } : null,
-    );
+    settleAskTurn(id, (turn) => {
+      if (turn.kind !== "tool" || turn.body.kind !== "receipt") return null;
+      // It settled as a refusal (leg t2c: the store did not keep it): nothing to undo, nowhere to go.
+      if (settled.key.startsWith("coachTools.why.") && laterDecidesUndo(turn.body.undo) && turn.body.undo) {
+        retireUndo(turn.body.undo.call);
+        return { ...turn, body: { ...turn.body, next: undefined, receipt: settled, settling: false, undo: { ...turn.body.undo, state: "gone", note: undefined } } };
+      }
+      return { ...turn, body: { ...turn.body, receipt: settled, settling: false } };
+    });
   });
+}
+
+/**
+ * A `make_exercise` call (leg t2c) waits for the generator, which is not in the
+ * shell's first load: loaded once, then the call runs as it would have. Any
+ * other call runs at once.
+ */
+function withGenerator(call: ToolCall, run: () => void): boolean {
+  if (call.tool !== "make_exercise" || exerciseGenerator()) return false;
+  void loadExerciseGenerator().then(run, run);
+  return true;
+}
+
+/** A newer `make_exercise` proposal replaces the open one (a variant chip, a recipe typed again): it is retired through the runner. */
+function retireOlderMakes(outcome: RunOutcome): void {
+  if (!outcome.ok || !("proposal" in outcome) || outcome.proposal.tool !== "make_exercise") return;
+  for (const turn of getAskState().turns) {
+    if (turn.kind !== "tool" || turn.body.kind !== "proposal" || turn.body.state !== "open") continue;
+    if (turn.body.proposal.tool !== "make_exercise") continue;
+    dismissProposal(turn.body.proposal);
+    setBody(turn.id, { ...turn.body, state: "expired" });
+  }
 }
 
 function turnOf(id: string): (AskTurn & { kind: "tool" }) | null {
@@ -261,13 +310,18 @@ const unavailable = (): ToolBody => ({ kind: "refusal", line: line("coachTools.w
 export function runAskCall(call: ToolCall, said: string): string {
   if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
   const id = askTurnId();
+  if (withGenerator(call, () => runAskCallAs(id, call))) return id;
+  runAskCallAs(id, call);
+  return id;
+}
+
+function runAskCallAs(id: string, call: ToolCall): void {
   const at = where();
   if (!at) {
     appendAskTurn({ id, kind: "tool", body: unavailable() });
-    return id;
+    return;
   }
   writeOutcome(id, runCoachTool(call, at.host, at.ctx), at);
-  return id;
 }
 
 /**
@@ -318,6 +372,7 @@ function tellTakeStart(): void {
 }
 
 function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
+  retireOlderMakes(outcome);
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
 }
@@ -555,6 +610,8 @@ function nameNotFound(outcome: Refusal): boolean {
  * is still the answer (review t1b2c, finding 2).
  */
 export function runTypedCall(call: ToolCall, said: string): boolean {
+  // `make_exercise` names nothing by title, so it is always the answer: run once the generator is in.
+  if (withGenerator(call, () => runTypedCall(call, said))) return true;
   const at = where();
   if (!at) {
     runAskCall(call, said);
@@ -697,7 +754,6 @@ export function pressProposal(id: string): void {
   setBody(id, bodyOf(result, at.host, at.ctx));
   followLater(id, result);
 }
-
 /** "Not now": the proposal can never be confirmed, and nothing happens. */
 export function notNowProposal(id: string): void {
   const turn = turnOf(id);
@@ -717,6 +773,10 @@ export function pressUndo(id: string): void {
   if (!turn || turn.body.kind !== "receipt" || !turn.body.undo) return;
   const body = turn.body;
   const undo = body.undo!;
+  // Nothing to undo before the store has said it kept the add (review t2c, finding 4): not offered yet.
+  if (body.settling && laterDecidesUndo(undo)) return;
+  // Already pressed (settling, done, refused) or gone: a second press changes nothing (review t2cb, LOW 4).
+  if (undo.state !== "live") return;
   if (!undoLive(undo, Date.now())) {
     setBody(id, { ...body, undo: { ...undo, state: "gone" } });
     return;
@@ -725,7 +785,16 @@ export function pressUndo(id: string): void {
   if (!at) return;
   const result = runCoachUndo(undo.call, at.host, at.ctx);
   if (result.ok) {
-    setBody(id, { ...body, undo: { ...undo, state: "done", note: result.receipt } });
+    // An Undo the app finishes a moment later (leg t2c: the store's write) says it is at it, and
+    // "Undone." only when the store answers (review t2c, finding 4); its note says how it went.
+    setBody(id, { ...body, undo: { ...undo, state: result.later ? "settling" : "done", note: result.receipt } });
+    void result.later?.then((settled) =>
+      settleAskTurn(id, (turn) =>
+        turn.kind === "tool" && turn.body.kind === "receipt" && turn.body.undo
+          ? { ...turn, body: { ...turn.body, undo: { ...turn.body.undo, state: settled.key.startsWith("coachTools.why.") ? "refused" : "done", note: settled } } }
+          : null,
+      ),
+    );
     return;
   }
   // Not now (a Take, the click still playing): it stays good, and says why.
@@ -773,7 +842,11 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
       continue;
     }
     if (undo.view === null || undo.view === view) continue;
-    setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone" } });
+    // An add's Undo still on its clock (its own "Open Paths" chip moves the view): the receipt says
+    // it ended (it does not come back) and what does the same job, rather than losing it silently
+    // (review t2c, finding 3; review t2cb, MEDIUM 1).
+    const said = laterDecidesUndo(undo) && undoLive(undo, Date.now()) ? { note: line("coachTools.make.undoLeft") } : {};
+    setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone", ...said } });
   }
 }
 

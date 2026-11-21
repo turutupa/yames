@@ -527,12 +527,4 @@ describe("loop_bars (leg lb1)", () => {
   });
 });
 
-describe("typed and waiting", () => {
-  it.each([
-    ["make_exercise", { shape: "scale run", root: "A", scale: "minorPentatonic" }],
-  ])("%s says not yet, and touches nothing", (tool, args) => {
-    const h = fakeHost({ paths: TEST_PATHS });
-    expect(runCoachTool(call(tool, args), h, toolCtx())).toMatchObject({ why: "notWiredYet", line: { values: { tool } } });
-    expect(h.changes()).toEqual([]);
-  });
-});
+// `make_exercise` is wired since leg t2c: `make.test.ts`.

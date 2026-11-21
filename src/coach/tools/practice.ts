@@ -1,7 +1,7 @@
 /**
  * The `confirm` tools that start or shape playing (TOOLS 2.2): `start_today`,
  * `play_exercise`, `set_tempo`, `find_edge`, `test_out`, `loop_bars` (its door
- * since leg lb1), and the one typed and waiting, `make_exercise`.
+ * since leg lb1), and `make_exercise` (in `make.ts`, leg t2c).
  *
  * Each `propose` resolves the call against the app's own data and says exactly
  * what a press will do (the Exercise by its title, the tempo it will start at,
@@ -27,7 +27,7 @@ import type { CoachContext } from "../context";
 import { MAX_STEP, MAX_QUERY, outsideSession, resolveStepCall, sessionOpen } from "./go";
 import type { CoachToolHost } from "./host";
 import { MAX_CHOICES, resolveExercise, resolvePath, snapPart, snapToRung, type ExerciseHit } from "./resolve";
-import { NECK_POSITIONS, ROOT_NAMES, SCALE_NAMES } from "../blocks/spec";
+import { MAKE_TOOLS } from "./make";
 import {
   argNumber,
   argString,
@@ -453,25 +453,6 @@ const loopBars = defineConfirmTool<LoopBars>({
   },
 });
 
-/** A custom Exercise (TOOLS 2.4, leg t2): typed, waiting. */
-const makeExercise = defineConfirmTool<never>({
-  name: "make_exercise",
-  kind: "confirm",
-  audience: "player",
-  note: "Make a custom Exercise from a recipe, shown as a preview first.",
-  args: [
-    { name: "shape", type: { kind: "query", maxLength: MAX_QUERY }, note: "What to practise (a scale run, an arpeggio…), in the player's words." },
-    { name: "root", type: { kind: "enum", values: ROOT_NAMES }, optional: true, note: "The root." },
-    { name: "scale", type: { kind: "enum", values: SCALE_NAMES }, optional: true, note: "The scale." },
-    { name: "position", type: { kind: "enum", values: NECK_POSITIONS }, optional: true, note: "Where on the neck." },
-    { name: "subdivision", type: { kind: "integer", min: 1, max: 6 }, optional: true, note: "Notes per beat." },
-    { name: "bars", type: { kind: "integer", min: 1, max: 8 }, optional: true, note: "How long." },
-  ],
-  when: (ctx) => !takeRunning(ctx),
-  propose: () => notWiredYet("make_exercise"),
-  commit: () => notWiredYet("make_exercise"),
-});
-
 export const PRACTICE_TOOLS: readonly ConfirmTool[] = [
   startToday,
   playExercise,
@@ -479,5 +460,6 @@ export const PRACTICE_TOOLS: readonly ConfirmTool[] = [
   findEdge,
   testOut,
   loopBars,
-  makeExercise,
+  // `make_exercise` and its Undo (leg t2c): `make.ts`.
+  ...MAKE_TOOLS,
 ];

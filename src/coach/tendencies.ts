@@ -29,7 +29,9 @@ import type { PathTakeRow } from "../ipc";
 import type { CueTrigger, Exercise, PathDoc } from "../paths/format";
 import { placeTriggers } from "../paths/cues";
 import { findExercise } from "../session/packs";
-import { CUSTOM_PATH_ID } from "../paths/custom";
+// The light store's copy of `paths/custom.ts`'s id (a test holds them equal): importing the generator
+// here put it back in the shell's first load (t2b; found by leg t2c's build).
+import { MY_EXERCISES_PATH_ID as CUSTOM_PATH_ID } from "../session/myExercises";
 import { factsOf, isMarkedNotFair, isUngradedTake, leanOf, sessionKeyOf } from "../session/progress";
 import { withVariant } from "../session/take";
 import { totalsFrom } from "../session/totals";
