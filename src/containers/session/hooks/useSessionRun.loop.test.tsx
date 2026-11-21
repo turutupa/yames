@@ -165,9 +165,9 @@ describe("useSessionRun — startLoop(bars?)", () => {
     await readyOn(h);
     const startLoop = h.result.current.actions.startLoop;
     const ran = h.result.current.run;
-    act(() => h.result.current.actions.slower());
+    // The Session's clock ticks once a second, a new run each time.
+    await waitFor(() => expect(h.result.current.run).not.toBe(ran), { timeout: 3000 });
     // Stable: the run moved, the door did not.
-    expect(h.result.current.run).not.toBe(ran);
     expect(h.result.current.actions.startLoop).toBe(startLoop);
     let out: LoopRefusal | null = null;
     act(() => {
