@@ -164,5 +164,33 @@
     "pour moi", "avec moi", "en arrière", "arrière", "retour", "revenir"
   ],
   "polite": ["s'il te plaît", "s'il te plait", "s'il vous plaît", "s'il vous plait", "svp", "stp", "merci", "ok", "okay", "hey coach", "hé coach", "salut", "maintenant", "juste", "allez"],
-  "fillers": ["me", "moi", "le", "la", "les", "un peu", "un", "une", "des", "mon", "ma", "mes", "ce", "cette", "au", "aux"]
+  "fillers": ["me", "moi", "le", "la", "les", "un peu", "un", "une", "des", "mon", "ma", "mes", "ce", "cette", "au", "aux"],
+  "recipe": {
+    "shapes": {
+      "box": ["boîte", "boite", "box"],
+      "threePerString": ["trois par corde", "3 par corde", "3nps"],
+      "arpeggio": ["arpèges", "arpège", "arpeges", "arpege", "arpeggio"],
+      "oneString": ["sur une seule corde", "sur une corde", "une seule corde", "une corde"],
+      "chromatic": ["chromatique", "araignée", "araignee", "spider"]
+    },
+    "chords": {
+      "maj": ["majeur", "majeure"],
+      "min": ["mineur", "mineure"],
+      "dim": ["diminué", "diminuée", "diminue", "dim"],
+      "aug": ["augmenté", "augmentée", "augmente", "aug"],
+      "7": ["septième de dominante", "septieme de dominante", "dominante", "septième", "septieme", "7"],
+      "maj7": ["majeur 7", "septième majeure", "septieme majeure", "maj7"],
+      "m7": ["mineur 7", "septième mineure", "septieme mineure", "m7"],
+      "m7b5": ["demi-diminué", "demi diminué", "demi diminue", "mineur 7 bémol 5", "m7b5"],
+      "dim7": ["diminué 7", "septième diminuée", "septieme diminuee", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["noires", "noire"],
+      "eighths": ["croches", "croche"],
+      "eighthTriplets": ["triolets de croches", "triolets", "triolet"],
+      "sixteenths": ["doubles croches", "double croches", "doubles-croches", "double-croches"]
+    },
+    "fret": ["case #", "# case", "frette #", "# frette"],
+    "numberSuffixes": ["e", "ème", "eme"]
+  }
 }

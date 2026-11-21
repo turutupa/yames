@@ -170,5 +170,43 @@
     "für mich", "mit mir", "bei mir", "zurück", "drüber", "darüber"
   ],
   "polite": ["bitte", "ok", "okay", "hey coach", "hey", "jetzt", "danke", "einfach"],
-  "fillers": ["mir", "mich", "die", "der", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "mein", "meine", "meinen", "meinem", "meiner", "ein bisschen", "bisschen", "ein wenig", "etwas"]
+  "fillers": ["mir", "mich", "die", "der", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "mein", "meine", "meinen", "meinem", "meiner", "ein bisschen", "bisschen", "ein wenig", "etwas"],
+  "recipe": {
+    "shapes": {
+      "box": ["box muster", "boxmuster", "box pattern", "box"],
+      "threePerString": ["drei töne pro saite", "drei noten pro saite", "3 töne pro saite", "3 noten pro saite", "drei pro saite", "3 pro saite", "3nps"],
+      "arpeggio": ["arpeggien", "arpeggio", "arpeggios", "akkordzerlegung", "arp"],
+      "oneString": ["auf einer saite", "einer saite", "eine saite", "einsaitig"],
+      "chromatic": ["chromatische", "chromatisch", "spider"]
+    },
+    "chords": {
+      "maj": ["dur"],
+      "min": ["moll"],
+      "dim": ["vermindert", "verminderter", "dim"],
+      "aug": ["übermäßig", "übermäßiger", "aug"],
+      "7": ["dominant 7", "dominantseptakkord", "dominant", "septakkord", "7"],
+      "maj7": ["dur 7", "major 7", "maj7"],
+      "m7": ["moll 7", "m7"],
+      "m7b5": ["halbvermindert", "m7b5"],
+      "dim7": ["vermindert 7", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["viertelnoten", "viertelnote", "viertel"],
+      "eighths": ["achtelnoten", "achtelnote", "achtel", "8tel"],
+      "eighthTriplets": ["achteltriolen", "achteltriole", "triolen", "triole"],
+      "sixteenths": ["sechzehntelnoten", "sechzehntelnote", "sechzehntel", "16tel"]
+    },
+    "fret": ["# bund", "bund #", "im # bund", "im bund #", "am # bund", "am bund #", "# lage", "lage #"],
+    "rootNames": {
+      "h": "B",
+      "b": null,
+      "fis": "F#",
+      "cis": "C#",
+      "gis": "G#",
+      "dis": "D#",
+      "ais": "A#",
+      "as": "Ab",
+      "ges": "Gb"
+    }
+  }
 }
