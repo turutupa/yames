@@ -42,7 +42,9 @@ value that lives inside each stream's data closure:
   in static atomics (`mmcss` / `fallback` / `failed`, plus the last error).
   `report_once()` prints each outcome the first time it is seen. It runs from
   the engine's event loop, next to the beat-queue overflow report, and costs
-  three relaxed loads when there is nothing new. The probe prints
+  three acquire loads when nothing has been seen, plus one `fetch_or` once
+  something has; the `fetch_or` claims new outcomes in one RMW so two live
+  event loops never print the same line twice. The probe prints
   `callback thread priority: mmcss=.. fallback=.. failed=..`.
 - **The A/B switch:** `YAMES_NO_CALLBACK_PRIORITY=1` keeps the old behaviour.
   It is read once, on the stream-building thread. The RTX runs below used it
@@ -103,8 +105,10 @@ base 6).
 
 The probe's callback-heap gate counts Rust allocations and frees inside the
 body of our closure (`alloc_probe::Span`, raised in `render`). The promotion
-runs before `render`, so it sits outside the span. It also allocates nothing,
-which is the claim that matters:
+runs inside `render`, right after the span is raised, so the gate checks the
+claim that it allocates nothing on the Rust side rather than taking it on
+trust (moved there after review, finding F4; until then it ran just before
+`render`, outside the span). What the gate covers:
 
 - **Every callback after the first** does one `bool` test (`#[inline(always)]`;
   the promote path is `#[cold] #[inline(never)]`).
@@ -112,19 +116,28 @@ which is the claim that matters:
   `AvSetMmThreadCharacteristicsW`, `AvSetMmThreadPriority`; on the fallback,
   `GetLastError` / `GetThreadPriority` / `SetThreadPriority`). Their arguments
   are a stack `u32` and a `'static` UTF-16 array built at compile time. After
-  that come a few relaxed atomic stores. There is no `String`, no `Vec`, no
+  that come a few atomic stores. There is no `String`, no `Vec`, no
   formatting, no lock and no log.
 - **`avrt.dll` is a load-time import** (windows-sys links it), so there is no
   `LoadLibrary` on the audio thread.
 - **The warm-up:** `CallbackPriority::new()` runs on the thread that builds the
   stream, never the audio thread. The first time in the process, it registers
   that thread with Pro Audio and reverts it straight away (`Once`). That keeps
-  the MMCSS service's one-off first-call setup out of the first buffer, and it
-  serialises the first call, which the avrt crate saw fail with
-  `ERROR_PATH_NOT_FOUND` when made concurrently.
-- Whatever the OS does inside `AvSetMmThreadCharacteristicsW` happens once per
-  stream, on the first buffer, inside the probe's 1.5 s warm-up. It is OS code,
-  not the Rust heap.
+  the process-first MMCSS call off the audio thread, and it serialises that
+  first call, which the avrt crate saw fail with `ERROR_PATH_NOT_FOUND` when
+  made concurrently. It runs once per process, so it only shields the first
+  stream, and it is not measured.
+- **Each stream's own registration costs one syscall in its first buffer.**
+  `AvSetMmThreadCharacteristicsW` reads the task's registry key, calls into
+  MMCSS, and may allocate on the process heap, which on Windows is the heap
+  the Rust allocator uses too, so it can wait on a heap lock another thread
+  holds. The gate can't see OS-side heap use. This is standard practice
+  (cpal 0.17, PortAudio and JUCE all register from the audio thread) and
+  costs at most one buffer at stream start, inside the probe's 1.5 s warm-up.
+- **The onset analyzer is already MMCSS "Audio"** (`audio_thread_priority`'s
+  first call in `onset.rs`). The warm-up doesn't serialise against that crate's
+  own first-call `Once`. With this change the mic producer (Pro Audio, 23-26)
+  outranks its consumer (Audio, 16-22), which is the right order.
 - **`Drop`** runs at stream teardown, on a thread that is leaving.
 
 Measured: `callback_allocs = 0`, `callback_frees = 0` and
@@ -135,6 +148,13 @@ The mic input callback in `audio_input.rs` already allocates (`Vec` per
 buffer) and takes `try_lock`s. That was true before this change, and that
 callback is not under the probe's gate. Promoting it makes capture more timely.
 It does not make that allocation any less legal than it was.
+
+Its two `eprintln!`s (the recording-cap notice, and take playback's
+first-callback line) took Rust's stderr lock on the callback, a priority
+inversion now that the thread runs at 25 (review finding F6). Both moved off
+the audio thread: the cap is reported by `stop_recording`, and the first
+callback only stores its buffer length for the playback thread's wait loop to
+print.
 
 ## Linux, macOS, Android: unchanged
 

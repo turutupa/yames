@@ -6630,6 +6630,14 @@ impl MetronomeEngine {
             // it — that is the whole point of the split, because this is the
             // code that renders the click and it must be the same code on a
             // laptop and on a phone.
+            //
+            // Real-time scheduling for the stream thread, taken on the first
+            // call (cpal 0.15.3's own TIME_CRITICAL boost is a no-op on
+            // Windows; see `callback_priority`). A zero-sized no-op on every
+            // other platform, Oboe included. Built here, on the thread that
+            // builds the stream, and called inside the probe's allocation
+            // span below, so the probe proves it allocates nothing.
+            let mut priority = crate::callback_priority::CallbackPriority::new();
             let render = move |data: &mut [f32]| {
                     let frames = data.len() / channels;
 
@@ -6670,6 +6678,7 @@ impl MetronomeEngine {
                     let _alloc_span = probe_cb
                         .as_ref()
                         .map(|_| crate::alloc_probe::Span::new());
+                    priority.on_callback();
 
                     // Output latency compensation.
                     // CoreAudio device/safety/stream latency + one buffer of
@@ -8572,18 +8581,11 @@ impl MetronomeEngine {
                 // of it instead and needs no such thing, hence the rebinding
                 // here rather than a `mut` on the definition.
                 let mut render = render;
-                // Real-time scheduling for cpal's stream thread, taken on the
-                // first callback (cpal 0.15.3's own TIME_CRITICAL boost is a
-                // no-op on Windows; see `callback_priority`). Nothing on
-                // other platforms. Outside `render`, so outside the probe's
-                // allocation span — and it allocates nothing either way.
-                let mut priority = crate::callback_priority::CallbackPriority::new();
+                // `render` promotes its own thread first thing (see
+                // `priority` above it), inside the probe's allocation span.
                 let built = device.build_output_stream(
                     &config,
-                    move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| {
-                        priority.on_callback();
-                        render(data)
-                    },
+                    move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| render(data),
                     |err| {
                         eprintln!("Audio stream error: {}", err);
                     },
