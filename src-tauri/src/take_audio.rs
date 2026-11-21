@@ -357,6 +357,18 @@ impl HeardTake {
     }
 }
 
+/// The Take's bar lines where its audio has them, for [`HeardTake::new`]
+/// (c5b1b, review L4): `ScheduleRun::bar_spans_ms` moved by the Take's
+/// calibrated offset (`TakeCalibration::offset_ms`, its input's latency as
+/// the grader measured it) less the detector's delay: the same shift
+/// `score::notes::lookups` gives every expected attack before it looks in
+/// the audio. Without a grade (the pass failed) they stay where the beat map
+/// has them. The notes thread's arithmetic; no lock.
+pub fn bars_as_heard(bars_ms: &[(f64, f64)], offset_ms: Option<f64>, detection_delay_ms: f64) -> Vec<(f64, f64)> {
+    let shift = offset_ms.map_or(0.0, |offset| offset - detection_delay_ms);
+    bars_ms.iter().map(|&(open, close)| (open + shift, close + shift)).collect()
+}
+
 /// The copy a hear-back plays, faded in and out at its edges.
 fn faded_copy(samples: &[f32], rate: u32) -> Vec<f32> {
     let mut out = samples.to_vec();
@@ -510,6 +522,26 @@ impl HeardTakeSlot {
         let generation = self.playing.swap(NO_HEAR, Ordering::AcqRel);
         generation != NO_HEAR && handoff.clear_play_if(generation)
     }
+
+    /// The input stopping (`playing_too`: it ends the Session, so a bar
+    /// still playing goes too) or `forget_heard_take` (a finished hear-back
+    /// only; a playing bar plays out): take the hear-back's slice out of the
+    /// take slot, so none of the player's audio stays there and a finished
+    /// one no longer stops a jam take from starting (review L1). Then drain
+    /// what the audio thread handed back. Command thread; nothing new on the
+    /// callback, which retires its own copy on its next buffer as it does
+    /// after any cut, for the NEXT drain (the input's stop drains again once
+    /// the analyzer has joined). `true` when it cleared the slot.
+    pub fn clear(&self, handoff: &TakeHandoff, playing_too: bool) -> bool {
+        let generation = self.playing.load(Ordering::Acquire);
+        let cleared = generation != NO_HEAR
+            && (playing_too || handoff.has_ended(generation))
+            // a Start's cut or a stop that got here first has it
+            && self.playing.compare_exchange(generation, NO_HEAR, Ordering::AcqRel, Ordering::Acquire).is_ok()
+            && handoff.clear_play_if(generation);
+        handoff.drain_retired();
+        cleared
+    }
 }
 
 #[cfg(test)]
@@ -658,7 +690,7 @@ mod tests {
     fn a_kept_take_is_shrunk_to_its_length_and_maps_its_bars_after_the_count_in() {
         let t = take(1);
         assert_eq!(t.samples.len(), 10_000);
-        assert_eq!(t.samples.capacity(), 10_000, "the tap's spare room is kept");
+        assert_eq!(t.samples.capacity(), 10_000, "the tap's spare room was not freed");
         assert_eq!(t.bytes(), 40_000);
         assert_eq!(t.bars, vec![(2000, 4000), (4000, 6000), (6000, 8000), (8000, 10_000)]);
         assert_eq!(t.first_ns, 7);
@@ -785,5 +817,74 @@ mod tests {
         slot.forget();
         assert!(handoff.is_playing_back());
         assert!(slot.stop(&handoff, h.generation));
+    }
+
+    /// c5b1b, review L1: `forget_heard_take` takes a FINISHED hear-back's
+    /// slice out of the take slot (a playing one plays out); the input's
+    /// stop takes it playing or not. A jam's take is never touched, and the
+    /// audio thread's retired copies are drained.
+    #[test]
+    fn a_forget_clears_a_finished_hear_back_and_the_inputs_stop_any() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        slot.keep(take(1), slot.epoch());
+        // nothing in the slot: nothing to clear
+        assert!(!slot.clear(&handoff, true));
+        // a bar still playing: a forget leaves it to finish
+        let h = slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        assert!(!slot.clear(&handoff, false));
+        assert!(handoff.is_playing_back());
+        // it runs off its end: now a forget clears it, and a jam take may start
+        handoff.note_ended(h.generation);
+        assert!(slot.clear(&handoff, false), "a finished bar held the take slot");
+        assert!(!handoff.is_playing_back());
+        // and once its ending was reported (the event thread got there first)
+        let h = slot.start(&handoff, slot.slice(1, 2, 2).unwrap()).unwrap();
+        handoff.note_ended(h.generation);
+        assert_eq!(handoff.take_ended(), Some(h.generation));
+        assert!(slot.clear(&handoff, false));
+        assert!(!handoff.is_playing_back());
+        // the input's stop takes a bar that is still playing
+        slot.start(&handoff, slot.slice(1, 3, 3).unwrap()).unwrap();
+        assert!(slot.clear(&handoff, true));
+        assert!(!handoff.is_playing_back());
+        // never a jam's own take, finished or not
+        slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        let jam = handoff.set_play(Some(TakePlayback { pcm: Arc::new(vec![0.0; 8]), sample_rate: 48_000 })).unwrap();
+        handoff.note_ended(jam);
+        assert!(!slot.clear(&handoff, true));
+        assert!(handoff.is_playing_back(), "the jam's take was cleared");
+    }
+
+    /// c5b1b, review L1: what the audio thread retired is drained by a clear.
+    #[test]
+    fn a_clear_drains_what_the_audio_thread_retired() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        let pcm = Arc::new(vec![0.5f32; 100]);
+        let mut parking = crate::take::TakeParking::new();
+        parking.retire_pcm(&handoff, pcm.clone());
+        assert_eq!(Arc::strong_count(&pcm), 2, "the retired copy is held");
+        slot.clear(&handoff, false);
+        assert_eq!(Arc::strong_count(&pcm), 1, "the retired copy was not drained");
+    }
+
+    /// c5b1b, review L4: the bars are moved where the grader looks for their
+    /// attacks: by the calibrated offset less the detector's delay, the shift
+    /// `score::notes::lookups` gives a due beat (`due + offset - delay`).
+    #[test]
+    fn the_bars_are_moved_by_the_calibrated_input_latency() {
+        let on_the_map = bars(2000.0, 2000.0, 4);
+        // 120 ms of input latency, a detector 20 ms behind its attacks
+        let heard = bars_as_heard(&on_the_map, Some(120.0), 20.0);
+        assert_eq!(heard[0], (2100.0, 4100.0));
+        assert_eq!(heard[3], (8100.0, 10_100.0));
+        let t = HeardTake::new(1, captured(1000, 11.0), 0.0, &heard);
+        assert_eq!(t.bars[0], (2100, 4100), "bar 1 opens where its downbeat was played");
+        assert_eq!(t.span(1, 1), Ok(1950..4400));
+        // no grade: the beat map's own lines
+        assert_eq!(bars_as_heard(&on_the_map, None, 20.0), on_the_map);
+        // an input ahead of the map (a negative offset) moves them earlier
+        assert_eq!(bars_as_heard(&on_the_map, Some(-30.0), 0.0)[0], (1970.0, 3970.0));
     }
 }

@@ -48,7 +48,7 @@ case "$step" in
     # Wait up to 30 min for the lock alone; then at most 10 min inside it.
     flock -x -w 1800 /tmp/coach-heavy.lock bash "$0" inner "$out" "$label" "$@" > "$log" 2>&1
     code=$?
-    grep -E 'mode|hear-backs|p99|missed|alloc|frees|dropped|PASS|FAIL|load' "$log"
+    grep -E 'mode|hear-backs|start to click|starts as fresh|p99|missed|alloc|frees|dropped|PASS|FAIL|load' "$log"
     exit "$code"
     ;;
   inner)

@@ -3089,7 +3089,13 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
             // The Take's audio is kept as the last heard Take ("Hear bar N",
             // c5b1), in RAM only. The one it replaces, or this one when it is
             // refused, is freed here, on this thread.
-            let bars = run.bar_spans_ms();
+            // Its bars where the grader looked for them: moved by the Take's
+            // calibrated input latency (c5b1b, review L4).
+            let bars = crate::take_audio::bars_as_heard(
+                &run.bar_spans_ms(),
+                late.as_ref().map(|r| r.grade.calibration.offset_ms),
+                audio.detection_delay_ns as f64 / 1e6,
+            );
             heard.keep(crate::take_audio::HeardTake::new(serial, audio, start_ms, &bars), heard_epoch);
         });
     if spawned.is_err() {

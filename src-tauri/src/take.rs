@@ -564,6 +564,16 @@ impl TakeHandoff {
         cleared
     }
 
+    /// Has the playback `generation` named run off its end (reported or not
+    /// yet)? Command thread; atomic loads only. `acknowledged_end` is read
+    /// on both sides of `ended_generation`, so an ending the event thread is
+    /// moving from one to the other (`take_ended`) is seen in one of them.
+    pub fn has_ended(&self, generation: u64) -> bool {
+        self.acknowledged_end.load(Ordering::Acquire) == generation
+            || self.ended_generation.load(Ordering::Acquire) == generation
+            || self.acknowledged_end.load(Ordering::Acquire) == generation
+    }
+
     /// `set_play`'s three steps, apart so a test can interleave the other
     /// threads between them. Called with the slot's lock held.
     fn bump_play_generation(&self) {
