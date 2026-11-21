@@ -16,9 +16,46 @@ Cues: `src/paths/specs/tapping-cues.ts`, attached with `withCues` in `tapping.ts
   two-taps-through-chords, over-the-band, second-solo, warm-up fast-around), 23 Exercises. `check`: 0
   errors, 0 refused, 0 cues rewritten (`gc7.log`; the 55 `variant.rewritten` lines are purposes and
   how-tos, none mine).
-- [ ] Proof-read
+- [x] Proof-read (below); `check` after the fixes: 0 errors, 0 refused, 0 cues rewritten (`gc10.log`).
 - [ ] Translations
 - [ ] Gates
+
+## The proof-read (three separate sonnet readers, one per Level: cues, tabs, purposes, how-tos, the guide's rules)
+
+25 objections (`/tmp/coach-cues12/proof-tapping/objections-{a,b,c}.md`), 21 taken, 4 answered.
+Taken (was -> now): tap-and-pull heard "Pull the tap off sideways, toward the floor." (two directions)
+-> "Pull the tap off toward the floor, not up." · "Tap each new fret as firmly as the first." (implied the
+force of a tap was heard; five Exercises) -> "Look at each new fret before you tap it." · tap-and-stop
+heard "Tap the long note as firmly as the cells." -> "Hold the long tap down for its whole beat.";
+afterHeld duplicated the general and the early cue -> "Have the tap just above the string on '4'." ·
+d-to-b general "together" contradicted how-to 2 (the two hands move at different notes) -> "Move both
+hands down three frets each." · double-tap heard "the higher finger" (ambiguous) -> "Put the lifted
+finger back down as you tap." (the reader's "little finger" is refused by the G-string variant) ·
+sixteenth-changes general "both hands" (false for Am to F) -> "Move from each chord's last pull-off." ·
+loop-em-c-d-b general "in the three notes after it" (no referent) -> "Move the tap while the fretting
+hand plays." · double-tap-em-c-d-b general "never wait" (fought the early cue) -> "Keep the taps in
+steady eighths throughout." · "Tap each string as firmly as the top one." (force; four Exercises) ->
+"Fret the new string before the tap pulls off." · scale-tap-em-to-am lastBars "Cross back to the B
+string for Em." (the last bar is the Am bar) -> "Keep the Am figure as even as the Em one." ·
+two-taps-em-bm late was about the move, not the time -> "Put both taps of each beat on the count." ·
+taps-and-skip-line general (a practice routine) -> "Know each change before it comes." · tap-minute
+general two ideas -> "Let both shoulders drop." · em-line general "Move as the tap lands" (what?) ->
+"Move the whole hand as the tap lands." · em-line and em-eight-bars heard "both fingers down" (false
+for the Em and C bars, which hammer) -> "Land each hammer-on firmly enough to sound." · em-melody
+lastBars was about every beat -> "Move the tap early into the last chord." · em-eight-bars general
+(vague) -> "Move both hands up as the melody begins."; lastBars "the eighth bar" -> "Keep the last
+chord as even as the first."
+
+Answered, not changed:
+- *am-f-e lastBars "Slide the fretting hand back up a fret for Am." is about the bar before*: the slide
+  lands on the last bar's first notes, where a slip there is measured.
+- *em-with-the-band lastBars and skip-em-am lastBars name a distance ("three frets", "two frets") on
+  Exercises that change string set / key*: a distance is the same in every variant, and `check` lets
+  every variant say both.
+- *double-tap-em-c-d-b late "Change the tap's fret between two taps." is not about time*: it is the
+  how-to's order for the moment the tap is late (it waits to change fret); kept.
+- *the reader's "little finger" for the double tap*: refused by the G-string variant, which hammers with
+  the third finger.
 
 ## Refusals and rewordings
 

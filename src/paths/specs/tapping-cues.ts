@@ -30,7 +30,7 @@ const B_ONLY = "Keep the tap on the B string only.";
 const HAMMER_FIRM = "Land each hammer-on firmly enough to sound.";
 const NEXT_FRET_LATE = "Be over the next fret before its beat.";
 const NEW_TAP_EARLY = "Wait for the click before each new tap.";
-const NEW_FRET_FIRM = "Tap each new fret as firmly as the first.";
+const NEW_FRET_FIRM = "Look at each new fret before you tap it.";
 const CHORD_LATE = "Put the first tap of each chord on the click.";
 const CHORD_EARLY = "Wait for the click on each chord's first tap.";
 const BAND_LATE = "Land each chord's first tap with the band.";
@@ -49,7 +49,7 @@ const PUT_BACK = "Put the little finger back down as you tap.";
 const BOTH_TAPS_LATE = "Put both taps of each beat on the count.";
 const BOTH_TAPS_EARLY = "Wait for '1' and 'and' before each tap.";
 const SHAPE_BACK_AM = "Bring the shape back to frets 5 and 8 for Am.";
-const EACH_STRING_FIRM = "Tap each string as firmly as the top one.";
+const EACH_STRING_FIRM = "Fret the new string before the tap pulls off.";
 const ONE_ON_ONE = "Land each tap on one string, not two.";
 const ROLL_ACROSS = "Roll the first finger across without lifting.";
 const CROSS_ON_HAMMER = "Cross both hands during the last hammer-on.";
@@ -62,13 +62,13 @@ const MOVE_EARLY_WAIT = "Move the tap early and wait above the string.";
 const WAIT_ABOVE = "Wait above the string for the click.";
 const BOTH_DOWN_TAPS = "Keep both fretting fingers down for the taps.";
 const SKIP_HALF_BEAT = "Cross every half beat, both hands at once.";
-const BOTH_DOWN_LEAVES = "Have both fingers down before the tap leaves.";
+const BOTH_DOWN_LEAVES = "Land each hammer-on firmly enough to sound.";
 
 export const TAPPING_CUES: CueBook = {
   // Step 1: first taps
   "first-taps.tap-and-pull": [
     g("Tap on the beat, pull off on the 'and'.", 0),
-    c("heard", "Pull the tap off sideways, toward the floor.", 1),
+    c("heard", "Pull the tap off toward the floor, not up.", 1),
     c("extras", ONE_STRING),
     c("late", TAP_LATE),
     c("early", TAP_EARLY),
@@ -106,11 +106,11 @@ export const TAPPING_CUES: CueBook = {
   ],
   "moving-the-tap.tap-and-stop": [
     g("Count the rest, then tap from just above.", 1),
-    c("heard", "Tap the long note as firmly as the cells."),
+    c("heard", "Hold the long tap down for its whole beat."),
     c("extras", TOP_ONLY),
     c("late", TAP_LATE),
     c("early", "Wait for '1' before the tap after the rest."),
-    c("afterHeld", "Count the rest out, then tap on '1'.", 1),
+    c("afterHeld", "Have the tap just above the string on '4'.", 1),
     c("lastBars", "Hold the last tap a full beat, then rest."),
   ],
 
@@ -150,7 +150,7 @@ export const TAPPING_CUES: CueBook = {
     c("lastBars", BACK_TO_12_C),
   ],
   "cell-in-e-minor.d-to-b": [
-    g("Move both hands down three frets together.", 1),
+    g("Move both hands down three frets each.", 1),
     c("heard", FRET_FIRST, 2),
     c("extras", B_ONLY),
     c("late", MOVE_ON_HAMMER, 2),
@@ -191,13 +191,13 @@ export const TAPPING_CUES: CueBook = {
   ],
   "sixteenths.double-tap": [
     g("Tap twice a beat: on '1' and on the 'and'.", 0),
-    c("heard", "Put the higher finger back down as you tap.", 1),
+    c("heard", "Put the lifted finger back down as you tap.", 1),
     c("extras", ONE_STRING),
     c("late", BOTH_TAPS_LATE),
     c("early", BOTH_TAPS_EARLY),
   ],
   "sixteenths.sixteenth-changes": [
-    g("Move both hands from each chord's last pull-off.", 1),
+    g("Move from each chord's last pull-off.", 1),
     c("heard", FRET_FIRST),
     c("extras", TOP_ONLY),
     c("late", CHORD_LATE),
@@ -223,7 +223,7 @@ export const TAPPING_CUES: CueBook = {
     c("lastBars", LOOK_AT_7, 2),
   ],
   "sixteenths-in-e-minor.loop-em-c-d-b": [
-    g("Move the tap in the three notes after it.", 1),
+    g("Move the tap while the fretting hand plays.", 1),
     c("heard", FRET_FIRST),
     c("extras", B_ONLY),
     c("late", CHORD_LATE),
@@ -231,7 +231,7 @@ export const TAPPING_CUES: CueBook = {
     c("lastBars", DOWN_TO_B),
   ],
   "sixteenths-in-e-minor.double-tap-em-c-d-b": [
-    g("Keep the taps going in eighths; never wait.", 1),
+    g("Keep the taps in steady eighths throughout.", 1),
     c("heard", PUT_BACK, 2),
     c("extras", B_ONLY),
     c("late", "Change the tap's fret between two taps.", 1),
@@ -379,7 +379,7 @@ export const TAPPING_CUES: CueBook = {
     c("late", CHORD_LATE),
     c("early", CHORD_EARLY),
     c("stringChange", "Cross as the last hammer-on sounds."),
-    c("lastBars", "Cross back to the B string for Em."),
+    c("lastBars", "Keep the Am figure as even as the Em one."),
   ],
 
   // Step 12: two taps and string skips
@@ -419,7 +419,7 @@ export const TAPPING_CUES: CueBook = {
     g("Keep the fretting hand still; move the taps.", 0),
     c("heard", BOTH_DOWN_TAPS),
     c("extras", ONE_STRING),
-    c("late", "Move the tapping hand as the pull-offs sound.", 1),
+    c("late", BOTH_TAPS_LATE),
     c("early", BOTH_TAPS_EARLY),
     c("lastBars", "Slide the whole tapping hand, thumb and all.", 1),
   ],
@@ -433,7 +433,7 @@ export const TAPPING_CUES: CueBook = {
     c("lastBars", "Move only the fretting hand, two frets down."),
   ],
   "two-taps-through-chords.taps-and-skip-line": [
-    g("Practise each change alone, then all four.", 1),
+    g("Know each change before it comes.", 1),
     c("heard", FRET_FIRST),
     c("extras", ONE_ON_ONE),
     c("late", BOTH_TAPS_LATE),
@@ -460,7 +460,7 @@ export const TAPPING_CUES: CueBook = {
     c("lastBars", "Reach the tap up to fret 19 and back down."),
   ],
   "over-the-band.tap-minute": [
-    g("Breathe, and let both shoulders drop.", 0),
+    g("Let both shoulders drop.", 0),
     c("heard", "Flick every pull-off right to the end."),
     c("late", TAP_LATE),
     c("early", TAP_EARLY),
@@ -469,7 +469,7 @@ export const TAPPING_CUES: CueBook = {
 
   // Step 15: the second solo
   "second-solo.em-line": [
-    g("Move as the tap lands, not after.", 1),
+    g("Move the whole hand as the tap lands.", 1),
     c("heard", BOTH_DOWN_LEAVES, 1),
     c("extras", ONE_STRING),
     c("late", BAND_LATE),
@@ -482,15 +482,15 @@ export const TAPPING_CUES: CueBook = {
     c("extras", ONE_STRING),
     c("late", NEXT_FRET_LATE),
     c("early", BAND_EARLY),
-    c("lastBars", "Look at the fret you are going to, every beat.", 2),
+    c("lastBars", "Move the tap early into the last chord.", 2),
   ],
   "second-solo.em-eight-bars": [
-    g("Join the line to the melody without a gap.", 1),
+    g("Move both hands up as the melody begins.", 1),
     c("heard", BOTH_DOWN_LEAVES),
     c("extras", ONE_STRING),
     c("late", BAND_LATE),
     c("early", BAND_EARLY),
-    c("lastBars", "Keep the eighth bar as even as the first."),
+    c("lastBars", "Keep the last chord as even as the first."),
   ],
   "warmup-advanced.fast-around": [
     g(WELL_UNDER, 1),
