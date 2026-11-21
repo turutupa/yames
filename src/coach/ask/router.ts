@@ -797,7 +797,7 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
   // "a" was read as A only because a quality word followed it ("make a minor pentatonic exercise"):
   // a key the player names at the end ("… in e") is plainer, and wins (review t2cb, LOW 2).
   let guessed = false;
-  const once =(name: string, value: string | number): boolean => {
+  const once = (name: string, value: string | number): boolean => {
     if (name in args) return false;
     args[name] = value;
     return true;
