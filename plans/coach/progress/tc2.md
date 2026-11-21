@@ -83,5 +83,6 @@ left them), **it** ("mantenendo lo stesso tempo", "a un solo tempo"), **tr** ("a
 - [x] Gates (2026-11-21): tsc pass (coach-tc2-tsc); build pass (coach-tc2-build); `npm run test` 466/467
   files, 50363 tests, only the known TabStage.render symlink file fails (coach-tc2-test,
   `/tmp/coach-tc2/test.log`).
-- [ ] Layout `tool-coach.spec.ts`: first run 42/57 with 15 timeouts on a loaded box (6 jobs, other legs'
-  layout runs; `/tmp/coach-tc2/layout.log`); re-run with `--workers=2` (coach-tc2-layout-2).
+- [x] Layout `tool-coach.spec.ts` (English): first run 42/57 with 15 timeouts on a loaded box (6 jobs, other
+  legs' layout runs; `/tmp/coach-tc2/layout.log`); re-run with `--workers=2` (coach-tc2-layout-2): 57 passed,
+  2 skipped. German / Russian layout of these lines not run (the break tips are not in the spec's scenes).
