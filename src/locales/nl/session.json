@@ -87,7 +87,11 @@
           "lastSession": "{{count}} minuut aan takes in je laatste sessie, als laatste {{exercise}} op {{bpm}} BPM.",
           "lastSession_other": "{{count}} minuten aan takes in je laatste sessie, als laatste {{exercise}} op {{bpm}} BPM."
         },
-        "samePlace": "Vandaag op dezelfde plek."
+        "samePlace": "Vandaag op dezelfde plek.",
+        "songDue": {
+          "one": "Maat {{bar}} van {{song}} is weer aan de beurt.",
+          "range": "Maten {{from}} tot {{to}} van {{song}} zijn weer aan de beurt."
+        }
       },
       "whatsIn": "Wat erin zit, en waarom",
       "min": "MIN",

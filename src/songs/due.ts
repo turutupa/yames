@@ -254,10 +254,30 @@ export function songDueNow(
   scoreId: string,
   today: number = dayOf(),
 ): SongDue | null {
+  let found: SongDue | null = null;
   for (const item of items) {
-    if (item.scoreId === scoreId && item.dueDay <= today) return item;
+    if (item.scoreId !== scoreId || item.dueDay > today) continue;
+    if (found === null || compareSongDue(item, found) < 0) found = item;
   }
-  return null;
+  return found;
+}
+
+/**
+ * Which due passage comes first: the one due longest ago, then the song, then
+ * its bars. The one order both Songs (`songDueNow`, the passage a song opens
+ * on) and Today's line (`coach/songDue.ts` `duePassagesOn`) use, so the line
+ * never names bars 1 to 4 while opening the song loops bars 9 to 12.
+ */
+export function compareSongDue(
+  a: Pick<SongDue, "scoreId" | "startBar" | "endBar" | "dueDay">,
+  b: Pick<SongDue, "scoreId" | "startBar" | "endBar" | "dueDay">,
+): number {
+  return (
+    a.dueDay - b.dueDay ||
+    a.scoreId.localeCompare(b.scoreId) ||
+    a.startBar - b.startBar ||
+    a.endBar - b.endBar
+  );
 }
 
 /**

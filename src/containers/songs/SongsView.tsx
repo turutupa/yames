@@ -337,6 +337,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
     bpm: tempo,
     isPlaying,
     listening,
+    publishPass: true,
   });
 
   /**
