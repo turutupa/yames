@@ -15,7 +15,13 @@ Cues: `src/paths/specs/metal-rhythm-cues.ts`, attached with `withCues` in `metal
   `check`: 0 errors, 0 `cue.refused`, 0 cues rewritten for a variant (`/tmp/coach-cues10/gc7.log`).
 - [x] Proof-read: three sonnet readers, one per Level (`/tmp/coach-cues10/proof-metal-rhythm/`), below.
   `check` after the fixes: 0 errors, 0 refused, 0 cues rewritten (`gc9.log`).
-- [ ] Translations.
+- [x] Translations: 271 distinct sentences (`/tmp/coach-cues10/i18n-metal-rhythm/`), four sonnet helpers
+  (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW). Only one could be started at first (the
+  session's limit of 20 concurrent agents was reached by the other legs; the tool said "Do not retry"); the
+  other three were started when that one finished and freed its slot. Every file checked again with
+  `check_i18n.py` (problems 0 in all fourteen), merged: every overlay 1031 of 1031 (`merge*.log`; the
+  "different numbers" warnings are finger numbers written as digits). `check metal-rhythm`: 0 errors
+  (`gc10.log`).
 - [ ] Gates.
 
 ## How the cues were written
