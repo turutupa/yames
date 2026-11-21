@@ -13,7 +13,14 @@ Cues: `src/paths/specs/arpeggios-over-changes-cues.ts`, attached with `withCues`
   18 Exercises. Two `cue.specific` refusals: "Root on fret ten for C, fret seven for A minor." and the G / E
   minor one ("Root on fret five for G, ...") -> "Start C at fret ten, A minor at fret seven." /
   "Start G at fret five, E minor at fourteen." (`gc2.log`: 0 errors, 0 refused, 0 rewritten).
-- [ ] Level 2
+- [x] Level 2 (Intermediate: sevenths, sevenths-in-g, two-octaves, two-octaves-more, sevenths-across,
+  a-whole-form, warm-up), 20 Exercises. Refusals: `cue.specific` on "Seventh at fret seven for C, three for A
+  minor." and its G twin (a second fret number with no "fret" before it, after "for <chord>") -> "Put each
+  seventh on top: fret seven, then three." / "..., fret two, then ten."; `cue.refused` on the intermediate
+  warm-up's coming-down variants for "Keep the pick close as it crosses strings." -> "Keep the pick close to
+  the strings." (`gc4.log`: 0 errors, 0 refused, 0 rewritten). Level 1's quarter-note Exercises had the
+  eighth-note shift cue; changed to "Move as each chord's last note ends.", and the one-octave `lastBars`
+  (it repeated `afterHeld`) to "Keep the way down as even as the way up.".
 - [ ] Level 3
 - [ ] Proof-read
 - [ ] Translations
