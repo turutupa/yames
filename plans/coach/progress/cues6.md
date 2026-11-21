@@ -9,8 +9,9 @@ Cues: `src/paths/specs/classic-rock-cues.ts`, attached with `withCues` in `class
   Dump `/tmp/coach-cues6/classic-rock-dump.txt`.
 - [x] Level 1 (Beginner: riffs, riffs-in-e, box-extension, box-at-twelve, major-pentatonic, warm-up
   riff-around), 17 Exercises. `check`: 0 errors, 0 `cue.refused`, no cue of mine rewritten (`gc1.log`).
-- [ ] Level 2 (Intermediate: box-two, repeating-licks, double-stops, double-stops-in-e, embellishment,
-  embellishment-in-a, chord-tones, chord-tones-ade, warm-up loop-around).
+- [x] Level 2 (Intermediate: box-two, repeating-licks, double-stops, double-stops-in-e, embellishment,
+  embellishment-in-a, chord-tones, chord-tones-ade, warm-up loop-around), 31 Exercises. `check`: 0
+  errors, 0 refused (`gc3.log`). Six `cue.specific` refusals on the first run, reworded (below).
 - [ ] Level 3 (Advanced: melody, call-response, sixes-at-twelve, climax, solo-in-e, solo-etude, warm-up
   run-around).
 - [ ] Proof-read; translations; gates.

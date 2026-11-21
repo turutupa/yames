@@ -3085,6 +3085,17 @@
             "Say 'A' each time you play one: D string fret 7, B string fret 10."
           ],
           "coachLine": "Right notes and even eighths after the take.",
+          "cues": [
+            {"when":"even","say":"First finger on fret 7, one finger per fret.","more":1,"general":true},
+            {"when":"notes","say":"Say 'A' each time you play one.","more":2},
+            {"when":"heard","say":"Pick every note, top string to bottom."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count the held note out, then climb again."},
+            {"when":"stringChange","say":"Cross after every two notes, without a gap."},
+            {"when":"lastBars","say":"Come down as evenly as you went up."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3207,6 +3218,18 @@
             "The hand moves up two frets between bars 1 and 2, on the G string, and back down between bars 3 and 4, on the low E string."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Move up two frets on the G string into box 2.","more":3,"general":true},
+            {"when":"notes","say":"Play fret 9 on the G string to enter box 2.","more":1},
+            {"when":"heard","say":"Pick every eighth through both boxes."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count every quarter and the held A in full."},
+            {"when":"shift","say":"Shift up on the G string, back on the low E.","more":3},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Play the last three notes right on the beat.","more":2}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3339,6 +3362,17 @@
             "First finger on fret 7 throughout: frets 7, 8, 9 and 10 lie under the four fingers."
           ],
           "coachLine": "Band on. Right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Keep finger one on fret 7 the whole time.","more":2,"general":true},
+            {"when":"notes","say":"Say A, C, D, C as you start the lick.","more":1},
+            {"when":"heard","say":"Pick every eighth, the turn and the walk down."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Give each quarter note its full beat."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Play C and A as two full quarter notes.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3458,6 +3492,9 @@
             "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself."
           ],
           "coachLine": "Not checked yet. Record it and listen for the moment you change box.",
+          "cues": [
+            {"when":"even","say":"Cross over at fret 7 on the G string.","more":1,"general":true}
+          ],
           "grading": "selfChecked",
           "feedback": "none",
           "meter": {
@@ -3578,6 +3615,17 @@
             "On the top pair: pick C at fret 8 on the high E with your fourth finger, pull off to A at fret 5 under your first, pick G at fret 8 on the B with your third. The lower pairs are the same move: fret 8 to 5 on the B and 7 on the G, or 7 to 5 on the G and 7 on the D."
           ],
           "coachLine": "The picked notes are checked for pitch and time. A pulled-off note that is too quiet for me doesn't count against you.",
+          "cues": [
+            {"when":"even","say":"Pick, pull off, pick: count '1-trip-let'.","more":1,"general":true},
+            {"when":"notes","say":"Pull off onto the finger already down.","more":1},
+            {"when":"heard","say":"Pick the first and last note of every triplet."},
+            {"when":"extras","say":"Keep the pick on the loop's two strings."},
+            {"when":"late","say":"Put each triplet's first note on the beat."},
+            {"when":"early","say":"Wait for the beat before each triplet."},
+            {"when":"afterHeld","say":"Hold the last note two beats, then start again."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Count the triplets right to the held note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3883,6 +3931,17 @@
             "C, A (pull-off), G, over and over: sixteen groups across three bars, then A held in bar 4. The first note of each group is accented: lean on it so you can hear where the group starts."
           ],
           "coachLine": "The picked notes are checked for pitch and time; the pull-offs count only if I hear them.",
+          "cues": [
+            {"when":"even","say":"Count '1 e and a' under the groups of three.","more":1,"general":true},
+            {"when":"notes","say":"Play C, A, G over and over, then the held A.","more":1},
+            {"when":"heard","say":"Pick C and G each time; pull off for A."},
+            {"when":"extras","say":"Keep the pick on the top two strings."},
+            {"when":"late","say":"Put each beat's first sixteenth on the beat."},
+            {"when":"early","say":"Wait for each beat before its first sixteenth."},
+            {"when":"afterHeld","say":"Count the rest out in full, then start again."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Land the last A on beat one and stop."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4042,6 +4101,18 @@
             "Pick evenly; the open string should be as loud as the fretted one."
           ],
           "coachLine": "The open string can ring under the next note, and when it does, I say right notes weren't checked. Notes heard and time always are.",
+          "cues": [
+            {"when":"even","say":"Pick the open E as firmly as the fretted notes.","more":2,"general":true},
+            {"when":"notes","say":"Say G, F sharp, G, F sharp on the B string.","more":1},
+            {"when":"heard","say":"Pick every open E, every other note."},
+            {"when":"extras","say":"Keep the pick on the top two strings."},
+            {"when":"late","say":"Put each beat's first sixteenth on the beat."},
+            {"when":"early","say":"Wait for each beat before its first sixteenth."},
+            {"when":"afterHeld","say":"Count the last E's beat, then start again."},
+            {"when":"openString","say":"Move along the B string while the open E rings."},
+            {"when":"stringChange","say":"Keep the pick between the top two strings."},
+            {"when":"lastBars","say":"Climb G, A, B, then land on E at fret 5.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4193,6 +4264,17 @@
             "Bar 1: frets 5 on the B and high E, eight times. Bar 2: keep the B string at 5 and move the G string 6, 7, 6, 5, then 6 held. Bar 3: A, G, E, D, C, A, C, A down the box. Bar 4: G, E, G, and A held."
           ],
           "coachLine": "The double stops are timed and counted, not pitch-checked; the single notes in bars 3 and 4 are checked as well.",
+          "cues": [
+            {"when":"even","say":"Hit each double stop short, like a snare.","general":true},
+            {"when":"notes","say":"Say A, G, E, D, C, A, C, A down the box.","more":1},
+            {"when":"heard","say":"Play all eight double stops of the first bar.","more":1},
+            {"when":"extras","say":"Strike two strings for stops, one for the run."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count each long note out, then go on."},
+            {"when":"stringChange","say":"Go from stops to single notes with no gap."},
+            {"when":"lastBars","say":"Play G, E, G, then hold the A two beats.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4336,6 +4418,17 @@
             "Bar 1: the E and A double stop four times, the G and C double stop at fret 8, the E and A again, then D at 7 on the G string. Bar 2: E, D, C, A as single notes, and G held, which pulls back to the top."
           ],
           "coachLine": "Double stops are timed and counted; the single notes are pitch-checked too.",
+          "cues": [
+            {"when":"even","say":"Switch from two strings to one without a gap.","more":1,"general":true},
+            {"when":"notes","say":"Say E, D, C, A, then G as you play bar two.","more":1},
+            {"when":"heard","say":"Pick the single notes as firmly as the stops."},
+            {"when":"extras","say":"Strike one string only for each single note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count each long note out, then go on."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the last G its two beats, then go again."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4459,6 +4552,16 @@
             "Bar 1: frets 6 on the G and 5 on the B three times, a rest, then A, C, C#, A as single notes. Bar 2: fret 7 on the G and B three times, a rest, then A, C, D, A."
           ],
           "coachLine": "The double stops are timed and counted; the single notes are pitch-checked as well.",
+          "cues": [
+            {"when":"even","say":"Play each stop on the beat, then count the rest.","more":1,"general":true},
+            {"when":"notes","say":"Play C sharp in the first run, D in the second.","more":1},
+            {"when":"heard","say":"Strike all three stops before each rest."},
+            {"when":"extras","say":"Leave each rest silent, then pick the run."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Keep the run's eighths even to the last A."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4606,6 +4709,16 @@
             "First finger flat across the strings at fret 12, and second and third fingers for frets 13 and 14 on the G string. Play the fret 15 double stop with your third finger flat across the top two strings, or with your little finger if that holds both strings cleaner, then come straight back to the first finger at fret 12."
           ],
           "coachLine": "Two notes at once are one attack: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Lay finger one flat across fret 12.","more":2,"general":true},
+            {"when":"heard","say":"Strike all eight stops in the first bar.","more":1},
+            {"when":"extras","say":"Strike only the two strings of the shape."},
+            {"when":"late","say":"Lock each eighth to the hi-hat, not behind it."},
+            {"when":"early","say":"Sit back: let the hi-hat lead each eighth."},
+            {"when":"afterHeld","say":"Count the held stop's two beats, then go."},
+            {"when":"stringChange","say":"Hold the B string at fret 12; walk the G string.","more":1},
+            {"when":"lastBars","say":"Hold the last stop for its two beats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4734,6 +4847,16 @@
             "Third finger flat across both strings at 14, first finger flat across them at 12. The first finger is where the E barre was: the hand has not moved."
           ],
           "coachLine": "Two notes at once are one attack: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Third finger flat at fret 14, first at fret 12.","more":2,"general":true},
+            {"when":"heard","say":"Strike the fret 12 stops as firmly as fret 14."},
+            {"when":"extras","say":"Strike just the G and B strings each time.","more":1},
+            {"when":"late","say":"Lock each eighth to the hi-hat, not behind it."},
+            {"when":"early","say":"Sit back: let the hi-hat lead each eighth."},
+            {"when":"afterHeld","say":"Count the held stop's two beats, then go."},
+            {"when":"stringChange","say":"Keep the fingers flat across both strings."},
+            {"when":"lastBars","say":"Hold the last stop for its two beats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4862,6 +4985,16 @@
             "Move the whole hand up two frets: third finger flat at 16, first finger flat at 14."
           ],
           "coachLine": "Two notes at once are one attack: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Move the whole hand up two frets from A.","more":2,"general":true},
+            {"when":"heard","say":"Strike the fret 14 stops as firmly as fret 16."},
+            {"when":"extras","say":"Strike just the G and B strings each time.","more":1},
+            {"when":"late","say":"Lock each eighth to the hi-hat, not behind it."},
+            {"when":"early","say":"Sit back: let the hi-hat lead each eighth."},
+            {"when":"afterHeld","say":"Count the held stop's two beats, then go."},
+            {"when":"stringChange","say":"Keep the fingers flat across both strings."},
+            {"when":"lastBars","say":"Hold the last stop for its two beats."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -4990,6 +5123,17 @@
             "The whole hand moves only for bar 9, up two frets, and comes back for bar 10. In every other bar it stays where the first finger sits at fret 12."
           ],
           "coachLine": "Twelve bars of double stops: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Know the next chord before each figure starts.","more":1,"general":true},
+            {"when":"heard","say":"Strike every stop, all twelve bars through."},
+            {"when":"extras","say":"Strike only the two strings of the shape."},
+            {"when":"late","say":"Lock each eighth to the hi-hat, not behind it."},
+            {"when":"early","say":"Sit back: let the hi-hat lead each eighth."},
+            {"when":"afterHeld","say":"Count the held stop's two beats, then go."},
+            {"when":"shift","say":"Move up two frets for the B bar, then back.","more":2},
+            {"when":"stringChange","say":"Keep the fingers flat across both strings."},
+            {"when":"lastBars","say":"Hold the last G sharp and B for two beats.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5272,6 +5416,17 @@
             "Bar 1: low E, E at fret 2 on the D string, open G, hammer to fret 1, open B, G#, E, G#. Bar 2: B at fret 2 on the A string, E on the D string, open D, hammer to E, G#, open B, and G# held."
           ],
           "coachLine": "Notes ring into each other here, so I time them and count them heard, and don't pitch-check them.",
+          "cues": [
+            {"when":"even","say":"Hammer onto fret 1 right on its eighth.","more":1,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the third."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count the held G sharp out, then start again."},
+            {"when":"openString","say":"Keep the chord held while open strings ring."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the last G sharp for its full beat."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5391,6 +5546,16 @@
             "Barre fret 7 with your first finger, and hammer frets 9 with your third finger flattened."
           ],
           "coachLine": "Two notes at once, so I time them and count them heard; I don't pitch-check double stops.",
+          "cues": [
+            {"when":"even","say":"Hammer both strings to fret 9 together.","more":2,"general":true},
+            {"when":"heard","say":"Hammer both fingers down hard, as one."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count each long note out, then go on."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the last E for both beats.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5510,6 +5675,18 @@
             "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A, the E shape barred at fret 5: the first finger lies flat across all six strings and the third finger takes the D string at fret 7. The notes are A at 5 on the low E, A at 7 on the D string, C at 5 on the G hammered to C# at 6 with the second finger, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held."
           ],
           "coachLine": "Ringing notes again: timing and notes heard, not pitch.",
+          "cues": [
+            {"when":"even","say":"Barre fret 5 for the A, then play the same move.","more":1,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the third."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count the held E out, then hit the low E."},
+            {"when":"openString","say":"Keep the chord held while open strings ring."},
+            {"when":"shift","say":"Barre fret 5 as the second bar starts.","more":1},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the open high E for two beats.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5660,6 +5837,17 @@
             "Hold the whole A chord. Only the third finger moves: it lifts off the B string for the open B and hammers back down at fret 2."
           ],
           "coachLine": "Notes ring into each other here: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Hold the A chord; move only the third finger.","more":2,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the third."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count the held C sharp out, then start again."},
+            {"when":"openString","say":"Lift the third finger just for the open B.","more":2},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the last C sharp for its full beat."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5779,6 +5967,17 @@
             "Hold the whole D chord. Only the second finger moves: it lifts off the high E string for the open E and hammers back down at fret 2. Keep the third finger, on the B string, standing on its tip so it does not touch the high E string."
           ],
           "coachLine": "Notes ring into each other here: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Hold the D chord; move only the second finger.","more":2,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the third."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count the held F sharp out, then start again."},
+            {"when":"openString","say":"Lift the second finger for the open high E.","more":2},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the last F sharp for its full beat."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5900,6 +6099,17 @@
             "From A to D the third finger does not leave the B string: it moves from fret 2 to fret 3 with the pressure let off, and the other two fingers move to the G string and the high E string."
           ],
           "coachLine": "Two notes at once are one attack: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Keep the lower finger down; move the top one.","more":3,"general":true},
+            {"when":"heard","say":"Strike every pair, the quarters and the eighths."},
+            {"when":"extras","say":"Strike just the two strings after the bass note."},
+            {"when":"late","say":"Put each beat's first note right on the beat."},
+            {"when":"early","say":"Wait for each beat before its first note."},
+            {"when":"afterHeld","say":"Give each quarter note its full beat."},
+            {"when":"openString","say":"Lift one finger for the open string, not all.","more":3},
+            {"when":"stringChange","say":"Slide the third finger along the B string to D.","more":4},
+            {"when":"lastBars","say":"Hold the D shape through to the last pair."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6026,6 +6236,17 @@
             "Change with the third finger first: it stays on the B string and moves between fret 2 and fret 3 with the pressure let off."
           ],
           "coachLine": "Ringing notes and double stops: timed and counted, not checked for pitch.",
+          "cues": [
+            {"when":"even","say":"Change shape while the open bass string sounds.","more":2,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the third."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Put each beat's first note right on the beat."},
+            {"when":"early","say":"Wait for each beat before its first note."},
+            {"when":"afterHeld","say":"Count the bass note's beat, then the pair."},
+            {"when":"openString","say":"Lift one finger for the open string, not all."},
+            {"when":"stringChange","say":"Lead the change with the third finger.","more":3},
+            {"when":"lastBars","say":"Hold the last pair for both beats.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6180,6 +6401,18 @@
             "A: frets 7, 6, 5, 5 from the D string up and back. G: the same shape two frets lower, 5, 4, 3, 3. D: F# at 4 and A at 7 on the D string, D at 7 on the G, F# at 7 on the B, A at 5 on the high E, and back. Then A."
           ],
           "coachLine": "Every note here is a chord tone, and I check each one and its time after the take.",
+          "cues": [
+            {"when":"even","say":"Say the chord's name as each bar starts.","general":true},
+            {"when":"notes","say":"Play the second chord's shape two frets lower.","more":1},
+            {"when":"heard","say":"Pick every chord tone, up and back."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count the held note out, then start again."},
+            {"when":"shift","say":"Move the hand as each new chord starts."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Land the held last note on beat three."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6592,6 +6825,18 @@
             "A: E, D, C#, B, then A on the D string. G: D, B, A, B, then G at 5 on the D string. D: F#, A, F#, E, then D at 7 on the G. A: C#, E, D, C#, then A."
           ],
           "coachLine": "Written notes over the changes: right notes and time, after the take.",
+          "cues": [
+            {"when":"even","say":"End each bar on that chord's root.","general":true},
+            {"when":"notes","say":"Sing the root before each bar starts."},
+            {"when":"heard","say":"Pick all four eighths before each root."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Land each root right on beat three."},
+            {"when":"early","say":"Wait for beat three before each root."},
+            {"when":"afterHeld","say":"Count each root's two beats, then go on."},
+            {"when":"shift","say":"Move the hand as each new chord starts."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the last root for both beats."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6976,6 +7221,16 @@
             "C# at 6 on the G string, B at 4 on the G string, F# at 7 on the B string, C# again. Hear each one turn the chord major."
           ],
           "coachLine": "Four notes, each the third of its chord: I check them and their time.",
+          "cues": [
+            {"when":"even","say":"Hold each third for all four beats.","more":1,"general":true},
+            {"when":"notes","say":"Play C sharp, B, F sharp, then C sharp.","more":1},
+            {"when":"heard","say":"Pick each note firmly and let it ring."},
+            {"when":"extras","say":"Play one note a bar and let it ring."},
+            {"when":"late","say":"Play each note right as its bar starts."},
+            {"when":"early","say":"Wait for '1' before each new note."},
+            {"when":"stringChange","say":"Have the next finger ready during beat four."},
+            {"when":"lastBars","say":"Hold the last C sharp through all four beats."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7082,6 +7337,9 @@
             "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself."
           ],
           "coachLine": "Not checked yet. Record it and listen to the end of each bar.",
+          "cues": [
+            {"when":"even","say":"End each bar on that chord's root.","more":1,"general":true}
+          ],
           "grading": "selfChecked",
           "feedback": "none",
           "meter": {
@@ -7199,6 +7457,18 @@
             "D and E are one shape: lay the third finger flat across the D, G and B strings, at fret 7 for D and fret 9 for E, and use the first finger for the two notes outside it. The first of those is three frets below the barre and the other is two, so let the hand move up a fret as the barre goes down."
           ],
           "coachLine": "Every note here is a chord tone: right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Lay the third finger flat for D and E.","more":2,"general":true},
+            {"when":"notes","say":"Play the D shape two frets higher for E.","more":1},
+            {"when":"heard","say":"Pick every chord tone, up and back."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Play each beat's first eighth right on the beat."},
+            {"when":"early","say":"Wait for the beat before each pair of eighths."},
+            {"when":"afterHeld","say":"Count the held A out, then start again."},
+            {"when":"shift","say":"Move the barre up two frets, then back."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Land the held A on beat three."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7331,6 +7601,17 @@
             "In bars 1, 2 and 4 the last eighth note is one fret below the root it leads to, on the same string."
           ],
           "coachLine": "Written notes over the changes: right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"First finger on fret 4; the hand stays put.","more":2,"general":true},
+            {"when":"notes","say":"Sing the root before each bar starts."},
+            {"when":"heard","say":"Pick all four eighths before each root."},
+            {"when":"extras","say":"Pick only the written string for each note."},
+            {"when":"late","say":"Land each root right on beat three."},
+            {"when":"early","say":"Wait for beat three before each root."},
+            {"when":"afterHeld","say":"Count each root's two beats, then go on."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Hold the high A for both beats.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7457,6 +7738,16 @@
             "First finger on fret 6, second on fret 7, fourth on fret 9."
           ],
           "coachLine": "Four notes, each the third of its chord: right notes and time after the take.",
+          "cues": [
+            {"when":"even","say":"Hold each third for all four beats.","more":2,"general":true},
+            {"when":"notes","say":"Play C sharp, F sharp, G sharp, then C sharp.","more":1},
+            {"when":"heard","say":"Pick each note firmly and let it ring."},
+            {"when":"extras","say":"Play one note a bar and let it ring."},
+            {"when":"late","say":"Play each note right as its bar starts."},
+            {"when":"early","say":"Wait for '1' before each new note."},
+            {"when":"stringChange","say":"Have the next finger ready during beat four."},
+            {"when":"lastBars","say":"Hold the last C sharp through all four beats."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7563,6 +7854,9 @@
             "Your turn, and not checked yet: the app can't judge notes you choose, so you tick it off yourself."
           ],
           "coachLine": "Not checked yet. Record it and listen to the end of each bar.",
+          "cues": [
+            {"when":"even","say":"Over E, try landing on G sharp.","more":1,"general":true}
+          ],
           "grading": "selfChecked",
           "feedback": "none",
           "meter": {
@@ -12385,6 +12679,15 @@
             "Eighth-note triplets, well under your clean tempo. Pick, pull, pick, and move at each bar line."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
+            {"when":"heard","say":"Pick the first and last note of every triplet."},
+            {"when":"late","say":"Put each triplet's first note on the beat."},
+            {"when":"early","say":"Wait for the beat before each triplet."},
+            {"when":"shift","say":"Move the whole hand as each new bar starts.","more":0},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Count the triplets right to the last note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
