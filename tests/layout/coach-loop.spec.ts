@@ -141,7 +141,8 @@ test("loop_bars (leg lb1): \"loop bars 1-2\" on a ready screen is a proposal, an
   test.slow();
   await openShot(page, "session-ready", WIDE);
   await expect(page.locator('[data-testid="session-take"]')).toHaveAttribute("data-phase", "ready", { timeout: 30_000 });
-  await page.locator(".rail-footer .rail-action").first().click();
+  // In a Session the rail is away: the Session's own Ask opens the panel.
+  await page.locator('[data-testid="session-coach-ask"]').click();
   await expect(page.locator(".ask-panel")).toBeVisible();
   // The call the typed command makes (`router.ts`: "loop bars 1-2" -> loop_bars { from: 1, to: 2 }).
   await page.evaluate(async () => {
@@ -153,7 +154,7 @@ test("loop_bars (leg lb1): \"loop bars 1-2\" on a ready screen is a proposal, an
   // Nothing moved before the press.
   await expect(page.locator('[data-testid="session-take"]')).toHaveAttribute("data-phase", "ready");
   await proposal.locator("[data-testid=ask-proposal-go]").click();
-  await expect(page.locator(".ask-panel [data-testid=ask-receipt]")).toContainText("Looping");
+  // The Session's Ask steps aside when the screen changes; the loop's own screen is what started.
   await expect(page.locator('[data-testid="session-loop-screen"]')).toHaveAttribute("data-phase", "looping", { timeout: 15_000 });
   await expect(page.locator('[data-testid="session-big"]')).toHaveText("Stop the loop");
 });
