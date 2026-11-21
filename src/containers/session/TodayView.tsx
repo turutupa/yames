@@ -14,6 +14,7 @@ import { TAKES_TO_READ } from "./hooks/useSessionRun";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { todayLine, todayLineText } from "../../coach/todayLine";
 import { CoachLine } from "../coach/CoachLine";
+import { TodayReminder } from "./TodayReminder";
 import { askCoach } from "../coach/askStore";
 import { IS_MOBILE } from "../../platform";
 import { lineText } from "./lineText";
@@ -386,6 +387,7 @@ export function TodayView({
             )}
           </div>
           {/* Mock 12: on a phone the line sits under the title, above the minutes. */}
+          {IS_MOBILE && <TodayReminder />}
           {IS_MOBILE && coachLine}
           {noPaths ? (
             <button
@@ -435,6 +437,7 @@ export function TodayView({
         </div>
 
         <div className="session-today-plan">
+          {!IS_MOBILE && <TodayReminder />}
           {!IS_MOBILE && coachLine}
           {steps.length > 0 && (
             <div className="session-plan-head session-rise" style={rise(4)}>

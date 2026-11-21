@@ -95,6 +95,17 @@
       "on": "On",
       "asked": "Only when I ask",
       "unreadable": "Your choice could not be read this time; pressing one saves it."
+    },
+    "reminder": {
+      "label": "Practice reminder",
+      "hint": "Today mentions it after this time on these days, if you have not practised yet. There is no notification.",
+      "off": "Off",
+      "on": "On",
+      "time": "Time",
+      "days": "Days",
+      "quiet": "Today has stopped mentioning it: three reminder days went by without a Session. It starts again after your next Session.",
+      "unreadable": "Your reminder could not be read this time, so Today does not mention it; pressing Off or On saves it.",
+      "line": "Your reminder: guitar at {{time}}."
     }
   }
 }

@@ -889,6 +889,23 @@
 .main-window.is-mobile .session-today-line .coach-line {
   font-size: 16px;
 }
+/* The practice reminder's line (leg rem2): one sentence above Today's line,
+   in its register and size; on a phone in the same slot, just before it. */
+.session-today-reminder {
+  margin: 0 0 10px;
+  min-width: 0;
+}
+.session-today-reminder .coach-line {
+  font-size: 18px;
+  line-height: 1.4;
+}
+.main-window.is-mobile .session-today-reminder {
+  order: 1;
+  margin: 0;
+}
+.main-window.is-mobile .session-today-reminder .coach-line {
+  font-size: 16px;
+}
 /* The eyebrow breaks only between its parts, and evenly: never "START" alone
    on a line of its own (acceptance P1-11). */
 .session-today-head > .session-kick {

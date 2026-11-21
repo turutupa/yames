@@ -1146,6 +1146,17 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
   // The Notebook's goal (leg c4a2), said twelve days ago.
   if (shot.session?.seed === "notebook") store.set("coach.goal", { text: "A clean pentatonic solo at 120", at: Date.now() - 12 * DAY_MS });
+  // `?reminder=on` (leg rem2): the practice reminder on, every day, its time the
+  // last whole hour (midnight before one), turned on a month ago, so Today says it.
+  if (new URLSearchParams(window.location.search).get("reminder") === "on") {
+    const hour = Math.max(0, new Date().getHours() - 1);
+    store.set("coach.reminder", {
+      on: true,
+      time: `${String(hour).padStart(2, "0")}:00`,
+      days: [0, 1, 2, 3, 4, 5, 6],
+      since: Date.now() - 30 * DAY_MS,
+    });
+  }
   if (shot.session?.unsubscribed) store.set("session.unsubscribed", shot.session.unsubscribed);
   // A focus is kept with the day it was chosen on: the scene's is today's.
   if (shot.session?.focus) store.set("session.todayFocus", storedFocus(shot.session.focus, Date.now()));

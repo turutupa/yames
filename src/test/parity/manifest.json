@@ -1710,6 +1710,11 @@
       "read": true,
       "written": true
     },
+    "coach.reminder": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
     "coach.suggestions": {
       "store": "settings.json",
       "read": true,

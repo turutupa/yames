@@ -23,6 +23,7 @@ import { ToolsSettingsSection } from "./ToolsSettingsSection";
 import { AppearanceSettingsSection } from "./AppearanceSettingsSection";
 import { DevicesSettingsSection } from "./DevicesSettingsSection";
 import { CoachSettingsSection } from "./CoachSettingsSection";
+import { CoachReminderRow } from "./CoachReminderRow";
 import { SongsSettingsSection } from "./SongsSettingsSection";
 import { WidgetSettingsSection } from "./WidgetSettingsSection";
 import { HotkeysSettingsSection } from "./HotkeysSettingsSection";
@@ -350,6 +351,16 @@ export function SettingsView({
           onRequestDownload={onRequestDownload}
         />
         </>
+      )}
+      {/* A phone has no Coach section (the model is not part of the phone
+          app), but the practice reminder is rule-made and shows on a phone
+          too (leg rem2, judgement call 24): its row alone, under the same
+          title. c6a regroups the section. */}
+      {IS_MOBILE && (
+        <section className="settings-section" id="settings-coach-reminder">
+          <h2>{t("settings.coach.title")}</h2>
+          <CoachReminderRow />
+        </section>
       )}
 
       <AppearanceSettingsSection
