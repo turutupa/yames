@@ -134,7 +134,12 @@ describe.each(LANGUAGES)("%s", (lng) => {
   });
 
   it.each(SCREENS)("on %s, no near-miss is a command", (_name, f) => {
-    for (const text of lines.nearMissNone) expect(routeCommand(text, table(), f), text).toEqual({ kind: "none" });
+    // Every line that is not `none`, at once, with what it became.
+    const wrong = lines.nearMissNone
+      .map((text) => [text, routeCommand(text, table(), f)] as const)
+      .filter(([, r]) => r.kind !== "none" || r.notHere !== undefined)
+      .map(([text, r]) => `${text} → ${JSON.stringify(r)}`);
+    expect(wrong).toEqual([]);
   });
 
   it.each(SCREENS)("on %s, a never-list request is 'that one is yours'", (_name, f) => {
