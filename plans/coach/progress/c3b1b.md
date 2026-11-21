@@ -31,6 +31,20 @@ asked 11/27, yours 11/24, none 54/54.
   item is wrong.
 - The README is read by c3d: it quotes no item. Keep it that way.
 
+## Open: the prefix budget
+
+With the seven cards the choice prefix is 1113 estimated tokens against DESIGN 5.5's 900 (tools and
+format ~870, cards ~250). Rust does not cap it. `choicePrompt.test.ts` now gates the tools part at 900 and
+the cards' section at 300, and prints the total. Decision owed: raise the budget, shorten the tool lines
+(c3bp is editing them), or send cards by name only.
+
 ## Gates
 
-See the report (tsc, named vitest, full vitest, build, `npm run test:rust` for the regenerated fixture).
+- tsc: pass (`coach-c3b1b-tsc`, `-tsc-2`). Eval vitest files (6): 897 passed (`coach-c3b1b-vt-2`).
+- build: pass (`coach-c3b1b-build`).
+- full vitest: 49998 passed, 1 failed + the known `TabStage.render.test.tsx`; the failure
+  (`SupportSection.test.tsx`, export via save dialog) passes alone (`coach-c3b1b-vt-support`).
+  `/tmp/coach-c3b1b/vitest.log`.
+- `npm run test:rust`: 1274 passed, 3 failed, all wall-clock under load (timing sixteenths, kit decode
+  linearity, harmony worker window wait); the three and the grammar precheck re-run: 4 passed
+  (`coach-c3b1b-rust-2`). `/tmp/coach-c3b1b/rust.log`.
