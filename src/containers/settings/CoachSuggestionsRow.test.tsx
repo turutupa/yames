@@ -11,6 +11,7 @@ const store = vi.hoisted(() => ({
   saves: [] as Array<[string, unknown]>,
   fail: new Set<string>(),
   failSave: false,
+  failSaveOf: "",
 }));
 
 vi.mock("../../ipc", async (importOriginal) => {
@@ -22,7 +23,7 @@ vi.mock("../../ipc", async (importOriginal) => {
       return store.disk.get(key);
     }),
     storeSave: vi.fn(async (key: string, value: unknown) => {
-      if (store.failSave) throw new Error("unwritable");
+      if (store.failSave || store.failSaveOf === key) throw new Error("unwritable");
       store.saves.push([key, value]);
       store.disk.set(key, value);
     }),
@@ -46,6 +47,7 @@ beforeEach(() => {
   store.saves.length = 0;
   store.fail.clear();
   store.failSave = false;
+  store.failSaveOf = "";
   resetCoachStored();
 });
 
@@ -72,6 +74,63 @@ describe("Suggestions: On / Only when I ask", () => {
     fireEvent.click(screen.getByTestId("coach-suggestions-asked"));
     expect(store.saves).toEqual([["coach.suggestions", "asked"]]);
     expect(screen.getByTestId("coach-suggestions-asked")).toHaveClass("active");
+  });
+
+  // c4b2b (review M2): "Hidden until you ask" names this press as the way back.
+  it("On asks for the cards hidden twice again; Only when I ask does not touch them", async () => {
+    const at = Date.now() - 86_400_000;
+    store.disk.set("coach.cards", { weekly: { dismissed: 2, lastDismissed: at }, plateau: { dismissed: 1, lastDismissed: at } });
+    render(<CoachSuggestionsRow />);
+    await loaded();
+    fireEvent.click(screen.getByTestId("coach-suggestions-asked"));
+    expect(store.saves.map(([k]) => k)).toEqual(["coach.suggestions"]);
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("coach-suggestions-on"));
+    });
+    const cards = store.saves.find(([k]) => k === "coach.cards")?.[1] as Record<string, { dismissed: number; lastDismissed: number | null }>;
+    expect(cards.weekly).toEqual({ dismissed: 0, lastDismissed: null });
+    expect(cards.plateau).toEqual({ dismissed: 0, lastDismissed: null });
+    expect(store.saves.filter(([k]) => k === "coach.cards")).toHaveLength(1);
+  });
+
+  // c4b2b's re-read, LOW 4: the cards' half of On is followed too.
+  it("On says the hidden cards stay hidden when coach.cards could not be read, though coach.suggestions saved", async () => {
+    store.fail.add("coach.cards");
+    render(<CoachSuggestionsRow />);
+    await loaded();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("coach-suggestions-on"));
+    });
+    expect(store.saves).toEqual([["coach.suggestions", "on"]]);
+    expect(screen.getByTestId("coach-suggestions-cards-not-read")).toHaveTextContent(t("companion.cardsNotRead"));
+    expect(screen.queryByTestId("coach-suggestions-not-saved")).toBeNull();
+  });
+
+  it("On says it did not land when the cards' save fails, though coach.suggestions saved", async () => {
+    const at = Date.now() - 86_400_000;
+    store.disk.set("coach.cards", { weekly: { dismissed: 2, lastDismissed: at } });
+    render(<CoachSuggestionsRow />);
+    await loaded();
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      store.failSaveOf = "coach.cards";
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("coach-suggestions-on"));
+      });
+      expect(await screen.findByTestId("coach-suggestions-not-saved")).toHaveTextContent(t("notebook.ui.notSaved"));
+    } finally {
+      quiet.mockRestore();
+    }
+  });
+
+  it("On with no card hidden writes coach.suggestions alone and says nothing more", async () => {
+    render(<CoachSuggestionsRow />);
+    await loaded();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("coach-suggestions-on"));
+    });
+    expect(store.saves).toEqual([["coach.suggestions", "on"]]);
+    expect(screen.queryByTestId("coach-suggestions-not-saved")).toBeNull();
   });
 
   // c4a2b, L2: no silent failed save.

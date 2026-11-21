@@ -36,6 +36,8 @@ const NAMESPACES = [
   // The coach's tools in Ask: receipts, proposals, choices, "that one is yours" (leg t1b1).
   "coachTools",
   "common",
+  // The coach over time: the weekly look-back, the plateau question, the dot on Progress (leg c4b2).
+  "companion",
   "drill",
   "jam",
   "metronome",

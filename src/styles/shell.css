@@ -1353,6 +1353,22 @@ button.jam-vibe-chip {
   color: var(--text-primary);
 }
 
+/* The coach's dot on Progress (leg c4b2, DESIGN 6.6): a card waits there. No
+   count. Inline after the label on the rail (beside the glyph when the rail
+   is collapsed); at the glyph's corner in the phone's tab bar. */
+.rail-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.mobile-tab .rail-dot {
+  position: absolute;
+  top: 7px;
+  left: calc(50% + 7px);
+}
+
 .rail-mode.active svg {
   color: var(--accent);
 }
@@ -3386,6 +3402,7 @@ body[data-sheet-maximized] .rail {
 }
 
 .mobile-tab {
+  position: relative;
   flex: 1 1 0;
   min-width: 0;
   display: flex;
