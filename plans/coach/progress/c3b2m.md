@@ -144,5 +144,6 @@ right tool the miss is smaller: 77% / 80% in the chain, 83% / 84% for the model 
   1 skipped (`coach-c3b2m-vt`).
 - The CUDA build (`coach-c3b2m-cuda-build`), the 4B smoke (`coach-c3b2m-4b-smoke`), the runs
   (`coach-c3b2m-4b-arms`, `-4b-arms-2`, `coach-c3b2m-8b-arms`).
-- Not run: `npm run test:rust` (no Rust source changed; `Cargo.toml` only gains a feature nothing enables),
-  the full vitest suite and `npm run build` (owed by the orchestrator's merge gate, or see the report).
+- `npm run build`: pass (`coach-c3b2m-build`). Full vitest: 49152 passed, 11 skipped; the one file failing
+  is the known `TabStage.render.test.tsx` (symlink) (`coach-c3b2m-vitest`, `/tmp/coach-c3b2m/vitest.log`).
+- Not run: `npm run test:rust` (no Rust source changed; `Cargo.toml` only gains a feature nothing enables).
