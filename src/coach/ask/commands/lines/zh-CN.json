@@ -60,7 +60,19 @@
     "别打开路线",
     "以后再快一点",
     "第3小节有点慢",
-    "打开路线之后再说"
+    "打开路线之后再说",
+    "播放的时候总卡顿",
+    "跟着节拍弹",
+    "加载布鲁斯很慢",
+    "循环到第3小节结束",
+    "改成80会更好",
+    "播放按钮在哪",
+    "开始练习前先热身",
+    "显示不出来",
+    "路线打开失败",
+    "弹得快一点好难",
+    "把速度调到80会舒服点",
+    "打开设置怎么没反应"
   ],
   "nearMissYours": [
     ["录音", "recording"],
@@ -71,7 +83,9 @@
     ["关闭评分", "grading"],
     ["查看成绩", "grades"],
     ["下载模型", "model"],
-    ["取消跟随布鲁斯", "unfollowing"]
+    ["取消跟随布鲁斯", "unfollowing"],
+    ["录下吉他的声音", "recording"],
+    ["退出路线", "unfollowing"]
   ],
-  "notes": "Screens use the UI words (路线, 进度, 设置 and its sections as Settings writes them). Pronoun 我 is in the not-a-command list, so requests like 帮我打开路线 are not commands and the UI label 找我的极限 is typed as 找极限. Please check: 去 / 前往 as ways to open a screen, 慢一点 / 快一点 and their short forms, and the Part counter 第3部分 (the word 部分 is a filler so 第3部分 reads as 3). Bebop scales are left out on purpose: 比波普 contains 比 (than)."
+  "notes": "Screens use the UI words (路线, 进度, 设置 and its sections as Settings writes them). Pronoun 我 is in the not-a-command list, so requests like 帮我打开路线 are not commands and the UI label 找我的极限 is typed as 找极限. Please check: 去 / 前往 as ways to open a screen, 慢一点 / 快一点 and their short forms, and the Part counter 第3部分 (the word 部分 is a filler so 第3部分 reads as 3). Bebop scales are left out on purpose: 比波普 contains 比 (than). Second reader: added 12 nearMissNone lines (progress, time clauses, conditionals, complaints, 在哪) and 2 nearMissYours (录下吉他的声音, 退出路线); notCommand gained 会, 先, 弹, 时候, 结束, 失败, 不出, 不到, 不上, 好难, 更好, 卡顿 and questions gained 在哪 (not bare 卡 or 难: they sit inside 声卡 and 更难的). Leftover-as-name is still possible for a statement with no such marker."
 }

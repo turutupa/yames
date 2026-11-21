@@ -48,7 +48,20 @@
     "120 bpm là mục tiêu của tôi",
     "chơi lại lần nữa",
     "bắt đầu lại từ đầu",
-    "chậm hơn so với hôm qua"
+    "chậm hơn so với hôm qua",
+    "nhanh quá",
+    "hôm qua chơi ở 80",
+    "không muốn chậm lại",
+    "chơi nhanh hơn thì bị lệch",
+    "chơi 15 phút rồi",
+    "toc do 80 nhanh qua",
+    "bước 7 sao khó vậy",
+    "đã mở lộ trình rồi",
+    "cài đặt ở đâu",
+    "tập 20 phút mỗi ngày",
+    "chậm lại thì khó quá",
+    "lộ trình nào hay nhất",
+    "chậm hơn nhiều so với 80"
   ],
   "nearMissYours": [
     ["ghi âm", "recording"],
@@ -59,7 +72,9 @@
     ["chấm điểm cho tôi", "grading"],
     ["cho xem điểm của tôi", "grades"],
     ["tải xuống mô hình", "model"],
-    ["bỏ theo blues", "unfollowing"]
+    ["bỏ theo blues", "unfollowing"],
+    ["tắt chấm điểm", "grading"],
+    ["đổi micro", "input"]
   ],
-  "notes": "Check: 'tôi' and 'mình' as a first word make a sentence not a command (they are in questions, which is the router's first-word test); 'ô nhịp' is the bar and 'bài tập' the exercise (the UI's 'bài' alone is left out so 'chơi bài hát' does not become an exercise); tone-less typing (cai dat, nhanh hon) is not listed; 'đi' and 'nhé' are dropped as polite endings."
+  "notes": "Check: 'tôi' and 'mình' as a first word make a sentence not a command (they are in questions, which is the router's first-word test); 'ô nhịp' is the bar and 'bài tập' the exercise (the UI's 'bài' alone is left out so 'chơi bài hát' does not become an exercise); tone-less typing (cai dat, nhanh hon) is not listed; 'đi' and 'nhé' are dropped as polite endings. Second reader: added 13 nearMissNone (complaints, dropped pronoun, tone-less typing, negation, 'chậm lại thì khó quá', 'chậm hơn nhiều so với 80') and 2 nearMissYours (tắt chấm điểm, đổi micro); all routed correctly first run, no table change."
 }

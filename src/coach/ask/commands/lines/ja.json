@@ -61,7 +61,21 @@
     "あとで速くして",
     "ステップ7を開いたけどわからなかった",
     "またゆっくりにして",
-    "3小節目は遅くなりがち"
+    "3小節目は遅くなりがち",
+    "速く弾くのは難しい",
+    "昨日ブルースのコースを開いた",
+    "ブルースを再生しながら練習する",
+    "ブルースをフォローしているところ",
+    "ブルースを読み込むと遅くなる",
+    "再生ボタンはどこにありますか",
+    "ブルースのコースを開いてもらえますか",
+    "コースを開く方法",
+    "ループ再生のやり方",
+    "80にすると速い",
+    "ゆっくり弾けば上手くなる",
+    "ステップ7をやりたいなあ",
+    "コースを開いてみようと思う",
+    "テンポ80でもいいですか"
   ],
   "nearMissYours": [
     ["録音", "recording"],
@@ -72,7 +86,9 @@
     ["採点して", "grading"],
     ["成績を見せて", "grades"],
     ["モデルをダウンロード", "model"],
-    ["ブルースをフォロー解除", "unfollowing"]
+    ["ブルースをフォロー解除", "unfollowing"],
+    ["ギターの音を録音して", "recording"],
+    ["ブルースのコースをやめて", "unfollowing"]
   ],
-  "notes": "Screens use the UI words (コース, 上達, 設定 and its sections as the Settings screen writes them). Please check: 「行く」「移動」 as ways to open a screen, 「速く / 早く」 and 「遅く / ゆっくり」, 「限界を探して」 for find-my-edge, and that 「た」 (past tense) in the not-a-command list reads right."
+  "notes": "Screens use the UI words (コース, 上達, 設定 and its sections as the Settings screen writes them). Please check: 「行く」「移動」 as ways to open a screen, 「速く / 早く」 and 「遅く / ゆっくり」, 「限界を探して」 for find-my-edge, and that 「た」 (past tense) in the not-a-command list reads right. Second reader: added 14 nearMissNone lines (past/progress, feelings, ways-to-ask, conditionals, wishes, verb + leftover) and 2 nearMissYours (録音して, コースをやめて); notCommand gained ながら, なる, なっ, なり, 方法, やり方, 仕方, ば, すると, たら, なら because 「ブルースを再生しながら練習する」 routed to play_exercise with the leftover as the name. Leftover-as-name is still possible for a statement with no such marker."
 }

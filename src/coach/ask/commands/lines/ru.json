@@ -50,7 +50,20 @@
     "сыграй это ещё раз",
     "начни сначала",
     "медленнее, чем вчера",
-    "открой курсы, потому что хочу посмотреть прогресс"
+    "открой курсы, потому что хочу посмотреть прогресс",
+    "слишком быстро",
+    "играл на 80 вчера",
+    "не могу играть быстрее",
+    "сыграл быстрее чем вчера",
+    "занимаюсь по 15 минут каждый день",
+    "темп 80 слишком быстрый",
+    "нужно медленнее",
+    "в настройках ничего не нашёл",
+    "поставил 90 bpm и сбился",
+    "открыл курсы, ничего не понял",
+    "быстрее бы",
+    "хочу медленнее",
+    "это слишком медленно на 60"
   ],
   "nearMissYours": [
     ["запись", "recording"],
@@ -61,7 +74,9 @@
     ["включи оценивание", "grading"],
     ["покажи мои оценки", "grades"],
     ["скачай модель", "model"],
-    ["перестань следовать blues", "unfollowing"]
+    ["перестань следовать blues", "unfollowing"],
+    ["выключи оценивание", "grading"],
+    ["смени вход на микрофон", "input"]
   ],
-  "notes": "Check: the UI calls Paths 'Курсы' (so 'открой пути' is deliberately not listed); Drill is 'Темповая тренировка' in four case forms; 'это' is accepted in 'объясни это' but a sentence with 'не', 'я', 'ещё', 'снова', 'сначала' is never a command; 'давай' is dropped as polite filler; Latin a-g roots as in 'покажи a минорную пентатонику'."
+  "notes": "Check: the UI calls Paths 'Курсы' (so 'открой пути' is deliberately not listed); Drill is 'Темповая тренировка' in four case forms; 'это' is accepted in 'объясни это' but a sentence with 'не', 'я', 'ещё', 'снова', 'сначала' is never a command; 'давай' is dropped as polite filler; Latin a-g roots as in 'покажи a минорную пентатонику'. Second reader: added 13 nearMissNone (complaints, dropped pronoun, past-tense verbs, 'бы', 'хочу', 'нужно', negation) and 2 nearMissYours (выключи оценивание, смени вход на микрофон); all routed correctly first run, no table change."
 }

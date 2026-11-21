@@ -56,7 +56,19 @@
     "hedefim 120 bpm",
     "sonra çal",
     "çok hızlı çal",
-    "hızlı çalmıyorum"
+    "hızlı çalmıyorum",
+    "dün 80 çaldım",
+    "tempo çok hızlı",
+    "yolları açmak istiyorum",
+    "yolları açtım",
+    "80 çok yavaş",
+    "daha hızlı olmalı",
+    "ayarları sonra aç",
+    "keşke daha yavaş olsa",
+    "daha yavaş değil",
+    "hızlı çalmak zor",
+    "dünden daha hızlı",
+    "yollrı aç demek istedim"
   ],
   "nearMissYours": [
     ["kayıt", "recording"],
@@ -67,7 +79,9 @@
     ["değerlendirmeyi kapat", "grading"],
     ["notlarımı göster", "grades"],
     ["modeli indir", "model"],
-    ["blues yolunu takipten çık", "unfollowing"]
+    ["blues yolunu takipten çık", "unfollowing"],
+    ["kayda al", "recording"],
+    ["mikrofon seç", "input"]
   ],
-  "notes": "The verb comes last, as Turkish puts it (\"yolları aç\"). Please check: no ordinal form is accepted (\"7. adımı aç\", \"3. ölçüyü tekrarla\") because \"7 adım\" can also mean seven steps, so a player must type \"adım 7\"; words with an apostrophe suffix (\"80'e\", \"blues'u\") are not understood; \"giriş\" (input) is on the never-list, so \"giriş sayımı\" is answered as \"that one is yours\" and the count-in is reached as \"sayım\"; dotted capital İ is covered for the words that start with it."
+  "notes": "The verb comes last, as Turkish puts it (\"yolları aç\"). Please check: no ordinal form is accepted (\"7. adımı aç\", \"3. ölçüyü tekrarla\") because \"7 adım\" can also mean seven steps, so a player must type \"adım 7\"; words with an apostrophe suffix (\"80'e\", \"blues'u\") are not understood; \"giriş\" (input) is on the never-list, so \"giriş sayımı\" is answered as \"that one is yours\" and the count-in is reached as \"sayım\"; dotted capital İ is covered for the words that start with it. Second reader: added 12 nearMissNone lines (past statements, complaints, wishes, verb-last statements, a typo) and 2 nearMissYours (\"kayda al\", \"mikrofon seç\"); none routed to a call. No table change; a never-list request with a pronoun (\"beni kaydet\") answers none, not yours, because notCommand is checked first: safe, no action."
 }

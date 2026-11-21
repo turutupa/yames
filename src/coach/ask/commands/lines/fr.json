@@ -60,7 +60,19 @@
     "recommence",
     "va plus lentement que tout à l'heure",
     "ne joue pas à 80",
-    "est-ce que je peux ouvrir les parcours"
+    "est-ce que je peux ouvrir les parcours",
+    "j'ai joué plus lentement que le clic",
+    "ça va trop vite",
+    "hier j'ai répété 15 minutes",
+    "je joue à 90 mais je bloque",
+    "sans accélérer",
+    "plus vite que hier",
+    "mon tempo accélère tout seul",
+    "à 100 bpm ça passe mieux",
+    "joue pas à 80",
+    "jouer à 80 c'est dur",
+    "la rampe m'ennuie",
+    "pas plus vite"
   ],
   "nearMissYours": [
     ["enregistre", "recording"],
@@ -71,7 +83,10 @@
     ["évalue-moi", "grading"],
     ["montre mes notes", "grades"],
     ["télécharge le modèle", "model"],
-    ["arrête de suivre blues", "unfollowing"]
+    ["arrête de suivre blues", "unfollowing"],
+    ["utilise un autre micro", "input"],
+    ["montre mon score", "grades"],
+    ["supprime toutes les prises", "deleting"]
   ],
-  "notes": "Un lecteur natif: la note 'la' est aussi un article, donc la racine s'écrit en lettre (a, c#, d dièse); 'note/notes' est sur la liste de ce qui est à toi (notes = résultats); 'non' est lu comme une négation, pas comme 'désactivé' (on dit désactivé/éteint/off); 'paramètres' (menu) et 'réglages' (coach) sont tous deux acceptés."
+  "notes": "Un lecteur natif: la note 'la' est aussi un article, donc la racine s'écrit en lettre (a, c#, d dièse); 'note/notes' est sur la liste de ce qui est à toi (notes = résultats); 'non' est lu comme une négation, pas comme 'désactivé' (on dit désactivé/éteint/off); 'paramètres' (menu) et 'réglages' (coach) sont tous deux acceptés. Second reader: added 12 nearMissNone lines (past, complaints, 'sans accélérer', 'mon tempo accélère tout seul', 'joue pas à 80' without ne) and 3 nearMissYours (micro, score, supprime toutes les prises); none routed, so the table is unchanged. The dozen read as natural."
 }

@@ -58,7 +58,22 @@
     "empieza de nuevo",
     "toca a 80 cuando puedas",
     "ve más lento que antes",
-    "no quiero ir más despacio"
+    "no quiero ir más despacio",
+    "toqué más lento que el clic",
+    "va demasiado rápido",
+    "ayer practiqué 15 minutos",
+    "toco a 90 pero me equivoco",
+    "sin acelerar",
+    "mas rapido que ayer",
+    "el tempo acelera solo",
+    "a 100 bpm me sale mejor",
+    "abrí rutas y no entendí nada",
+    "tocar a 80 me cuesta",
+    "la rampa me parece aburrida",
+    "me da pereza abrir los ajustes",
+    "mejor no abrir ajustes",
+    "ni toca ni acelera",
+    "toca muy rapido"
   ],
   "nearMissYours": [
     ["graba", "recording"],
@@ -69,7 +84,10 @@
     ["evalúame", "grading"],
     ["muestra mis notas", "grades"],
     ["descarga el modelo", "model"],
-    ["deja de seguir blues", "unfollowing"]
+    ["deja de seguir blues", "unfollowing"],
+    ["usa otro micro", "input"],
+    ["muéstrame mi puntaje", "grades"],
+    ["borra todas las tomas", "deleting"]
   ],
-  "notes": "Un lector nativo: 'a pentatónica menor' es la raíz A (la letra) y no lleva artículo porque el router lee la nota primero; 'nota/notas' está en la lista de lo que es tuyo (notas = calificaciones); 'no' no vale como 'desactivado' (se lee como negación), se usa 'desactivado/apagado/off'."
+  "notes": "Un lector nativo: 'a pentatónica menor' es la raíz A (la letra) y no lleva artículo porque el router lee la nota primero; 'nota/notas' está en la lista de lo que es tuyo (notas = calificaciones); 'no' no vale como 'desactivado' (se lee como negación), se usa 'desactivado/apagado/off'. Second reader: added 15 nearMissNone lines (past, complaints, dropped subject, no accents, 'sin acelerar', 'el tempo acelera solo') and 3 nearMissYours (micro, puntaje, borra todas las tomas); none routed, so the table is unchanged. The dozen read as natural."
 }

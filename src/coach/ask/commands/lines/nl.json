@@ -64,7 +64,19 @@
     "120 bpm is mijn doel",
     "start straks de metronoom",
     "de volgende keer speel ik langzamer",
-    "speel niet sneller"
+    "speel niet sneller",
+    "ik heb de leerpaden geopend",
+    "leerpaden later openen",
+    "gisteren 80 gespeeld",
+    "het tempo is te snel",
+    "80 was te snel",
+    "niet zo snel",
+    "sneller dan gisteren",
+    "zou fijn zijn als het langzamer was",
+    "wij herhalen maat 3 morgen",
+    "de start van het nummer is moeilijk",
+    "tempo 80 vind ik te druk",
+    "leerpdaen openen geen idee hoe"
   ],
   "nearMissYours": [
     ["opnemen", "recording"],
@@ -75,7 +87,9 @@
     ["beoordeel me", "grading"],
     ["toon mijn cijfers", "grades"],
     ["download het model", "model"],
-    ["ontvolg blues", "unfollowing"]
+    ["ontvolg blues", "unfollowing"],
+    ["neem op", "recording"],
+    ["microfoon kiezen", "input"]
   ],
-  "notes": "Verb first or last (\"open leerpaden\", \"leerpaden openen\"). Please check: \"leg dit scherm uit\" is read through the verb \"leg\" plus \"dit scherm uit\"; \"mol\" as the flat sign; \"het\" and \"me\" are fillers, so they never count as \"it\" or \"me\" in a sentence; a player's short form \"paden\" is not accepted because the UI says \"Leerpaden\"."
+  "notes": "Verb first or last (\"open leerpaden\", \"leerpaden openen\"). Please check: \"leg dit scherm uit\" is read through the verb \"leg\" plus \"dit scherm uit\"; \"mol\" as the flat sign; \"het\" and \"me\" are fillers, so they never count as \"it\" or \"me\" in a sentence; a player's short form \"paden\" is not accepted because the UI says \"Leerpaden\". Second reader: added 11 nearMissNone lines (past statements, complaints, wishes, verb-last statements, a typo) and 2 nearMissYours (\"neem op\", \"microfoon kiezen\"); none routed to a call. No table change; a never-list request with a pronoun (\"neem mij op\") answers none, not yours, because notCommand is checked first: safe, no action."
 }

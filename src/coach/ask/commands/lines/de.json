@@ -64,7 +64,19 @@
     "120 bpm ist mein ziel",
     "später die einstellungen öffnen",
     "beim nächsten mal spiele ich langsamer",
-    "spiel nicht schneller"
+    "spiel nicht schneller",
+    "ich habe die pfade geöffnet",
+    "pfade später öffnen",
+    "gestern 80 gespielt",
+    "das tempo ist zu schnell",
+    "80 war zu schnell",
+    "nicht so schnell",
+    "schneller als gestern",
+    "wäre schön wenn es langsamer wäre",
+    "wir wiederholen takt 3 morgen",
+    "die einstellungen sind schon geöffnet",
+    "tempo 80 ist mir zu hektisch",
+    "pfde öffnen kein plan wie"
   ],
   "nearMissYours": [
     ["aufnahme", "recording"],
@@ -75,7 +87,9 @@
     ["bewerte mich", "grading"],
     ["zeig meine noten", "grades"],
     ["lade das modell herunter", "model"],
-    ["entfolge blues", "unfollowing"]
+    ["entfolge blues", "unfollowing"],
+    ["nimm auf", "recording"],
+    ["mikrofon wählen", "input"]
   ],
-  "notes": "Verb last or first (\"pfade öffnen\", \"öffne pfade\"). Please check: \"b\" is read as B-flat's root letter only as the English letter b (German B vs H is not modelled); \"noten\" is a never-list word for grades (it also means sheet music); \"zu schnell\" and its kin are listed as whole phrases because \"zu\" is also the connector of \"gehe zu\"; \"3. takt\" (dot dropped by the router) is read as the third bar."
+  "notes": "Verb last or first (\"pfade öffnen\", \"öffne pfade\"). Please check: \"b\" is read as B-flat's root letter only as the English letter b (German B vs H is not modelled); \"noten\" is a never-list word for grades (it also means sheet music); \"zu schnell\" and its kin are listed as whole phrases because \"zu\" is also the connector of \"gehe zu\"; \"3. takt\" (dot dropped by the router) is read as the third bar. Second reader: added 11 nearMissNone lines (past statements, complaints, wishes, verb-last statements, a typo) and 2 nearMissYours (\"nimm auf\", \"mikrofon wählen\"); all routed to none already, no table change. A never-list request containing a pronoun (\"nimm mich auf\") answers none, not yours, because notCommand is checked first: safe, no action."
 }

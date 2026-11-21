@@ -59,7 +59,18 @@
     "começa de novo",
     "toca a 80 quando puder",
     "vai mais devagar que antes",
-    "não quero ir mais devagar"
+    "não quero ir mais devagar",
+    "toquei mais devagar que o clique",
+    "tá rápido demais",
+    "ontem pratiquei 15 minutos",
+    "toco a 90 mas erro",
+    "sem acelerar",
+    "mais rápido que ontem",
+    "o andamento acelera sozinho",
+    "a 100 bpm sai melhor",
+    "nem abro as configurações",
+    "tocar a 80 é difícil",
+    "a rampa é chata"
   ],
   "nearMissYours": [
     ["grava", "recording"],
@@ -70,7 +81,10 @@
     ["me avalia", "grading"],
     ["mostra minhas notas", "grades"],
     ["baixa o modelo", "model"],
-    ["deixa de seguir blues", "unfollowing"]
+    ["deixa de seguir blues", "unfollowing"],
+    ["usa outro microfone", "input"],
+    ["mostra minha pontuação", "grades"],
+    ["apaga todas as tomadas", "deleting"]
   ],
-  "notes": "Para um leitor nativo: 'a' é a nota lá (a letra), então 'mostra a pentatônica menor' lê A + pentatônica menor, como no inglês; 'nota/notas' ficam na lista do que é seu (notas = avaliações); 'não' vale como negação, não como 'desligado' (usa-se desligado/desativado/off); 'baixar' (download) ficou de fora de propósito porque também é 'baixar o andamento', 'modelo' já cobre 'baixa o modelo'; 'sobre' não é conector para não esconder a seção Sobre."
+  "notes": "Para um leitor nativo: 'a' é a nota lá (a letra), então 'mostra a pentatônica menor' lê A + pentatônica menor, como no inglês; 'nota/notas' ficam na lista do que é seu (notas = avaliações); 'não' vale como negação, não como 'desligado' (usa-se desligado/desativado/off); 'baixar' (download) ficou de fora de propósito porque também é 'baixar o andamento', 'modelo' já cobre 'baixa o modelo'; 'sobre' não é conector para não esconder a seção Sobre. Second reader: added 11 nearMissNone lines (past, complaints, dropped subject, colloquial 'tá rápido demais', 'sem acelerar', 'o andamento acelera sozinho') and 3 nearMissYours (microfone, pontuação, apaga todas as tomadas); none routed, so the table is unchanged. The dozen read as natural."
 }

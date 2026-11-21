@@ -61,7 +61,19 @@
     "나는 80으로 쳤어",
     "나중에 빠르게 해줘",
     "코스를 열어서 봤어",
-    "3번째 마디가 느려져"
+    "3번째 마디가 느려져",
+    "빠르게 치는 게 어려워",
+    "블루스 코스 열어봐도 돼",
+    "80으로 치면 빨라",
+    "블루스 따라가고 있어",
+    "블루스를 불러오면 느려져",
+    "재생 버튼이 안 보여",
+    "시작하면 소리가 안 나",
+    "느리게 치는 연습",
+    "코스 열고 연습할래",
+    "템포 80으로 바꾸면 돼",
+    "3번째 마디 반복하면 좋을까",
+    "블루스 따라가는 중이야"
   ],
   "nearMissYours": [
     ["녹음", "recording"],
@@ -72,7 +84,9 @@
     ["채점해줘", "grading"],
     ["점수 보여줘", "grades"],
     ["모델 다운로드", "model"],
-    ["블루스 팔로우 해제", "unfollowing"]
+    ["블루스 팔로우 해제", "unfollowing"],
+    ["기타 소리 녹음해줘", "recording"],
+    ["블루스 코스 그만해줘", "unfollowing"]
   ],
-  "notes": "Screens use the UI words (코스, 진도, 설정, the Settings sections as that screen writes them). Please check: 열어 / 이동 / 가줘 as ways to open a screen, 느리게 / 천천히 and 빠르게 / 빨리, 한계 찾아줘 for find-my-edge, and the negation list (안해, 안돼 ... are spelled without a space because the router drops spaces)."
+  "notes": "Screens use the UI words (코스, 진도, 설정, the Settings sections as that screen writes them). Please check: 열어 / 이동 / 가줘 as ways to open a screen, 느리게 / 천천히 and 빠르게 / 빨리, 한계 찾아줘 for find-my-edge, and the negation list (안해, 안돼 ... are spelled without a space because the router drops spaces). Second reader: added 12 nearMissNone lines (progress, conditionals, wishes, verb + leftover, 안 보여) and 2 nearMissYours (녹음해줘, 코스 그만해줘); notCommand gained 돼, 봐도, 하면, 치면, 오면, 가면, 으면, 보면, 열면, 안보, 안나, 중이, 할래, 칠래, 볼래 because 「블루스 코스 열어봐도 돼」 routed to open_path. Leftover-as-name is still possible for a statement with no such marker."
 }

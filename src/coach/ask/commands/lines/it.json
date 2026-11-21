@@ -58,7 +58,19 @@
     "ricomincia da capo",
     "vai più lento di ieri",
     "suona a 80 quando puoi",
-    "non voglio andare più piano"
+    "non voglio andare più piano",
+    "ho suonato più lento del click",
+    "va troppo veloce",
+    "ieri ho fatto 15 minuti",
+    "suono a 90 ma sbaglio",
+    "senza accelerare",
+    "più veloce di ieri",
+    "il tempo accelera da solo",
+    "a 100 bpm mi riesce meglio",
+    "non suona a 80",
+    "aprivo i percorsi ma non capivo",
+    "la rampa mi annoia",
+    "suonare a 80 è difficile"
   ],
   "nearMissYours": [
     ["registra", "recording"],
@@ -69,7 +81,10 @@
     ["valutami", "grading"],
     ["mostra i miei voti", "grades"],
     ["scarica il modello", "model"],
-    ["smetti di seguire blues", "unfollowing"]
+    ["smetti di seguire blues", "unfollowing"],
+    ["usa un altro microfono", "input"],
+    ["mostra il mio punteggio", "grades"],
+    ["elimina tutte le take", "deleting"]
   ],
-  "notes": "Da controllare per un madrelingua: la nota 'la' è anche un articolo, quindi la tonica si scrive con la lettera (a, c#, d diesis); 'voto/voti' sono nella lista di ciò che è tuo; 'no' vale come negazione, non come 'disattivo' (si usa disattivo/spento/off); 'prova' (test out) e 'suona' (start) sono i verbi più brevi accettati."
+  "notes": "Da controllare per un madrelingua: la nota 'la' è anche un articolo, quindi la tonica si scrive con la lettera (a, c#, d diesis); 'voto/voti' sono nella lista di ciò che è tuo; 'no' vale come negazione, non come 'disattivo' (si usa disattivo/spento/off); 'prova' (test out) e 'suona' (start) sono i verbi più brevi accettati. Second reader: added 12 nearMissNone lines (past, complaints, dropped subject, 'senza accelerare', 'il tempo accelera da solo') and 3 nearMissYours (microfono, punteggio, elimina tutte le take); none routed, so the table is unchanged. The dozen read as natural."
 }

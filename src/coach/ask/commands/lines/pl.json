@@ -49,7 +49,22 @@
     "zagraj to jeszcze raz",
     "zacznij od nowa",
     "wolniej niż wczoraj",
-    "otwórz ścieżki, bo chcę zobaczyć postępy"
+    "otwórz ścieżki, bo chcę zobaczyć postępy",
+    "za szybko",
+    "grałem szybciej",
+    "wczoraj grałem na 80",
+    "gram za szybko na 100 bpm",
+    "nie chcę zwolnić",
+    "szybciej niż metronom",
+    "ćwiczę 15 minut dziennie",
+    "tempo było za szybkie na 120",
+    "zagralem to szybciej niz wczoraj",
+    "pokazałem to nauczycielowi",
+    "mam ustawienia na 80",
+    "chciałbym 90 bpm",
+    "w ustawieniach nic nie znalazłem",
+    "zwolniłem w takcie 3",
+    "80 bpm to za wolno"
   ],
   "nearMissYours": [
     ["nagraj", "recording"],
@@ -60,7 +75,9 @@
     ["włącz ocenianie", "grading"],
     ["pokaż moje oceny", "grades"],
     ["pobierz model", "model"],
-    ["przestań śledzić blues", "unfollowing"]
+    ["przestań śledzić blues", "unfollowing"],
+    ["wyłącz ocenianie", "grading"],
+    ["zmień wejście audio", "input"]
   ],
-  "notes": "Check: 'szybciej'/'wolniej' as the comparative; 'rozbieg' (Drill) and 'setlista'; no diacritic forms for common verbs (otworz, pokaz, zapetl, sledz) are kept on purpose; 'to' (it/this) is on the not-a-command list, so 'wyjaśnij to' is not a command but 'wyjaśnij ten ekran' is."
+  "notes": "Check: 'szybciej'/'wolniej' as the comparative; 'rozbieg' (Drill) and 'setlista'; no diacritic forms for common verbs (otworz, pokaz, zapetl, sledz) are kept on purpose; 'to' (it/this) is on the not-a-command list, so 'wyjaśnij to' is not a command but 'wyjaśnij ten ekran' is. Second reader: added 15 nearMissNone (complaints, dropped pronoun, no-diacritic typing, 'bym', 'niż', past-tense verbs, comparatives) and 2 nearMissYours (wyłącz ocenianie, zmień wejście audio); all routed correctly first run, no table change."
 }
