@@ -28,6 +28,7 @@ import { findExercise } from "../session/packs";
 import { countsTowardCleanTempo, factsOf, isMarkedNotFair, isUngradedTake, type PlayerProgress } from "../session/progress";
 import { weekStartOf, weekTotals, type Weekday } from "../session/totals";
 import { MY_EXERCISES_PATH_ID } from "../session/myExercises";
+import { variantIndexOf } from "../session/take";
 import type { CoachGoal } from "./store";
 import { plateausNow, type Plateau } from "./nudges";
 
@@ -43,9 +44,16 @@ export type WeeklyLine = { key: string; values: Record<string, string | number> 
 export type Moved = {
   path: PathDoc;
   exercise: Exercise;
-  /** Graded: its clean tempo before the week (null: none yet) and at its end. Ungraded: the tempo played on its first and last day in the week. */
+  /**
+   * Graded: its clean tempo before the week, null when it had none (`isNew`)
+   * or when the Takes in memory do not reach back far enough to know it; and
+   * at the week's end. Ungraded: the tempo played on its first and last day in
+   * the week.
+   */
   from: number | null;
   to: number;
+  /** Graded: the week set this Exercise's first clean tempo ever (the long view says so). */
+  isNew: boolean;
   /** "clean": a clean tempo (graded); "played": the tempo played (ungraded). */
   kind: "clean" | "played";
 };
@@ -77,6 +85,14 @@ export type LookBack = {
   start: number;
   end: number;
   graded: boolean;
+  /**
+   * Graded, and the long view has not answered: what moved is not known yet
+   * (M4), so this look-back is not shown; Progress shows the one computed
+   * with the spans.
+   */
+  needsSpans: boolean;
+  /** The week held Takes the counts leave out (marked not fair, or on the player's own exercises): the foot says so. */
+  leftOut: boolean;
   sentence: WeeklyLine;
   benchmark: Benchmark | null;
   moved: Moved[];
@@ -137,36 +153,65 @@ const evenOf = (take: PathTakeRow): number | null => {
   return typeof v === "number" && Number.isFinite(v) ? Math.round(v * 100) : null;
 };
 
-/** Graded: the clean tempo before the week and at its end, per Exercise, where it rose. */
+/**
+ * The oldest Take in memory, or null: the store hands over its newest 500, so
+ * a span whose first clean Take is older than this has Takes the card cannot
+ * read.
+ */
+function oldestRead(progress: PlayerProgress): number | null {
+  let oldest: number | null = null;
+  for (const t of progress.takes) if (oldest === null || t.startedAt < oldest) oldest = t.startedAt;
+  return oldest;
+}
+
+/**
+ * Graded: the Exercises whose clean tempo moved in the week, measured against
+ * the long view (c4b2's review, M4), never the newest 500 Takes alone:
+ * - a span whose best (the clean tempo Progress shows, every Take read) was
+ *   set before the week: the week moved nothing, whatever the Takes in memory
+ *   say;
+ * - a best set inside the week is above every clean tempo before it (the best
+ *   is the earliest on a tie): it moved, to that best;
+ * - a span whose first clean Take is in the week: the week set its first;
+ * - a best set after the week: it moved that week only if the week's best
+ *   clean Take beat the one before it, which needs the Takes in memory to
+ *   reach back to the span's first clean Take; else nothing is said.
+ * "From" is the clean tempo before the week, said only when the Takes in
+ * memory reach back that far. Null spans (not answered yet): nothing is said.
+ */
 function cleanMoved(
   takes: readonly PathTakeRow[],
   paths: readonly PathDoc[],
-  end: number,
   start: number,
+  end: number,
   spans: readonly CleanTempoSpanRow[] | null,
+  oldest: number | null,
 ): Moved[] {
-  const before = new Map<string, number>();
-  const after = new Map<string, number>();
-  for (const take of takes) {
-    if (take.startedAt >= end || !countsTowardCleanTempo(take)) continue;
-    const id = `${take.pathId}/${take.exerciseId}`;
-    const into = take.startedAt < start ? before : after;
-    into.set(id, Math.max(into.get(id) ?? 0, take.bpm));
-  }
+  if (!spans) return [];
   const out: Moved[] = [];
-  for (const [id, best] of after) {
-    const was = before.get(id) ?? null;
-    if (was !== null && best <= was) continue;
-    const [pathId, ...rest] = id.split("/");
-    // No clean tempo before the week in the Takes read, but the long view has
-    // one from before it (past the 500-Take window): the "from" is not known
-    // here, so the row is not said rather than said as new.
-    const span = spans?.find((s) => s.pathId === pathId && s.exerciseId === rest.join("/"));
-    if (was === null && span && span.firstAt < start) continue;
-    const found = exerciseOf(paths, pathId, rest.join("/"));
-    if (found) out.push({ ...found, from: was, to: best, kind: "clean" });
+  for (const span of spans) {
+    if (span.bestAt < start || span.firstAt >= end) continue;
+    const found = exerciseOf(paths, span.pathId, span.exerciseId);
+    if (!found) continue;
+    let was: number | null = null;
+    let inWeek: number | null = null;
+    for (const t of takes) {
+      if (t.pathId !== span.pathId || t.exerciseId !== span.exerciseId) continue;
+      if (t.startedAt >= end || !countsTowardCleanTempo(t)) continue;
+      if (t.startedAt < start) was = Math.max(was ?? 0, t.bpm);
+      else inWeek = Math.max(inWeek ?? 0, t.bpm);
+    }
+    const isNew = span.firstAt >= start;
+    const complete = oldest !== null && oldest <= span.firstAt;
+    const bestInWeek = span.bestAt < end;
+    const to = bestInWeek ? span.bestBpm : inWeek;
+    if (to === null) continue;
+    // Before the week: none (new), known (the Takes reach back), or not known.
+    const from = isNew ? null : complete && was !== null && was < to ? was : null;
+    if (!bestInWeek && !isNew && from === null) continue;
+    out.push({ ...found, from, to, isNew, kind: "clean" });
   }
-  return out.sort((a, b) => b.to - (b.from ?? 0) - (a.to - (a.from ?? 0)) || a.exercise.title.localeCompare(b.exercise.title));
+  return out.sort((a, b) => b.to - (b.from ?? b.to) - (a.to - (a.from ?? a.to)) || a.exercise.title.localeCompare(b.exercise.title));
 }
 
 /** Ungraded: the tempo played on the first and on the last day in the week, where they differ. */
@@ -183,12 +228,17 @@ function playedMoved(inWeek: readonly PathTakeRow[], paths: readonly PathDoc[]):
     const last = sorted[sorted.length - 1];
     if (first.bpm === last.bpm) continue;
     const found = exerciseOf(paths, first.pathId, first.exerciseId);
-    if (found) out.push({ ...found, from: first.bpm, to: last.bpm, kind: "played" });
+    if (found) out.push({ ...found, from: first.bpm, to: last.bpm, isNew: false, kind: "played" });
   }
   return out.sort((a, b) => a.exercise.title.localeCompare(b.exercise.title));
 }
 
-/** The newest benchmark Take in the week, beside the benchmark before it on the same Exercise and tempo. */
+/**
+ * The newest benchmark Take in the week, beside the benchmark before it on the
+ * same Exercise, the same version of it (`variantIndexOf`, `withVariant`'s
+ * rule: the planner rotates a benchmark's variant like any step's) and the
+ * same tempo; else nothing (c4b2's review, M3).
+ */
 function benchmarkOf(takes: readonly PathTakeRow[], paths: readonly PathDoc[], start: number, end: number): Benchmark | null {
   const marked = takes
     .filter((t) => t.caught && !isMarkedNotFair(t) && factsOf(t).benchmark && evenOf(t) !== null)
@@ -196,17 +246,21 @@ function benchmarkOf(takes: readonly PathTakeRow[], paths: readonly PathDoc[], s
   for (const latest of marked) {
     if (latest.startedAt < start || latest.startedAt >= end) continue;
     const spec = factsOf(latest).benchmark!;
+    const found = exerciseOf(paths, latest.pathId, latest.exerciseId);
+    if (!found) continue;
+    const version = variantIndexOf(found.exercise, latest.variantSeed);
     const earlier = marked.find(
       (t) =>
         t.startedAt < latest.startedAt &&
         t.pathId === latest.pathId &&
+        t.exerciseId === latest.exerciseId &&
+        t.bpm === latest.bpm &&
+        variantIndexOf(found.exercise, t.variantSeed) === version &&
         factsOf(t).benchmark?.exerciseId === spec.exerciseId &&
         factsOf(t).benchmark?.bpm === spec.bpm &&
         (factsOf(t).benchmark?.day ?? 0) < spec.day,
     );
     if (!earlier) continue;
-    const found = exerciseOf(paths, latest.pathId, latest.exerciseId);
-    if (!found) continue;
     return {
       ...found,
       bpm: spec.bpm,
@@ -221,19 +275,37 @@ function benchmarkOf(takes: readonly PathTakeRow[], paths: readonly PathDoc[], s
 
 /**
  * DESIGN 6.5's "clean tempo up 20 BPM on one Exercise": from the long view,
- * whose first and best already leave Takes marked not fair out (nf1). Only a
- * best reached inside the week, so each is said in one look-back only.
+ * whose first and best already leave Takes marked not fair out (nf1). Said in
+ * one look-back only (c4b2's review, L6): the week whose best first crossed
+ * +20, not every later week in which the best rose again. That needs the
+ * Takes before the week back to the span's first clean Take; when the Takes
+ * in memory (`takes`, from `oldest` on) do not reach that far, it is not said.
  */
 export function bpmMilestones(
   spans: readonly CleanTempoSpanRow[],
   paths: readonly PathDoc[],
   start: number,
   end: number,
+  takes: readonly PathTakeRow[],
+  oldest: number | null,
 ): BpmMilestone[] {
   const out: BpmMilestone[] = [];
   for (const span of spans) {
     if (span.bestAt < start || span.bestAt >= end) continue;
-    if (span.bestBpm - span.firstBpm < MILESTONE_BPM_UP) continue;
+    const mark = span.firstBpm + MILESTONE_BPM_UP;
+    if (span.bestBpm < mark) continue;
+    if (span.firstAt < start) {
+      if (oldest === null || oldest > span.firstAt) continue;
+      const crossedBefore = takes.some(
+        (t) =>
+          t.pathId === span.pathId &&
+          t.exerciseId === span.exerciseId &&
+          t.startedAt < start &&
+          t.bpm >= mark &&
+          countsTowardCleanTempo(t),
+      );
+      if (crossedBefore) continue;
+    }
     const found = exerciseOf(paths, span.pathId, span.exerciseId);
     if (!found) continue;
     out.push({ ...found, firstBpm: span.firstBpm, firstAt: span.firstAt, bestBpm: span.bestBpm, bestAt: span.bestAt });
@@ -241,10 +313,22 @@ export function bpmMilestones(
   return out.sort((a, b) => b.bestBpm - b.firstBpm - (a.bestBpm - a.firstBpm));
 }
 
-function sentenceOf(graded: boolean, moved: Moved[], benchmark: Benchmark | null, counts: LookBack["counts"], exercises: number): WeeklyLine {
+function sentenceOf(
+  graded: boolean,
+  rows: Moved[],
+  benchmark: Benchmark | null,
+  counts: LookBack["counts"],
+  exercises: number,
+  leftOut: boolean,
+): WeeklyLine {
   if (!graded) {
-    return { key: "companion.weekly.say.ungraded", values: { minutes: counts.minutes, sessions: counts.sessions, exercises } };
+    return {
+      key: leftOut ? "companion.weekly.say.ungradedLeftOut" : "companion.weekly.say.ungraded",
+      values: { minutes: counts.minutes, sessions: counts.sessions, exercises },
+    };
   }
+  // A first clean tempo is its own row ("first clean tempo: 90"), not one that moved (L7).
+  const moved = rows.filter((m) => !m.isNew);
   const better = benchmark !== null && benchmark.toEven > benchmark.fromEven;
   if (moved.length === 0) {
     return better
@@ -270,18 +354,24 @@ export function lookBack(input: LookBackInput): LookBack | null {
   const { start, end } = lastWeek;
   const inWeek = takes.filter((t) => t.startedAt >= start && t.startedAt < end);
   const counts = { sessions: lastWeek.sessions, minutes: lastWeek.minutes, takes: lastWeek.takes };
+  // L10: the counts leave Takes out, so the lines that quote them say so when
+  // the week held any (without a number: a Take marked not fair is in none).
+  const leftOut = progress.takes.some((t) => t.startedAt >= start && t.startedAt < end && (isMarkedNotFair(t) || t.pathId === MY_EXERCISES_PATH_ID));
   const exercises = new Set(inWeek.map((t) => `${t.pathId}/${t.exerciseId}`)).size;
   // A graded player whose whole week went ungraded is spoken to as ungraded.
   const gradedWeek = graded && inWeek.some((t) => !isUngradedTake(t));
-  const moved = gradedWeek ? cleanMoved(takes, paths, end, start, input.spans) : playedMoved(inWeek, paths);
+  const oldest = oldestRead(progress);
+  const moved = gradedWeek ? cleanMoved(takes, paths, start, end, input.spans, oldest) : playedMoved(inWeek, paths);
   const benchmark = gradedWeek ? benchmarkOf(takes, paths, start, end) : null;
-  const milestones = gradedWeek && input.spans ? bpmMilestones(input.spans, paths, start, end) : [];
+  const milestones = gradedWeek && input.spans ? bpmMilestones(input.spans, paths, start, end, takes, oldest) : [];
   const stuck = gradedWeek ? (plateausNow(progress, paths, now, true)[0] ?? null) : null;
   return {
     start,
     end,
     graded: gradedWeek,
-    sentence: sentenceOf(gradedWeek, moved, benchmark, counts, exercises),
+    needsSpans: gradedWeek && input.spans === null,
+    leftOut,
+    sentence: sentenceOf(gradedWeek, moved, benchmark, counts, exercises, leftOut),
     benchmark,
     moved,
     milestones,

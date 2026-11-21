@@ -112,7 +112,7 @@ import { ZenTransition } from "../zen/ZenTransition";
 import { useEvaluation } from "../../hooks/useEvaluation";
 import { useSession } from "../../hooks/useSession";
 import { useCoachVoice } from "../../coach/useCoachVoice";
-import { useCompanionWatch } from "../../coach/companion";
+import { companionBlocked, useCompanionWatch } from "../../coach/companion";
 import { playerWeekStart } from "../../coach/weekly";
 import { useCoachKeys } from "../session/hooks/useCoachKeys";
 import AudioInputTestModal from "../settings/AudioInputTestModal";
@@ -631,12 +631,17 @@ export function MainWindow() {
   // The coach's proactive card for this app run (leg c4b2): the look-back or
   // the plateau question, and the dot on Progress. Nothing in a Session or
   // the wizard (DESIGN 6.6); recomputed when the stored Takes change, not per beat.
+  // Blocked by the run's phase too, as the nudges are (`holdNudges` below): no
+  // recompute during a count-in, a Take or its recap, whatever the view. The
+  // week's first day is worked out once per language, not at every render
+  // (the shell renders at every beat; c4b2's review, L8 and L9).
+  const companionWeekStart = useMemo(() => playerWeekStart(i18n.language), [i18n.language]);
   useCompanionWatch(
     sessionRun.progress,
     sessionRun.paths,
     sessionRun.grading !== "off",
-    playerWeekStart(i18n.language),
-    view === "session" || onboarding.isOpen,
+    companionWeekStart,
+    companionBlocked({ inSession: view === "session" || inSession, phase: sessionRun.run.phase, wizardOpen: onboarding.isOpen }),
   );
 
   // Ask (leg c2a1): the panel, the coach's context for it, and the drawer's

@@ -17,10 +17,12 @@ import {
   coachStored,
   coachStoredLoaded,
   loadCoachStored,
+  saveCardsAsked,
   saveSuggestions,
   subscribeCoachStored,
   type Suggestions,
 } from "../../coach/store";
+import { BUDGET_ORDER } from "../../coach/cardBudget";
 
 const CHOICES: readonly Suggestions[] = ["on", "asked"];
 
@@ -44,6 +46,10 @@ export function CoachSuggestionsRow() {
   }, []);
   const choose = (value: Suggestions) => {
     saveSuggestions(value);
+    // "On" is how the player asks for the proactive cards again: a card hidden
+    // twice ("Hidden until you ask") may come back (c4b2b). Writes nothing
+    // when no card was hidden.
+    if (value === "on") saveCardsAsked(BUDGET_ORDER);
     void coachPressSettled("suggestions").then((end) => {
       if (mounted.current) setNotSaved(end === "notSaved");
     });

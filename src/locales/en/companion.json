@@ -5,11 +5,13 @@
     "notNow": "Not now",
     "undo": "Undo",
     "hidden": "Hidden for seven days. Settings → Coach → Suggestions turns these off.",
+    "hiddenUntilAsked": "Hidden until you ask for it: pressing On under Settings → Coach → Suggestions lets it come back.",
     "weekly": {
       "label": "Your week, from the coach",
       "kick": "Your week · {{from}} to {{to}}",
       "say": {
         "ungraded": "That week: {{sessions}} Sessions, {{minutes}} minutes of playing, Exercises played: {{exercises}}.",
+        "ungradedLeftOut": "That week, leaving out your own exercises and Takes marked not fair: {{sessions}} Sessions, {{minutes}} minutes of playing, Exercises played: {{exercises}}.",
         "held": "No clean tempo moved that week, over {{sessions}} Sessions.",
         "benchOnly": "No clean tempo moved that week, and the benchmark Take is more even than on day {{fromDay}}.",
         "one": "One clean tempo moved that week.",
@@ -24,14 +26,18 @@
       "movedHeadPlayed": "Tempo played on the first and the last day that week, in BPM",
       "movedFromTo": "{{from}} → {{to}}",
       "movedNew": "first clean tempo: {{to}}",
+      "movedRisen": "now {{to}}, a new clean tempo",
       "milestone": "{{exercise}}: clean from {{from}} to {{to}} BPM since {{date}}.",
-      "foot": "That week: Sessions {{sessions}} · minutes {{minutes}} · Takes {{takes}}"
+      "foot": "That week: Sessions {{sessions}} · minutes {{minutes}} · Takes {{takes}}",
+      "footLeftOut": "That week, leaving out your own exercises and Takes marked not fair: Sessions {{sessions}} · minutes {{minutes}} · Takes {{takes}}"
     },
     "plateau": {
       "label": "A question from the coach",
       "kick": "A question from the coach",
-      "say": "{{exercise}}: {{sessions}} Sessions in a row at {{bpm}} BPM without a new clean tempo. The plan rests it till {{day}}. Keep at it, try it another way, or let it rest?",
-      "sayRange": "{{exercise}}: {{sessions}} Sessions in a row between {{low}} and {{high}} BPM without a new clean tempo. The plan rests it till {{day}}. Keep at it, try it another way, or let it rest?",
+      "say": "{{exercise}}: {{sessions}} Sessions in a row at {{bpm}} BPM without a new clean tempo. The plan rests it till {{day}}.",
+      "sayRange": "{{exercise}}: {{sessions}} Sessions in a row between {{low}} and {{high}} BPM without a new clean tempo. The plan rests it till {{day}}.",
+      "ask": "Keep at it, try it another way, or let it rest?",
+      "askTwo": "Keep at it, or let it rest?",
       "keep": "Keep at it",
       "another": "Try it another way",
       "rest": "Rest it till {{day}}",

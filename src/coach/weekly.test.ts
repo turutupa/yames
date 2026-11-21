@@ -6,7 +6,8 @@
  */
 import { describe, expect, it } from "vitest";
 import type { CleanTempoSpanRow, PathTakeRow } from "../ipc";
-import type { TakeFacts } from "../session/progress";
+import { countsTowardCleanTempo, type TakeFacts } from "../session/progress";
+import type { Exercise, PathDoc } from "../paths/format";
 import { ALT, DAY, NOW, progress, take } from "../session/testKit";
 import { weekTotals, type Weekday } from "../session/totals";
 import { MY_EXERCISES_PATH_ID } from "../session/myExercises";
@@ -44,10 +45,31 @@ function week(): PathTakeRow[] {
   ];
 }
 
+/**
+ * The long view over these Takes, as `clean_tempo_spans_sql` reads it: per
+ * Exercise, over the clean Takes not marked not fair, the first (earliest, the
+ * lower tempo on a tie) and the best (the highest, the earliest on a tie).
+ */
+function spansOf(takes: readonly PathTakeRow[]): CleanTempoSpanRow[] {
+  const out = new Map<string, CleanTempoSpanRow>();
+  for (const t of takes) {
+    if (!countsTowardCleanTempo(t)) continue;
+    const id = `${t.pathId}/${t.exerciseId}`;
+    const s = out.get(id);
+    if (!s) {
+      out.set(id, { pathId: t.pathId, exerciseId: t.exerciseId, firstBpm: t.bpm, firstAt: t.startedAt, bestBpm: t.bpm, bestAt: t.startedAt });
+      continue;
+    }
+    if (t.startedAt < s.firstAt || (t.startedAt === s.firstAt && t.bpm < s.firstBpm)) Object.assign(s, { firstBpm: t.bpm, firstAt: t.startedAt });
+    if (t.bpm > s.bestBpm || (t.bpm === s.bestBpm && t.startedAt < s.bestAt)) Object.assign(s, { bestBpm: t.bpm, bestAt: t.startedAt });
+  }
+  return [...out.values()];
+}
+
 const input = (takes: PathTakeRow[], extra: Partial<Parameters<typeof lookBack>[0]> = {}) => ({
   progress: progress({ takes }),
   paths: [ALT],
-  spans: null,
+  spans: spansOf(takes),
   now: NOW,
   weekStart: MON,
   graded: true,
@@ -58,6 +80,8 @@ const input = (takes: PathTakeRow[], extra: Partial<Parameters<typeof lookBack>[
 describe("lookBack", () => {
   it("reads the fixture week in full, leaving the Takes marked not fair out of every number", () => {
     const look = lookBack(input(week()))!;
+    expect(look.needsSpans).toBe(false);
+    expect(look.leftOut).toBe(true); // the week holds Takes marked not fair: the foot says it leaves them out
     expect(look.start).toBe(lastWeek.start);
     expect(look.end).toBe(lastWeek.end);
     expect(look.graded).toBe(true);
@@ -106,8 +130,72 @@ describe("lookBack", () => {
   it("does not call a clean tempo new when the long view has one from before the week", () => {
     const takes = [clean(A.id, 80, day(0)), clean(A.id, 90, day(2)), below(B.id, 60, day(4))];
     const spans: CleanTempoSpanRow[] = [{ pathId: ALT.id, exerciseId: A.id, firstBpm: 60, firstAt: day(-200), bestBpm: 90, bestAt: day(2) }];
-    expect(lookBack(input(takes))!.moved).toMatchObject([{ from: null, to: 90 }]);
+    // From the Takes alone it would be new; the long view says it is not, and
+    // the clean tempo before the week is past the Takes read: no "from".
+    expect(lookBack(input(takes))!.moved).toMatchObject([{ from: null, to: 90, isNew: true }]);
+    expect(lookBack(input(takes, { spans }))!.moved).toMatchObject([{ from: null, to: 90, isNew: false }]);
+  });
+
+  it("says nothing moved until the long view has answered, and says it waits for it (M4)", () => {
+    const look = lookBack(input(week(), { spans: null }))!;
+    expect(look.needsSpans).toBe(true);
+    expect(look.moved).toEqual([]);
+    // Ungraded rows need no long view.
+    expect(lookBack(input(week(), { spans: null, graded: false }))!.needsSpans).toBe(false);
+  });
+
+  it("measures 'moved' against the long view, never the 500 Takes in memory alone (M4)", () => {
+    // Clean at 100 two months ago, outside the Takes read; since then 90 before the week and 95 in it.
+    const takes = [clean(A.id, 90, day(-3)), clean(A.id, 95, day(2)), below(B.id, 60, day(3)), below(B.id, 60, day(4))];
+    const spans: CleanTempoSpanRow[] = [{ pathId: ALT.id, exerciseId: A.id, firstBpm: 100, firstAt: day(-60), bestBpm: 100, bestAt: day(-60) }];
+    const look = lookBack(input(takes, { spans }))!;
+    expect(look.moved).toEqual([]);
+    expect(look.sentence.key).toBe("companion.weekly.say.held");
+  });
+
+  it("keeps a week's move when the best rose again after it, only with the Takes back to the first", () => {
+    const takes = [...week(), clean(A.id, 120, NOW - 60_000)];
+    expect(lookBack(input(takes))!.moved).toMatchObject([{ from: 70, to: 90 }]);
+    // The same, with the first clean Take past the Takes read: not known, not said.
+    const spans = spansOf(takes).map((s) => (s.exerciseId === A.id ? { ...s, firstAt: day(-90) } : s));
     expect(lookBack(input(takes, { spans }))!.moved).toEqual([]);
+  });
+
+  it("does not count a first clean tempo as one that moved (L7)", () => {
+    const takes = [clean(A.id, 80, day(0)), below(B.id, 60, day(2)), below(B.id, 60, day(4))];
+    const look = lookBack(input(takes))!;
+    expect(look.moved).toMatchObject([{ isNew: true, from: null, to: 80 }]);
+    expect(look.sentence.key).toBe("companion.weekly.say.held");
+  });
+
+  it("says the foot leaves Takes out only when the week held some (L10)", () => {
+    const plain = [clean(A.id, 80, day(0)), below(B.id, 60, day(2)), below(B.id, 60, day(4))];
+    expect(lookBack(input(plain))!.leftOut).toBe(false);
+    const mine = take("mine-1", { pathId: MY_EXERCISES_PATH_ID, bpm: 90, startedAt: day(1), facts: { session: ++session } });
+    expect(lookBack(input([...plain, mine]))!.leftOut).toBe(true);
+    expect(lookBack(input([...plain, mine], { graded: false }))!.sentence.key).toBe("companion.weekly.say.ungradedLeftOut");
+  });
+
+  it("compares the benchmark on the same version of the Exercise only (M3)", () => {
+    const VB = {
+      ...B,
+      variation: { variants: [{ id: "a" }, { id: "b" }, { id: "c" }] },
+    } as unknown as Exercise;
+    const VALT: PathDoc = { ...ALT, steps: ALT.steps.map((s) => ({ ...s, exercises: s.exercises.map((e) => (e.id === B.id ? VB : e)) })) };
+    const seeded = (row: PathTakeRow, variantSeed: number) => ({ ...row, variantSeed });
+    const takes = (lastSeed: number) => [
+      clean(A.id, 70, day(-5)),
+      clean(A.id, 80, day(0)),
+      seeded(bench(1, 0.74, day(1)), 0),
+      clean(A.id, 90, day(3)),
+      seeded(bench(7, 0.86, day(6)), lastSeed),
+    ];
+    // Seed 3 plays variant 0 (3 mod 3), as `withVariant` picks it: the same notes.
+    expect(lookBack(input(takes(3), { paths: [VALT] }))!.benchmark).toMatchObject({ fromEven: 74, toEven: 86 });
+    // Seed 2 is another variant: no benchmark line, and the sentence claims no "more even".
+    const other = lookBack(input(takes(2), { paths: [VALT] }))!;
+    expect(other.benchmark).toBeNull();
+    expect(other.sentence.key).toBe("companion.weekly.say.one");
   });
 
   it("quotes the goal when one is set", () => {
@@ -127,26 +215,42 @@ describe("bpmMilestones (DESIGN 6.5: clean tempo up 20 BPM)", () => {
     ...fields,
   });
 
+  /** The Takes in memory reach back to the span's first clean Take, and none before the week crossed +20. */
+  const read = [clean(A.id, 70, day(-11))];
+  const mile = (spans: CleanTempoSpanRow[], takes: PathTakeRow[] = read, oldest: number | null = day(-11)) =>
+    bpmMilestones(spans, [ALT], lastWeek.start, lastWeek.end, takes, oldest);
+
   it("names a best reached inside the week at least 20 BPM over the first", () => {
     expect(MILESTONE_BPM_UP).toBe(20);
-    const out = bpmMilestones([span({})], [ALT], lastWeek.start, lastWeek.end);
-    expect(out).toMatchObject([{ exercise: { id: A.id }, firstBpm: 70, bestBpm: 90 }]);
+    expect(mile([span({})])).toMatchObject([{ exercise: { id: A.id }, firstBpm: 70, bestBpm: 90 }]);
   });
 
   it("says each once: a best from another week, or under 20 up, is not one", () => {
-    expect(bpmMilestones([span({ bestAt: day(-2) })], [ALT], lastWeek.start, lastWeek.end)).toEqual([]);
-    expect(bpmMilestones([span({ bestBpm: 89 })], [ALT], lastWeek.start, lastWeek.end)).toEqual([]);
+    expect(mile([span({ bestAt: day(-2) })])).toEqual([]);
+    expect(mile([span({ bestBpm: 89 })])).toEqual([]);
+  });
+
+  it("is not said again in a later week whose best rose further (L6)", () => {
+    // +20 crossed the week before (90 on day -4); this week's 95 is not a new milestone.
+    expect(mile([span({ bestBpm: 95 })], [...read, clean(A.id, 90, day(-4))])).toEqual([]);
+    // Crossed in this week: said, with this week's best.
+    expect(mile([span({ bestBpm: 95 })], [...read, clean(A.id, 85, day(-4))])).toMatchObject([{ bestBpm: 95 }]);
+    // The Takes read do not reach back to the first clean Take: not known, not said.
+    expect(mile([span({})], [], day(-5))).toEqual([]);
+    // A first clean Take inside the week needs nothing before it.
+    expect(mile([span({ firstAt: day(0), bestAt: day(3) })], [], day(0))).toHaveLength(1);
   });
 
   it("joins every span to an Exercise that still exists, and skips my exercises", () => {
     const spans = [span({ exerciseId: "deleted" }), span({ pathId: MY_EXERCISES_PATH_ID }), span({ pathId: "gone-path" })];
-    expect(bpmMilestones(spans, [ALT], lastWeek.start, lastWeek.end)).toEqual([]);
+    expect(mile(spans)).toEqual([]);
   });
 
   it("reaches the card through lookBack when the long view has answered (graded only)", () => {
-    const look = lookBack(input(week(), { spans: [span({ exerciseId: C.id })] }))!;
+    const spans = [span({ exerciseId: C.id, firstAt: day(-5) })];
+    const look = lookBack(input(week(), { spans }))!;
     expect(look.milestones.map((m) => m.exercise.id)).toEqual([C.id]);
-    expect(lookBack(input(week(), { spans: [span({ exerciseId: C.id })], graded: false }))!.milestones).toEqual([]);
+    expect(lookBack(input(week(), { spans, graded: false }))!.milestones).toEqual([]);
   });
 });
 

@@ -91,6 +91,18 @@ export function writtenOut(exercise: Exercise, bars: number): Exercise {
  * index into the Exercise's variants), or the Exercise as written. The id stays
  * the Exercise's own, so progress and the clean tempo pool across its variants.
  */
+/**
+ * Which of the Exercise's variants a seed plays, by `withVariant`'s own rule
+ * (the seed modulo the variant count); null: the Exercise as written, or one
+ * with no variants. Two Takes are on the same notes when this agrees (the same
+ * rule as the history cards' `variantIndex` in `coach/ask/cards.ts`).
+ */
+export function variantIndexOf(exercise: Exercise, variantSeed: number | null | undefined): number | null {
+  const n = exercise.variation?.variants?.length ?? 0;
+  if (n === 0 || variantSeed === null || variantSeed === undefined) return null;
+  return ((variantSeed % n) + n) % n;
+}
+
 export function withVariant(exercise: Exercise, variantSeed: number | null | undefined): Exercise {
   const variants = exercise.variation?.variants;
   if (variantSeed === null || variantSeed === undefined || !variants?.length) return exercise;

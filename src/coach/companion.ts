@@ -95,6 +95,15 @@ export function companionFor(
 }
 
 /**
+ * MainWindow's `blocked` (c4b2's review, L8): the Session's view, any phase of
+ * a run but "idle" (a count-in, a Take, the recap: the shell's `holdNudges`
+ * rule), or the wizard. Whatever the view, nothing recomputes while a run is on.
+ */
+export function companionBlocked(at: { inSession: boolean; phase: string; wizardOpen: boolean }): boolean {
+  return at.inSession || at.phase !== "idle" || at.wizardOpen;
+}
+
+/**
  * MainWindow's one call. `blocked`: a Session runs, or the wizard is open:
  * nothing proactive is offered then (DESIGN 6.6), and nothing is spent.
  */
