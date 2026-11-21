@@ -131,8 +131,24 @@ function uniform(values: number[]): number | null {
   return values.every((v) => v === values[0]) ? values[0] : null;
 }
 
-function fingersOf(side: TextSide): Array<number | null> {
-  return fingerPlan(side.notes, { fret: side.position.fret, shifts: side.position.shifts }).map((s) => s.finger);
+/**
+ * The fingers already worked out, by everything `fingerPlan` reads. A pack's build asks for the
+ * Exercise's own fingers once per variant and again per cue check; the key is the content, not the
+ * array, so a note changed in place can never be answered from a stale entry.
+ */
+const FINGERS = new Map<string, ReadonlyArray<number | null>>();
+const FINGERS_KEPT = 4096;
+
+function fingersOf(side: TextSide): ReadonlyArray<number | null> {
+  const key = `${side.position.fret}|${side.position.shifts}|${side.notes
+    .map((n) => `${n.string},${n.fret},${n.tick},${n.tech.join("+")},${n.bend ?? ""},${n.finger ?? ""}`)
+    .join(";")}`;
+  const known = FINGERS.get(key);
+  if (known) return known;
+  const fingers = fingerPlan(side.notes, { fret: side.position.fret, shifts: side.position.shifts }).map((s) => s.finger);
+  if (FINGERS.size >= FINGERS_KEPT) FINGERS.clear();
+  FINGERS.set(key, fingers);
+  return fingers;
 }
 
 function moveOf(ex: TextSide, v: TextSide): Move | null {

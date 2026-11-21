@@ -8,12 +8,13 @@
  * a muted stroke and a rest look the same to an onset detector that is asked
  * to ignore them, and the app cannot tell a muted string from a quiet one.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec } from "../spec";
 import type { PassBar } from "../format";
 import { ladder, repeat } from "../templates";
 import { DISPLACED_SHAPES, LONG_FORM, SECOND_PAIR } from "./funk-lines-more";
 import { HOLES_MIXED, LINES_SECOND_KEY } from "./funk-lines-encore";
+import { FUNK_LINES_CUES } from "./funk-lines-cues";
 
 const even = (min: number, overBars = 4): PassBar => ({ metric: "timingEvenness", min, overBars });
 const heard = (min: number, overBars = 4): PassBar => ({ metric: "notesHeard", min, overBars });
@@ -142,7 +143,7 @@ function warm(key: string, figure: (note: string) => string) {
 }
 const WARM_KEYS = { key: Object.keys(WARM_FRETS) } as const;
 
-export default definePath({
+export default withCues(definePath({
   id: "funk-lines",
   title: "Funk Lines",
   kind: "mechanics",
@@ -923,4 +924,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), FUNK_LINES_CUES);

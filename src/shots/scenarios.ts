@@ -968,6 +968,17 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   {
+    // The Step page's line (c1b2a): the same history, on the Step whose
+    // Exercise slipped (Alternate Picking, Even eighths).
+    id: "step-line",
+    suffix: "step-line",
+    window: "main",
+    session: { seed: "slipped", stop: "step" },
+    width: 1440,
+    height: 900,
+    settleMs: 300,
+  },
+  {
     id: "session-ready",
     suffix: "session-ready",
     window: "main",
@@ -2317,7 +2328,7 @@ for (const id of PHONE_LEARNING_SCENES) {
 // A key-moved Exercise's own how-to on a phone (card #79), measured by
 // `tests/layout/session-variant-text.spec.ts` (session-variant-e is in the list
 // above since the band's slider became thumb-sized, card #93).
-for (const id of ["session-variant-runway"]) {
+for (const id of ["session-variant-runway", "step-line"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
 }

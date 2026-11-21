@@ -420,6 +420,8 @@ async function drive() {
             }
             if (stop === "playingAgain") {
               // Go again: straight into the next Take, whose order the last verdict chose.
+              // That Take is watched as it runs, at its own tempo (mockIpc's beat loop).
+              (window as unknown as { __SHOT_TAKE_WATCHED__?: boolean }).__SHOT_TAKE_WATCHED__ = true;
               big()?.click();
               await until("the next Take to run", () => !!byId("session-live"), 20000);
             }

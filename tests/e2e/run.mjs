@@ -405,7 +405,7 @@ async function playTake(d, exercise, style, label, { band = false, again = false
       `the capture lost ${heard?.captureLostMs} ms of audio`);
   if (!endedItself) await d.clickText(/^End take$/).catch(() => {});
   try {
-    await d.waitText(/Go again|Move on|Next|See how it went/i, 30000);
+    await d.waitText(/Go again|Move on|Next|Finish the Session/i, 30000);
   } catch (e) {
     await shot(d, `stuck-${label}`);
     throw e;
@@ -707,7 +707,7 @@ async function scenarioWarmup() {
         if (kind === "metronome") return "found";
         const big = await d.exec(`return document.querySelector('[data-testid="session-big"]')?.innerText ?? ""`);
         if (/Start take/.test(big)) return "take";
-        if (/See how it went|Back to /.test(big)) return "none";
+        if (/Finish the Session|Back to /.test(big)) return "none";
         await key("n", "KeyN");
       }
       return "none";
@@ -835,8 +835,8 @@ async function scenarioTwoPaths() {
     const played = new Set();
     for (let step = 0; step < 12 && played.size < 2; step++) {
       // A Take to play, or a timed step (the warm-up) to start and move past.
-      const m = await d.waitText(/Start take, (\d+) BPM|Start warm-up|Start (?:the (?:jam|ramp|finisher)|your turn)|Next: |See how it went/, 20000);
-      if (/See how it went/.test(m[0])) break;
+      const m = await d.waitText(/Start take, (\d+) BPM|Start warm-up|Start (?:the (?:jam|ramp|finisher)|your turn)|Next: |Finish the Session/, 20000);
+      if (/Finish the Session/.test(m[0])) break;
       if (/^Start (?:warm-up|the |your turn)/.test(m[0])) {
         // A timed step waits for its Start: nothing plays and the clock holds
         // until it is pressed (owner, 2026-11-17).
@@ -865,7 +865,7 @@ async function scenarioTwoPaths() {
       await playTake(d, hit.exercise, "good", `two paths: ${hit.path.id}/${hit.exercise.id}`);
       played.add(hit.path.id);
       // On: the next step, past "Go again" (placement's pass tempo, a climb).
-      await d.clickText(/^Next: |^Move on$|^See how it went$/i);
+      await d.clickText(/^Next: |^Move on$|^Finish the Session$/i);
     }
     const rows = takesSince(t0);
     const paths = [...new Set(rows.map((r) => r.path_id))];

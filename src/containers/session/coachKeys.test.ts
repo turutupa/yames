@@ -144,7 +144,7 @@ describe("ask-what-next", () => {
     expect(whatNextText(t, session("result", [outcome("passed")], { kind: "next", step: WARM_DOWN }))).toMatch(
       /^Next: .+\. Just you and the click at 70 BPM, before anything counts\.$/,
     );
-    expect(whatNextText(t, session("result", [outcome("passed")], { kind: "finish" }))).toBe("See how it went.");
+    expect(whatNextText(t, session("result", [outcome("passed")], { kind: "finish" }))).toBe("Finish the Session.");
   });
 });
 

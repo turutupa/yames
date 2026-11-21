@@ -20,6 +20,7 @@ const PATH = "alternate-picking";
 const TUNE = "other-strings.b-string-tune";
 const FOUR = "even-eighths.four-fingers";
 const tune = findExercise(PATHS[0], TUNE)!.exercise;
+const four = findExercise(PATHS[0], FOUR)!.exercise;
 const BARS = Math.max(1, tune.bars);
 
 const DAY = 86_400_000;
@@ -197,7 +198,29 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
       steps: [WARM, exerciseStep({ bpm: 85, why: { code: "backEased", values: { days: 12, bpm: 85, clean: 90 } } })],
     }),
     "back",
-    `Last Session, ${tune.title}: 79% even at 90 BPM. Today starts a rung lower than it would have.`,
+    `Last Session, ${tune.title}: 79% even at 90 BPM. That was 12 days ago. Today starts at 85 BPM.`,
+  ],
+  [
+    "back after twelve days, eased, today on another Exercise: it is named",
+    input({
+      mood: "back",
+      daysAway: 12,
+      takes: [take({ daysAgo: 12 })],
+      steps: [WARM, exerciseStep({ exerciseId: FOUR, title: "Four fingers", bpm: 70, why: { code: "backEased", values: { days: 12, bpm: 70, clean: 75 } } })],
+    }),
+    "back",
+    `Last Session, ${tune.title}: 79% even at 90 BPM. That was 12 days ago. Today ${four.title} starts at 70 BPM.`,
+  ],
+  [
+    "back after twelve days, the last Take marked not fair: the days and the tempo alone",
+    input({
+      mood: "back",
+      daysAway: 12,
+      takes: [take({ daysAgo: 12, facts: { fair: "no" } })],
+      steps: [WARM, exerciseStep({ bpm: 85, why: { code: "backEased", values: { days: 12, bpm: 85, clean: 90 } } })],
+    }),
+    "back",
+    `Your last Session was 12 days ago. Today ${tune.title} starts at 85 BPM.`,
   ],
   [
     "back after thirty days, three rungs",
@@ -208,7 +231,7 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
       steps: [WARM, exerciseStep({ bpm: 75, why: { code: "backEased", values: { days: 30, bpm: 75, clean: 90 } } })],
     }),
     "back",
-    `Last Session, ${tune.title}: 79% even at 90 BPM. Today starts 3 rungs lower than it would have.`,
+    `Last Session, ${tune.title}: 79% even at 90 BPM. That was 30 days ago. Today starts at 75 BPM.`,
   ],
   [
     "ungraded player: minutes and tempo, same place today",
@@ -231,6 +254,13 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
   ],
 ];
 
+/** A row of the table by its name: an index moves when a row is added. */
+function row(name: string): TodayLineInput {
+  const found = TABLE.find(([n]) => n === name);
+  if (!found) throw new Error(`no table row "${name}"`);
+  return found[1];
+}
+
 describe("Today's line, by history", () => {
   it.each(TABLE)("%s", (_name, given, kind, sentence) => {
     const line = todayLine(given);
@@ -239,7 +269,7 @@ describe("Today's line, by history", () => {
   });
 
   it("an ungraded line says minutes and tempo, nothing about the playing", () => {
-    const text = say(TABLE[11][1])!;
+    const text = say(row("ungraded player: minutes and tempo, same place today"))!;
     const quarters = tune.meter.numerator * (4 / tune.meter.denominator);
     const minutes = Math.floor((4 * 40 * quarters * 60) / 90 / 60);
     expect(text).toBe(`${minutes} minutes of Takes yesterday, ending with ${tune.title} at 90 BPM. Same place today.`);
@@ -247,7 +277,7 @@ describe("Today's line, by history", () => {
   });
 
   it("a graded Session read with grading off now says no percentage and no place", () => {
-    const text = say(TABLE[13][1])!;
+    const text = say(row("grading off, with a graded last Session: still no claim about the playing"))!;
     expect(text).not.toMatch(/%|slipped|clean/);
   });
 

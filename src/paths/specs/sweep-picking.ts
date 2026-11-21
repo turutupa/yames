@@ -3,7 +3,7 @@
  * it. Muting and pick path are the heart of sweeping, and neither can be
  * graded from sound, so they are taught in words and self-checked.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, StepSpec, VariantParams } from "../spec";
 import {
   arpeggioCells,
@@ -20,6 +20,7 @@ import {
   sweepUp,
 } from "../templates";
 import { ADVANCED_ETUDE, SIX_STRING_CHANGES } from "./sweep-picking-more";
+import { SWEEP_PICKING_CUES } from "./sweep-picking-cues";
 
 const ROLL_CHECK =
   "Record a take and listen back. Does each note stop as the next one starts, or do they ring together like a strummed chord?";
@@ -1799,7 +1800,7 @@ const WARMUP_WORDS = {
   how: "Start well under your clean tempo. Nothing here should feel hard, and it plays different notes each day.",
 };
 
-export default definePath({
+export default withCues(definePath({
   id: "sweep-picking",
   title: "Sweep Picking",
   kind: "mechanics",
@@ -1926,4 +1927,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), SWEEP_PICKING_CUES);
