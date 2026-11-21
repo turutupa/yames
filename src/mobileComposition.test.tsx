@@ -273,6 +273,8 @@ describe("SettingsView on a phone", () => {
     expect(screen.queryByText("Hotkeys")).toBeNull();
     expect(screen.queryByText("Widget")).toBeNull();
     expect(screen.queryByText(/always on top/i)).toBeNull();
+    // The practice reminder is rule-made and shows on a phone (leg rem2), without naming the coach.
+    expect(screen.getByTestId("coach-reminder-row")).toBeInTheDocument();
     expectNoCoachAnywhere();
   });
 });
