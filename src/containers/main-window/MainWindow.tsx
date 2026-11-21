@@ -686,6 +686,8 @@ export function MainWindow() {
     chart: heardChartNow,
     bpm: state.bpm,
     formBar: currentBeat?.formBar ?? 0,
+    // A jam on the Jam screen: its stop is the coach's `jamStopped` (leg c5a1).
+    jamRun: !!heardJam && state.isPlaying,
   });
   // Recording session (card #109): a jam or the Session's free play is kept
   // while it plays and the input listens. A finisher too, ungraded.
@@ -3059,6 +3061,7 @@ export function MainWindow() {
             onChipAction={session.handleChipAction}
             onAsk={askCoach}
             onOpenRuns={openToolRuns}
+            jam={view === "jam" ? jamSession.jam : null}
           />
         )}
         {/* Nothing to transport on an empty setlist tab. */}

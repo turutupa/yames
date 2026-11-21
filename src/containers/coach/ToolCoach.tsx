@@ -40,6 +40,10 @@ import { CoachLine } from "./CoachLine";
 import { CoachNote, NoteChips, NoteLine } from "./CoachNote";
 import { suggestChips } from "../../coach/ask/suggest";
 import type { AskHandler } from "./askStore";
+import { useCoachEvent } from "../../coach/useCoachEvent";
+import { jamHeardLine } from "../../jam/heard";
+import { jamHarmony } from "../../jam/display";
+import type { Jam } from "../../jam/types";
 import "../../styles/coach.css";
 
 /**
@@ -98,6 +102,8 @@ type ToolCoachProps = {
   onAsk?: AskHandler;
   /** Progress → Tool runs, where a finished run is kept. */
   onOpenRuns?: () => void;
+  /** The jam on Jam's stage (Jam only): its stop's line (leg c5a1). */
+  jam?: Jam | null;
 };
 
 // `@__PURE__`: the phone build drops the only use (an `IS_MOBILE` branch), and
@@ -112,6 +118,7 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
   onChipAction,
   onAsk,
   onOpenRuns,
+  jam = null,
 }: ToolCoachProps) {
   const { t } = useTranslation();
   // The run that is playing, or the one that just stopped, began here. Moved
@@ -133,8 +140,9 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
       ? toolFinding(findings.findings, findings.playedMs)
       : null;
   const askHint = useFirstTimeHint("coach-ask", !!note && shouldHintCoachAsk(note.type));
+  const jamLine = useJamStopLine(jam, isPlaying, runStartedAt);
 
-  if (!listenOn && !note) return null;
+  if (!listenOn && !note && !jamLine) return null;
 
   const action = tip?.affordance && !tip.affordanceResolved ? tip.affordance : null;
   const act = () => {
@@ -147,9 +155,14 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
 
   return (
     <div className="tool-coach" data-testid="tool-coach">
-      {(listenOn || tip) && (
+      {(listenOn || tip || jamLine) && (
         <div className="tool-coach-row">
-          {tip ? (
+          {jamLine ? (
+            // The jam's stop: newer than any tip of its run, so it has the slot.
+            <div className="tool-coach-line" data-testid="tool-coach-jam-line" aria-live="polite">
+              <CoachLine onAsk={onAsk}>{jamLine.map((l) => t(l.key, l.values)).join(" ")}</CoachLine>
+            </div>
+          ) : tip ? (
             <div className="tool-coach-line" data-testid="tool-coach-line" aria-live="polite">
               <CoachLine onAsk={onAsk}>{tip.content}</CoachLine>
               {action && (
@@ -305,6 +318,22 @@ function useRunFindings(listenOn: boolean, isPlaying: boolean): RunFindings | nu
     };
   }, [listenOn]);
   return published;
+}
+
+/**
+ * The jam's stop, as one line (leg c5a1, DESIGN 8 Jam's row): the chords the
+ * app heard against the chart's (`jamHeardLine`), from the bus's `jamStopped`.
+ * Only on Jam, only stopped, only for a stop after this run began (so it goes
+ * when the next play starts and never follows the player back from elsewhere),
+ * and only when "Hear what I play" heard something: with it off the event has
+ * no `heard`, and nothing is said. The bus publishes at a stop, never at a beat.
+ */
+function useJamStopLine(jam: Jam | null, isPlaying: boolean, runStartedAt: number) {
+  const stopped = useCoachEvent("jamStopped");
+  return useMemo(() => {
+    if (!jam || isPlaying || !stopped?.heard || stopped.at < runStartedAt) return null;
+    return jamHeardLine(stopped.heard, jamHarmony(jam));
+  }, [jam, isPlaying, stopped, runStartedAt]);
 }
 
 function qualifierKey(score: number): string {

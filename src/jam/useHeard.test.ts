@@ -15,6 +15,8 @@ let nextId = 1;
 let starts: ((id: number | null) => void)[] = [];
 let holdStarts = false;
 let reading: (live: unknown) => void = () => {};
+/** What `harmonyStop` answers. */
+let stopSummary: unknown = null;
 
 vi.mock("../ipc", () => ({
   harmonyStart: vi.fn((_chart: unknown, _bpm: number, clearStale: boolean) => {
@@ -26,7 +28,7 @@ vi.mock("../ipc", () => ({
   }),
   harmonyStop: vi.fn((id: number) => {
     calls.push(`stop:${id}`);
-    return Promise.resolve(null);
+    return Promise.resolve(stopSummary);
   }),
   harmonyMarkBar: vi.fn(() => Promise.resolve()),
   harmonySetTempo: vi.fn((bpm: number) => {
@@ -40,8 +42,9 @@ vi.mock("../ipc", () => ({
 }));
 
 const { useHeard } = await import("./useHeard");
+const { resetCoachBus, subscribe } = await import("../coach/bus");
 
-type Props = { active: boolean; chart: HeardChart | null; bpm: number; formBar: number };
+type Props = { active: boolean; chart: HeardChart | null; bpm: number; formBar: number; jamRun?: boolean };
 const chart = (tonic: number) => ({ key: { tonic, mode: "major" }, bars: [] }) as unknown as HeardChart;
 
 async function settle() {
@@ -56,6 +59,73 @@ beforeEach(async () => {
   cleared.length = 0;
   starts = [];
   holdStarts = false;
+  stopSummary = null;
+  resetCoachBus();
+});
+
+describe("useHeard: jamStopped (leg c5a1)", () => {
+  const summary = { reading: { keyState: "settled", key: null, chord: null, settledAtS: 3, heardS: 40 }, chords: [], chordBeats: 0, beats: 80 };
+
+  function heard() {
+    const events: { type: string; heard?: unknown; at: number }[] = [];
+    subscribe((e) => events.push(e as never));
+    return events;
+  }
+
+  it("a jam's stop publishes jamStopped once, with what the hearing came to", async () => {
+    const events = heard();
+    stopSummary = summary;
+    const view = renderHook((p: Props) => useHeard(p), { initialProps: { active: true, chart: null, bpm: 100, formBar: 0, jamRun: true } });
+    await settle();
+    // playing: nothing is published, however many renders
+    view.rerender({ active: true, chart: null, bpm: 100, formBar: 1, jamRun: true });
+    view.rerender({ active: true, chart: null, bpm: 100, formBar: 2, jamRun: true });
+    await settle();
+    expect(events).toEqual([]);
+    const before = Date.now();
+    view.rerender({ active: false, chart: null, bpm: 100, formBar: 2, jamRun: false });
+    await settle();
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("jamStopped");
+    expect(events[0].heard).toEqual(summary);
+    expect(events[0].at).toBeGreaterThanOrEqual(before);
+    view.unmount();
+    await settle();
+    expect(events).toHaveLength(1);
+  });
+
+  it("a stop with hearing off publishes jamStopped with no heard, and invokes nothing", async () => {
+    const events = heard();
+    stopSummary = summary;
+    const view = renderHook((p: Props) => useHeard(p), { initialProps: { active: false, chart: null, bpm: 100, formBar: 0, jamRun: true } });
+    await settle();
+    view.rerender({ active: false, chart: null, bpm: 100, formBar: 0, jamRun: false });
+    await settle();
+    expect(calls).toEqual([]);
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("jamStopped");
+    expect("heard" in events[0]).toBe(false);
+  });
+
+  it("a stretch the engine heard nothing in (null) publishes no heard", async () => {
+    const events = heard();
+    const view = renderHook((p: Props) => useHeard(p), { initialProps: { active: true, chart: null, bpm: 100, formBar: 0, jamRun: true } });
+    await settle();
+    view.rerender({ active: false, chart: null, bpm: 100, formBar: 0, jamRun: false });
+    await settle();
+    expect(events).toHaveLength(1);
+    expect("heard" in events[0]).toBe(false);
+  });
+
+  it("a Session's free play (no jamRun) publishes nothing", async () => {
+    const events = heard();
+    stopSummary = summary;
+    const view = renderHook((p: Props) => useHeard(p), { initialProps: { active: true, chart: null, bpm: 100, formBar: 0 } });
+    await settle();
+    view.rerender({ active: false, chart: null, bpm: 100, formBar: 0 });
+    await settle();
+    expect(events).toEqual([]);
+  });
 });
 
 describe("useHeard", () => {

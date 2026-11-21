@@ -753,7 +753,9 @@
       "heard": "Heard: {{what}}",
       "chart": "Chart: {{what}}",
       "unsure": "Couldn't tell yet",
-      "listening": "Listening…"
+      "listening": "Listening…",
+      "stopLine": "The chords the app heard most in your playing: {{heard}}. The chart has {{chart}}.",
+      "sameNotes": "Every note of {{heard}} is also in the chart's {{chart}}."
     }
   },
   "scale": {

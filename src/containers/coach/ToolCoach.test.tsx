@@ -6,6 +6,9 @@ import { ToolCoach, toolCoachView } from "./ToolCoach";
 import type { FeedMessage, SessionReport } from "../../types";
 import { mockListen } from "../../test/mocks";
 import { notifySettingsChange } from "../../ipc";
+import type { HeardSummary } from "../../ipc";
+import { publish, resetCoachBus } from "../../coach/bus";
+import { createJam } from "../../jam/jams";
 
 afterEach(cleanup);
 
@@ -304,5 +307,47 @@ describe("ToolCoach: the run's measured finding (C5)", () => {
     const end: FeedMessage = { id: "e", type: "session-end", timestamp: Date.now() + 5, content: "Good work today.", report: REPORT };
     rerender(<ToolCoach {...base} isPlaying={false} messages={[end]} />);
     expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+  });
+});
+
+describe("ToolCoach on Jam: the line after a stop (leg c5a1)", () => {
+  const base = { listenOn: true, inputOn: true, onChipAction: vi.fn(), messages: [] as FeedMessage[] };
+  const jam = createJam("Slow rock", { key: "Am", chords: false });
+  const heard: HeardSummary = {
+    reading: { keyState: "settled", key: { key: { tonic: 9, mode: "minor" }, scale: "aeolian", confidence: 0.6, relativeToo: false }, chord: null, settledAtS: 9, heardS: 45 },
+    chords: [
+      { root: 9, quality: "min", beats: 30 },
+      { root: 2, quality: "min", beats: 12 },
+    ],
+    chordBeats: 42,
+    beats: 90,
+  };
+  afterEach(() => resetCoachBus());
+
+  it("shows the line once the jam stops, and hides it when the next play starts", () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying jam={jam} />);
+    rerender(<ToolCoach {...base} isPlaying={false} jam={jam} />);
+    act(() => publish({ type: "jamStopped", at: Date.now() + 5, heard }));
+    const line = screen.getByTestId("tool-coach-jam-line");
+    expect(line.textContent).toContain("Am, Dm");
+    expect(line.textContent).toContain("The chart has");
+    expect(line.textContent).not.toMatch(/wrong|missed/i);
+    rerender(<ToolCoach {...base} isPlaying jam={jam} />);
+    expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
+  });
+
+  it("says nothing for a stop with hearing off, or a stop from before this screen", () => {
+    const { rerender } = render(<ToolCoach {...base} listenOn={false} isPlaying={false} jam={jam} />);
+    act(() => publish({ type: "jamStopped", at: Date.now() + 5 }));
+    expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
+    act(() => publish({ type: "jamStopped", at: 1, heard }));
+    rerender(<ToolCoach {...base} listenOn={false} isPlaying={false} jam={jam} />);
+    expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
+  });
+
+  it("is not shown under another tool", () => {
+    render(<ToolCoach {...base} isPlaying={false} />);
+    act(() => publish({ type: "jamStopped", at: Date.now() + 5, heard }));
+    expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
   });
 });

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { publish } from "../coach/bus";
 import { harmonyMarkBar, harmonySetTempo, harmonyStart, harmonyStop, onHarmonyReading } from "../ipc";
 import { scheduleHeld } from "../songs/scheduleHold";
-import type { HeardChart, HeardLive } from "../ipc";
+import type { HeardChart, HeardLive, HeardSummary } from "../ipc";
 import { rememberHeard } from "./heard";
 
 /** How long after the worker ended by itself before it is asked for again. */
@@ -29,17 +30,25 @@ function inTurn<T>(job: () => Promise<T>): Promise<T> {
  * The worker ends when the input stops or restarts (a device change restarts
  * the input); the page is told with a null reading and asks again, a few
  * times.
+ *
+ * `jamRun`: a jam is playing on the Jam screen (not a Session's free play).
+ * When it stops, the coach's bus hears `jamStopped` once (leg c5a1), carrying
+ * what the last stretch of hearing in that run came to, when there was one;
+ * with "Hear what I play" off nothing was heard and the event has no `heard`.
+ * Published once the stop has returned, never while the band plays.
  */
 export function useHeard({
   active,
   chart,
   bpm,
   formBar,
+  jamRun = false,
 }: {
   active: boolean;
   chart: HeardChart | null;
   bpm: number;
   formBar: number;
+  jamRun?: boolean;
 }): HeardLive | null {
   const [live, setLive] = useState<HeardLive | null>(null);
   const running = useRef(false);
@@ -51,6 +60,8 @@ export function useHeard({
   const chartKey = chart ? JSON.stringify(chart) : "";
   const chartRef = useRef(chart);
   chartRef.current = chart;
+  // The last stop of hearing in this jam run: what `jamStopped` carries.
+  const heardInRun = useRef<Promise<HeardSummary | null> | null>(null);
 
   useEffect(() => {
     if (!active) return;
@@ -95,11 +106,27 @@ export function useHeard({
       running.current = false;
       setLive(null);
       void unlisten.then((off) => off()).catch(() => {});
-      inTurn(async () => (id === null ? null : harmonyStop(id)))
-        .then(rememberHeard)
-        .catch(() => {});
+      const stopped = inTurn(async () => (id === null ? null : harmonyStop(id))).catch(() => null);
+      heardInRun.current = stopped;
+      void stopped.then(rememberHeard);
     };
   }, [active, chartKey]);
+
+  // The jam's run. Declared after the hearing above on purpose: a stop ends
+  // both in one commit, and React runs the cleanups in this order, so the
+  // hearing's stop is already in `heardInRun` when the run's end reads it.
+  useEffect(() => {
+    if (!jamRun) return;
+    heardInRun.current = null;
+    return () => {
+      const at = Date.now();
+      const heard = heardInRun.current;
+      heardInRun.current = null;
+      void (heard ?? Promise.resolve(null)).then((summary) =>
+        publish(summary ? { type: "jamStopped", at, heard: summary } : { type: "jamStopped", at }),
+      );
+    };
+  }, [jamRun]);
 
   // The bar lines, so the engine knows which chord of the chart sounds.
   useEffect(() => {

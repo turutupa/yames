@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { HeardLive, HeardSummary } from "../ipc";
-import { forgetHeard, heardLine, heardRecap, heardSince, rememberHeard, RECAP_MIN_HEARD_S } from "./heard";
+import { forgetHeard, heardLine, heardRecap, heardSince, jamHeardLine, rememberHeard, RECAP_MIN_HEARD_S } from "./heard";
+import type { JamHarmony } from "./display";
 
 const live = (over: Partial<HeardLive>): HeardLive => ({
   keyState: "listening",
@@ -89,5 +90,116 @@ describe("the recap's line about free play", () => {
     rememberHeard(null, 3_000);
     expect(heardSince(500)).not.toBeNull();
     forgetHeard();
+  });
+});
+
+describe("jamHeardLine: the line under Jam's stage after a stop (leg c5a1)", () => {
+  type Q = HeardSummary["chords"][number]["quality"];
+  const heardOf = (chords: [number, Q, number][], over: Partial<HeardSummary["reading"]> = {}): HeardSummary => ({
+    reading: { keyState: "settled", key: aMinor, chord: null, settledAtS: 12, heardS: 60, ...over },
+    chords: chords.map(([root, quality, beats]) => ({ root, quality, beats })),
+    chordBeats: chords.reduce((n, c) => n + c[2], 0),
+    beats: 160,
+  });
+  // A minor, Am F C G (concert, read in concert).
+  const aMinorChart: JamHarmony = {
+    key: { root: 9, mode: "minor" },
+    concert: { root: 9, mode: "minor" },
+    chords: [
+      { root: 9, quality: "min" },
+      { root: 5, quality: "maj" },
+      { root: 0, quality: "maj" },
+      { root: 7, quality: "maj" },
+      { root: 9, quality: "min" },
+    ],
+  };
+  const played = heardOf([
+    [9, "min", 40],
+    [5, "maj", 30],
+    [7, "maj", 20],
+  ]);
+
+  it("says nothing without a summary, under the floor, or without a settled reading", () => {
+    expect(jamHeardLine(null, aMinorChart)).toBeNull();
+    expect(jamHeardLine(undefined, aMinorChart)).toBeNull();
+    expect(jamHeardLine(heardOf([[9, "min", 40]], { heardS: RECAP_MIN_HEARD_S - 1 }), aMinorChart)).toBeNull();
+    expect(jamHeardLine(heardOf([[9, "min", 40]], { keyState: "unsure" }), aMinorChart)).toBeNull();
+    expect(jamHeardLine(heardOf([[9, "min", 40]], { keyState: "listening", key: null }), aMinorChart)).toBeNull();
+  });
+
+  it("says nothing for a jam heard with its chart: the engine named no chord of its own", () => {
+    expect(jamHeardLine(heardOf([], { keyState: "chart" }), aMinorChart)).toBeNull();
+    // and a settled key with no chord held (single notes only) names none either
+    expect(jamHeardLine(heardOf([]), aMinorChart)).toBeNull();
+  });
+
+  it("all heard chords in the chart: the two lists, side by side, nothing more", () => {
+    expect(jamHeardLine(played, aMinorChart)).toEqual([{ key: "jam.heard.stopLine", values: { heard: "Am, F, G", chart: "Am, F, C, G" } }]);
+  });
+
+  it("a chord outside the chart is listed as heard, not marked", () => {
+    const outside = heardOf([
+      [9, "min", 40],
+      [2, "min", 25],
+    ]);
+    expect(jamHeardLine(outside, aMinorChart)).toEqual([{ key: "jam.heard.stopLine", values: { heard: "Am, Dm", chart: "Am, F, C, G" } }]);
+  });
+
+  it("a chord whose notes are all in a chart chord of another name says so (Am7 and C6, C and Am7)", () => {
+    const sevenths: JamHarmony = {
+      key: { root: 0, mode: "major" },
+      concert: { root: 0, mode: "major" },
+      chords: [
+        { root: 9, quality: "m7" },
+        { root: 0, quality: "6" },
+        { root: 7, quality: "7" },
+      ],
+    };
+    const lines = jamHeardLine(
+      heardOf([
+        [0, "maj", 30],
+        [9, "min7", 20],
+      ]),
+      sevenths,
+    );
+    expect(lines).toEqual([
+      { key: "jam.heard.stopLine", values: { heard: "C, Am7", chart: "Am7, C6, G7" } },
+      // C E G is in Am7 (A C E G) and in C6 (C E G A)
+      { key: "jam.heard.sameNotes", values: { heard: "C", chart: "Am7, C6" } },
+    ]);
+  });
+
+  it("a transposed jam: both lists as a B flat player reads them", () => {
+    // G major in concert, read a tone up: A major.
+    const bb: JamHarmony = {
+      key: { root: 9, mode: "major" },
+      concert: { root: 7, mode: "major" },
+      chords: [
+        { root: 9, quality: "maj" },
+        { root: 2, quality: "maj" },
+        { root: 4, quality: "7" },
+      ],
+    };
+    const concertHeard = heardOf(
+      [
+        [7, "maj", 30],
+        [0, "maj", 20],
+      ],
+      { key: { key: { tonic: 7, mode: "major" }, scale: "ionian", confidence: 0.5, relativeToo: false } },
+    );
+    expect(jamHeardLine(concertHeard, bb)).toEqual([{ key: "jam.heard.stopLine", values: { heard: "A, D", chart: "A, D, E7" } }]);
+  });
+
+  it("spells by the jam's key: Bb in F major, never A#", () => {
+    const f: JamHarmony = {
+      key: { root: 5, mode: "major" },
+      concert: { root: 5, mode: "major" },
+      chords: [
+        { root: 5, quality: "maj" },
+        { root: 10, quality: "maj" },
+        { root: 0, quality: "7" },
+      ],
+    };
+    expect(jamHeardLine(heardOf([[10, "maj", 30]]), f)).toEqual([{ key: "jam.heard.stopLine", values: { heard: "Bb", chart: "F, Bb, C7" } }]);
   });
 });

@@ -41,7 +41,7 @@ type Stamp = { at: number };
  * What the coach can hear, as one union. The Session's five are published by
  * `useSessionRun.ts` today; the rest are typed now and published by the legs
  * that build their surfaces (milestones after `savePathTake`, the jam in
- * `useJamSession.ts`, Songs in `useSongAttempt.ts`, the tools in
+ * `useHeard.ts`, Songs in `useSongAttempt.ts`, the tools in
  * `useSegmentCoach.ts`, the app's opening in `MainWindow.tsx`).
  */
 export type CoachEvent =
@@ -88,7 +88,11 @@ export type CoachEvent =
   | (Stamp & { type: "levelDone"; pathId: string; levelId: LevelId })
   | (Stamp & { type: "pathDone"; pathId: string })
   // --- elsewhere (later legs) --------------------------------------------
-  /** `useJamSession.ts`, where `harmonyStop()` returns. */
+  /**
+   * `useHeard.ts`, once per stop of a jam on the Jam screen, after the
+   * hearing's `harmonyStop()` has returned. `heard` only when "Hear what I
+   * play" heard something in that run; `at` is the stop.
+   */
   | (Stamp & { type: "jamStopped"; heard?: HeardSummary })
   /**
    * `useSongAttempt.ts`, when a pass settles. No subscriber yet. It can arrive
