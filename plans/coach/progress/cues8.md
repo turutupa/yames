@@ -27,7 +27,68 @@ Cues: `src/paths/specs/triads-cues.ts`, attached with `withCues` in `triads.ts`.
   0 in all fourteen), merged: every overlay 1284 of 1284 (`/tmp/coach-cues8/merge.log`; the warnings
   are all "different numbers", fret numbers as digits where the English spells them). `check triads`
   after the merge: 0 errors (`gc10.log`).
-- [ ] Gates
+- [x] Gates (below)
+
+## Gates (logs in `/tmp/coach-cues8/`, all through the job queue)
+
+- `npm run paths -- check` (every pack): exit 0, 16 Paths, 0 errors (`check-all.log`).
+- `npx tsc --noEmit`: clean (job `coach-cues8-tsc`).
+- `npm run build`: ok (job `coach-cues8-build`).
+- `npm run test`: 413 of 415 files, 32,110 of 32,111 tests passed (`vitest.log`). The two files: the
+  known worktree-only `TabStage.render.test.tsx`, and `generate.test.ts`'s "subdivisions ... mostly"
+  test, which timed out at 20 s (31 s) on a machine running six jobs. Re-run alone
+  (`vitest-gen.log`): 96 of 96 passed, triads' three tests among them; exit 1 only from "Timeout
+  calling onTaskUpdate" under the load, the known vitest noise. The full run also printed three
+  unhandled "window is not defined" errors from `useDownbeatPulse.ts` timers after teardown: not this
+  leg's (no app code touched).
+- No Rust file changed; no layout run (the orchestrator's).
+
+## The numbers
+
+617 cues on 72 Exercises (all covered: 65 graded, 3 self-checked with the general cue only, 4
+warm-ups), 171 distinct sentences. By trigger: general 72, heard 69, late 69, early 69, lastBars 69,
+notes 65, extras 65, stringChange 65, shift 63, afterHeld 10, openString 1. Final `check`: 0 errors, 0
+`cue.refused`, 0 cues said in other words for a variant (no `variant.rewritten` line of mine).
+
+## How the cues are built
+
+Most graded Exercises roll a three-note shape low, middle, high, middle in eighths, one chord a bar:
+`roll(general, notes, shift, lastBars)` adds the stock `heard` / `extras` / `late` / `early` /
+`stringChange` orders. The one-string scale and arpeggio Exercises of Steps 1 and 3 use
+`oneString(...)` (quarter notes, first finger). The specific cues: the general names the Exercise's
+point (the fret the G, D or A string leads with up the neck, the note that stays across a change, the
+form, the numbers); `notes` names the shape most likely wrong by finger and fret, or, where one chord
+is played in three places, the chord's letters ("Say D, F, A as you fret each shape."); `lastBars`
+names what the last bar is. Key-varied Exercises name only chord numbers, string names and shapes
+("Keep the top string's fret for one and four.", "For four, add finger two on the B string."). The
+four warm-ups jump an octave where the neck runs out, so their variants are not one transposition:
+their cues name no shape, string, fret or direction.
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 48 · vi 45 · ko 33 ·
+ja 29 · zh-CN 23 · zh-TW 23. Read first: ko, zh-CN and zh-TW (written by me, not by a helper: the
+helper could not be started; terms from each overlay: 쉐입 / 指型 / 形狀, 프렛 / 品 / 格, 검지..새끼손가락 /
+食指..小指); ja writes chord degrees as digits (1、4、5); tr "tiz C" for "the high C" and "penayı yakın
+tut" for the pick, not from its overlay; de names fingers (Zeigefinger .. kleiner Finger); fr and it
+shortened "before you leave shape two" to "before shape three" in one cue; it "Tieni il tasto della
+acuta" for "the top string's fret". The letter-name cues ("Say C, E, G ...") keep letters in every
+language, with Bb / F# as the overlays write them (es "B bemol", "F sostenido").
+
+## Twelve cues to read
+
+- **"One, three and five on one string"** (Level 1). C, E and G picked out along the B string, first
+  finger only. general "Say each note's number: one, three or five." · notes "Play the high C at fret
+  thirteen." · afterHeld "Count fret eight's two beats, then jump up."
+- **"C, G, F, C: five before four"** (Level 1). The three chords around fret 12 in a new order; two
+  notes keep their fret across a change. general "Keep the G string at fret twelve from C to G." · notes
+  "For F, lay finger one across fret thirteen." · lastBars "Keep the B string at fret thirteen into C."
+- **"A line that steps down"** (Level 2). C, G, A minor, F with shapes chosen so the top note falls and
+  is held a beat. general "Hold each chord's top note a full beat." · afterHeld "Have the next chord
+  ready as the top note rings." · lastBars "Keep finger one on fret eight from A minor to F."
+- **"B minor to B diminished"** (Level 3). One note, the top one, makes minor into diminished. general
+  "Move only the top note, down to fret one." · notes "For B diminished, put finger one at fret one." ·
+  shift "Keep fingers three and four down all four bars."
 
 ## The proof-read (three separate sonnet readers: cues, tabs, purposes, how-tos, per-bar triggers, the guide's rules)
 
