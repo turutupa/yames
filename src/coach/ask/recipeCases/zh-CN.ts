@@ -16,6 +16,8 @@ export const CASES: RecipeCases = {
     ["做个Bb大调五声 4小节", { root: "Bb", scale: "majorPentatonic", bars: 4 }],
     ["生成D小七琶音 第12品", { root: "D", chord: "m7", shape: "arpeggio", position: 12 }],
     ["做个A布鲁斯 三连音 7品", { root: "A", scale: "blues", subdivision: 3, position: 7 }],
+    ["生成C大调琶音 7品", { root: "C", chord: "maj", shape: "arpeggio", position: 7 }],
+    ["生成C大调琶音 7小节", { root: "C", chord: "maj", shape: "arpeggio", bars: 7 }],
   ],
   none: [
     "A小调五声音阶是什么",
@@ -27,6 +29,11 @@ export const CASES: RecipeCases = {
     "做个A小调五声音阶 16品",
     "做个A小调五声音阶 9小节",
     "做个五声音阶练习",
+    "开始 A小调五声音阶 八分音符",
+    "播放 A小调五声音阶 八分音符",
+    "显示 A小调五声音阶 八分音符",
+    "怎么做个A小调五声音阶 八分音符",
+    "不要做个A小调五声音阶 八分音符",
   ],
   yours: ["做个A小调五声音阶 八分音符 录音"],
 };

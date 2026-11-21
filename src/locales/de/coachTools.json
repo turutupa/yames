@@ -209,15 +209,15 @@
         "notMade": "Die App kann diese nicht machen.",
         "loading": "Die App bereitet den Übungsgenerator vor. Frag gleich noch einmal.",
         "loadFailed": "Die App konnte den Übungsgenerator nicht laden, deshalb wurde nichts gemacht.",
-        "full": "Meine Übungen ist voll (50), deshalb wurde diese nicht hinzugefügt. Entferne dort zuerst eine.",
+        "full": "Die Liste Meine Übungen ist voll (50), deshalb wurde diese nicht hinzugefügt. Entferne dort zuerst eine.",
         "already": "Diese ist schon in Meine Übungen.",
         "badRecipe": "Die App kann diese nicht machen.",
-        "unreadable": "Meine Übungen ließ sich gerade nicht lesen, deshalb wurde nichts hinzugefügt.",
-        "failed": "Meine Übungen ließ sich gerade nicht speichern, deshalb wurde nichts hinzugefügt.",
+        "unreadable": "Die Liste Meine Übungen ließ sich gerade nicht lesen, deshalb wurde nichts hinzugefügt.",
+        "failed": "Die Liste Meine Übungen ließ sich gerade nicht speichern, deshalb wurde nichts hinzugefügt.",
         "undo": {
           "gone": "Sie ist nicht mehr in Meine Übungen.",
-          "unreadable": "Meine Übungen ließ sich gerade nicht lesen, deshalb wurde nichts herausgenommen.",
-          "failed": "Meine Übungen ließ sich gerade nicht speichern, deshalb ist sie noch dort."
+          "unreadable": "Die Liste Meine Übungen ließ sich gerade nicht lesen, deshalb wurde nichts herausgenommen.",
+          "failed": "Die Liste Meine Übungen ließ sich gerade nicht speichern, deshalb ist sie noch dort."
         }
       }
     },

@@ -197,7 +197,7 @@
         "scale": "De app kan nog geen oefening maken in {{scale}}. Ze maakt mineur en majeur pentatonisch, blues, majeur, natuurlijk en harmonisch mineur, dorisch en mixolydisch.",
         "boxScale": "Een box is er voor mineur pentatonisch, majeur pentatonisch en blues, niet voor {{scale}}.",
         "threeScale": "Drie noten per snaar is er voor majeur, natuurlijk mineur, harmonisch mineur, dorisch en mixolydisch, niet voor {{scale}}.",
-        "mixed": "Dat noemt een toonladder en een akkoord tegelijk, of er een die deze vorm niet kent. Noem er één.",
+        "mixed": "Dat noemt een toonladder en een akkoord tegelijk, of een die deze vorm niet kent. Noem er één.",
         "noShapeHere": "Die vorm begint niet op fret {{fret}}.",
         "outOfRange": "Vanaf fret {{fret}} loopt hij voorbij het einde van de hals.",
         "tooManyNotes": "Eén keer doorspelen kost {{count}} maat.",

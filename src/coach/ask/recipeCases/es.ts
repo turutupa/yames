@@ -38,6 +38,7 @@ export const CASES: RecipeCases = {
     "quiero un ejercicio de a menor pentatónica",
     "haz un ejercicio de pentatónica menor",
     "haz un ejercicio a mayor velocidad",
+    "haz un ejercicio a menor velocidad corcheas",
     "haz una escala pentatónica menor de a corcheas",
   ],
   yours: ["graba a menor pentatónica corcheas traste 5", "borra mi ejercicio a menor pentatónica corcheas"],

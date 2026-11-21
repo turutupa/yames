@@ -20,6 +20,7 @@ export const CASES: RecipeCases = {
     ["mach ab dem 5. bund a moll pentatonik achtel", { root: "A", scale: "minorPentatonic", subdivision: 2, position: 5 }],
     ["erstelle d dorisch 4 takte", { root: "D", scale: "dorian", bars: 4 }],
     ["mach as dur viertel", { root: "Ab", scale: "major", subdivision: 1 }],
+    ["mach c dur achtel ab 5. bund", { root: "C", scale: "major", subdivision: 2, position: 5 }],
     ["mach c# moll pentatonik achtel", { root: "C#", scale: "minorPentatonic", subdivision: 2 }],
     ["erstelle a moll 7 arpeggio", { root: "A", chord: "m7", shape: "arpeggio" }],
   ],
@@ -32,6 +33,8 @@ export const CASES: RecipeCases = {
     "mach c dur pentatonik achtel in b",
     "mach c dur pentatonik achtel im 20. bund",
     "mach a moll pentatonik 12 takte",
+    "mach es dur achtel",
+    "mach des dur achtel",
   ],
   yours: ["erstelle a moll pentatonik achtel aufnahme"],
 };

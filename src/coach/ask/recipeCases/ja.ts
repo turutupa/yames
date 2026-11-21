@@ -18,6 +18,8 @@ export const CASES: RecipeCases = {
     ["Dマイナー7アルペジオ 12フレット 作って", { root: "D", chord: "m7", shape: "arpeggio", position: 12 }],
     ["Aブルース 3連符 7フレット 作って", { root: "A", scale: "blues", subdivision: 3, position: 7 }],
     ["Cメジャースケールの課題 作って", { root: "C", scale: "major" }],
+    ["Cメジャーアルペジオ 7フレット 作って", { root: "C", chord: "maj", shape: "arpeggio", position: 7 }],
+    ["Cメジャーアルペジオ 7小節 作って", { root: "C", chord: "maj", shape: "arpeggio", bars: 7 }],
   ],
   none: [
     "Aマイナーペンタって何ですか",
@@ -29,6 +31,10 @@ export const CASES: RecipeCases = {
     "Aマイナーペンタ 16フレット 作って",
     "Aマイナーペンタ 9小節 作って",
     "ペンタ 作って",
+    "始めて Aマイナーペンタ 8分音符",
+    "再生 Aマイナーペンタ 8分音符",
+    "Aマイナーペンタ 8分音符 表示して",
+    "Aマイナーペンタ 8分音符 どう作る？ 何",
   ],
   yours: ["Aマイナーペンタ 録音 作って"],
 };

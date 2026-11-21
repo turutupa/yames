@@ -36,6 +36,7 @@ export const CASES: RecipeCases = {
     "a mineur pentatonique 9 mesures",
     "je veux un exercice de a mineur pentatonique",
     "fais un exercice de pentatonique mineure",
+    "fais un exercice à a mineur vitesse croches",
     "fais une gamme pentatonique mineure de a croches",
   ],
   yours: ["enregistre a mineur pentatonique croches case 5", "supprime mon exercice a mineur pentatonique croches"],

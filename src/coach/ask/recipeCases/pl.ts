@@ -22,6 +22,7 @@ export const CASES: RecipeCases = {
     ["zrób a moll 7 arpeggio", { root: "A", chord: "m7", shape: "arpeggio" }],
     ["zrób des dur ósemkami", { root: "Db", scale: "major", subdivision: 2 }],
     ["zrób c# moll ósemkami", { root: "C#", scale: "naturalMinor", subdivision: 2 }],
+    ["zrób es dur ósemkami", { root: "Eb", scale: "major", subdivision: 2 }],
   ],
   none: [
     "co to jest a molowa pentatonika",
@@ -32,6 +33,8 @@ export const CASES: RecipeCases = {
     "zrób c dur ósemkami w b",
     "zrób c dur ósemkami od 20 progu",
     "zrób a moll 12 taktów",
+    "zrób as dur ósemkami",
+    "zrób a moll pentatonika ósemkami",
   ],
   yours: ["zrób a moll ósemkami nagranie"],
 };

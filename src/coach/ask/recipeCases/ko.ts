@@ -17,6 +17,8 @@ export const CASES: RecipeCases = {
     ["E플랫 메이저 펜타토닉 4마디 만들어줘", { root: "Eb", scale: "majorPentatonic", bars: 4 }],
     ["D 마이너 7 아르페지오 12프렛부터 만들어줘", { root: "D", chord: "m7", shape: "arpeggio", position: 12 }],
     ["A 블루스 셋잇단음표 7프렛 만들어줘", { root: "A", scale: "blues", subdivision: 3, position: 7 }],
+    ["C 메이저 아르페지오 7프렛 만들어줘", { root: "C", chord: "maj", shape: "arpeggio", position: 7 }],
+    ["C 메이저 아르페지오 7마디 만들어줘", { root: "C", chord: "maj", shape: "arpeggio", bars: 7 }],
   ],
   none: [
     "A 마이너 펜타토닉이 뭐야",
@@ -28,6 +30,10 @@ export const CASES: RecipeCases = {
     "A 마이너 펜타토닉 16프렛 만들어줘",
     "A 마이너 펜타토닉 9마디 만들어줘",
     "펜타토닉 과제 만들어줘",
+    "시작해줘 A 마이너 펜타토닉 8분음표",
+    "재생 A 마이너 펜타토닉 8분음표",
+    "A 마이너 펜타토닉 8분음표 보여줘",
+    "A 마이너 펜타토닉 8분음표 어떻게 만들어줘",
   ],
   yours: ["A 마이너 펜타토닉 녹음 만들어줘"],
 };

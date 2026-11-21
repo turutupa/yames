@@ -190,7 +190,7 @@
     "numberSuffixes": ["a", "o"],
     "article": {
       "words": ["a", "e"],
-      "rootAfter": ["em", "de", "do"]
+      "rootAfter": ["em", "do"]
     }
   }
 }

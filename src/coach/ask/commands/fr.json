@@ -188,7 +188,7 @@
       "quarters": ["noires", "noire"],
       "eighths": ["croches", "croche"],
       "eighthTriplets": ["triolets de croches", "triolets", "triolet"],
-      "sixteenths": ["doubles croches", "double croches", "doubles-croches", "double-croches"]
+      "sixteenths": ["doubles croches", "double croches", "double croche", "doubles-croches", "double-croches"]
     },
     "fret": ["case #", "# case", "frette #", "# frette"],
     "numberSuffixes": ["e", "ème", "eme"]

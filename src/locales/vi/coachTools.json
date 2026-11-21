@@ -34,8 +34,8 @@
       "setGoal": "Đã giữ mục tiêu: “{{to}}”",
       "makeExercise": "Đã thêm {{what}} vào Bài của tôi.",
       "makeExerciseAdding": "Đang thêm {{what}} vào Bài của tôi…",
-      "undoMakeExercise": "Đã đưa ra khỏi Bài của tôi.",
-      "undoMakeExerciseDoing": "Đang đưa ra khỏi Bài của tôi…"
+      "undoMakeExercise": "Đã gỡ khỏi Bài của tôi.",
+      "undoMakeExerciseDoing": "Đang gỡ khỏi Bài của tôi…"
     },
     "propose": {
       "goTo": "Mở {{screen}}?",
@@ -68,7 +68,7 @@
       "setGoal": "Giữ làm mục tiêu của bạn: “{{to}}”",
       "setGoalFrom": "Đổi mục tiêu của bạn từ “{{from}}” thành “{{to}}”",
       "makeExercise": "Thêm vào Bài của tôi",
-      "undoMakeExercise": "Đưa ra khỏi Bài của tôi"
+      "undoMakeExercise": "Gỡ khỏi Bài của tôi"
     },
     "stops": {
       "click": "Tiếng click dừng.",
@@ -302,15 +302,15 @@
       "startsOnString": "Bắt đầu ở dây {{string}}, phím {{fret}}.",
       "notesLabel": "{{n}} nốt, phím {{from}} đến {{to}}",
       "openPaths": "Mở Lộ trình",
-      "undoLeft": "Hoàn tác đã hết hiệu lực khi bạn rời màn hình nơi bài này được thêm. Để đưa ra, hãy dùng Xóa trong Bài của tôi, ở Lộ trình.",
+      "undoLeft": "Hoàn tác đã hết hiệu lực khi bạn rời màn hình nơi bài này được thêm. Để gỡ bài này ra, hãy dùng Xóa trong Bài của tôi, ở Lộ trình.",
       "chip": {
         "fret": "Phím {{fret}}",
         "bars": "{{count}} ô nhịp",
         "bars_other": "{{count}} ô nhịp",
         "quarters": "Đổi sang nốt đen",
         "eighths": "Đổi sang nốt móc đơn",
-        "eighthTriplets": "Đổi sang nhịp ba",
-        "sixteenths": "Đổi sang móc kép",
+        "eighthTriplets": "Đổi sang nốt chùm ba",
+        "sixteenths": "Đổi sang nốt móc kép",
         "nextPosition": "Vị trí kế tiếp"
       }
     }

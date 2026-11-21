@@ -309,10 +309,10 @@
         "fret": "Traste {{fret}}",
         "bars": "{{count}} compás",
         "bars_other": "{{count}} compases",
-        "quarters": "Mejor negras",
-        "eighths": "Mejor corcheas",
-        "eighthTriplets": "Mejor tresillos",
-        "sixteenths": "Mejor semicorcheas",
+        "quarters": "En negras",
+        "eighths": "En corcheas",
+        "eighthTriplets": "En tresillos",
+        "sixteenths": "En semicorcheas",
         "nextPosition": "Siguiente posición",
         "bars_many": "{{count}} compases"
       }

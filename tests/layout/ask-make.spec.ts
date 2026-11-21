@@ -20,6 +20,14 @@ import { openShot, settleAnimations, notHitTestable, noSidewaysScroll, MOBILE_UR
 const SHOTS = process.env.YAMES_SHOT_DIR;
 const MOCK_17 = "a minor pentatonic eighths 5th fret";
 
+// An error in the page fails the scene with its message, not with a blank screen.
+test.beforeEach(async ({ page }) => {
+  page.on("pageerror", (e) => console.log(`pageerror: ${e.message}\n${e.stack ?? ""}`));
+  page.on("console", (m) => {
+    if (m.type() === "error") console.log(`console.error: ${m.text()}`);
+  });
+});
+
 async function shot(page: Page, name: string) {
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/${name}.png` });
 }
@@ -77,8 +85,13 @@ async function previewReceiptEnded(page: Page, root: string, where: string, engl
   await makeHolds(page, root, `${where} preview`, minTarget);
   await shot(page, `make-preview-${where}`);
 
+  await settleAnimations(page);
+  await go.scrollIntoViewIfNeeded();
   await go.click();
-  const receipt = page.locator(`${root} [data-testid=ask-receipt]`).last();
+  // The make receipt by its place: "Open Paths" below adds a receipt of its own (with its own Undo).
+  const receipts = page.locator(`${root} [data-testid=ask-receipt]`);
+  await expect(receipts.first()).toBeVisible({ timeout: 10_000 });
+  const receipt = receipts.nth((await receipts.count()) - 1);
   await expect(receipt.locator("[data-testid=ask-undo]")).toBeVisible({ timeout: 10_000 });
   if (english) await expect(receipt).toContainText("to My exercises.");
   await toBottom(page, root);
@@ -87,6 +100,16 @@ async function previewReceiptEnded(page: Page, root: string, where: string, engl
 
   // "Open Paths": the move retires the add's Undo, and the receipt says what does its job now.
   await receipt.locator("[data-testid=ask-receipt-next] .ask-chip").first().click();
+  // On a desktop the dock closes with the move to Paths: the player opens Ask again from the rail.
+  if (root === ".ask-panel") {
+    await page.waitForTimeout(400);
+    if (!(await page.locator(".ask-panel").isVisible())) {
+      await page.locator(".rail-footer .rail-action").first().click();
+      await expect(page.locator(".ask-panel")).toBeVisible();
+      await settleAnimations(page);
+    }
+  }
+  await expect(receipt).toBeVisible();
   await expect(receipt.locator("[data-testid=ask-undo]")).toHaveCount(0);
   if (english) await expect(receipt).toContainText("The Undo ended when you left the screen this was added on.");
   else await expect(receipt.locator(":is([data-testid=ask-undone], [data-testid=ask-undo-note])")).toBeVisible();

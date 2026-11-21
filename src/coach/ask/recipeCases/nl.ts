@@ -20,6 +20,8 @@ export const CASES: RecipeCases = {
     ["maak a mineur 7 arpeggio", { root: "A", chord: "m7", shape: "arpeggio" }],
     ["maak een a mineur achtste triolen op de 7e fret", { root: "A", scale: "naturalMinor", subdivision: 3, position: 7 }],
     ["maak cis mineur pentatoniek achtsten", { root: "C#", scale: "minorPentatonic", subdivision: 2 }],
+    ["maak as majeur kwartnoten", { root: "Ab", scale: "major", subdivision: 1 }],
+    ["maak een es majeur achtsten", { root: "Eb", scale: "major", subdivision: 2 }],
   ],
   none: [
     "wat is a mineur pentatoniek",

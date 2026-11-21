@@ -32,10 +32,10 @@
       "clickSubdivision": "Click per battito: {{to}}",
       "setSetting": "{{key}}: {{to}}",
       "setGoal": "Obiettivo tenuto: «{{to}}»",
-      "makeExercise": "{{what}} aggiunto a I miei esercizi.",
-      "makeExerciseAdding": "Aggiungo {{what}} a I miei esercizi…",
-      "undoMakeExercise": "Tolto da I miei esercizi.",
-      "undoMakeExerciseDoing": "Lo tolgo da I miei esercizi…"
+      "makeExercise": "{{what}} aggiunto in “I miei esercizi”.",
+      "makeExerciseAdding": "Aggiungo {{what}} in “I miei esercizi”…",
+      "undoMakeExercise": "Tolto da “I miei esercizi”.",
+      "undoMakeExerciseDoing": "Lo tolgo da “I miei esercizi”…"
     },
     "propose": {
       "goTo": "Aprire {{screen}}?",
@@ -67,8 +67,8 @@
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Tenere questo come obiettivo: «{{to}}»",
       "setGoalFrom": "Cambiare il tuo obiettivo da «{{from}}» a «{{to}}»",
-      "makeExercise": "Aggiungilo a I miei esercizi",
-      "undoMakeExercise": "Toglilo da I miei esercizi"
+      "makeExercise": "Aggiungilo in “I miei esercizi”",
+      "undoMakeExercise": "Toglilo da “I miei esercizi”"
     },
     "stops": {
       "click": "Il click si ferma.",
@@ -197,30 +197,30 @@
         "scale": "L'app non sa ancora creare un esercizio in {{scale}}. Crea la pentatonica minore e maggiore, il blues, la maggiore, la minore naturale e armonica, la dorica e la misolidia.",
         "boxScale": "Un box è per la pentatonica minore, la pentatonica maggiore e il blues, non per {{scale}}.",
         "threeScale": "Tre note per corda è per la maggiore, la minore naturale, la minore armonica, la dorica e la misolidia, non per {{scale}}.",
-        "mixed": "Indica insieme una scala e un accordo, o uno che questa forma non accetta. Indicane uno solo.",
+        "mixed": "Qui ci sono una scala e un accordo insieme, oppure uno che questa forma non prevede. Dimmene uno solo.",
         "noShapeHere": "Questa forma non parte dal tasto {{fret}}.",
-        "outOfRange": "Dal tasto {{fret}} esce dalla fine del manico.",
+        "outOfRange": "Dal tasto {{fret}} va oltre la fine del manico.",
         "tooManyNotes": "Un giro richiede {{count}} battuta.",
         "tooManyNotes_other": "Un giro richiede {{count}} battute.",
         "tooLong": "Un giro richiede più di {{count}} battute, il massimo che un esercizio può avere.",
-        "tooFewNotes": "Sono troppo poche note per tante battute: ne riempiono {{count}}.",
-        "tooFewNotes_other": "Sono troppo poche note per tante battute: ne riempiono {{count}}.",
+        "tooFewNotes": "Sono troppo poche note per tante battute: riempiono {{count}} battuta.",
+        "tooFewNotes_other": "Sono troppo poche note per tante battute: riempiono {{count}} battute.",
         "unreachable": "Nessuna mano che l'app conosca può suonare abbastanza veloce da valutarlo.",
         "notMade": "L'app non sa creare questo.",
         "loading": "L'app sta preparando il creatore di esercizi. Chiedi di nuovo tra un momento.",
         "loadFailed": "L'app non ha potuto caricare il creatore di esercizi, quindi non è stato creato nulla.",
-        "full": "I miei esercizi è pieno (50), quindi questo non è stato aggiunto. Rimuovine prima uno lì.",
-        "already": "Questo è già in I miei esercizi.",
+        "full": "“I miei esercizi” è pieno (50), quindi questo non è stato aggiunto. Rimuovine prima uno da quella lista.",
+        "already": "Questo è già in “I miei esercizi”.",
         "badRecipe": "L'app non sa creare questo.",
-        "unreadable": "Non è stato possibile leggere I miei esercizi ora, quindi non è stato aggiunto nulla.",
-        "failed": "Non è stato possibile salvare I miei esercizi ora, quindi non è stato aggiunto nulla.",
+        "unreadable": "Non è stato possibile leggere “I miei esercizi” ora, quindi non è stato aggiunto nulla.",
+        "failed": "Non è stato possibile salvare “I miei esercizi” ora, quindi non è stato aggiunto nulla.",
         "undo": {
-          "gone": "Non è più in I miei esercizi.",
-          "unreadable": "Non è stato possibile leggere I miei esercizi ora, quindi non è stato tolto nulla.",
-          "failed": "Non è stato possibile salvare I miei esercizi ora, quindi è ancora lì."
+          "gone": "Non è più in “I miei esercizi”.",
+          "unreadable": "Non è stato possibile leggere “I miei esercizi” ora, quindi non è stato tolto nulla.",
+          "failed": "Non è stato possibile salvare “I miei esercizi” ora, quindi è ancora lì."
         },
         "tooManyNotes_many": "Un giro richiede {{count}} battute.",
-        "tooFewNotes_many": "Sono troppo poche note per tante battute: ne riempiono {{count}}."
+        "tooFewNotes_many": "Sono troppo poche note per tante battute: riempiono {{count}} battute."
       }
     },
     "yours": {
@@ -304,15 +304,15 @@
       "startsOnString": "Parte dalla corda {{string}}, tasto {{fret}}.",
       "notesLabel": "{{n}} note, tasti da {{from}} a {{to}}",
       "openPaths": "Apri Percorsi",
-      "undoLeft": "Annulla è terminato quando hai lasciato la schermata in cui è stato aggiunto. Per toglierlo, usa Rimuovi in I miei esercizi, in Percorsi.",
+      "undoLeft": "Annulla è terminato quando hai lasciato la schermata in cui è stato aggiunto. Per toglierlo, usa Rimuovi in “I miei esercizi”, in Percorsi.",
       "chip": {
         "fret": "Tasto {{fret}}",
         "bars": "{{count}} battuta",
         "bars_other": "{{count}} battute",
-        "quarters": "Meglio in quarti",
-        "eighths": "Meglio in ottavi",
-        "eighthTriplets": "Meglio in terzine",
-        "sixteenths": "Meglio in sedicesimi",
+        "quarters": "In quarti",
+        "eighths": "In ottavi",
+        "eighthTriplets": "In terzine",
+        "sixteenths": "In sedicesimi",
         "nextPosition": "Posizione successiva",
         "bars_many": "{{count}} battute"
       }

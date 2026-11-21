@@ -195,7 +195,7 @@
         "chord": "Powiedz, jaki to akord arpeggia: na przykład „arpeggio akordu A moll 7”.",
         "needScale": "Powiedz, jaka skala: na przykład „pentatonika molowa A”.",
         "scale": "Aplikacja nie potrafi jeszcze zrobić ćwiczenia w skali: {{scale}}. Robi pentatonikę molową i durową, bluesową, durową, molową naturalną i harmoniczną, dorycką i miksolidyjską.",
-        "boxScale": "Pudełko jest dla pentatoniki molowej, pentatoniki durowej i bluesowej, nie dla skali: {{scale}}.",
+        "boxScale": "Pozycja pudełkowa jest dla pentatoniki molowej, pentatoniki durowej i bluesowej, nie dla skali: {{scale}}.",
         "threeScale": "Trzy dźwięki na strunie są dla skali durowej, molowej naturalnej, molowej harmonicznej, doryckiej i miksolidyjskiej, nie dla skali: {{scale}}.",
         "mixed": "To nazywa naraz skalę i akord albo coś, czego ten kształt nie przyjmuje. Podaj jedno.",
         "noShapeHere": "Ten kształt nie zaczyna się na progu {{fret}}.",
@@ -302,9 +302,9 @@
     "make": {
       "source": "Opracowane przez aplikację",
       "graded": "Zaczyna się od {{bpm}} BPM. Ocenie podlegają rytm i usłyszane dźwięki; resztę oceniasz ty.",
-      "startsOn": "Zaczyna się od {{note}}: struna {{string}}, próg {{fret}}.",
+      "startsOn": "Zaczyna się na dźwięku {{note}}: struna {{string}}, próg {{fret}}.",
       "startsOnString": "Zaczyna się na strunie {{string}}, próg {{fret}}.",
-      "notesLabel": "Dźwięki: {{n}}, progi {{from}} do {{to}}",
+      "notesLabel": "Dźwięki: {{n}}, progi od {{from}} do {{to}}",
       "openPaths": "Otwórz Ścieżki",
       "undoLeft": "Cofnięcie wygasło, gdy opuszczono ekran, na którym to dodano. Aby to usunąć, użyj Usuń w Moich ćwiczeniach w Ścieżkach.",
       "chip": {

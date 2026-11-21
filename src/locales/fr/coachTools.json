@@ -35,7 +35,7 @@
       "makeExercise": "{{what}} ajouté à Mes exercices.",
       "makeExerciseAdding": "Ajout de {{what}} à Mes exercices…",
       "undoMakeExercise": "Retiré de Mes exercices.",
-      "undoMakeExerciseDoing": "Retrait de Mes exercices en cours…"
+      "undoMakeExerciseDoing": "Retrait de l'exercice de Mes exercices…"
     },
     "propose": {
       "goTo": "Ouvrir {{screen}} ?",
@@ -209,7 +209,7 @@
         "notMade": "L'app ne sait pas créer celui-là.",
         "loading": "L'app prépare le créateur d'exercices. Redemande dans un instant.",
         "loadFailed": "L'app n'a pas pu charger le créateur d'exercices, donc rien n'a été créé.",
-        "full": "Mes exercices est plein (50), donc celui-ci n'a pas été ajouté. Retires-en un d'abord, là-bas.",
+        "full": "Mes exercices est plein (50) : celui-ci n'a pas été ajouté. Retires-en d'abord un de cette liste.",
         "already": "Celui-là est déjà dans Mes exercices.",
         "badRecipe": "L'app ne sait pas créer celui-là.",
         "unreadable": "Mes exercices n'a pas pu être lu à l'instant, donc rien n'a été ajouté.",
@@ -309,10 +309,10 @@
         "fret": "Case {{fret}}",
         "bars": "{{count}} mesure",
         "bars_other": "{{count}} mesures",
-        "quarters": "Plutôt des noires",
-        "eighths": "Plutôt des croches",
-        "eighthTriplets": "Plutôt des triolets",
-        "sixteenths": "Plutôt des doubles-croches",
+        "quarters": "En noires",
+        "eighths": "En croches",
+        "eighthTriplets": "En triolets",
+        "sixteenths": "En doubles-croches",
         "nextPosition": "Position suivante",
         "bars_many": "{{count}} mesures"
       }
