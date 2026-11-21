@@ -763,7 +763,26 @@
       "heard": "Entendu : {{what}}",
       "chart": "Grille : {{what}}",
       "unsure": "Pas encore clair",
-      "listening": "Écoute…"
+      "listening": "Écoute…",
+      "stopLine": "Les accords que l'appli a le plus entendus dans ton jeu : {{heard}}. La grille a {{chart}}.",
+      "sameNotes": "Toutes les notes de {{heard}} sont aussi dans {{chart}} de la grille."
+    },
+    "change": {
+      "halfUp": "Quand {{to}} vient après {{from}}, {{note}} monte d'un demi-ton (une case) vers {{target}}.",
+      "halfDown": "Quand {{to}} vient après {{from}}, {{note}} descend d'un demi-ton (une case) vers {{target}}.",
+      "wholeUp": "Quand {{to}} vient après {{from}}, {{note}} monte d'un ton (deux cases) vers {{target}}.",
+      "wholeDown": "Quand {{to}} vient après {{from}}, {{note}} descend d'un ton (deux cases) vers {{target}}.",
+      "third": "{{target}} est la tierce de {{to}}.",
+      "seventh": "{{target}} est la septième de {{to}}."
+    },
+    "pin": {
+      "done": "{{chord}} épinglé, position {{shape}}, sur l'écran Jam.",
+      "noNeck": "Ton instrument n'a pas de manche où épingler une position.",
+      "noShape": "Il n'y a pas cette position de {{chord}} sur ton manche.",
+      "otherJam": "Cette position a été dessinée pour un autre jam, elle n'est donc pas épinglée à celui-ci.",
+      "changed": "L'épingle a changé depuis, donc elle reste telle quelle.",
+      "restored": "La position épinglée avant est de retour.",
+      "cleared": "Plus rien n'est épinglé."
     }
   },
   "scale": {

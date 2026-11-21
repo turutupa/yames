@@ -9,8 +9,9 @@
  * "outside" calls are wrong (`plans/detection/PROGRESS.md`, M7).
  */
 import type { HeardChart, HeardChord, HeardKey, HeardLive, HeardQuality, HeardSummary } from "../ipc";
-import { chordName, chordNotes, keyRootName, parseChordName, transposeChord } from "./harmony";
+import { chordName, chordNotes, keyRootName, parseChordName, sameChord, transposeChord } from "./harmony";
 import type { Chord, ChordQuality, Key } from "./harmony";
+import { jamHarmony, type JamHarmony } from "./display";
 import { chordsForJam, jamChangesBars } from "./progression";
 import { jamKey } from "./compile";
 import type { Jam } from "./types";
@@ -110,6 +111,107 @@ export function heardRecap(summary: HeardSummary | null): { key: HeardKeyName; r
     .map((c) => chordNameOf(c, r.key!.key, 0))
     .filter((c): c is string => !!c);
   return { key: line.key, relative: line.relative, chords };
+}
+
+/**
+ * How much chord the jam's stop line rests on (review c5a1 L2). The engine's
+ * summary (`harmony/worker.rs` `Heard::summary`) keeps any chord shown for at
+ * least 2 beats and a tenth of the beats that showed one, so 20 s of single
+ * notes and one strum would still name a chord "heard most". The line asks for
+ * more: two bars of common time with a chord shown in all (8 beats), and each
+ * chord it names shown for at least one bar (4 beats). Below that the tenth's
+ * share is at most one beat and adds nothing, so these two are the floor.
+ */
+export const JAM_LINE_MIN_CHORD_BEATS = 8;
+export const JAM_LINE_MIN_BEATS_PER_CHORD = 4;
+
+/**
+ * Who a jam's stop line belongs to: the jam's id and the chart as the Jam
+ * screen reads it (key, transposition, chords). `jamStopped` carries the one
+ * taken while the jam played, and the line is said only beside a jam with the
+ * same one: not beside another jam picked since, nor beside this jam after its
+ * key or chords were edited (review c5a1 M2).
+ */
+export function jamHeardKey(jam: Jam, harmony: JamHarmony): string {
+  return JSON.stringify([jam.id, harmony.key, harmony.concert, harmony.chords]);
+}
+
+/**
+ * The stop line for the jam on screen now, or null: only when the stop was of
+ * this very jam, with the chart it has now (`jamHeardKey`).
+ */
+export function jamStopLine(stopped: { heard?: HeardSummary; jam?: string } | null | undefined, jam: Jam): HeardSentence[] | null {
+  if (!stopped?.heard || !stopped.jam) return null;
+  const harmony = jamHarmony(jam);
+  if (jamHeardKey(jam, harmony) !== stopped.jam) return null;
+  return jamHeardLine(stopped.heard, harmony);
+}
+
+/** A sentence the page words: an i18n key and its values (the coach's `Line`). */
+export type HeardSentence = { key: string; values: Record<string, string | number> };
+
+/**
+ * The line under Jam's stage when a jam stops (leg c5a1; DESIGN 8, Jam's
+ * row): the chords the engine named from the player's notes, most first, beside
+ * the chords the chart has. Stated as heard, never as a mistake: the two lists
+ * stand side by side and nothing says which of them was "right".
+ *
+ * What the reading supports, and so what the line may claim:
+ *
+ * - **Chords only where the engine estimated them.** With the jam's chart sent
+ *   (`heardChart`: the timeline's chord names on), the engine takes the chart as
+ *   the truth and names no chord of its own (`harmony/mod.rs` `close_beat`), the
+ *   key reads "chart", and the summary's `chords` are empty: no line. Only a jam
+ *   heard without its chart has chords of the player's own to set beside it.
+ * - **The recap's floor** (`heardRecap`): a key that settled, and at least
+ *   `RECAP_MIN_HEARD_S` of playing. And at least one chord: a line of single
+ *   notes names none (a chord is named only when a beat held several voices).
+ * - **Enough chord** (review c5a1 L2): `JAM_LINE_MIN_CHORD_BEATS` beats with a
+ *   chord in all, and each chord named held for `JAM_LINE_MIN_BEATS_PER_CHORD`.
+ * - **Five qualities.** The engine names major, minor, 7, maj7 and m7 from a
+ *   triad and a seventh, so it cannot tell a chord from another with the same
+ *   notes (Am7 and C6 are one set). When every note of a chord it named is
+ *   in a chart chord of another name, a second sentence says exactly that,
+ *   so "C" beside a chart of Am7 does not read as "you played something else".
+ *
+ * Names: the heard chords through `chordNameOf`, spelled in the jam's key and
+ * transposed as the jam is read; the chart's as the Jam screen writes them.
+ */
+export function jamHeardLine(summary: HeardSummary | null | undefined, chart: JamHarmony): HeardSentence[] | null {
+  const r = summary?.reading;
+  if (!summary || !r || r.keyState !== "settled" || !r.key || r.heardS < RECAP_MIN_HEARD_S) return null;
+  if (summary.chordBeats < JAM_LINE_MIN_CHORD_BEATS) return null;
+  const semitones = pc(chart.key.root - chart.concert.root);
+  const spell: HeardKey = { tonic: pc(chart.concert.root), mode: chart.concert.mode };
+  const charted: { chord: Chord; name: string }[] = [];
+  for (const chord of chart.chords) {
+    if (!charted.some((c) => sameChord(c.chord, chord))) charted.push({ chord, name: chordName(chord, chart.key) });
+  }
+  if (charted.length === 0) return null;
+  const heard: { chord: Chord; name: string }[] = [];
+  for (const c of summary.chords) {
+    if (!c.quality || c.beats < JAM_LINE_MIN_BEATS_PER_CHORD) continue;
+    const name = chordNameOf(c, spell, semitones);
+    if (!name) continue;
+    const chord = transposeChord({ root: pc(c.root), quality: QUALITY[c.quality] }, semitones);
+    if (!heard.some((h) => sameChord(h.chord, chord))) heard.push({ chord, name });
+  }
+  if (heard.length === 0) return null;
+  const lines: HeardSentence[] = [
+    { key: "jam.heard.stopLine", values: { heard: heard.map((h) => h.name).join(", "), chart: charted.map((c) => c.name).join(", ") } },
+  ];
+  for (const h of heard) {
+    if (charted.some((c) => sameChord(c.chord, h.chord))) continue;
+    const notes = chordNotes(h.chord);
+    const holding = charted.filter((c) => {
+      const has = chordNotes(c.chord);
+      return notes.every((n) => has.includes(n));
+    });
+    if (holding.length > 0) {
+      lines.push({ key: "jam.heard.sameNotes", values: { heard: h.name, chart: holding.map((c) => c.name).join(", ") } });
+    }
+  }
+  return lines;
 }
 
 // The last stretch of free play, for the Session's recap. In memory only: it

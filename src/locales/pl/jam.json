@@ -773,7 +773,26 @@
       "heard": "Usłyszano: {{what}}",
       "chart": "Z zapisu: {{what}}",
       "unsure": "Jeszcze nie wiadomo",
-      "listening": "Słucham…"
+      "listening": "Słucham…",
+      "stopLine": "Akordy, które aplikacja najczęściej usłyszała w twojej grze: {{heard}}. W zapisie jest: {{chart}}.",
+      "sameNotes": "Każdy dźwięk z {{heard}} jest też w {{chart}} z zapisu."
+    },
+    "change": {
+      "halfUp": "Gdy {{to}} następuje po {{from}}, dźwięk {{note}} idzie o półton (jeden próg) w górę do {{target}}.",
+      "halfDown": "Gdy {{to}} następuje po {{from}}, dźwięk {{note}} idzie o półton (jeden próg) w dół do {{target}}.",
+      "wholeUp": "Gdy {{to}} następuje po {{from}}, dźwięk {{note}} idzie o cały ton (dwa progi) w górę do {{target}}.",
+      "wholeDown": "Gdy {{to}} następuje po {{from}}, dźwięk {{note}} idzie o cały ton (dwa progi) w dół do {{target}}.",
+      "third": "{{target}} to tercja akordu {{to}}.",
+      "seventh": "{{target}} to septyma akordu {{to}}."
+    },
+    "pin": {
+      "done": "Przypięto {{chord}}, chwyt {{shape}}, do ekranu jamu.",
+      "noNeck": "Twój instrument nie ma gryfu, do którego można przypiąć chwyt.",
+      "noShape": "Na twoim gryfie nie ma takiego chwytu akordu {{chord}}.",
+      "otherJam": "Ten chwyt narysowano dla innego jamu, więc nie jest przypięty do tego.",
+      "changed": "Przypięcie zmieniło się w międzyczasie, więc zostaje bez zmian.",
+      "restored": "Wcześniej przypięty chwyt wrócił.",
+      "cleared": "Teraz nic nie jest przypięte."
     }
   },
   "scale": {

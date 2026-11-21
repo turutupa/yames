@@ -753,7 +753,26 @@
       "heard": "Heard: {{what}}",
       "chart": "Chart: {{what}}",
       "unsure": "Couldn't tell yet",
-      "listening": "Listening…"
+      "listening": "Listening…",
+      "stopLine": "The chords the app heard most in your playing: {{heard}}. The chart has {{chart}}.",
+      "sameNotes": "Every note of {{heard}} is also in the chart's {{chart}}."
+    },
+    "change": {
+      "halfUp": "When {{to}} comes after {{from}}, {{note}} moves up a half step (one fret) to {{target}}.",
+      "halfDown": "When {{to}} comes after {{from}}, {{note}} moves down a half step (one fret) to {{target}}.",
+      "wholeUp": "When {{to}} comes after {{from}}, {{note}} moves up a whole step (two frets) to {{target}}.",
+      "wholeDown": "When {{to}} comes after {{from}}, {{note}} moves down a whole step (two frets) to {{target}}.",
+      "third": "{{target}} is the third of {{to}}.",
+      "seventh": "{{target}} is the seventh of {{to}}."
+    },
+    "pin": {
+      "done": "Pinned {{chord}}, shape {{shape}}, to the Jam screen.",
+      "noNeck": "Your instrument has no neck to pin a grip to.",
+      "noShape": "There is no such grip of {{chord}} on your neck.",
+      "otherJam": "This grip was drawn for another jam, so it is not pinned to this one.",
+      "changed": "The pin has changed since, so it is left as it is.",
+      "restored": "The grip pinned before is back.",
+      "cleared": "Nothing is pinned now."
     }
   },
   "scale": {

@@ -134,6 +134,11 @@ export type ToolDone = {
   /** What a `read` tool shows, resolved against the app's own data. */
   blocks?: readonly ResolvedBlock[];
   /**
+   * The jam on the Jam screen when the blocks were drawn, by id: a "Pin this
+   * shape" among them pins to that jam and no other (review c5a1 L3).
+   */
+  forJam?: string;
+  /**
    * The receipt as it turned out, when the app only learns that a moment
    * later (a preset is re-read from the store before it is applied). Until it
    * settles, `receipt` says the app is at it, never that it is done (leg t1b1).

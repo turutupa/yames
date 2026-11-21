@@ -72,13 +72,18 @@ const showChord: ActTool = {
     },
   ],
   when: notDuringTake,
-  run(args, host) {
+  run(args, host, ctx) {
     const chord = argString(args, "chord") ?? "";
     const shape = (argNumber(args, "shape") ?? 1) - 1;
-    return show(
-      { type: "chordShape", chord, shape, instrument: host.instrument() },
-      line("coachTools.receipt.showChord", { chord, shape: shape + 1 }),
-    );
+    const receipt = line("coachTools.receipt.showChord", { chord, shape: shape + 1 });
+    const grip: CoachBlock = { type: "chordShape", chord, shape, instrument: host.instrument() };
+    // On the Jam screen the grip carries "Pin this shape" (leg c5a1, DESIGN 9.3
+    // `pinShape`): a button, pressed or not; drawing it pins nothing.
+    if (ctx.jam) {
+      const { blocks } = resolveCoachAnswer({ blocks: [grip, { type: "action", action: { kind: "pinShape", chord, shape } }] }, {});
+      if (blocks.length === 2 && blocks[0].type === "chordShape") return { ok: true, receipt, blocks, forJam: ctx.jam.jam.id };
+    }
+    return show(grip, receipt);
   },
 };
 

@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "明天再回到這裡",
         "inDays": "{{days}} 天後再練這裡"
-      }
+      },
+      "pinShape": "釘住這個按法"
     },
     "fretboard": {
       "aria": "{{what}}，在指板上"

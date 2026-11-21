@@ -42,6 +42,7 @@ import {
   scaleFits,
   UNKNOWN_SUFFIX,
 } from "./pathCards";
+import { withChangeNote } from "./changeNote";
 import { CHORD_SUFFIXES, ROOT_NAMES } from "../blocks/spec";
 import {
   ASKABLE_METRICS,
@@ -275,10 +276,11 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     "The scales the app picks over a chord in a key it names, only those holding every note of the chord, spelled; the first drawn.",
     "scales that hold a chord",
     () => false,
-    (args) => scaleFits(argString(args, "root") ?? "", argString(args, "suffix") ?? UNKNOWN_SUFFIX),
+    // On Jam, the note that makes the change into this chord audible follows (leg c5a1, `changeNote.ts`).
+    (args, ctx) => theoryCard(scaleFits, args, ctx),
   ),
-  pathEntry("chord_notes", CHORD_ARGS, "The notes of a chord, spelled by the app, and its grip.", "notes of a chord", () => false, (args) =>
-    chordNotesCard(argString(args, "root") ?? "", argString(args, "suffix") ?? UNKNOWN_SUFFIX),
+  pathEntry("chord_notes", CHORD_ARGS, "The notes of a chord, spelled by the app, and its grip.", "notes of a chord", () => false, (args, ctx) =>
+    theoryCard(chordNotesCard, args, ctx),
   ),
   pathEntry(
     "pass_mark_ms",
@@ -321,6 +323,13 @@ function pathEntry(
   card: FactCardTool["card"],
 ): FactCardTool {
   return { ...entry(name, { args, note, short }, (ctx) => !takeRunning(ctx) && when(ctx), card), readsNoTake: true };
+}
+
+/** A theory card from its two closed arguments, with the Jam's change note when there is one (leg c5a1). */
+function theoryCard(build: (root: string, suffix: string) => FactCard, args: ToolArgs, ctx: CoachContext): FactCard | NoCard {
+  const root = argString(args, "root") ?? "";
+  const suffix = argString(args, "suffix") ?? UNKNOWN_SUFFIX;
+  return withChangeNote(build(root, suffix), ctx, root, suffix);
 }
 
 /** An Exercise on screen (its words, its cue, its schedule). */

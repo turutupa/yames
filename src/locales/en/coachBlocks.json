@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Come back to this tomorrow",
         "inDays": "Come back to this in {{days}} days"
-      }
+      },
+      "pinShape": "Pin this shape"
     },
     "fretboard": {
       "aria": "{{what}}, on the neck"
