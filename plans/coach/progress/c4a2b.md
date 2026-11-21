@@ -31,4 +31,9 @@ No English changed (every sentence used already existed), so no locale work.
 
 ## Gates
 
-See the final report (job names `coach-c4a2b-*`).
+- `npx tsc --noEmit`: pass (`coach-c4a2b-tsc`).
+- Named vitest files (store, tendencies, Notebook, useAskHost, useCoachToolHost, CoachSuggestionsRow, AskPanel): 164 pass (`coach-c4a2b-vt1`).
+- `npm run test`: 49218 pass, 10 skipped, 436 of 437 files; the one failed file is the known `TabStage.render.test.tsx` (`coach-c4a2b-vitest`, `/tmp/coach-c4a2b/vitest.log`).
+- `npm run build`: pass (`coach-c4a2b-build`).
+- Layout, the eight named specs: 192 pass (`coach-c4a2b-pw`); after the last CSS touch (the left-out sentence centred), `notebook.spec.ts` again: 9 pass (`coach-c4a2b-pw2`). The full suite is the orchestrator's (owed).
+- Pictures: `/tmp/coach-c4a2b/shots/notebook-*.png` (`notebook-ember-1440.png`, `notebook-ember-left-out.png`, phone).
