@@ -192,7 +192,7 @@
             "Hơn năm phút liền khớp nhịp. Bạn có muốn tôi chỉ ra điều gì cụ thể không?",
             "Một đoạn dài — hãy dừng nếu bạn muốn, tôi ở đây.",
             "Đang chơi vững. Bạn có muốn tôi nghe điều gì cụ thể không?",
-            "Bạn đã chơi một lúc rồi. Hãy hít một hơi nếu cần.",
+            "Bạn đã chơi một lúc rồi. Nghỉ ngắn cũng được, nếu bạn muốn.",
             "Đến giờ vẫn yên. Hãy cho tôi biết bạn đang luyện gì, tôi sẽ để ý.",
             "Chưa có gì để nêu. Bạn muốn tôi nghe điều gì?",
             "Pocket vững. Cứ tiếp tục, hoặc đổi hướng nếu bạn sẵn sàng."
@@ -200,7 +200,7 @@
           "neutral": [
             "Năm phút rồi, không có gì để báo. Pocket vững. Tiếp tục hay đổi trọng tâm?",
             "Một đoạn yên. Hãy cho tôi biết bạn đang luyện gì.",
-            "Một lượt dài không gián đoạn. Bạn có muốn nhận xét về điều gì không?",
+            "Tôi đã im lặng một lúc rồi. Bạn có muốn nhận xét về điều gì không?",
             "Đã năm phút. Không có vấn đề gì để nêu — cứ tiếp tục.",
             "Buổi tập đều. Bạn muốn một góc nhìn khác, hay giữ hướng hiện tại?",
             "Một lượt dài không trượt. Tiếp theo là gì?",
@@ -208,45 +208,45 @@
             "Đến giờ buổi tập vẫn yên. Hãy chọn một mục tiêu nếu bạn muốn nhận xét sắc hơn."
           ],
           "correction": [
-            "Lưu ý — bạn đã chơi một lúc rồi. Hãy nghỉ 10 phút nếu tay bạn cần.",
-            "Hơn năm phút liên tục. Hãy hỏi cơ thể mình trước khi đẩy thêm.",
-            "Buổi tập kéo dài — hãy duỗi ngón tay, rồi quay lại.",
-            "Tay mỏi? Hãy nghỉ 60 giây trước lượt tiếp theo.",
-            "Một đoạn dài không nghỉ. Nghỉ ngắn một chút là một lựa chọn trước khi bạn tiếp tục.",
-            "Đến lúc nghỉ một chút. Tay lạnh chơi cẩu thả.",
-            "Dừng và duỗi người. Nghỉ hai phút giúp hai mươi phút sau vững.",
-            "Chơi liên tục — hãy cho tay nghỉ trước khi đẩy tiếp."
+            "Lưu ý — bạn đã chơi một lúc rồi. Hãy nghỉ vài phút nếu bạn muốn.",
+            "Đã hơn năm phút rồi. Bạn muốn nghỉ ngắn trước khi chơi tiếp không?",
+            "Buổi tập kéo dài — nghỉ ngắn lúc này cũng ổn, rồi quay lại.",
+            "Bạn muốn nghỉ 60 giây trước lượt tiếp theo không?",
+            "Một đoạn dài kể từ gợi ý trước của tôi. Nghỉ ngắn một chút là một lựa chọn trước khi bạn tiếp tục.",
+            "Năm phút kể từ gợi ý trước của tôi. Bạn có thể nghỉ ngắn.",
+            "Nếu muốn, hãy dừng ở đây. Nghỉ hai phút, rồi chơi tiếp.",
+            "Chơi liên tục — hãy nghỉ ngắn trước khi đẩy tiếp."
           ]
         },
         "fatigue": {
           "encouragement": [
             "Độ chính xác đã tụt trong vài phút qua. Hãy nghỉ một nhịp.",
-            "Tay đang căng lên? Duỗi nhanh rồi quay lại với sức mới.",
-            "Chất lượng đang trôi. Dừng, hít thở, rồi quay lại.",
-            "Tay đang làm việc nặng hơn mức cần. Nghỉ ngắn, rồi vào lại.",
+            "Độ chính xác đang tụt ở tempo này. Dừng nhanh, rồi quay lại.",
+            "Chất lượng đang giảm. Dừng, tập trung lại, rồi quay lại.",
+            "Số lần hụt tăng ở cùng tempo. Nghỉ ngắn, rồi vào lại.",
             "Bạn đã chơi một lúc rồi — hãy đặt nhạc cụ xuống 60 giây.",
-            "Cơ thể đang nặng hơn âm nhạc. Nghỉ nhanh một chút.",
-            "Ngón tay đang cứng? Hãy lắc cho thả lỏng, rồi quay lại.",
-            "Đến lúc nghỉ ngắn — tay tươi chơi sạch hơn."
+            "Điểm đang tụt ở một tempo. Nghỉ nhanh một chút nhé?",
+            "Bạn muốn nghỉ ngắn không? Rồi quay lại ở cùng tempo.",
+            "Nghỉ ngắn lúc này cũng ổn — rồi chơi tiếp."
           ],
           "neutral": [
-            "Độ chính xác giảm trong 3 phút qua ở BPM không đổi — có thể là mệt.",
+            "Độ chính xác giảm trong 3 phút qua ở BPM không đổi. Bạn có thể nghỉ một lát.",
             "Điểm đang đi xuống mà tempo không đổi. Hãy nghỉ.",
             "Độ chính xác giảm liên tục ở cùng BPM — coi đó là một chu kỳ nghỉ.",
-            "Cùng tempo, độ chính xác tụt. Tay đang mệt dần.",
-            "Chất lượng đang trượt mà tempo không đổi — đó là mệt.",
+            "Cùng tempo, độ chính xác tụt. Bạn có thể nghỉ ngắn.",
+            "Chất lượng đang trượt mà tempo không đổi. Bạn muốn dừng một lát không?",
             "Lỗi tăng trong khi tiếng click giữ nguyên. Đến lúc dừng.",
-            "Ba phút tụt dần ở một tempo. Hãy cho tay nghỉ.",
-            "BPM đều, độ chính xác tụt — đôi tay đang nói với bạn điều gì đó."
+            "Ba phút tụt dần ở một tempo. Hãy nghỉ ngắn.",
+            "BPM đều, độ chính xác tụt — lúc này là thời điểm tốt để nghỉ."
           ],
           "correction": [
-            "Mệt đã lộ ra — dừng ngay, nghỉ 90 giây, rồi quay lại.",
-            "Bạn đã qua đỉnh. Hãy nghỉ trước khi chất lượng tụt thêm.",
-            "Hãy nghỉ. Chơi khi mệt dạy đôi tay thói quen cẩu thả.",
+            "Độ chính xác cứ tụt — dừng ngay, nghỉ 90 giây, rồi quay lại.",
+            "Điểm trong buổi tập này đang thấp hơn đỉnh của bạn. Hãy nghỉ trước khi tụt thêm.",
+            "Hãy nghỉ. Vài phút gần nhất có điểm thấp hơn những phút trước đó.",
             "Dừng, đứng dậy, đi quanh một phút. Rồi quay lại.",
             "Chất lượng đã giảm nhiều phút. Nghỉ thật sự — tối thiểu 90 giây.",
-            "Đôi tay tạm xong rồi. Dừng, lắc cho thả lỏng, uống nước.",
-            "Cố vượt qua lúc mệt sẽ khắc sâu lỗi. Hãy dừng và hồi phục.",
+            "Điểm cứ tụt ở tempo này. Dừng, rồi kiểm tra lại.",
+            "Số lần hụt cứ tăng ở một tempo. Hãy dừng và nghỉ.",
             "Đặt nhạc cụ xuống. Nghỉ hai phút, rồi đánh giá lại."
           ]
         },
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Điểm lại đang tụt sau mốc {staminaMinutes} phút — hãy nghỉ 30 giây, rồi quay lại ở cùng BPM.",
-            "Sau mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi vào lại.",
-            "Bạn thường yếu đi quanh phút thứ {staminaMinutes}. Hãy nghỉ và quay lại cho tươi.",
-            "Bức tường sức bền quanh phút thứ {staminaMinutes} — nghỉ ngắn bây giờ giữ được chất lượng về sau."
+            "Các buổi tập của bạn ở đây dài trung bình khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ 30 giây nếu bạn muốn, rồi giữ nguyên BPM.",
+            "Trong một khoảng tempo, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ ngắn là một lựa chọn.",
+            "Các buổi tập của bạn ở đây dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ một chút là một lựa chọn.",
+            "Một buổi tập thường lệ ở đây dài khoảng {staminaMinutes} phút, và gần đây điểm thấp hơn lúc đầu. Nghỉ ngắn lúc này là một lựa chọn."
           ]
         },
         "ramp_complete": {
@@ -676,22 +676,22 @@
           "encouragement": [
             "Các nhát đánh đang trượt ở cùng một tempo. Đặt dùi xuống một lát, rồi quay lại.",
             "Chất lượng đang trôi — hãy rời ghế ngồi 60 giây.",
-            "Cẳng tay đang lên tiếng? Dừng ngắn, rồi vào lại.",
-            "Dùi trống thấy nặng? Đặt chúng xuống, duỗi người, rồi quay lại.",
-            "Tay nắm đang siết lại? Rời bộ trống một phút.",
+            "Các nhát gõ đang kém chính xác ở cùng tempo. Dừng ngắn, rồi vào lại.",
+            "Bạn muốn nghỉ không? Đặt dùi xuống, rồi quay lại.",
+            "Số lần hụt tăng ở tempo này. Rời bộ trống một phút.",
             "Độ chính xác đang tụt — nghỉ nhanh một chút, rồi tiếp tục.",
-            "Đôi tay đang làm việc nặng hơn mức cần. Nghỉ ngắn.",
-            "Đặt dùi xuống một lát — để hai cánh tay được đặt lại."
+            "Độ chính xác đang tụt ở một tempo. Nghỉ ngắn.",
+            "Nếu muốn, hãy đặt dùi xuống một lát, rồi bắt đầu lại."
           ],
           "correction": [
-            "Mệt đã lộ ra — dừng ngay, bỏ dùi xuống, nghỉ 90 giây. Đánh trống khi mệt khắc sâu nhịp cẩu thả.",
-            "Bạn đã qua đỉnh — đặt dùi xuống, đi một vòng, rồi đánh giá lại.",
-            "Các nhát đánh cứ trượt ở tempo này. Nghỉ 90 giây, uống nước, rồi quay lại.",
+            "Độ chính xác cứ tụt ở tempo này. Dừng ngay, đặt dùi xuống, nghỉ 90 giây.",
+            "Điểm đang thấp hơn đỉnh của bạn — đặt dùi xuống, đi một vòng, rồi đánh giá lại.",
+            "Các nhát đánh cứ kém chính xác ở tempo này. Nghỉ 90 giây, rồi quay lại.",
             "Số lần hụt đang tăng ở một tempo. Dừng, đặt dùi xuống, nghỉ hai phút.",
-            "Cố vượt qua đây là bạn sẽ tự làm đau mình. Nghỉ thật sự ngay bây giờ.",
+            "Hãy dừng nếu có chỗ nào đau. Dù sao, nghỉ thật sự ngay bây giờ.",
             "Dừng đánh trống. Rời bộ trống vài phút.",
-            "Đặt dùi xuống. Cẳng tay trước, rồi đến bàn tay, rồi quay lại khi đã thả lỏng.",
-            "Dừng hẳn. Nghỉ hai phút và uống một ngụm nước trước khi quay lại."
+            "Đặt dùi xuống. Nghỉ hai phút, rồi quay lại khi bạn sẵn sàng.",
+            "Dừng hẳn. Nghỉ hai phút trước khi quay lại."
           ]
         },
         "tempo_milestone": {
@@ -712,7 +712,7 @@
             "Hơn năm phút rồi. Bạn muốn tôi nhận xét kick, hi-hat, hay cả hai?",
             "Bạn đã ở sâu trong pocket. Hãy cho tôi biết bạn muốn gì tiếp theo.",
             "Chơi vững trên bộ trống. Bạn có muốn nhận xét sắc hơn về điều gì không?",
-            "Bạn đã chơi một lúc rồi. Muốn tôi nghe kick, snare, hay độ đồng bộ tay chân?",
+            "Bạn đã chơi một lúc rồi. Bạn muốn tôi nghe điều gì cụ thể không?",
             "Pocket đã vững suốt. Trọng tâm từ đây là gì?",
             "Groove dài đang chạy — hãy chọn một mục tiêu và tôi sẽ tập trung vào đó.",
             "Hơn năm phút. Hãy cho tôi biết bạn muốn nhận xét tiếp theo ở đâu."
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Quanh phút thứ {staminaMinutes} đôi tay của bạn căng lên. Giảm BPM 5 nấc và xây lại.",
-            "Qua mốc {staminaMinutes} phút, tay chân bắt đầu trôi. Nghỉ ngắn, rồi quay lại.",
-            "Điểm của bạn trên bộ trống tụt quanh phút thứ {staminaMinutes}. Nghỉ ngắn, rồi quay lại.",
-            "Bạn thường mất độ khớp của kick quanh phút thứ {staminaMinutes}. Hãy nghỉ lấy hơi."
+            "Các buổi tập của bạn với groove này dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Giảm BPM 5 nấc là một lựa chọn.",
+            "Trên bộ trống, các buổi tập của bạn ở đây kéo dài khoảng {staminaMinutes} phút, và điểm đã thấp xuống so với những buổi đầu. Nghỉ ngắn, rồi quay lại, nếu bạn muốn.",
+            "Điểm gần đây của bạn với groove này thấp hơn điểm đầu, qua các buổi tập dài khoảng {staminaMinutes} phút. Nghỉ ngắn là một lựa chọn.",
+            "Khoảng {staminaMinutes} phút mỗi buổi với groove này, và các buổi gần đây có điểm thấp hơn. Bạn muốn nghỉ ngắn không?"
           ]
         },
         "bias_only": {
@@ -946,24 +946,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Cánh tay gảy đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
+            "Độ chính xác đang tụt ở một tempo. Dừng ngắn, rồi vào lại.",
             "Độ chính xác đã tụt vài phút nay. Dừng nhanh một chút, rồi vào lại.",
             "Số lần hụt đang len vào ở tempo này — hãy đặt cây đàn xuống 60 giây.",
-            "Đã chạy dài ở một tempo. Hít thở, rồi chơi tiếp.",
-            "Lực gảy đang nặng hơn mức cần. Nghỉ ngắn.",
-            "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
-            "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
+            "Đã chơi một mạch dài ở một tempo. Dừng một lát, rồi chơi tiếp.",
+            "Số lần hụt tăng ở tempo này. Nghỉ ngắn.",
+            "Bạn muốn nghỉ ngắn không? Rồi chơi tiếp.",
+            "Điểm đang tụt ở một tempo — dừng ngắn rồi tiếp tục.",
             "Nghỉ 30 giây là một lựa chọn, rồi quay lại."
           ],
           "correction": [
             "Độ chính xác cứ tụt ở cùng một tempo — dừng, đặt đàn xuống 90 giây, rồi kiểm tra lại.",
             "Điểm đang thấp hơn đỉnh của bạn — đặt đàn xuống một phút, rồi vào lại.",
-            "Dừng trước khi gân bắt đầu kêu ca. Rời dây đàn 90 giây.",
+            "Độ chính xác cứ tụt ở tempo này. Rời dây đàn 90 giây.",
             "Số lần hụt cứ tăng ở tempo này. Đặt đàn xuống, nghỉ hai phút.",
             "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
-            "Cánh tay gảy tạm xong rồi. Tối thiểu 90 giây, rồi kiểm tra lại.",
-            "Dừng ở đây. Rời cây đàn hai phút, rồi quay lại cho tươi.",
-            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng hẳn."
+            "Điểm vẫn đang tụt. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng ở đây. Rời cây đàn hai phút, rồi quay lại với nó.",
+            "Dừng hẳn ở đây, và hãy dừng bất cứ lúc nào có chỗ nào đau."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Qua mốc {staminaMinutes} phút, nhịp của bạn ở tempo này dễ bị trượt. Nghỉ ngắn, rồi chơi tiếp.",
-            "Quanh phút thứ {staminaMinutes} lực gảy bắt đầu trôi. Nghỉ ngắn, rồi vào lại.",
-            "Bức tường sức bền ở phút thứ {staminaMinutes} — tay phải siết lại. Nghỉ 30 giây.",
-            "Bạn thường mất độ sắc khi gảy quanh phút thứ {staminaMinutes}. Nghỉ ngắn, rồi quay lại."
+            "Trong một khoảng tempo với riff này, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ ngắn là một lựa chọn.",
+            "Các buổi tập của bạn với riff này dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ nhanh, rồi vào lại, nếu bạn muốn.",
+            "Các buổi tập của bạn ở đây dài trung bình {staminaMinutes} phút; các buổi gần đây có điểm thấp hơn. Nghỉ 30 giây nếu bạn muốn.",
+            "Gần đây điểm của bạn với riff này thấp hơn các buổi đầu, qua các buổi dài khoảng {staminaMinutes} phút. Bạn muốn nghỉ ngắn không?"
           ]
         },
         "bias_only": {
@@ -1218,24 +1218,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Cánh tay quạt đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
+            "Các nhát quạt đang kém chính xác ở một tempo. Dừng ngắn, rồi vào lại.",
             "Độ chính xác đang tụt ở tempo này. Nghỉ nhanh một chút, rồi vào lại.",
             "Số lần hụt đang len vào nhát quạt — đặt đàn xuống 60 giây.",
-            "Đã quạt ở một tempo khá lâu. Hít thở, rồi tiếp tục.",
-            "Nhát quạt đang nặng hơn mức cần. Nghỉ ngắn.",
-            "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
-            "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
+            "Đã quạt ở một tempo khá lâu. Dừng một lát, rồi tiếp tục.",
+            "Số lần hụt tăng ở tempo này. Nghỉ ngắn.",
+            "Bạn muốn nghỉ ngắn không? Rồi chơi tiếp.",
+            "Điểm đang tụt ở một tempo — dừng ngắn rồi tiếp tục.",
             "Nghỉ 30 giây nếu bạn muốn, rồi quay lại."
           ],
           "correction": [
-            "Mệt đã lộ ra ở nhát quạt — dừng, rời dây đàn 90 giây.",
+            "Các nhát quạt cứ trượt ở tempo này — dừng, rời dây đàn 90 giây.",
             "Điểm đang thấp hơn đỉnh của bạn — đặt đàn xuống một phút, rồi quay lại.",
-            "Quạt khi mệt làm chìm đi độ mạnh nhẹ. Dừng, nghỉ, rồi bắt đầu lại.",
-            "Cánh tay quạt đang căng quá. Đặt đàn xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Điểm cứ tụt ở một tempo. Dừng, nghỉ, rồi bắt đầu lại.",
+            "Số lần hụt cứ tăng ở tempo này. Đặt đàn xuống, nghỉ hai phút.",
             "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
-            "Tay quạt đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Độ chính xác vẫn đang tụt. Tối thiểu 90 giây, rồi kiểm tra lại.",
             "Dừng hẳn. Nghỉ hai phút, rồi tiếp tục khi bạn sẵn sàng.",
-            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
+            "Dừng ở đây để nghỉ thật sự, và hãy dừng bất cứ lúc nào có chỗ nào đau."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Lực bấm của bạn tăng lên quanh phút thứ {staminaMinutes}. Nghỉ 30 giây rồi vào lại.",
-            "Quanh phút thứ {staminaMinutes} cánh tay quạt căng lên. Nghỉ ngắn, rồi vào lại.",
-            "Qua mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi chơi tiếp.",
-            "Mệt lộ ra ở phút thứ {staminaMinutes} trên cây acoustic. Hãy nghỉ lấy hơi."
+            "Các buổi tập của bạn ở đây dài khoảng {staminaMinutes} phút, và điểm đã thấp xuống so với những buổi đầu. Nghỉ 30 giây là một lựa chọn.",
+            "Các buổi gần đây với bài này có điểm thấp hơn các buổi đầu; trung bình chúng dài khoảng {staminaMinutes} phút. Nghỉ ngắn, rồi vào lại, nếu bạn muốn.",
+            "Trong một khoảng tempo với bài này, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ ngắn là một lựa chọn.",
+            "Trên cây acoustic, các buổi tập của bạn ở đây dài trung bình khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn. Bạn muốn nghỉ ngắn không?"
           ]
         },
         "bias_only": {
@@ -1438,7 +1438,7 @@
             "Tay phải đang kéo chậm. Hãy chơi cùng tiếng click, đừng chờ tiếng kick rơi.",
             "Hãy nhấc ngón búng dây sớm hơn — gặp tiếng click ở phần đầu của nốt.",
             "Mỗi nốt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
-            "Đẩy từ cẳng tay — ngón tay đang nặng dần.",
+            "Các nốt đang rơi trễ. Hãy búng mỗi nốt sớm hơn một chút.",
             "Giảm tempo một chút và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết.",
             "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
             "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước."
@@ -1489,24 +1489,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Các ngón búng dây đang căng lên? Duỗi nhanh — rồi vào lại.",
-            "Cẳng tay bắt đầu cứng? Đặt bass xuống 60 giây.",
+            "Các nốt đang kém chính xác ở một tempo. Dừng nhanh — rồi vào lại.",
+            "Số lần hụt tăng ở tempo này. Đặt bass xuống 60 giây.",
             "Các nốt đang trượt ở cùng một tempo. Nghỉ ngắn, rồi vào lại.",
-            "Tay bấm đang nặng dần? Dừng một lát, rồi tiếp tục.",
-            "Tay phải thấy căng? Lắc cho thả lỏng, rồi chơi tiếp.",
-            "Đã chạy dài ở một tempo. Hít thở, rồi tiếp tục.",
-            "Cẳng tay đang làm việc quá sức. Nghỉ nhanh một chút.",
+            "Bạn muốn nghỉ một lát không? Cứ nghỉ, rồi tiếp tục.",
+            "Độ chính xác đang tụt ở một tempo. Dừng ngắn, rồi chơi tiếp.",
+            "Đã chơi một mạch dài ở một tempo. Dừng ngắn, rồi tiếp tục.",
+            "Điểm đang tụt ở tempo này. Nghỉ nhanh một chút.",
             "Nghỉ 30 giây nếu bạn muốn, rồi quay lại."
           ],
           "correction": [
-            "Mệt đã lộ ra ở lực búng — dừng, nghỉ 90 giây, rồi kiểm tra lại.",
-            "Bạn đã qua đỉnh — đặt bass xuống, duỗi người, rồi vào lại.",
-            "Dừng ngay. Búng dây khi mệt dạy bàn tay một lực búng cẩu thả.",
-            "Tay phải đang căng quá. Đặt bass xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Độ chính xác cứ tụt ở tempo này — dừng, nghỉ 90 giây, rồi kiểm tra lại.",
+            "Điểm đang thấp hơn đỉnh của bạn — đặt bass xuống một phút, rồi vào lại.",
+            "Dừng ngay. Số lần hụt cứ tăng ở cùng tempo.",
+            "Số lần hụt cứ tăng ở một tempo. Đặt bass xuống, nghỉ hai phút.",
             "Nghỉ thật sự — bass lên giá, đi quanh một lúc.",
-            "Tay búng dây đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Độ chính xác vẫn đang tụt. Tối thiểu 90 giây, rồi kiểm tra lại.",
             "Dừng hẳn. Rời cây bass hai phút trước khi tiếp tục.",
-            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
+            "Hãy nghỉ thật sự ngay bây giờ, và dừng nếu có chỗ nào đau."
           ]
         },
         "tempo_milestone": {
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Bức tường sức bền ở phút thứ {staminaMinutes} — groove của bạn lỏng ra. Nghỉ ngắn, rồi vào lại.",
-            "Quanh phút thứ {staminaMinutes} tay búng dây bắt đầu mệt. Hãy nghỉ rồi quay lại.",
-            "Qua mốc {staminaMinutes} phút, sự khớp của bass bắt đầu trượt. Nghỉ ngắn, rồi chơi tiếp.",
-            "Bạn thường yếu đi quanh phút thứ {staminaMinutes}. Nghỉ 30 giây, quay lại cho sạch."
+            "Các buổi tập gần đây của bạn với đường bass này có điểm thấp hơn các buổi đầu, mỗi buổi khoảng {staminaMinutes} phút. Nghỉ ngắn là một lựa chọn.",
+            "Các buổi tập của bạn ở đây dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn. Nghỉ rồi quay lại, nếu bạn muốn.",
+            "Trong một khoảng tempo với đường bass này, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ một chút là một lựa chọn.",
+            "Một buổi tập thường lệ với đường bass này dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ 30 giây nếu bạn muốn."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Giảm tempo và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
             "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
             "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước.",
-            "Các ngón tay đang nặng dần. Hãy chạm nhẹ hơn và để chúng lướt."
+            "Các nốt đang rơi sau click. Hãy nhắm mỗi nốt sớm hơn một chút."
           ]
         },
         "personal_best_streak": {
@@ -1760,24 +1760,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Độ chính xác đang tụt ở tempo này. Nhấc tay lên, hít thở, rồi vào lại.",
-            "Cẳng tay thấy cứng? Dừng lại, thả tay xuống, hít thở.",
+            "Độ chính xác đang tụt ở tempo này. Dừng ngắn, rồi vào lại.",
+            "Bạn muốn dừng ngắn không? Rời khỏi phím đàn một lát.",
             "Số lần hụt đang len vào ở tempo này — rời phím đàn 60 giây.",
-            "Các ngón tay thấy nặng? Duỗi nhanh, rồi chơi tiếp.",
-            "Đôi tay đang làm việc nặng hơn mức cần. Nghỉ ngắn.",
-            "Đã ngồi trước phím đàn khá lâu. Hít thở, rồi chơi.",
+            "Các nốt đang kém chính xác ở một tempo. Dừng nhanh, rồi chơi tiếp.",
+            "Số lần hụt tăng ở tempo này. Nghỉ ngắn.",
+            "Đã ngồi trước phím đàn khá lâu. Dừng ngắn, rồi chơi.",
             "Nghỉ 30 giây là một lựa chọn, rồi quay lại.",
-            "Độ chính xác đang tụt ở một tempo. Dừng lại, đặt hai tay lên đùi, hít thở."
+            "Độ chính xác đang tụt ở một tempo. Dừng một lát, rồi chơi tiếp."
           ],
           "correction": [
-            "Mệt đã lộ ra ở lực chạm phím — dừng, bỏ tay xuống 90 giây.",
-            "Bạn đã qua đỉnh — rời ghế đàn, lắc cho thả lỏng, rồi quay lại.",
+            "Độ chính xác cứ tụt ở tempo này — dừng, rời phím đàn 90 giây.",
+            "Điểm đang thấp hơn đỉnh của bạn — rời ghế đàn một phút, rồi quay lại.",
             "Điểm cứ giảm ở tempo này. Dừng, nghỉ, rồi bắt đầu lại.",
-            "Số lần hụt cứ tăng ở một tempo. Nhấc tay khỏi phím, nghỉ hai phút.",
-            "Nghỉ thật sự — đứng dậy, đi quanh, rồi quay lại cho tươi.",
-            "Đôi tay tạm xong rồi. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Số lần hụt cứ tăng ở một tempo. Rời phím đàn hai phút.",
+            "Nghỉ thật sự — đứng dậy, đi quanh, rồi quay lại.",
+            "Độ chính xác vẫn đang tụt. Tối thiểu 90 giây, rồi kiểm tra lại.",
             "Dừng hẳn. Rời phím đàn hai phút trước khi tiếp tục.",
-            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
+            "Hãy nghỉ thật sự ngay bây giờ, và dừng nếu có chỗ nào đau."
           ]
         },
         "tempo_milestone": {
@@ -1795,10 +1795,10 @@
         "check_in": {
           "neutral": [
             "Đã chơi phím đàn một đoạn dài — bài, bài tập, hay điều gì cụ thể?",
-            "Hơn năm phút rồi. Bạn muốn tôi nhận xét tay trái, tay phải, hay cả hai?",
+            "Hơn năm phút rồi. Bạn muốn tôi nhận xét đoạn nào trong bản nhạc không?",
             "Bạn đã tập trung rất lâu. Hãy cho tôi biết bạn muốn nhận xét về điều gì.",
             "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một đoạn cụ thể không?",
-            "Bạn đã chơi một lúc rồi. Tay trái? Tay phải? Cách xếp hợp âm? Hãy cho tôi biết nghe ở đâu.",
+            "Bạn đã chơi một lúc rồi. Một đoạn? Một tempo? Hãy cho tôi biết nghe ở đâu.",
             "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
             "Đã chơi phím đàn một đoạn dài. Bạn muốn tôi nêu điều gì không?",
             "Bạn đã chơi rất sâu. Hãy cho tôi biết tiếp theo nên nghe điều gì."
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Điểm của bạn ở tempo này tụt quanh phút thứ {staminaMinutes}. Hít thở, quay lại cho sạch.",
-            "Quanh phút thứ {staminaMinutes} các lần hụt bắt đầu len vào. Nghỉ ngắn, rồi chơi tiếp.",
-            "Qua mốc {staminaMinutes} phút, lực chạm phím nặng dần. Nghỉ ngắn, rồi quay lại với phím đàn.",
-            "Mệt ở đôi tay lộ ra quanh phút thứ {staminaMinutes}. Nghỉ, rồi quay lại."
+            "Các buổi gần đây với bản nhạc này có điểm thấp hơn các buổi đầu; chúng dài khoảng {staminaMinutes} phút. Dừng một lát là một lựa chọn.",
+            "Các buổi tập của bạn với bản nhạc này dài trung bình khoảng {staminaMinutes} phút, và gần đây điểm thấp hơn lúc đầu. Nghỉ ngắn, rồi chơi tiếp, nếu bạn muốn.",
+            "Các buổi tập trên phím đàn của bạn ở đây dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn. Nghỉ ngắn, rồi quay lại với phím đàn, nếu bạn muốn.",
+            "Gần đây điểm của bạn với bản nhạc này thấp hơn các buổi đầu, qua các buổi dài khoảng {staminaMinutes} phút. Bạn muốn nghỉ không?"
           ]
         },
         "bias_only": {

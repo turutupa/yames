@@ -192,7 +192,7 @@
             "Beş dakikadan fazladır kilitlisin. Özel bir şeyi söylememi ister misin?",
             "Uzun bir bölüm — istersen dur, buradayım.",
             "Sağlam bir gidiş var. Özellikle bir şeye kulak vermemi ister misin?",
-            "Bir süredir bunun içindesin. Gerekirse bir nefes al.",
+            "Bir süredir bunun içindesin. İstersen kısa bir ara vermekte sakınca yok.",
             "Şimdilik sessiz. Üzerinde çalıştığın şeyi söyle, ona göz kulak olayım.",
             "Henüz söylenecek bir şey yok. Neye kulak vermemi istersin?",
             "Sabit cep. Devam et, ya da hazırsan vites değiştir."
@@ -200,7 +200,7 @@
           "neutral": [
             "Beş dakika oldu, işaretlenecek bir şey yok. Sağlam cep. Devam mı, odak değişikliği mi?",
             "Sessiz bir bölüm. Üzerinde çalıştığın şeyi söyle.",
-            "Uzun, kesintisiz bir seri. Hakkında geri bildirim istediğin bir şey var mı?",
+            "Bir süredir benden ses çıkmadı. Hakkında geri bildirim istediğin bir şey var mı?",
             "Beş dakikadır devam ediyorsun. Söylenecek bir sorun yok — devam et.",
             "Sabit bir oturum. Farklı bir açı ister misin, yoksa aynı yolda mı?",
             "Kaymasız uzun bir seri. Sırada ne var?",
@@ -208,45 +208,45 @@
             "Şimdilik sessiz bir oturum. Daha keskin geri bildirim istersen bir hedef seç."
           ],
           "correction": [
-            "Dikkat — bir süredir bunun içindesin. Ellerin ihtiyaç duyuyorsa 10 dakika ara ver.",
-            "Beş dakikadan fazla kesintisiz. Daha fazla zorlamadan önce bedenine kulak ver.",
-            "Uzun bir oturum — parmaklarını esnet, sonra geri dön.",
-            "Eller yorgun mu? Sonraki geçişten önce 60 saniye ara ver.",
-            "Ara vermeden uzun bir bölüm. Devam etmeden önce kısa bir ara verebilirsin.",
-            "Kısa bir mola zamanı. Soğuk eller özensiz çalar.",
-            "Dur ve esne. İki dakikalık ara, sonraki yirmiyi sağlam tutar.",
-            "Kesintisiz seri — daha fazla zorlamadan önce ellere dinlenme ver."
+            "Dikkat — bir süredir bunun içindesin. İstersen birkaç dakika ara ver.",
+            "Beş dakikayı geçti. Daha fazla ilerlemeden önce kısa bir mola ister misin?",
+            "Uzun bir oturum — burada kısa bir mola verebilirsin, sonra geri dön.",
+            "Sonraki geçişten önce 60 saniyelik bir ara ister misin?",
+            "Son ipucumdan beri uzun bir bölüm geçti. Devam etmeden önce kısa bir ara verebilirsin.",
+            "Son ipucumdan beri beş dakika geçti. Kısa bir mola verebilirsin.",
+            "İstersen burada ara ver. İki dakika ara, sonra kaldığın yerden devam et.",
+            "Kesintisiz seri — daha fazla ilerlemeden önce kısa bir mola ver."
           ]
         },
         "fatigue": {
           "encouragement": [
             "Doğruluk son birkaç dakikadır düşüyor. Bir an ara ver.",
-            "Eller geriliyor mu? Kısa bir esneme — taze dön.",
-            "Kalite kayıyor. Dur, nefes al, geri dön.",
-            "Eller olması gerekenden çok çalışıyor. Kısa bir dinlenme, sonra tekrar gir.",
+            "Bu tempoda doğruluk düşüyor. Kısa bir ara, sonra geri dön.",
+            "Kalite düşüyor. Dur, baştan başla, geri dön.",
+            "Aynı tempoda ıskalar artıyor. Kısa bir mola, sonra tekrar gir.",
             "Bir süredir devam ediyorsun — enstrümanı 60 saniye bırak.",
-            "Beden müzikten daha ağırlaşıyor. Kısa bir mola.",
-            "Parmaklar sertleşiyor mu? Salla, sonra geri dön.",
-            "Kısa bir ara zamanı — taze eller daha temiz çalar."
+            "Tek bir tempoda puanlar düşüyor. Kısa bir mola?",
+            "Kısa bir mola ister misin? Sonra aynı tempoda geri dön.",
+            "Burada kısa bir ara verebilirsin — sonra devam et."
           ],
           "neutral": [
-            "Doğruluk, sabit BPM'de son 3 dakikada düştü — muhtemelen yorgunluk.",
+            "Doğruluk, sabit BPM'de son 3 dakikada düştü. Mola verebilirsin.",
             "Tempo değişmeden puan düşüyor. Dinlen.",
             "Aynı BPM'de süren doğruluk düşüşü — bunu bir dinlenme döngüsü say.",
-            "Aynı tempo, düşen doğruluk. Eller yoruluyor.",
-            "Kalite kayıyor ama tempo değişmedi — bu yorgunluk.",
+            "Aynı tempo, düşen doğruluk. Kısa bir dinlenme verebilirsin.",
+            "Kalite kayıyor ama tempo değişmedi. Ara vermek ister misin?",
             "Tık aynı kalırken kaçırmalar artıyor. Ara zamanı.",
-            "Tek tempoda üç dakikalık kayış. Ellere dinlenme ver.",
-            "Sabit BPM, kayan doğruluk — ellerin sana bir şey söylüyor."
+            "Tek tempoda üç dakikalık düşüş. Kısa bir mola ver.",
+            "Sabit BPM, kayan doğruluk — mola için iyi bir an."
           ],
           "correction": [
-            "Yorgunluk görünüyor — şimdi dur, 90 saniye ara ver, sonra dön.",
-            "Zirve aralığını geçtin. Kalite daha da düşmeden dinlen.",
-            "Dinlen. Yorgun çalmak ellere özensiz alışkanlıklar öğretir.",
+            "Doğruluk düşmeye devam ediyor — şimdi dur, 90 saniye ara ver, sonra dön.",
+            "Bu oturumda puanların zirvenin altında. Daha da düşmeden dinlen.",
+            "Ara ver. Son birkaç dakika, öncekilerden daha düşük puan aldı.",
             "Dur, ayağa kalk, bir dakika dolaş. Sonra geri dön.",
             "Kalite dakikalardır düşüyor. Gerçek bir dinlenme — en az 90 saniye.",
-            "Eller şimdilik tamam. Dur, salla, su iç.",
-            "Yorgunluğun ötesine zorlamak hataları yerleştirir. Dur ve toparlan.",
+            "Bu tempoda puanlar düşmeye devam ediyor. Dur, sonra yeniden bak.",
+            "Tek tempoda ıskalar artmaya devam ediyor. Dur ve mola ver.",
             "Enstrümanı bırak. İki dakika ara, sonra yeniden değerlendir."
           ]
         },
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Puan yine {staminaMinutes}. dakikayı geçince düşüyor — 30 saniye ara ver, sonra aynı BPM'de dön.",
-            "{staminaMinutes}. dakikadan sonra doğruluğun düşme eğiliminde. Kısa bir dinlenme, sonra tekrar gir.",
-            "{staminaMinutes}. dakika civarında zayıflama eğilimindesin. Mola ver ve taze dön.",
-            "{staminaMinutes}. dakika civarında dayanıklılık duvarı — şimdi kısa bir dinlenme, sonra kaliteyi kurtarır."
+            "Buradaki oturumların ortalama {staminaMinutes} dakika sürüyor ve son oturumlar ilk oturumlardan daha düşük puan aldı. İstersen 30 saniye ara ver, sonra aynı BPM.",
+            "Tek bir tempo aralığında, yaklaşık {staminaMinutes} dakikalık son oturumların ilk oturumlarından daha düşük puan aldı. Kısa bir dinlenme bir seçenek.",
+            "Buradaki oturumların yaklaşık {staminaMinutes} dakika sürüyor ve son oturumların ilklerinden daha düşük puan aldı. Mola bir seçenek.",
+            "Burada olağan oturumun yaklaşık {staminaMinutes} dakika ve son zamanlarda puanlar başlangıçtakinden düşük. Şimdi kısa bir dinlenme bir seçenek."
           ]
         },
         "ramp_complete": {
@@ -676,22 +676,22 @@
           "encouragement": [
             "Vuruşlar aynı tempoda kayıyor. Çubukları bir an bırak, sonra geri dön.",
             "Kalite kayıyor — 60 saniye tabureden kalk.",
-            "Ön kollar sana bir şey mi söylüyor? Kısa bir ara, sonra geri gir.",
-            "Bagetler ağır mı geliyor? Bırak, esne, sonra dön.",
-            "Kavrama sıkılaşıyor mu? Bir dakika setten uzaklaş.",
+            "Aynı tempoda vuruşlar aksıyor. Kısa bir ara, sonra tekrar gir.",
+            "Mola ister misin? Bagetleri bırak, sonra dön.",
+            "Bu tempoda ıskalar artıyor. Bir dakika setten uzaklaş.",
             "Doğruluk düşüyor — kısa bir ara, sonra devam et.",
-            "Eller olması gerekenden çok çalışıyor. Kısa bir dinlenme.",
-            "Bagetleri bir an bırak — kollar sıfırlansın."
+            "Tek tempoda doğruluk düşüyor. Kısa bir dinlenme.",
+            "İstersen bagetleri bir an bırak, sonra yeniden başla."
           ],
           "correction": [
-            "Yorgunluk görünüyor — şimdi dur, bagetleri bırak, 90 saniye dinlen. Yorgun davul çalmak özensiz zamanlamayı yerleştirir.",
-            "Zirveyi geçtin — bagetler yere, bir tur yürü, sonra yeniden değerlendir.",
-            "Vuruşlar bu tempoda kaymaya devam ediyor. 90 saniye ara, su iç, dön.",
+            "Bu tempoda doğruluk düşmeye devam ediyor. Şimdi dur, bagetler yere, 90 saniye dinlen.",
+            "Puanlar zirvenin altında — bagetler yere, bir tur yürü, sonra yeniden değerlendir.",
+            "Vuruşlar bu tempoda aksamaya devam ediyor. 90 saniye ara, sonra dön.",
             "Iskalar tek bir tempoda artıyor. Dur, çubukları bırak, iki dakika ara ver.",
-            "Bunun ötesine zorlarsan kendini yaralarsın. Şimdi gerçek bir dinlenme.",
+            "Bir şey acıtıyorsa dur. Her durumda şimdi gerçek bir dinlenme.",
             "Davul çalmayı bırak. Birkaç dakika setten uzaklaş.",
-            "Bagetler yere. Önce ön kollar, sonra eller, gevşeyince dön.",
-            "Kesin dur. Dönmeden önce iki dakika ara ve bir yudum su."
+            "Bagetler yere. İki dakika ara, hazır olunca dön.",
+            "Kesin dur. Dönmeden önce iki dakika ara."
           ]
         },
         "tempo_milestone": {
@@ -712,7 +712,7 @@
             "Beş dakikadan fazla oldu. Bas davulu, hi-hat'i ya da ikisini birden işaretlememi ister misin?",
             "Cebin derinlerindeydin. Sırada ne istediğini söyle.",
             "Sette sağlam bir seri. Daha keskin geri bildirim istediğin bir şey var mı?",
-            "Bir süredir buradasın. Bas davula, trampete ya da uzuvların senkronuna mı kulak vereyim?",
+            "Bir süredir buradasın. Özellikle neye kulak vermemi istersin?",
             "Cep sabit gidiyor. Bundan sonraki odak ne?",
             "Uzun bir groove sürüyor — bir hedef seç, ona yoğunlaşırım.",
             "Beş dakikadan fazla. Sıradaki geri bildirimi nerede istediğini söyle."
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "{staminaMinutes}. dakika civarında ellerin geriliyor. BPM'i 5 kademe düşür ve yeniden kur.",
-            "{staminaMinutes}. dakikayı geçince uzuvlar kaymaya başlıyor. Kısa bir mola, sonra geri dön.",
-            "Sette puanların {staminaMinutes}. dakika civarında düşüyor. Kısa bir dinlenme, sonra dön.",
-            "{staminaMinutes}. dakika civarında bas davul kilidini kaybetme eğilimindesin. Biraz soluklan."
+            "Bu groove'da oturumların yaklaşık {staminaMinutes} dakika sürüyor ve son oturumlar ilk oturumlardan daha düşük puan aldı. BPM'i 5 kademe düşürmek bir seçenek.",
+            "Sette buradaki oturumların yaklaşık {staminaMinutes} dakika sürüyor ve puanların ilk oturumlardan beri düştü. İstersen kısa bir mola, sonra geri dön.",
+            "Bu groove'daki son puanların ilk puanlarının altında, yaklaşık {staminaMinutes} dakikalık oturumlarda. Kısa bir dinlenme bir seçenek.",
+            "Bu groove'da oturum başına yaklaşık {staminaMinutes} dakika ve son oturumlar daha düşük puan aldı. Kısa bir mola ister misin?"
           ]
         },
         "bias_only": {
@@ -946,24 +946,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Mızrap kolu geriliyor mu? Salla, sonra geri gir.",
+            "Tek tempoda doğruluk düşüyor. Kısa bir ara, sonra tekrar gir.",
             "Doğruluk birkaç dakikadır düşüyor. Kısa bir ara, sonra geri gir.",
             "Bu tempoda ıskalar artıyor — gitarı 60 saniye bırak.",
-            "Aynı tempoda uzun bir seri. Nefes al, sonra devam et.",
-            "Mızrap vuruşu gerektiğinden daha zor oluyor. Kısa bir dinlenme.",
-            "Sap üzerindeki kavrama sıkılaşıyor mu? Gevşet, sonra çal.",
-            "Ön kol fazla çalışıyor — salla ve devam et.",
+            "Aynı tempoda uzun bir seri. Dur, sonra devam et.",
+            "Bu tempoda ıskalar artıyor. Kısa bir dinlenme.",
+            "Kısa bir mola ister misin? Sonra çalmaya devam et.",
+            "Tek tempoda puanlar düşüyor — kısa bir ara, sonra devam et.",
             "30 saniyelik bir ara verebilirsin, sonra geri dön."
           ],
           "correction": [
             "Doğruluk aynı tempoda düşüyor — dur, gitarı 90 saniye bırak, sonra tekrar bak.",
             "Puanların zirvenin altında — gitarı bir dakika bırak, sonra geri gir.",
-            "Tendonlar şikâyet etmeden önce dur. Tellerden 90 saniye uzak dur.",
+            "Bu tempoda doğruluk düşmeye devam ediyor. Tellerden 90 saniye uzak dur.",
             "Iskalar bu tempoda artmaya devam ediyor. Gitarı bırak, iki dakika ara ver.",
             "Gerçek bir dinlenme — gitar sehpada, bir süre dolaş.",
-            "Mızrap kolu şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
-            "Burada dur. Gitardan iki dakika uzak kal, sonra taze dön.",
-            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Kesin dur."
+            "Puanlar hâlâ düşüyor. En az 90 saniye, sonra yeniden değerlendir.",
+            "Burada dur. Gitardan iki dakika uzak kal, sonra ona geri dön.",
+            "Burada kesin dur, bir şey acıtıyorsa da istediğin an dur."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "{staminaMinutes}. dakikayı geçince bu tempoda zamanlaman kayma eğiliminde. Kısa bir ara, sonra devam et.",
-            "{staminaMinutes}. dakika civarında mızrap vuruşu kaymaya başlıyor. Kısa bir mola, sonra geri gir.",
-            "{staminaMinutes}. dakikada dayanıklılık duvarı — sağ el sıkılaşıyor. 30 saniye dinlen.",
-            "{staminaMinutes}. dakika civarında mızrap çalışında keskinliğini kaybetme eğilimindesin. Kısa bir dinlenme, sonra dön."
+            "Bu rifte tek bir tempo aralığında, yaklaşık {staminaMinutes} dakikalık son oturumların ilk oturumlarından daha düşük puan aldı. Kısa bir ara bir seçenek.",
+            "Bu rifteki oturumların yaklaşık {staminaMinutes} dakika sürüyor ve son oturumlar ilk oturumlardan daha düşük puan aldı. İstersen kısa bir mola, sonra geri gir.",
+            "Buradaki oturumların ortalama {staminaMinutes} dakika; son oturumlar daha düşük puan aldı. İstersen 30 saniye dinlen.",
+            "Son zamanlarda bu rifteki puanların ilk puanlarının altında, yaklaşık {staminaMinutes} dakikalık oturumlarda. Kısa bir dinlenme ister misin?"
           ]
         },
         "bias_only": {
@@ -1218,24 +1218,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Strum kolu geriliyor mu? Salla, sonra geri gir.",
+            "Tek tempoda strumlar aksıyor. Kısa bir ara, sonra tekrar gir.",
             "Bu tempoda doğruluk düşüyor. Kısa bir ara, sonra geri gir.",
             "Strum'a ıskalar sızıyor — gitarı 60 saniye bırak.",
-            "Bir süredir aynı tempoda strum yapıyorsun. Nefes al, sonra devam et.",
-            "Strum gerektiğinden daha ağırlaşıyor. Kısa bir dinlenme.",
-            "Sap üzerindeki kavrama sıkılaşıyor mu? Gevşet, sonra çal.",
-            "Ön kol fazla çalışıyor — salla ve devam et.",
+            "Bir süredir aynı tempoda strum yapıyorsun. Dur, sonra devam et.",
+            "Bu tempoda ıskalar artıyor. Kısa bir dinlenme.",
+            "Kısa bir mola ister misin? Sonra çalmaya devam et.",
+            "Tek tempoda puanlar düşüyor — kısa bir ara, sonra devam et.",
             "İstersen 30 saniye ara ver, sonra geri dön."
           ],
           "correction": [
-            "Yorgunluk strum'da görünüyor — dur, tellerden 90 saniye uzak dur.",
+            "Bu tempoda strumlar kaymaya devam ediyor — dur, tellerden 90 saniye uzak dur.",
             "Puanların zirvenin altında — gitarı bir dakika bırak, sonra dön.",
-            "Yorgun strum dinamikleri gömer. Dur, dinlen, yeniden başla.",
-            "Strum kolu zorlanıyor. Gitarı bırak, ön kolu esnet, iki dakika ara ver.",
+            "Tek tempoda puanlar düşmeye devam ediyor. Dur, dinlen, yeniden başla.",
+            "Bu tempoda ıskalar artmaya devam ediyor. Gitarı bırak, iki dakika ara ver.",
             "Gerçek bir dinlenme — gitar sehpada, bir süre dolaş.",
-            "Strum eli şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
+            "Doğruluk hâlâ düşüyor. En az 90 saniye, sonra yeniden değerlendir.",
             "Kesin dur. İki dakika ara, sonra hazır olunca devam et.",
-            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
+            "Gerçek bir mola için burada dur, bir şey acıtıyorsa da istediğin an dur."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Perde basma baskın {staminaMinutes}. dakika civarında artıyor. 30 saniye dinlen ve yeniden yaklaş.",
-            "{staminaMinutes}. dakika civarında strum kolu geriliyor. Kısa bir mola, sonra geri gir.",
-            "{staminaMinutes}. dakikayı geçince doğruluğun düşme eğiliminde. Kısa bir dinlenme, sonra devam et.",
-            "Akustikte yorgunluk {staminaMinutes}. dakikada görünüyor. Biraz soluklan."
+            "Buradaki oturumların yaklaşık {staminaMinutes} dakika sürüyor ve puanların ilk oturumlardan beri düştü. 30 saniye dinlenmek bir seçenek.",
+            "Bu alıştırmadaki son oturumlar ilk oturumlardan daha düşük puan aldı; ortalama yaklaşık {staminaMinutes} dakika sürüyorlar. İstersen kısa bir mola, sonra geri gir.",
+            "Bu alıştırmada tek bir tempo aralığında, yaklaşık {staminaMinutes} dakikalık son oturumların ilk oturumlarından daha düşük puan aldı. Kısa bir dinlenme bir seçenek.",
+            "Akustikte buradaki oturumların ortalama yaklaşık {staminaMinutes} dakika sürüyor ve son oturumlar daha düşük puan aldı. Kısa bir mola ister misin?"
           ]
         },
         "bias_only": {
@@ -1438,7 +1438,7 @@
             "Sağ el sürükleniyor. Tıkla birlikte çal; bas davulun inmesini bekleme.",
             "Tel çeken parmağı daha erken kaldır — tıkla notanın ön kısmında buluş.",
             "Her nota geç iniyor. Her tıkın ön kenarını hedefle.",
-            "Ön koldan it — parmak ağırlaşıyor.",
+            "Notalar geç düşüyor. Her teli biraz daha erken çekmeye başla.",
             "Tempoyu biraz düşür ve daha çok kaldırarak çal. Sürükleme geçer.",
             "Tıkın gerçekte olduğundan bir kıl payı önde olduğunu düşün ve onunla buluş.",
             "Dur, bir nefes al, sonra hafifçe öne iterek gir."
@@ -1489,24 +1489,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Tel çeken parmaklar geriliyor mu? Kısa bir esneme — geri gir.",
-            "Ön kol kilitlenmeye mi başlıyor? Bası 60 saniye bırak.",
+            "Tek tempoda notalar aksıyor. Kısa bir ara — geri gir.",
+            "Bu tempoda ıskalar artıyor. Bası 60 saniye bırak.",
             "Notalar aynı tempoda kayıyor. Kısa bir mola, sonra geri gir.",
-            "Perde basan el ağırlaşıyor mu? Bir an dur, sonra devam et.",
-            "Sağ el sıkı mı hissettiriyor? Salla, sonra devam et.",
-            "Aynı tempoda uzun bir seri. Nefes al, sonra devam et.",
-            "Ön kol fazla çalışıyor. Kısa bir dinlenme.",
+            "Bir an durmak ister misin? Dur, sonra devam et.",
+            "Tek tempoda doğruluk düşüyor. Kısa bir ara, sonra devam et.",
+            "Aynı tempoda uzun bir seri. Kısa bir ara, sonra devam et.",
+            "Bu tempoda puanlar düşüyor. Kısa bir dinlenme.",
             "İstersen 30 saniye ara ver, sonra geri dön."
           ],
           "correction": [
-            "Yorgunluk vuruşta görünüyor — dur, 90 saniye ara ver, sonra yeniden değerlendir.",
-            "Zirveyi geçtin — bası bırak, esne, sonra geri gir.",
-            "Şimdi dur. Yorgun tel çekmek ele özensiz bir vuruş öğretir.",
-            "Sağ el zorlanıyor. Bası bırak, ön kolu esnet, iki dakika ara ver.",
+            "Bu tempoda doğruluk düşmeye devam ediyor — dur, 90 saniye ara ver, sonra yeniden değerlendir.",
+            "Puanlar zirvenin altında — bası bir dakika bırak, sonra geri gir.",
+            "Şimdi dur. Aynı tempoda ıskalar artmaya devam ediyor.",
+            "Tek tempoda ıskalar artmaya devam ediyor. Bası bırak, iki dakika ara ver.",
             "Gerçek bir dinlenme — bas sehpada, bir süre dolaş.",
-            "Tel çeken el tamam. En az 90 saniye, sonra yeniden değerlendir.",
+            "Doğruluk hâlâ düşüyor. En az 90 saniye, sonra yeniden değerlendir.",
             "Kesin dur. Devam etmeden önce bastan iki dakika uzak kal.",
-            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
+            "Şimdi gerçek bir mola ver ve bir şey acıtıyorsa dur."
           ]
         },
         "tempo_milestone": {
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "{staminaMinutes}. dakikada dayanıklılık duvarı — groove'un gevşiyor. Kısa bir mola, sonra geri gir.",
-            "{staminaMinutes}. dakika civarında tel çeken el yorulmaya başlıyor. Dinlen ve dön.",
-            "{staminaMinutes}. dakikayı geçince bas kilidi kaymaya başlıyor. Kısa bir dinlenme, sonra devam et.",
-            "{staminaMinutes}. dakika civarında zayıflama eğilimindesin. 30 saniye ara ver, temiz dön."
+            "Bu hattaki son oturumların ilk oturumlarından daha düşük puan aldı, her biri yaklaşık {staminaMinutes} dakika. Kısa bir mola bir seçenek.",
+            "Buradaki oturumların yaklaşık {staminaMinutes} dakika sürüyor ve son oturumlar daha düşük puan aldı. İstersen dinlen ve dön.",
+            "Bu hatta tek bir tempo aralığında, yaklaşık {staminaMinutes} dakikalık son oturumların ilk oturumlarından daha düşük puan alıyor. Kısa bir dinlenme bir seçenek.",
+            "Bu hatta olağan bir oturum yaklaşık {staminaMinutes} dakika ve son oturumlar ilk oturumlardan daha düşük puan aldı. İstersen 30 saniye ara ver."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Tempoyu düşür ve daha çok kaldırarak çal. Kolay gelince sürükleme geçer.",
             "Tıkın gerçekte olduğundan bir kıl payı önde olduğunu düşün ve onunla buluş.",
             "Dur, bir nefes al, sonra hafifçe öne iterek gir.",
-            "Parmaklar ağırlaşıyor. Dokunuşunu hafiflet ve süzülmelerine izin ver."
+            "Notalar klikin gerisine düşüyor. Her birini biraz daha erken hedefle."
           ]
         },
         "personal_best_streak": {
@@ -1760,24 +1760,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Bu tempoda doğruluk düşüyor. Elleri kaldır, nefes al, sonra geri gir.",
-            "Ön kollar kilitlenmiş gibi mi? Dur, elleri bırak, nefes al.",
+            "Bu tempoda doğruluk düşüyor. Kısa bir ara, sonra geri gir.",
+            "Kısa bir ara ister misin? Bir an tuşlardan uzaklaş.",
             "Bu tempoda ıskalar artıyor — 60 saniye tuşlardan uzak dur.",
-            "Parmaklar ağırlaşıyor mu? Kısa bir esneme, sonra devam et.",
-            "Eller olması gerekenden çok çalışıyor. Kısa bir dinlenme.",
-            "Bir süredir tuşlardasın. Nefes al, sonra çal.",
+            "Tek tempoda notalar aksıyor. Kısa bir ara, sonra devam et.",
+            "Bu tempoda ıskalar artıyor. Kısa bir dinlenme.",
+            "Bir süredir tuşlardasın. Kısa bir ara, sonra çal.",
             "30 saniyelik bir ara verebilirsin, sonra geri dön.",
-            "Aynı tempoda doğruluk düşüyor. Dur, elleri dizlerine bırak, nefes al."
+            "Aynı tempoda doğruluk düşüyor. Bir an dur, sonra çalmaya devam et."
           ],
           "correction": [
-            "Yorgunluk dokunuşta görünüyor — dur, eller 90 saniye aşağıda.",
-            "Zirveyi geçtin — tabureden kalk, salla, sonra dön.",
+            "Bu tempoda doğruluk düşmeye devam ediyor — dur, tuşlardan 90 saniye uzak dur.",
+            "Puanlar zirvenin altında — bir dakika tabureden kalk, sonra dön.",
             "Puanlar bu tempoda düşmeye devam ediyor. Dur, dinlen, yeniden başla.",
-            "Iskalar tek bir tempoda artmaya devam ediyor. Elleri tuşlardan çek, iki dakika ara ver.",
-            "Gerçek bir dinlenme — ayağa kalk, dolaş, taze dön.",
-            "Eller şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
+            "Tek tempoda ıskalar artmaya devam ediyor. Tuşlardan iki dakika uzak dur.",
+            "Gerçek bir dinlenme — ayağa kalk, dolaş, sonra dön.",
+            "Doğruluk hâlâ düşüyor. En az 90 saniye, sonra yeniden değerlendir.",
             "Kesin dur. Devam etmeden önce tuşlardan iki dakika uzak kal.",
-            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
+            "Şimdi gerçek bir mola ver ve bir şey acıtıyorsa dur."
           ]
         },
         "tempo_milestone": {
@@ -1795,10 +1795,10 @@
         "check_in": {
           "neutral": [
             "Tuşların başında uzun bir bölüm — parça, alıştırma, belirli bir şey mi?",
-            "Beş dakikadan fazla oldu. Sol eli, sağ eli ya da ikisini birden işaretlememi ister misin?",
+            "Beş dakikadan fazla oldu. Parçada geri bildirim istediğin bir yer var mı?",
             "İçine kilitlendin. Neyle ilgili geri bildirim istediğini söyle.",
             "Sağlam bir seri sürüyor. Belirli bir pasaj için daha keskin geri bildirim ister misin?",
-            "Bir süredir buradasın. Sol el mi? Sağ el mi? Dizilimler mi? Nereyi dinlemem gerektiğini söyle.",
+            "Bir süredir buradasın. Bir pasaj mı? Bir tempo mu? Nereyi dinlemem gerektiğini söyle.",
             "Cep sabit gidiyor. Daha yakın geri bildirim istersen bir hedef seç.",
             "Tuşların başında uzun bir bölüm. İşaretlememi istediğin bir şey var mı?",
             "Derinlere daldın. Sıradaki dinlenecek şeyi söyle."
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Bu tempoda puanların {staminaMinutes}. dakika civarında düşüyor. Nefes al, temiz dön.",
-            "{staminaMinutes}. dakika civarında ıskalar artmaya başlıyor. Kısa bir dinlenme, sonra devam et.",
-            "{staminaMinutes}. dakikayı geçince dokunuş ağırlaşıyor. Kısa bir mola, sonra tuşların başına dön.",
-            "Ellerde yorgunluk {staminaMinutes}. dakika civarında görünüyor. Dinlen, sonra dön."
+            "Bu parçadaki son oturumların ilk oturumlarından daha düşük puan aldı; yaklaşık {staminaMinutes} dakika sürüyorlar. Bir ara bir seçenek.",
+            "Bu parçadaki oturumların ortalama yaklaşık {staminaMinutes} dakika sürüyor ve son zamanlarda başlangıca göre daha düşük puan alıyorlar. İstersen kısa bir dinlenme, sonra devam et.",
+            "Tuşların başındaki oturumların burada yaklaşık {staminaMinutes} dakika sürüyor ve son oturumlar daha düşük puan aldı. İstersen kısa bir mola, sonra tuşların başına dön.",
+            "Son zamanlarda bu parçadaki puanların ilk puanlarının altında, yaklaşık {staminaMinutes} dakikalık oturumlarda. Dinlenmek ister misin?"
           ]
         },
         "bias_only": {
