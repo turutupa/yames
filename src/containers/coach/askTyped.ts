@@ -15,8 +15,11 @@
  *    labelled with the resolved title (review t1b2c, findings 1 and 5).
  * 2. The next answerer (`setAskNextAnswerer`): today it answers nothing; the
  *    fact cards plug in here (c2b1a's `answerCardFor`, wired by c2b1b).
- * 3. What Ask did before commands: the model when one is selected, otherwise
- *    the plain statement (`sendAsk` → the host's answerer).
+ * 3. Where the model chooses for this language and tier (`MODEL_LANGS`, leg
+ *    c3b2a; empty in this build): the plain statement at once, then the
+ *    model's choice under it (`askModelTurn.ts`), the one asynchronous step.
+ *    Otherwise what Ask did before commands: the model when one is selected,
+ *    otherwise the plain statement (`sendAsk` → the host's answerer).
  *
  * With a model selected the router still runs first: a command is never
  * handed to a model to be described instead of done.
@@ -26,6 +29,7 @@ import { routeCommand } from "../../coach/ask/router";
 import { line, type ToolChoice } from "../../coach/tools/types";
 import { appendAskTurn, askTurnId, sendAsk } from "./askStore";
 import { askCommandFacts, askYours, runAskCall, runTypedCall, typedGo } from "./askTools";
+import { answerWithModel, modelTurnWanted, stopModelTurn } from "./askModelTurn";
 
 /**
  * An answerer tried after the router and before the model: true when it
@@ -70,8 +74,8 @@ export function setAskNextAnswerer(fn: AskNextAnswerer | null): () => void {
   };
 }
 
-/** What the router made of a sentence, for a test: the turn kind it led to. */
-export type TypedOutcome = "call" | "which" | "yours" | "notHere" | "next" | "asked";
+/** What the router made of a sentence, for a test: the turn kind it led to (`model`: the model's turn, leg c3b2a). */
+export type TypedOutcome = "call" | "which" | "yours" | "notHere" | "next" | "asked" | "model";
 
 /**
  * The player sent `text` from Ask's box, in `language` (i18next's). The router
@@ -80,6 +84,8 @@ export type TypedOutcome = "call" | "which" | "yours" | "notHere" | "next" | "as
 export function answerTyped(text: string, language: string): TypedOutcome | null {
   const said = text.trim();
   if (!said) return null;
+  // A new sentence supersedes the model's turn in flight: cancelled, its answer dropped (leg c3b2a).
+  stopModelTurn();
   const table = commandTableFor(language);
   const facts = table ? askCommandFacts() : null;
   if (table && facts) {
@@ -131,6 +137,12 @@ export function answerTyped(text: string, language: string): TypedOutcome | null
     answered = false;
   }
   if (answered) return "next";
+  // The model's choice, where it is on for this language and tier (leg c3b2a; none in this build):
+  // the plain statement at once, the model after it. Otherwise what Ask did before.
+  if (modelTurnWanted(language)) {
+    answerWithModel(said, language);
+    return "model";
+  }
   sendAsk(said);
   return "asked";
 }
