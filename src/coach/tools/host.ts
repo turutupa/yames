@@ -149,6 +149,13 @@ export type CoachToolHost = {
    * While it is not null a navigating `go` tool waits for a press (t1a2).
    */
   sounding: (target?: MainView) => Sounding | null;
+  /**
+   * A jam take is being written to disk (`useJamTakes().recording`; named
+   * so no never-list word is a member). Leg chip1b (review M2): while it is,
+   * a chip's press is not the press (the owner's rule counts a jam take being
+   * written as a Take for the at-once path). A read; it changes nothing.
+   */
+  jamTakeRunning: () => boolean;
 
   // -- Declared for t1a2 (the `confirm` tools) -----------------------------
 
@@ -251,6 +258,7 @@ export const HOST_MEMBERS = [
   "movePaths",
   "openSettingsSection",
   "sounding",
+  "jamTakeRunning",
   "plan",
   "minutes",
   "todayFocus",
@@ -333,6 +341,7 @@ export function notWiredHost(): CoachToolHost {
     movePaths: () => {},
     openSettingsSection: () => {},
     sounding: () => null,
+    jamTakeRunning: () => false,
     plan: () => null,
     minutes: () => 15,
     todayFocus: () => "mix",

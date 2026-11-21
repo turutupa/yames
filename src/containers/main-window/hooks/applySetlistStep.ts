@@ -2,6 +2,7 @@ import { setBeatGroups, setBpm, setFreeMode, setSoundType, setSubdivision, setVo
 import { compileJam } from "../../../jam";
 import type { Jam, JamBand } from "../../../jam";
 import { clearJam, pushJam } from "./jamEngine";
+import { noteAskLoad } from "../../coach/askTools";
 import type { SetlistStep, Subdivision } from "../../../types";
 
 /**
@@ -36,6 +37,8 @@ export function applySetlistStep(
   /** True when this application lands on a bar line — the runner's switch. */
   atBarLine = false,
 ): void {
+  // The coach's chip Undos put back values this step replaces (leg chip1b, review L2 b).
+  noteAskLoad();
   void setBpm(step.bpm).catch(() => {});
   void setSoundType(step.soundType).catch(() => {});
   void setVolume(step.volume).catch(() => {});

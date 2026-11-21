@@ -30,6 +30,7 @@ import type { MainView } from "../../containers/main-window/MainHeader";
 import type { CoachToolHost, HostOutcome, Sounding } from "./host";
 import { COACH_TOOLS } from "./registry";
 import {
+  inSession,
   line,
   refuse,
   takeRunning,
@@ -269,6 +270,155 @@ export function runCoachTool(
 }
 
 /**
+ * Whether a chip's own press may be the press for this tool: registry data
+ * (`chipPress`, set only from `CHIP_PRESS`), and never for a tool that
+ * leaves the screen or that only the app may call, whatever the data says.
+ */
+export function chipPressable(tool: CoachTool | undefined): boolean {
+  return !!tool && tool.kind === "confirm" && tool.chipPress === true && tool.audience === "player" && !tool.leaves;
+}
+
+/**
+ * A suggestion chip's press (leg chip1; the owner's decision: the chip's own
+ * press IS the press for a reversible one-step change, always with Undo).
+ * The ONLY door to "confirm at once", and only Ask's suggestion chips call
+ * it: a typed command, a "Which one?" choice, a model's call and the
+ * `accept-suggestion` binding go through `runCoachTool` and keep the proposal.
+ *
+ * The call goes exactly the way a proposal and its press go: the shape
+ * check, the context (never during a Take; the tool's `when`), the tool's
+ * `propose` (resolution against real data), and then `confirmCoachTool` on
+ * that very proposal, which checks the context again and calls the tool's
+ * `commit` (the screen, the value still what was proposed from). A tool not
+ * flagged, or a proposal that carries a plan or says it cannot be undone:
+ * the proposal is returned as `runCoachTool` would, and nothing has happened.
+ * That every flagged tool's receipt carries its undo is `chipPress.test.ts`'s
+ * to prove (it presses each one and puts it back).
+ *
+ * `prior` (leg chip1b, review M1): the live Undo of the previous chip press
+ * of the same thing, if Ask still offers one. When this press moves on from
+ * exactly the value that press left, the two are one run, and the new Undo
+ * carries the OLDER `from` ("Slower, Slower, Slower, Undo" goes back to the
+ * tempo before the run); the receipt says the run's whole change. In a
+ * Session a run cannot be put back in one press (one rung per nudge, the
+ * only door), so there a second press while the first one's Undo is live
+ * comes back as the proposal. So does any press while a jam take is being
+ * recorded (review M2: the owner's rule counts that as a Take here).
+ */
+export function pressCoachChip(
+  call: unknown,
+  host: CoachToolHost,
+  ctx: CoachContext,
+  registry: readonly CoachTool[] = COACH_TOOLS,
+  prior?: unknown,
+): RunOutcome {
+  const checked = checkCall(call, registry, "player");
+  if (!checked.ok) return checked;
+  const outcome = run(checked.call, host, ctx);
+  if (!("proposal" in outcome)) return outcome;
+  const { proposal } = outcome;
+  if (!chipPressable(checked.call.tool) || proposal.noUndo || proposal.plan) return outcome;
+  const session = inSession(ctx) || host.sessionActive();
+  // In a Session, at once only on the ready screen: a nudge pressed on a result also
+  // takes the Session from the result to ready, which no Undo puts back.
+  if (session && ctx.run?.phase !== "ready") return outcome;
+  if (jamTakeNow(host)) return outcome;
+  const before = liveUndoHere(prior, checked.call.tool.name, host, ctx);
+  if (before && session) return outcome;
+  const result = confirmCoachTool(proposal, host, ctx, registry);
+  return before ? chainUndo(result, before) : result;
+}
+
+/** A jam take is being written (review M2). A read that throws counts as yes: the proposal is the safe side. */
+function jamTakeNow(host: CoachToolHost): boolean {
+  try {
+    return host.jamTakeRunning();
+  } catch {
+    return true;
+  }
+}
+
+/** `prior`, if it is an Undo this runner issued for `tool`, still live, issued where the player is now. */
+function liveUndoHere(prior: unknown, tool: string, host: CoachToolHost, ctx: CoachContext): ToolCall | null {
+  if (!isPlainObject(prior) || !undos.has(prior as ToolCall)) return null;
+  const undo = prior as ToolCall;
+  try {
+    return undo.tool === tool && undos.get(undo) === placeOf(host, ctx) ? undo : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The one argument an undo puts back (`bpm`, `subdivision`, `value`): not its guard, not a setting's key. */
+function valueArg(args: ToolArgs): string | null {
+  const names = Object.keys(args).filter((name) => name !== "at" && name !== "key");
+  return names.length === 1 ? names[0] : null;
+}
+
+/**
+ * One run of presses, one Undo (review M1): when `result` moved on from the
+ * very value `before`'s press left (`before.args.at`), its Undo becomes
+ * `before`'s value guarded by `result`'s `at`, and its receipt's `from` the
+ * run's start. Both single Undos are spent. A run back to where it started
+ * is not chained (an Undo to the value it is at would do nothing): the
+ * result's own Undo stays.
+ */
+function chainUndo(result: ToolResult, before: ToolCall): ToolResult {
+  if (!result.ok || !result.undo) return result;
+  const after = result.undo;
+  const key = valueArg(after.args);
+  if (!key || after.tool !== before.tool || after.args.key !== before.args.key) return result;
+  if (before.args.at === undefined || before.args.at !== after.args[key]) return result;
+  if (before.args[key] === after.args.at) return result;
+  const place = undos.get(after);
+  if (place === undefined) return result;
+  const undo: ToolCall = Object.freeze({ tool: before.tool, args: Object.freeze({ ...before.args, at: after.args.at }) });
+  undos.delete(after);
+  undos.delete(before);
+  undos.set(undo, place);
+  const start = before.args[key];
+  const receipt =
+    "from" in result.receipt.values && (typeof start === "number" || typeof start === "string")
+      ? line(result.receipt.key, { ...result.receipt.values, from: start })
+      : result.receipt;
+  return { ...result, receipt, undo };
+}
+
+/**
+ * Whether an Undo this runner handed out would still put back what its
+ * receipt changed, asked without pressing it (leg chip1: a chip's Undo is
+ * offered until the value is changed again, by anyone). Still live, here (the
+ * view and, in a Session, the Exercise it was issued on), no Take running,
+ * and, for a `confirm` undo, its tool's `propose` (which changes nothing)
+ * still accepts it: the undo's `at` guard says no once the value moved.
+ */
+export function undoStillGood(
+  undo: unknown,
+  host: CoachToolHost,
+  ctx: CoachContext,
+  registry: readonly CoachTool[] = COACH_TOOLS,
+): boolean {
+  if (!isPlainObject(undo) || !undos.has(undo as ToolCall)) return false;
+  const issuedUndo = undo as ToolCall;
+  const checked = checkCall(issuedUndo, registry, "app");
+  if (!checked.ok) return false;
+  const { tool, args } = checked.call;
+  if (tool.kind !== "confirm") return true;
+  try {
+    if (placeOf(host, ctx) !== undos.get(issuedUndo)) return false;
+    if (checkContext(tool, ctx)) return false;
+    return tool.propose(args, host, ctx).ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Spend an Undo without running it: it is no longer offered (a later change, a Take, another screen). */
+export function retireUndo(undo: unknown): void {
+  if (isPlainObject(undo)) undos.delete(undo as ToolCall);
+}
+
+/**
  * The press on a proposal's button. Only a proposal this runner minted, only
  * once, and only if the context still allows it (a Take may have started
  * since it was shown).
@@ -305,8 +455,9 @@ export function dismissProposal(proposal: Proposal): void {
  * (`return_to`). An undo that is a `confirm` tool runs at once, because the
  * Undo press is the press. A `confirm` undo pressed anywhere but the view
  * (and, in a Session, the Exercise) it was issued on is refused and spent.
- * Refused as `notNow` (a Take, a click still playing), it stays good for a
- * later press, on that same screen.
+ * Refused as `notNow` (a Take, a click still playing, a jam take being
+ * written: a `confirm` undo only), it stays good for a later press, on that
+ * same screen.
  */
 export function runCoachUndo(
   undo: unknown,
@@ -332,6 +483,12 @@ export function runCoachUndo(
     }
     if (here !== place) {
       return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "the undo was issued on another screen" });
+    }
+    // A jam take being written is a Take here (review chip1b MEDIUM; the backstop to Ask
+    // retiring chip Undos at its start): not now, and the Undo stays good for after it.
+    if (jamTakeNow(host)) {
+      undos.set(issuedUndo, place);
+      return refuse("notNow", "coachTools.why.notNow.take");
     }
   }
   const outcome = runIssuedUndo(issuedUndo, host, ctx, registry);
