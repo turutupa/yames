@@ -87,16 +87,13 @@ describe("plan reasons quote the shown clean tempo; the tempo stays on the ceili
   });
 
   it("the plan's own warm-up quotes the shown tempo too", () => {
-    const { marked, unmarked } = histories(OPEN, 90, 100, 2 * DAY);
+    // Under the pass tempo, so the focus stays on this Exercise and warms up on it.
+    const { marked, unmarked } = histories(OPEN, 50, 55, 2 * DAY);
     const run = (p: PlayerProgress) => planSession({ minutes: 15, now: NOW, paths: [ALT], progress: p }).steps;
     const warm = run(marked).find((s) => s.kind === "metronome" && s.id === "warmup");
     const warmBefore = run(unmarked).find((s) => s.kind === "metronome" && s.id === "warmup");
-    expect(warm?.why).toMatchObject({ code: "warmUpClean" });
-    expect(warmBefore?.why).toMatchObject({ code: "warmUpClean" });
-    const quoted = (warm?.why.values as { clean?: number }).clean;
-    const quotedBefore = (warmBefore?.why.values as { clean?: number }).clean;
-    // Whichever Exercise the warm-up reads, it quotes that Exercise's shown tempo.
-    expect(quoted === quotedBefore || (quoted === 90 && quotedBefore === 100)).toBe(true);
+    expect(warmBefore?.why).toMatchObject({ code: "warmUpClean", values: { clean: 55 } });
+    expect(warm?.why).toMatchObject({ code: "warmUpClean", values: { clean: 50 } });
     expect(warm?.kind === "metronome" && warm.bpm).toBe(warmBefore?.kind === "metronome" && warmBefore.bpm);
   });
 
