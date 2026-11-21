@@ -312,6 +312,28 @@ pub struct ExerciseCeiling {
     pub last_practiced: i64,
 }
 
+/// One Exercise's clean tempo over its whole history: the first one earned
+/// and the best, each with the Take's date. The long view's milestones
+/// ("from 70 to 90") read this; the 500-Take window cannot see that far back.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CleanTempoSpan {
+    pub path_id: String,
+    pub exercise_id: String,
+    pub first_bpm: i64,
+    /// `started_at` of the Take that earned the first clean tempo.
+    pub first_at: i64,
+    /// The highest clean tempo: the ceiling `list_exercise_ceilings` reports.
+    pub best_bpm: i64,
+    /// `started_at` of the first Take that earned it.
+    pub best_at: i64,
+}
+
+/// A Take earns a clean tempo over at least this many bars
+/// (`CLEAN_TEMPO_MIN_BARS` in `src/session/grade.ts`). Only read for rows
+/// saved before `facts.newClean` existed; see `clean_tempo_spans_sql`.
+const CLEAN_TEMPO_MIN_BARS: i64 = 8;
+
 /// An onset the player produced that the score did not ask for.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -1687,6 +1709,61 @@ impl Db {
             .map_err(DbError::from)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
     }
+
+    /// The first and the best clean tempo of every Exercise, over every Take
+    /// the store holds rather than the planner's 500. Read-only.
+    ///
+    /// Which Takes count is `clean_tempo_spans_sql`'s business. Sorted by Path,
+    /// then Exercise; an Exercise with no clean tempo has no entry, and the
+    /// same Exercise id on two Paths is two entries (as `exercise_ceilings`
+    /// keys it).
+    pub fn list_clean_tempo_spans(&self) -> DbResult<Vec<CleanTempoSpan>> {
+        let (sql, args) = clean_tempo_spans_sql();
+        let params: Vec<&dyn rusqlite::ToSql> = args.iter().map(|b| b.as_ref()).collect();
+        let mut stmt = self.conn.prepare(&sql).map_err(DbError::from)?;
+        let rows = stmt
+            .query_map(params.as_slice(), |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, i64>(2)?,
+                    r.get::<_, i64>(3)?,
+                ))
+            })
+            .map_err(DbError::from)?;
+        let mut spans: std::collections::BTreeMap<(String, String), CleanTempoSpan> =
+            std::collections::BTreeMap::new();
+        for row in rows {
+            let (path_id, exercise_id, at, bpm) = row.map_err(DbError::from)?;
+            // Independent of the order the rows come in: the earliest Take is
+            // the first, and the best is the highest tempo, earliest on a tie.
+            match spans.entry((path_id, exercise_id)) {
+                std::collections::btree_map::Entry::Vacant(slot) => {
+                    let (path_id, exercise_id) = slot.key().clone();
+                    slot.insert(CleanTempoSpan {
+                        path_id,
+                        exercise_id,
+                        first_bpm: bpm,
+                        first_at: at,
+                        best_bpm: bpm,
+                        best_at: at,
+                    });
+                }
+                std::collections::btree_map::Entry::Occupied(mut slot) => {
+                    let span = slot.get_mut();
+                    if at < span.first_at {
+                        span.first_bpm = bpm;
+                        span.first_at = at;
+                    }
+                    if bpm > span.best_bpm || (bpm == span.best_bpm && at < span.best_at) {
+                        span.best_bpm = bpm;
+                        span.best_at = at;
+                    }
+                }
+            }
+        }
+        Ok(spans.into_values().collect())
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1734,6 +1811,45 @@ fn history_sql(filter: &HistoryFilter) -> (String, Vec<Box<dyn rusqlite::ToSql>>
     sql.push_str(&(args.len() + 1).to_string());
     args.push(Box::new(filter.limit.unwrap_or(u32::MAX) as i64));
     (sql, args)
+}
+
+/// The Takes that earned a clean tempo, for `list_clean_tempo_spans`.
+///
+/// The clean tempo the app shows (`cleanTempoOf` in `src/session/progress.ts`)
+/// is `exercise_ceilings`, which keeps only the highest one and no history.
+/// Its history is the Takes that raised it, and those are the rows whose
+/// `facts.newClean` is true: `useSessionRun` sets it exactly when it hands
+/// `save_path_take` a clean tempo. So a Take not caught, a Take below the
+/// pass mark, an ungraded Take and a Take that passed slower than the clean
+/// tempo already was are all left out, as the ceiling leaves them out; a
+/// Take the player later called unfair stays in, because the ceiling keeps it
+/// too.
+///
+/// Rows saved before `newClean` existed (2026-11-08 to 11-16) carry no such
+/// flag; for those alone, a caught, passed Take over at least
+/// `CLEAN_TEMPO_MIN_BARS` bars counts, which is what `gradeTake` asked of a
+/// clean tempo then, short of the per-bar evenness it cannot see from here.
+/// Facts that are not JSON are read as having no flag, as `list_path_takes`
+/// keeps such a row.
+///
+/// Every Take is a candidate, so this reads the table end to end; it walks it
+/// in `path_takes_exercise` order, which spares SQLite a sort.
+fn clean_tempo_spans_sql() -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
+    let sql = String::from(
+        "SELECT path_id, exercise_id, started_at, bpm
+         FROM path_takes
+         WHERE caught = 1 AND passed = 1
+           AND CASE COALESCE(
+                      CASE WHEN json_valid(facts_json)
+                           THEN json_type(facts_json, '$.newClean') END,
+                      'null')
+                 WHEN 'true' THEN 1
+                 WHEN 'null' THEN bars >= ?1
+                 ELSE 0
+               END
+         ORDER BY exercise_id ASC, started_at DESC",
+    );
+    (sql, vec![Box::new(CLEAN_TEMPO_MIN_BARS)])
 }
 
 fn attempts_sql(query: &AttemptQuery) -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
@@ -2922,6 +3038,236 @@ mod tests {
         let ceilings = db.list_exercise_ceilings().unwrap();
         assert_eq!(ceilings[0].clean_bpm, 100);
         assert_eq!(ceilings[0].last_practiced, 200);
+    }
+
+    /// A Take as `useSessionRun` saves it: `newClean` in its facts when it
+    /// raised the clean tempo, with the clean tempo handed to the store beside
+    /// it. `None` is a row from before the flag existed.
+    fn clean_take(
+        id: &str,
+        path: &str,
+        exercise: &str,
+        at: i64,
+        bpm: i64,
+        new_clean: Option<bool>,
+    ) -> PathTake {
+        let mut facts = serde_json::json!({
+            "verdict": "passed",
+            "measures": { "caught": true, "barsPlayed": 8, "evenness": 0.9 },
+            "session": at,
+        });
+        if let Some(raised) = new_clean {
+            facts["newClean"] = serde_json::json!(raised);
+        }
+        PathTake {
+            id: id.into(),
+            path_id: path.into(),
+            step_id: "s".into(),
+            exercise_id: exercise.into(),
+            started_at: at,
+            bpm,
+            bars: 8,
+            caught: true,
+            passed: true,
+            variant_seed: None,
+            facts,
+        }
+    }
+
+    fn save_clean(db: &mut Db, take: &PathTake) {
+        let raised = take.facts["newClean"] == serde_json::json!(true);
+        db.save_path_take(take, raised.then_some(take.bpm)).unwrap();
+    }
+
+    fn span(path: &str, ex: &str, first: (i64, i64), best: (i64, i64)) -> CleanTempoSpan {
+        CleanTempoSpan {
+            path_id: path.into(),
+            exercise_id: ex.into(),
+            first_bpm: first.0,
+            first_at: first.1,
+            best_bpm: best.0,
+            best_at: best.1,
+        }
+    }
+
+    #[test]
+    fn an_empty_store_has_no_clean_tempo_spans() {
+        let db = Db::open_in_memory().unwrap();
+        assert!(db.list_clean_tempo_spans().unwrap().is_empty());
+    }
+
+    /// The statement can only read: SQLite says so of the prepared statement.
+    #[test]
+    fn the_clean_tempo_span_query_is_read_only() {
+        let db = Db::open_in_memory().unwrap();
+        let (sql, _) = clean_tempo_spans_sql();
+        assert!(db.conn.prepare(&sql).unwrap().readonly());
+    }
+
+    /// Up, down (a slower pass, which raised nothing), and up again: the first
+    /// is the first, the best is the highest, and the best is the ceiling.
+    #[test]
+    fn a_clean_tempo_span_runs_from_the_first_to_the_best() {
+        let mut db = Db::open_in_memory().unwrap();
+        let (p, e) = ("alternate-picking", "even-eighths.open-string");
+        save_clean(&mut db, &clean_take("a", p, e, 100, 70, Some(true)));
+        save_clean(&mut db, &clean_take("b", p, e, 200, 80, Some(true)));
+        save_clean(&mut db, &clean_take("c", p, e, 300, 75, Some(false)));
+        save_clean(&mut db, &clean_take("d", p, e, 400, 90, Some(true)));
+        save_clean(&mut db, &clean_take("e", p, e, 500, 85, Some(false)));
+
+        let spans = db.list_clean_tempo_spans().unwrap();
+        assert_eq!(spans, [span(p, e, (70, 100), (90, 400))]);
+        let ceilings = db.list_exercise_ceilings().unwrap();
+        assert_eq!(ceilings[0].clean_bpm, spans[0].best_bpm);
+    }
+
+    /// What earned no clean tempo is not in the span: not caught, below the
+    /// pass mark, ungraded, or passed without raising it. A Take the player
+    /// called unfair stays, because the ceiling (`cleanTempoOf`) keeps it.
+    #[test]
+    fn a_clean_tempo_span_leaves_out_what_the_ceiling_leaves_out() {
+        let mut db = Db::open_in_memory().unwrap();
+        let (p, e) = ("p", "x");
+        let mut not_caught = clean_take("nc", p, e, 10, 60, None);
+        not_caught.caught = false;
+        not_caught.passed = false;
+        save_clean(&mut db, &not_caught);
+        let mut below = clean_take("below", p, e, 20, 62, None);
+        below.passed = false;
+        below.facts["verdict"] = serde_json::json!("belowBar");
+        save_clean(&mut db, &below);
+        let mut ungraded = clean_take("ung", p, e, 30, 64, Some(false));
+        ungraded.caught = false;
+        ungraded.passed = false;
+        ungraded.facts["ungraded"] = serde_json::json!("chosen");
+        save_clean(&mut db, &ungraded);
+        save_clean(&mut db, &clean_take("first", p, e, 40, 66, Some(true)));
+        save_clean(&mut db, &clean_take("slower", p, e, 50, 50, Some(false)));
+        let mut unfair = clean_take("unfair", p, e, 60, 72, Some(true));
+        unfair.facts["fair"] = serde_json::json!("no");
+        save_clean(&mut db, &unfair);
+
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 40), (72, 60))]);
+        assert_eq!(db.list_exercise_ceilings().unwrap()[0].clean_bpm, 72);
+    }
+
+    /// Rows from before `newClean`: a caught, passed Take over eight bars
+    /// counts, a shorter one does not, and unreadable facts are no flag.
+    #[test]
+    fn a_take_from_before_the_flag_counts_by_its_columns() {
+        let mut db = Db::open_in_memory().unwrap();
+        let (p, e) = ("p", "x");
+        let mut short = clean_take("short", p, e, 10, 60, None);
+        short.bars = 7;
+        save_clean(&mut db, &short);
+        save_clean(&mut db, &clean_take("old", p, e, 20, 64, None));
+        db.conn
+            .execute(
+                "INSERT INTO path_takes (id, path_id, step_id, exercise_id, started_at, bpm,
+                                         bars, caught, passed, variant_seed, facts_json)
+                 VALUES ('garbled', 'p', 's', 'x', 30, 70, 8, 1, 1, NULL, '{not json')",
+                [],
+            )
+            .unwrap();
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (64, 20), (70, 30))]);
+    }
+
+    /// The same Exercise id on two Paths is two clean tempos, as the ceiling
+    /// keys it.
+    #[test]
+    fn two_paths_sharing_an_exercise_id_keep_their_own_spans() {
+        let mut db = Db::open_in_memory().unwrap();
+        save_clean(&mut db, &clean_take("a1", "path-a", "shared", 100, 60, Some(true)));
+        save_clean(&mut db, &clean_take("b1", "path-b", "shared", 150, 100, Some(true)));
+        save_clean(&mut db, &clean_take("a2", "path-a", "shared", 200, 70, Some(true)));
+        save_clean(&mut db, &clean_take("b2", "path-b", "shared", 250, 110, Some(true)));
+
+        assert_eq!(
+            db.list_clean_tempo_spans().unwrap(),
+            [
+                span("path-a", "shared", (60, 100), (70, 200)),
+                span("path-b", "shared", (100, 150), (110, 250)),
+            ]
+        );
+    }
+
+    /// A first clean tempo older than the newest 500 Takes is still found:
+    /// that is what this query is for.
+    #[test]
+    fn the_first_clean_tempo_comes_from_beyond_the_500_take_window() {
+        let mut db = Db::open_in_memory().unwrap();
+        let (p, e) = ("p", "x");
+        save_clean(&mut db, &clean_take("oldest", p, e, 1, 60, Some(true)));
+        for i in 0..600i64 {
+            save_clean(&mut db, &clean_take(&format!("t{i}"), p, "other", 1_000 + i, 80, Some(false)));
+        }
+        save_clean(&mut db, &clean_take("newest", p, e, 5_000, 90, Some(true)));
+
+        let window = db.list_path_takes(500).unwrap();
+        assert!(window.iter().all(|t| t.id != "oldest"));
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (60, 1), (90, 5_000))]);
+    }
+
+    /// 5 000 Takes over 60 Exercises on three Paths, with facts the size a real
+    /// Take keeps (per-bar figures included). The plan is the gate; the clock
+    /// is printed for the progress file and held to a loose bound.
+    #[test]
+    fn a_5000_take_store_answers_the_long_view_through_its_index() {
+        let mut db = Db::open_in_memory().unwrap();
+        let bars: Vec<f64> = (0..16).map(|i| 0.8 + (i as f64) * 0.01).collect();
+        {
+            let tx = db.conn.transaction().unwrap();
+            {
+                let mut stmt = tx
+                    .prepare(
+                        "INSERT INTO path_takes (id, path_id, step_id, exercise_id, started_at,
+                                                 bpm, bars, caught, passed, variant_seed, facts_json)
+                         VALUES (?1, ?2, 's', ?3, ?4, ?5, 8, 1, ?6, NULL, ?7)",
+                    )
+                    .unwrap();
+                for i in 0..5_000i64 {
+                    let facts = serde_json::json!({
+                        "verdict": if i % 3 == 0 { "passed" } else { "belowBar" },
+                        "measures": { "caught": true, "barsPlayed": 8, "evenness": 0.9,
+                                      "barEvenness": bars, "heard": 30, "expected": 32 },
+                        "lean": [1.5, -2.0, null, 0.5],
+                        "session": i / 10,
+                        "role": "focus",
+                        "reason": "nextUp",
+                        "newClean": i % 30 == 0,
+                    })
+                    .to_string();
+                    stmt.execute(rusqlite::params![
+                        format!("t{i}"),
+                        ["p1", "p2", "p3"][(i % 3) as usize],
+                        format!("ex{}", i % 60),
+                        1_700_000_000_000i64 + i * 600_000,
+                        60 + (i % 40),
+                        i % 3 == 0,
+                        facts,
+                    ])
+                    .unwrap();
+                }
+            }
+            tx.commit().unwrap();
+        }
+
+        let (sql, args) = clean_tempo_spans_sql();
+        let plan = db.explain(&sql, &args);
+        assert!(
+            plan.contains("path_takes_exercise") && !plan.contains("TEMP B-TREE"),
+            "the long view should walk `path_takes_exercise` without a sort, \
+             but SQLite plans to: {plan}"
+        );
+        eprintln!("clean tempo spans plan: {plan}");
+
+        let started = std::time::Instant::now();
+        let spans = db.list_clean_tempo_spans().unwrap();
+        let elapsed = started.elapsed();
+        eprintln!("clean tempo spans over 5000 Takes: {} spans in {elapsed:?}", spans.len());
+        assert!(!spans.is_empty());
+        assert!(elapsed < std::time::Duration::from_millis(500), "took {elapsed:?}");
     }
 
     #[test]
