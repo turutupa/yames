@@ -466,6 +466,19 @@ describe("a suggestion chip's own press (leg chip1)", () => {
     expect(host.bpm()).toBe(115);
   });
 
+  it("every load path calls noteAskLoad: a preset (handleLoadPreset), a jam (loadJam), a setlist entry (applySetlistStep) (leg chip1b, L2 b)", () => {
+    const main = join(__dirname, "../main-window");
+    const body = (file: string, from: string) => {
+      const source = readFileSync(join(main, file), "utf8");
+      const at = source.indexOf(from);
+      expect(at, `${from} in ${file}`).toBeGreaterThan(-1);
+      return source.slice(at, at + 400);
+    };
+    expect(body("MainWindow.tsx", "const handleLoadPreset = useCallback(")).toContain("noteAskLoad();");
+    expect(body("hooks/useJamSession.ts", "const loadJam = useCallback(")).toContain("noteAskLoad();");
+    expect(body("hooks/applySetlistStep.ts", "export function applySetlistStep(")).toContain("noteAskLoad();");
+  });
+
   it("the Settings overlay does not retire a chip's Undo; back on the screen it is still good (leg chip1b, L2 d)", () => {
     vi.useFakeTimers();
     const host = use(tempoHost(), beat);

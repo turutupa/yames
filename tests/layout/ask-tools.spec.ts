@@ -166,6 +166,24 @@ test("a fast double-click has one effect: on a chip, one change and the Undo dra
   await expect(page.locator(".ask-panel [data-testid=ask-undo]")).toHaveCount(1);
 });
 
+test("a held Enter on a focused chip is one press: the browser's auto-repeat clicks change nothing (leg chip1b, review M1)", async ({ page }) => {
+  await openShot(page, "metronome", { width: 1440, height: 900 }, "ember");
+  await openFromRail(page);
+  // One turn first, so the chips sit in the row above the text box and keep focus after a press.
+  await page.locator(".ask-panel .ask-chip", { hasText: "Faster" }).click();
+  const receipt = page.locator(".ask-panel [data-testid=ask-receipt]");
+  await expect(receipt).toHaveCount(1);
+  const slower = page.locator(".ask-panel .ask-chip-row .ask-chip", { hasText: "Slower" });
+  await slower.focus();
+  // Playwright sends `repeat: true` for a key already down: Chromium clicks a focused button on each.
+  await page.keyboard.down("Enter");
+  for (let i = 0; i < 6; i++) await page.keyboard.down("Enter");
+  await page.keyboard.up("Enter");
+  await page.waitForTimeout(150);
+  await expect(receipt).toHaveCount(2);
+  await expect(page.locator(".ask-panel [data-testid=ask-undo]")).toHaveCount(1);
+});
+
 test("in a Session at 1024: Slower's chip nudges at once, with Undo", async ({ page }) => {
   await openShot(page, "session-ready", { width: 1024, height: 700 }, "ember");
   await settleAnimations(page);
