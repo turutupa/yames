@@ -21,7 +21,15 @@ pain, posture or tuning.
   the attack nothing measured).
 
 Rules applied (as tc1's): say what was measured (accuracy / scores / misses at this tempo, around minute
-{staminaMinutes}), offer the break without the diagnosis, or ask an open question. The three "you'll buy
+{staminaMinutes}), offer the break without the diagnosis, or ask an open question.
+
+**Corrected by tc2b (2026-11-21), after review:** two premises above were wrong. (1) The `fatigue` slot
+does not fire "on accuracy falling at an unchanged tempo": nothing fires it in production (the gatekeeper
+has no fatigue detector; only tests force it). Its lines are held to the documented contract, "accuracy
+declining >10% over 3 consecutive minutes, BPM constant" (`plans/archive/DSP_AND_COACH_PLAN.md`); nothing
+fires the slot today. (2) "around minute {staminaMinutes}" is not measured: `staminaMinutes` is the
+average length of the preset's sessions in one BPM band, and the stamina trigger compares the oldest third
+of those sessions with the newest third. tc2b reworded every stamina line (`tc2b.md`). The three "you'll buy
 yourself an injury" lines and "you'll hurt yourself" became a plain "stop if anything hurts". Slots,
 severities, placeholders and variant counts unchanged.
 
