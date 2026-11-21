@@ -33,7 +33,6 @@ const LAST_EVEN = "Keep the eighths even right to the last note.";
 const LOOK = "Look at the next fret before you move.";
 const IN_SHAPE = "Keep the fingers in shape as the hand slides.";
 const HAND_STILL = "Keep the hand still; only the fingers change.";
-const UNTIL_FIVE = "Keep the hand still until chord five.";
 const FIVE_TO_ONE = "From five, go straight back to one on '1'.";
 const TOP_BEAT = "Hold each chord's top note a full beat.";
 const NEXT_RING = "Have the next chord ready as the top note rings.";
@@ -56,19 +55,23 @@ const FOUR_ADD2 = "For four, add finger two on the B string.";
 const BACK_TO_C = "From G, go straight back to C on '1'.";
 const F_ACROSS_13 = "For F, lay finger one across fret thirteen.";
 const G_FINGER1_7 = "For G, put finger one at fret seven.";
-const G_ACROSS_3 = "For G, lay finger one across fret three.";
+const G_ACROSS_3 = "For G, barre the top two strings at fret three.";
 const F_ADD2 = "For F, add finger two on the B string, fret six.";
 const AM_F3_10 = "For A minor, put finger three at fret ten.";
-const EM_TO_AM = "From E minor, go straight back to A minor.";
-const TEN_TO_FIVE = "From fret ten, drop to fret five as it loops.";
-const SEVEN_TO_THREE = "From fret seven, drop to fret three as it loops.";
-const NINE_TO_FIVE = "From fret nine, drop to fret five as it loops.";
-const SEVEN_TO_FOUR = "From fret seven, drop to fret four as it loops.";
-const TEN_TO_SEVEN = "From fret ten, drop to fret seven as it loops.";
+const EM_TO_AM = "From E minor, land A minor right on '1'.";
+/** The last bar of an up-and-back Exercise: the arrival from the top shape. */
+const BACK_MIDDLE = "Come back to the middle shape right on '1'.";
+// The chord's letters, for an Exercise that plays one chord in several shapes.
+const SAY_CEG = "Say C, E, G as you fret each shape.";
+const SAY_ACE = "Say A, C, E as you fret each shape.";
+const SAY_DFA = "Say D, F, A as you fret each shape.";
+const SAY_EGB = "Say E, G, B as you fret each shape.";
+const SAY_FAC = "Say F, A, C as you fret each shape.";
+const SAY_GBD = "Say G, B, D as you fret each shape.";
+const SAY_BDF = "Say B, D, F as you fret each shape.";
 const F_TO_C_FIVE = "From F, drop to fret five for C on '1'.";
 const FOUR_TO_ONE = "From four, go straight back to one on '1'.";
 const D_5_10_14 = "Lead with the D string: five, ten, fourteen.";
-const ACROSS_FIVE = "Lay finger one across fret five, three strings.";
 const FIVE_THREE = "Keep finger one at fret five for three chords.";
 const F4_A = "For F, put finger four on the A string.";
 const BDIM_F1 = "For B diminished, put finger one at fret one.";
@@ -131,7 +134,7 @@ export const TRIADS_CUES: CueBook = {
   ),
   "one-three-five.pick-three": oneString(
     g("Say each note's number: one, three or five.", 2),
-    "Find the high one at fret thirteen.",
+    "Play the high C at fret thirteen.",
     "End on fret five and hold it two beats.",
     "Count fret eight's two beats, then jump up.",
   ),
@@ -152,19 +155,19 @@ export const TRIADS_CUES: CueBook = {
     g("Look at fret eight before you leave shape one."),
     "Lay finger one flat across fret eight.",
     SHIFT,
-    "Drop back to fret five as the loop starts.",
+    "Keep shape two down to the last note.",
   ),
   "three-shapes.second-and-third": roll(
     g("Look at fret twelve before you leave shape two."),
     "Finger one on fret twelve, G and top strings.",
     SHIFT,
-    "Go straight back to shape two as it loops.",
+    "Keep shape three down to the last note.",
   ),
   "three-shapes.all-three": roll(
     g("Lead with the G string: five, nine, twelve.", 1),
-    "Second finger on fret thirteen in shape three.",
+    SAY_CEG,
     LOOK,
-    "From shape two, drop to fret five as it loops.",
+    "Come back to shape two right on '1'.",
   ),
 
   // Level 1, Step 3: one, three and five again
@@ -206,20 +209,20 @@ export const TRIADS_CUES: CueBook = {
   // Level 1, Step 4: F and G
   "f-and-g.f-three-places": roll(
     g("Lead with the G string: five, ten, fourteen.", 1),
-    "Second finger on the G string, fret fourteen.",
+    SAY_FAC,
     SHIFT,
-    TEN_TO_FIVE,
+    BACK_MIDDLE,
   ),
   "f-and-g.g-three-places": roll(
     g("Lead with the G string: four, seven, twelve.", 1),
-    "Second finger on the B string at fret eight.",
+    SAY_GBD,
     SHIFT,
-    SEVEN_TO_FOUR,
+    BACK_MIDDLE,
   ),
   "f-and-g.shape-three-moves": roll(
     g("Keep finger one across the G and top strings.", 1),
     "Finger two on the B string, fret six, for F.",
-    "Look at fret five before you leave C.",
+    IN_SHAPE,
     "Hold the C shape down to the last note.",
   ),
 
@@ -232,14 +235,14 @@ export const TRIADS_CUES: CueBook = {
   ),
   "three-chords.stay-put": roll(
     g(HAND_STILL, 1),
-    "Keep finger one on the top string, fret eight.",
-    G_FINGER1_7,
+    "Put fingers three and four at fret ten for F.",
+    SHIFT,
     BACK_TO_C,
   ),
   "three-chords.stay-put-high": roll(
     g("Stay around fret twelve; let the fingers change."),
     F_ACROSS_13,
-    "For G, put finger one at fret ten.",
+    SHIFT,
     BACK_TO_C,
   ),
   "three-chords.stay-put-keys": roll(g(SAY_1451), TOP_SAME, HAND_STILL, FIVE_TO_ONE),
@@ -248,7 +251,7 @@ export const TRIADS_CUES: CueBook = {
   "three-chords-tunes.five-before-four": roll(
     g("Keep the G string at fret twelve from C to G.", 3),
     F_ACROSS_13,
-    "From G to F, look at fret thirteen first.",
+    SHIFT,
     "Keep the B string at fret thirteen into C.",
   ),
   "three-chords-tunes.eight-bars": roll(
@@ -260,7 +263,7 @@ export const TRIADS_CUES: CueBook = {
   "three-chords-tunes.twelve-bars": roll(
     g("Count the lines of four all the way round.", 3),
     "Finger one across fret thirteen for the high F.",
-    "Look at fret fourteen during the second C.",
+    SHIFT,
     "Stay on C for the last two bars.",
   ),
   "three-chords-tunes.eight-bars-keys": roll(g(SAY_NUMBER), TOP_SAME, HAND_STILL, FOUR_TO_ONE),
@@ -280,29 +283,29 @@ export const TRIADS_CUES: CueBook = {
   ],
   "minor.a-minor-three": roll(
     g("Lead with the G string: five, nine, fourteen.", 1),
-    "Finger one flat across fret five for A minor.",
+    SAY_ACE,
     SHIFT,
-    NINE_TO_FIVE,
+    BACK_MIDDLE,
   ),
   "minor.c-and-a-minor": roll(
     g("Move one note for A minor; keep the other two.", 1),
     "For high A minor, put finger three at fret ten.",
-    "Look at fret nine before you leave A minor.",
+    SHIFT,
     "From A minor, drop to fret five for C.",
   ),
 
   // Level 2, Step 8: more minors
   "more-minors.d-minor-three": roll(
     g("Lead with the G string: two, seven, ten.", 1),
-    "Barre fret ten with finger one for D minor.",
+    SAY_DFA,
     SHIFT,
-    "From fret seven, drop to fret two as it loops.",
+    BACK_MIDDLE,
   ),
   "more-minors.e-minor-three": roll(
     g("Lead with the G string: four, nine, twelve.", 1),
-    "Barre fret twelve with finger one for E minor.",
+    SAY_EGB,
     SHIFT,
-    "From fret nine, drop to fret four as it loops.",
+    BACK_MIDDLE,
   ),
   "more-minors.three-minors": roll(
     g("Stay between frets three and seven throughout."),
@@ -312,15 +315,15 @@ export const TRIADS_CUES: CueBook = {
   ),
 
   // Level 2, Step 9: four chords
-  "four-chords.low": roll(g(UNTIL_FIVE), F_ADD2, G_ACROSS_3, BACK_TO_C),
-  "four-chords.mid": roll(g("Keep finger one on the top string at fret eight."), AM_F3_10, G_FINGER1_7, BACK_TO_C),
+  "four-chords.low": roll(g("Keep the hand around fret five until G."), F_ADD2, G_ACROSS_3, BACK_TO_C),
+  "four-chords.mid": roll(g("Keep the top string at fret eight until G."), AM_F3_10, G_FINGER1_7, BACK_TO_C),
   "four-chords.walk-the-key": roll(
     g("Say major, minor, minor, major as you climb."),
     "For the minors, put finger two on the B string.",
     "Keep finger three on the G string as you climb.",
     F_TO_C_FIVE,
   ),
-  "four-chords.four-chords-keys": roll(g(SAY_1645), FOUR_ADD2, UNTIL_FIVE, FIVE_TO_ONE),
+  "four-chords.four-chords-keys": roll(g(SAY_1645), FOUR_ADD2, SHIFT, FIVE_TO_ONE),
 
   // Level 2, Step 10: the top note
   "top-note.falling-line": [
@@ -352,15 +355,15 @@ export const TRIADS_CUES: CueBook = {
   // Level 2, Step 11: the middle strings
   "middle-strings.c-middle": roll(
     g(D_5_10_14, 1),
-    ACROSS_FIVE,
+    SAY_CEG,
     SHIFT,
-    TEN_TO_FIVE,
+    BACK_MIDDLE,
   ),
   "middle-strings.a-minor-middle": roll(
     g("Lead with the D string: seven, ten, fourteen.", 1),
-    "Finger one on the B string, fret thirteen.",
+    SAY_ACE,
     SHIFT,
-    TEN_TO_SEVEN,
+    BACK_MIDDLE,
   ),
   "middle-strings.four-chords-middle": roll(
     g(FIVE_THREE),
@@ -372,15 +375,15 @@ export const TRIADS_CUES: CueBook = {
   // Level 2, Step 12: F and G on the middle strings
   "f-and-g-middle.f-middle": roll(
     g("Lead with the D string: three, seven, ten.", 1),
-    "Barre fret ten with finger one for F.",
+    SAY_FAC,
     SHIFT,
-    SEVEN_TO_THREE,
+    BACK_MIDDLE,
   ),
   "f-and-g-middle.g-middle": roll(
     g("Lead with the D string: five, nine, twelve.", 1),
-    "Barre fret twelve with finger one for G.",
+    SAY_GBD,
     SHIFT,
-    NINE_TO_FIVE,
+    BACK_MIDDLE,
   ),
   "f-and-g-middle.three-chords-middle": roll(
     g("Keep the D string at fret ten from C to F.", 2),
@@ -398,15 +401,15 @@ export const TRIADS_CUES: CueBook = {
   // Level 2, Step 13: minors on the middle strings
   "minors-middle.d-minor-middle": roll(
     g("Lead with the D string: three, seven, twelve.", 1),
-    "Finger one across the G and B strings at ten.",
+    SAY_DFA,
     SHIFT,
-    SEVEN_TO_THREE,
+    BACK_MIDDLE,
   ),
   "minors-middle.e-minor-middle": roll(
     g("Lead with the D string: five, nine, fourteen.", 1),
-    "Finger one across the G and B strings at twelve.",
+    SAY_EGB,
     SHIFT,
-    NINE_TO_FIVE,
+    BACK_MIDDLE,
   ),
   "minors-middle.three-minors-middle": roll(
     g("Keep fret seven on the D string into D minor.", 2),
@@ -414,16 +417,16 @@ export const TRIADS_CUES: CueBook = {
     "For E minor, put finger one at fret four.",
     EM_TO_AM,
   ),
-  "minors-middle.four-chords-middle-keys": roll(g(SAY_1645), FOUR_ADD2, UNTIL_FIVE, FIVE_TO_ONE),
+  "minors-middle.four-chords-middle-keys": roll(g(SAY_1645), FOUR_ADD2, SHIFT, FIVE_TO_ONE),
 
   "warmup-intermediate.major-shapes": warm(g("Start well under your clean tempo.")),
 
   // Level 3 (Advanced), Step 14: two sets joined
-  "two-sets.c-four-strings": roll(g(D_5_10_14, 1), "Put finger one on the top string at fret three.", SHIFT, TEN_TO_FIVE),
+  "two-sets.c-four-strings": roll(g(D_5_10_14, 1), SAY_CEG, SHIFT, BACK_MIDDLE),
   "two-sets.four-chords-four-strings": roll(g("Start each chord on the D string."), F_ADD2, G_ACROSS_3, BACK_TO_C),
   "two-sets.up-the-neck": [
     g("Move to a new shape every two beats.", 0),
-    c("notes", ACROSS_FIVE),
+    c("notes", SAY_CEG),
     c("heard", HEARD),
     c("extras", EXTRAS),
     c("late", LATE),
@@ -437,15 +440,15 @@ export const TRIADS_CUES: CueBook = {
   // Level 3, Step 15: the low set
   "low-set.c-low-set": roll(
     g("Lead with the A string: seven, ten, fifteen.", 1),
-    "Finger one across the D and G strings at five.",
+    SAY_CEG,
     SHIFT,
-    TEN_TO_SEVEN,
+    BACK_MIDDLE,
   ),
   "low-set.a-minor-low-set": roll(
     g("Lead with the A string: three, seven, twelve.", 1),
-    "Finger one across the D and G strings at two.",
+    SAY_ACE,
     SHIFT,
-    SEVEN_TO_THREE,
+    BACK_MIDDLE,
   ),
   "low-set.four-chords-low-set": roll(g(FIVE_THREE), F4_A, "For G, put finger one at fret four.", BACK_TO_C),
 
@@ -454,7 +457,7 @@ export const TRIADS_CUES: CueBook = {
   "three-sets.four-chords-low-set-keys": roll(
     g(SAY_1645),
     "For four, put finger four on the A string.",
-    UNTIL_FIVE,
+    SHIFT,
     FIVE_TO_ONE,
   ),
   "three-sets.three-sets-one-place": [
@@ -477,9 +480,9 @@ export const TRIADS_CUES: CueBook = {
   ),
   "diminished.b-diminished-three": roll(
     g("Lead with the G string: four, seven, ten.", 1),
-    "Finger three on the B string at fret twelve.",
+    SAY_BDF,
     SHIFT,
-    SEVEN_TO_FOUR,
+    BACK_MIDDLE,
   ),
   "diminished.leading-home": roll(
     g("Keep frets four and three into B diminished.", 1),
@@ -497,7 +500,7 @@ export const TRIADS_CUES: CueBook = {
     c("late", LATE_Q),
     c("early", EARLY_Q),
     c("afterHeld", LONG_TWO),
-    c("openString", "Pick the open G string like the fretted notes."),
+    c("openString", "Put each open string right on its click."),
     c("stringChange", CROSS),
     c("lastBars", LAST_B_HOLD),
   ],
@@ -514,7 +517,7 @@ export const TRIADS_CUES: CueBook = {
   ],
   "chords-from-triads.add-a-seventh": [
     g("Walk the top note down: eight, seven, six.", 1),
-    c("notes", "Finger one across the G and B strings at five."),
+    c("notes", "Keep the G string at fret five all four bars."),
     c("heard", HEARD),
     c("extras", EXTRAS),
     c("late", LATE),
@@ -525,7 +528,7 @@ export const TRIADS_CUES: CueBook = {
   ],
 
   // Level 3, Step 19: a song
-  "a-song.eight-bars": roll(g(LOW_HIGH), AM_F3_10, "Look at fret nine during the low F.", F_TO_C_FIVE),
+  "a-song.eight-bars": roll(g(LOW_HIGH), "For the high A minor, put finger three at ten.", "Look at fret nine during the low F.", F_TO_C_FIVE),
   "a-song.eight-bars-keys": roll(g(LOW_HIGH), SAY_NUMBER, LOOK, FOUR_TO_ONE),
   "a-song.your-song": [g("Keep the top note moving as little as you can.", 1)],
 
