@@ -31,7 +31,8 @@ describe("suggestPath", () => {
     // curriculum's order, not started) is not ready. A later Path with nothing to
     // meet first is the pick, and the sentence says "first ... with everything it
     // builds on in place", never "the next you have not started" (Sweep is that).
-    const later: PathDoc = { ...SWEEP_OPEN, id: "later-open", title: "Later Open" };
+    // A runnable id (the suggestion offers only Paths the app can run).
+    const later: PathDoc = { ...SWEEP_OPEN, id: "legato", title: "Legato" };
     const p = progress({ states: [{ pathId: ALT.id, startedAt: NOW - 30 * DAY, updatedAt: NOW - DAY }] });
     const s = suggestPath(p, [ALT, SWEEP, later], null)!;
     expect(s.path.id).toBe(later.id);

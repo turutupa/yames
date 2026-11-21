@@ -25,7 +25,9 @@ import { newSongRecord } from "../songs/library";
 import type { SongRecord } from "../songs/library";
 import { scriptFindings, scriptPass } from "../containers/songs/review/reviewFixtures";
 import type { ScoreSchedule, SongTransport } from "../songs/types";
-import type { ExerciseCeilingRow, PathStateRow, PathTakeRow, ScorerPassBar, ScorerPassResult, ScorerTakeGrade } from "../ipc";
+import type { CleanTempoSpanRow, ExerciseCeilingRow, PathStateRow, PathTakeRow, ScorerPassBar, ScorerPassResult, ScorerTakeGrade } from "../ipc";
+import { weekTotals } from "../session/totals";
+import { playerWeekStart } from "../coach/weekly";
 import {
   COACH_REPORT_SENTENCE,
   coachFeedOption,
@@ -809,8 +811,9 @@ function seededTake(
   };
 }
 
-function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped" | "notebook"): PathStoreSeed {
+function sessionSeed(seed: NonNullable<Shot["session"]>["seed"]): PathStoreSeed {
   if (seed === "first") return { states: [], takes: [], ceilings: [] };
+  if (seed === "week" || seed === "plateau" || seed === "milestone" || seed === "levelDone") return companionSeed(seed);
   if (seed === "notebook") return notebookSeed();
   // The same Takes, every one played without grading (owner, 2026-11-18).
   if (seed === "ungraded") {
@@ -938,6 +941,125 @@ function threePaths(): PathStoreSeed {
       ...base.ceilings,
       { exerciseKey: "blues-pentatonics/box-one.box-eighths", cleanBpm: 70, lastPracticed: day(3) },
     ],
+  };
+}
+
+/**
+ * The companion's scenes on Progress and Paths (leg c4b4; c4b2's brief item 8).
+ * Each seed is built so that exactly one proactive card is on offer, whatever
+ * the weekday the suite runs on:
+ *
+ * - `week`: three Sessions in the last whole calendar week (the player's week
+ *   start, as the look-back reads it), clean tempos moving on two Exercises, no
+ *   Exercise passed (so no milestone) and nothing stuck: the look-back.
+ * - `plateau`: Four Fingers played in three Sessions today without a new clean
+ *   tempo (each tagged as its own Session), so the planner rests it and the
+ *   coach asks; nothing else in the last fourteen days, so no look-back.
+ * - `milestone`: yesterday's Session passed Open String at 100, the first
+ *   Exercise ever passed (the earlier Takes are below the pass mark).
+ * - `levelDone`: every Step of Alternate Picking's Beginner Level passed, the
+ *   last of them (One-String Tunes) yesterday: the Level's milestone on
+ *   Progress and the Path suggestion on Paths.
+ */
+const AP = "alternate-picking";
+const COMPANION_SEEDS = new Set<string>(["week", "plateau", "milestone", "levelDone"]);
+
+function passedTake(exerciseId: string, bpm: number, at: number, session?: number): PathTakeRow {
+  const t = seededTake(exerciseId, bpm, 0.9, true, 0);
+  return { ...t, id: `seed-${exerciseId}-${bpm}-${at}`, stepId: exerciseId.split(".")[0], startedAt: at, facts: { ...(t.facts as object), ...(session ? { session } : {}) } };
+}
+
+function belowTake(exerciseId: string, bpm: number, at: number, session?: number): PathTakeRow {
+  const t = seededTake(exerciseId, bpm, 0.78, false, 0);
+  return { ...t, id: `seed-${exerciseId}-${bpm}-${at}`, stepId: exerciseId.split(".")[0], startedAt: at, facts: { ...(t.facts as object), ...(session ? { session } : {}) } };
+}
+
+/** Ceilings from the Takes: the fastest passed tempo per Exercise. */
+function ceilingsOf(takes: readonly PathTakeRow[]): ExerciseCeilingRow[] {
+  const best = new Map<string, ExerciseCeilingRow>();
+  for (const t of takes) {
+    if (!t.passed) continue;
+    const key = `${t.pathId}/${t.exerciseId}`;
+    const row = best.get(key);
+    if (!row || t.bpm > row.cleanBpm) best.set(key, { exerciseKey: key, cleanBpm: t.bpm, lastPracticed: t.startedAt });
+  }
+  return [...best.values()];
+}
+
+/** The long view (`list_clean_tempo_spans`) from the Takes: first and best clean tempo per Exercise (best: the earliest on a tie). */
+export function spansOf(takes: readonly PathTakeRow[]): CleanTempoSpanRow[] {
+  const by = new Map<string, CleanTempoSpanRow>();
+  for (const t of [...takes].sort((a, b) => a.startedAt - b.startedAt)) {
+    if (!t.caught || !t.passed) continue;
+    const key = `${t.pathId}/${t.exerciseId}`;
+    const span = by.get(key);
+    if (!span) by.set(key, { pathId: t.pathId, exerciseId: t.exerciseId, firstBpm: t.bpm, firstAt: t.startedAt, bestBpm: t.bpm, bestAt: t.startedAt });
+    else if (t.bpm > span.bestBpm) by.set(key, { ...span, bestBpm: t.bpm, bestAt: t.startedAt });
+  }
+  return [...by.values()];
+}
+
+function companionSeed(kind: "week" | "plateau" | "milestone" | "levelDone"): PathStoreSeed {
+  const now = Date.now();
+  const hour = 3_600_000;
+  const open = "even-eighths.open-string";
+  const four = "even-eighths.four-fingers";
+  let takes: PathTakeRow[];
+  let currentStepId = "even-eighths";
+  if (kind === "week") {
+    const { start } = weekTotals([], [], now, playerWeekStart("en")).lastWeek;
+    const on = (day: number) => start + day * DAY_MS + 18 * hour;
+    takes = [
+      passedTake(open, 70, start - 12 * DAY_MS),
+      passedTake(four, 60, start - 11 * DAY_MS),
+      passedTake(open, 80, start - 10 * DAY_MS),
+      passedTake(open, 85, on(1), on(1)),
+      belowTake(four, 70, on(1) + 600_000, on(1)),
+      passedTake(open, 90, on(3), on(3)),
+      passedTake(four, 70, on(3) + 600_000, on(3)),
+      passedTake(open, 95, on(5), on(5)),
+      passedTake(four, 75, on(5) + 600_000, on(5)),
+    ];
+  } else if (kind === "plateau") {
+    const at = (h: number) => now - h * hour;
+    takes = [
+      passedTake(open, 100, now - 30 * DAY_MS),
+      passedTake(four, 90, now - 20 * DAY_MS),
+      belowTake(four, 95, at(5), at(5)),
+      belowTake(four, 90, at(3), at(3)),
+      belowTake(four, 95, at(1), at(1)),
+    ];
+  } else if (kind === "milestone") {
+    takes = [
+      passedTake(four, 80, now - 20 * DAY_MS),
+      passedTake(open, 90, now - 15 * DAY_MS),
+      passedTake(four, 90, now - 15 * DAY_MS + 600_000),
+      belowTake(open, 100, now - DAY_MS - 900_000, now - DAY_MS - 900_000),
+      passedTake(open, 100, now - DAY_MS, now - DAY_MS - 900_000),
+    ];
+  } else {
+    // Alternate Picking's Beginner Level, every Exercise with a pass mark
+    // passed at it; One-String Tunes yesterday, the rest weeks before.
+    const beginner: [string, number][] = [
+      ["even-eighths.open-string", 100], ["even-eighths.four-fingers", 100], ["even-eighths.a-minor-one-string", 100], ["even-eighths.pedal-riff", 110],
+      ["other-strings.d-string-tune", 100], ["other-strings.a-string-tune", 100], ["other-strings.b-string-tune", 100], ["other-strings.string-per-bar", 100],
+      ["even-sixteenths.gear-change", 85], ["even-sixteenths.four-fingers-16", 85], ["even-sixteenths.repeated-notes", 85], ["even-sixteenths.b-string-melody", 85],
+      ["mixed-rhythms.long-short-short", 80], ["mixed-rhythms.short-short-long", 80], ["mixed-rhythms.both-cells", 80], ["mixed-rhythms.mixed-melody", 80],
+      ["accents.on-the-beat", 80], ["accents.walking-accent", 75], ["accents.three-over-four", 80], ["accents.melody-on-accents", 75],
+      ["one-string-tunes.e-minor-tune", 80], ["one-string-tunes.accent-tune", 75], ["one-string-tunes.tune-with-band", 80],
+    ];
+    takes = beginner.map(([id, bpm], i) =>
+      // Yesterday's three are one Session (tagged, as a Session tags its Takes).
+      id.startsWith("one-string-tunes.") ? passedTake(id, bpm, now - DAY_MS + i * 60_000, now - DAY_MS) : passedTake(id, bpm, now - (60 - i * 2) * DAY_MS),
+    );
+    currentStepId = "crossing";
+  }
+  takes = takes.map((t) => ({ ...t, pathId: AP })).sort((a, b) => b.startedAt - a.startedAt);
+  const oldest = takes[takes.length - 1].startedAt;
+  return {
+    states: [{ pathId: AP, currentStepId, startedAt: oldest - DAY_MS, updatedAt: takes[0].startedAt }],
+    takes,
+    ceilings: ceilingsOf(takes),
   };
 }
 
@@ -1552,8 +1674,9 @@ export function installShotMock(shot: Shot, theme: string): void {
     // The practice reminder's Songs read (rem2c): no Songs attempt in any scene.
     list_attempt_times_since: () => [],
     list_exercise_ceilings: () => pathStore.ceilings,
-    // The long view (c4b1), read by the look-back on Progress (c4b2). No seed has spans yet.
-    list_clean_tempo_spans: () => [],
+    // The long view (c4b1), read by the look-back on Progress (c4b2): the
+    // companion's seeds (c4b4) answer from their Takes; the older seeds as before.
+    list_clean_tempo_spans: () => (COMPANION_SEEDS.has(shot.session?.seed ?? "first") ? spansOf(pathStore.takes) : []),
     save_path_state: (a) => {
       const row = a?.state as PathStateRow;
       pathStore.states = [...pathStore.states.filter((s) => s.pathId !== row.pathId), row];
