@@ -29,6 +29,25 @@ English text in the fourteen other locales: `ask.card.tooShort` / `tooShort_othe
 `count.tooShort` / `tooShort_other`, `count.notClean`, `count.notCleanPlain`,
 `count.ungraded.selfChecked`, `count.ungraded.selfCheckedTempo`.
 
+## The merge
+
+`coach` merged in, then `coach-t1b2b` (not yet in `coach`): first at its WIP `90beef16`, which did
+not type-check (`askTyped.ts` `go` possibly null), then again at `a65f3edb` once the branch moved
+(tsc on `coach-t1b2b` alone passes). No conflict anywhere. `AskPanel.tsx`: t1b2b's send
+(`answerTyped(draft, i18n.language)`) whole; the card turn kind, card chips and the cap from here.
+Nothing is plugged into the slot.
+
+## Gates (logs in /tmp/coach-c2b1c/), after the merge
+
+- tsc: pass (`coach-c2b1c-tsc-2`). Build: pass (`coach-c2b1c-build-2`).
+- vitest full (`vitest.log`): 48658 passed, 1 failed: `i18n.songs-wave` plural forms (the new
+  `tooShort` plurals lacked `_many` / `_few` in es, fr, it, pt-BR, pl, ru); fixed in the next commit,
+  then `src/test` + `src/coach/ask` + `src/containers/coach` re-run: 1818 passed. Plus the known
+  `TabStage.render.test.tsx` load failure.
+- Layout, the five specs (`layout.log`): 75 passed, 52 skipped, 3 failed, all `smooth` long tasks
+  (91 to 121 ms) at a load average over 60; `smooth.spec.ts` alone (`layout-smooth.log`): 2 other
+  long-task failures; the five failing tests alone (`layout-smooth-2.log`): 5 passed.
+
 ## For c2b1b
 
 - The slot is t1b2b's `setAskNextAnswerer((text) => boolean)` in `askTyped.ts`. **It must be
