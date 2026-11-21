@@ -64,7 +64,7 @@
       "label": "Un percorso da provare dopo, dal coach",
       "kick": "Un percorso da provare dopo",
       "chip": "Suggerisci un percorso",
-      "next": "{{path}} è il prossimo percorso, nell'ordine del curriculum, che non hai iniziato, e non manca nulla di ciò su cui si basa.",
+      "next": "Tra i percorsi che non hai iniziato, {{path}} è il primo, nell'ordine del curriculum, a cui non manca nulla di ciò su cui si basa.",
       "readyGoal": "{{path}} corrisponde a ciò che hai detto di voler raggiungere, e non manca nulla di ciò su cui si basa.",
       "buildsOn":"{{path}} si basa su {{on}}, che hai iniziato.",
       "buildsOnLevel": "{{path}} si basa su {{on}}, e lì hai superato {{level}}.",

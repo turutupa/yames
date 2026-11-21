@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Kom hier morgen op terug",
         "inDays": "Kom hier over {{days}} dagen op terug"
-      }
+      },
+      "pinShape": "Zet deze greep vast"
     },
     "fretboard": {
       "aria": "{{what}}, op de hals"

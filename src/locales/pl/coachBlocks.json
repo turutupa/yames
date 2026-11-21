@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Wróć do tego jutro",
         "inDays": "Wróć do tego za {{days}} dni"
-      }
+      },
+      "pinShape": "Przypnij ten chwyt"
     },
     "fretboard": {
       "aria": "{{what}}, na gryfie"

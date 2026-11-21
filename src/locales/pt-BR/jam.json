@@ -763,7 +763,26 @@
       "heard": "Ouvido: {{what}}",
       "chart": "Cifra: {{what}}",
       "unsure": "Ainda não deu para saber",
-      "listening": "Ouvindo…"
+      "listening": "Ouvindo…",
+      "stopLine": "Os acordes que o app mais ouviu no seu toque: {{heard}}. A cifra tem {{chart}}.",
+      "sameNotes": "Toda nota de {{heard}} também está em {{chart}} da cifra."
+    },
+    "change": {
+      "halfUp": "Quando {{to}} vem depois de {{from}}, {{note}} sobe meio tom (uma casa) até {{target}}.",
+      "halfDown": "Quando {{to}} vem depois de {{from}}, {{note}} desce meio tom (uma casa) até {{target}}.",
+      "wholeUp": "Quando {{to}} vem depois de {{from}}, {{note}} sobe um tom (duas casas) até {{target}}.",
+      "wholeDown": "Quando {{to}} vem depois de {{from}}, {{note}} desce um tom (duas casas) até {{target}}.",
+      "third": "{{target}} é a terça de {{to}}.",
+      "seventh": "{{target}} é a sétima de {{to}}."
+    },
+    "pin": {
+      "done": "{{chord}} fixado, forma {{shape}}, na tela Jam.",
+      "noNeck": "Seu instrumento não tem braço para fixar uma forma.",
+      "noShape": "Não existe essa forma de {{chord}} no seu braço.",
+      "otherJam": "Essa forma foi desenhada para outro jam, por isso não fica fixada neste.",
+      "changed": "A fixação mudou desde então, por isso fica como está.",
+      "restored": "A forma fixada antes voltou.",
+      "cleared": "Agora não há nada fixado."
     }
   },
   "scale": {

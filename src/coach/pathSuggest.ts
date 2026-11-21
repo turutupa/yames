@@ -92,7 +92,9 @@ export function suggestPath(progress: PlayerProgress, paths: readonly PathDoc[],
 }
 
 function reasonOf(progress: PlayerProgress, path: PathDoc, on: { path: PathDoc; level?: LevelId } | null, order: number): WeeklyLine {
-  // "The next in the curriculum's order" only of the first ready Path: one the
+  // "The first in the curriculum's order with everything it builds on in place"
+  // (key `next`) only of the first READY Path (an earlier unstarted Path may not
+  // be ready, so it is never called "the next you have not started"): one the
   // goal put first is said to match the goal instead (review c4b3 H1).
   if (!on) return { key: order === 0 ? "next" : "readyGoal", values: { path: path.title } };
   const level = (on.path.levels ?? []).find((l) => l.id === on.level) ?? null;

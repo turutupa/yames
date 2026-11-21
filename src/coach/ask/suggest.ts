@@ -15,7 +15,8 @@
  *   order, unchanged.
  * - `askEmpty`, `askAbove`: Ask's empty state and the row above its text box.
  *   The fact cards that can answer here, ordered by what the last Take was,
- *   never the card the thread just answered.
+ *   never the card the thread just answered. The empty state ends with the
+ *   help set's "What is this screen for?" (`explain_screen`, leg c2cb).
  *
  * At most three chips from one place here (`MAX_CHIPS`). In Ask, card chips
  * and the tools' chips together are at most four (`askCards.ts`
@@ -152,5 +153,17 @@ export function cardChipsFor(ctx: CoachContext, place: "askEmpty" | "askAbove", 
   // A player without grading sees no card chips (Ask's empty state says why in
   // one line); the Path's words and the plan still answer a typed question.
   const cards = ungradedPlayer(ctx) ? [] : cardsHere(ctx).filter((c) => c !== "suggest_path" || SUGGEST_PATH_CHIP_SCREENS.has(ctx.screen));
-  return suggestChips(place, { cards, verdict, answered });
+  const chips = suggestChips(place, { cards, verdict, answered });
+  // Ask's empty state always offers "What is this screen for?" (leg c2cb): every
+  // screen has a help entry. Last, in the third place at most, so the cards keep two.
+  if (place !== "askEmpty" || answered === "help") return chips;
+  return [...chips.slice(0, MAX_CHIPS - 1), SCREEN_HELP_CHIP];
 }
+
+/** The help set's chip: `explain_screen`, answered in Ask as a help card. */
+export const SCREEN_HELP_CHIP: ChipChoice = {
+  kind: "card",
+  shape: "help",
+  call: { tool: "explain_screen", args: {} },
+  label: { key: "help.ui.chip", values: {} },
+};

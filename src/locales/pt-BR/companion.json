@@ -64,7 +64,7 @@
       "label": "Uma trilha para tentar a seguir, do coach",
       "kick": "Uma trilha para tentar a seguir",
       "chip": "Sugerir uma trilha",
-      "next": "{{path}} é a próxima trilha, na ordem do currículo, que você ainda não começou, e não falta nada do que ela usa como base.",
+      "next": "Das trilhas que você ainda não começou, {{path}} é a primeira, na ordem do currículo, em que não falta nada do que ela usa como base.",
       "readyGoal": "{{path}} combina com o que você disse que quer alcançar, e não falta nada do que ela usa como base.",
       "buildsOn":"{{path}} se apoia em {{on}}, que você já começou.",
       "buildsOnLevel": "{{path}} se apoia em {{on}}, e lá você já passou de {{level}}.",

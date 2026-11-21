@@ -781,6 +781,39 @@
   }
 }
 
+/* Settings → Coach in five groups (leg c6a): each a heading and its rows. The
+   first group's heading sits under the section's title without a rule. */
+.coach-settings-group:first-of-type > .settings-subhead {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 8px;
+}
+.coach-answers-line {
+  margin: 6px 0 2px;
+}
+.coach-tier-state {
+  flex: 0 1 auto;
+  text-align: end;
+}
+/* The Notebook group: the lines left out, each with its date and Bring back. */
+.coach-notebook-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 6px 0 4px;
+}
+.coach-notebook-group .nb-item .nb-evidence {
+  grid-column: 1;
+}
+@media (pointer: coarse) {
+  .coach-notebook-group :is(.nb-leave, .nb-quiet, .nb-input, .ask-tool-btn) {
+    min-height: 44px;
+  }
+  .coach-notebook-group .nb-leave {
+    min-width: 44px;
+  }
+}
+
 .toggle-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;

@@ -1,0 +1,77 @@
+{
+  "help": {
+    "entry": {
+      "screen": {
+        "today": "Oggi costruisce la tua sessione dai percorsi che segui, e Inizia la avvia. Scegli quanti minuti hai e, se segui più di un percorso, se oggi li mescola o ne usa uno solo. Ogni riga dice perché è nel piano; Cambia la sostituisce con un altro esercizio, e toccare una riga avvia la sessione da lì.",
+        "paths": "Percorsi elenca tutti i percorsi, raggruppati in Fondamenta, Come funziona l'armonia, Tecnica e Stili; niente è bloccato, quindi puoi iniziare qualsiasi tappa. Ogni scheda mostra a che punto sei, e il suo interruttore mette il percorso nel tuo mix giornaliero o lo lascia fuori. I miei esercizi, quelli che hai creato in Chiedi, stanno in fondo.",
+        "path": "La pagina di un percorso mostra a che punto sei, con il pulsante che continua da lì, e le tappe in ordine. Livello sceglie da dove ti fa partire Oggi, e Iscriviti mette il percorso nel piano di Oggi, fino a quattro percorsi alla volta. Il riquadro sotto dice cosa questo percorso può misurare e cosa no.",
+        "step": "La pagina di una tappa elenca i suoi esercizi con tempi e asticelle; Suona questo ne suona uno, e Trova il mio limite alza il suo tempo dopo che lo hai suonato. Supera la maggior parte degli esercizi valutati e la tappa è fatta, oppure Fai la verifica prova ogni esercizio che non hai ancora superato in una sola take. Note di tecnica dice perché la tappa c'è e come suonarla.",
+        "sessionReady": "Questo è l'esercizio prima della sua take: il tempo, l'asticella e la nota del coach su cosa provare. Più lento e Più veloce cambiano il tempo, Guarda accende le note in ordine senza valutare niente, e dopo una take che è scivolata in un punto, un pulsante ripete quella battuta o due a un tempo più lento, senza valutazione. Il pulsante grande avvia la take.",
+        "sessionTake": "Una take è in corso: il conteggio, poi le note che suoni contro la griglia man mano che arrivano. La vista è bloccata mentre dura, e Chiudi la take la ferma. Chiedi si riapre quando la take è finita.",
+        "sessionResult": "Ecco com'è andata la take: il numero che ha deciso, se ha raggiunto l'asticella e, battuta per battuta, dove ha tenuto o è scivolata. Il pulsante grande riprova o va avanti, e la riga sotto cambia il tempo o ripete una battuta. Chiedi può dirti di più su questa take.",
+        "sessionTimed": "Questa parte della sessione va a tempo e non è valutata: un riscaldamento, una jam, una rampa, un finale o il tuo turno. Avviala, e passa avanti da sola quando il tempo è scaduto; Pausa, Ricomincia e Salta ci sono finché corre.",
+        "sessionRecap": "La sessione è finita: cosa hai suonato, cosa si è mosso e quando un esercizio ritorna. Da qui puoi suonare altri 5 minuti, tornare dove eri o aprire Progressi.",
+        "progress": "Progressi è ciò che è stato misurato dal tuo modo di suonare: minuti nelle take, sessioni, i tuoi giorni di fila e il tempo pulito di ogni percorso nel tempo. In alto può esserci una nota del coach: la tua settimana, un traguardo come una tappa finita, o una domanda su un esercizio che non avanza più. Su un computer, Esecuzioni degli strumenti, sotto, conserva ogni tratto in cui il coach ha ascoltato negli strumenti e nelle sessioni.",
+        "tools": "Strumenti contiene Metronomo, Scaletta, Rampa, Jam e Brani. Usali quando vuoi; ciò che suoni lì resta tuo e non fa avanzare niente nei tuoi percorsi.",
+        "metronome": "Il Metronomo è un click su cui suonare. Imposta il tempo (o battilo), il metro, la suddivisione, gli accenti e il suono, e salva un'impostazione come preset. Con Ascolta attivo, il coach ascolta mentre suoni.",
+        "drill": "Rampa alza il tempo mentre suoni, scritta come una frase che modifichi: tempo iniziale e obiettivo, quanto in fretta sale e per quante battute. Lineare sale in modo costante, Zigzag sale e torna indietro, e Adattivo alza o abbassa il tempo in base a come suoni.",
+        "setlist": "Una scaletta è una routine che costruisci tu: passi suonati in ordine, ognuno con il suo tempo, il suo metro e la sua durata. Ogni passo dice quando va avanti e come passa la mano al successivo; Inizia suona la lista.",
+        "jam": "Jam è una band che suona una forma mentre tu suoni sopra, e non è mai valutata. Scegli un'atmosfera, il feeling, la forma e gli accordi; gli strumenti di pratica possono togliere la band per qualche battuta, alternare battute con te o alzare il tempo a ogni giro.",
+        "songs": "Brani apre un file Guitar Pro o MusicXML e mostra la sua tablatura, tiene il tempo e ti segue. Scegli la tua parte, le battute e la velocità, ripeti un tratto e decidi chi senti. Il file resta su questo dispositivo.",
+        "settings": "Impostazioni contiene le scelte dell'app: Generale, Pratica (compreso se il tuo modo di suonare è valutato), Dispositivi per l'ingresso audio, Coach, Aspetto, gli strumenti, Brani, Scorciatoie e altro. Chiedi non è aperto lì.",
+        "modelSelector": "Il modello del coach sceglie se un modello linguistico gira su questo computer: Off lascia il coach alle sue regole, e Standard o Studio è un modello che richiede prima uno Scarica. Niente viene scaricato finché non premi Scarica; un modello che hai scelto si carica da solo dopo l'avvio dell'app, mai durante una take, e resta caricato finché non scegli Off o un altro. Con un modello caricato, una domanda scritta a cui nient'altro qui risponde riceve una risposta con parole sue, indicata come consiglio generale.",
+        "ask": "Chiedi risponde a domande su questa schermata, le tue take e i tuoi percorsi, da ciò che l'app ha misurato e da ciò che dicono i percorsi; un chip fa una domanda con un tocco. I comandi scritti come «più lento» o «apri Progressi» vengono eseguiti, o proposti con un tocco. La scheda Taccuino conserva ciò che il coach ha notato e il tuo obiettivo."
+      },
+      "word": {
+        "take": "Una take è un passaggio di un esercizio in una sessione, dal conteggio alla fine. Una take valutata viene misurata e può raggiungere l'asticella; una troppo breve per essere giudicata non conta né in un senso né nell'altro. In Jam e Brani, una take è una registrazione di te che suoni, senza asticella, anche se Brani mostra quali note sono andate a segno.",
+        "step": "Una tappa è uno stadio di un percorso, con qualche esercizio e note su perché c'è. È fatta quando superi la maggior parte dei suoi esercizi valutati, o facendo la verifica.",
+        "level": "Il tuo Livello in un percorso, Principiante, Intermedio o Avanzato, imposta la tappa da cui ti fa partire Oggi. Oggi salta le tappe sotto, ma puoi comunque suonarle.",
+        "rung": "Un gradino è un passo di tempo di un esercizio. Più veloce e Più lento si spostano di un gradino, e raggiungere l'asticella permette al piano di portarti al successivo.",
+        "passMark": "L'asticella è ciò che una take deve raggiungere per essere superata, per esempio quanto è regolare il timing o quante note si sentono. Ogni esercizio mostra le sue asticelle, e una take le soddisfa solo se raggiunge tutte quelle che ha potuto misurare.",
+        "cleanTempo": "Il tuo tempo pulito in un esercizio è il tempo più veloce a cui hai raggiunto l'asticella per otto battute di fila. Le take che hai segnato come non giuste non contano, né per questo né per un traguardo.",
+        "review": "Un ripasso riporta un esercizio che hai superato, un giorno dopo e poi dopo 3, 7, 14 e 30 giorni, per due take che lo tengono fresco. Se è scivolato, torna prima e un gradino più lento.",
+        "parked": "Un esercizio è messo da parte quando tre sessioni di fila non hanno portato un nuovo tempo pulito. Riposa un paio di giorni e poi torna fresco.",
+        "benchmark": "Un benchmark è la stessa take dello stesso esercizio allo stesso tempo nei giorni 1, 7, 14 e 21 di un percorso, contati dal giorno in cui ti iscrivi, così senti il cambiamento. Oggi ne mette uno nel piano quando la tua prima sessione sul percorso è alle spalle, e uno lasciato passare per una settimana viene saltato, non recuperato.",
+        "grading": "Valutata significa che l'app ascolta dal tuo ingresso e misura il tuo timing e le tue note rispetto all'asticella. Non valutata, o Suona e basta, ti dà il click e la parte visiva senza misurare niente; quelle take contano come pratica, ma solo le take valutate fanno avanzare il tuo tempo pulito e le tue tappe. Impostazioni, Pratica lo sceglie, e una sessione può chiederlo.",
+        "notFair": "Dopo un risultato per un soffio puoi dire che il voto non era giusto. Il voto resta com'è stato misurato, con la tua risposta accanto, e quella take smette di contare per il tempo pulito che mostra l'app e non dà alcun traguardo. Rispondi Sì più tardi e conta di nuovo.",
+        "listen": "Ascolta è l'interruttore nella barra degli strumenti che lascia il coach ascoltare il tuo modo di suonare lì. Resta spento finché non lo accendi; quando lo spegni, l'esecuzione viene conservata in Esecuzioni degli strumenti.",
+        "toolRuns": "Esecuzioni degli strumenti, in Progressi, elenca ogni tratto in cui il coach ha ascoltato negli strumenti e nelle sessioni, dal più recente. C'è solo su computer.",
+        "myExercises": "I miei esercizi sono esercizi che hai creato tu, elencati in fondo a Percorsi. Non appartengono a nessun percorso e non superano niente. Ne crei uno in Chiedi scrivendo ciò che vuoi, come una scala e una posizione, e premendo Add it.",
+        "notebook": "Il Taccuino è la seconda scheda di Chiedi. Mostra ciò che il coach ha notato in almeno cinque delle tue take salvate, ti lascia escludere una riga per 30 giorni e conserva il tuo obiettivo con parole tue. Niente al suo interno è scritto da un modello.",
+        "variant": "Alcuni esercizi hanno delle varianti: la stessa abilità in un'altra tonalità o in un'altra forma. La sessione ne sceglie una, e le sue parole sostituiscono quelle dell'esercizio dove le ha.",
+        "countIn": "In una sessione, il conteggio è una battuta di click prima di ogni take, così entri in tempo, e non fa parte di ciò che viene valutato. Sul Metronomo e in Rampa è l'interruttore Conteggio iniziale nella barra in basso: qualche battito di click prima del primo.",
+        "loop": "Un loop suona una battuta o due dell'esercizio in cerchio, lentamente, finché non lo fermi. Niente in un loop viene valutato o conservato.",
+        "testOut": "Fai la verifica suona una take al tempo di superamento di ogni esercizio di una tappa che non hai ancora superato. Superane abbastanza e la tappa è fatta.",
+        "warmUp": "Un riscaldamento apre una sessione e un finale la chiude. Entrambi vanno a tempo e non sono valutati."
+      }
+    },
+    "tuning": {
+      "none": "L'app non ha ancora un accordatore, quindi non ho controllato la tua accordatura e qui non posso aiutarti."
+    },
+    "search": {
+      "from": "Il passaggio più vicino nei tuoi percorsi, da «{{step}}» in {{path}}:"
+    },
+    "ui": {
+      "chip": "A cosa serve questa schermata?",
+      "placeholder": "Cerca nei tuoi percorsi o tocca una domanda",
+      "empty": {
+        "local": "Scrivi una domanda e l'app risponde dalle tue take, dai tuoi percorsi e dal suo aiuto, senza bisogno di un modello. Oppure tocca una domanda qui sotto.",
+        "phone": "Scrivi una domanda e l'app risponde dalle tue take, dai tuoi percorsi e dal suo aiuto. Oppure tocca una domanda qui sotto.",
+        "search": "Scrivi una domanda e l'app la cerca nei tuoi percorsi. Tocca una domanda qui sotto per le tue take e questa schermata.",
+        "searchLoading": "Scrivi una domanda e l'app la cerca subito nei tuoi percorsi; tocca una domanda qui sotto per le tue take e questa schermata. Il modello che hai scelto si sta preparando; quando è pronto, aggiunge consigli generali con parole sue, indicati come tali.",
+        "searchModel": "Scrivi una domanda e l'app la cerca nei tuoi percorsi; a ciò a cui non rispondono, risponde il modello su questo computer con parole sue, indicato come consiglio generale. Tocca una domanda qui sotto per le tue take e questa schermata."
+      },
+      "reply": {
+        "local": "Niente nelle tue take, nei tuoi percorsi o nell'aiuto dell'app risponde a questo. Con un modello attivo, scelto in fondo a questo pannello, potrebbe rispondere con parole sue.",
+        "phone": "Niente nelle tue take, nei tuoi percorsi o nell'aiuto dell'app risponde a questo.",
+        "search": "Niente nei tuoi percorsi risponde a questo.",
+        "searchLocal": "Niente nei tuoi percorsi risponde a questo. Con un modello attivo, scelto in fondo a questo pannello, potrebbe rispondere con parole sue."
+      },
+      "footer": {
+        "local": "Risposte dalle tue take e dai tuoi percorsi. Niente di ciò che scrivi lascia questo computer.",
+        "phone": "Risposte dalle tue take e dai tuoi percorsi. Niente di ciò che scrivi lascia questo telefono.",
+        "model": "Risposte dalle tue take e dai tuoi percorsi, e con parole sue dal modello su questo computer. Niente di ciò che scrivi lo lascia."
+      }
+    }
+  }
+}

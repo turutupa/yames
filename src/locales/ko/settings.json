@@ -128,7 +128,7 @@
       "removeTierLabel": "{{name}} 제거",
       "olderCopy": "이 모델의 이전 사본도 디스크에 있어요 · {{size}}",
       "removeOlderCopyLabel": "{{name}}의 이전 사본 제거",
-      "removeModels": "모델 제거",
+      "removeModels": "모델과 음성 제거",
       "stance": "코칭 방식",
       "stanceHint": "도구에서 연주할 때 코치가 얼마나 엄격한지",
       "stanceStrict": "엄격하게",
@@ -137,7 +137,26 @@
       "stanceLearningDesc": "무언가 말하기까지의 여유를 절반 더 주고, 연주 중에는 지적을 귀에 넣지 않으며, 잘된 것부터 이야기합니다. 점수는 어느 쪽이든 똑같이 계산됩니다.",
       "cuesNoVoice": "코치 목소리가 필요합니다: 위에서 기본 또는 스튜디오를 선택하세요. 그 전까지는 화면에 표시됩니다.",
       "toolsOnly": "도구 전용",
-      "toolsOnlyHint": "메트로놈, 템포 연습, 잼에 적용됩니다. 세션은 항상 같은 방식으로 채점합니다."
+      "toolsOnlyHint": "메트로놈, 템포 연습, 잼에 적용됩니다. 세션은 항상 같은 방식으로 채점합니다.",
+      "groups": {
+        "answers": "답변",
+        "voice": "음성",
+        "suggestions": "제안",
+        "notebook": "노트",
+        "tools": "도구에서"
+      },
+      "answersRuleMade": "코치는 테이크와 코스를 바탕으로 답해요.",
+      "answersLangs": "자체 표현으로 답하는 언어: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "뺀 항목",
+        "empty": "뺀 항목이 없어요.",
+        "leftOutOn": "{{date}}에 뺌",
+        "bringBack": "다시 넣기",
+        "broughtBack": "노트에 다시 넣었어요.",
+        "lineGone": "최근 테이크에는 더 이상 나타나지 않는 항목",
+        "comesBack": "뺀 항목은 30일 뒤 저절로 돌아와요. 삭제되는 것은 없어요.",
+        "unreadableEntries": "일부 항목은 이 버전에서 읽을 수 없는 방식으로 빠져 있어요. 저장된 그대로 계속 빠진 상태로 남아요."
+      }
     },
     "general": {
       "title": "일반",

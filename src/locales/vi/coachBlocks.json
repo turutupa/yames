@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Mai quay lại phần này",
         "inDays": "Quay lại phần này sau {{days}} ngày"
-      }
+      },
+      "pinShape": "Ghim thế bấm này"
     },
     "fretboard": {
       "aria": "{{what}}, trên cần đàn"

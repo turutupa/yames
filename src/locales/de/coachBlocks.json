@@ -17,7 +17,8 @@
       "comeBack": {
         "tomorrow": "Komm morgen darauf zurück",
         "inDays": "Komm in {{days}} Tagen darauf zurück"
-      }
+      },
+      "pinShape": "Diesen Griff anheften"
     },
     "fretboard": {
       "aria": "{{what}}, auf dem Griffbrett"

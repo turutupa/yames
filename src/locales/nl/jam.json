@@ -753,7 +753,26 @@
       "heard": "Gehoord: {{what}}",
       "chart": "Schema: {{what}}",
       "unsure": "Nog niet te zeggen",
-      "listening": "Luistert…"
+      "listening": "Luistert…",
+      "stopLine": "De akkoorden die de app het vaakst hoorde in je spel: {{heard}}. Het schema heeft {{chart}}.",
+      "sameNotes": "Elke noot van {{heard}} zit ook in {{chart}} van het schema."
+    },
+    "change": {
+      "halfUp": "Als {{to}} op {{from}} volgt, gaat {{note}} een halve toon (één fret) omhoog naar {{target}}.",
+      "halfDown": "Als {{to}} op {{from}} volgt, gaat {{note}} een halve toon (één fret) omlaag naar {{target}}.",
+      "wholeUp": "Als {{to}} op {{from}} volgt, gaat {{note}} een hele toon (twee frets) omhoog naar {{target}}.",
+      "wholeDown": "Als {{to}} op {{from}} volgt, gaat {{note}} een hele toon (twee frets) omlaag naar {{target}}.",
+      "third": "{{target}} is de terts van {{to}}.",
+      "seventh": "{{target}} is de septiem van {{to}}."
+    },
+    "pin": {
+      "done": "{{chord}}, greep {{shape}}, vastgezet op het jamscherm.",
+      "noNeck": "Je instrument heeft geen hals om een greep aan vast te zetten.",
+      "noShape": "Zo'n greep van {{chord}} bestaat niet op je hals.",
+      "otherJam": "Deze greep is voor een andere jam getekend, dus hij wordt niet aan deze vastgezet.",
+      "changed": "De vastgezette greep is intussen veranderd, dus hij blijft zoals hij is.",
+      "restored": "De eerder vastgezette greep is terug.",
+      "cleared": "Er is nu niets vastgezet."
     }
   },
   "scale": {

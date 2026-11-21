@@ -30,15 +30,11 @@
     },
     "empty": {
       "title": "¿Qué quieres saber?",
-      "model": "Pregunta sobre esta pantalla, tus tomas o tus rutas. El modelo de este ordenador responde con sus propias palabras, como consejo general.",
-      "loading": "El modelo que elegiste se está preparando. Cuando esté listo, podrás preguntar sobre esta pantalla, tus tomas o tus rutas.",
-      "noModel": "Las preguntas escritas necesitan un modelo en este ordenador, y no hay ninguno activado. Elige uno abajo para preguntar sobre esta pantalla, tus tomas o tus rutas.",
-      "phone": "Las preguntas escritas necesitan un modelo, y los móviles aún no ejecutan ninguno."
+      "model": "Pregunta sobre esta pantalla, tus tomas o tus rutas: la app responde con lo que midió, tus rutas y su propia ayuda. Lo que estas no responden, lo responde el modelo de este ordenador con sus propias palabras, indicado como consejo general.",
+      "loading": "Pregunta sobre esta pantalla, tus tomas o tus rutas: la app responde ahora, con lo que midió, tus rutas y su propia ayuda. El modelo que elegiste se está preparando; cuando esté listo, añade consejo general con sus propias palabras, indicado como tal."
     },
     "reply": {
-      "noModel": "No hay ningún modelo activado, así que las preguntas escritas aún no se pueden responder. Elige uno al pie de este panel.",
       "gettingReady": "El modelo aún se está preparando. Vuelve a preguntar en un momento.",
-      "phone": "Los móviles aún no ejecutan un modelo, así que aquí no se pueden responder preguntas escritas.",
       "nothing": "Esta vez no llegó ninguna respuesta."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "Así he entendido lo que preguntaste. No pasa nada hasta que pulses."
     },
     "footer": {
-      "choice": "Respuestas de tus tomas y tus rutas, con la ayuda del modelo de este ordenador. Nada sale de él.",
-      "model": "Respondido por el modelo de este ordenador. Nada de lo que escribes sale de él.",
-      "local": "Nada de lo que escribes aquí sale de este ordenador.",
-      "phone": "Nada de lo que escribes aquí sale de este móvil."
+      "choice": "Respuestas de tus tomas y tus rutas, con la ayuda del modelo de este ordenador. Nada sale de él."
     },
     "card": {
       "chips": "Sobre tu última toma:",

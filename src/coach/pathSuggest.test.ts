@@ -26,6 +26,20 @@ describe("suggestPath", () => {
     expect(s.goal).toBeNull();
   });
 
+  it("an earlier unstarted Path that is not ready is passed over: the pick is the first READY one, not the next unstarted", () => {
+    // Alternate Picking started, not through Intermediate: Sweep (earlier in the
+    // curriculum's order, not started) is not ready. A later Path with nothing to
+    // meet first is the pick, and the sentence says "first ... with everything it
+    // builds on in place", never "the next you have not started" (Sweep is that).
+    // A runnable id (the suggestion offers only Paths the app can run).
+    const later: PathDoc = { ...SWEEP_OPEN, id: "legato", title: "Legato" };
+    const p = progress({ states: [{ pathId: ALT.id, startedAt: NOW - 30 * DAY, updatedAt: NOW - DAY }] });
+    const s = suggestPath(p, [ALT, SWEEP, later], null)!;
+    expect(s.path.id).toBe(later.id);
+    expect(s.reason).toEqual({ key: "next", values: { path: later.title } });
+    expect(s.goal).toBeNull();
+  });
+
   it("names what it builds on, and the Level the player is through", () => {
     const top = ALT.levels![ALT.levels!.length - 1];
     const p = progress({ states: [{ pathId: ALT.id, startedAt: NOW - 30 * DAY, updatedAt: NOW - DAY, level: top.id }] });

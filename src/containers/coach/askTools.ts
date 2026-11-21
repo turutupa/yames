@@ -19,9 +19,13 @@
  *   runner's refusal ("That one has gone; ask again") when the context moved on.
  * - **refusal**: why not, and "Which one?"'s choices, each a full call.
  * - **yours**: a never-list item: one line, and a "show me" that only navigates.
+ *
+ * `explain_screen`'s answer is not a tool turn: it is a help entry, written as
+ * a help card (`writeOutcome`, leg c2cb).
  */
 import type { CoachContext } from "../../coach/context";
 import type { ResolvedBlock } from "../../coach/blocks/resolve";
+import { helpCard, isHelpLine } from "../../coach/ask/help";
 import { commandFacts, type CommandFacts } from "../../coach/ask/router";
 import { getCoachToolHost, type CoachToolHost } from "../../coach/tools/host";
 import { resolveStepCall } from "../../coach/tools/go";
@@ -88,6 +92,8 @@ export type ToolBody =
       /** The app is still finding out (a preset being re-read): the receipt says it is at it. */
       settling?: boolean;
       blocks?: readonly ResolvedBlock[];
+      /** The jam the blocks were drawn on (`ToolDone.forJam`): what "Pin this shape" pins to. */
+      forJam?: string;
       /** Where to go next (`ToolDone.next`, leg t2c: "Open Paths"). */
       next?: readonly ToolChoice[];
       undo: UndoState | null;
@@ -229,6 +235,7 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext, chi
     receipt: outcome.receipt,
     ...(outcome.later ? { settling: true } : {}),
     ...(outcome.blocks ? { blocks: outcome.blocks } : {}),
+    ...(outcome.forJam ? { forJam: outcome.forJam } : {}),
     ...(outcome.next && outcome.next.length > 0 ? { next: outcome.next } : {}),
     // The step as `useAskHost` says it to `noteAskToolView`: null outside a running Session.
     undo: undoOf(outcome, host, Date.now(), chip ? { step: ctx.run && ctx.run.phase !== "idle" ? ctx.run.stepIndex : null } : undefined),
@@ -372,6 +379,11 @@ function tellTakeStart(): void {
 }
 
 function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
+  // `explain_screen`'s answer is a help entry (leg c2cb): drawn as the app's words, not as something done.
+  if (outcome.ok && !("proposal" in outcome) && isHelpLine(outcome.receipt)) {
+    appendAskTurn({ id, kind: "card", card: helpCard(outcome.receipt) });
+    return;
+  }
   retireOlderMakes(outcome);
   appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);

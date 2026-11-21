@@ -51,8 +51,15 @@ const GOAL_STARTERS = ["song", "tempo", "style", "justPlaying"] as const;
 
 const NO_SOURCE: NotebookSource = { rows: [], paths: [], sessionStartedAt: null };
 
-/** "11 Nov" in the locale's own order and month name. */
-function dayOf(ms: number, lang: string): string {
+/**
+ * "11 Nov" in the locale's own order and month name. Never throws (review c6a
+ * H1): a time that is not finite (an unreadable `coach.suppressed` entry loads
+ * as `Infinity`) or past what a Date holds (a stored goal's `at` of 1e20 reads
+ * as a time) gives "" rather than a RangeError in a render, which with no error
+ * boundary blanks the app.
+ */
+export function dayOf(ms: number, lang: string): string {
+  if (!Number.isFinite(ms) || Number.isNaN(new Date(ms).getTime())) return "";
   try {
     return new Intl.DateTimeFormat(lang, { day: "numeric", month: "short" }).format(new Date(ms));
   } catch {
@@ -293,7 +300,8 @@ function Noticed({ book, lang, played }: { book: Book; lang: string; played: num
 // What you're working toward
 // ---------------------------------------------------------------------------
 
-function Goal({ book, lang, offer }: { book: Book; lang: string; offer: boolean }) {
+/** Also Settings → Coach's Notebook group (leg c6a), with `offer` false: the goal and its Edit, never the question. */
+export function Goal({ book, lang, offer }: { book: Book; lang: string; offer: boolean }) {
   const { t } = useTranslation();
   const { turns } = useAskState();
   const [editing, setEditing] = useState(false);
@@ -410,7 +418,9 @@ function Goal({ book, lang, offer }: { book: Book; lang: string; offer: boolean 
             <q>{book.goal.text}</q>
           </p>
           <small className="nb-evidence">
-            {book.goal.at !== null ? t("notebook.ui.goalSaid", { date: dayOf(book.goal.at, lang) }) : t("notebook.ui.goalSaidUndated")}
+            {book.goal.at !== null && dayOf(book.goal.at, lang) !== ""
+              ? t("notebook.ui.goalSaid", { date: dayOf(book.goal.at, lang) })
+              : t("notebook.ui.goalSaidUndated")}
           </small>
           <button type="button" className="nb-leave nb-edit" onClick={startEdit} data-testid="nb-goal-edit-button">
             {t("notebook.ui.goalEdit")}

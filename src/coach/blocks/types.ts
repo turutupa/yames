@@ -66,7 +66,15 @@ export type CoachAction =
    * three words could not hold it: a two-day promise went out as "tomorrow"
    * and came back as one day.
    */
-  | { kind: "comeBack"; days: number };
+  | { kind: "comeBack"; days: number }
+  /**
+   * Pin a grip to the Jam screen (DESIGN 9.3, leg c5a1): the jam's
+   * `pinnedShape`, through the same edit the chord sheet's "Pin this one"
+   * makes. `chord` as the app writes it; `shape` counted from 0 into that
+   * chord's grips on the player's neck, as a `chordShape` block counts them.
+   * One press, with a receipt and Undo; refused during a Take.
+   */
+  | { kind: "pinShape"; chord: string; shape: number };
 
 export type TextBlock = { type: "text"; text: string };
 

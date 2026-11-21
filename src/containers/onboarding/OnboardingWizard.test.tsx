@@ -630,7 +630,8 @@ describe("W7 — ready", () => {
     expect(screen.getByText("Wood")).toBeInTheDocument();
     expect(screen.getByText("Obsidian")).toBeInTheDocument();
     expect(screen.getByText("Keyboard")).toBeInTheDocument();
-    expect(screen.getByText("Timing feedback only")).toBeInTheDocument();
+    // Leg c6a: the coach row says what Off is now, as the coach step does.
+    expect(screen.getByText("Off: answers from your Takes and Paths")).toBeInTheDocument();
     expect(screen.getByText("Not set up")).toBeInTheDocument();
   });
 
