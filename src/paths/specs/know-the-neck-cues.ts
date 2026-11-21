@@ -32,10 +32,10 @@ const SAY_CHORD = "Say each chord's name on its first beat.";
 const NEXT_PAIR = "Have the next pair ready before the click.";
 const LAST_PAIR = "Finish on the opening pair, two clicks each.";
 const SHIFT_NAME = "Move the first finger with each new name.";
-const NEXT_SHAPE = "Look at the next shape before you move.";
+const NEXT_SHAPE = "Move the whole shape in one go, on the beat.";
 const SHAPE_READY = "Have the next shape ready before the click.";
 const BACK_TO_FIRST = "Go from the middle shape back to the first.";
-const GUIDE_TWO = "Let finger two guide on the G string.";
+const GUIDE_TWO = "Move the hand with each new pair, not after.";
 const CALL_THIRDS = "Call each third major or minor as you play it.";
 const A_TO_C = "Cross to the A string with finger one for C.";
 const E_FOR_G = "Drop to the low E string with finger one for G.";
@@ -44,7 +44,7 @@ const BACK_D = "Go back to the A string on '1' for D.";
 const EXTRAS_TWO = "Play two notes on each string, no more.";
 const EXTRAS_HALF = "Play one note every two beats, no more.";
 const HELD_OUT = "Count the held note out, then go again.";
-const STRING_PAIRS = "Name each string's two notes before you start.";
+const STRING_PAIRS = "Find the key note first, then count from it.";
 const JOIN = "Start each box where the last one ended.";
 const SEE_BOX = "See the next box before the hand moves.";
 const DOWN_BOXES = "Come down box by box to where you started.";
@@ -78,7 +78,7 @@ const OPEN_ANY = "Put the unfretted notes right on the click.";
 const DOWN_DAE = "Say D, A, E as you come back down.";
 
 /** A one-string walk of the natural notes from the open string to fret 12 and back. */
-const walk = (gen: string, notes: string, open: string, last: string): Cue[] => [
+const walk = (gen: string, notes: string, open: string, last: string, dots = DOTS): Cue[] => [
   g(gen),
   c("notes", notes, 1),
   c("heard", HEARD),
@@ -87,7 +87,7 @@ const walk = (gen: string, notes: string, open: string, last: string): Cue[] => 
   c("early", EARLY),
   c("afterHeld", HELD_LOOP),
   c("openString", open),
-  c("shift", DOTS),
+  c("shift", dots),
   c("lastBars", last),
 ];
 
@@ -119,14 +119,14 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   ),
   "low-strings.two-places": [
     g("Say each name twice, once on each string."),
-    c("notes", "Play the A string five frets below the low E.", 1),
+    c("notes", "Find it five frets lower on the A string.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS),
     c("late", "Find the A string's fret before the click."),
     c("early", EARLY),
     c("afterHeld", HELD),
     c("openString", "Put the open A right on its click."),
-    c("shift", "Shift on the way back to the low E string."),
+    c("shift", "Find the low E fret before the hand moves."),
     c("stringChange", CROSS),
     c("lastBars", "Name E twice: fret twelve, then fret seven."),
   ],
@@ -207,7 +207,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   ],
   "chord-roots.roots-wide-shape": [
     g("Reach three frets up from the D and G strings."),
-    c("notes", "Reach the octave with the little finger.", 2),
+    c("notes", "Reach three frets up, two strings over.", 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
     c("late", "Have the octave shape ready before the click."),
@@ -248,6 +248,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     "Find C at fret one and F at fret six.",
     "Put the open B right on the click.",
     "Name D, C and B on the way back down.",
+    "Find frets five and twelve by the dots.",
   ),
   "upper-strings.one-note-six-strings": [
     g("Say the same name on every string."),
@@ -275,7 +276,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   ],
   "in-between.between-a-string": [
     g("Find the same four names on the A string.", 1),
-    c("notes", ONE_PER_FRET3, 2),
+    c("notes", "Keep one finger per fret as the hand moves.", 2),
     c("heard", HEARD),
     c("extras", EXTRAS),
     c("late", LATE),
@@ -284,8 +285,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("openString", "Put the open A right on the click."),
     c("shift", "Take the second D with finger one.", 2),
     c("lastBars", "Say G, F sharp, G to finish."),
-  ],
-  "in-between.every-fret": [
+  ],  "in-between.every-fret": [
     g("Say sharps going up and flats coming down.", 1),
     c("notes", "Keep one finger per fret, four in a row.", 2),
     c("heard", HEARD),
@@ -295,7 +295,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("afterHeld", HELD_WHOLE),
     c("openString", OPEN_CLICK),
     c("shift", BAR_MOVE, 2),
-    c("lastBars", "Keep naming flats right down to the open string."),
+    c("lastBars", "Land on the open string and let it ring."),
   ],
   "in-between.between-by-octave": [
     g("Say one name for both notes of each pair.", 2),
@@ -322,7 +322,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   // Level 2 (Intermediate), Step 6: G major and F major on the top strings
   "top-strings-keys.g-major-strings": [
     g("Name the key's one sharp every time it comes.", 1),
-    c("notes", "Say the sharp's name before you play it.", 1),
+    c("notes", "Find the sharp just under the key note.", 1),
     c("heard", HEARD_ANY),
     c("extras", EXTRAS),
     c("late", LATE_SAY),
@@ -334,7 +334,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   ],
   "top-strings-keys.f-major-strings": [
     g("Name the key's one flat every time it comes.", 1),
-    c("notes", "Say the flat's name before you play it.", 1),
+    c("notes", "Find the flat just under its natural note.", 1),
     c("heard", HEARD_ANY),
     c("extras", EXTRAS),
     c("late", LATE_SAY),
@@ -345,7 +345,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   ],
   "top-strings-keys.fifth-position-keys": [
     g("Keep the hand where it is for every note.", 1),
-    c("notes", "Picture each place before you play it.", 1),
+    c("notes", "Find each place from the one before it.", 1),
     c("heard", HEARD_ANY),
     c("extras", EXTRAS8),
     c("late", LATE_SAY),
@@ -386,7 +386,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("late", NEXT_PAIR),
     c("early", EARLY),
     c("afterHeld", HELD_LOOP),
-    c("shift", "Move finger one up with each new pair."),
+    c("shift", GUIDE_TWO),
     c("stringChange", CROSS),
     c("lastBars", LAST_PAIR),
   ],
@@ -422,7 +422,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("late", "Have each root ready before its click."),
     c("early", EARLY_BEAT),
     c("afterHeld", HELD_LOOP_BEAT),
-    c("shift", "Move up two frets for the third chord."),
+    c("shift", "Move the shape to the next root before '1'."),
     c("stringChange", CROSS),
     c("lastBars", "Land back on A and hold it two beats."),
   ],
@@ -510,7 +510,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("late", LATE_CHORD),
     c("early", EARLY_BEAT),
     c("afterHeld", HELD_LOOP_BEAT),
-    c("shift", "Change only the fingers, not the hand."),
+    c("shift", "Move only the fingers the new chord needs."),
     c("stringChange", CROSS),
     c("lastBars", "Roll C once, then hold its lowest note.", 1),
   ],
@@ -540,13 +540,13 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   ],
   "five-boxes.ladder": [
     g(JOIN, 1),
-    c("notes", "Say which box you are in as you climb."),
+    c("notes", "Say each note's name, then find its fret."),
     c("heard", HEARD),
     c("extras", EXTRAS8),
     c("late", SEE_BOX),
     c("early", EARLY),
     c("afterHeld", "Give the last note its full beat, then go again."),
-    c("shift", "Put finger one where the higher finger just was.", 1),
+    c("shift", "Move the whole hand to the next box's frets.", 1),
     c("stringChange", CROSS),
     c("lastBars", DOWN_BOXES),
   ],
@@ -581,7 +581,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("late", SEE_BOX),
     c("early", EARLY),
     c("openString", "Put the open G and B right on the click."),
-    c("shift", "Keep the hand still for boxes one and two.", 2),
+    c("shift", "Move the hand as one to each new box.", 2),
     c("stringChange", CROSS),
     c("lastBars", DOWN_BOXES),
   ],
@@ -594,7 +594,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("early", EARLY),
     c("openString", "Put the open E and A right on the click."),
     c("shift", SHIFT_OCT),
-    c("stringChange", "Flatten finger one from the A to the D string.", 2),
+    c("stringChange", CROSS),
     c("lastBars", "Hold the top E at fret twelve two clicks."),
   ],
   "boxes-second-key.e-minor-box-one-twice": [
@@ -613,7 +613,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   // Step 13: arpeggios
   "arpeggios.am-up": [
     g("Say A, C and E as each one sounds."),
-    c("notes", "Take the G string's fret nine with finger two.", 1),
+    c("notes", "Find each A first: frets five, seven and ten.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS8),
     c("late", LATE),
@@ -623,20 +623,20 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("lastBars", "End on the A at the D string's fret seven."),
   ],
   "arpeggios.c-up": [
-    g("Hold an open C chord as you pick each string.", 1),
-    c("notes", "Keep the C chord held down as you pick.", 1),
+    g("Pick each string of the open C chord in turn.", 1),
+    c("notes", "Say which of C, E and G each string is.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS8),
     c("late", LATE),
     c("early", EARLY),
     c("openString", "Put the open G right on the click."),
-    c("shift", "Slide up to fret eight with the little finger."),
+    c("shift", "Play fret eight with the little finger."),
     c("stringChange", CROSS),
     c("lastBars", "Finish on C, the A string at fret three."),
   ],
   "arpeggios.changes-in-position": [
     g(SAY_CHORD),
-    c("notes", "Move only the notes that change between chords.", 1),
+    c("notes", "Find each chord's notes from the one before it.", 1),
     c("heard", HEARD_ANY),
     c("extras", EXTRAS8),
     c("late", LATE_CHORD),
@@ -647,7 +647,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   // Step 14: the changes in A minor
   "the-changes.thirds-of-the-chords": [
     g("Say C, A, E, B as the chords change."),
-    c("notes", "Sit a fret low, in fourth position.", 1),
+    c("notes", "Find each third from its chord's root.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS_HALF),
     c("late", LATE_CHORD),
@@ -670,7 +670,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
   // Step 15: the changes in G
   "changes-in-g.g-three-lines": [
     g("Say what job the note does on each chord.", 1),
-    c("notes", FINGER_AT_TWO, 4),
+    c("notes", "Name the note's job, then find it by fret.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS_HALF),
     c("late", LATE_CHORD),
@@ -697,7 +697,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("early", EARLY_BEAT),
     c("shift", "Move the hand down a fret for D, then back.", 4),
     c("stringChange", CROSS),
-    c("lastBars", "Move back up a fret for G on '1'.", 4),
+    c("lastBars", "Go back to the G shape on '1'.", 2),
   ],
   "changes-in-g.g-land-on-a-chord-tone": [g("Land on a note of the chord and name its job.")],
   // Level 3 warm-up: a key and a pair of boxes that change every Take
@@ -707,7 +707,7 @@ export const KNOW_THE_NECK_CUES: CueBook = {
     c("late", LATE_SAY),
     c("early", EARLY),
     c("afterHeld", HELD_OUT),
-    c("shift", "Land the first note after the hold on its click."),
+    c("shift", "Move up as the held note ends."),
     c("stringChange", CLOSE),
     c("lastBars", KEEP_NAMING),
   ],
