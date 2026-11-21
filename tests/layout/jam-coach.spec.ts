@@ -66,13 +66,16 @@ async function send(page: Page, text: string) {
   await page.locator(".ask-panel [data-testid=ask-send]").click();
 }
 
+/** "show a7" in each language's own command words (`src/coach/ask/commands/<lng>.json`). */
+const SHOW_A7: Record<string, string> = { en: "show a7", de: "zeig a7" };
+
 for (const lng of ["en", "de"]) {
   test(`"Pin this shape" on Jam: one press, its receipt and Undo (${lng})`, async ({ page }) => {
     await openShot(page, "jam", { width: 1440, height: 900 }, "ember", { lng });
     await stop(page);
     await expect(page.locator(".jam-pinned")).toHaveCount(0);
     await openAsk(page);
-    await send(page, "A7");
+    await send(page, SHOW_A7[lng]);
     const receipt = page.locator(".ask-panel [data-testid=ask-receipt]").last();
     const pin = receipt.locator("[data-action=pinShape]");
     await expect(pin).toBeVisible();
