@@ -7,6 +7,8 @@ Branch `coach-pol2`, worktree `/home/dgx-delgado/yames-coach-pol2`. Status per i
 ## Not reached, by number
 
 Brief (`plans/tasks/coach/pol2-tools-and-ask.md`):
+- **1**: the view switch under the drawer at 1024. A margin on the switch wrapped the head in
+  Manuscript at 1024x700 (picture 279.7 → 266.5 px): reverted. Move it without growing the head.
 - **6**: at 1024x700 the tool's line cuts the beat row mid-circle (c2a2). Needs a picture
   (`tests/layout/tool-coach.spec.ts` scenes), a CSS fix, a scene.
 - **7**: the header at 620 px with the rail open cuts "Save preset" to "Sa". First check whether it is

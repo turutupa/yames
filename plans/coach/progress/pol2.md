@@ -9,7 +9,7 @@ Extras copied from `/tmp/coach-orch/s6/pol2-extras.md` (below, verbatim index).
 
 | # | State | Commit / note |
 |---|---|---|
-| 1 | done | `6c0a00a3`: the head's view switch moves in beside the drawer (ask.css); ask.spec at 1024x700 / x768 (switch left of the drawer, picture's frame unchanged), the result's column also at 1024x768. The note under the head stays covered (DESIGN 3.3: covers the picture, never the controls; c2a1's decision kept). |
+| 1 | left (tried, reverted) | Moving the head's view switch in by the drawer's width (`6c0a00a3`) wrapped the head in Manuscript at 1024x700 and took 13 px from the picture (279.7 → 266.5; ask.spec:103's own frame check and the new scene both failed, `/tmp/coach-pol2/layout-2.log`). Reverted; c2a1's decision (head covered, the switch closes Ask anyway) stands. Kept: the result's text-column scene also at 1024x768. A fix needs the switch moved without growing the head (e.g. over the picture's top-left, or the title allowed to ellipsize with Ask open): pol3. |
 | 2 | gone | chip1b's `onePress` covers the question chips (AskPanel.tsx:240, AskToolTurn.tsx:245, AskCardTurn.tsx:70). |
 | 3 | done | `2a758277`: askStore puts the divider before turns written since the open (askStore.test.ts). |
 | 4 | done | `9ece5bfe`: the chip's canned answer speaks through `speakAndReveal` (useToolCoach.ts; useToolCoach.chipSpeech.test.tsx). R-adjacent: useToolCoach.ts is the old useSession body. |
