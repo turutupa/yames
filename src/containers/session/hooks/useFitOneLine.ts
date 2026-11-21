@@ -139,13 +139,22 @@ export function fitRow(row: HTMLElement): void {
   }
 }
 
-/** Re-fits when `label` changes, on resize, and once the web fonts land. */
-export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
+/**
+ * Re-fits when `label` changes, on resize, and once the web fonts land.
+ *
+ * Keyed on the row element itself, not on a ref object: a row that is
+ * unmounted and mounted again (the footer's row comes and goes with Watch's
+ * availability) is a new element under the same ref, and an effect keyed on
+ * the ref kept measuring and observing the old one. The new row was then
+ * never fitted, and ran 3–5px off a 360px phone once its controls settled
+ * (lf1). Pass the element from a callback ref (`useState`'s setter).
+ */
+export function useFitRow(row: HTMLElement | null, label: string): void {
   useLayoutEffect(() => {
-    if (!ref.current || typeof window === "undefined") return;
+    if (!row || typeof window === "undefined") return;
     let alive = true;
     const fit = () => {
-      if (alive && ref.current) fitRow(ref.current);
+      if (alive && row.isConnected) fitRow(row);
     };
     fit();
     window.addEventListener("resize", fit);
@@ -155,7 +164,6 @@ export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
     // A theme changes the face without a resize or a new font landing: the
     // row's and the controls' own widths say so. A fit that changes nothing
     // ends the loop.
-    const row = ref.current;
     const sizes = typeof ResizeObserver === "function" ? new ResizeObserver(fit) : null;
     const watchSizes = () => {
       sizes?.disconnect();
@@ -187,7 +195,7 @@ export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
       window.removeEventListener("resize", fit);
       fonts?.removeEventListener?.("loadingdone", fit);
     };
-  }, [ref, label]);
+  }, [row, label]);
 }
 
 /**

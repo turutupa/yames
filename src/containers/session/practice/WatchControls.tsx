@@ -3,7 +3,7 @@
  * foot row, and the row under the Tab and the Runway): acceptance 5, P1-1.
  * What they do is `useWatch`'s; this only draws them.
  */
-import { useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { WatchControl } from "./useWatch";
 import { subscribeWatchKeyLabel, watchKeyLabel } from "./watchBus";
@@ -93,11 +93,13 @@ export function WatchRow({ watch }: { watch: WatchControl }) {
  */
 export function WatchFooterRow({ watch, children }: { watch: WatchControl; children?: ReactNode }) {
   const { i18n } = useTranslation();
-  const row = useRef<HTMLDivElement>(null);
+  // The element, not a ref object: the row is unmounted while Watch is not
+  // available, and a row mounted again must be fitted again (`useFitRow`).
+  const [row, setRow] = useState<HTMLDivElement | null>(null);
   useFitRow(row, `${i18n.language}|${watch.showing}|${watch.again}|${watch.hasSound}`);
   if (!watch.canWatch) return null;
   return (
-    <div className="practice-watchrow" data-place="footer" data-testid="practice-watchrow" ref={row}>
+    <div className="practice-watchrow" data-place="footer" data-testid="practice-watchrow" ref={setRow}>
       <WatchControls watch={watch} compact />
       {children}
     </div>

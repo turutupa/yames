@@ -2598,6 +2598,23 @@ body[data-sheet-maximized] .rail {
     line-height: 1.15;
     text-align: left;
   }
+
+  /* The same give for the two other labels a long language makes long, on a
+   * bar that carries Listen: Count-in's word and a setlist's Skip
+   * (Portuguese's "Contagem inicial" and "Pular para o próximo" ran a
+   * listening Listen 19–30px past a 1024 window with a setlist loaded). */
+  .transport:has(.transport-listen) > .transport-switch,
+  .transport:has(.transport-listen) > .transport-setlist {
+    flex-shrink: 1;
+    min-width: min-content;
+  }
+
+  .transport:has(.transport-listen) > .transport-switch .transport-switch-label,
+  .transport:has(.transport-listen) .transport-skip {
+    white-space: normal;
+    line-height: 1.1;
+    text-align: left;
+  }
 }
 
 @media (max-width: 1023px) {
