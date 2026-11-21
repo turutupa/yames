@@ -51,7 +51,133 @@ decisions), `plans/tasks/coach/RULES-FOR-PROMPTS.md` (the rules every agent gets
 - Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
   `ssh rtx … powershell.exe` was refused by this session's permission mode (see "Owed").
 
-## SESSION 4, LIVE STATE (kept current; newer than everything below; last written 21:15 PT, 2026-11-20)
+## SESSION 5, in flight (started 2026-11-20 23:45 by this machine's clock; newer than everything below)
+
+Every agent's prompt starts from `/tmp/coach-orch/s5/RULES-INLINE.md` (the rules block, session 5's
+copy; if `/tmp` was cleared, `RULES-FOR-PROMPTS.md` is the same list) plus `code-leg-prompt.md`.
+The relay's answers (OWNER-UPDATES, ~23:15): the planner ignores not-fair Takes too; expired
+"Leave out" entries stay on disk, not shown; the tip catalogue is translated whole, most-seen first;
+training in a venv under `~/scratch`.
+
+| Leg (worktree `~/yames-coach-<x>`) | Launched | What | When it reports |
+|---|---|---|---|
+| int1b (on `-int1`) | 23:55 | the two reviews' fixes (`t2bb-review.md`, `c2b1b-review.md`) | re-read `/tmp/coach-orch/int1b-fix.diff` (fresh reviewer), merge `coach-int1`, `touch /tmp/coach-orch/s5/int1-merged` (c5a2b waits on it), gates with `ask ask-tools ask-typed ask-cards notebook my-exercises coach-session settings phone-header phone-learning short-window`; `done-leg.sh int1 c2b1b c4a2 t2b`; then launch rem2, c4b2, t2c, c2b2a, c3b1b, c3b2a, pol2 |
+| c5c2m (on `-c5c2`) | 23:55 | `merge coach`, the second review's fixes (`c5c2b-review.md`: MERGE AFTER FIXES, audio side clean; M-1 the counts are of notes on the click's ticks: wording), gates | if Rust changed after the review: a short re-read of `/tmp/coach-orch/c5c2m-fix.diff`; merge; `gates-rust.sh tool-coach` |
+| c5a2b (on `-c5a2`) | 00:05 | the review's fixes (`c5a2-review.md`: overdue passages called "due today" in eight locales; "% right notes" from the previous pass's recording), then `merge coach` once int1 is in (the due line gates on the raw input, not on `withoutCustomTakes`) | read the hunk near the recording path, merge, gates `songs-coach songs-review today-line short-window phone-learning` |
+| c5b1c | 23:55 | the audio re-read's four LOW (`c5b1b-review.md`) | audio reviewer on `/tmp/coach-orch/c5b1c-review.diff`, merge, `gates-rust.sh`; then the probe on a quiet machine |
+| c5b2 | 00:15 | the hear-back chip | reviewer on `/tmp/coach-orch/c5b2-review.diff` (R: `useSessionRun.ts`, `useListenDemo.ts`), merge after c5b1c |
+| c3bp | 00:00 | the prompt fixes the measurement asked for; re-measure both tiers into `~/scratch/yames-c3bp-results/` | merge (no review flag unless Rust changed); its `choicePrompt.ts` is what c3d renders with |
+| c3d1 | 00:00 | the router's training records (never the held-out set), a validation split, `scripts/coach-train.mjs render` | merge; with c3denv done launch **c3d2** (the trial, the training jobs, the table against stock) |
+| c3denv | 00:00 | venv `~/scratch/yames-c3d/venv`, Qwen3 0.6B / 1.7B / 4B safetensors, `train_lora.py`, the LoRA → GGUF → llama.cpp-with-grammar smoke test, timing rows | merge (scripts under `evals/coach/train/env/`) |
+| c5c3 | 00:00 | the tip catalogue into `toolTips.json`, fifteen locales, most-seen first | merge, gates with `tool-coach`; c5c4 if it handed off |
+
+Still owed after these: the full layout suite (in `~/yames-coach-night`), the hear-back probe on a
+quiet machine, then milestones 2 to 5 as listed below.
+
+## READ THIS FIRST: where session 4 stopped (2026-11-20, 23:05 by this machine's clock, at its context limit)
+
+Newer than everything below; where they differ, this wins. **Delivered: 1m and 1n** (`STATUS.md`).
+`coach` is gated green at the chip1 + c5b1 merge (vitest 49,221, `test:rust` 1,252, layout 162);
+c3b2m (eval-only) merged after that job. The owner's four decisions: hd1, nf1 and chip1 are merged;
+rem2 is briefed and waits on c4a2. Session 4's working rules that held: merge in batches and never
+into the main checkout while a `coach-gates-*` job runs; **every fix leg was re-read, and every
+first review and most re-reads found real defects** (do not skip either); test a merge first with
+`git merge-tree --write-tree coach <branch>`.
+
+**On branches, in this order:**
+
+1. **`coach-int1`** (`~/yames-coach-int1`): **finished at 23:25 and gated on its branch** (`coach-t2b`,
+   `coach-c2b1b` and `coach-c4a2` merged onto chip1; the conflicts were import lines only, every
+   side's hunks kept; `progress/int1.md`; tsc, vitest 49,812, build, twelve layout specs 426 passed).
+   **Nothing was running when session 4 ended.** Not merged into `coach` because the re-read asks
+   for fixes first. Its open decision: the history cards still compare an own exercise's Takes with
+   earlier Takes of the same recipe (identical music: accepted). Next: a fix agent on that branch
+   with two work lists: `/tmp/coach-orch/t2bb-review.md`
+   (MEDIUM: the "list is full" Undo notice promises something no press can do; LOW: Undo's order
+   beside an unreadable row) and `/tmp/coach-orch/c2b1b-review.md` (three MEDIUM: "what changed" and
+   "am I improving" mix variants of an Exercise (`takesOf` ignores `variantSeed`); evenness is said
+   without its tempo and two Takes are both called "the oldest"; "is my tone / muting improving"
+   gets the tempo card instead of "I didn't measure that"; plus the LOW wordings and wrong matches).
+   `/tmp/coach-orch/c4a2b-review.md` is MERGE (three LOW for a polish leg). Then a short re-read,
+   merge, `gates.sh` with `ask ask-tools ask-typed ask-cards notebook my-exercises coach-session
+   settings phone-header phone-learning short-window`. Screens read by the orchestrator: the
+   Notebook (accepted once "Leave out" became words, not a bin), My exercises (accepted).
+2. **`coach-c5c2`** (`~/yames-coach-c5c2`): free-play findings for the tools' note, its four
+   sentences rebuilt with stated counts and minimum evidence (`progress/c5c2b.md`). Owed: `git merge
+   coach` (c5b1 merged since: add `bar_beat` to any `BeatTick { }` literal c5b1 wrote; both edit
+   `commands.rs`), **the audio reviewer on its one `engine.rs` line** (`bar_beat: notif.measure_beat`
+   in the event loop's `beat_log` push) and a re-read of the four sentences against
+   `/tmp/coach-orch/c5c2-review.md`; then `gates-rust.sh tool-coach`.
+3. **`coach-c5a2`** (`~/yames-coach-c5a2`): Songs' verdict as the coach note; a due passage in
+   Today's line. Gated on its branch; **its diff read is owed** (`useSongAttempt.ts`'s publish,
+   `SongReview.tsx`, `todayLine.ts`: it will meet t2bb's `withoutCustomTakes` there); read its three
+   screenshots under `/tmp/coach-c5a2/shots/`.
+4. **A small Rust follow-up, c5b1c** (not launched): the audio re-read's four LOW
+   (`/tmp/coach-orch/c5b1b-review.md`): `clear` and `stop` must empty the take slot before they drop
+   the hear-back's claim (a Start in that window plays the rest of the bar before the click); the
+   probe adds only each span's positive deficit; refuse a `hear_take` begun while the input stops; a
+   drop guard in `stop_evaluation`. Do it before or with **c5b2** (the button; brief exists; "bar N"
+   means played bars).
+
+**The measurement and what it decides** (`evals/coach/results/2026-11-20-tables.md`,
+`progress/c3b2m.md`): rules alone 15% right tool and 0 wrong actions; the 4B in the chain 77.4% /
+10.7% wrong; the 8B 79.8% / 7.1%; gates 90% / under 2%; latency fine. **So c3d is on** (the owner
+approved training, all night and the weekend, as queue jobs). First steps for session 5, in order:
+(a) **c3b1b**: the ~120 card items (after int1 merges, so the seven cards' ids exist; its seven
+steps are in `progress/c3b1a.md`); (b) a small prompt leg the measurement asks for (list every
+enum value instead of two and "…"; "leave out what the player did not say"; a value list per
+setting; show the model the Paths' titles so it can answer "which"): re-measure with the frozen
+binary `~/scratch/yames-c3b-results/coach-eval-cuda` (feature `coach-llm-cuda-eval`,
+`YAMES_LLM_GPU_LAYERS=99`); (c) **c3d1** (`c3d-small-router.md`): the training data, never from the
+held-out set (hashes in `evals/coach/README.md`); (d) the environment for c3d2: no `peft` /
+`datasets` anywhere; my plan, told to the owner in STATUS: a new venv under `~/scratch` and the
+base weights from the model's own repository, as queue jobs (the stock GGUFs were fetched that way:
+`job submit … -- curl -L --fail -o … <the URL the app pins>`; it was not refused). The target for
+the router is the WRONG-ACTION rate: refuse / ask / none where the stock models act. c3b2a (the
+wiring, dark) can run beside all of it; a model's call never runs at once.
+
+**Then, as before:** c2b2a → c2b2b → c2cb (a tuning refusal before search) → **delivery 2**; c4b2
+(milestones skip Path id `my-exercises`; "a card was shown" is memory only; spans already leave out
+not-fair Takes), rem2, t2c (add only through `updateMyExercises`), t2d, c5a1, c5b2, c3c, c6a, c6b,
+pol2 (its `useSession.ts` item is done; add: c4a2b's three LOW, chip1's fast-tap LOW, lb1b's three
+LOW, `phone-learning`'s footer at 360 px that fails by 1 to 4 px under load in three legs' runs).
+c5c3 waits on the owner (STATUS, question 4).
+
+**Owed gates:** the click-jitter probe for c5b1 on a quiet machine (five runs; commands in
+`progress/c5b1b.md`; the worktree was removed, so build from `coach`:
+`plans/coach/tools/probe-c5b1.sh`); the full layout suite in `~/yames-coach-night` after
+`merge --ff-only coach` (not run this session: the load never fell under 30).
+
+**Worktrees left:** `-int1`, `-c2b1b`, `-c4a2`, `-t2b` (inputs of int1), `-c5c2`, `-c5a2`, `-night`,
+`-base`. The merged legs' worktrees were removed with `done-leg.sh` (branches kept).
+
+## SESSION 4, state at 21:55 (superseded by the section above where they differ)
+
+**Delivered:** 1m (`STATUS.md`). **Merged since 1m, gated or gating:** c2b1a (fact cards; three fix
+rounds; gates green: vitest 48,869), nf1 (+ nf1b, nf1c; queue job `coach-gates-nf1` with the Rust
+suite). **The relay's RTX numbers landed** (`PROGRESS.md`, owner updates): the stock 4B on Vulkan
+answers a chat turn in about 0.5 s and holds every hard gate; the owner also allows training all
+night and through the weekend.
+
+| Leg (worktree `~/yames-coach-<leg>`) | State at 21:55 | Next |
+|---|---|---|
+| chip1 (+ **chip1b running**) | review `/tmp/coach-orch/chip1-review.md`: a held Enter repeats the press; a recording jam take is not a "Take" to the chip path; `set_setting` unflagged | read chip1b's `run.ts` / `askTools.ts` hunks, merge, gates `ask ask-tools ask-typed short-window coach-session` |
+| lb1 (+ **lb1b running**) | review `/tmp/coach-orch/lb1-review.md`: a loop could start in the count-in window (both doors) | read lb1b's `useSessionRun.ts` hunk, merge |
+| c5b1 (+ **c5b1b running**) | audio review `/tmp/coach-orch/c5b1-review.md`: callback untouched; M1 a Take closing while the input stops keeps its audio | a short re-read of M1 / L1 (privacy), merge, **then the probe on a quiet machine** (`plans/coach/tools/probe-c5b1.sh` in that worktree; commands in `progress/c5b1.md`), then c5b2 |
+| c5c2 | built; **review running** → `/tmp/coach-orch/c5c2-review.md` | fix leg if asked, merge after c5b1 (both in `timing.rs`), `gates-rust.sh tool-coach` |
+| t2b (+ **t2bb running**) | review `/tmp/coach-orch/t2b-review.md`: a false recap sentence; the store could write without having read | read t2bb's store, merge, regenerate the parity manifest if it conflicts; then t2c |
+| c4a2 | built; **review running** (it reads `store.ts` whole) → `/tmp/coach-orch/c4a2-review.md`. **Orchestrator's note for its fix leg: "Leave out" must not be a trash-can icon (nothing is deleted): the words, or an eye-off glyph with a label** | fix, merge, gates `notebook ask ask-tools coach-model settings phone-header short-window`; then rem2 ‖ c4b2 (c4b2: milestones skip Path id `my-exercises`; "a card was shown" is memory only) |
+| **c2b1b running** | four more cards, the slot plugged, every `ask.card.*` translated | diff read (the seam, every new sentence), merge; then c2b2a → c2b2b → c2cb → **delivery 2** |
+| **c3b1a running** | the eval harness, grammar, choice prompt, and the 180 non-card items of the tool test set | merge (no review flag unless `coach.rs` changed); c3b1b adds the ~120 card items after c2b2a; then c3b2a, c3b2b |
+| **c5a2 running** | Songs' note; a due passage in Today's line | diff read, merge |
+
+**Questions for the owner so far** (put them in the next STATUS line): (1) should the planner's own
+arithmetic also ignore a Take marked not fair (today only the words do: `progress/nf1c.md` lists
+what a player sees); (2) typed commands keep their proposal (my reading of the chip decision);
+(3) a jam take being recorded counts as a Take for the chip path (my reading); (4) c5c3's size
+(1,305 tool-tip strings into fourteen languages: about 18,000 lines) before it is launched.
+
+## SESSION 4, earlier state (21:15; superseded by the section above where they differ)
 
 **Merged this session** (rows in `PROGRESS.md`): t2a, fc1 (0 `cue.refused` anywhere), t1b2b (+ t1b2c,
 t1b2d; two reviews), c2ca, hd1, c5c1 (reviewed: MERGE), c4a1 (+ b, c; two reviews), the session-4

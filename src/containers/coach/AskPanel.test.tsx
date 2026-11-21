@@ -142,10 +142,11 @@ describe("the panel", () => {
     __setAskToolsForTests(null, null);
   });
 
-  it("is only Ask: no Start, no End, no Feed or History tabs, no sections (leg c2a2)", () => {
+  it("is Ask and its Notebook only: no Start, no End, no Feed or History tabs, no sections (legs c2a2, c4a2)", () => {
     openAsk();
     const { container } = render(<AskPanel lookingAt={null} onClose={() => {}} />);
-    expect(container.querySelector("[role=tablist], [data-testid^='ask-section']")).toBeNull();
+    expect(container.querySelector("[data-testid^='ask-section']")).toBeNull();
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([t("notebook.ui.tabAsk"), t("notebook.ui.tabNotebook")]);
     for (const word of ["Start", "End", "Feed", "History"]) {
       expect(screen.queryByRole("button", { name: word })).toBeNull();
       expect(screen.queryByRole("tab", { name: word })).toBeNull();
@@ -199,20 +200,77 @@ describe("the panel", () => {
     __setAskToolsForTests(null, null);
   });
 
-  it("the chips are chosen again when a turn is written in place: after the proposal's press, the subdivision chip offers the other value", () => {
+  it("the chips are chosen again when a turn is written in place: after the Undo's press, the subdivision chip offers the other value", () => {
     let now = 1;
     const host = fakeHost({ view: "beat" }, { clickSubdivision: () => now as 1, setClickSubdivision: (s) => ((now = s), "done") });
     __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
     openAsk();
     const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
+    // A chip's own press is the press (leg chip1): changed at once, with Undo.
     act(() => fireEvent.click(within(screen.getByTestId("ask-empty")).getByRole("button", { name: "Two clicks a beat" })));
     const row = () => [...container.querySelectorAll(".ask-chip-row [data-testid=ask-tool-chips] button")].map((b) => b.textContent);
-    expect(row()).toContain("Two clicks a beat");
-    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
     expect(now).toBe(2);
+    expect(screen.queryByTestId("ask-proposal")).toBeNull();
     expect(row()).toContain("One click a beat");
-    expect(row()).not.toContain("Two clicks a beat");
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(now).toBe(1);
+    expect(row()).toContain("Two clicks a beat");
+    expect(row()).not.toContain("One click a beat");
     __setAskToolsForTests(null, null);
+  });
+});
+
+describe("the chip row's own button (leg chip1b: review M1, L4)", () => {
+  function tempoPanel() {
+    let bpm = 120;
+    const host = fakeHost({ view: "beat" }, { tempo: () => bpm, setTempo: (b) => ((bpm = b), "done") });
+    __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
+    openAsk();
+    const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
+    const chip = () => container.querySelector<HTMLButtonElement>('[data-chip="slower"]')!;
+    return { host, chip, bpm: () => bpm };
+  }
+  afterEach(() => __setAskToolsForTests(null, null));
+
+  it("the second click of a double-click is not a press: one change, one receipt", () => {
+    const { chip, bpm } = tempoPanel();
+    act(() => fireEvent.click(chip(), { detail: 1 }));
+    act(() => fireEvent.click(chip(), { detail: 2 }));
+    expect(bpm()).toBe(115);
+    expect(screen.getAllByTestId("ask-receipt")).toHaveLength(1);
+  });
+
+  it("a held Enter is one press: its auto-repeats change nothing, and Undo puts back what the player had", () => {
+    const { chip, bpm } = tempoPanel();
+    // The browser's own sequence for a held key: keydown, click (detail 0), then keydown(repeat) + click per repeat.
+    act(() => void fireEvent.keyDown(chip(), { key: "Enter" }));
+    act(() => void fireEvent.click(chip(), { detail: 0 }));
+    for (let i = 0; i < 5; i++) {
+      const repeat = fireEvent.keyDown(chip(), { key: "Enter", repeat: true });
+      expect(repeat, "the repeat's default (its click) is stopped").toBe(false);
+      act(() => void fireEvent.click(chip(), { detail: 0 }));
+    }
+    act(() => void fireEvent.keyUp(chip(), { key: "Enter" }));
+    expect(bpm()).toBe(115);
+    expect(screen.getAllByTestId("ask-receipt")).toHaveLength(1);
+    // A new, separate key press is a press again.
+    act(() => void fireEvent.keyDown(chip(), { key: "Enter" }));
+    act(() => void fireEvent.click(chip(), { detail: 0 }));
+    expect(bpm()).toBe(110);
+  });
+
+  it("separate presses chain: Slower ×3, Undo goes back to 120; the live receipt says 120 → 105, the earlier ones are plain lines", () => {
+    const { chip, bpm } = tempoPanel();
+    for (let i = 0; i < 3; i++) act(() => fireEvent.click(chip(), { detail: 1 }));
+    expect(bpm()).toBe(105);
+    const receipts = screen.getAllByTestId("ask-receipt");
+    expect(receipts).toHaveLength(3);
+    expect(receipts.map((r) => r.getAttribute("data-undo"))).toEqual(["gone", "gone", "live"]);
+    expect(receipts[2]).toHaveTextContent("Tempo 120 → 105 BPM");
+    expect(receipts[0]).toHaveTextContent("Tempo 120 → 115 BPM");
+    expect(screen.getAllByTestId("ask-undo")).toHaveLength(1);
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    expect(bpm()).toBe(120);
   });
 });
 

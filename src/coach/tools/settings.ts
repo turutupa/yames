@@ -102,6 +102,12 @@ const setSetting = defineConfirmTool<Resolved>({
   args: [
     { name: "key", type: { kind: "enum", values: SAFE_SETTING_KEYS }, note: "Which setting." },
     { name: "value", type: { kind: "query", maxLength: 40 }, note: "The new value, in the player's words (a theme's or a language's name, on / off, a percentage)." },
+    {
+      name: "at",
+      type: { kind: "query", maxLength: 40 },
+      optional: true,
+      note: "Only if the setting is this now, as the undo words it (an undo's guard: it puts back what the tool changed, nothing since).",
+    },
   ],
   when: (ctx) => !takeRunning(ctx),
   propose(args, host, ctx): ProposeResult<Resolved> {
@@ -111,6 +117,9 @@ const setSetting = defineConfirmTool<Resolved>({
     }
     const from = host.safeSetting(key);
     if (from === "notWiredYet") return notWiredYet("set_setting");
+    // The undo's guard (leg chip1): changed again since, by anyone, it is not this undo's to put back.
+    const guard = argString(args, "at");
+    if (guard !== undefined && String(settingWords(key, from)) !== guard) return gone("the setting moved since");
     const found = resolveValue(key, argString(args, "value") ?? "", host);
     if ("ok" in found) return found;
     const to = found.value;
@@ -132,7 +141,7 @@ const setSetting = defineConfirmTool<Resolved>({
     return {
       ok: true,
       receipt: line("coachTools.receipt.setSetting", { key, from: settingWords(key, from), to: settingWords(key, to) }),
-      undo: { tool: "set_setting", args: { key, value: String(settingWords(key, from)) } },
+      undo: { tool: "set_setting", args: { key, value: String(settingWords(key, from)), at: String(settingWords(key, to)) } },
     };
   },
 });

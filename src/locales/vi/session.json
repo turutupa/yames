@@ -444,6 +444,34 @@
       "heard": "Khi chơi tự do, bạn ở giọng {{key}}, chủ yếu trên {{chords}}.",
       "heardKey": "Khi chơi tự do, bạn ở giọng {{key}}."
     },
+    "myExercises": {
+      "title": "Bài của tôi",
+      "intro": "Những bài bạn tự tạo. Chúng không thuộc lộ trình nào và không tính là đạt gì cả.",
+      "shape": {
+        "box": "{{root}} {{scale}}, thế hộp ở phím {{position}}",
+        "threePerString": "{{root}} {{scale}}, ba nốt mỗi dây từ phím {{position}}",
+        "arpeggio": "Arpeggio {{chord}} từ phím {{position}}",
+        "oneString": "{{root}} {{scale}} dọc dây {{string}} từ phím {{position}}",
+        "chromatic": "Chromatic, mỗi phím một ngón, từ phím {{position}}"
+      },
+      "direction": {
+        "up": "đi lên",
+        "down": "đi xuống",
+        "upAndBack": "đi lên rồi xuống lại"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} ô nhịp",
+      "bars_other": "{{count}} ô nhịp",
+      "remove": "Xóa",
+      "removeLabel": "Xóa {{what}} khỏi Bài của tôi",
+      "removed": "Đã xóa khỏi Bài của tôi.",
+      "undo": "Hoàn tác",
+      "notSaved": "Không thể đọc hoặc lưu Bài của tôi lúc này, nên không có gì thay đổi.",
+      "undoFull": "Bài của tôi đã đầy (50), nên Hoàn tác không thể đưa bài này trở lại.",
+      "undoAlready": "Bài này đã có lại trong Bài của tôi.",
+      "cantBuild": "Bài này không thể dựng lại nữa: phiên bản Yames này không còn tạo ra nó. Nó vẫn ở đây cho đến khi bạn xóa.",
+      "howTo": "Chơi đúng như đã viết, theo click."
+    },
     "paths": {
       "title": "Lộ trình",
       "intro": "Chọn một mục tiêu. Không có gì bị khóa: bạn có thể bắt đầu bước nào cũng được và đổi ý bất cứ lúc nào.",

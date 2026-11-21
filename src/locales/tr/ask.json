@@ -47,98 +47,218 @@
       "phone": "Buraya yazdığın hiçbir şey bu telefondan çıkmaz."
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "Son denemen hakkında:",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "Nerede aksadı?",
+        "lean": "Erken miydim, geç mi?",
+        "count": "Bu neden sayılmadı?",
+        "changed": "Son denemeden beri ne değişti?",
+        "improving": "Gelişiyor muyum?",
+        "madeOf": "Puan neyden oluşuyor?",
+        "distance": "Çıta ne kadar uzakta?"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "Değerlendirmesiz çalıyorsun, bu yüzden denemelerin hakkındaki soruları yanıtlayacak ölçüm yok."
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "{{take}}. deneme {{bars}} ölçü sonra durdu, değerlendirmek için çok az.",
+      "tooShort_other": "{{take}}. deneme {{bars}} ölçü sonra durdu, değerlendirmek için çok az.",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "{{take}}. denemede hiçbir ölçü aksamadı: değerlendirilebilen her ölçü tuttu.",
+        "noBars": "{{take}}. denemeyi ölçü ölçü ölçmedim, bu yüzden nerede aksadığını söyleyemem."
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "{{take}}. denemede sapan ölçüler, denemenin geri kalanından daha erken geldi, daha geç değil. Tüm denemenin paylaştığı bir sapma ölçtüğüm bir şey değil.",
+          "late": "{{take}}. denemede sapan ölçüler, denemenin geri kalanından daha geç geldi, daha erken değil. Tüm denemenin paylaştığı bir sapma ölçtüğüm bir şey değil."
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "{{take}}. denemede, ölçebildiğim ölçülerin ({{bars}} ölçünün {{measured}} tanesi) hiçbiri geri kalanından {{ms}} ms'den fazla erken gelmedi. Tüm denemenin paylaştığı bir sapma ölçtüğüm bir şey değil.",
+          "late": "{{take}}. denemede, ölçebildiğim ölçülerin ({{bars}} ölçünün {{measured}} tanesi) hiçbiri geri kalanından {{ms}} ms'den fazla geç gelmedi. Tüm denemenin paylaştığı bir sapma ölçtüğüm bir şey değil."
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "Parçanın {{bar}}. ölçüsü: denemenin geri kalanından {{ms}} ms erken.",
+          "late": "Parçanın {{bar}}. ölçüsü: denemenin geri kalanından {{ms}} ms geç."
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "{{take}}. denemede, ölçebildiğim ölçülerin ({{bars}} ölçünün {{measured}} tanesi) hiçbiri geri kalanından {{ms}} ms'den fazla erken ya da geç gelmedi.",
+        "notMeasured": "{{take}}. denemenin hangi yöne saptığını ölçmedim: hiçbir ölçüsünde bunu söylemeye yetecek nota nota zamanlama yoktu."
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "Oradaki notalar denemenin geri kalanından daha erken geldi.",
+        "late": "Oradaki notalar denemenin geri kalanından daha geç geldi.",
+        "earlyOpen": "Oradaki açık {{note}} notaları denemenin geri kalanından daha erken geldi.",
+        "lateOpen": "Oradaki açık {{note}} notaları denemenin geri kalanından daha geç geldi.",
+        "earlyNote": "Oradaki {{fret}}. perdedeki {{note}} notaları denemenin geri kalanından daha erken geldi.",
+        "lateNote": "Oradaki {{fret}}. perdedeki {{note}} notaları denemenin geri kalanından daha geç geldi."
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "{{take}}. deneme, {{bpm}} BPM'de çıtanın altında kaldı.",
+        "even": "{{take}}. deneme %{{value}} düzgünlükteydi, çıta %{{bar}}.",
+        "evenSome": "{{take}}. deneme %{{value}} düzgünlükteydi, çıta %{{bar}}; {{expected}} notanın {{heard}} tanesini duydum.",
+        "heard": "{{take}}. denemede {{expected}} notanın {{heard}} tanesini duydum, çıta %{{bar}}.",
+        "extras": "{{take}}. denemede çıtanın izin verdiğinden daha çok fazla nota vardı: dört ölçüde {{bar}} veya daha az.",
+        "accents": "{{take}}. denemede işaretli aksanlardan çevresindeki notalardan yüksek çıkanların oranı %{{value}}, çıta %{{bar}}.",
+        "notes": "{{take}}. denemede ses yüksekliğini belirleyebildiğim notalarda yazılı olanların oranı %{{value}}, çıta %{{bar}}."
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "{{take}}. deneme sayıldı: {{bpm}} BPM'de çıtayı geçti.",
+        "below": "{{take}}. deneme kaydedildi, {{bpm}} BPM'de çıtanın altında.",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "{{take}}. denemeyi değerlendiremedim: notalarından hiçbirini duymadım, bu yüzden aleyhine sayılmaz.",
+          "tooFewHeard": "{{take}}. denemeyi değerlendiremedim: {{expected}} notanın {{heard}} tanesini duydum, değerlendirmek için çok az, bu yüzden aleyhine sayılmaz.",
+          "tooManyExtras": "{{take}}. denemeyi değerlendiremedim: yazılı olmayan notaları yazılı olanlardan daha çok duydum, bu yüzden aleyhine sayılmaz.",
+          "lowConfidence": "{{take}}. denemeyi değerlendiremedim: duyduğum notalardan yeterince emin değildim, bu yüzden aleyhine sayılmaz.",
+          "unknown": "{{take}}. denemeyi değerlendiremedim."
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "{{take}}. deneme {{bars}} ölçü sonra durdu, değerlendirmek için çok kısa, bu yüzden ne lehine ne aleyhine sayılır.",
+        "tooShort_other": "{{take}}. deneme {{bars}} ölçü sonra durdu, değerlendirmek için çok kısa, bu yüzden ne lehine ne aleyhine sayılır.",
+        "notClean": "Temiz tempon değişmedi: bunun için art arda {{need}} temiz ölçü gerekir, {{take}}. denemedeki en uzun seri {{held}} oldu.",
+        "notCleanPlain": "Temiz tempon değişmedi: bunun için art arda {{need}} temiz ölçü gerekir, {{take}}. denemede bunlar yoktu.",
+        "unfair": "Bu değerlendirmeyi adil değil diye işaretledin. Ölçüldüğü gibi tutuluyor, yanıtın yanında.",
+        "pitchGraded": "Notalarının ses yüksekliği bu alıştırmanın değerlendirmesinin parçası.",
+        "pitchNotGraded": "Notalarının ses yüksekliği bu alıştırmanın değerlendirmesinin parçası değil.",
+        "rightNotes": "{{take}}. denemede, ses yüksekliğini belirleyebildiğim {{base}} notada yazılı olanların oranı %{{value}}.",
+        "notesUnchecked": "{{take}}. denemedeki ses yüksekliklerini kontrol edemedim.",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "{{take}}. denemeyi ölçmedim: gözlerin için olandı, bu yüzden hiçbir şey değerlendirilmedi.",
+          "chosen": "{{take}}. denemeyi ölçmedim: sadece çalmayı seçtin, bu yüzden hiçbir şey değerlendirilmedi.",
+          "inputOff": "{{take}}. denemeyi ölçmedim: girdi açık değildi, bu yüzden hiçbir şey değerlendirilmedi.",
+          "gradingOff": "{{take}}. denemeyi ölçmedim: değerlendirme kapalı, bu yüzden hiçbir şey değerlendirilmedi.",
+          "selfChecked": "{{take}}. denemeyi ölçmedim: bu alıştırmayı kendin kontrol ediyorsun, bu yüzden hiçbir şey değerlendirilmedi.",
+          "selfCheckedTempo": "{{take}}. denemeyi ölçmedim: {{bpm}} BPM'de bu alıştırmayı kendin kontrol ediyorsun, bu yüzden hiçbir şey değerlendirilmedi.",
+          "practiceOnly": "{{take}}. denemeyi ölçmedim: bu alıştırma sadece çalışma, değerlendirilmez.",
+          "landings": "{{take}}. denemeyi ölçmedim: bu alıştırma henüz değerlendirilmiyor."
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "Bunu ölçmedim. Notalarının ses yüksekliği bu alıştırmanın değerlendirmesinin parçası değil.",
+        "pickDirection": "Bunu ölçmedim. Uygulamada yalnızca ses var ve aşağı vuruş ile yukarı vuruş benzer duyulabilir.",
+        "muting": "Bunu ölçmedim. Uygulama, susturulmuş bir teli yanındaki yüksek sesli telden ayıramaz.",
+        "posture": "Bunu ölçmedim. Uygulamada senin görüntün yok.",
+        "tension": "Bunu ölçmedim. Gerginliği yalnızca sen hissedebilirsin ve duyulabilmesinden önce gelir.",
+        "handAttribution": "Bunu ölçmedim. Geç gelen bir nota iki elden de aynı duyulur.",
+        "fingering": "Bunu ölçmedim. Aynı ses yüksekliği her parmaktan aynı duyulur.",
+        "tone": "Bunu ölçmedim. Ses rengi ve dokunuş ölçülmez.",
+        "feel": "Bunu ölçmedim. İyi duyulup duyulmadığı uygulamanın ölçtüğü bir şey değil."
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "Bu alıştırmanın henüz yanıt verebileceğim bir denemesi yok.",
+        "notSaved": "{{take}}. deneme henüz kaydedilmedi, bu yüzden ondan önceki denemeleri okuyamıyorum.",
+        "ungraded": "Değerlendirmesiz çalıyorsun, bu yüzden buna yanıt verecek hiçbir şey ölçmedim."
+      },
+      "history": {
+        "leftOut": "Adil değil diye işaretlediğin {{count}} denemeyi dışarıda bıraktım.",
+        "leftOut_other": "Adil değil diye işaretlediğin {{count}} denemeyi dışarıda bıraktım.",
+        "otherNotes": "Bu alıştırmanın başka bir varyantında çalınan {{count}} denemeyi dışarıda bıraktım.",
+        "otherNotes_other": "Bu alıştırmanın başka bir varyantında çalınan {{count}} denemeyi dışarıda bıraktım."
+      },
+      "changed": {
+        "first": "Bu alıştırmanın {{take}}. denemeden önce ölçülmüş denemesi yok, bu yüzden karşılaştıracak bir şey yok.",
+        "onlyUnfair": "Bu alıştırmanın {{take}}. denemeden önce ölçülmüş tek denemeleri adil değil diye işaretlediklerin, bu yüzden onlarla karşılaştırmıyorum.",
+        "thisUnfair": "{{take}}. denemenin değerlendirmesini adil değil diye işaretledin, bu yüzden diğer denemelerle karşılaştırmıyorum.",
+        "noneAlike": "Alıştırmanın bu varyantının {{take}}. denemeden önce ölçülmüş, karşılaştırabileceğim bir denemesi yok.",
+        "sameTempo": "{{take}}. deneme ve ondan önceki son ölçülmüş deneme ikisi de {{bpm}} BPM'deydi.",
+        "tempo": "{{take}}. denemeden önceki son ölçülmüş deneme {{before}} BPM'deydi; {{take}}. deneme {{bpm}} BPM'deydi.",
+        "metric": {
+          "even": "Düzgünlük: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
+          "heard": "Duyulan nota: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
+          "extras": "Fazla nota: o denemede {{before}}, {{take}}. denemede {{now}}.",
+          "accents": "Oturan aksan: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
+          "notes": "Doğru nota: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
+          "hold": "Sona kadar korunan düzgünlük: o denemede %{{before}}, {{take}}. denemede %{{now}}."
+        },
+        "noPair": "O deneme ile {{take}}. deneme, yan yana koyabileceğim ortak bir ölçülmüş sayı paylaşmıyor.",
+        "verdict": {
+          "bothPassed": "İkisi de çıtayı geçti.",
+          "bothBelow": "İkisi de çıtanın altındaydı.",
+          "nowPassed": "O deneme çıtanın altındaydı; {{take}}. deneme geçti.",
+          "nowBelow": "O deneme çıtayı geçti; {{take}}. deneme altında kaldı."
+        }
+      },
+      "improving": {
+        "tooFew": "Bu alıştırmanın ölçülmüş {{count}} denemesini karşılaştırabilirim, bunun için {{need}} gerekir.",
+        "tooFew_other": "Bu alıştırmanın ölçülmüş {{count}} denemesini karşılaştırabilirim, bunun için {{need}} gerekir.",
+        "window": "Bu alıştırmanın son {{count}} ölçülmüş denemesinde tempo {{to}} BPM'ydi.",
+        "window_other": "Bu alıştırmanın son {{count}} ölçülmüş denemesinde tempo en eskide {{from}} BPM'den en yenide {{to}} BPM'ye değişti.",
+        "windowSame": "Bu alıştırmanın son {{count}} ölçülmüş denemesinde tempo {{to}} BPM'ydi.",
+        "windowSame_other": "Bu alıştırmanın son {{count}} ölçülmüş denemesinde en eskisi ve en yenisi ikisi de {{to}} BPM'deydi.",
+        "clean": "Bunlardan {{count}} tanesi temiz tempo kazandı, {{bpm}} BPM'de.",
+        "clean_other": "Bunlardan {{count}} tanesi temiz tempo kazandı; en hızlısı {{bpm}} BPM'ydi.",
+        "cleanNone": "Bunlardan hiçbiri temiz tempo kazanmadı.",
+        "cleanUnknown": "Kazandıkları temiz tempoları sayamıyorum: bazıları kazanıp kazanmadığını kaydetmemiş.",
+        "even": "Düzgünlük, bunu tutan {{count}} tanesinde: bunların en eskisinde %{{first}}, {{firstBpm}} BPM'de; bunların en yenisinde %{{last}}, {{lastBpm}} BPM'de; en iyisinde %{{best}}, {{bestBpm}} BPM'de.",
+        "even_other": "Düzgünlük, bunu tutan {{count}} tanesinde: bunların en eskisinde %{{first}}, {{firstBpm}} BPM'de; bunların en yenisinde %{{last}}, {{lastBpm}} BPM'de; en iyisinde %{{best}}, {{bestBpm}} BPM'de.",
+        "evenNone": "Bunlardan ikiden azında düzgünlük değeri vardı, bu yüzden karşılaştırmıyorum."
+      },
+      "made": {
+        "intro": "Bu alıştırmanın çıtasında {{count}} kontrol var.",
+        "intro_other": "Bu alıştırmanın çıtasında {{count}} kontrol var.",
+        "check": {
+          "even": "Düzgünlük: art arda {{over}} ölçüde en az %{{bar}}.",
+          "heard": "Duyulan nota: yazılı notaların en az %{{bar}} oranı.",
+          "extras": "Fazla nota: {{over}} ölçüde {{bar}} veya daha az.",
+          "accents": "Aksanlar: işaretli aksanların en az %{{bar}} oranı çevresindeki notalardan yüksek.",
+          "notes": "Doğru nota: ses yüksekliğini belirleyebildiğim notalarda yazılı olanların oranı en az %{{bar}}.",
+          "hold": "Sona kadar korunan düzgünlük: değerlendirilen kesitin son ölçülerinde en az %{{bar}}."
+        },
+        "unnamed": "Bunlardan {{count}} tanesi henüz tarif edemediğim bir kontrol.",
+        "unnamed_other": "Bunlardan {{count}} tanesi henüz tarif edemediğim bir kontrol.",
+        "clean": "Geçen bir deneme, art arda {{need}} temiz ölçüyle kendi temposunda temiz tempo kazanır ve daha hızlıysa temiz tempoyu yukarı taşır.",
+        "tempo": "{{passAt}} BPM veya daha hızlı temiz bir deneme alıştırmayı geçer.",
+        "ungraded": {
+          "selfChecked": "Bu alıştırmayı kendin kontrol ediyorsun: uygulama değerlendirmiyor, bu yüzden dökülecek bir puan yok.",
+          "practiceOnly": "Bu alıştırma sadece çalışma, değerlendirilmez, bu yüzden dökülecek bir puan yok.",
+          "landings": "Bu alıştırma henüz değerlendirilmiyor, bu yüzden dökülecek bir puan yok."
+        },
+        "not": {
+          "pickDirection": "Vuruş yönü değerlendirmenin parçası değil.",
+          "muting": "Susturma değerlendirmenin parçası değil.",
+          "posture": "Duruş değerlendirmenin parçası değil.",
+          "tension": "Gerginlik değerlendirmenin parçası değil.",
+          "handAttribution": "Bir aksamanın hangi elden geldiği değerlendirmenin parçası değil.",
+          "fingering": "Bir notayı hangi parmağın çaldığı değerlendirmenin parçası değil.",
+          "tone": "Ses rengi ve dokunuş değerlendirmenin parçası değil.",
+          "feel": "His ve iyi duyulup duyulmadığı değerlendirmenin parçası değil.",
+          "bendPitch": "Bir bend'in ne kadar gittiği değerlendirmenin parçası değil.",
+          "vibrato": "Vibrato değerlendirmenin parçası değil.",
+          "noteChoice": "İniş noktaları arasında hangi notaları seçtiğin değerlendirmenin parçası değil.",
+          "notesWritten": "Notalarının ses yüksekliği değerlendirmenin parçası değil."
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "even_other": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "heard": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "heard_other": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "extras": "Fazla nota: {{take}}. denemede {{value}}, çıtanın izin verdiğinden {{gap}} fazla ({{over}} ölçüde {{bar}} veya daha az).",
+          "accents": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "accents_other": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "notes": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "notes_other": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "hold": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "hold_other": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında."
+        },
+        "under": {
+          "even": "Düzgünlük, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "heard": "Duyulan nota, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "accents": "Oturan aksan, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "notes": "Doğru nota, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "hold": "Sona kadar korunan düzgünlük, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında."
+        },
+        "unnamed": "Çıtanın tarif edemediğim {{count}} kontrolü daha var, bu yüzden {{take}}. denemenin onda nasıl olduğunu söyleyemem.",
+        "unnamed_other": "Çıtanın tarif edemediğim {{count}} kontrolü daha var, bu yüzden {{take}}. denemenin onlarda nasıl olduğunu söyleyemem.",
+        "met": {
+          "even": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
+          "heard": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
+          "extras": "Fazla nota: {{take}}. denemede {{value}}, {{over}} ölçüde {{bar}} veya daha az olan çıtanın içinde.",
+          "accents": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
+          "notes": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
+          "hold": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor."
+        },
+        "unmeasured": "Çıtanın {{count}} kontrolü {{take}}. denemede ölçülmedi.",
+        "unmeasured_other": "Çıtanın {{count}} kontrolü {{take}}. denemede ölçülmedi.",
+        "tempo": "{{take}}. deneme {{bpm}} BPM'deydi; {{passAt}} BPM veya daha hızlı temiz bir deneme alıştırmayı geçer.",
+        "none": "{{take}}. denemede çıtanın hiçbir kontrolünü ölçmedim."
       }
     }
   }

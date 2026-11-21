@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Szukanie Twojej granicy w: {{title}}",
       "testOut": "Test z kroku {{step}}: {{title}}",
+      "loopBar": "Takt {{bar}} w pętli, {{bpm}} BPM",
+      "loopBars": "Takty {{from}} do {{to}} w pętli, {{bpm}} BPM",
       "swapPart": "Część {{part}} to teraz {{to}}",
       "restorePart": "Część {{part}} znów to {{from}}",
       "setMinutes": "Dzisiaj: {{to}} min",
@@ -47,6 +49,8 @@
       "findEdge": "Znaleźć Twoją granicę w: {{title}} ({{path}} · Krok {{step}}), od {{bpm}} BPM",
       "findEdgeNoBpm": "Znaleźć Twoją granicę w: {{title}} ({{path}} · Krok {{step}})",
       "testOut": "Test z kroku {{step}}: {{title}}, w podejściach: {{takes}}",
+      "loopBar": "Zapętl takt {{bar}}, {{bpm}} BPM, aż to zatrzymasz",
+      "loopBars": "Zapętl takty {{from}} do {{to}}, {{bpm}} BPM, aż to zatrzymasz",
       "swapPart": "Część {{part}}: {{from}} → {{to}}",
       "restorePart": "Przywrócić w części {{part}}: {{title}}",
       "setMinutes": "Dzisiaj: {{from}} → {{to}} min, części: {{parts}}",
@@ -115,7 +119,8 @@
       "load": "Wczytaj",
       "keep": "Zapisz",
       "go": "Przejdź",
-      "open": "Otwórz"
+      "open": "Otwórz",
+      "loop": "Zapętl"
     },
     "why": {
       "which": "Którą?",
@@ -132,7 +137,10 @@
         "level": "{{path}} nie ma poziomu o nazwie „{{query}}”.",
         "swap": "Nic o nazwie „{{query}}” nie pasuje do części {{part}}.",
         "rung": "Nie ma tam tempa do ustawienia.",
-        "settingValue": "{{key}} nie może mieć wartości „{{query}}”. Możliwe wartości to:"
+        "settingValue": "{{key}} nie może mieć wartości „{{query}}”. Możliwe wartości to:",
+        "loopBar": "Ta melodia nie ma taktu {{bar}}.",
+        "loopAcross": "Takty {{from}} do {{to}} wychodzą za koniec melodii i wracają na jej początek. Poproś o takty z jednego przebiegu melodii.",
+        "loopOneBar": "To ćwiczenie ma jeden takt: poproś o takt 1."
       },
       "notNow": {
         "take": "Po tym podejściu.",
@@ -163,13 +171,15 @@
         "following": "Już śledzisz: {{path}}.",
         "alreadySubdivision": "Już jest {{subdivision}} kliknięć na uderzenie.",
         "alreadySetting": "{{key}} już ma wartość {{value}}.",
-        "alreadyGoal": "To już Twój cel."
+        "alreadyGoal": "To już Twój cel.",
+        "loopHere": "Pętla zaczyna się od ćwiczenia w sesji, między podejściami."
       },
       "notWiredYet": "Aplikacja nie potrafi jeszcze tego zrobić stąd.",
       "refused": {
         "shape": "Aplikacja nie potrafi tego zrobić.",
         "proposal": "Od tamtej pory coś się zmieniło, więc nic nie zrobiono. Zapytaj jeszcze raz.",
-        "cap": "Śledzisz {{cap}} ścieżek, czyli maksimum. Najpierw porzuć jedną na jej stronie."
+        "cap": "Śledzisz {{cap}} ścieżek, czyli maksimum. Najpierw porzuć jedną na jej stronie.",
+        "loopBackwards": "Takt {{to}} jest przed taktem {{from}}. Najpierw podaj pierwszy takt."
       },
       "failed": "To się nie udało i nic nie zostało zmienione."
     },

@@ -444,6 +444,34 @@
       "heard": "自由演奏时你在 {{key}}，主要用了 {{chords}}。",
       "heardKey": "自由演奏时你在 {{key}}。"
     },
+    "myExercises": {
+      "title": "我的练习",
+      "intro": "你自己做的练习。它们不属于任何路线，也不计入通过。",
+      "shape": {
+        "box": "{{root}} {{scale}}，第 {{position}} 品的音阶框",
+        "threePerString": "{{root}} {{scale}}，从第 {{position}} 品起每弦三个音",
+        "arpeggio": "{{chord}} 琶音，从第 {{position}} 品起",
+        "oneString": "{{root}} {{scale}}，沿第 {{string}} 弦从第 {{position}} 品起",
+        "chromatic": "半音阶，一指一品，从第 {{position}} 品起"
+      },
+      "direction": {
+        "up": "上行",
+        "down": "下行",
+        "upAndBack": "上行再下行"
+      },
+      "line": "{{shape}}：{{direction}}。{{bars}}。",
+      "bars": "{{count}} 小节",
+      "bars_other": "{{count}} 小节",
+      "remove": "移除",
+      "removeLabel": "从我的练习中移除{{what}}",
+      "removed": "已从我的练习中移除。",
+      "undo": "撤销",
+      "notSaved": "我的练习刚才无法读取或保存，所以没有任何改动。",
+      "undoFull": "我的练习已满（50），所以撤销无法把这个放回去。",
+      "undoAlready": "这个练习已经回到我的练习里了。",
+      "cantBuild": "这个练习已无法再生成：当前版本的 Yames 不再提供它。在你移除之前，它会一直留在这里。",
+      "howTo": "照谱弹，跟着节拍器。"
+    },
     "paths": {
       "title": "路线",
       "intro": "选一个目标。没有任何锁定：你可以从任意一步开始，也可以随时改主意。",

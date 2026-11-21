@@ -262,11 +262,20 @@ pub fn set_subdivision(
     persist_state(&state, &app_handle);
 }
 
+/// `is_playing = true`, with a hear-back cut first (c5b1, [`cut_hear_back`]).
+/// The caller holds the state's lock, as `hear_take` does when it hands a bar
+/// over, so the two cannot interleave.
+fn raise_transport(s: &mut crate::state::AppState, heard: &HeardTakeState, handoff: &crate::take::TakeHandoff) {
+    cut_hear_back(heard, handoff);
+    s.is_playing = true;
+}
+
 #[tauri::command]
 pub fn toggle_playback(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
     let is_playing = {
@@ -294,7 +303,7 @@ pub fn toggle_playback(
             // context itself. Writing here afterwards would overwrite that
             // correction with a stale `true`, which is precisely the "Stop
             // over silence" this whole change exists to kill.
-            state.lock().unwrap().is_playing = true;
+            raise_transport(&mut state.lock().unwrap(), &heard, &engine.take_handoff());
             tempo_ctx.set_playing(true);
             if let Err(e) = engine.start(state.inner().clone(), app_handle.clone()) {
                 eprintln!("[yames] play failed: {e}");
@@ -313,13 +322,14 @@ pub fn set_playing(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
     {
         let mut engine = engine_state.0.lock().unwrap();
         if playing && !engine.is_running() {
             // Written before the start, never after — see `toggle_playback`.
-            state.lock().unwrap().is_playing = true;
+            raise_transport(&mut state.lock().unwrap(), &heard, &engine.take_handoff());
             // D2 — mirror into tempo context so the onset detector gates on
             // the live playing state.
             tempo_ctx.set_playing(true);
@@ -725,8 +735,10 @@ pub fn start_speed_ramp(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
     {
         let mut s = state.lock().unwrap();
         s.speed_ramp.active = true;
@@ -748,7 +760,7 @@ pub fn start_speed_ramp(
             beats: s.speed_ramp.warmup_beats,
             done: 0,
         };
-        s.is_playing = true;
+        raise_transport(&mut s, &heard, &handoff);
         // Don't touch s.bpm — ramp uses its own current_bpm
     }
     // D2 — gate onset analysis on the running state. Both this and
@@ -773,8 +785,10 @@ pub fn start_speed_ramp_from(
     state: State<SharedState>,
     engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
     {
         let mut s = state.lock().unwrap();
         s.speed_ramp.active = true;
@@ -801,7 +815,7 @@ pub fn start_speed_ramp_from(
             beats: s.speed_ramp.warmup_beats,
             done: 0,
         };
-        s.is_playing = true;
+        raise_transport(&mut s, &heard, &handoff);
         // Don't touch s.bpm — ramp uses its own current_bpm
     }
     // D2 — gate onset analysis on the running state. Written before the
@@ -1523,27 +1537,9 @@ pub async fn start_evaluation(
             // Also persist into the accumulator so the D1 diagnostic log
             // (written at stop_evaluation) includes the segments timeline.
             if let Ok(mut acc) = session_for_segment.lock() {
-                acc.push_segment(crate::session_log::PracticeSegment {
-                    start_ms: segment_end.start_ms,
-                    end_ms: segment_end.end_ms,
-                    start_bpm: segment_end.bpm,
-                    end_bpm: segment_end.bpm,
-                    score: segment_end.score,
-                    component_scores: segment_end.component_scores.clone(),
-                    end_reason: segment_end.end_reason,
-                    // Path B — propagate the inferred divisor so the D1
-                    // diagnostic log records what grid the matcher was
-                    // scoring against (essential for debugging "why did
-                    // this score this way?" from session_*.json).
-                    inferred_divisor: segment_end.inferred_divisor,
-                    inferred_divisor_confidence: segment_end.inferred_divisor_confidence,
-                    // D4c — forward raw IC errors for post-hoc debugging.
-                    interval_errors: segment_end.interval_errors.clone(),
-                    // D4c — and where each burst starts in them, without
-                    // which the errors above cannot reproduce the IC
-                    // score they sit beside.
-                    burst_start_indices: segment_end.burst_start_indices.clone(),
-                });
+                // Field by field: the event's free-play findings are not
+                // stored (`PracticeSegment::from_segment_end`).
+                acc.push_segment(crate::session_log::PracticeSegment::from_segment_end(&segment_end));
             }
         },
         move |converged_offset_ms| {
@@ -1663,11 +1659,21 @@ pub async fn stop_evaluation(
     session_acc: State<'_, SharedSessionAccumulator>,
     state: State<'_, SharedState>,
     harmony: State<'_, crate::harmony::worker::SharedHarmony>,
+    heard: State<'_, HeardTakeState>,
+    engine_state: State<'_, EngineState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let mut slow = SlowInputCall::new("stop_evaluation");
     let _turn = EVALUATION_TURN.lock().await;
     slow.got_turn();
+    // The input stops: the last heard Take's audio goes with it (c5b1), and
+    // a hear-back's slice with it (c5b1b, L1). Before the guard below, so a
+    // second stop empties it too; and again once the analyzer has joined.
+    let take_handoff = engine_state.0.lock().unwrap_or_else(|e| e.into_inner()).take_handoff();
+    heard_input_stops(&heard, &take_handoff);
+    // The second one, on every exit from here (c5b1c, review L4): a `?` on a
+    // poisoned lock or a panic in `ta.stop()` no longer skips it.
+    let heard_again = HeardInputStopsAgain { heard: &heard, handoff: &take_handoff };
     // The free-play worker reads this input: it ends with it (not waited
     // for), and the page is told, so a device change can start it again.
     // It says nothing once ended, so this `null` is the last word.
@@ -1728,6 +1734,11 @@ pub async fn stop_evaluation(
         ta.stop();
         ta.drain_telemetry()
     };
+    // The analyzer has joined: no Take closes and no pitch pass starts from
+    // here on. Forget again (c5b1b, review M1): a Take that closed while the
+    // input was stopping read the epoch the first forget moved, and its pass
+    // would keep the player's audio after the input is off.
+    drop(heard_again);
     telemetry.audio_levels = captured_audio_levels;
     telemetry.input_ring_drops = input_ring_drops;
 
@@ -5111,6 +5122,7 @@ pub fn start_take(
     engine_state: State<EngineState>,
     audio_input: State<SharedAudioInput>,
     take_state: State<TakeState>,
+    heard: State<HeardTakeState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let home = takes_home(&app_handle)?;
@@ -5209,6 +5221,9 @@ pub fn start_take(
 
     let started = {
         let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        // A hear-back that has played out no longer holds the take slot
+        // against a jam take (c5b1b, review L1); one still playing does.
+        heard.0.clear(&handoff, false);
         session.start(crate::take::TakeStart {
             app_data: &home,
             jam_id: &jam_id,
@@ -5460,6 +5475,125 @@ pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String
     handoff.set_play(None);
     handoff.drain_retired();
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// "Hear bar N": the last heard Take, played back a bar at a time (c5b1,
+// src-tauri/src/take_audio.rs)
+// ---------------------------------------------------------------------------
+
+/// The last heard Take's slot, managed beside the timing analyzer (which
+/// fills it) so a Start can cut a hear-back without waiting on the analyzer's
+/// lock.
+pub struct HeardTakeState(pub crate::take_audio::SharedHeardTake);
+
+/// A Start always wins over a hear-back: called by every door that raises the
+/// transport, with the app state's lock held and BEFORE `is_playing` rises,
+/// because the take branch runs ahead of the click and would silence it. One
+/// atomic swap when no hear-back is in the take slot; a jam's listen-back is
+/// left as it was.
+fn cut_hear_back(heard: &HeardTakeState, handoff: &crate::take::TakeHandoff) {
+    heard.0.cut(handoff);
+}
+
+/// Play bars `from_bar..=to_bar` (1-based, after the count-in) of the Take
+/// whose grade carried `serial`, through the jam's listen-back path, with a
+/// short margin either side. Refused unless that Take's audio is held, while
+/// the transport runs, and while a jam take records. The copy is made here;
+/// the held audio is not touched.
+#[tauri::command]
+pub fn hear_take(
+    serial: u64,
+    from_bar: u32,
+    to_bar: u32,
+    state: State<SharedState>,
+    engine_state: State<EngineState>,
+    take_state: State<TakeState>,
+    heard: State<HeardTakeState>,
+) -> Result<crate::take_audio::HearBack, String> {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    hear_take_in(serial, from_bar, to_bar, &state, &take_state, &heard, &handoff)
+}
+
+/// `hear_take`'s body, apart so its refusals can be tested (c5b1b). Lock
+/// order: the held Take's (for the copy, released), then the take session's,
+/// then the app state's, then the take slot's.
+fn hear_take_in(
+    serial: u64,
+    from_bar: u32,
+    to_bar: u32,
+    state: &std::sync::Mutex<crate::state::AppState>,
+    take_state: &TakeState,
+    heard: &HeardTakeState,
+    handoff: &crate::take::TakeHandoff,
+) -> Result<crate::take_audio::HearBack, String> {
+    let slice = heard.0.slice(serial, from_bar, to_bar).map_err(|e| e.to_string())?;
+    // Held across the hand-over (c5b1b, review L5): a jam take starts under
+    // this lock and refuses while the take slot plays, so it either came
+    // first (refused here) or finds the hear-back in the slot.
+    let session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+    if session.is_recording() {
+        return Err("stop recording before hearing a bar back".into());
+    }
+    // Under the state's lock: a Start cuts under it too, so it either came
+    // first (refused here) or comes after the generation is recorded.
+    let s = state.lock().unwrap();
+    if s.is_playing {
+        return Err("stop the click before hearing a bar back".into());
+    }
+    heard.0.start(handoff, slice)
+}
+
+/// The input stops (`stop_evaluation`, called twice: before its idempotency
+/// guard, and again once the analyzer has joined, review M1): the last heard
+/// Take's audio is forgotten, and a hear-back's slice comes out of the take
+/// slot, playing or finished (the input stopping ends the Session), with what
+/// the audio thread retired drained (review L1). Command thread.
+fn heard_input_stops(heard: &HeardTakeState, handoff: &crate::take::TakeHandoff) {
+    heard.0.forget();
+    heard.0.clear(handoff, true);
+}
+
+/// `stop_evaluation`'s second [`heard_input_stops`], run when this drops:
+/// explicitly once the analyzer has joined, or on any earlier exit (a `?`, the
+/// idempotency guard's return, a panic unwinding). c5b1c, review L4. Neither
+/// step can panic on a poisoned lock, so it is safe during an unwind.
+struct HeardInputStopsAgain<'a> {
+    heard: &'a HeardTakeState,
+    handoff: &'a crate::take::TakeHandoff,
+}
+
+impl Drop for HeardInputStopsAgain<'_> {
+    fn drop(&mut self) {
+        heard_input_stops(self.heard, self.handoff);
+    }
+}
+
+/// Stop the hear-back `generation` names. Any other playback (a later
+/// hear-back, a jam's take) is left playing.
+#[tauri::command]
+pub fn stop_hear_take(
+    generation: u64,
+    engine_state: State<EngineState>,
+    heard: State<HeardTakeState>,
+) -> bool {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    heard.0.stop(&handoff, generation)
+}
+
+/// Whether the Take whose grade carried `serial` is held, and how many bars.
+#[tauri::command]
+pub fn heard_take(serial: u64, heard: State<HeardTakeState>) -> crate::take_audio::HeldTake {
+    heard.0.held(serial)
+}
+
+/// Let the last heard Take's audio go now, and a finished hear-back's slice
+/// with it (c5b1b, review L1); a bar still playing plays out.
+#[tauri::command]
+pub fn forget_heard_take(engine_state: State<EngineState>, heard: State<HeardTakeState>) {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    heard.0.forget();
+    heard.0.clear(&handoff, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -6418,6 +6552,190 @@ mod evaluation_turn_tests {
         drop(held);
         rx.recv_timeout(std::time::Duration::from_secs(5)).expect("and went once it was free");
         waiter.join().unwrap();
+    }
+}
+
+#[cfg(test)]
+mod hear_take_tests {
+    use super::*;
+    use crate::take_audio::{CapturedAudio, HeardTake, HeardTakeSlot};
+    use std::sync::Arc;
+
+    fn held_take(heard: &HeardTakeState) {
+        let audio = CapturedAudio { samples: vec![0.1; 10_000], rate: 1000, first_ns: 0, detection_delay_ns: 0 };
+        let bars: Vec<(f64, f64)> = (0..4).map(|k| (2000.0 + k as f64 * 2000.0, 4000.0 + k as f64 * 2000.0)).collect();
+        assert!(heard.0.keep(HeardTake::new(1, audio, 0.0, &bars), heard.0.epoch()));
+    }
+
+    /// c5b1: every door that raises the transport takes a hear-back out of
+    /// the take slot first, played out or not, and the flag rises after it.
+    #[test]
+    fn a_start_cuts_a_hear_back_before_the_transport_rises() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        held_take(&heard);
+        let handoff = crate::take::TakeHandoff::new();
+        let mut s = crate::state::AppState::default();
+        assert!(!s.is_playing);
+        heard.0.start(&handoff, heard.0.slice(1, 1, 1).unwrap()).unwrap();
+        assert!(handoff.is_playing_back());
+        raise_transport(&mut s, &heard, &handoff);
+        assert!(s.is_playing);
+        assert!(!handoff.is_playing_back(), "the bar would have silenced the click");
+        // and with nothing in the slot it only raises the flag
+        let mut s = crate::state::AppState::default();
+        raise_transport(&mut s, &heard, &handoff);
+        assert!(s.is_playing);
+    }
+
+    /// The jam's own listen-back is left as it is today: a Start does not
+    /// take it out of the slot.
+    #[test]
+    fn a_start_leaves_the_jams_listen_back_as_it_was() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        let handoff = crate::take::TakeHandoff::new();
+        handoff.set_play(Some(crate::take::TakePlayback { pcm: Arc::new(vec![0.0; 8]), sample_rate: 48_000 }));
+        let mut s = crate::state::AppState::default();
+        raise_transport(&mut s, &heard, &handoff);
+        assert!(handoff.is_playing_back());
+    }
+
+    /// c5b1b, review M1: the input's stop empties the slot, and so does a
+    /// pitch pass that BEGINS while the input is stopping (a Take closed by
+    /// the analyzer between `stop_evaluation`'s first forget and the
+    /// analyzer's join) and finishes after the input is off. The pass is a
+    /// real thread that outlives the join, as `yames-take-notes` does.
+    #[test]
+    fn the_inputs_stop_empties_the_slot_even_for_a_pass_begun_during_it() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        let handoff = crate::take::TakeHandoff::new();
+        held_take(&heard);
+        assert!(heard.0.held(1).held);
+        // stop_evaluation, its first step
+        heard_input_stops(&heard, &handoff);
+        assert!(!heard.0.held(1).held, "the input stopped and the Take was kept");
+        // the analyzer, still alive, closes a Take: the pass reads the epoch
+        let slot = heard.0.clone();
+        let (go, wait) = std::sync::mpsc::channel::<()>();
+        let analyzer = std::thread::spawn(move || {
+            let epoch = slot.epoch();
+            std::thread::spawn(move || {
+                wait.recv().unwrap();
+                let audio = CapturedAudio { samples: vec![0.1; 10_000], rate: 1000, first_ns: 0, detection_delay_ns: 0 };
+                let bars: Vec<(f64, f64)> = (0..4).map(|k| (2000.0 + k as f64 * 2000.0, 4000.0 + k as f64 * 2000.0)).collect();
+                slot.keep(HeardTake::new(2, audio, 0.0, &bars), epoch)
+            })
+        });
+        // `ta.stop()`: the analyzer joins; its pass runs on
+        let pass = analyzer.join().unwrap();
+        // stop_evaluation, after the join
+        heard_input_stops(&heard, &handoff);
+        go.send(()).unwrap();
+        assert!(!pass.join().unwrap(), "a pass begun during the stop kept its audio");
+        assert!(!heard.0.held(2).held);
+        assert_eq!(heard.0.held_bytes(), 0, "the player's audio is held with the input off");
+    }
+
+    /// c5b1b, review L1: the input's stop takes a hear-back out of the take
+    /// slot, still playing or not, so no bar of the player stays in RAM.
+    #[test]
+    fn the_inputs_stop_takes_a_hear_back_out_of_the_take_slot() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        let handoff = crate::take::TakeHandoff::new();
+        held_take(&heard);
+        heard.0.start(&handoff, heard.0.slice(1, 1, 1).unwrap()).unwrap();
+        assert!(handoff.is_playing_back());
+        heard_input_stops(&heard, &handoff);
+        assert!(!handoff.is_playing_back(), "a bar of the player stayed in the take slot");
+    }
+
+    /// c5b1c, review L4: `stop_evaluation`'s second forget runs on an early
+    /// return (a `?` on a poisoned lock) and on a panic (in `ta.stop()`), not
+    /// only on the path that reaches it: a Take kept after the first forget
+    /// is gone either way.
+    #[test]
+    fn the_inputs_second_stop_runs_on_an_early_return_and_a_panic() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        let handoff = crate::take::TakeHandoff::new();
+        let poisoned = std::sync::Mutex::new(());
+        let _ = std::panic::catch_unwind(|| {
+            let _g = poisoned.lock().unwrap();
+            panic!("another thread panicked holding it");
+        });
+        let stop = |panics: bool| -> Result<(), String> {
+            heard_input_stops(&heard, &handoff);
+            let _again = HeardInputStopsAgain { heard: &heard, handoff: &handoff };
+            // a pass begun during the stop keeps its Take (it read the new epoch)
+            assert!(heard.0.keep(take_for_l4(), heard.0.epoch()));
+            if panics {
+                panic!("ta.stop() panicked after its join");
+            }
+            let _g = poisoned.lock().map_err(|e| format!("Lock failed: {e}"))?;
+            unreachable!("the lock is poisoned");
+        };
+        assert!(stop(false).is_err());
+        assert_eq!(heard.0.held_bytes(), 0, "an early return kept the player's audio");
+        assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| stop(true))).is_err());
+        assert_eq!(heard.0.held_bytes(), 0, "a panic kept the player's audio");
+    }
+
+    fn take_for_l4() -> HeardTake {
+        let audio = CapturedAudio { samples: vec![0.1; 10_000], rate: 1000, first_ns: 0, detection_delay_ns: 0 };
+        let bars: Vec<(f64, f64)> = (0..4).map(|k| (2000.0 + k as f64 * 2000.0, 4000.0 + k as f64 * 2000.0)).collect();
+        HeardTake::new(2, audio, 0.0, &bars)
+    }
+
+    fn a_jam_take_recording(root: &std::path::Path, handoff: &crate::take::SharedTake) -> crate::take::TakeSession {
+        let mut session = crate::take::TakeSession::default();
+        session
+            .start(crate::take::TakeStart {
+                app_data: root,
+                jam_id: "blues",
+                handoff,
+                mic: None,
+                out_sr: 48_000,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                position: None,
+                loopback: None,
+            })
+            .expect("the jam take starts");
+        session
+    }
+
+    /// c5b1b, review Q8: `hear_take`'s refusals. Not with the click running,
+    /// not while a jam take records, not for a Take or a bar not held; and a
+    /// refusal hands nothing to the take slot.
+    #[test]
+    fn hear_take_refuses_while_the_click_runs_and_while_a_jam_take_records() {
+        let heard = HeardTakeState(HeardTakeSlot::new());
+        let handoff: crate::take::SharedTake = Arc::new(crate::take::TakeHandoff::new());
+        let state = std::sync::Mutex::new(crate::state::AppState::default());
+        let takes = TakeState(std::sync::Mutex::new(crate::take::TakeSession::default()));
+        // nothing held
+        assert!(hear_take_in(1, 1, 1, &state, &takes, &heard, &handoff).is_err());
+        held_take(&heard);
+        assert!(hear_take_in(2, 1, 1, &state, &takes, &heard, &handoff).is_err(), "another Take's serial");
+        assert!(hear_take_in(1, 9, 9, &state, &takes, &heard, &handoff).is_err(), "a bar not held");
+        // the click runs
+        state.lock().unwrap().is_playing = true;
+        let e = hear_take_in(1, 1, 1, &state, &takes, &heard, &handoff).unwrap_err();
+        assert!(e.contains("click"), "{e}");
+        assert!(!handoff.is_playing_back());
+        state.lock().unwrap().is_playing = false;
+        // a jam take records
+        let root = std::env::temp_dir().join(format!("yames-hear-take-{}", crate::clock::now_ns()));
+        std::fs::create_dir_all(&root).unwrap();
+        *takes.0.lock().unwrap() = a_jam_take_recording(&root, &handoff);
+        let e = hear_take_in(1, 1, 1, &state, &takes, &heard, &handoff).unwrap_err();
+        assert!(e.contains("recording"), "{e}");
+        assert!(!handoff.is_playing_back(), "a refused hear-back reached the take slot");
+        let _ = takes.0.lock().unwrap().stop(&handoff);
+        let _ = std::fs::remove_dir_all(&root);
+        // and with neither, it plays
+        let back = hear_take_in(1, 1, 1, &state, &takes, &heard, &handoff).unwrap();
+        assert!(handoff.is_playing_back());
+        assert!(heard.0.stop(&handoff, back.generation));
     }
 }
 

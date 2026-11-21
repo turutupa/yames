@@ -24,7 +24,40 @@
     "runScore": "Nota {{score}} a {{bpm}} BPM",
     "runScoreNoBpm": "Nota {{score}}",
     "sessionScore": "Nota da sessão {{score}} · {{word}}",
-    "openRuns": "Abrir Execuções das ferramentas em Progresso"
+    "openRuns": "Abrir Execuções das ferramentas em Progresso",
+    "finding": {
+      "beatEarly": "No tempo {{beat}} do compasso, suas notas vieram em média {{ms}} ms mais cedo do que as notas dos outros tempos: {{agreeing}} das {{notes}} notas desse tempo vieram mais cedo do que a média dos outros tempos.",
+      "beatLate": "No tempo {{beat}} do compasso, suas notas vieram em média {{ms}} ms mais tarde do que as notas dos outros tempos: {{agreeing}} das {{notes}} notas desse tempo vieram mais tarde do que a média dos outros tempos.",
+      "subdivision": "Em {{missed}} dos {{total}} tempos em que ela foi contada, nenhuma nota caiu na posição “{{position}}”.",
+      "ceiling": "A {{low}} BPM, pelo menos metade das suas {{lowNotes}} notas sobre o clique caiu a até {{lowMs}} ms do lugar onde suas notas costumam cair em relação ao clique; a {{high}} BPM, pelo menos metade das {{highNotes}} notas sobre o clique ficou a {{highMs}} ms ou mais desse lugar.",
+      "driftEarly": "Em um trecho de {{notes}} notas sobre o clique, as últimas {{third}} caíram em média {{ms}} ms mais cedo em relação ao clique do que as primeiras {{third}}.",
+      "driftLate": "Em um trecho de {{notes}} notas sobre o clique, as últimas {{third}} caíram em média {{ms}} ms mais tarde em relação ao clique do que as primeiras {{third}}.",
+      "position": {
+        "2": {
+          "0": "colcheia no tempo",
+          "1": "colcheia fora do tempo"
+        },
+        "3": {
+          "0": "primeira tercina",
+          "1": "segunda tercina",
+          "2": "terceira tercina"
+        },
+        "4": {
+          "0": "primeira semicolcheia",
+          "1": "segunda semicolcheia",
+          "2": "terceira semicolcheia",
+          "3": "quarta semicolcheia"
+        },
+        "6": {
+          "0": "primeira sextina",
+          "1": "segunda sextina",
+          "2": "terceira sextina",
+          "3": "quarta sextina",
+          "4": "quinta sextina",
+          "5": "sexta sextina"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Modelo do coach",

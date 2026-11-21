@@ -754,9 +754,28 @@ export async function getEvaluationState(): Promise<boolean> {
  *
  * Safe to call when no evaluation is running (the analyzer's flag
  * is cleared on `start_evaluation`).
+ *
+ * Because that close is silent, whoever keeps a segment's findings learns
+ * of it here (`onSettingsChangeNotified`), in this window, before the
+ * command is sent (c5c2b review L-2).
  */
 export async function notifySettingsChange(): Promise<void> {
+  for (const cb of [...settingsChangeListeners]) cb();
   return invoke("notify_settings_change");
+}
+
+const settingsChangeListeners = new Set<() => void>();
+
+/**
+ * Called, in this window, each time `notifySettingsChange` is sent: the
+ * open segment is about to close with no `practice-segment-ended`.
+ * Returns the unsubscribe.
+ */
+export function onSettingsChangeNotified(cb: () => void): () => void {
+  settingsChangeListeners.add(cb);
+  return () => {
+    settingsChangeListeners.delete(cb);
+  };
 }
 
 /**
@@ -1229,6 +1248,13 @@ export type PracticeSegmentEndedPayload = {
    * revamp wave). Absent in free play, and from a build without it.
    */
   takeGrade?: ScorerTakeGrade;
+  /**
+   * C5 — what `analyze_free_play` (`findings.rs`) measured in this segment,
+   * ranked, `findings[0]` the headline; Songs' `Finding` shape, bars absent.
+   * Free play only, and absent when nothing ranked. Never stored: neither the
+   * D1 log's segment nor the mini-report's `SessionReport` carries it.
+   */
+  findings?: Finding[];
 };
 
 /** Why the scorer would not grade a Take (`score.rs` `NoCatchReason`). */
@@ -3150,6 +3176,52 @@ export async function playTake(id: string): Promise<number> {
 
 export async function stopTakePlayback(): Promise<void> {
   return invoke("stop_take_playback");
+}
+
+/** What `hearTake` resolves to (`take_audio::HearBack`). */
+export interface HearBack {
+  /** The playback's generation: what `take-playback-ended` carries when it runs out. */
+  generation: number;
+  /** How long it runs, margins included. */
+  lengthMs: number;
+}
+
+/** Whether a Take's audio is held (`take_audio::HeldTake`). */
+export interface HeldTake {
+  held: boolean;
+  /** Complete bars held, from bar 1; 0 when not held. */
+  bars: number;
+}
+
+/**
+ * "Hear bar N" (c5b1): play bars `fromBar..=toBar` (1-based, after the
+ * count-in) of the last heard Take, the one whose grade carried `serial`,
+ * through the engine's take playback. Rejects when that Take's audio is not
+ * held, the bar is not in it, the click is running, or a jam take records:
+ * show nothing then. The audio lives in memory only and goes when the input
+ * stops. A Start cuts it.
+ */
+export async function hearTake(
+  serial: number,
+  fromBar: number,
+  toBar: number,
+): Promise<HearBack> {
+  return invoke("hear_take", { serial, fromBar, toBar });
+}
+
+/** Stop the hear-back `generation` names; anything else plays on. */
+export async function stopHearTake(generation: number): Promise<boolean> {
+  return invoke("stop_hear_take", { generation });
+}
+
+/** Whether the Take whose grade carried `serial` is held, and how many bars. */
+export async function heardTake(serial: number): Promise<HeldTake> {
+  return invoke("heard_take", { serial });
+}
+
+/** Let the last heard Take's audio go now. */
+export async function forgetHeardTake(): Promise<void> {
+  return invoke("forget_heard_take");
 }
 
 /**

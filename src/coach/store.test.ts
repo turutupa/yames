@@ -205,9 +205,12 @@ describe("the rule of DESIGN 6.7: thirty days left out", () => {
     expect(isSuppressed(s, "other", NOW)).toBe(false);
   });
 
-  it("leaving a line out drops the ids whose thirty days are over", () => {
+  // c4a2b, L6: nothing is removed that the player did not press; an expired entry is ignored when read.
+  it("leaving a line out keeps the ids whose thirty days are over; they read as not left out", () => {
     const old = withSuppressed({}, "old", NOW - 31 * DAY);
-    expect(Object.keys(withSuppressed(old, "new", NOW))).toEqual(["new"]);
+    const both = withSuppressed(old, "new", NOW);
+    expect(both).toEqual({ old: NOW - 31 * DAY, new: NOW });
+    expect(isSuppressed(both, "old", NOW)).toBe(false);
   });
 });
 
@@ -410,10 +413,19 @@ describe("the values in memory and the store", () => {
     disk.set("coach.goal", { text: "Learn the blues", at: NOW - 10 * DAY });
     await loadCoachStored();
     saveGoal("Play in a band", NOW);
-    expect(saveGoal("Learn the blues", NOW + 1)).toEqual({ text: "Learn the blues", at: NOW - 10 * DAY });
+    expect(saveGoal("Learn the blues", NOW + 1, { restore: true })).toEqual({ text: "Learn the blues", at: NOW - 10 * DAY });
     expect(disk.get("coach.goal")).toEqual({ text: "Learn the blues", at: NOW - 10 * DAY });
     // Any other text is dated now.
     expect(saveGoal("Join a band", NOW + 2)?.at).toBe(NOW + 2);
+  });
+
+  // c4a2b, L3: the same words typed again are a new press, dated the day they were typed.
+  it("a replaced goal typed again (not an Undo) is dated now", async () => {
+    disk.set("coach.goal", { text: "Blues in A", at: NOW - 17 * DAY });
+    await loadCoachStored();
+    saveGoal("Sweep at 90", NOW - DAY);
+    expect(saveGoal("Blues in A", NOW)).toEqual({ text: "Blues in A", at: NOW });
+    expect(disk.get("coach.goal")).toEqual({ text: "Blues in A", at: NOW });
   });
 
   // c4a1c, F2: not only the last one replaced.
@@ -422,10 +434,31 @@ describe("the values in memory and the store", () => {
     saveGoal("A", NOW + 1);
     saveGoal("B", NOW + 2);
     saveGoal("C", NOW + 3);
-    expect(saveGoal("B", NOW + 4)).toEqual({ text: "B", at: NOW + 2 });
+    expect(saveGoal("B", NOW + 4, { restore: true })).toEqual({ text: "B", at: NOW + 2 });
     expect(disk.get("coach.goal")).toEqual({ text: "B", at: NOW + 2 });
-    expect(saveGoal("A", NOW + 5)).toEqual({ text: "A", at: NOW + 1 });
+    expect(saveGoal("A", NOW + 5, { restore: true })).toEqual({ text: "A", at: NOW + 1 });
     expect(disk.get("coach.goal")).toEqual({ text: "A", at: NOW + 1 });
+  });
+
+  // c4a2b, L2: the goal and Suggestions say how their save ended, as the map keys do.
+  it("a goal or a Suggestions choice that could not be saved is reported as not saved", async () => {
+    await loadCoachStored();
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      failSave = "coach.goal";
+      expect(saveGoal("Join a band", NOW)).not.toBeNull();
+      expect(await coachPressSettled("goal")).toBe("notSaved");
+      failSave = "coach.suggestions";
+      saveSuggestions("asked");
+      expect(await coachPressSettled("suggestions")).toBe("notSaved");
+      failSave = null;
+      saveGoal("Learn the blues", NOW + 1);
+      saveSuggestions("on");
+      expect(await coachPressSettled("goal")).toBe("saved");
+      expect(await coachPressSettled("suggestions")).toBe("saved");
+    } finally {
+      quiet.mockRestore();
+    }
   });
 
   // c4a1c, F6.
@@ -452,9 +485,40 @@ describe("the values in memory and the store", () => {
     expect(saveSuppressed("place:shift:early", NOW)).toBe("saved");
     expect(disk.get("coach.cards")).toEqual({ weekly: { dismissed: 2, lastDismissed: NOW, colour: "red" }, later: odd });
     expect(disk.get("coach.suppressed")).toEqual({ "lean:first:late": NOW - DAY, bad: "x", "": NOW - DAY, "place:shift:early": NOW });
-    // A press on the kind it could not read writes that kind over its own fields, the press's two changed.
+    // A press on the kind it could not read writes that kind over its own fields, the press's two
+    // changed; it counts from "closed" (two dismissals, c4a2b L6), which is what it was read as.
     saveCardDismissed("later", NOW);
-    expect((disk.get("coach.cards") as Record<string, unknown>).later).toEqual({ dismissed: 1, lastDismissed: NOW });
+    expect((disk.get("coach.cards") as Record<string, unknown>).later).toEqual({ dismissed: 3, lastDismissed: NOW });
+  });
+
+  // c4a2b, L6: an entry this build cannot read, inside a key it can, fails closed.
+  it("a malformed entry reads as dismissed until asked / left out, and is written back as it was", async () => {
+    const odd = { dismissed: "2" };
+    disk.set("coach.cards", { goal: odd });
+    disk.set("coach.suppressed", { x: { at: NOW - DAY, why: "later build" } });
+    await loadCoachStored();
+    expect(coachKeyStates()).toEqual(READ);
+    expect(cardMayShow(coachStored(), "goal", NOW, coachKeyStates())).toBe(false);
+    expect(isSuppressed(coachStored().suppressed, "x", NOW + 365 * DAY)).toBe(true);
+    // A press on another entry writes both malformed entries back exactly.
+    saveCardDismissed("weekly", NOW);
+    saveSuppressed("y", NOW);
+    expect(disk.get("coach.cards")).toEqual({ goal: odd, weekly: { dismissed: 1, lastDismissed: NOW } });
+    expect(disk.get("coach.suppressed")).toEqual({ x: { at: NOW - DAY, why: "later build" }, y: NOW });
+  });
+
+  // c4a2b, L6: a press on line B neither deletes line A's expired entry nor rewrites a future date.
+  it("a press on one line leaves every other entry on disk exactly as it was", async () => {
+    const later = Date.now() + 365 * DAY;
+    const stale = { "lean:first:late": Date.now() - 40 * DAY, "lean:last:early": later };
+    disk.set("coach.suppressed", stale);
+    disk.set("coach.cards", { weekly: { dismissed: 1, lastDismissed: later } });
+    await loadCoachStored();
+    const at = Date.now();
+    saveSuppressed("place:shift:early", at);
+    saveCardDismissed("plateau", at);
+    expect(disk.get("coach.suppressed")).toEqual({ ...stale, "place:shift:early": at });
+    expect(disk.get("coach.cards")).toEqual({ weekly: { dismissed: 1, lastDismissed: later }, plateau: { dismissed: 1, lastDismissed: at } });
   });
 
   it("a goal with fields this build does not know: one press replaces it, and its Undo puts the stored value back exactly", async () => {
@@ -463,7 +527,7 @@ describe("the values in memory and the store", () => {
     await loadCoachStored();
     expect(coachStored().goal).toEqual({ text: "Learn the blues", at: null });
     expect(saveGoal("Join a band", NOW)).toEqual({ text: "Join a band", at: NOW });
-    expect(saveGoal("Learn the blues", NOW + 1)).toEqual({ text: "Learn the blues", at: null });
+    expect(saveGoal("Learn the blues", NOW + 1, { restore: true })).toEqual({ text: "Learn the blues", at: null });
     expect(disk.get("coach.goal")).toEqual(raw);
   });
 

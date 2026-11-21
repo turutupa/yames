@@ -154,12 +154,23 @@ const clickSubdivision = defineConfirmTool<Subdivide>({
   kind: "confirm",
   audience: "player",
   note: "Set how many clicks the Metronome plays per beat (1 to 6).",
-  args: [{ name: "subdivision", type: { kind: "integer", min: 1, max: 6 }, note: "Clicks per beat." }],
+  args: [
+    { name: "subdivision", type: { kind: "integer", min: 1, max: 6 }, note: "Clicks per beat." },
+    {
+      name: "at",
+      type: { kind: "integer", min: 1, max: 6 },
+      optional: true,
+      note: "Only if the subdivision is this now (an undo's guard: it puts back what the tool changed, nothing since).",
+    },
+  ],
   when: outsideSession,
   propose(args, host) {
     if (host.sessionActive()) return sessionOpen();
     const from = clickNow(host);
     if (from === "notWiredYet") return notWiredYet("click_subdivision");
+    // The undo's guard (leg chip1): changed again since, by anyone, it is not this undo's to put back.
+    const guard = argNumber(args, "at");
+    if (guard !== undefined && from !== guard) return gone("the subdivision moved since");
     const to = (argNumber(args, "subdivision") ?? from) as Subdivision;
     if (to === from) return refuse("notNow", "coachTools.why.notNow.alreadySubdivision", { subdivision: from });
     return { ok: true, line: line("coachTools.propose.clickSubdivision", { from, to }), resolved: { from, to } };
@@ -171,7 +182,7 @@ const clickSubdivision = defineConfirmTool<Subdivide>({
     return {
       ok: true,
       receipt: line("coachTools.receipt.clickSubdivision", { from, to }),
-      undo: { tool: "click_subdivision", args: { subdivision: from } },
+      undo: { tool: "click_subdivision", args: { subdivision: from, at: to } },
     };
   },
 });

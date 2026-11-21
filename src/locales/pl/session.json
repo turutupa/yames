@@ -466,6 +466,36 @@
       "heard": "W swobodnej grze byłeś w {{key}}, najczęściej na {{chords}}.",
       "heardKey": "W swobodnej grze byłeś w {{key}}."
     },
+    "myExercises": {
+      "title": "Moje ćwiczenia",
+      "intro": "Ćwiczenia stworzone przez ciebie. Nie należą do żadnej ścieżki i niczego nie zaliczają.",
+      "shape": {
+        "box": "{{root}} {{scale}}, pozycja pudełkowa na progu {{position}}",
+        "threePerString": "{{root}} {{scale}}, trzy dźwięki na strunie od progu {{position}}",
+        "arpeggio": "Arpeggio {{chord}} od progu {{position}}",
+        "oneString": "{{root}} {{scale}} wzdłuż struny {{string}} od progu {{position}}",
+        "chromatic": "Chromatycznie, jeden palec na próg, od progu {{position}}"
+      },
+      "direction": {
+        "up": "w górę",
+        "down": "w dół",
+        "upAndBack": "w górę i z powrotem w dół"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} takt",
+      "bars_few": "{{count}} takty",
+      "bars_many": "{{count}} taktów",
+      "bars_other": "{{count}} taktu",
+      "remove": "Usuń",
+      "removeLabel": "Usuń {{what}} z Moich ćwiczeń",
+      "removed": "Usunięto z Moich ćwiczeń.",
+      "undo": "Cofnij",
+      "notSaved": "Moje ćwiczenia nie mogły zostać teraz odczytane ani zapisane, więc nic się nie zmieniło.",
+      "undoFull": "Moje ćwiczenia są pełne (50), więc Cofnij nie może przywrócić tego ćwiczenia.",
+      "undoAlready": "To ćwiczenie jest już z powrotem w Moich ćwiczeniach.",
+      "cantBuild": "Tego nie da się już zbudować: ta wersja Yames już go nie tworzy. Zostaje tutaj, dopóki go nie usuniesz.",
+      "howTo": "Zagraj to tak, jak zapisano, z metronomem."
+    },
     "paths": {
       "title": "Ścieżki",
       "intro": "Wybierz cel. Nic nie jest zablokowane: możesz zacząć dowolny krok i zmienić zdanie.",

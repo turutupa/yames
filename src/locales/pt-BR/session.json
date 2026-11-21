@@ -455,6 +455,35 @@
       "heard": "Tocando livre você esteve em {{key}}, principalmente em {{chords}}.",
       "heardKey": "Tocando livre você esteve em {{key}}."
     },
+    "myExercises": {
+      "title": "Meus exercícios",
+      "intro": "Exercícios que você criou. Eles não pertencem a nenhuma trilha e não aprovam nada.",
+      "shape": {
+        "box": "{{root}} {{scale}}, o box na casa {{position}}",
+        "threePerString": "{{root}} {{scale}}, três notas por corda a partir da casa {{position}}",
+        "arpeggio": "Arpejo de {{chord}} a partir da casa {{position}}",
+        "oneString": "{{root}} {{scale}} ao longo da corda {{string}} a partir da casa {{position}}",
+        "chromatic": "Cromático, um dedo por casa, a partir da casa {{position}}"
+      },
+      "direction": {
+        "up": "subindo",
+        "down": "descendo",
+        "upAndBack": "subindo e voltando descendo"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} compasso",
+      "bars_many": "{{count}} compassos",
+      "bars_other": "{{count}} compassos",
+      "remove": "Remover",
+      "removeLabel": "Remover {{what}} de Meus exercícios",
+      "removed": "Removido de Meus exercícios.",
+      "undo": "Desfazer",
+      "notSaved": "Não foi possível ler ou salvar Meus exercícios agora, então nada mudou.",
+      "undoFull": "Meus exercícios está cheio (50), então Desfazer não pode colocar este de volta.",
+      "undoAlready": "Este já voltou para Meus exercícios.",
+      "cantBuild": "Este não pode mais ser montado: esta versão do Yames não o gera mais. Ele fica aqui até você removê-lo.",
+      "howTo": "Toque como está escrito, com o click."
+    },
     "paths": {
       "title": "Trilhas",
       "intro": "Escolha um objetivo. Nada está bloqueado: você pode começar qualquer etapa e mudar de ideia.",

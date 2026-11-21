@@ -34,6 +34,7 @@ import { calendarDaysBetween, factsOf, isUngradedTake, sessionKeyOf, shownCleanT
 import type { PathTakeRow } from "../ipc";
 import type { DuePassage } from "./songDue";
 import { songDueLine } from "./songDue";
+import { isCustomTake } from "../session/myExercises";
 
 /**
  * Which sentence it is. `songDue` ("Bars 17 to 24 of {{song}} are due
@@ -254,22 +255,43 @@ function backLine(input: TodayLineInput, session: readonly PathTakeRow[]): Today
 }
 
 /**
+ * The history as Today's line and the Step page's line read it (t2bb): the
+ * Takes of My exercises left out, so a custom Take never silences the line and
+ * is never named; it speaks from the last Path Take. `takesRead` shrinks by as
+ * many, so "the read may have been cut" is judged on the same window.
+ */
+function withoutCustomTakes<I extends { progress: PlayerProgress; takesRead?: number }>(input: I): I {
+  const takes = input.progress.takes.filter((t) => !isCustomTake(t));
+  if (takes.length === input.progress.takes.length) return input;
+  const dropped = input.progress.takes.length - takes.length;
+  return {
+    ...input,
+    progress: { ...input.progress, takes },
+    ...(input.takesRead === undefined ? {} : { takesRead: input.takesRead - dropped }),
+  };
+}
+
+/**
  * Today's line, or null: nothing measured to add, and the slot is absent.
  *
  * The Path's line, then a due Songs passage as one more sentence (judgement
  * call 18): never on the first day (no Takes yet, or the `first` case), at
  * most one passage, and on its own only when there is no Path line.
  */
-export function todayLine(input: TodayLineInput): TodayLine | null {
+export function todayLine(rawInput: TodayLineInput): TodayLine | null {
+  // My exercises' Takes out FIRST, once; `pathTodayLine` does not filter again.
+  const input = withoutCustomTakes(rawInput);
   const line = pathTodayLine(input);
-  const { plan, progress, songDue } = input;
+  // The due passage's gate reads the RAW history (orchestrator, c5a2b): a
+  // player whose only Takes are My-exercises Takes is not on their first day.
+  const { plan, progress, songDue } = rawInput;
   if (!songDue || plan.steps.length === 0) return line;
   if (plan.mood === "first" || progress.takes.length === 0 || line?.kind === "first") return line;
   const due = songDueLine(songDue);
   return line ? { kind: line.kind, lines: [...line.lines, due] } : { kind: "songDue", lines: [due] };
 }
 
-/** The Path's part of Today's line, or null. */
+/** The Path's part of Today's line, or null. Given the history already filtered. */
 function pathTodayLine(input: TodayLineInput): TodayLine | null {
   const { plan, progress, paths, now, grading } = input;
   if (plan.steps.length === 0) return null;
@@ -341,7 +363,7 @@ export function stepLine(input: {
   now: number;
   grading: GradingChoice;
 }): Line | null {
-  const { progress, paths, pathId, exerciseIds, now, grading } = input;
+  const { progress, paths, pathId, exerciseIds, now, grading } = withoutCustomTakes(input);
   if (grading === "off") return null;
   const session = lastSessionOf(progress.takes);
   const latest = session.find((t) => t.pathId === pathId && exerciseIds.includes(t.exerciseId) && isGraded(t));

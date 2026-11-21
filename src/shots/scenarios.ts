@@ -65,7 +65,7 @@ export interface Shot {
      * Path is subscribed (QA 2026-11-17 #7).
      */
     /** `slipped`: `returning`, its last Take with per-bar figures in which the tune's first bar slipped (Today's line). */
-    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped";
+    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped" | "notebook";
     /**
      * c5a2: a Songs passage of the library's first song came due three days
      * ago (`list_due`), bars 2 to 4 as played; Today's line names it.
@@ -75,6 +75,8 @@ export interface Shot {
     focus?: string;
     /** Paths switched out of the daily mix (`session.offMix`). */
     offMix?: string[];
+    /** My exercises as stored (`myExercises`): `{ recipe, addedAt }` rows. */
+    myExercises?: unknown[];
     /** Paths unsubscribed from (`session.unsubscribed`), on top of what the seed says. */
     unsubscribed?: string[];
     /** On a result, answer "Was this grade fair?" before the photograph. */
@@ -940,6 +942,16 @@ export const SHOTS: Shot[] = [
     window: "main",
     session: { seed: "returning", minutes: 15, stop: "today" },
     width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    // The Notebook (leg c4a2, mock 10): two noticed lines and a goal.
+    id: "notebook",
+    suffix: "notebook",
+    window: "main",
+    session: { seed: "notebook", minutes: 15, stop: "today" },
+    width: 1440,
     height: 900,
     settleMs: 300,
   },
@@ -1855,6 +1867,30 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // My exercises (t2b): two custom Exercises after the Paths, mock 17's box and a
+  // chromatic line. `paths` (none stored) is the empty case.
+  {
+    id: "paths-mine",
+    suffix: "paths-mine",
+    window: "main",
+    session: {
+      seed: "returning",
+      stop: "paths",
+      myExercises: [
+        {
+          recipe: { v: 1, shape: "box", root: "A", scale: "minorPentatonic", position: 5, subdivision: "eighths", bars: 3, direction: "upAndBack" },
+          addedAt: 1_794_000_000_000,
+        },
+        {
+          recipe: { v: 1, shape: "chromatic", position: 5, subdivision: "eighths", bars: 6, direction: "up" },
+          addedAt: 1_793_900_000_000,
+        },
+      ],
+    },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
   // What a Path builds on (plans/paths/NEW_PATHS.md, "UI spec for
   // prerequisites"): Shred for a new player, "Builds on" and "Start with
   // Alternate Picking first"; then Subscribe pressed, and the offer.
@@ -2325,6 +2361,7 @@ export const PHONE_LEARNING_SCENES = [
   "coach-after-loop",
   "progress-ungraded",
   "paths",
+  "paths-mine",
   "path-alternate",
   "path-unmet",
   "path-offer",
@@ -2348,6 +2385,12 @@ for (const id of PHONE_LEARNING_SCENES) {
 for (const id of ["session-variant-runway", "step-line", "today-back"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
+}
+
+// The Notebook on a phone (leg c4a2): the sheet's "Ask | Notebook".
+{
+  const notebook = SHOTS.find((s) => s.id === "notebook");
+  if (notebook) SHOTS.push({ ...notebook, id: "phone-notebook", suffix: "phone-notebook", width: 360, height: 800 });
 }
 
 export function shotById(id: string): Shot | undefined {

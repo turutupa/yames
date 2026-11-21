@@ -16,6 +16,7 @@ const statesAll = (s: CoachKeyState): CoachKeyStates => ({ suggestions: s, cards
 const READ = statesAll("read");
 import { MIN_SESSIONS, MIN_TAKES, TAKES_WINDOW, tendencies, type NoticedLine } from "./tendencies";
 import { totalsFrom } from "../session/totals";
+import { CUSTOM_PATH_ID } from "../paths/custom";
 
 const DAY = 86_400_000;
 const HOUR = 3_600_000;
@@ -120,6 +121,23 @@ describe("tempo against evenness", () => {
     const [line] = tendencies(oneUnfair, NOW);
     expect(line.takeIds).toHaveLength(8);
     expect(line.values.fastScore).toBe(74);
+  });
+
+  // c4a2b, L8: "your Takes were N% even" is the mean over the Takes the evidence line counts.
+  it("the percentages are the mean over the Takes counted, not a mean of per-Exercise means", () => {
+    const rows = [
+      even("a", 100, 0.7, 1 * DAY),
+      even("a", 100, 0.7, 2 * DAY),
+      even("a", 90, 0.8, 3 * DAY),
+      even("a", 90, 0.8, 4 * DAY),
+      ...[1, 2, 3, 4, 5, 6].map((i) => even("b", 100, 0.85, i * DAY + HOUR)),
+      even("b", 90, 0.95, 7 * DAY),
+      even("b", 90, 0.95, 8 * DAY),
+    ];
+    const [line] = tendencies(rows, NOW);
+    // Over the eight Takes at 100: (2 × 70 + 6 × 85) / 8 = 81.25 (a mean of the two means would say 78).
+    expect(line.values).toMatchObject({ fastScore: 81, slowScore: 88 });
+    expect(line.evidence.values.count).toBe(12);
   });
 
   it("never reads a Take too little was heard in", () => {
@@ -282,9 +300,18 @@ describe("the window", () => {
     expect(tendencies(history(TAKES_WINDOW - MIN_TAKES + 1), NOW)).toEqual([]);
   });
 
-  it("never reads the player's own exercises (Path `mine`)", () => {
-    const rows = tempoHistory().map((t) => ({ ...t, pathId: "mine" }));
+  // c4a2b, M2: the real id (`paths/custom.ts`), so the test cannot drift from it again.
+  it("never reads the player's own exercises (CUSTOM_PATH_ID)", () => {
+    expect(CUSTOM_PATH_ID).toBe("my-exercises");
+    const rows = tempoHistory().map((t) => ({ ...t, pathId: CUSTOM_PATH_ID }));
     expect(tendencies(rows, NOW)).toEqual([]);
+    // Mixed in: the line, its numbers and its evidence count rest on the Path Takes alone.
+    const own = [even("c", 100, 0.5, DAY + 2 * HOUR), even("c", 100, 0.5, 2 * DAY + 2 * HOUR), even("c", 90, 0.9, 3 * DAY + 2 * HOUR), even("c", 90, 0.9, 4 * DAY + 2 * HOUR)];
+    const mixed = [...tempoHistory(), ...own.map((t) => ({ ...t, pathId: CUSTOM_PATH_ID }))];
+    const [line] = tendencies(mixed, NOW);
+    expect(line.values.fastScore).toBe(74);
+    expect(line.evidence.values).toEqual({ count: 8, exercises: 2 });
+    expect(line.exercises.every((e) => e.pathId !== CUSTOM_PATH_ID)).toBe(true);
   });
 });
 

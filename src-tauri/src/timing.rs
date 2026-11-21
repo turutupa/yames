@@ -61,6 +61,13 @@ pub struct BeatTick {
     /// actually playing.
     #[serde(rename = "beatsPerBar")]
     pub beats_per_bar: u8,
+    /// The engine's bar-local beat for this tick, 0-based: its
+    /// `measure_beat`, which restarts at every bar line and at every meter,
+    /// grouping or held-meter change. `beat_index` counts from play start and
+    /// does not, so "beat N of the bar" is read from this and never from
+    /// `beat_index % beats_per_bar` (c5c2b H2).
+    #[serde(rename = "barBeat")]
+    pub bar_beat: u32,
 }
 
 /// Feedback for a single beat after matching with an onset.
@@ -221,6 +228,15 @@ pub struct PracticeSegmentEnded {
     /// grade at all. Absent in free play, for the same reason as above.
     #[serde(rename = "takeGrade", default, skip_serializing_if = "Option::is_none")]
     pub take_grade: Option<TakeGrade>,
+    /// C5 — what `findings::analyze_free_play` measured in this segment,
+    /// ranked, `findings[0]` the headline: the tools' note leads with it.
+    /// Free play only (a segment with a schedule loaded runs nothing new),
+    /// computed once here at the close on the analysis thread, and never
+    /// stored: the stored segment (`session_log::PracticeSegment`) and the
+    /// mini-report's `SessionReport` do not carry it. Skipped on the wire
+    /// when empty, like the fields above.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub findings: Vec<crate::findings::Finding>,
 }
 
 /// Path B — UI event emitted whenever the rhythm-inference's locked
@@ -405,6 +421,10 @@ pub struct NotesPass {
     /// input audio, which may not even be that instrument. So such a Take gets
     /// no pass over its audio; right notes stay "not checked this time".
     pub midi_seen: Arc<std::sync::atomic::AtomicBool>,
+    /// The last heard Take's audio, which the pitch pass moves here when it
+    /// is done with it rather than freeing it ("Hear bar N", c5b1). Not
+    /// emptied by a new Take's load: replaced by the next Take's audio.
+    pub heard: crate::take_audio::SharedHeardTake,
 }
 
 impl NotesPass {
@@ -535,8 +555,14 @@ impl TimingAnalyzer {
                 slot: Arc::new(Mutex::new(NotesSlot::default())),
                 diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
                 midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+                heard: crate::take_audio::HeardTakeSlot::new(),
             },
         }
+    }
+
+    /// The last heard Take, for `hear_take` and the input's stop.
+    pub fn heard_take(&self) -> crate::take_audio::SharedHeardTake {
+        self.notes.heard.clone()
     }
 
     /// Where the onset detector keeps a Session Take's audio. Handed to it
@@ -1242,7 +1268,9 @@ impl TimingAnalyzer {
             // every bar played before a tempo/meter tweak vanished from
             // the session log and the final report.
             if settings_changed.swap(false, Ordering::SeqCst) {
-                if let Some(seg) = segment.take() {
+                if let Some(mut seg) = segment.take() {
+                    // No event carries this close: nothing to analyse (L2).
+                    seg.free_play.clear();
                     on_segment_end(
                         build_segment_ended(
                             &seg,
@@ -1315,7 +1343,9 @@ impl TimingAnalyzer {
             // `emit_ui = false`), and the next one opens fresh after it.
             // Nothing of a schedule is graded: the demo cleared it.
             if demo_close_now.swap(false, Ordering::SeqCst) {
-                if let Some(seg) = segment.take() {
+                if let Some(mut seg) = segment.take() {
+                    // No event carries this close: nothing to analyse (L2).
+                    seg.free_play.clear();
                     on_segment_end(
                         build_segment_ended(
                             &seg,
@@ -2020,6 +2050,7 @@ impl TimingAnalyzer {
                             subdivision: beat.subdivision_total,
                             accent_buckets: std::collections::HashMap::new(),
                             matched_amplitudes: Vec::new(),
+                            free_play: std::collections::VecDeque::with_capacity(1024),
                         });
                         // Anchor the first quarter-note boundary to this onset so the
                         // cap window starts from real play, not Unix epoch zero.
@@ -2130,7 +2161,7 @@ impl TimingAnalyzer {
                         }
                     }
 
-                    on_feedback(BeatFeedback {
+                    let feedback = BeatFeedback {
                         beat_index: beat.beat_index,
                         deviation_ms,
                         interval_error_ms,
@@ -2139,7 +2170,22 @@ impl TimingAnalyzer {
                         calibration_offset_ms,
                         calibration_confidence: confidence,
                         grid_correlation,
-                    });
+                    };
+                    // C5 — what `analyze_free_play` reads at the close, as a
+                    // 20-byte record (this thread; nothing is analysed here).
+                    // The raw offset, not `deviation_ms`: the running
+                    // calibration must not reach the findings (c5c2b M1).
+                    if schedule_run.is_none() {
+                        if let Some(seg) = segment.as_mut() {
+                            let invented = virtual_for.is_some();
+                            seg.push_free_play(if feedback.classification == "miss" {
+                                crate::findings::FreePlayBeat::missed(beat, invented)
+                            } else {
+                                crate::findings::FreePlayBeat::played(beat, raw_offset_ms, invented)
+                            });
+                        }
+                    }
+                    on_feedback(feedback);
 
                     // Telemetry — record the match decision so the D1
                     // log carries beat→onset pairing details. The
@@ -2267,6 +2313,14 @@ impl TimingAnalyzer {
                             // Active-state miss: counts toward HC denominator
                             // (player attempted but missed — not a rest).
                             seg.active_expected_beats = seg.active_expected_beats.saturating_add(1);
+                            // C5 — the same miss, paired with its tick, as
+                            // the feedback emitted below carries it.
+                            if schedule_run.is_none() {
+                                seg.push_free_play(crate::findings::FreePlayBeat::missed(
+                                    beat,
+                                    virtual_for.is_some(),
+                                ));
+                            }
                         }
                     }
 
@@ -3009,6 +3063,10 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
     let run = run.clone();
     let slot = notes.slot.clone();
     let diagnostics = notes.diagnostics.clone();
+    // Read now, as the Take closes: an input stopped while the pass runs
+    // moves it, and the audio is then freed rather than kept.
+    let heard = notes.heard.clone();
+    let heard_epoch = heard.epoch();
     // What the recording session says this Take is, read as it closes: the
     // next Take's context may be set before this thread writes.
     let capture_context = crate::capture::global().context_snapshot();
@@ -3072,8 +3130,17 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass,
                     crate::capture::global().write_take(&audio.samples, audio.rate, audio.first_ns, job);
                 }));
             }
-            // The Take's audio is freed here, on this thread.
-            drop(audio);
+            // The Take's audio is kept as the last heard Take ("Hear bar N",
+            // c5b1), in RAM only. The one it replaces, or this one when it is
+            // refused, is freed here, on this thread.
+            // Its bars where the grader looked for them: moved by the Take's
+            // calibrated input latency (c5b1b, review L4).
+            let bars = crate::take_audio::bars_as_heard(
+                &run.bar_spans_ms(),
+                late.as_ref().map(|r| r.grade.calibration.offset_ms),
+                audio.detection_delay_ns as f64 / 1e6,
+            );
+            heard.keep(crate::take_audio::HeardTake::new(serial, audio, start_ms, &bars), heard_epoch);
         });
     if spawned.is_err() {
         notes.slot.lock().unwrap().pending = false;
@@ -3414,6 +3481,14 @@ fn build_segment_ended(
         extra_onsets,
         accent_agreement,
         take_grade,
+        // Empty when the close emits nothing: those callers clear the
+        // records first (c5c2b L2).
+        findings: if schedule_run.is_none() && !seg.free_play.is_empty() {
+            let records: Vec<crate::findings::FreePlayBeat> = seg.free_play.iter().copied().collect();
+            crate::findings::analyze_free_play(&records)
+        } else {
+            Vec::new()
+        },
     }
 }
 
@@ -3825,6 +3900,24 @@ struct SegmentState {
     /// Amplitudes of every matched onset (excluding misses), for
     /// population std-dev computation in `score_segment`.
     matched_amplitudes: Vec<f32>,
+    /// C5 — every hit and every genuine miss of the segment with the tick
+    /// it was judged against, in played order, for
+    /// `findings::analyze_free_play` at the close. Filled only while no
+    /// schedule is loaded; skipped ticks (grace, rests) are left out, as
+    /// the analysis ignores them anyway. Compact records, the newest
+    /// `FREE_PLAY_MAX_BEATS` kept (c5c2b L1).
+    free_play: std::collections::VecDeque<crate::findings::FreePlayBeat>,
+}
+
+impl SegmentState {
+    /// Keeps the newest `FREE_PLAY_MAX_BEATS`: a segment never closes while
+    /// the player keeps playing, so this is what bounds it.
+    fn push_free_play(&mut self, beat: crate::findings::FreePlayBeat) {
+        if self.free_play.len() >= crate::findings::FREE_PLAY_MAX_BEATS {
+            self.free_play.pop_front();
+        }
+        self.free_play.push_back(beat);
+    }
 }
 
 /// Compute the median of a VecDeque<f64>.
@@ -3943,6 +4036,7 @@ mod tests {
             subdivision_index: sub_index,
             subdivision_total: sub_total,
             beats_per_bar: 4,
+            bar_beat: beat_index % 4,
         }
     }
 
@@ -4037,6 +4131,310 @@ mod tests {
         // Everything that is not the score is still the segment's.
         assert_eq!(scored.onset_count, free.onset_count);
         assert_eq!(scored.total_onsets, free.total_onsets);
+    }
+
+    // ── C5 — free-play findings ride out on the event, and only there ──
+
+    /// One scored tick of free play, as the analysis loop records it;
+    /// `dev` is the raw offset of the note on it.
+    fn played(index: u32, sub: u8, sub_total: u8, bpm: f64, dev: f64, class: &str) -> crate::findings::FreePlayBeat {
+        let t = tick(u64::from(index) * 1_000, index, sub, sub_total, 60_000.0 / bpm);
+        if class == "miss" {
+            crate::findings::FreePlayBeat::missed(&t, false)
+        } else {
+            crate::findings::FreePlayBeat::played(&t, dev, false)
+        }
+    }
+
+    fn ended_with(free_play: Vec<crate::findings::FreePlayBeat>) -> PracticeSegmentEnded {
+        let mut seg = make_seg(16, 0, 0, 0, vec![0.0; 16], vec![0.5; 16]);
+        seg.free_play = free_play.into();
+        build_segment_ended(&seg, "electric-guitar", &None, SegmentEndReason::UserStopped, 1, 0.9, None)
+    }
+
+    fn headline_kind(ended: &PracticeSegmentEnded) -> Option<crate::findings::FindingKind> {
+        ended.findings.first().map(|f| f.kind)
+    }
+
+    #[test]
+    fn the_close_finds_the_beat_of_the_bar_that_slips() {
+        let ended = ended_with(
+            (0..64)
+                .map(|i| played(i, 0, 1, 120.0, if i % 4 == 2 { 40.0 } else { 0.0 }, "good"))
+                .collect(),
+        );
+        assert_eq!(headline_kind(&ended), Some(crate::findings::FindingKind::BeatPositionBias));
+        assert_eq!(ended.findings[0].evidence.beat_position, Some(3));
+    }
+
+    #[test]
+    fn the_close_finds_the_subdivision_that_goes_missing() {
+        let ended = ended_with(
+            (0..96)
+                .map(|i| {
+                    let sub = (i % 2) as u8;
+                    let missed = sub == 1 && i % 6 != 1;
+                    played(i / 2, sub, 2, 120.0, 0.0, if missed { "miss" } else { "good" })
+                })
+                .collect(),
+        );
+        assert_eq!(headline_kind(&ended), Some(crate::findings::FindingKind::SubdivisionWeak));
+        let ev = &ended.findings[0].evidence;
+        assert_eq!(ev.subdivision_position, Some((1, 2)));
+        assert_eq!((ev.onsets, ev.hits), (48, 16));
+    }
+
+    #[test]
+    fn the_close_finds_the_tempo_band_where_it_collapses() {
+        let mut beats: Vec<_> = (0..20).map(|i| played(i, 0, 1, 100.0, f64::from(i % 5) - 2.0, "perfect")).collect();
+        beats.extend((20..40).map(|i| played(i, 0, 1, 140.0, if i % 2 == 0 { 45.0 } else { -45.0 }, "ok")));
+        let ended = ended_with(beats);
+        let ceiling = ended
+            .findings
+            .iter()
+            .find(|f| f.kind == crate::findings::FindingKind::TempoCeiling)
+            .expect("a tempo that collapses is a finding");
+        assert_eq!(ceiling.evidence.bpm_band, Some((100, 140)));
+    }
+
+    #[test]
+    fn the_close_finds_drift_across_the_segment() {
+        let ended = ended_with((0..60).map(|i| played(i, 0, 1, 120.0, f64::from(i) - 30.0, "good")).collect());
+        let drift = ended
+            .findings
+            .iter()
+            .find(|f| f.kind == crate::findings::FindingKind::Drift)
+            .expect("drifting across a minute is a finding");
+        assert!(drift.evidence.mean_deviation_ms > 30.0);
+    }
+
+    #[test]
+    fn a_clean_steady_run_finds_nothing_and_the_event_is_unchanged() {
+        let ended = ended_with(
+            (0..64)
+                .map(|i| played(i, 0, 1, 120.0, if i % 2 == 0 { 2.0 } else { -2.0 }, "perfect"))
+                .collect(),
+        );
+        assert!(ended.findings.is_empty());
+        let json = serde_json::to_string(&ended).expect("serialize");
+        assert!(!json.contains("findings"), "{json}");
+    }
+
+    #[test]
+    fn a_finding_goes_out_on_the_event_in_the_songs_shape() {
+        let ended = ended_with((0..60).map(|i| played(i, 0, 1, 120.0, f64::from(i) - 30.0, "good")).collect());
+        let json = serde_json::to_value(&ended).expect("serialize");
+        let all = json["findings"].as_array().expect("findings on the wire");
+        let first = all.iter().find(|f| f["kind"] == "drift").expect("the drift on the wire");
+        assert!(first["evidence"]["meanDeviationMs"].as_f64().unwrap() > 30.0);
+        assert!(first.get("bars").is_none(), "free play has no bars: {first}");
+        assert_eq!(first["noteIds"], serde_json::json!([]));
+    }
+
+    #[test]
+    fn a_segment_with_a_schedule_runs_no_free_play_analysis() {
+        let run = ScheduleRun::new(ScoreSchedule {
+            onsets: vec![crate::score::ExpectedOnset { id: 0, beat: 0.0, note_ids: vec![0], soft: false, accent: false }],
+            length_beats: 4.0,
+            loops: false,
+        });
+        let mut seg = make_seg(16, 0, 0, 0, vec![0.0; 16], vec![0.5; 16]);
+        seg.free_play = (0..60).map(|i| played(i, 0, 1, 120.0, f64::from(i) - 30.0, "good")).collect();
+        let ended =
+            build_segment_ended(&seg, "electric-guitar", &None, SegmentEndReason::UserStopped, 1, 0.9, Some(&run));
+        assert!(ended.findings.is_empty());
+    }
+
+    #[test]
+    fn findings_are_not_stored_with_the_segment_or_the_report() {
+        // What the history keeps: the D1 log's segment, made by the same
+        // `PracticeSegment::from_segment_end` that `commands.rs`'s
+        // `on_segment_end` calls, and the mini-report the JS keeps as a
+        // `SessionSegment` (`get_session_report` = the accumulator's
+        // report). The event carries the findings; neither of these does.
+        let ended = ended_with((0..60).map(|i| played(i, 0, 1, 120.0, f64::from(i) - 30.0, "good")).collect());
+        assert!(!ended.findings.is_empty());
+        let event_json = serde_json::to_string(&ended).expect("serialize");
+        assert!(event_json.contains("\"findings\""), "{event_json}");
+        let stored = crate::session_log::PracticeSegment::from_segment_end(&ended);
+        let mut acc = crate::session::SessionAccumulator::new();
+        acc.push_segment(stored.clone());
+        let stored_json = serde_json::to_string(&stored).expect("serialize");
+        let report_json = serde_json::to_string(&acc.report()).expect("serialize");
+        for json in [&stored_json, &report_json] {
+            assert!(!json.contains("findings"), "{json}");
+            assert!(!json.contains("evidence"), "{json}");
+            assert!(!json.contains("freePlay"), "{json}");
+        }
+    }
+
+    #[test]
+    fn the_analysis_of_a_long_segment_is_cheap() {
+        // 2,000 scored ticks: eighths at 120 BPM for 1,000 beats, a bit over
+        // eight minutes of play, with every diagnostic's inputs present.
+        let beats: Vec<_> = (0..2_000u32)
+            .map(|i| {
+                let sub = (i % 2) as u8;
+                let class = if sub == 1 && i % 6 != 1 { "miss" } else { "good" };
+                played(i / 2, sub, 2, 120.0, f64::from(i % 50) - 25.0, class)
+            })
+            .collect();
+        let mut best = f64::MAX;
+        for _ in 0..5 {
+            let t = std::time::Instant::now();
+            let found = crate::findings::analyze_free_play(&beats);
+            best = best.min(t.elapsed().as_secs_f64() * 1_000.0);
+            assert!(!found.is_empty());
+        }
+        println!("analyze_free_play over 2,000 ticks: {best:.3} ms (best of 5)");
+        // Generous for an unoptimised test build on a loaded machine; the
+        // close is on the analysis thread, never the audio one.
+        assert!(best < 50.0, "2,000 ticks took {best:.2} ms");
+    }
+
+    #[test]
+    fn a_segment_keeps_its_newest_free_play_records() {
+        // L1: past the cap the oldest record goes, the newest stays.
+        let mut seg = make_seg(16, 0, 0, 0, vec![0.0; 16], vec![0.5; 16]);
+        let cap = crate::findings::FREE_PLAY_MAX_BEATS as u32;
+        for i in 0..cap + 10 {
+            seg.push_free_play(played(i, 0, 1, 120.0, 0.0, "good"));
+        }
+        assert_eq!(seg.free_play.len(), cap as usize);
+        assert_eq!(seg.free_play.front().map(|b| b.beat_index), Some(10));
+        assert_eq!(seg.free_play.back().map(|b| b.beat_index), Some(cap + 9));
+    }
+
+    /// Plays sixteenths over an eighth click at 100 BPM through the shipped
+    /// analysis loop — both of its push sites, the real virtual ticks — then
+    /// closes the segment (`settings` = a settings change, else the stop)
+    /// and returns every close with its `emit_ui`. `drop(q, slot)` leaves a
+    /// note out.
+    fn free_play_live(drop: impl Fn(u32, u8) -> bool, settings: bool) -> Vec<(PracticeSegmentEnded, bool)> {
+        const QUARTERS: u32 = 44; // 26.4 s: under Signal B's and D's 30 s
+        let quarter_ms = 600.0;
+        let quarter_ns = (quarter_ms * 1_000_000.0) as u64;
+        let beat_log = create_beat_log();
+        let mut analyzer = TimingAnalyzer::new(beat_log.clone());
+        let (tick_tx, tick_rx) = std::sync::mpsc::channel::<u32>();
+        let (close_tx, close_rx) = std::sync::mpsc::channel::<(PracticeSegmentEnded, bool)>();
+        analyzer.start(
+            Instrument::ElectricGuitar.profile(),
+            "electric-guitar".to_string(),
+            None,
+            None,
+            CoachMode::Default,
+            move |fb| {
+                let _ = tick_tx.send(fb.beat_index);
+            },
+            move |pse, emit_ui| {
+                let _ = close_tx.send((pse, emit_ui));
+            },
+            |_| {},
+            |_| {},
+            |_| {},
+        );
+        let base_ns = crate::clock::now_ns().saturating_sub(quarter_ns * (u64::from(QUARTERS) + 2) + 1_000_000_000);
+        for q in 0..QUARTERS {
+            let anchor = base_ns + u64::from(q) * quarter_ns;
+            for slot in 0..4u8 {
+                if !drop(q, slot) {
+                    analyzer.log_onset(Onset {
+                        ts_ns: anchor + (quarter_ns / 4) * u64::from(slot),
+                        amplitude: 0.6,
+                        centroid: 900.0,
+                        confidence: 1.0,
+                    });
+                }
+            }
+            {
+                let mut log = beat_log.lock().unwrap();
+                for s in 0..2u8 {
+                    log.push_back(BeatTick {
+                        ts_ns: anchor + (quarter_ns / 2) * u64::from(s),
+                        beat_index: q,
+                        is_downbeat: s == 0 && q % 4 == 0,
+                        expected_interval_ms: quarter_ms,
+                        subdivision_index: s,
+                        subdivision_total: 2,
+                        beats_per_bar: 4,
+                        bar_beat: q % 4,
+                    });
+                }
+            }
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+            loop {
+                match tick_rx.recv_timeout(std::time::Duration::from_millis(200)) {
+                    Ok(index) if index == q => break,
+                    Ok(_) => {}
+                    Err(_) if std::time::Instant::now() >= deadline => {
+                        panic!("the analysis loop never scored quarter {q}")
+                    }
+                    Err(_) => {}
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+        std::thread::sleep(std::time::Duration::from_millis(60));
+        if settings {
+            analyzer.notify_settings_change();
+        } else {
+            analyzer.close_open_segment();
+        }
+        let first = close_rx
+            .recv_timeout(std::time::Duration::from_secs(10))
+            .expect("the close never came");
+        analyzer.stop();
+        let mut closes = vec![first];
+        closes.extend(close_rx.try_iter());
+        closes
+    }
+
+    fn weak_position(ended: &PracticeSegmentEnded) -> Option<(u8, u8)> {
+        ended
+            .findings
+            .iter()
+            .find(|f| f.kind == crate::findings::FindingKind::SubdivisionWeak)
+            .and_then(|f| f.evidence.subdivision_position)
+    }
+
+    #[test]
+    fn invented_sixteenths_never_blame_the_click_off_beat_on_the_live_path() {
+        // H1, run 2, through both push sites: the "e" (a position the
+        // matcher invents between the eighth click's ticks) is dropped on
+        // every other beat; the "&" the click sounds is always played.
+        let closes = free_play_live(|q, slot| slot == 1 && q % 2 == 0, false);
+        let (stop, emit_ui) = &closes[0];
+        assert!(*emit_ui);
+        assert_eq!(stop.end_reason, SegmentEndReason::UserStopped);
+        assert_eq!(weak_position(stop), None, "{:?}", stop.findings);
+    }
+
+    #[test]
+    fn a_dropped_click_off_beat_is_found_on_the_live_path() {
+        // The same run with the "&" — the click's own off-beat — dropped on
+        // every other beat instead: a miss at the unmatched push site, hits
+        // at the matched one, and the position named on the click's grid.
+        let closes = free_play_live(|q, slot| slot == 2 && q % 2 == 1, false);
+        let (stop, _) = &closes[0];
+        assert_eq!(weak_position(stop), Some((1, 2)), "{:?}", stop.findings);
+        let weak = stop
+            .findings
+            .iter()
+            .find(|f| f.kind == crate::findings::FindingKind::SubdivisionWeak)
+            .and_then(|f| f.evidence.free_play)
+            .expect("counts");
+        assert!(weak.agreeing >= 8 && weak.agreeing <= weak.counted, "{weak:?}");
+    }
+
+    #[test]
+    fn a_close_that_emits_nothing_analyses_nothing() {
+        // L2: the run above, closed by a settings change (no event).
+        let closes = free_play_live(|q, slot| slot == 2 && q % 2 == 1, true);
+        let (settings, emit_ui) = &closes[0];
+        assert!(!*emit_ui);
+        assert_eq!(settings.end_reason, SegmentEndReason::SettingsChange);
+        assert!(settings.findings.is_empty(), "{:?}", settings.findings);
     }
 
     #[test]
@@ -4380,6 +4778,7 @@ mod tests {
             subdivision: 1,
             accent_buckets: std::collections::HashMap::new(),
             matched_amplitudes: Vec::new(),
+            free_play: std::collections::VecDeque::new(),
         }
     }
 
@@ -5444,6 +5843,7 @@ mod tests {
                     subdivision_index: 0,
                     subdivision_total: 1,
                     beats_per_bar: 4,
+                    bar_beat: i % 4,
                 })
                 .collect()
         };
@@ -5546,6 +5946,7 @@ mod tests {
                     subdivision_index: 0,
                     subdivision_total: 1,
                     beats_per_bar: 4,
+                    bar_beat: i % 4,
                 })
                 .collect()
         };
@@ -5741,6 +6142,7 @@ mod tests {
                     subdivision_index: 0,
                     subdivision_total: 1,
                     beats_per_bar: 4,
+                    bar_beat: i % 4,
                 });
             }
         }
@@ -5936,6 +6338,7 @@ mod tests {
                         subdivision_index: s,
                         subdivision_total: click,
                         beats_per_bar: 4,
+                        bar_beat: q % 4,
                     });
                 }
             }
@@ -6323,6 +6726,7 @@ mod tests {
                 subdivision_index: 0,
                 subdivision_total: 1,
                 beats_per_bar: 4,
+                bar_beat: q as u32 % 4,
             });
         }
         // One more beat for the last quarter to clear its hold, settle and
@@ -6449,6 +6853,7 @@ mod notes_pass_tests {
             slot: Arc::new(Mutex::new(NotesSlot::default())),
             diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
             midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            heard: crate::take_audio::HeardTakeSlot::new(),
         };
         notes.tap.arm(Some(RATE));
         let mut ring = RingBuffer::new(RATE as usize * 4);
@@ -6531,10 +6936,67 @@ mod notes_pass_tests {
         assert!(!grade.notes_pending);
         assert_eq!(grade.notes_serial, Some(serial));
         assert!(notes.slot.lock().unwrap().provisional.is_none(), "the tracker's grade is dropped once the full one is in");
+        // c5b1: the audio is kept as the last heard Take once the pass is
+        // done with it, rather than freed, with the Take's complete bars.
+        let held = loop {
+            let held = notes.heard.held(serial);
+            if held.held {
+                break held;
+            }
+            assert!(std::time::Instant::now() < deadline, "the Take's audio was never kept");
+            thread::sleep(Duration::from_millis(10));
+        };
+        assert_eq!(held.bars, run.bar_spans_ms().len() as u32);
+        assert!(held.bars >= 1, "{held:?}");
         // A new Take's load forgets it: no answer for the next Take.
         notes.forget();
         assert!(notes.slot.lock().unwrap().grade.is_none());
         assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // The heard Take is not a grade: a load leaves it for the next
+        // Take's audio to replace, and the input's stop to empty.
+        assert!(notes.heard.held(serial).held);
+        notes.heard.forget();
+        assert!(!notes.heard.held(serial).held);
+    }
+
+    /// c5b1: a Take whose audio the pitch pass never got keeps nothing: a
+    /// MIDI Take, a pull that fell behind, a tap that never armed.
+    #[test]
+    fn nothing_is_kept_for_hearing_back_without_a_usable_capture() {
+        let notes = NotesPass {
+            tap: crate::take_audio::TakeAudioTap::new(),
+            slot: Arc::new(Mutex::new(NotesSlot::default())),
+            diagnostics: Arc::new(crate::take_diagnostics::TakeDiagnostics::default()),
+            midi_seen: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            heard: crate::take_audio::HeardTakeSlot::new(),
+        };
+        let schedule = ScoreSchedule {
+            onsets: vec![ExpectedOnset { id: 0, beat: 0.0, note_ids: vec![0], soft: false, accent: false }],
+            length_beats: 4.0,
+            loops: false,
+        };
+        let run = ScheduleRun::new(schedule)
+            .with_pass_bars(vec![PassBar { metric: "noteIdentity".into(), min: Some(0.9), max: None, over_bars: 1 }])
+            .with_note_pitches(vec![ScoreNote { id: 0, midi: 60.0 }]);
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        let mut started = None;
+        // no capture: the tap was never armed
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // a gap: more came in than one pull takes
+        notes.tap.arm(Some(100));
+        let mut ring = RingBuffer::new(1000);
+        notes.tap.pull(&ring, 0);
+        ring.write(&[0.0; 51]);
+        notes.tap.pull(&ring, 1);
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        // MIDI: armed and captured, but the pass never looks at it
+        notes.tap.arm(Some(100));
+        notes.tap.pull(&ring, 2);
+        ring.write(&[0.0; 10]);
+        notes.tap.pull(&ring, 3);
+        notes.midi_seen.store(true, std::sync::atomic::Ordering::Release);
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started, "electric-guitar"), None);
+        assert_eq!(notes.heard.held_bytes(), 0);
     }
 
     /// A Take with MIDI notes in it gets no pass over its audio: a MIDI note's

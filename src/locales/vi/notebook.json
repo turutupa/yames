@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "Ở {{fast}} BPM, các lượt của bạn đều {{fastScore}}%; ở {{slow}} BPM, {{slowScore}}%.",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "Ô nhịp đầu tiên của mẫu rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất đo được.",
+          "early": "Ô nhịp đầu tiên của mẫu rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất đo được."
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "Ô nhịp cuối cùng của mẫu rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất đo được.",
+          "early": "Ô nhịp cuối cùng của mẫu rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất đo được."
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Các ô nhịp có nốt theo sau một nốt ngân rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất có những ô nhịp như vậy và đo được.",
+          "early": "Các ô nhịp có nốt theo sau một nốt ngân rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất có những ô nhịp như vậy và đo được.",
+          "lateOne": "Trong {{exercise}}, các ô nhịp có nốt theo sau một nốt ngân rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất của bài này đo được.",
+          "earlyOne": "Trong {{exercise}}, các ô nhịp có nốt theo sau một nốt ngân rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất của bài này đo được."
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Các ô nhịp có dây buông rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất có những ô nhịp như vậy và đo được.",
+          "early": "Các ô nhịp có dây buông rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất có những ô nhịp như vậy và đo được.",
+          "lateOne": "Trong {{exercise}}, các ô nhịp có dây buông rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất của bài này đo được.",
+          "earlyOne": "Trong {{exercise}}, các ô nhịp có dây buông rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất của bài này đo được."
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Các ô nhịp có chuyển vị trí rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất có những ô nhịp như vậy và đo được.",
+          "early": "Các ô nhịp có chuyển vị trí rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất có những ô nhịp như vậy và đo được.",
+          "lateOne": "Trong {{exercise}}, các ô nhịp có chuyển vị trí rơi trễ so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất của bài này đo được.",
+          "earlyOne": "Trong {{exercise}}, các ô nhịp có chuyển vị trí rơi sớm so với phần còn lại: {{hits}} trong {{count}} lượt gần đây nhất của bài này đo được."
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "Bạn chơi {{exercise}} ở {{fromBpm}} BPM lúc đầu và ở {{toBpm}} BPM gần đây nhất.",
+        "unnamed": "Bạn chơi một bài ở {{fromBpm}} BPM lúc đầu và ở {{toBpm}} BPM gần đây nhất."
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "{{sessions}} buổi tập gần nhất của bạn, mỗi buổi trung bình có {{now}} phút chơi trong các lượt; {{sessions}} buổi trước đó, {{then}}."
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "Từ {{count}} lượt · {{from}} đến {{to}}",
+      "exercises": "Từ {{count}} lượt của {{exercises}} bài · {{from}} đến {{to}}"
+    },
+    "ui": {
+      "tabsLabel": "Huấn luyện viên",
+      "tabAsk": "Hỏi",
+      "tabNotebook": "Sổ tay",
+      "noticedTitle": "Điều tôi đã nhận thấy",
+      "goalTitle": "Điều bạn đang hướng tới",
+      "loading": "Chờ một chút: đang đọc ghi chú của huấn luyện viên.",
+      "noticedUnreadable": "Không đọc được danh sách các dòng bạn đã bỏ ra, nên lần này không hiển thị dòng nào. Mọi lượt vẫn được lưu.",
+      "tooFewTakes": "Tôi cần năm lượt trước khi nói gì ở đây. Số lượt cho đến nay: {{count}}. Bỏ một dòng ra và tôi sẽ không dùng nó trong 30 ngày.",
+      "nothingYet": "Chưa có gì nổi bật. Số lượt đã đọc: {{count}}. Một dòng sẽ xuất hiện ở đây khi cùng một điều xuất hiện trong từ năm lượt trở lên.",
+      "leaveOutHint": "Bỏ một dòng ra và tôi sẽ không dùng nó trong 30 ngày.",
+      "leaveOut": "Bỏ ra",
+      "leftOut": "Đã bỏ ra trong 30 ngày. Mọi lượt vẫn được giữ.",
+      "undo": "Hoàn tác",
+      "leftOutNotRead": "Chưa bỏ ra: lần này không đọc được danh sách các dòng đã bỏ ra.",
+      "notSaved": "Điều này giữ nguyên đến khi Yames đóng: không lưu được.",
+      "sessionNote": "Trong một buổi tập, mục này chỉ hiện những gì đã lưu trước khi buổi tập bắt đầu.",
+      "goalSaid": "Bạn nói · {{date}}",
+      "goalSaidUndated": "Bạn nói",
+      "goalEdit": "Sửa",
+      "goalAdd": "Thêm mục tiêu",
+      "goalNone": "Chưa có mục tiêu.",
+      "goalUnreadable": "Lần này không đọc được mục tiêu của bạn, nên nó không hiển thị và không thể đổi ở đây.",
+      "goalQuestion": "Bạn đang hướng tới điều gì?",
+      "goalHint": "Một bài hát, một tempo, một phong cách, chỉ chơi, hoặc lời của chính bạn.",
+      "goalInputLabel": "Mục tiêu của bạn",
+      "goalSave": "Lưu",
+      "goalCancel": "Hủy",
+      "goalChoice": {
+        "song": "Một bài hát",
+        "tempo": "Một tempo",
+        "style": "Một phong cách",
+        "justPlaying": "Chỉ chơi"
+      },
+      "goalStarter": {
+        "song": "Để chơi bài hát",
+        "tempo": "Để chơi sạch ở",
+        "style": "Để chơi theo phong cách",
+        "justPlaying": "Chỉ chơi"
+      },
+      "notNow": "Để sau",
+      "notNowDone": "Để sau. Tôi sẽ không hỏi lại trong ít nhất 7 ngày. Cài đặt → Huấn luyện viên → Gợi ý tắt những câu hỏi như thế này.",
+      "notNowNotRead": "Chưa lưu: lần này không đọc được ghi chú của huấn luyện viên.",
+      "footer": "Mọi thứ ở đây đến từ các lượt đã lưu của bạn, hoặc là điều bạn đã gõ."
+    },
+    "suggestions": {
+      "label": "Gợi ý",
+      "hint": "Việc huấn luyện viên có tự đưa ra gì không, chẳng hạn câu hỏi về mục tiêu của bạn. Hỏi và Sổ tay luôn có sẵn.",
+      "on": "Bật",
+      "asked": "Chỉ khi tôi hỏi",
+      "unreadable": "Lần này không đọc được lựa chọn của bạn; bấm một mục sẽ lưu nó."
     }
   }
 }
