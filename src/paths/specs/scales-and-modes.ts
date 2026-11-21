@@ -7,7 +7,7 @@
  * meets first: Dorian and Mixolydian, each as one changed note heard over a
  * band. Written lines, graded on right notes first.
  */
-import { definePath } from "../spec";
+import { definePath, withCues } from "../spec";
 import type { ExerciseSpec, VariantParams } from "../spec";
 import type { PassBar } from "../format";
 import type { FretCell, Sequence } from "../templates";
@@ -15,6 +15,7 @@ import { handAt, ladder, moveChart, oneStringClimb, sequenced, shiftFrets } from
 import { MODES_SECOND_KEY, SECOND_SHAPE, WHAT_A_KEY_IS } from "./scales-more";
 import { CHORDS_FROM_THE_SCALE, HARMONIC_MINOR_AGAIN, KEYS_BY_HAND, MINOR_SECOND_KEY } from "./scales-encore";
 import { BOX_PLUS_TWO, CHOOSING_AGAIN, SAME_NOTES_NEW_HOME } from "./modes-encore";
+import { SCALES_AND_MODES_CUES } from "./scales-and-modes-cues";
 
 type Grading = Pick<ExerciseSpec, "grade" | "alsoGraded" | "pass">;
 
@@ -124,7 +125,7 @@ const ETUDE_DORIAN = `/8 4:7 4:5 4:4 5:7 /4 5:5 5:7 | /8 4:4 5:7 4:4 4:5 /2 4:4 
 const ETUDE_MIXO = `/8 4:7 4:5 4:4 5:7 /4 5:4 5:7 | /8 4:5 4:4 5:7 5:5 /2 6:3 | /8 5:7 5:5 5:4 5:5 /4 5:7 4:4 | /8 4:7 4:5 4:4 5:7 /2 6:5`;
 const MODE_EXAMPLE = `/2 4:7 /8 4:5 4:4 5:7 5:5 | /2 4:5 /8 4:4 4:5 4:7 4:5 | /2 4:7 /8 4:5 4:4 5:7 5:4 | /2 5:4 /8 5:5 5:7 4:4 5:7`;
 
-export default definePath({
+export default withCues(definePath({
   id: "scales-and-modes",
   title: "Scales and Modes",
   kind: "theory",
@@ -970,4 +971,4 @@ export default definePath({
       ],
     },
   ],
-});
+}), SCALES_AND_MODES_CUES);
