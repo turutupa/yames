@@ -12,6 +12,6 @@ Cues: `src/paths/specs/classic-rock-cues.ts`, attached with `withCues` in `class
 - [x] Level 2 (Intermediate: box-two, repeating-licks, double-stops, double-stops-in-e, embellishment,
   embellishment-in-a, chord-tones, chord-tones-ade, warm-up loop-around), 31 Exercises. `check`: 0
   errors, 0 refused (`gc3.log`). Six `cue.specific` refusals on the first run, reworded (below).
-- [ ] Level 3 (Advanced: melody, call-response, sixes-at-twelve, climax, solo-in-e, solo-etude, warm-up
-  run-around).
+- [x] Level 3 (Advanced: melody, call-response, sixes-at-twelve, climax, solo-in-e, solo-etude, warm-up
+  run-around), 24 Exercises. `check`: 0 errors, 0 refused (`gc5.log`). 604 cues in all.
 - [ ] Proof-read; translations; gates.

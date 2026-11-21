@@ -104,6 +104,24 @@ const WHOLE_LATE = "Play each note right as its bar starts.";
 const WHOLE_EARLY = "Wait for '1' before each new note.";
 const WHOLE_NEXT = "Have the next finger ready during beat four.";
 const WHOLE_LAST = "Hold the last C sharp through all four beats.";
+// Melody, call and response, the solos.
+const HEARD_SHORT = "Pick every short note as firmly as the long.";
+const LONG_TO_END = "Count each long note to its end, then move.";
+const CALL_QUIET = "Stay silent while the call plays.";
+const CALL_LATE = "Come in right on '1' after the call.";
+const CALL_EARLY = "Wait for '1' after the call to come in.";
+const ANSWER_HEARD = "Pick every note of the answer, to the end.";
+const ANSWER_LAST = "Hold the last A its two beats, then listen.";
+const SIX_HEARD = "Pick all six notes of every group.";
+const SIX_LOWER = "Start each group one box note lower.";
+const SAY_SIX = "Say 'one-two-three-four-five-six' each beat.";
+const NEXT_STRING_EARLY = "Lay finger one on the next string early.";
+const PICK_THREE = "Pick three, pull off one, every beat.";
+const FAST_HEARD = "Pick G, A and C each time; pull off for A.";
+const TO_THE_NUT = "Get to the nut while the open E's sound.";
+const INTO_BOX_TWO = "Shift with finger one, two frets, into box 2.";
+const PHRASE_FIRST = "Say each phrase's first note before it comes.";
+const LAST_E_REST = "Hold the last E two beats, then rest two.";
 
 export const CLASSIC_ROCK_CUES: CueBook = {
   // Level 1, Step 1: riffs
@@ -620,5 +638,239 @@ export const CLASSIC_ROCK_CUES: CueBook = {
     c("shift", NEW_BAR_MOVE, 0),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Count the triplets right to the last note."),
+  ],
+
+  // Level 3, Step 14: melody
+  "melody.long-notes": [
+    g("Count every beat of each long note.", 1),
+    c("notes", "Play the long notes B, E, G, then D.", 1),
+    c("heard", HEARD_SHORT),
+    c("extras", "Pick each long note once and let it ring."),
+    c("late", "Play each long note right as its bar starts."),
+    c("early", "Wait for '1' before each long note."),
+    c("afterHeld", LONG_TO_END),
+    c("stringChange", "Ready the next finger while the long note rings."),
+    c("lastBars", "Hold the last D through all four beats.", 1),
+  ],
+  "melody.bent-melody": [
+    g("Hear the target B before you bend.", 2),
+    c("heard", "Pick the notes after each bend as firmly."),
+    c("extras", "Pick each bend once and let it ring."),
+    c("late", "Pick each bend right on its beat."),
+    c("early", "Wait for the beat before each bend."),
+    c("stringChange", "Have the next finger ready as each bend ends."),
+    c("lastBars", "Hold the last bend up for its two beats."),
+  ],
+  "melody.one-note": [g("Play the same B five ways, one per bar.")],
+
+  // Level 3, Step 15: call and response
+  "call-response.answer-the-lick": [
+    g("Stay silent for the call, then answer on '1'.", 0),
+    c("notes", "End each answer on an A.", 1),
+    c("heard", ANSWER_HEARD),
+    c("extras", CALL_QUIET),
+    c("late", CALL_LATE),
+    c("early", CALL_EARLY),
+    c("afterHeld", AFTER_LONG),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", ANSWER_LAST),
+  ],
+  "call-response.answer-in-major": [
+    g("Answer brighter: the same shape, major notes.", 1),
+    c("notes", "Play F sharp and C sharp in your answer.", 1),
+    c("heard", ANSWER_HEARD),
+    c("extras", CALL_QUIET),
+    c("late", CALL_LATE),
+    c("early", CALL_EARLY),
+    c("afterHeld", "Count the held A's two beats, then go on."),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the last C sharp its two beats."),
+  ],
+  "call-response.answer-the-riff": [
+    g("Answer high: start at fret 5 on the high E.", 1),
+    c("notes", "Play the four-note group twice, then hold.", 1),
+    c("heard", GROUP_HEARD),
+    c("extras", CALL_QUIET),
+    c("late", CALL_LATE),
+    c("early", CALL_EARLY),
+    c("afterHeld", "Count the held E out, then D, C, A, G."),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", ANSWER_LAST),
+  ],
+  "call-response.free-answers": [g("Answer every call with two bars of your own.", 0)],
+
+  // Level 3, Step 16: the sixes at fret 12
+  "sixes-at-twelve.sixes-in-triplets": [
+    g("Count '1-trip-let, 2-trip-let' for each six.", 1),
+    c("notes", SIX_LOWER),
+    c("heard", SIX_HEARD),
+    c("extras", EXTRAS),
+    c("late", GROUP_LATE),
+    c("early", GROUP_EARLY),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the low E through all four beats.", 2),
+  ],
+  "sixes-at-twelve.sixes-in-e": [
+    g(SAY_SIX, 3),
+    c("notes", SIX_LOWER),
+    c("heard", SIX_HEARD),
+    c("extras", EXTRAS),
+    c("late", GROUP_LATE, 3),
+    c("early", GROUP_EARLY),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Land the low note on the beat and hold it."),
+  ],
+  "sixes-at-twelve.sixes-turn": [
+    g("Count six to a click as the line climbs.", 5),
+    c("notes", "Drop back two strings between climbing groups.", 4),
+    c("heard", SIX_HEARD),
+    c("extras", EXTRAS),
+    c("late", GROUP_LATE),
+    c("early", GROUP_EARLY),
+    c("stringChange", NEXT_STRING_EARLY, 3),
+    c("lastBars", "Land the top note on the beat and hold it."),
+  ],
+  "sixes-at-twelve.sixes-phrase": [
+    g("Count twos, then sixes, to the same click.", 3),
+    c("notes", "Start the sixes on G, fret 15 on the high E.", 2),
+    c("heard", SIX_HEARD),
+    c("extras", EXTRAS),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", "Ready finger four for fret 15 while B is held.", 2),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Land the low E on the beat and hold it."),
+  ],
+
+  // Level 3, Step 17: the climax
+  "climax.run-up": [
+    g("Count '1 e and a' up to the held note."),
+    c("notes", "Play two notes on every string, low to high.", 1),
+    c("heard", "Pick every sixteenth, right up to the top."),
+    c("extras", EXTRAS),
+    c("late", S16_LATE),
+    c("early", S16_EARLY),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Land the held note right on '1'."),
+  ],
+  "climax.fast-repeat": [
+    g(PICK_THREE, 1),
+    c("notes", "Play G, A, C, then pull off back to A.", 1),
+    c("heard", FAST_HEARD),
+    c("extras", TOP_TWO),
+    c("late", S16_LATE),
+    c("early", S16_EARLY),
+    c("afterHeld", "Hold the last G two beats, then start again."),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Land the held G right on beat three."),
+  ],
+  "climax.tumble-down": [
+    g("Pick the top note, pull off, next string.", 1),
+    c("notes", "Pull off to finger one at fret 5 each time.", 1),
+    c("heard", "Pick the upper note on every string."),
+    c("extras", EXTRAS),
+    c("late", S16_LATE),
+    c("early", S16_EARLY),
+    c("afterHeld", "Count the last note's beat, then tumble again."),
+    c("stringChange", NEXT_STRING_EARLY, 1),
+  ],
+  "climax.the-peak": [
+    g("Join the three moves without a gap."),
+    c("notes", "Start bar three on the low C, fret 8.", 1),
+    c("heard", FAST_HEARD),
+    c("extras", EXTRAS),
+    c("late", S16_LATE),
+    c("early", S16_EARLY),
+    c("afterHeld", "Hold the high A four beats, then start again.", 1),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Land the high A on '1' and hold it."),
+  ],
+
+  // Level 3, Step 18: the solo in E
+  "solo-in-e.e-solo-a": [
+    g("Go to the nut during bar three's open notes.", 2),
+    c("notes", "Say E, G, A, B, D, E as you climb.", 1),
+    c("heard", HEARD_SHORT),
+    c("extras", EXTRAS),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_TO_END),
+    c("openString", TO_THE_NUT, 2),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the last A on the G string two beats."),
+  ],
+  "solo-in-e.e-solo-b": [
+    g("Play A with finger one to climb into box 2.", 2),
+    c("notes", "Climb E, G, A, B, D, E, A, then back to G.", 1),
+    c("heard", PICK_THREE),
+    c("extras", EXTRAS),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_TO_END),
+    c("shift", INTO_BOX_TWO, 2),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the E at fret 17 through all four beats."),
+  ],
+  "solo-in-e.e-solo": [
+    g("Join bar six to bar seven without a gap.", 1),
+    c("notes", PHRASE_FIRST),
+    c("heard", HEARD_SHORT),
+    c("extras", EXTRAS),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_TO_END),
+    c("openString", TO_THE_NUT),
+    c("shift", INTO_BOX_TWO),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the last E all four beats, then go round.", 1),
+  ],
+  "solo-in-e.your-e-solo": [g("Say something, then answer it higher up.", 1)],
+
+  // Level 3, Step 19: the sixteen-bar solo
+  "solo-etude.etude-a": [
+    g("Climb the opening phrase up to the high A.", 1),
+    c("notes", "Play G, E, D, C after the double stop.", 1),
+    c("heard", HEARD_SHORT),
+    c("extras", EXTRAS),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_TO_END),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Hold the high A for its two beats.", 1),
+  ],
+  "solo-etude.etude-b": [
+    g("Switch from eighths to triplets and back on '1'."),
+    c("notes", "Play C, A, G twice, then G, E, D twice.", 1),
+    c("heard", HEARD_SHORT),
+    c("extras", EXTRAS),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_TO_END),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_E_REST, 1),
+  ],
+  "solo-etude.etude": [
+    g("Lead bar eight's high A straight into the C.", 1),
+    c("notes", PHRASE_FIRST),
+    c("heard", HEARD_SHORT),
+    c("extras", EXTRAS),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", LONG_TO_END),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", LAST_E_REST, 1),
+  ],
+  "solo-etude.your-solo": [g("Start low and simple, then build to the peak.", 1)],
+
+  // Level 3 warm-up
+  "warmup-advanced.run-around": [
+    g(WELL_UNDER, 0),
+    c("heard", GROUP_HEARD),
+    c("late", GROUP_LATE),
+    c("early", GROUP_EARLY),
+    c("afterHeld", "Count the held note out, then move the hand."),
+    c("shift", NEW_BAR_MOVE, 0),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Keep the groups even right to the last note."),
   ],
 };
