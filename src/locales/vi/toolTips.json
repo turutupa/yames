@@ -221,7 +221,7 @@
         "fatigue": {
           "encouragement": [
             "Độ chính xác đã tụt trong vài phút qua. Hãy nghỉ một nhịp.",
-            "Tay đang căng lên? Duỗi nhanh rồi quay lại cho tươi.",
+            "Tay đang căng lên? Duỗi nhanh rồi quay lại với sức mới.",
             "Chất lượng đang trôi. Dừng, hít thở, rồi quay lại.",
             "Tay đang làm việc nặng hơn mức cần. Nghỉ ngắn, rồi vào lại.",
             "Bạn đã chơi một lúc rồi — hãy đặt nhạc cụ xuống 60 giây.",
@@ -1618,7 +1618,7 @@
         "low_confidence": {
           "neutral": [
             "Phần âm trầm khó đọc ở phía tôi — tôi kém chắc về đoạn này.",
-            "Tín hiệu của bạn bị đục ở dải trầm. Hãy xem các con số của nửa phút qua một cách lỏng lẻo.",
+            "Tín hiệu của bạn bị đục ở dải trầm. Hãy xem các con số của nửa phút qua chỉ như ước chừng.",
             "Lúc này khó tách các lần búng khỏi dải trầm. Số đọc của tôi mềm hơn thường lệ."
           ]
         },

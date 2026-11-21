@@ -845,13 +845,13 @@
         },
         "session_start_returning": {
           "neutral": [
-            "Welkom terug. Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we daarop voortbouwen.",
+            "Welkom terug. Vorige sessie: {lastScore} op {lastBpm} BPM. Laten we voortbouwen op dat plectrumspel.",
             "Fijn je te zien. Je haalde de vorige keer {lastScore} op {lastBpm} BPM: een goede basis.",
             "Weer aan de gitaar. {lastScore} op {lastBpm} BPM vorige sessie. Laten we doorpakken.",
             "Welkom terug: {lastScore} / {lastBpm} BPM de vorige keer. Ik ben klaar wanneer jij het bent.",
             "Vorige sessie: {lastScore} op {lastBpm} BPM. Ga verder waar je bent gebleven.",
             "Weer aan de slag. {lastScore} op {lastBpm} BPM de vorige keer: een stevige basis.",
-            "Welkom terug. {lastScore} op {lastBpm} BPM was de lat vorige sessie. Laten we die evenaren.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM was je score vorige sessie. Laten we die evenaren.",
             "Fijn dat je terug bent. {lastScore} op {lastBpm} BPM de vorige keer: aan de slag."
           ]
         },
@@ -1123,7 +1123,7 @@
             "Welkom terug: {lastScore} / {lastBpm} BPM de vorige keer. Ik ben klaar wanneer jij het bent.",
             "Vorige sessie: {lastScore} op {lastBpm} BPM. Ga verder waar je bent gebleven.",
             "Weer aan de slag. {lastScore} op {lastBpm} BPM de vorige keer: een stevig beginpunt.",
-            "Welkom terug. {lastScore} op {lastBpm} BPM was de lat vorige sessie. Laten we die evenaren.",
+            "Welkom terug. {lastScore} op {lastBpm} BPM was je score vorige sessie. Laten we die evenaren.",
             "Fijn dat je terug bent. {lastScore} op {lastBpm} BPM de vorige keer: aan de slag."
           ]
         },
@@ -1151,7 +1151,7 @@
             "Tel de tussenslagen: voel de ruimte tussen elke klik.",
             "Zet het tempo vijf BPM lager en laat de klik elke strum uit je trekken.",
             "Pauzeer een maat. Hoor de klik en kom dan binnen op tel 1.",
-            "Laat je strumarm langs je zij zakken, adem in en begin dan opnieuw.",
+            "Laat je strumarm langs je zij zakken, adem rustig en begin dan opnieuw.",
             "De handen racen. Demp de snaren en tik een maat lang de klik mee met het plectrum.",
             "Stop met het metronoom te willen aansturen. Laat het jou een hele maat lang aansturen."
           ]
@@ -1593,7 +1593,7 @@
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Je tokkelen landt goed op de tel, maar de ruimte tussen de noten blijft verschuiven. Probeer de onderverdelingen hardop te tellen terwijl je speelt.",
+            "Je getokkel landt goed op de tel, maar de ruimte tussen de noten blijft verschuiven. Probeer de onderverdelingen hardop te tellen terwijl je speelt.",
             "De plaatsing op de tel zit goed, maar de ruimte tussen de getokkelde noten is ongelijk. Tik met je voet op elke onderverdeling om de ruimte vast te zetten.",
             "Steeds op de tel, maar de ruimte tussen de noten dwaalt. Tel de onderverdelingen hardop: laat je stem het raster bepalen.",
             "Goede plaatsing op de tel, maar de ruimte tussen de getokkelde noten drijft weg. Vertraag de lijn tot de tussenruimtes gelijk voelen en ga dan weer sneller."

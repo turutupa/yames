@@ -626,7 +626,7 @@
             "Arka vuruş geç. 2. ve 4. vuruşları öne it.",
             "Hi-hat geride. Daha erken gir ve daha çok sekmeyle çal.",
             "Tempoyu düşür ve daha çok kaldırarak çal. Kolay gelince sürükleme geçer.",
-            "Bagetler geç iniyor. Tıkın gerçekte olduğundan bir kıl önde olduğunu düşün."
+            "Bagetler geç iniyor. Tıkın gerçekte olduğundan bir kıl payı önde olduğunu düşün."
           ]
         },
         "personal_best_streak": {
@@ -877,7 +877,7 @@
             "Aşağı vuruşlar öne geçiyor — yukarı vuruşları tam tıkın üstüne indir.",
             "Mızrap eli acele ediyor. Her aşağı vuruşu metronom yönlendirsin.",
             "Aradaki sekizlikleri say ve her tık arasındaki boşluğu hisset.",
-            "Tempoyu beş BPM geri çek ve her notayı tık senden çekip çıkarsın.",
+            "Tempoyu beş BPM geri çek ve tıkın her notayı senden çekip çıkarmasına izin ver.",
             "Bir ölçü dur. Tıkı duy, sonra tam 1. vuruşta gir.",
             "Sağ elini dizine bırak, nefes al, sonra yeniden çalmaya başla.",
             "Eller yarışıyor. Önce telleri sustur ve bir ölçü boyunca mızrapla tıkı vur.",
@@ -896,7 +896,7 @@
             "Mızrap öncülük etsin — her notayı uzanıp almak yerine karşıla.",
             "Her nota geç iniyor. Her tıkın ön kenarını hedefle.",
             "Tempoyu biraz düşür ve daha çok kaldırarak çal. Kolay gelince sürükleme geçer.",
-            "Tıkın gerçekte olduğundan bir kıl önde olduğunu düşün ve onunla buluş.",
+            "Tıkın gerçekte olduğundan bir kıl payı önde olduğunu düşün ve onunla buluş.",
             "Dur, bir nefes al, sonra hafifçe öne iterek gir.",
             "Mızrap takılıyor — baskıyı azalt ve akmasına izin ver."
           ]
@@ -963,7 +963,7 @@
             "Gerçek bir dinlenme — gitar sehpada, bir süre dolaş.",
             "Mızrap kolu şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
             "Dur. Bilek daireleri, ön kol esnetmeleri, sonra taze dön.",
-            "Bunun ötesine zorlarsan kendine sakatlık kazandırırsın. Kesin dur."
+            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Kesin dur."
           ]
         },
         "tempo_milestone": {
@@ -1143,13 +1143,13 @@
           "neutral": [
             "Aşağı strum tıktan önce geliyor. Beklesin.",
             "Strum kolu biraz öne geçiyor — önce tıkı duy, sonra hareket et.",
-            "Biraz erkensin. Strum'ı tık senden çekip çıkarsın."
+            "Biraz erkensin. Tıkın strum'ı senden çekip çıkarmasına izin ver."
           ],
           "correction": [
             "Strum kolu öne geçiyor — aşağı strum'ı tam tıkın üstüne indir.",
             "Strum eli acele ediyor. Strum'ı tık sürsün.",
             "Aradakileri say — her tık arasındaki boşluğu hisset.",
-            "Tempoyu beş BPM geri çek ve her strum'ı tık senden çekip çıkarsın.",
+            "Tempoyu beş BPM geri çek ve tıkın her strum'ı senden çekip çıkarmasına izin ver.",
             "Bir ölçü dur. Tıkı duy, sonra 1. vuruşta gir.",
             "Strum kolunu yanına bırak, nefes al, sonra yeniden başla.",
             "Eller yarışıyor. Telleri sustur ve bir ölçü boyunca mızrapla tıkı vur.",
@@ -1168,7 +1168,7 @@
             "Strum'a daha fazla ivme ver ve tıkla aşağıda buluş.",
             "Her strum geç iniyor. Her tıkın ön kenarını hedefle.",
             "Tempoyu düşür ve daha çok kaldırarak çal. Kolay gelince sürükleme geçer.",
-            "Tıkın gerçekte olduğundan bir kıl önde olduğunu düşün ve onunla buluş.",
+            "Tıkın gerçekte olduğundan bir kıl payı önde olduğunu düşün ve onunla buluş.",
             "Dur, bir nefes al, sonra hafifçe öne iterek gir.",
             "Strum takılıyor — gevşet ve akmasına izin ver."
           ]
@@ -1235,7 +1235,7 @@
             "Gerçek bir dinlenme — gitar sehpada, bir süre dolaş.",
             "Strum eli şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
             "Kesin dur. Bilek daireleri, ön kol esnetmeleri, gevşeyince devam et.",
-            "Bunun ötesine zorlarsan kendine sakatlık kazandırırsın. Dur ve toparlan."
+            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
           ]
         },
         "tempo_milestone": {
@@ -1440,7 +1440,7 @@
             "Her nota geç iniyor. Her tıkın ön kenarını hedefle.",
             "Ön koldan it — parmak ağırlaşıyor.",
             "Tempoyu biraz düşür ve daha çok kaldırarak çal. Sürükleme geçer.",
-            "Tıkın gerçekte olduğundan bir kıl önde olduğunu düşün ve onunla buluş.",
+            "Tıkın gerçekte olduğundan bir kıl payı önde olduğunu düşün ve onunla buluş.",
             "Dur, bir nefes al, sonra hafifçe öne iterek gir."
           ]
         },
@@ -1506,7 +1506,7 @@
             "Gerçek bir dinlenme — bas sehpada, bir süre dolaş.",
             "Tel çeken el tamam. En az 90 saniye, sonra yeniden değerlendir.",
             "Kesin dur. Devam etmeden önce bilek daireleri ve ön kol esnetmeleri.",
-            "Bunun ötesine zorlarsan kendine sakatlık kazandırırsın. Dur ve toparlan."
+            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
           ]
         },
         "tempo_milestone": {
@@ -1710,7 +1710,7 @@
             "Vuruşla öncülük et — tıkla her notanın ön kısmında buluş.",
             "Her nota geç iniyor. Her tıkın ön kenarını hedefle.",
             "Tempoyu düşür ve daha çok kaldırarak çal. Kolay gelince sürükleme geçer.",
-            "Tıkın gerçekte olduğundan bir kıl önde olduğunu düşün ve onunla buluş.",
+            "Tıkın gerçekte olduğundan bir kıl payı önde olduğunu düşün ve onunla buluş.",
             "Dur, bir nefes al, sonra hafifçe öne iterek gir.",
             "Parmaklar ağırlaşıyor. Dokunuşunu hafiflet ve süzülmelerine izin ver."
           ]
@@ -1777,7 +1777,7 @@
             "Gerçek bir dinlenme — ayağa kalk, dolaş, taze dön.",
             "Eller şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
             "Kesin dur. Devam etmeden önce bilek daireleri ve omuz çevirmeleri.",
-            "Bunun ötesine zorlarsan kendine sakatlık kazandırırsın. Dur ve toparlan."
+            "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
           ]
         },
         "tempo_milestone": {

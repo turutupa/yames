@@ -109,7 +109,7 @@
             "O metrônomo está deixando você para trás. Entre em cada clique.",
             "O ritmo está cedendo. Levante as mãos e toque por cima do clique.",
             "Notas chegando tarde. Mire na borda da frente de cada tempo.",
-            "O arrasto está aparecendo. Imagine que o clique vem meio tom mais cedo do que você pensa."
+            "O arrasto está aparecendo. Imagine que o clique vem um fio mais cedo do que você pensa."
           ],
           "correction": [
             "Ainda ficando para trás: toque com o clique, não espere por ele.",
@@ -513,7 +513,7 @@
           "neutral": [
             "A posição dos seus tempos está boa, mas o espaço entre as notas continua oscilando. Tente contar as subdivisões em voz alta enquanto toca.",
             "No tempo de forma consistente, mas o espaçamento das notas é desigual. Bata o pé e conte as subdivisões enquanto toca.",
-            "O tempo dos tempos está aí, mas o intervalo entre as notas está mudando. Conte colcheias (ou semicolcheias) em voz alta para travar o espaçamento.",
+            "A posição nos tempos está aí, mas o intervalo entre as notas está mudando. Conte colcheias (ou semicolcheias) em voz alta para travar o espaçamento.",
             "A posição está sólida, o espaçamento está oscilando. Tente desacelerar até os intervalos parecerem iguais e depois acelere de novo."
           ]
         },
@@ -530,7 +530,7 @@
             "A posição dos tempos e o espaçamento das notas estão ambos travados. Essa é a pegada.",
             "Espaçamento e posição, ambos no ponto. Sessão limpa.",
             "As duas dimensões sólidas: você está tocando exatamente onde pretende.",
-            "O tempo está afinado em tudo. É assim que soa a prática consistente."
+            "O tempo está firme em tudo. É assim que soa a prática consistente."
           ]
         },
         "drill_step_up": {
@@ -797,7 +797,7 @@
           "neutral": [
             "A posição das pancadas e o espaçamento entre os toques, ambos travados. Isso é bateria de pocket.",
             "Espaçamento e posição no tempo, ambos no ponto. Groove sólido.",
-            "As duas dimensões afinadas: você está tocando com precisão de verdade agora.",
+            "As duas dimensões travadas: você está tocando com precisão de verdade agora.",
             "O tempo está travado em tudo. É essa a pegada que você está construindo."
           ]
         },
@@ -1053,7 +1053,7 @@
           "neutral": [
             "A posição das suas notas está sólida, mas o espaço entre elas continua oscilando. Tente contar as subdivisões em voz alta enquanto palheta.",
             "No tempo, mas o intervalo entre as palhetadas é desigual. Bata o pé em cada subdivisão para fixar o espaçamento.",
-            "O tempo dos tempos está aí, mas o espaço entre as notas está mudando. Conte semicolcheias em voz alta enquanto toca e deixe a boca marcar a grade.",
+            "A posição nos tempos está aí, mas o espaço entre as notas está mudando. Conte semicolcheias em voz alta enquanto toca e deixe a boca marcar a grade.",
             "A posição está travada, o espaçamento está derivando. Desacelere o riff até os intervalos parecerem iguais e depois acelere de novo."
           ]
         },
@@ -1069,7 +1069,7 @@
           "neutral": [
             "Espaçamento e posição, ambos travados. Esse é o groove.",
             "Espaçamento das notas e posição no tempo, ambos no ponto. Riff limpo.",
-            "As duas dimensões afinadas: você está tocando exatamente onde pretende.",
+            "As duas dimensões travadas: você está tocando exatamente onde pretende.",
             "O tempo está travado em tudo. É assim que o riff deve soar."
           ]
         },
@@ -1340,7 +1340,7 @@
           "neutral": [
             "Espaçamento das batidas e posição no tempo, ambos travados. Esse é um padrão de batida limpo.",
             "Espaçamento e posição, ambos no ponto. O padrão está exatamente onde deveria.",
-            "As duas dimensões afinadas: você está tocando com precisão de verdade agora.",
+            "As duas dimensões travadas: você está tocando com precisão de verdade agora.",
             "O tempo está travado em tudo. É essa a pegada de batida que você quer."
           ]
         },
@@ -1611,7 +1611,7 @@
           "neutral": [
             "Espaçamento dos toques e posição no tempo, ambos travados. Esse é o pocket.",
             "Espaçamento e posição, ambos no ponto. A linha de baixo está exatamente onde deveria.",
-            "As duas dimensões afinadas: você está no groove com precisão de verdade.",
+            "As duas dimensões travadas: você está no groove com precisão de verdade.",
             "O tempo está travado em tudo. É essa a pegada de linha de baixo que você quer."
           ]
         },
@@ -1882,7 +1882,7 @@
           "neutral": [
             "Espaçamento das notas e posição no tempo, ambos travados. Esse é um tempo limpo ao piano.",
             "Espaçamento e posição, ambos no ponto. A frase está exatamente onde deveria.",
-            "As duas dimensões afinadas: você está tocando com precisão de verdade agora.",
+            "As duas dimensões travadas: você está tocando com precisão de verdade agora.",
             "O tempo está travado em tudo. É essa a pegada que você vem construindo."
           ]
         },
@@ -1931,7 +1931,7 @@
           "neutral": [
             "Seu tempo está travado: espaçamento e posição estão ambos sólidos.",
             "Bem firme: suas notas caem nos lugares certos e estão espaçadas por igual.",
-            "Bem consistente: a posição dos tempos e o espaçamento das notas estão ambos afinados.",
+            "Bem consistente: a posição dos tempos e o espaçamento das notas estão ambos travados.",
             "Ótima pegada: notas espaçadas por igual caindo bem no pulso.",
             "Seu tempo está bem no pocket: espaçamento e posição estão ambos aí."
           ]
@@ -2073,7 +2073,7 @@
             "O espaçamento das notas é consistente e a posição dos tempos é sólida: tempo firme em tudo.",
             "O espaçamento das notas e a posição dos tempos estão no ponto: tempo limpo no geral.",
             "Espaçamento uniforme das notas e posição precisa dos tempos: é isso que travado parece.",
-            "Espaçamento e posição estão ambos afinados: o tempo está sólido.",
+            "Espaçamento e posição estão ambos travados: o tempo está sólido.",
             "Espaçamento consistente e posição limpa dos tempos: nada a corrigir aqui."
           ]
         },
@@ -2100,7 +2100,7 @@
             "Posição firme dos tempos e espaçamento uniforme das notas: tempo limpo em tudo.",
             "Posição dos tempos sólida, espaçamento consistente: aumente o andamento quando estiver pronto.",
             "Todos os componentes do tempo limpos: boa sessão.",
-            "Espaçamento das notas e posição ambos afinados.",
+            "Espaçamento das notas e posição ambos travados.",
             "O tempo está travado: considere aumentar o andamento ou apertar as subdivisões."
           ]
         },

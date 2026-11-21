@@ -422,7 +422,7 @@
         "preset_ceiling_hit": {
           "neutral": [
             "{bpmLow}–{bpmHigh} to miejsce, w którym to przestaje być u ciebie czyste — {attemptCount} sesji w tym paśmie, wszystkie około {score}.",
-            "Wróciłeś do {bpmLow}–{bpmHigh}. Twoje ostatnie {attemptCount} przejść tutaj wyszło około {score}.",
+            "Wróciłeś do {bpmLow}–{bpmHigh}. W ostatnich {attemptCount} przejściach tutaj wychodziło około {score}.",
             "Zapisuję to w trakcie gry: {attemptCount} sesji przy {bpmLow}–{bpmHigh}, każda blisko {score}.",
             "To tempo, przy którym twoje wyniki w tym ćwiczeniu zaczynają spadać. Dotychczas {attemptCount} sesji tutaj.",
             "{attemptCount} razy przy {bpmLow}–{bpmHigh}, za każdym razem około {score}. Zobaczmy, jak wypadnie dzisiaj.",
@@ -849,7 +849,7 @@
             "Dobrze cię widzieć. Ostatnio było {lastScore} przy {lastBpm} BPM — dobra podstawa.",
             "Znowu przy gitarze. {lastScore} przy {lastBpm} BPM w ostatniej sesji. Podkręćmy to.",
             "Witaj z powrotem — ostatnio {lastScore} / {lastBpm} BPM. Jestem gotowy, kiedy ty.",
-            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Podejmij tam, gdzie skończyło się ostatnio.",
+            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Zacznij tam, gdzie ostatnio skończyłeś.",
             "Znowu do roboty. Ostatnio {lastScore} przy {lastBpm} BPM — solidna baza.",
             "Witaj z powrotem. {lastScore} przy {lastBpm} BPM było poziomem z ostatniej sesji. Dorównajmy mu.",
             "Dobrze, że wracasz. Ostatnio {lastScore} przy {lastBpm} BPM — zaczynajmy."
@@ -886,7 +886,7 @@
         },
         "dragging_trend": {
           "neutral": [
-            "Kostka ląduje za klikiem. Przynieś ją do przodu.",
+            "Kostka ląduje za klikiem. Przesuń ją do przodu.",
             "Siedzisz za późno — zacznij uderzenie o ułamek wcześniej.",
             "Każda nuta jest trochę z tyłu. Celuj w przód klika."
           ],
@@ -982,7 +982,7 @@
           "neutral": [
             "Długi odcinek z gitarą — riff, akordy, coś konkretnego?",
             "Ponad pięć minut za nami. Mam wskazywać granie kostką, rytm, czy jedno i drugie?",
-            "Jesteś mocno w tym. Powiedz, do czego chcesz uwag.",
+            "Jesteś mocno zgrany. Powiedz, do czego chcesz uwag.",
             "Dobra seria trwa. Chcesz ostrzejszych uwag do konkretnego fragmentu?",
             "Grasz już jakiś czas. Kostka? Rytmika? Powiedz, gdzie mam słuchać.",
             "Rytm był stały. Wybierz cel, jeśli chcesz bliższych uwag.",
@@ -1090,14 +1090,14 @@
         "boundary_signal_b": {
           "neutral": [
             "Pauza zamknęła ten fragment — {score}% przy {bpm} BPM.",
-            "Struny ucichły na tyle długo, by go zakończyć: {score}% przy {bpm} BPM.",
+            "Struny ucichły na tyle długo, by to zakończyć: {score}% przy {bpm} BPM.",
             "{score}% przy {bpm} BPM zapisane dla tego odcinka."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
             "{bpmLow}–{bpmHigh} to miejsce, w którym to przestaje być u ciebie czyste — {attemptCount} sesji, każda blisko {score}.",
-            "Wróciłeś do {bpmLow}–{bpmHigh}. Twoje ostatnie {attemptCount} przejść tutaj wyszło około {score}.",
+            "Wróciłeś do {bpmLow}–{bpmHigh}. W ostatnich {attemptCount} przejściach tutaj wychodziło około {score}.",
             "{attemptCount} sesji przy tym tempie, wszystkie blisko {score}. Zobaczmy, jak wypadnie dzisiaj."
           ]
         }
@@ -1121,7 +1121,7 @@
             "Dobrze cię widzieć. Ostatnio było {lastScore} przy {lastBpm} BPM — dobra podstawa.",
             "Znowu z akustykiem. {lastScore} przy {lastBpm} BPM w ostatniej sesji. Grajmy dalej.",
             "Witaj z powrotem — ostatnio {lastScore} / {lastBpm} BPM. Jestem gotowy, kiedy ty.",
-            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Podejmij tam, gdzie skończyło się ostatnio.",
+            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Zacznij tam, gdzie ostatnio skończyłeś.",
             "Znowu do roboty. Ostatnio {lastScore} przy {lastBpm} BPM — solidny punkt wyjścia.",
             "Witaj z powrotem. {lastScore} przy {lastBpm} BPM było poziomem z ostatniej sesji. Dorównajmy mu.",
             "Dobrze, że wracasz. Ostatnio {lastScore} przy {lastBpm} BPM — zaczynajmy."
@@ -1158,7 +1158,7 @@
         },
         "dragging_trend": {
           "neutral": [
-            "Uderzenie ląduje za klikiem. Przynieś je do przodu.",
+            "Uderzenie ląduje za klikiem. Przesuń je do przodu.",
             "Ręka od strumowania zostaje w tyle — zacznij ruch o ułamek wcześniej.",
             "Siedzisz za późno. Celuj uderzeniem w dół w przód klika."
           ],
@@ -1254,7 +1254,7 @@
           "neutral": [
             "Długi odcinek na akustyku — akordy, palcówka, coś konkretnego?",
             "Ponad pięć minut za nami. Mam wskazywać uderzanie czy zmiany akordów?",
-            "Jesteś mocno w tym. Powiedz, do czego chcesz uwag.",
+            "Jesteś mocno zgrany. Powiedz, do czego chcesz uwag.",
             "Dobra seria trwa. Chcesz ostrzejszych uwag do konkretnego fragmentu?",
             "Grasz już jakiś czas. Uderzanie? Zmiany akordów? Powiedz, gdzie mam słuchać.",
             "Rytm był stały. Wybierz cel, jeśli chcesz bliższych uwag.",
@@ -1361,14 +1361,14 @@
         "boundary_signal_b": {
           "neutral": [
             "Pauza zamknęła ten fragment — {score}% przy {bpm} BPM.",
-            "Uderzanie ustało na tyle długo, by go zakończyć: {score}% przy {bpm} BPM.",
+            "Uderzanie ustało na tyle długo, by to zakończyć: {score}% przy {bpm} BPM.",
             "{score}% przy {bpm} BPM zapisane dla tego odcinka."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
             "{bpmLow}–{bpmHigh} to miejsce, w którym to przestaje być u ciebie czyste — {attemptCount} sesji, każda blisko {score}.",
-            "Wróciłeś do {bpmLow}–{bpmHigh}. Twoje ostatnie {attemptCount} przejść tutaj wyszło około {score}.",
+            "Wróciłeś do {bpmLow}–{bpmHigh}. W ostatnich {attemptCount} przejściach tutaj wychodziło około {score}.",
             "{attemptCount} sesji przy tym tempie, wszystkie blisko {score}. Zobaczmy, jak wypadnie dzisiaj."
           ]
         }
@@ -1392,7 +1392,7 @@
             "Dobrze cię widzieć. Ostatnio było {lastScore} przy {lastBpm} BPM — solidna linia basu.",
             "Znowu przy basie. {lastScore} przy {lastBpm} BPM w ostatniej sesji. Grajmy dalej.",
             "Witaj z powrotem — ostatnio {lastScore} / {lastBpm} BPM. Jestem gotowy, kiedy ty.",
-            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Podejmij groove.",
+            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Wróć do groove'u.",
             "Znowu do roboty. Ostatnio {lastScore} przy {lastBpm} BPM — dobry punkt wyjścia.",
             "Witaj z powrotem. {lastScore} przy {lastBpm} BPM było poziomem z ostatniej sesji. Trafmy w niego.",
             "Dobrze, że wracasz. Ostatnio {lastScore} przy {lastBpm} BPM — zaczynajmy."
@@ -1632,14 +1632,14 @@
         "boundary_signal_b": {
           "neutral": [
             "Pauza zamknęła ten fragment — {score}% przy {bpm} BPM.",
-            "Linia ucichła na tyle długo, by go zakończyć: {score}% przy {bpm} BPM.",
+            "Linia ucichła na tyle długo, by to zakończyć: {score}% przy {bpm} BPM.",
             "{score}% przy {bpm} BPM zapisane dla tego odcinka."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
             "{bpmLow}–{bpmHigh} to miejsce, w którym ta linia przestaje siedzieć jak trzeba — {attemptCount} sesji, każda blisko {score}.",
-            "Wróciłeś do {bpmLow}–{bpmHigh}. Twoje ostatnie {attemptCount} przejść tutaj wyszło około {score}.",
+            "Wróciłeś do {bpmLow}–{bpmHigh}. W ostatnich {attemptCount} przejściach tutaj wychodziło około {score}.",
             "{attemptCount} sesji przy tym tempie, wszystkie blisko {score}. Warto to wiedzieć, grając."
           ]
         }
@@ -1663,7 +1663,7 @@
             "Dobrze cię widzieć. Ostatnio było {lastScore} przy {lastBpm} BPM — miło znowu grać.",
             "Znowu przy klawiszach. {lastScore} przy {lastBpm} BPM w ostatniej sesji. Podkręćmy to.",
             "Witaj z powrotem — ostatnio {lastScore} / {lastBpm} BPM. Jestem gotowy, kiedy ty.",
-            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Podejmij tam, gdzie skończyło się ostatnio.",
+            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Zacznij tam, gdzie ostatnio skończyłeś.",
             "Znowu do roboty. Ostatnio {lastScore} przy {lastBpm} BPM — solidna baza.",
             "Witaj z powrotem. {lastScore} przy {lastBpm} BPM było poziomem z ostatniej sesji. Dorównajmy mu.",
             "Dobrze, że wracasz. Ostatnio {lastScore} przy {lastBpm} BPM — zaczynajmy."
@@ -1700,7 +1700,7 @@
         },
         "dragging_trend": {
           "neutral": [
-            "Twoje ręce lądują za klikiem. Przynieś je do przodu.",
+            "Twoje ręce lądują za klikiem. Przesuń je do przodu.",
             "Siedzisz za późno — zacznij akord o ułamek wcześniej.",
             "Lewa ręka zostaje w tyle. Celuj w przód uderzenia."
           ],
@@ -1731,7 +1731,7 @@
           "encouragement": [
             "Pasmo {bpmLow}–{bpmHigh} BPM utrzymane — obie ręce zgrane z klikiem.",
             "Synchron rąk trzyma się przy {bpmLow}–{bpmHigh} BPM.",
-            "Utrzymane przy {bpmLow}–{bpmHigh} BPM — nowa podłoga dla tego układu akordów.",
+            "Utrzymane przy {bpmLow}–{bpmHigh} BPM — nowe minimum dla tego układu akordów.",
             "Czysto utrzymane {bpmLow}–{bpmHigh} BPM. Obie ręce się ustabilizowały.",
             "Zgrane przy {bpmLow}–{bpmHigh} BPM. Nowa podstawa dla tego utworu.",
             "{bpmLow}–{bpmHigh} BPM opanowane. Nie schodź poniżej niego.",
@@ -1796,7 +1796,7 @@
           "neutral": [
             "Długi odcinek przy klawiszach — utwór, ćwiczenie, coś konkretnego?",
             "Ponad pięć minut za nami. Mam wskazywać lewą rękę, prawą, czy obie?",
-            "Jesteś mocno w tym. Powiedz, do czego chcesz uwag.",
+            "Jesteś mocno zgrany. Powiedz, do czego chcesz uwag.",
             "Dobra seria trwa. Chcesz ostrzejszych uwag do konkretnego fragmentu?",
             "Grasz już jakiś czas. Lewa ręka? Prawa? Układy akordów? Powiedz, gdzie mam słuchać.",
             "Rytm był stały. Wybierz cel, jeśli chcesz bliższych uwag.",
@@ -1903,14 +1903,14 @@
         "boundary_signal_b": {
           "neutral": [
             "Pauza zamknęła ten fragment — {score}% przy {bpm} BPM.",
-            "Twoje ręce zeszły z klawiszy na tyle długo, by go zakończyć: {score}% przy {bpm} BPM.",
+            "Twoje ręce zeszły z klawiszy na tyle długo, by to zakończyć: {score}% przy {bpm} BPM.",
             "{score}% przy {bpm} BPM zapisane dla tego odcinka."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
             "{bpmLow}–{bpmHigh} to miejsce, w którym to przestaje być u ciebie czyste — {attemptCount} sesji, każda blisko {score}.",
-            "Wróciłeś do {bpmLow}–{bpmHigh}. Twoje ostatnie {attemptCount} przejść tutaj wyszło około {score}.",
+            "Wróciłeś do {bpmLow}–{bpmHigh}. W ostatnich {attemptCount} przejściach tutaj wychodziło około {score}.",
             "{attemptCount} sesji przy tym tempie, wszystkie blisko {score}. Warto to wiedzieć, grając."
           ]
         }

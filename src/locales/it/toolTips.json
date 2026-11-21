@@ -148,7 +148,7 @@
             "La serie è pulita. Resta a questi BPM finché non diventa automatico.",
             "Esattamente dove vuoi vivere per un minuto.",
             "Non accelerare ancora. Lascia che questo tempo si assesti nelle mani.",
-            "Resta piatto: ancora nessuna salita. Lascia che diventi memoria muscolare.",
+            "Resta a questo tempo: ancora nessuna salita. Lascia che diventi memoria muscolare.",
             "Mantieni questo per un altro minuto prima di aggiungere velocità.",
             "Parcheggia qui. La velocità viene dopo che questo diventa noioso.",
             "Resisti alla voglia di spingere. Prima consolida questo tempo."
@@ -242,7 +242,7 @@
           "correction": [
             "Si vede la stanchezza: fermati ora, 90 secondi di pausa, poi torna.",
             "Hai superato la tua finestra migliore. Riposa prima che la qualità cali ancora.",
-            "Prenditi il riposo. Suonare stanchi insegna alle mani abitudini sbagliate.",
+            "Riposati. Suonare stanchi insegna alle mani abitudini sbagliate.",
             "Fermati, alzati, cammina per un minuto. Poi torna.",
             "La qualità cala da minuti. Riposo vero: 90 secondi come minimo.",
             "Le mani per ora hanno finito. Fermati, scuotile, bevi.",
@@ -257,7 +257,7 @@
             "Recuperato: mantieni proprio questo feeling.",
             "L'hai riavuto. Restaci dentro per un minuto.",
             "Fuori dal calo. Non cambiare nulla adesso.",
-            "Hai sentito che scivolava e l'hai riportato su. Questa è la capacità.",
+            "Hai sentito che scivolava e l'hai riportato su. È questa l'abilità.",
             "Recupero solido. Resta sciolto, resta qui.",
             "L'hai preso prima che scappasse. Tieni questo feeling."
           ],
@@ -273,7 +273,7 @@
           ],
           "correction": [
             "Il recupero regge. Non spingere ancora il tempo.",
-            "Fuori dal calo: resta piatto, ancora nessuna salita.",
+            "Fuori dal calo: resta a questo tempo, ancora nessuna salita.",
             "L'hai salvato. Mantieni esattamente questi BPM per un minuto intero.",
             "Non premiare il recupero con un aumento di tempo. Resta qui.",
             "Di nuovo in carreggiata. Resisti alla voglia di accelerare.",
@@ -328,7 +328,7 @@
             "Guadagnati {bpmLow} BPM prima di inseguire il prossimo traguardo. Tienilo.",
             "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito qui.",
             "Hai toccato {bpmLow} BPM: ora consolidalo prima della prossima rampa.",
-            "{bpmLow} BPM è fresco. Resta piatto e lascia che le mani si adeguino."
+            "{bpmLow} BPM è fresco. Resta a questo tempo e lascia che le mani si adeguino."
           ]
         },
         "low_confidence": {
@@ -702,7 +702,7 @@
             "{bpmLow} BPM è nuovo. Aggancia la cassa su ogni clic prima di aggiungere i fill.",
             "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
             "Raggiunti {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
-            "{bpmLow}-{bpmHigh} BPM è nuovissimo. Resta piatto e lascia che gli arti si adeguino.",
+            "{bpmLow}-{bpmHigh} BPM è nuovissimo. Resta a questo tempo e lascia che gli arti si adeguino.",
             "Guadagnati {bpmLow} BPM prima di inseguirne altri. Tienili finché non diventa facile."
           ]
         },
@@ -896,7 +896,7 @@
             "Lascia che sia il plettro a guidare: incontra ogni nota invece di rincorrerla.",
             "Ogni nota cade in ritardo. Punta al bordo anteriore di ogni clic.",
             "Abbassa un po' il tempo e suona con più slancio. Il trascinamento passa quando sembra facile.",
-            "Immagina il clic un soffio prima di quando è, e incontra quello.",
+            "Immagina il clic un soffio prima di quando è, e raggiungilo.",
             "Fermati, respira, poi rientra spingendo leggermente in avanti.",
             "Il plettro si impiglia: allenta la pressione e lascia scorrere."
           ]
@@ -930,7 +930,7 @@
             "La mano del plettro è tornata: tienila.",
             "L'hai riportata su. Resta sciolto.",
             "Recuperato: mantieni questo feeling.",
-            "Hai sentito la scivolata e l'hai riportata a posto. Questa è la capacità.",
+            "Hai sentito la scivolata e l'hai riportata a posto. È questa l'abilità.",
             "La mano destra si è riallineata. Non cambiare nulla.",
             "Fuori dal calo. Resta rilassato.",
             "Pocket ritrovato. Siediti dentro.",
@@ -971,7 +971,7 @@
             "A {bpmLow} BPM: assicurati che le plettrate in su siano forti quanto quelle in giù prima di spingere.",
             "Traguardo {bpmLow} BPM. Resta qui finché l'attacco del plettro non è uniforme.",
             "Nuova fascia: {bpmLow}-{bpmHigh}. Plettra giù-su su una sola corda a vuoto prima di salire.",
-            "{bpmLow} BPM è nuovo. Resta piatto e lascia che la mano destra si assesti.",
+            "{bpmLow} BPM è nuovo. Resta a questo tempo e lascia che la mano destra si assesti.",
             "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
             "Guadagnati {bpmLow} BPM prima di inseguire altro. Tienilo finché non diventa noioso.",
             "Hai toccato {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
@@ -1052,7 +1052,7 @@
         "ic_spacing_drift": {
           "neutral": [
             "Il posizionamento delle note è solido, ma lo spazio tra una nota e l'altra continua a vagare. Prova a contare le suddivisioni ad alta voce mentre plettri.",
-            "Sei bene sul beat, ma la distanza tra le plettrate è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura.",
+            "Sei preciso sul beat, ma la distanza tra le plettrate è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura.",
             "Il timing sui beat c'è, ma lo spazio tra le note cambia. Conta le semicrome ad alta voce mentre suoni e lascia che sia la tua bocca a dare la griglia.",
             "Il posizionamento è saldo, la spaziatura va alla deriva. Rallenta il riff finché le distanze non sembrano uniformi, poi riaccelera."
           ]
@@ -1168,7 +1168,7 @@
             "Dai più slancio allo strumming e incontra il clic sul colpo in giù.",
             "Ogni colpo cade in ritardo. Punta al bordo anteriore di ogni clic.",
             "Abbassa il tempo e suona con più slancio. Il trascinamento passerà quando sembrerà facile.",
-            "Immagina il clic un soffio prima di quando è, e incontra quello.",
+            "Immagina il clic un soffio prima di quando è, e raggiungilo.",
             "Fermati, respira, poi rientra spingendo leggermente in avanti.",
             "Lo strumming si impiglia: allenta e lascia scorrere."
           ]
@@ -1202,7 +1202,7 @@
             "Lo strumming è tornato sulla griglia. Tienilo.",
             "Hai riportato lo schema a posto. Resta sciolto.",
             "Recuperato: mantieni questo feeling.",
-            "Hai sentito la scivolata e l'hai riportato a posto. Questa è la capacità.",
+            "Hai sentito la scivolata e l'hai riportato a posto. È questa l'abilità.",
             "La mano destra si è riallineata. Non cambiare nulla.",
             "Fuori dal calo. Resta sciolto.",
             "Lo schema è di nuovo pulito. Siediti dentro.",
@@ -1243,7 +1243,7 @@
             "A {bpmLow} BPM: assicurati che ogni colpo abbia lo stesso peso prima di salire.",
             "Traguardo {bpmLow} BPM. Resta qui finché l'equilibrio giù-su non è uniforme.",
             "Nuova fascia: {bpmLow}-{bpmHigh}. Prova prima lo schema su un solo accordo, poi passa avanti.",
-            "{bpmLow} BPM è nuovo. Resta piatto finché lo strumming non sembra facile.",
+            "{bpmLow} BPM è nuovo. Resta a questo tempo finché lo strumming non sembra facile.",
             "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
             "Hai toccato {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
             "{bpmLow}-{bpmHigh} BPM è nuovissimo. Tienilo finché non diventa noioso.",
@@ -1440,7 +1440,7 @@
             "Ogni nota cade in ritardo. Punta al bordo anteriore di ogni clic.",
             "Spingi dall'avambraccio: il dito si fa pesante.",
             "Abbassa un po' il tempo e suona con più slancio. Il trascinamento passa.",
-            "Immagina il clic un soffio prima di quando è, e incontra quello.",
+            "Immagina il clic un soffio prima di quando è, e raggiungilo.",
             "Fermati, respira, poi rientra spingendo leggermente in avanti."
           ]
         },
@@ -1518,7 +1518,7 @@
             "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
             "Hai toccato {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
             "{bpmLow}-{bpmHigh} BPM è nuovissimo. Tienilo finché non sembra facile.",
-            "Guadagnati {bpmLow} BPM prima di inseguire altro. Resta piatto."
+            "Guadagnati {bpmLow} BPM prima di inseguire altro. Resta a questo tempo."
           ]
         },
         "check_in": {
@@ -1710,7 +1710,7 @@
             "Guida con l'attacco: incontra il clic sulla parte anteriore di ogni nota.",
             "Ogni nota cade in ritardo. Punta al bordo anteriore di ogni clic.",
             "Abbassa il tempo e suona con più slancio. Il trascinamento passa quando diventa facile.",
-            "Immagina il clic appena più in anticipo di com'è, e incontra quello.",
+            "Immagina il clic appena più in anticipo di com'è, e raggiungilo.",
             "Fermati, respira, poi rientra spingendo leggermente in avanti.",
             "Le dita si fanno pesanti. Alleggerisci il tocco e lasciale fluttuare."
           ]
@@ -1785,11 +1785,11 @@
             "A {bpmLow} BPM: assicurati che la mano sinistra sia solidissima prima di salire.",
             "Traguardo {bpmLow} BPM. Resta qui finché le due mani non sono indipendenti.",
             "Nuova fascia: {bpmLow}-{bpmHigh}. Prima le mani separate, poi insieme.",
-            "{bpmLow} BPM è nuovo. Resta piatto finché le due mani non sono indipendenti.",
+            "{bpmLow} BPM è nuovo. Resta a questo tempo finché le due mani non sono indipendenti.",
             "Parcheggia a {bpmLow} BPM. Il prossimo salto viene dopo un minuto pulito.",
             "Raggiunti {bpmLow} BPM: ora costruisci un paio di battute pulite prima di salire.",
             "{bpmLow}-{bpmHigh} BPM è nuovissimo. Tienilo finché non diventa facile.",
-            "Guadagnati {bpmLow} BPM prima di inseguirne altri. Resta piatto."
+            "Guadagnati {bpmLow} BPM prima di inseguirne altri. Resta a questo tempo."
           ]
         },
         "check_in": {
@@ -1865,7 +1865,7 @@
         "ic_spacing_drift": {
           "neutral": [
             "Il posizionamento delle tue note è solido, ma lo spazio tra una pressione e l'altra continua a vagare. Prova a contare le suddivisioni ad alta voce mentre suoni.",
-            "Sei bene sul beat, ma l'intervallo tra le note è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura tra le pressioni.",
+            "Sei preciso sul beat, ma l'intervallo tra le note è irregolare. Batti il piede su ogni suddivisione per fissare la spaziatura tra le pressioni.",
             "Il posizionamento sul beat c'è, ma lo spazio tra le note si sposta. Conta le suddivisioni ad alta voce e lascia che sia la voce a tenere uniformi gli spazi.",
             "Buon posizionamento sul beat, ma la spaziatura delle note sta andando alla deriva. Rallenta il passaggio finché gli spazi sembrano uguali, poi riprendi velocità."
           ]
@@ -1883,7 +1883,7 @@
             "Spaziatura delle note e posizione sul beat entrambe agganciate. Questo è timing pianistico pulito.",
             "Spaziatura e posizione entrambe a punto. La frase sta esattamente dove deve stare.",
             "Entrambe le dimensioni a punto: stai suonando con vera precisione adesso.",
-            "Timing agganciato su tutta la linea. È il feeling verso cui stavi costruendo."
+            "Timing agganciato su tutta la linea. È il feeling a cui stavi lavorando."
           ]
         },
         "low_confidence": {

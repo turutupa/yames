@@ -109,7 +109,7 @@
             "El metrónomo te va dejando atrás. Entra en cada clic.",
             "El ritmo decae. Levanta las manos y toca encima del clic.",
             "Las notas llegan tarde. Apunta al borde delantero de cada pulso.",
-            "Se nota el arrastre. Imagina que el clic suena medio tono antes de lo que crees."
+            "Se nota el arrastre. Imagina que el clic suena un pelo antes de lo que crees."
           ],
           "correction": [
             "Sigues quedándote atrás: toca con el clic, no lo esperes.",
@@ -205,7 +205,7 @@
             "Sesión estable. ¿Quieres otro ángulo o seguir el rumbo?",
             "Tramo largo sin deslices. ¿Qué sigue?",
             "Has estado en el pocket. Haz balance y elige el siguiente enfoque.",
-            "Sesión tranquila hasta ahora. Elige un objetivo si quieres comentarios más afinados."
+            "Sesión tranquila hasta ahora. Elige un objetivo si quieres comentarios más precisos."
           ],
           "correction": [
             "Ojo: llevas un buen rato en esto. Tómate 10 si tus manos lo necesitan.",
@@ -530,7 +530,7 @@
             "La colocación en el pulso y el espaciado de notas están clavados. Esa es la sensación.",
             "Espaciado y colocación en su punto. Sesión limpia.",
             "Ambas dimensiones sólidas: tocas exactamente donde pretendes estar.",
-            "El timing está afinado en todo. Así suena la práctica constante."
+            "El timing está clavado en todo. Así suena la práctica constante."
           ]
         },
         "drill_step_up": {
@@ -711,7 +711,7 @@
             "Tramo largo en la batería: ¿trabajas algo concreto?",
             "Más de cinco minutos. ¿Quieres que señale el bombo, el hi-hat o ambos?",
             "Llevas un buen rato metido en el pocket. Dime qué quieres después.",
-            "Buena pasada en la batería. ¿Quieres comentarios más afinados sobre algo?",
+            "Buena pasada en la batería. ¿Quieres comentarios más precisos sobre algo?",
             "Llevas un rato en esto. ¿Quieres que escuche el bombo, la caja o la sincronía de extremidades?",
             "El pocket ha estado estable. ¿Cuál es el enfoque a partir de ahora?",
             "Llevas un groove largo: elige un objetivo y me centraré en él.",
@@ -797,7 +797,7 @@
           "neutral": [
             "La colocación de los golpes y el espaciado entre ellos están fijados los dos. Eso es tocar en el pocket.",
             "Espaciado y colocación en el pulso, ambos en su sitio. Groove sólido.",
-            "Las dos dimensiones afinadas: ahora mismo tocas con auténtica precisión.",
+            "Las dos dimensiones clavadas: ahora mismo tocas con auténtica precisión.",
             "El timing está fijado en todos los frentes. Esa es la sensación que vas construyendo."
           ]
         },
@@ -983,7 +983,7 @@
             "Tramo largo con la guitarra: ¿riff, acordes, algo concreto?",
             "Más de cinco minutos. ¿Quieres que señale el picado, el ritmo o ambos?",
             "Llevas un rato metido en ello. Dime sobre qué quieres comentarios.",
-            "Buena racha. ¿Quieres comentarios más afinados sobre una sección concreta?",
+            "Buena racha. ¿Quieres comentarios más precisos sobre una sección concreta?",
             "Llevas un buen rato. ¿Picado? ¿Rasgueo? Dime dónde escuchar.",
             "El pocket ha sido estable. Elige un objetivo si quieres comentarios más de cerca.",
             "Tramo largo con la guitarra. ¿Quieres que señale algo?",
@@ -1069,7 +1069,7 @@
           "neutral": [
             "Espaciado y colocación, ambos fijados. Ese es el groove.",
             "Espaciado de notas y colocación en el pulso, ambos en su punto. Riff limpio.",
-            "Ambas dimensiones afinadas: tocas exactamente donde pretendes estar.",
+            "Ambas dimensiones clavadas: tocas exactamente donde pretendes estar.",
             "El timing está fijado en todo. Así debería sentirse el riff."
           ]
         },
@@ -1340,7 +1340,7 @@
           "neutral": [
             "Espaciado de rasgueos y colocación en el pulso, ambos fijados. Un patrón de rasgueo limpio.",
             "Espaciado y colocación en su punto. El patrón está justo donde debe.",
-            "Ambas dimensiones afinadas: tocas con auténtica precisión ahora mismo.",
+            "Ambas dimensiones clavadas: tocas con auténtica precisión ahora mismo.",
             "Timing fijado en todo. Esa es la sensación de rasgueo que buscas."
           ]
         },
@@ -1524,9 +1524,9 @@
         "check_in": {
           "neutral": [
             "Tramo largo con el bajo: ¿línea, groove, algo concreto?",
-            "Más de cinco minutos enganchado al bombo. ¿Algo que quieras afinar?",
+            "Más de cinco minutos enganchado al bombo. ¿Algo que quieras pulir?",
             "Llevas un rato metido en el pocket. ¿Qué sigue?",
-            "Buena racha. ¿Quieres comentarios más afinados sobre una parte concreta?",
+            "Buena racha. ¿Quieres comentarios más precisos sobre una parte concreta?",
             "Llevas un buen rato. ¿Línea andante? ¿Fundamentales? Dime dónde escuchar.",
             "El pocket ha sido estable. Elige un objetivo si quieres comentarios más de cerca.",
             "Tramo largo con el bajo. ¿Quieres que señale algo?",
@@ -1611,7 +1611,7 @@
           "neutral": [
             "Espaciado de pulsaciones y colocación en el pulso, ambos fijados. Ese es el pocket.",
             "Espaciado y colocación en su punto. La línea de bajo está justo donde debe.",
-            "Ambas dimensiones afinadas: estás tocando con auténtica precisión.",
+            "Ambas dimensiones clavadas: estás tocando con auténtica precisión.",
             "Timing fijado en todo. Esa es la sensación de línea de bajo que buscas."
           ]
         },
@@ -1797,7 +1797,7 @@
             "Tramo largo ante el teclado: ¿una pieza, un ejercicio, algo concreto?",
             "Más de cinco minutos. ¿Quieres que señale la mano izquierda, la derecha o ambas?",
             "Llevas un buen rato concentrado. Dime sobre qué quieres comentarios.",
-            "Buena pasada. ¿Quieres comentarios más afinados sobre un pasaje concreto?",
+            "Buena pasada. ¿Quieres comentarios más precisos sobre un pasaje concreto?",
             "Llevas un rato en esto. ¿Mano izquierda? ¿Derecha? ¿Voicings? Dime dónde escuchar.",
             "El pocket ha estado estable. Elige un objetivo si quieres comentarios más de cerca.",
             "Tramo largo ante el teclado. ¿Quieres que señale algo?",
@@ -1882,7 +1882,7 @@
           "neutral": [
             "El espaciado entre notas y la colocación en el pulso están fijados los dos. Ese es un timing limpio al piano.",
             "Espaciado y colocación en su sitio. La frase está exactamente donde debe.",
-            "Las dos dimensiones afinadas: ahora mismo tocas con auténtica precisión.",
+            "Las dos dimensiones clavadas: ahora mismo tocas con auténtica precisión.",
             "El timing está fijado en todos los frentes. Esa es la sensación hacia la que venías construyendo."
           ]
         },
@@ -1931,7 +1931,7 @@
           "neutral": [
             "Tu timing está clavado: el espaciado y la colocación son sólidos.",
             "Muy ajustado: tus notas caen en su sitio y están espaciadas con regularidad.",
-            "Muy constante: la colocación en el pulso y el espaciado de las notas están afinados.",
+            "Muy constante: la colocación en el pulso y el espaciado de las notas están clavados.",
             "Gran sensación: notas con espaciado regular justo sobre el pulso.",
             "Tu timing está justo en el pocket: el espaciado y la colocación están ahí."
           ]
@@ -2100,7 +2100,7 @@
             "Colocación ajustada en el pulso y espaciado de notas regular: timing limpio en todo.",
             "Colocación en el pulso sólida, espaciado constante: sube el tempo cuando quieras.",
             "Todos los componentes del timing están limpios: buena sesión.",
-            "El espaciado de notas y la colocación están afinados.",
+            "El espaciado de notas y la colocación están clavados.",
             "El timing está clavado: considera subir el tempo o ajustar más las subdivisiones."
           ]
         },
