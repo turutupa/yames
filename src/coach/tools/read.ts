@@ -5,10 +5,11 @@
  * already has (`fretboard`, `chordShape`, `tabExcerpt`), resolved by
  * `blocks/resolve.ts` against the app's own theory tables and the song on
  * screen; what does not resolve is `notFound`, never a guess. `explain_screen`
- * waits on the help set (DESIGN C2c) and says so. The fact cards of the next
- * legs join this list as more `read` tools.
+ * answers with the help set's entry for the screen (`coach/ask/help.ts`, leg
+ * c2cb). The fact cards of the next legs join this list as more `read` tools.
  */
 
+import { explainScreen as helpEntryHere } from "../ask/help";
 import { playedBarOfPrinted } from "../../songs/selection";
 import { resolveCoachAnswer, type CoachBlockContext, type ScoreRef } from "../blocks/resolve";
 import { MAX_BAR, MAX_SHAPE_INDEX, NECK_POSITIONS, ROOT_NAMES, SCALE_NAMES } from "../blocks/spec";
@@ -18,7 +19,6 @@ import {
   argNumber,
   argString,
   line,
-  notWiredYet,
   refuse,
   takeRunning,
   type ActTool,
@@ -130,7 +130,8 @@ const explainScreen: ActTool = {
   note: "Say what this screen is for (the help set, DESIGN C2c).",
   args: [],
   when: notDuringTake,
-  run: () => notWiredYet("explain_screen"),
+  // The help set's entry for this screen (leg c2cb): every screen has one.
+  run: (_args, _host, ctx) => helpEntryHere(ctx),
 };
 
 export const READ_TOOLS: readonly ActTool[] = [showScale, showChord, showBars, explainScreen];

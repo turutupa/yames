@@ -26,6 +26,16 @@ const SNAPSHOT = path.resolve(process.cwd(), "src/test/parity/locale-keys.en.jso
  * in the commit. A key listed here must really be gone, so this cannot go stale.
  */
 const DELIBERATELY_REMOVED: readonly string[] = [
+  // Ask answers typed questions without a model since the help set and search
+  // (leg c2cb, DESIGN 5.5): "typed questions need a model" went, and the empty
+  // text, the plain statement and the footer moved to help.json (`help.ui.*`).
+  "ask.empty.noModel",
+  "ask.empty.phone",
+  "ask.reply.noModel",
+  "ask.reply.phone",
+  "ask.footer.model",
+  "ask.footer.local",
+  "ask.footer.phone",
   // Today's line (c1b2a, DESIGN 6.1) absorbs "Where you left off": its last
   // number moved into the line's "back" sentence, and "Today starts slower"
   // (said whatever the plan did) went.

@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { fixture } from "./cardFixtures";
-import { cardChipsFor, MAX_CHIPS, suggestChips, type ChipChoice, type ChipFacts, type ChipPlace } from "./suggest";
+import { cardChipsFor, MAX_CHIPS, SCREEN_HELP_CHIP, suggestChips, type ChipChoice, type ChipFacts, type ChipPlace } from "./suggest";
 
 const ALL = ["where_slipped", "early_or_late", "why_not_counted", "what_changed", "improving", "score_made_of", "pass_mark_distance"] as const;
 /** The first three after a Take below the pass mark (c2b1b; before it: where, lean, count). */
@@ -66,11 +66,19 @@ describe("suggestChips", () => {
 });
 
 describe("cardChipsFor: the facts read off a real context", () => {
-  it("a graded result below the pass mark offers three", () => {
-    expect(names(cardChipsFor(fixture({ slipped: [0, 4], failOn: "timingEvenness" }).ctx, "askEmpty"))).toEqual(BELOW);
+  it("a graded result below the pass mark offers three (in the empty state, two and 'What is this screen for?', leg c2cb)", () => {
+    const ctx = fixture({ slipped: [0, 4], failOn: "timingEvenness" }).ctx;
+    expect(names(cardChipsFor(ctx, "askAbove"))).toEqual(BELOW);
+    expect(names(cardChipsFor(ctx, "askEmpty"))).toEqual([...BELOW.slice(0, 2), "help"]);
   });
-  it("grading off: none", () => {
-    expect(cardChipsFor(fixture({ slipped: [0, 4], failOn: "timingEvenness" }, { grading: "off" }).ctx, "askEmpty")).toEqual([]);
+  it("grading off: no card, only 'What is this screen for?' in the empty state", () => {
+    const ctx = fixture({ slipped: [0, 4], failOn: "timingEvenness" }, { grading: "off" }).ctx;
+    expect(cardChipsFor(ctx, "askAbove")).toEqual([]);
+    expect(cardChipsFor(ctx, "askEmpty")).toEqual([SCREEN_HELP_CHIP]);
+  });
+  it("the help chip is explain_screen, and is not offered again straight after it answered", () => {
+    expect(SCREEN_HELP_CHIP).toMatchObject({ kind: "card", shape: "help", call: { tool: "explain_screen", args: {} }, label: { key: "help.ui.chip" } });
+    expect(names(cardChipsFor(fixture({ slipped: [0, 4], failOn: "timingEvenness" }).ctx, "askEmpty", "help"))).not.toContain("help");
   });
   it("a Take not caught: why, and what the score is made of (then the Path's cue, when the pack has cues)", () => {
     const f = fixture({ verdict: "notCaught" });

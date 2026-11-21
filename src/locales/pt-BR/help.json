@@ -1,0 +1,77 @@
+{
+  "help": {
+    "entry": {
+      "screen": {
+        "today": "Hoje monta sua sessão a partir das trilhas que você segue, e Começar a inicia. Escolha quantos minutos você tem e, quando segue mais de uma trilha, se hoje mistura todas ou fica em uma só. Cada linha diz por que está no plano; Trocar a troca por outro exercício, e tocar numa linha começa a sessão por ela.",
+        "paths": "Trilhas lista todas as trilhas, agrupadas em Fundamentos, Como a harmonia funciona, Técnica e Estilos; nada está bloqueado, então você pode começar por qualquer etapa. Cada cartão mostra onde você está, e o seu interruptor põe a trilha na sua mistura diária ou a deixa de fora. Meus exercícios, os que você criou em Perguntar, ficam no fim.",
+        "path": "A página de uma trilha mostra onde você está nela, o botão que continua dali e as etapas em ordem. Nível escolhe por onde Hoje começa você, e Inscrever-se põe a trilha no plano de Hoje, até quatro trilhas ao mesmo tempo. A parte recolhida embaixo diz o que esta trilha consegue e não consegue medir.",
+        "step": "A página de uma etapa lista seus exercícios com andamentos e metas; Tocar este toca um deles, e Achar meu limite sobe o andamento dele depois que você o tocou. Passe na maior parte dos exercícios com avaliação e a etapa está feita, ou use Fazer teste para tentar cada um que você ainda não passou numa única tomada. Notas de técnica diz por que a etapa existe e como tocá-la.",
+        "sessionReady": "Este é o exercício antes da tomada: o andamento, a meta e a nota do coach sobre o que tentar. Mais devagar e Mais rápido mudam o andamento, Ver acende as notas em ordem sem avaliar nada, e depois de uma tomada que escapou num ponto, um botão repete esse compasso ou dois num andamento mais lento, sem avaliação. O botão grande começa a tomada.",
+        "sessionTake": "Uma tomada está rodando: a contagem de entrada e depois as notas que você toca contra a grade, conforme chegam. A tela fica travada enquanto roda, e Encerrar tomada a para. Perguntar abre de novo quando a tomada termina.",
+        "sessionResult": "Assim foi a tomada: o número que decidiu, se atingiu a meta, e compasso a compasso onde segurou ou escapou. O botão grande toca de novo ou segue adiante, e a linha embaixo muda o andamento ou repete um compasso. Perguntar pode contar mais sobre esta tomada.",
+        "sessionTimed": "Esta parte da sessão corre contra o relógio e não é avaliada: um aquecimento, uma jam, uma subida, um final ou a sua vez. Comece, e ela passa adiante sozinha quando o tempo acaba; Pausar, Recomeçar e Pular ficam à mão enquanto roda.",
+        "sessionRecap": "A sessão acabou: o que você tocou, o que avançou e quando um exercício volta. Daqui você pode tocar mais cinco minutos, voltar para onde estava ou abrir Progresso.",
+        "progress": "Progresso é o que foi medido do seu jeito de tocar: minutos em tomadas, sessões, sua sequência de dias e o andamento limpo de cada trilha ao longo do tempo. Uma nota do coach pode ficar no topo: a sua semana, um marco, como uma etapa concluída, ou uma pergunta sobre um exercício que parou de evoluir. No computador, Execuções das ferramentas, logo abaixo, guarda cada trecho que o coach ouviu nas ferramentas e nas sessões.",
+        "tools": "Ferramentas reúne o Metrônomo, a Setlist, o Treino, a Jam e Músicas. Use quando quiser; o que você toca nelas continua seu e não move nada nas suas trilhas.",
+        "metronome": "O Metrônomo é um clique para tocar junto. Defina o andamento (ou marque no toque), o compasso, a subdivisão, os acentos e o som, e salve uma configuração como predefinição. Com Ouvir ligado, o coach escuta enquanto você toca.",
+        "drill": "Treino sobe o andamento enquanto você toca, escrito como uma frase que você edita: andamento inicial e alvo, a rapidez da subida e por quantos compassos. Linear sobe de forma constante, Ziguezague sobe e recua, e Adaptativo sobe ou desce o andamento conforme você toca.",
+        "setlist": "Uma setlist é uma rotina que você monta: etapas tocadas em ordem, cada uma com seu andamento, compasso e duração. Cada etapa diz quando passa adiante e como entrega para a próxima; Começar toca a lista.",
+        "jam": "Jam é uma banda que toca uma forma enquanto você toca por cima, e nunca é avaliada. Escolha um estilo, o clima, a forma e os acordes; as ferramentas de prática podem tirar a banda por alguns compassos, trocar compassos com você ou subir o andamento a cada volta.",
+        "songs": "Músicas abre um arquivo Guitar Pro ou MusicXML e mostra a tablatura, mantém o tempo e acompanha onde você está. Escolha sua parte, os compassos e a velocidade, repita um trecho e defina quem você ouve. O arquivo fica neste dispositivo.",
+        "settings": "Configurações guarda as escolhas do app: Geral, Prática (inclusive se o seu jeito de tocar é avaliado), Dispositivos para a entrada de áudio, Coach, Aparência, as ferramentas, Músicas, Atalhos e mais. Perguntar não abre lá.",
+        "modelSelector": "O modelo do coach escolhe se um modelo de linguagem roda neste computador: Desligado mantém o coach nas suas próprias regras, e Padrão ou Studio é um modelo que precisa de um Baixar antes. Nada é baixado até você apertar Baixar; um modelo que você escolheu carrega sozinho depois que o app abre, nunca durante uma tomada, e fica carregado até você escolher Desligado ou outro. Com um modelo carregado, uma pergunta digitada que nada mais aqui responde recebe uma resposta com as palavras dele, marcada como conselho geral.",
+        "ask": "Perguntar responde perguntas sobre esta tela, suas tomadas e suas trilhas, a partir do que o app mediu e do que as trilhas dizem; um chip faz uma pergunta com um toque. Comandos digitados, como “mais devagar” ou “abrir Progresso”, são executados ou oferecidos para um toque. A aba Caderno guarda o que o coach notou e o seu objetivo."
+      },
+      "word": {
+        "take": "Uma tomada é uma passada de um exercício numa sessão, da contagem de entrada até o fim. Uma tomada com avaliação é medida e pode atingir a meta; uma curta demais para julgar não conta para nenhum lado. Na Jam e em Músicas, um take é uma gravação de você tocando, sem meta, embora Músicas mostre quais notas acertaram.",
+        "step": "Uma etapa é um estágio de uma trilha, com alguns exercícios e notas sobre por que ela está ali. Ela está feita quando você passa na maior parte dos exercícios com avaliação, ou fazendo o teste.",
+        "level": "Seu nível numa trilha, Iniciante, Intermediário ou Avançado, define a etapa por onde Hoje começa você. As etapas abaixo dela são puladas por Hoje, mas você ainda pode tocá-las.",
+        "rung": "Um degrau é um passo de andamento de um exercício. Mais rápido e Mais devagar movem um degrau, e atingir a meta deixa o plano levar você ao próximo.",
+        "passMark": "A meta é o que uma tomada precisa atingir para passar, por exemplo quão uniforme está o tempo ou quantas notas são ouvidas. Cada exercício mostra as suas metas, e uma tomada só as atinge quando alcança todas as que deu para medir.",
+        "cleanTempo": "Seu andamento limpo num exercício é o andamento mais rápido em que você atingiu a meta por oito compassos seguidos. Tomadas que você marcou como injustas não contam para ele, nem para um marco.",
+        "review": "Uma revisão traz de volta um exercício que você passou, um dia depois e então após 3, 7, 14 e 30 dias, em duas tomadas para mantê-lo fresco. Se escapou, volta mais cedo e um degrau mais lento.",
+        "parked": "Um exercício fica estacionado quando três sessões seguidas não trouxeram um andamento limpo novo. Ele descansa uns dias e depois volta renovado.",
+        "benchmark": "Uma referência é a mesma tomada do mesmo exercício no mesmo andamento nos dias 1, 7, 14 e 21 de uma trilha, contados a partir do dia em que você se inscreve, para você ouvir a mudança. Hoje põe uma no plano quando a sua primeira sessão na trilha já ficou para trás, e uma perdida por uma semana é pulada, não refeita.",
+        "grading": "Com avaliação quer dizer que o app escuta pela sua entrada e mede o seu tempo e as suas notas contra a meta. Sem avaliação, ou Só tocar, dá o clique e o visual sem medir nada; essas tomadas contam como prática, mas só as tomadas com avaliação movem seu andamento limpo e suas etapas. Configurações, Prática escolhe isso, e uma sessão pode perguntar.",
+        "notFair": "Depois de um resultado apertado, você pode dizer que a nota não foi justa. A nota fica como foi medida, com a sua resposta ao lado, e essa tomada deixa de contar para o andamento limpo que o app mostra e não rende marco. Responda Sim depois e ela volta a contar.",
+        "listen": "Ouvir é o interruptor na barra das ferramentas que deixa o coach ouvir o seu jeito de tocar ali. Ele fica desligado até você ligar; quando você desliga, a execução fica guardada em Execuções das ferramentas.",
+        "toolRuns": "Execuções das ferramentas, em Progresso, lista cada trecho que o coach ouviu nas ferramentas e nas sessões, do mais novo para o mais antigo. Só existe no computador.",
+        "myExercises": "Meus exercícios são exercícios que você mesmo criou, listados no fim de Trilhas. Não pertencem a nenhuma trilha e não passam nada. Você cria um em Perguntar digitando o que quer, como uma escala e uma posição, e apertando Adicionar.",
+        "notebook": "O Caderno é a segunda aba de Perguntar. Mostra o que o coach notou em pelo menos cinco das suas tomadas guardadas, deixa você tirar uma linha por 30 dias e guarda seu objetivo com as suas palavras. Nada nele é escrito por um modelo.",
+        "variant": "Alguns exercícios vêm em variantes: a mesma habilidade em outro tom ou outro desenho. A sessão escolhe uma, e as palavras dela substituem as do exercício onde existirem.",
+        "countIn": "Numa sessão, a contagem de entrada é o compasso de cliques antes de cada tomada, para você entrar no tempo, e não faz parte do que é avaliado. No Metrônomo e no Treino é a chave de contagem de entrada na barra de baixo: alguns tempos de clique antes do primeiro.",
+        "loop": "Um loop toca um compasso ou dois do exercício em círculo, devagar, até você parar. Nada num loop é avaliado nem guardado.",
+        "testOut": "Fazer teste toca uma tomada no andamento de aprovação de cada exercício de uma etapa que você ainda não passou. Passe em quantos bastarem e a etapa está feita.",
+        "warmUp": "Um aquecimento abre uma sessão e um final a fecha. Os dois correm contra o relógio e não são avaliados."
+      }
+    },
+    "tuning": {
+      "none": "O app ainda não tem afinador, então não verifiquei a sua afinação e não posso ajudar com isso aqui."
+    },
+    "search": {
+      "from": "O trecho mais próximo nas suas trilhas, de “{{step}}” em {{path}}:"
+    },
+    "ui": {
+      "chip": "Para que serve esta tela?",
+      "placeholder": "Pesquise suas trilhas ou toque numa pergunta",
+      "empty": {
+        "local": "Digite uma pergunta e o app responde a partir das suas tomadas, das suas trilhas e da sua própria ajuda, sem precisar de modelo. Ou toque numa pergunta abaixo.",
+        "phone": "Digite uma pergunta e o app responde a partir das suas tomadas, das suas trilhas e da sua própria ajuda. Ou toque numa pergunta abaixo.",
+        "search": "Digite uma pergunta e o app a procura nas suas trilhas. Toque numa pergunta abaixo para saber das suas tomadas e desta tela.",
+        "searchLoading": "Digite uma pergunta e o app a procura agora nas suas trilhas; toque numa pergunta abaixo para saber das suas tomadas e desta tela. O modelo que você escolheu está se preparando; quando estiver pronto, ele acrescenta conselho geral com as próprias palavras, marcado como tal.",
+        "searchModel": "Digite uma pergunta e o app a procura nas suas trilhas; o que elas não respondem, o modelo neste computador responde com as próprias palavras, como conselho geral. Toque numa pergunta abaixo para saber das suas tomadas e desta tela."
+      },
+      "reply": {
+        "local": "Nada nas suas tomadas, nas suas trilhas ou na ajuda do app responde a isso. Com um modelo ligado, escolhido no pé deste painel, ele poderia responder com as próprias palavras.",
+        "phone": "Nada nas suas tomadas, nas suas trilhas ou na ajuda do app responde a isso.",
+        "search": "Nada nas suas trilhas responde a isso.",
+        "searchLocal": "Nada nas suas trilhas responde a isso. Com um modelo ligado, escolhido no pé deste painel, ele poderia responder com as próprias palavras."
+      },
+      "footer": {
+        "local": "Respostas das suas tomadas e trilhas. Nada do que você digita sai deste computador.",
+        "phone": "Respostas das suas tomadas e trilhas. Nada do que você digita sai deste celular.",
+        "model": "Respostas das suas tomadas e trilhas, e com as próprias palavras do modelo neste computador. Nada do que você digita sai dele."
+      }
+    }
+  }
+}

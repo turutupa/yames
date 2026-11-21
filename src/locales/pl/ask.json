@@ -30,15 +30,11 @@
     },
     "empty": {
       "title": "Co chcesz wiedzieć?",
-      "model": "Zapytaj o ten ekran, swoje podejścia lub ścieżki. Model na tym komputerze odpowiada własnymi słowami, jako ogólna rada.",
-      "loading": "Wybrany model się przygotowuje. Gdy będzie gotowy, możesz pytać o ten ekran, swoje podejścia lub ścieżki.",
-      "noModel": "Pytania wpisywane z klawiatury wymagają modelu na tym komputerze, a żaden nie jest włączony. Wybierz model poniżej, żeby pytać o ten ekran, swoje podejścia lub ścieżki.",
-      "phone": "Pytania wpisywane z klawiatury wymagają modelu, a telefony jeszcze go nie uruchamiają."
+      "model": "Zapytaj o ten ekran, swoje podejścia lub ścieżki: aplikacja odpowiada z tego, co zmierzyła, z twoich ścieżek i własnej pomocy. Na to, na co one nie odpowiadają, model na tym komputerze odpowiada własnymi słowami, jako ogólna rada.",
+      "loading": "Zapytaj o ten ekran, swoje podejścia lub ścieżki: aplikacja odpowiada już teraz, z tego, co zmierzyła, z twoich ścieżek i własnej pomocy. Wybrany model się przygotowuje; gdy będzie gotowy, doda ogólną radę własnymi słowami, oznaczoną jako taka."
     },
     "reply": {
-      "noModel": "Żaden model nie jest włączony, więc na wpisane pytania nie można jeszcze odpowiedzieć. Wybierz model na dole tego panelu.",
       "gettingReady": "Model wciąż się przygotowuje. Zapytaj ponownie za chwilę.",
-      "phone": "Telefony jeszcze nie uruchamiają modelu, więc na wpisane pytania nie można tu odpowiedzieć.",
       "nothing": "Tym razem nie przyszła żadna odpowiedź."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "Tak rozumiem twoje pytanie. Nic się nie stanie, dopóki nie naciśniesz."
     },
     "footer": {
-      "choice": "Odpowiedzi z twoich podejść i ścieżek, z pomocą modelu na tym komputerze. Nic go nie opuszcza.",
-      "model": "Odpowiada model na tym komputerze. Nic, co wpiszesz, go nie opuszcza.",
-      "local": "Nic, co tu wpiszesz, nie opuszcza tego komputera.",
-      "phone": "Nic, co tu wpiszesz, nie opuszcza tego telefonu."
+      "choice": "Odpowiedzi z twoich podejść i ścieżek, z pomocą modelu na tym komputerze. Nic go nie opuszcza."
     },
     "card": {
       "chips": "O twoim ostatnim podejściu:",

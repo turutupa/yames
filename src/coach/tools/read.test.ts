@@ -121,10 +121,10 @@ describe("show_bars", () => {
 });
 
 describe("explain_screen", () => {
-  it("says it is not wired yet, rather than nothing", () => {
+  it("answers with the help set's entry for the screen, and changes nothing (leg c2cb)", () => {
     const host = fakeHost();
-    const out = result(runCoachTool({ tool: "explain_screen", args: {} }, host, toolCtx()));
-    expect(out).toMatchObject({ ok: false, why: "notWiredYet", line: { key: "coachTools.why.notWiredYet", values: { tool: "explain_screen" } } });
+    const out = result(runCoachTool({ tool: "explain_screen", args: {} }, host, toolCtx({ screen: "beat" })));
+    expect(out).toMatchObject({ ok: true, receipt: { key: "help.entry.screen.metronome" } });
     expect(host.changes()).toEqual([]);
   });
 });

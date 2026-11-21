@@ -1,0 +1,77 @@
+{
+  "help": {
+    "entry": {
+      "screen": {
+        "today": "Heute baut deine Session aus den Pfaden, denen du folgst, und Los geht's startet sie. Wähle, wie viele Minuten du hast und, wenn du mehr als einem Pfad folgst, ob heute gemischt wird oder bei einem bleibt. Jede Zeile sagt, warum sie im Plan steht; Tauschen ersetzt sie durch eine andere Übung, und ein Tipp auf die Zeile startet die Session dort.",
+        "paths": "Pfade listet alle Pfade, gruppiert nach Grundlagen, Wie Harmonie funktioniert, Technik und Stile; nichts ist gesperrt, du kannst jeden Schritt starten. Jede Karte zeigt, wo du stehst, und ihr Schalter nimmt den Pfad in deinen Tagesmix auf oder lässt ihn weg. Meine Übungen, die du in Fragen gemacht hast, stehen ganz unten.",
+        "path": "Die Seite eines Pfads zeigt, wo du in ihm stehst, mit dem Button, der dort weitermacht, und die Schritte der Reihe nach. Niveau bestimmt, wo Heute dich einsteigen lässt, und Abonnieren nimmt den Pfad in den Plan von Heute auf, bis zu vier Pfade gleichzeitig. Das Feld darunter sagt, was dieser Pfad messen kann und was nicht.",
+        "step": "Die Seite eines Schritts listet seine Übungen mit Tempo und Messlatten; Spielen spielt eine davon, und Mein Limit finden steigert ihr Tempo, sobald du sie gespielt hast. Bestehst du die meisten bewerteten Übungen, ist der Schritt geschafft, oder Austesten probiert jede, die du noch nicht bestanden hast, in je einem Take. Technik-Notizen sagt, warum der Schritt da ist und wie du ihn spielst.",
+        "sessionReady": "Das ist die Übung vor ihrem Take: das Tempo, die Messlatte und die Notiz des Coachs, was du probieren sollst. Langsamer und Schneller ändern das Tempo, Ansehen leuchtet die Noten der Reihe nach auf, ohne etwas zu bewerten, und nach einem Take, der an einer Stelle gerutscht ist, wiederholt ein Button diesen Takt oder zwei langsamer, ohne Wertung. Der große Button startet den Take.",
+        "sessionTake": "Ein Take läuft: erst der Einzähler, dann die Noten, die du gegen das Raster spielst, sobald sie ankommen. Die Ansicht ist gesperrt, solange er läuft, und Take beenden stoppt ihn. Fragen öffnet sich wieder, wenn der Take vorbei ist.",
+        "sessionResult": "So ist der Take gelaufen: die Zahl, die entschieden hat, ob er die Messlatte erreicht hat, und Takt für Takt, wo er gehalten hat oder gerutscht ist. Der große Button spielt noch einmal oder geht weiter, und die Zeile darunter ändert das Tempo oder wiederholt einen Takt. Fragen kann dir mehr zu diesem Take sagen.",
+        "sessionTimed": "Dieser Teil der Session läuft gegen die Uhr und wird nicht bewertet: ein Warm-up, ein Jam, eine Steigerung, ein Abschluss oder dein Zug. Starte ihn, und er geht von selbst weiter, wenn die Zeit um ist; Pause, Neu starten und Überspringen gibt es, solange er läuft.",
+        "sessionRecap": "Die Session ist vorbei: was du gespielt hast, was sich bewegt hat und wann eine Übung wiederkommt. Von hier aus kannst du fünf Minuten mehr spielen, zurückgehen, wo du warst, oder Fortschritt öffnen.",
+        "progress": "Fortschritt ist das, was aus deinem Spiel gemessen wurde: Minuten in Takes, Sessions, deine Tage am Stück und das saubere Tempo jedes Pfads im Lauf der Zeit. Oben kann eine Notiz vom Coach stehen: deine Woche, ein Meilenstein wie ein abgeschlossener Schritt oder eine Frage zu einer Übung, die nicht mehr vorankommt. Am Computer hebt Tool-Läufe darunter jede Strecke auf, in der der Coach in den Werkzeugen und in Sessions zugehört hat.",
+        "tools": "Werkzeuge enthält Metronom, Setlist, Tempo-Training, Jam und Songs. Nutze sie jederzeit; was du darin spielst, bleibt deins und bewegt nichts in deinen Pfaden.",
+        "metronome": "Das Metronom ist ein Klick zum Mitspielen. Stelle Tempo (oder tippe es), Taktart, Unterteilung, Akzente und Klang ein und speichere ein Setup als Preset. Ist Zuhören an, hört der Coach zu, während du spielst.",
+        "drill": "Tempo-Training steigert das Tempo, während du spielst, geschrieben als Satz, den du bearbeitest: Start- und Zieltempo, wie schnell es steigt und über wie viele Takte. Linear steigt gleichmäßig, Zickzack steigt und fällt zurück, und Adaptiv hebt oder senkt das Tempo danach, wie du spielst.",
+        "setlist": "Eine Setlist ist eine Routine, die du selbst baust: Schritte der Reihe nach, jeder mit eigenem Tempo, eigener Taktart und Länge. Jeder Schritt sagt, wann er weitergeht und wie er an den nächsten übergibt; Starten spielt die Liste.",
+        "jam": "Jam ist eine Band, die eine Form spielt, während du darüber spielst, und er wird nie bewertet. Wähle eine Stimmung, das Feeling, die Form und die Akkorde; die Übungswerkzeuge können die Band für ein paar Takte aussetzen lassen, mit dir Takte tauschen oder bei jedem Durchgang das Tempo erhöhen.",
+        "songs": "Songs öffnet eine Guitar-Pro- oder MusicXML-Datei und zeigt ihre Tabulatur, hält den Takt und folgt dir. Wähle deine Stimme, die Takte und das Tempo, wiederhole eine Strecke und stelle ein, wen du hörst. Die Datei bleibt auf diesem Gerät.",
+        "settings": "Einstellungen enthält die Wahlmöglichkeiten der App: Allgemein, Üben (auch ob dein Spiel bewertet wird), Geräte für den Audio-Eingang, Übungscoach, Darstellung, die Werkzeuge, Songs, Tastenkürzel und mehr. Fragen ist dort nicht offen.",
+        "modelSelector": "Das Coach-Modell bestimmt, ob ein Sprachmodell auf diesem Computer läuft: Aus lässt den Coach bei seinen eigenen Regeln, und Standard oder Studio ist ein Modell, das erst ein Herunterladen braucht. Nichts wird heruntergeladen, bis du Herunterladen drückst; ein gewähltes Modell wird nach dem Start der App von selbst geladen, nie während eines Takes, und bleibt geladen, bis du Aus oder ein anderes wählst. Mit geladenem Modell bekommt eine getippte Frage, die sonst nichts hier beantwortet, eine Antwort in eigenen Worten, als allgemeiner Rat gekennzeichnet.",
+        "ask": "Fragen beantwortet Fragen zu diesem Bildschirm, deinen Takes und deinen Pfaden, aus dem, was die App gemessen hat und was die Pfade sagen; ein Chip stellt eine Frage mit einem Tipp. Getippte Befehle wie „langsamer“ oder „Fortschritt öffnen“ werden ausgeführt oder zum Bestätigen angeboten. Der Tab Notizbuch hält fest, was der Coach bemerkt hat, und dein Ziel."
+      },
+      "word": {
+        "take": "Ein Take ist ein Durchlauf einer Übung in einer Session, vom Einzähler bis zum Ende. Ein bewerteter Take wird gemessen und kann die Messlatte erreichen; einer, der zu kurz zum Beurteilen ist, zählt in keine Richtung. In Jam und Songs ist ein Take eine Aufnahme deines Spiels ohne Messlatte, wobei Songs zeigt, welche Noten getroffen wurden.",
+        "step": "Ein Schritt ist eine Stufe eines Pfads, mit ein paar Übungen und Notizen dazu, warum er da ist. Er ist geschafft, wenn du die meisten seiner bewerteten Übungen bestehst, oder durch Austesten.",
+        "level": "Dein Niveau in einem Pfad, Einsteiger, Mittelstufe oder Fortgeschritten, legt den Schritt fest, ab dem dich Heute starten lässt. Schritte darunter überspringt Heute, aber du kannst sie trotzdem spielen.",
+        "rung": "Eine Stufe ist ein Temposchritt einer Übung. Schneller und Langsamer gehen eine Stufe, und erreichst du die Messlatte, kann der Plan dich zur nächsten hochnehmen.",
+        "passMark": "Eine Messlatte ist das, was ein Take erreichen muss, um zu bestehen, zum Beispiel wie gleichmäßig das Timing ist oder wie viele der Noten zu hören sind. Jede Übung zeigt ihre eigenen Messlatten, und ein Take erfüllt sie nur, wenn er jede erreicht, die sich messen ließ.",
+        "cleanTempo": "Dein sauberes Tempo in einer Übung ist das schnellste Tempo, bei dem du die Messlatte über acht Takte hintereinander erreicht hast. Takes, die du als nicht fair markiert hast, zählen dafür nicht, auch nicht für einen Meilenstein.",
+        "review": "Eine Wiederholung bringt eine bestandene Übung einen Tag später zurück und dann nach 3, 7, 14 und 30 Tagen, für zwei Takes, damit sie frisch bleibt. Ist sie gerutscht, kommt sie früher und eine Stufe langsamer.",
+        "parked": "Eine Übung ist zurückgestellt, wenn drei Sessions hintereinander kein neues sauberes Tempo gebracht haben. Sie ruht ein paar Tage und kommt dann frisch zurück.",
+        "benchmark": "Ein Benchmark ist derselbe Take derselben Übung im selben Tempo an Tag 1, 7, 14 und 21 eines Pfads, gezählt ab dem Tag, an dem du ihn abonniert hast, damit du die Veränderung hören kannst. Heute nimmt einen in den Plan auf, sobald deine erste Session im Pfad hinter dir liegt, und einer, der eine Woche verpasst wurde, wird übersprungen, nicht nachgeholt.",
+        "grading": "Bewertet heißt, die App hört über deinen Eingang zu und misst dein Timing und deine Noten an der Messlatte. Nicht bewertet, oder Einfach spielen, gibt dir den Klick und die Anzeige ohne Messung; diese Takes zählen als Üben, aber nur bewertete Takes bewegen dein sauberes Tempo und deine Schritte. Einstellungen, Üben legt es fest, und eine Session kann danach fragen.",
+        "notFair": "Nach einem knappen Ergebnis kannst du sagen, dass die Bewertung nicht fair war. Die Bewertung bleibt, wie gemessen, mit deiner Antwort daneben, und dieser Take zählt nicht mehr für das saubere Tempo, das die App zeigt, und bringt keinen Meilenstein. Antwortest du später mit Ja, zählt er wieder.",
+        "listen": "Zuhören ist der Schalter in der Leiste der Werkzeuge, der den Coach deinem Spiel dort zuhören lässt. Er bleibt aus, bis du ihn einschaltest; schaltest du ihn aus, wird der Lauf in Tool-Läufe gespeichert.",
+        "toolRuns": "Tool-Läufe, unter Fortschritt, listet jede Strecke auf, in der der Coach in den Werkzeugen und in Sessions zugehört hat, die neueste zuerst. Es gibt sie nur am Computer.",
+        "myExercises": "Meine Übungen sind Übungen, die du selbst gemacht hast, ganz unten in Pfade aufgelistet. Sie gehören zu keinem Pfad und bestehen nichts. Du machst eine in Fragen, indem du tippst, was du willst, etwa eine Tonleiter und eine Lage, und Add it drückst.",
+        "notebook": "Das Notizbuch ist der zweite Tab von Fragen. Es zeigt, was der Coach in mindestens fünf deiner gespeicherten Takes bemerkt hat, lässt dich eine Zeile 30 Tage lang weglassen und hält dein Ziel in deinen eigenen Worten fest. Nichts darin ist von einem Modell geschrieben.",
+        "variant": "Manche Übungen gibt es in Varianten: dieselbe Fähigkeit in einer anderen Tonart oder Form. Die Session wählt eine aus, und ihre eigenen Worte ersetzen die der Übung, wo sie welche hat.",
+        "countIn": "In einer Session ist der Einzähler ein Takt aus Klicks vor jedem Take, damit du pünktlich einsetzt, und er gehört nicht zu dem, was bewertet wird. Im Metronom und im Tempo-Training ist er der Schalter Einzähler in der unteren Leiste: ein paar Schläge Klick vor dem ersten.",
+        "loop": "Eine Wiederholung spielt einen Takt oder zwei der Übung immer wieder, langsam, bis du sie stoppst. Nichts darin wird bewertet oder gespeichert.",
+        "testOut": "Austesten spielt einen Take im Bestehens-Tempo jeder Übung eines Schritts, die du noch nicht bestanden hast. Bestehst du genug davon, ist der Schritt geschafft.",
+        "warmUp": "Ein Warm-up eröffnet eine Session und ein Abschluss beendet sie. Beide laufen gegen die Uhr und werden nicht bewertet."
+      }
+    },
+    "tuning": {
+      "none": "Die App hat noch kein Stimmgerät, deshalb habe ich deine Stimmung nicht geprüft und kann hier nicht dabei helfen."
+    },
+    "search": {
+      "from": "Die nächste Stelle in deinen Pfaden, aus „{{step}}“ in {{path}}:"
+    },
+    "ui": {
+      "chip": "Wofür ist dieser Bildschirm?",
+      "placeholder": "Durchsuche deine Pfade oder tippe eine Frage an",
+      "empty": {
+        "local": "Tippe eine Frage, und die App antwortet aus deinen Takes, deinen Pfaden und ihrer eigenen Hilfe, ohne Modell. Oder tippe unten eine Frage an.",
+        "phone": "Tippe eine Frage, und die App antwortet aus deinen Takes, deinen Pfaden und ihrer eigenen Hilfe. Oder tippe unten eine Frage an.",
+        "search": "Tippe eine Frage, und die App durchsucht deine Pfade danach. Tippe unten eine Frage an, um etwas zu deinen Takes und diesem Bildschirm zu erfahren.",
+        "searchLoading": "Tippe eine Frage, und die App durchsucht deine Pfade jetzt danach; tippe unten eine Frage an, um etwas zu deinen Takes und diesem Bildschirm zu erfahren. Das gewählte Modell wird gerade vorbereitet; sobald es bereit ist, ergänzt es allgemeinen Rat in eigenen Worten, als solcher gekennzeichnet.",
+        "searchModel": "Tippe eine Frage, und die App durchsucht deine Pfade danach; was sie nicht beantworten, beantwortet das Modell auf diesem Computer in eigenen Worten, als allgemeiner Rat gekennzeichnet. Tippe unten eine Frage an, um etwas zu deinen Takes und diesem Bildschirm zu erfahren."
+      },
+      "reply": {
+        "local": "Nichts in deinen Takes, deinen Pfaden oder der Hilfe der App beantwortet das. Mit einem Modell, das du unten in diesem Fenster wählst, könnte es in eigenen Worten antworten.",
+        "phone": "Nichts in deinen Takes, deinen Pfaden oder der Hilfe der App beantwortet das.",
+        "search": "Nichts in deinen Pfaden beantwortet das.",
+        "searchLocal": "Nichts in deinen Pfaden beantwortet das. Mit einem Modell, das du unten in diesem Fenster wählst, könnte es in eigenen Worten antworten."
+      },
+      "footer": {
+        "local": "Antworten aus deinen Takes und Pfaden. Nichts, was du tippst, verlässt diesen Computer.",
+        "phone": "Antworten aus deinen Takes und Pfaden. Nichts, was du tippst, verlässt dieses Telefon.",
+        "model": "Antworten aus deinen Takes und Pfaden und in eigenen Worten vom Modell auf diesem Computer. Nichts, was du tippst, verlässt ihn."
+      }
+    }
+  }
+}

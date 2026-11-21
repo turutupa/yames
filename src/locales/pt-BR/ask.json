@@ -30,15 +30,11 @@
     },
     "empty": {
       "title": "O que você quer saber?",
-      "model": "Pergunte sobre esta tela, suas tomadas ou suas trilhas. O modelo neste computador responde com as próprias palavras, como conselho geral.",
-      "loading": "O modelo que você escolheu está se preparando. Quando estiver pronto, você poderá perguntar sobre esta tela, suas tomadas ou suas trilhas.",
-      "noModel": "Perguntas digitadas precisam de um modelo neste computador, e nenhum está ligado. Escolha um abaixo para perguntar sobre esta tela, suas tomadas ou suas trilhas.",
-      "phone": "Perguntas digitadas precisam de um modelo, e os celulares ainda não executam um."
+      "model": "Pergunte sobre esta tela, suas tomadas ou suas trilhas: o app responde a partir do que mediu, das suas trilhas e da sua própria ajuda. O que isso não responde, o modelo neste computador responde com as próprias palavras, como conselho geral.",
+      "loading": "Pergunte sobre esta tela, suas tomadas ou suas trilhas: o app responde agora, a partir do que mediu, das suas trilhas e da sua própria ajuda. O modelo que você escolheu está se preparando; quando estiver pronto, ele acrescenta conselho geral com as próprias palavras, marcado como tal."
     },
     "reply": {
-      "noModel": "Nenhum modelo está ligado, então as perguntas digitadas ainda não podem ser respondidas. Escolha um no rodapé deste painel.",
       "gettingReady": "O modelo ainda está se preparando. Pergunte de novo em instantes.",
-      "phone": "Os celulares ainda não executam um modelo, então as perguntas digitadas não podem ser respondidas aqui.",
       "nothing": "Nenhuma resposta voltou desta vez."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "Como entendi sua pergunta. Nada acontece até você pressionar."
     },
     "footer": {
-      "choice": "Respostas das suas tomadas e trilhas, com ajuda do modelo neste computador. Nada sai dele.",
-      "model": "Respondido pelo modelo neste computador. Nada do que você digita sai dele.",
-      "local": "Nada do que você digita aqui sai deste computador.",
-      "phone": "Nada do que você digita aqui sai deste celular."
+      "choice": "Respostas das suas tomadas e trilhas, com ajuda do modelo neste computador. Nada sai dele."
     },
     "card": {
       "chips": "Sobre a sua última tomada:",

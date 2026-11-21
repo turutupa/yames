@@ -1,0 +1,77 @@
+{
+  "help": {
+    "entry": {
+      "screen": {
+        "today": "Hôm nay dựng buổi tập của bạn từ các lộ trình bạn đang theo, và Bắt đầu mở buổi tập. Chọn bạn có bao nhiêu phút và, khi theo hơn một lộ trình, hôm nay trộn chúng hay chỉ giữ một. Mỗi dòng cho biết vì sao nó có trong kế hoạch; Đổi thay nó bằng một bài khác, và bấm vào một dòng sẽ bắt đầu buổi tập từ đó.",
+        "paths": "Lộ trình liệt kê mọi lộ trình, xếp theo Nền tảng, Hòa âm hoạt động thế nào, Kỹ thuật và Phong cách; không có gì bị khóa, nên bạn có thể bắt đầu từ bất kỳ bước nào. Mỗi thẻ cho biết bạn đang ở đâu, và công tắc của nó đưa lộ trình vào hoặc loại khỏi mức trộn hằng ngày. Bài của tôi, những bài bạn tạo trong Hỏi, nằm ở cuối.",
+        "path": "Trang của một lộ trình cho biết bạn đang ở đâu trong đó, nút để tiếp tục từ chỗ đó, và các bước theo thứ tự. Cấp độ chọn nơi Hôm nay cho bạn bắt đầu, còn Đăng ký đưa lộ trình vào kế hoạch của Hôm nay, tối đa bốn lộ trình cùng lúc. Phần gập bên dưới nói lộ trình này đo được gì và không đo được gì.",
+        "step": "Trang của một bước liệt kê các bài của nó cùng tempo và mức đạt; Chơi bài này chơi một bài, và Tìm giới hạn đẩy tempo của nó lên sau khi bạn đã chơi. Đạt phần lớn các bài có chấm điểm là bước xong, hoặc dùng Kiểm tra vượt để thử mọi bài chưa đạt trong một lượt. Ghi chú kỹ thuật nói vì sao có bước này và cách chơi nó.",
+        "sessionReady": "Đây là bài trước lượt chơi: tempo, mức đạt và ghi chú của huấn luyện viên về điều nên thử. Chậm hơn và Nhanh hơn đổi tempo, Xem làm các nốt sáng lên theo thứ tự mà không chấm gì, và sau một lượt trượt ở một chỗ, một nút lặp ô nhịp đó hoặc hai ô nhịp ở tempo chậm hơn, không chấm điểm. Nút lớn bắt đầu lượt chơi.",
+        "sessionTake": "Một lượt đang chạy: đếm vào, rồi các nốt bạn chơi so với lưới khi chúng đến. Màn hình bị khóa trong lúc chạy, và Kết thúc lượt dừng nó. Hỏi mở lại khi lượt kết thúc.",
+        "sessionResult": "Đây là lượt chơi đã diễn ra thế nào: con số quyết định, có đạt mức đạt hay không, và từng ô nhịp một, chỗ nào giữ được, chỗ nào trượt. Nút lớn chơi lại hoặc đi tiếp, và hàng bên dưới đổi tempo hoặc lặp một ô nhịp. Hỏi có thể nói thêm về lượt này.",
+        "sessionTimed": "Phần này của buổi tập chạy theo đồng hồ và không chấm điểm: khởi động, jam, tăng tốc, phần kết hoặc lượt của bạn. Bắt đầu nó, và nó tự chuyển tiếp khi hết giờ; Tạm dừng, Bắt đầu lại và Bỏ qua có sẵn trong lúc chạy.",
+        "sessionRecap": "Buổi tập xong: bạn đã chơi gì, điều gì đã nhích, và khi nào một bài quay lại. Từ đây bạn có thể chơi thêm năm phút, quay lại chỗ đã dừng, hoặc mở Tiến bộ.",
+        "progress": "Tiến bộ là những gì được đo từ cách bạn chơi: số phút trong các lượt, các buổi tập, chuỗi ngày của bạn, và tempo sạch của từng lộ trình theo thời gian. Ở trên cùng có thể có một ghi chú từ huấn luyện viên: tuần của bạn, một cột mốc như một bước đã xong, hoặc một câu hỏi về một bài đã không còn tiến. Trên máy tính, Lần chạy công cụ bên dưới giữ mọi đoạn mà huấn luyện viên đã nghe trong các công cụ và trong các buổi tập.",
+        "tools": "Công cụ gồm Máy đếm nhịp, Setlist, Luyện tempo, Jam và Bài hát. Dùng chúng bất cứ lúc nào; những gì bạn chơi trong đó vẫn là của bạn và không làm nhích gì trên các lộ trình.",
+        "metronome": "Máy đếm nhịp là tiếng click để chơi theo. Đặt tempo (hoặc gõ), nhịp, phân nhịp, trọng âm và âm thanh, rồi lưu một thiết lập thành cài đặt sẵn. Khi Nghe bật, huấn luyện viên nghe trong lúc bạn chơi.",
+        "drill": "Luyện tempo đẩy tempo lên trong lúc bạn chơi, được viết thành một câu bạn chỉnh: tempo đầu và tempo đích, tăng nhanh thế nào và trong bao nhiêu ô nhịp. Tuyến tính tăng đều, Zigzag tăng rồi lùi lại, và Thích ứng tăng hoặc giảm tempo theo cách bạn chơi.",
+        "setlist": "Setlist là một thói quen bạn tự dựng: các bước chơi theo thứ tự, mỗi bước có tempo, nhịp và độ dài riêng. Mỗi bước cho biết khi nào nó chuyển tiếp và bàn giao cho bước sau thế nào; Bắt đầu chơi danh sách.",
+        "jam": "Jam là một ban nhạc chơi một cấu trúc trong khi bạn chơi trên đó, và không bao giờ chấm điểm. Chọn phong cách, cảm giác, cấu trúc và hợp âm; các công cụ luyện tập có thể cho ban nhạc ngừng vài ô nhịp, đổi ô nhịp với bạn, hoặc tăng tempo mỗi vòng.",
+        "songs": "Bài hát mở một tệp Guitar Pro hoặc MusicXML và hiện tab của nó, giữ nhịp và theo dõi bạn đang ở đâu. Chọn phần của bạn, các ô nhịp và tốc độ, lặp một đoạn, và đặt bạn nghe ai. Tệp ở lại trên thiết bị này.",
+        "settings": "Cài đặt giữ các lựa chọn của ứng dụng: Chung, Luyện tập (gồm việc chơi của bạn có được chấm điểm không), Thiết bị cho đầu vào âm thanh, Huấn luyện viên, Giao diện, các công cụ, Bài hát, Phím tắt và hơn nữa. Hỏi không mở ở đó.",
+        "modelSelector": "Mô hình huấn luyện viên chọn xem có chạy một mô hình ngôn ngữ trên máy này không: Tắt giữ huấn luyện viên theo quy tắc riêng của nó, còn Tiêu chuẩn hoặc Studio là một mô hình cần Tải về trước. Không có gì được tải cho đến khi bạn bấm Tải về; một mô hình bạn đã chọn tự nạp sau khi ứng dụng khởi động, không bao giờ trong lúc đang có một lượt, và vẫn được nạp cho đến khi bạn chọn Tắt hoặc mô hình khác. Khi đã nạp mô hình, một câu hỏi gõ vào mà không chỗ nào khác ở đây trả lời sẽ nhận câu đáp bằng lời của chính nó, đánh dấu là lời khuyên chung.",
+        "ask": "Hỏi trả lời các câu hỏi về màn hình này, các lượt chơi và lộ trình của bạn, từ những gì ứng dụng đã đo và những gì các lộ trình nói; một chip hỏi một câu chỉ bằng một lần bấm. Các lệnh gõ như “chậm hơn” hay “mở Tiến bộ” được thực hiện, hoặc đề xuất để bấm một lần. Tab Sổ tay giữ những gì huấn luyện viên đã nhận thấy và mục tiêu của bạn."
+      },
+      "word": {
+        "take": "Lượt là một lần chạy một bài trong buổi tập, từ đếm vào đến hết. Một lượt có chấm điểm được đo và có thể đạt mức đạt; lượt quá ngắn để đánh giá thì không tính theo hướng nào. Trong Jam và Bài hát, một take là bản ghi bạn chơi, không có mức đạt, dù Bài hát cho thấy những nốt nào đã trúng.",
+        "step": "Bước là một chặng của lộ trình, với vài bài và ghi chú về vì sao nó có ở đó. Nó xong khi bạn đạt phần lớn các bài có chấm điểm của nó, hoặc bằng cách kiểm tra vượt.",
+        "level": "Cấp độ của bạn trong một lộ trình, Cơ bản, Trung cấp hoặc Nâng cao, đặt bước mà Hôm nay cho bạn bắt đầu. Các bước bên dưới bị Hôm nay bỏ qua, nhưng bạn vẫn có thể chơi chúng.",
+        "rung": "Nấc là một bước tempo của một bài. Nhanh hơn và Chậm hơn dịch một nấc, và đạt mức đạt để kế hoạch đưa bạn lên nấc kế tiếp.",
+        "passMark": "Mức đạt là điều một lượt phải đạt để qua, ví dụ nhịp có đều không hoặc nghe được bao nhiêu nốt. Mỗi bài hiện các mức đạt riêng, và một lượt chỉ đạt chúng khi đạt từng mức một trong những mức đo được.",
+        "cleanTempo": "Tempo sạch của bạn trong một bài là tempo nhanh nhất mà bạn đạt mức đạt trong tám ô nhịp liên tiếp. Các lượt bạn đã đánh dấu là không công bằng không được tính vào đó, cũng không vào một cột mốc.",
+        "review": "Ôn tập đưa lại một bài bạn đã đạt, một ngày sau rồi sau 3, 7, 14 và 30 ngày, trong hai lượt để giữ nó mới. Nếu nó trượt, nó quay lại sớm hơn và chậm hơn một nấc.",
+        "parked": "Một bài được tạm gác khi ba buổi tập liên tiếp không mang lại tempo sạch mới. Nó nghỉ vài ngày rồi quay lại.",
+        "benchmark": "Mốc là cùng một lượt của cùng một bài ở cùng một tempo vào các ngày 1, 7, 14 và 21 của một lộ trình, tính từ ngày bạn đăng ký, để bạn nghe ra sự thay đổi. Hôm nay đưa một lượt vào kế hoạch khi buổi tập đầu tiên của bạn trên lộ trình đã qua, và lượt bị lỡ một tuần thì bị bỏ qua, không bù lại.",
+        "grading": "Chấm điểm nghĩa là ứng dụng nghe qua đầu vào của bạn và đo nhịp cùng các nốt của bạn so với mức đạt. Không chấm điểm, hay Chỉ chơi, cho bạn tiếng click và hình ảnh mà không đo gì; các lượt đó tính là luyện tập, nhưng chỉ các lượt chấm điểm mới làm nhích tempo sạch và các bước của bạn. Cài đặt, Luyện tập chọn việc này, và một buổi tập có thể hỏi.",
+        "notFair": "Sau một kết quả sát nút, bạn có thể nói điểm không công bằng. Điểm được giữ như đã đo, kèm câu trả lời của bạn bên cạnh, và lượt đó thôi được tính vào tempo sạch mà ứng dụng hiện và không được cột mốc nào. Sau này trả lời Có thì nó lại được tính.",
+        "listen": "Nghe là công tắc trên thanh công cụ cho phép huấn luyện viên nghe bạn chơi ở đó. Nó tắt cho đến khi bạn bật; khi bạn tắt, lần chạy được giữ trong Lần chạy công cụ.",
+        "toolRuns": "Lần chạy công cụ, trong Tiến bộ, liệt kê mọi đoạn mà huấn luyện viên đã nghe trong các công cụ và trong các buổi tập, mới nhất trước. Nó chỉ có trên máy tính.",
+        "myExercises": "Bài của tôi là các bài bạn tự tạo, được liệt kê ở cuối Lộ trình. Chúng không thuộc lộ trình nào và không đạt gì. Bạn tạo một bài trong Hỏi bằng cách gõ điều bạn muốn, như một thang âm và một vị trí, rồi bấm Thêm.",
+        "notebook": "Sổ tay là tab thứ hai của Hỏi. Nó hiện những gì huấn luyện viên nhận thấy qua ít nhất năm lượt đã lưu của bạn, cho bạn bỏ một dòng trong 30 ngày, và giữ mục tiêu của bạn bằng lời của bạn. Không có gì trong đó do mô hình viết.",
+        "variant": "Một số bài có biến thể: cùng một kỹ năng ở giọng khác hoặc thế bấm khác. Buổi tập chọn một, và lời riêng của nó thay lời của bài ở chỗ nó có.",
+        "countIn": "Trong một buổi tập, đếm vào là ô nhịp tiếng click trước mỗi lượt, để bạn vào đúng lúc, và nó không nằm trong phần được chấm điểm. Trên Máy đếm nhịp và trong Luyện tempo, nó là công tắc đếm vào ở thanh dưới: vài phách click trước phách đầu tiên.",
+        "loop": "Vòng lặp chơi một hay hai ô nhịp của bài lặp đi lặp lại, chậm, cho đến khi bạn dừng. Không có gì trong vòng lặp được chấm hay được lưu.",
+        "testOut": "Kiểm tra vượt chơi một lượt ở tempo đạt của từng bài trong một bước mà bạn chưa đạt. Đạt đủ nhiều trong số đó là bước xong.",
+        "warmUp": "Khởi động mở đầu một buổi tập và phần kết khép lại nó. Cả hai chạy theo đồng hồ và không chấm điểm."
+      }
+    },
+    "tuning": {
+      "none": "Ứng dụng chưa có máy lên dây, nên tôi đã không kiểm tra dây đàn của bạn và không thể giúp việc đó ở đây."
+    },
+    "search": {
+      "from": "Đoạn gần nhất trong các lộ trình của bạn, từ “{{step}}” trong {{path}}:"
+    },
+    "ui": {
+      "chip": "Màn hình này để làm gì?",
+      "placeholder": "Tìm trong lộ trình, hoặc chạm vào một câu hỏi",
+      "empty": {
+        "local": "Gõ một câu hỏi và ứng dụng trả lời từ các lượt chơi, lộ trình và phần trợ giúp riêng của nó, không cần mô hình. Hoặc chạm vào một câu hỏi bên dưới.",
+        "phone": "Gõ một câu hỏi và ứng dụng trả lời từ các lượt chơi, lộ trình và phần trợ giúp riêng của nó. Hoặc chạm vào một câu hỏi bên dưới.",
+        "search": "Gõ một câu hỏi và ứng dụng tìm nó trong các lộ trình của bạn. Chạm vào một câu hỏi bên dưới để hỏi về các lượt chơi của bạn và màn hình này.",
+        "searchLoading": "Gõ một câu hỏi và ứng dụng tìm nó trong các lộ trình của bạn ngay bây giờ; chạm vào một câu hỏi bên dưới để hỏi về các lượt chơi của bạn và màn hình này. Mô hình bạn chọn đang được chuẩn bị; khi xong, nó thêm lời khuyên chung bằng lời của chính nó, đánh dấu là như vậy.",
+        "searchModel": "Gõ một câu hỏi và ứng dụng tìm nó trong các lộ trình của bạn; phần chúng không trả lời, mô hình trên máy tính này trả lời bằng lời của chính nó, như lời khuyên chung. Chạm vào một câu hỏi bên dưới để hỏi về các lượt chơi của bạn và màn hình này."
+      },
+      "reply": {
+        "local": "Không có gì trong các lượt chơi, lộ trình hay phần trợ giúp của ứng dụng trả lời được câu đó. Khi bật một mô hình, chọn ở cuối bảng này, nó có thể trả lời bằng lời của chính nó.",
+        "phone": "Không có gì trong các lượt chơi, lộ trình hay phần trợ giúp của ứng dụng trả lời được câu đó.",
+        "search": "Không có gì trong các lộ trình của bạn trả lời được câu đó.",
+        "searchLocal": "Không có gì trong các lộ trình của bạn trả lời được câu đó. Khi bật một mô hình, chọn ở cuối bảng này, nó có thể trả lời bằng lời của chính nó."
+      },
+      "footer": {
+        "local": "Câu trả lời từ các lượt chơi và lộ trình của bạn. Không có gì bạn gõ rời khỏi máy tính này.",
+        "phone": "Câu trả lời từ các lượt chơi và lộ trình của bạn. Không có gì bạn gõ rời khỏi điện thoại này.",
+        "model": "Câu trả lời từ các lượt chơi và lộ trình của bạn, và bằng lời của mô hình trên máy tính này. Không có gì bạn gõ rời khỏi nó."
+      }
+    }
+  }
+}
