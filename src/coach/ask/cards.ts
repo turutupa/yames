@@ -51,7 +51,16 @@ export type CardShape =
   | "improving"
   | "score_made_of"
   | "pass_mark_distance"
-  | PathCardShape;
+  | PathCardShape
+  | AnswerShape;
+
+/**
+ * Not cards, and never in `FACT_CARDS` or the tools' registry: Ask's other
+ * rule-made answers drawn in a card's shape (leg c2cb). `help` is a help-set
+ * entry or the tuning line (`help.ts`), `search` a passage of the player's
+ * Paths (`search.ts`).
+ */
+export type AnswerShape = "help" | "search";
 
 /** The Path, plan, theory and term cards (leg c2b2a, `pathCards.ts`). */
 export type PathCardShape =

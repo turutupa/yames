@@ -59,13 +59,14 @@ describe("the panel", () => {
     expect(screen.getByTestId("ask-context")).toHaveTextContent(`${t("ask.lookingAt")} Today`);
     const foot = panel.querySelector(".ask-foot")!;
     expect(foot.querySelector(".coach-model-button")).not.toBeNull();
-    expect(foot.querySelector(".ask-footer")).toHaveTextContent(t("ask.footer.local"));
+    expect(foot.querySelector(".ask-footer")).toHaveTextContent(t("help.ui.footer.local"));
   });
 
-  it("says honestly what it can do with no model, and fakes no answer", () => {
+  it("says honestly what it can do with no model (the rules and search answer, leg c2cb), and fakes no answer", () => {
     openAsk();
     render(<AskPanel lookingAt={null} onClose={() => {}} />);
-    expect(screen.getByTestId("ask-empty")).toHaveTextContent(t("ask.empty.noModel"));
+    expect(screen.getByTestId("ask-empty")).toHaveTextContent(t("help.ui.empty.local"));
+    expect(screen.getByTestId("ask-input")).toHaveAttribute("placeholder", t("help.ui.placeholder"));
   });
 
   it("holds no solid button", () => {
@@ -189,10 +190,10 @@ describe("the panel", () => {
     openAsk();
     const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
     const chips = within(screen.getByTestId("ask-empty")).getAllByRole("button");
-    expect(chips.map((c) => c.textContent)).toEqual(["Slower", "Faster", "Two clicks a beat", "Go to Today"]);
+    // The help set's chip first (a card chip, leg c2cb), then the tools' in the room left of four.
+    expect(chips.map((c) => c.textContent)).toEqual([`?${t("help.ui.chip")}`, "Slower", "Faster", "Two clicks a beat"]);
     act(() => fireEvent.click(chips[3]));
-    expect(host.where().view).toBe("today");
-    expect(screen.getByTestId("ask-receipt")).toHaveTextContent("Opened Today");
+    expect(screen.getByTestId("ask-receipt")).toBeInTheDocument();
     // The thread has turns now: the chips sit above the text box, once.
     expect(container.querySelectorAll("[data-testid=ask-tool-chips]").length).toBe(1);
     expect(container.querySelector(".ask-chip-row [data-testid=ask-tool-chips]")).not.toBeNull();
@@ -280,7 +281,7 @@ describe("answering", () => {
     await answerAsk("why?", t, () => "ctx");
     expect(getAskState().turns.map((x) => [x.kind, x.text])).toEqual([
       ["user", "why?"],
-      ["app", t("ask.reply.noModel")],
+      ["app", t("help.ui.reply.local")],
     ]);
     expect(mockInvoke.mock.calls.some(([cmd]) => cmd === "coach_generate")).toBe(false);
   });

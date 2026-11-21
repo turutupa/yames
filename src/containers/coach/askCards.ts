@@ -14,6 +14,7 @@
  */
 import type { FactCard, CardShape } from "../../coach/ask/cards";
 import { isCard, lastTakeHere, ungradedPlayer } from "../../coach/ask/cards";
+import { explainScreen, helpCard } from "../../coach/ask/help";
 import { findCard, runFactCard } from "../../coach/ask/intents";
 import { matchCard, type CardCall } from "../../coach/ask/match";
 import type { CoachContext } from "../../coach/context";
@@ -30,6 +31,11 @@ const NO_TAKE_KEY = "ask.card.notNow.noTake";
 /** The card for a call where the player is now, or the one line that says why there is none (a card the model chose too, leg c3b2a). */
 export function cardBodyFor(call: ToolCall): CardBody {
   const ctx = askToolContext();
+  // The empty state's "What is this screen for?" (leg c2cb): the help set's entry, as `explain_screen` answers it.
+  if (call.tool === "explain_screen" && ctx) {
+    const out = explainScreen(ctx);
+    return out.ok ? helpCard(out.receipt) : { shape: null, line: out.line };
+  }
   const out = ctx ? runFactCard(call, ctx) : { line: { key: NO_TAKE_KEY, values: {} } };
   return isCard(out) ? out : { shape: null, line: out.line };
 }

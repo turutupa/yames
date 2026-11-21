@@ -46,12 +46,13 @@ export async function answerAsk(question: string, t: TFunction, contextText: () 
   const { turns: before, about } = getAskState();
   appendAskTurn({ id: askTurnId(), kind: "user", text: q });
   if (IS_MOBILE) {
-    appendAskTurn({ id: askTurnId(), kind: "app", text: t("ask.reply.phone") });
+    // The rules and search came first (leg c2cb): this is what is left when none of them answered.
+    appendAskTurn({ id: askTurnId(), kind: "app", text: t("help.ui.reply.phone") });
     return;
   }
   const model = getCoachModelSnapshot().state;
   if (model !== "ready") {
-    const key = model === "loading" || model === "waiting" ? "ask.reply.gettingReady" : "ask.reply.noModel";
+    const key = model === "loading" || model === "waiting" ? "ask.reply.gettingReady" : "help.ui.reply.local";
     appendAskTurn({ id: askTurnId(), kind: "app", text: t(key) });
     return;
   }

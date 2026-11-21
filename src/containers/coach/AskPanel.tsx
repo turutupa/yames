@@ -13,7 +13,8 @@ import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { modelTurnWanted, stopModelTurn } from "./askModelTurn";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
-import { askCardChips, askUngradedHere, typedCardAnswerer, withinChipCap } from "./askCards";
+import { askCardChips, askUngradedHere, withinChipCap } from "./askCards";
+import { typedRuleAnswerer } from "./askAnswerers";
 import { askToolChips, noKeyRepeat, onePress, pressChip } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
@@ -184,9 +185,10 @@ function AskConversation({
     if (el) el.scrollTop = el.scrollHeight;
   }, [turns]);
 
-  // Typed English reaches the fact cards after the router (leg c2b1b): plugged into
-  // the send path's slot while the panel is mounted, unplugged when it closes.
-  useEffect(() => setAskNextAnswerer(typedCardAnswerer(() => i18n.language)), [i18n]);
+  // After the router, the rule-made answerers (legs c2b1b, c2cb): tuning, the fact cards,
+  // the help set, then search of the player's Paths. Plugged into the send path's slot
+  // while the panel is mounted, unplugged when it closes.
+  useEffect(() => setAskNextAnswerer(typedRuleAnswerer(() => i18n.language)), [i18n]);
   // The panel going stops the model's turn in flight (leg c3b2a); its answer is dropped.
   useEffect(() => () => stopModelTurn(), []);
 
@@ -234,13 +236,17 @@ function AskConversation({
     setDraft("");
   };
 
+  // Without a model, typed questions are still answered by the rules and search (leg c2cb, DESIGN 5.5).
   const emptyKey = IS_MOBILE
-    ? "ask.empty.phone"
+    ? "help.ui.empty.phone"
     : model === "ready"
       ? "ask.empty.model"
       : model === "loading" || model === "waiting"
         ? "ask.empty.loading"
-        : "ask.empty.noModel";
+        : "help.ui.empty.local";
+  // "About your last Take:" heads the card chips only when one is about a Take, not "What is this screen for?" alone.
+  const takeCards = cards.some((c) => c.shape !== "help");
+  const placeholder = !IS_MOBILE && model === "ready" ? t("ask.placeholder") : t("help.ui.placeholder");
 
   return (
     <>
@@ -250,7 +256,7 @@ function AskConversation({
             <p className="ask-empty-title">{t("ask.empty.title")}</p>
             <p className="ask-empty-text">{t(emptyKey)}</p>
             {ungraded && <p className="ask-empty-text" data-testid="ask-card-ungraded">{t("ask.card.canAnswer.ungraded")}</p>}
-            {cardRow && <p className="ask-empty-text ask-empty-tools">{t("ask.card.chips")}</p>}
+            {cardRow && takeCards && <p className="ask-empty-text ask-empty-tools">{t("ask.card.chips")}</p>}
             {cardRow}
             {chipRow && <p className="ask-empty-text ask-empty-tools">{t("coachTools.ui.chipsIntro")}</p>}
             {chipRow}
@@ -271,8 +277,8 @@ function AskConversation({
           className="ask-input"
           rows={1}
           value={draft}
-          placeholder={t("ask.placeholder")}
-          aria-label={t("ask.placeholder")}
+          placeholder={placeholder}
+          aria-label={placeholder}
           onChange={(e) => setDraft(e.target.value)}
           onFocus={() => onTyping(true)}
           onBlur={() => onTyping(false)}
@@ -349,12 +355,12 @@ function AskFooter({ tab }: { tab: AskTab }) {
     tab === "notebook"
       ? "notebook.ui.footer"
       : IS_MOBILE
-        ? "ask.footer.phone"
+        ? "help.ui.footer.phone"
         : model === "ready"
           ? modelTurnWanted(i18n.language)
             ? "ask.footer.choice"
-            : "ask.footer.model"
-          : "ask.footer.local";
+            : "help.ui.footer.model"
+          : "help.ui.footer.local";
   return <p className="ask-footer">{t(key)}</p>;
 }
 

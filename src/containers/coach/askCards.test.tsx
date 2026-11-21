@@ -38,11 +38,11 @@ describe("a chip asks and answers in the thread", () => {
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
     const row = screen.getByTestId("ask-card-chips");
-    // Below the pass mark (c2b1b): where, how far the pass mark is, early or late.
+    // Below the pass mark (c2b1b): where, how far the pass mark is; then the help set's chip (c2cb).
     expect(within(row).getAllByRole("button").map((b) => b.textContent)).toEqual([
       `?${t("ask.card.chip.where")}`,
       `?${t("ask.card.chip.distance")}`,
-      `?${t("ask.card.chip.lean")}`,
+      `?${t("help.ui.chip")}`,
     ]);
     fireEvent.click(screen.getByTestId("ask-card-chip-where_slipped"), { detail: 1 });
     const turns = getAskState().turns;
@@ -81,26 +81,33 @@ describe("a chip asks and answers in the thread", () => {
     __setAskToolsForTests(fakeHost(), below().ctx);
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
-    const chip = screen.getByTestId("ask-card-chip-early_or_late");
+    const chip = screen.getByTestId("ask-card-chip-pass_mark_distance");
     fireEvent.click(chip, { detail: 1 });
     fireEvent.click(chip, { detail: 2 });
     expect(getAskState().turns.filter((x) => x.kind === "card")).toHaveLength(1);
   });
 
-  it("an ungraded player: no card chip, and one line saying what is not there to answer from", () => {
+  it("an ungraded player: no card chip (only 'What is this screen for?'), and one line saying what is not there to answer from", () => {
     __setAskToolsForTests(fakeHost(), fixture({ slipped: [0, 4], failOn: "timingEvenness" }, { grading: "off" }).ctx);
     openAsk();
     render(<AskPanel lookingAt={{ text: "Your Session", key: "session|tune" }} onClose={() => {}} />);
-    expect(screen.queryByTestId("ask-card-chips")).toBeNull();
+    expect(within(screen.getByTestId("ask-card-chips")).getAllByRole("button").map((b) => b.getAttribute("data-chip"))).toEqual(["help"]);
+    expect(screen.queryByText(t("ask.card.chips"))).toBeNull();
     expect(screen.getByTestId("ask-card-ungraded")).toHaveTextContent(t("ask.card.canAnswer.ungraded"));
   });
 
-  it("off a Session, no card and no ungraded line", () => {
+  it("off a Session, no card and no ungraded line; 'What is this screen for?' answers with Today's help entry (c2cb)", () => {
     __setAskToolsForTests(fakeHost(), toolCtx({ screen: "today" }));
     openAsk();
     render(<AskPanel lookingAt={{ text: "Today", key: "today" }} onClose={() => {}} />);
-    expect(screen.queryByTestId("ask-card-chips")).toBeNull();
+    expect(within(screen.getByTestId("ask-card-chips")).getAllByRole("button").map((b) => b.getAttribute("data-chip"))).toEqual(["help"]);
+    expect(screen.queryByText(t("ask.card.chips"))).toBeNull();
     expect(screen.queryByTestId("ask-card-ungraded")).toBeNull();
+    fireEvent.click(screen.getByTestId("ask-card-chip-help"), { detail: 1 });
+    const card = screen.getByTestId("ask-card");
+    expect(card).toHaveAttribute("data-card", "help");
+    expect(card).toHaveTextContent(t("help.entry.screen.today").slice(0, 40));
+    expect(card).toHaveTextContent(t("coachBlocks.source.app"));
   });
 });
 
