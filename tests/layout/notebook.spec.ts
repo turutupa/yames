@@ -57,16 +57,27 @@ for (const theme of THEMES) {
       await holds(page, `${theme} 1440`);
     });
 
-    test("Leave out: the line goes, the Undo is offered, and the Undo brings it back", async ({ page }) => {
+    test("Leave out: the line goes, its Undo is offered where it was (nothing moves), and the Undo brings it back", async ({ page }) => {
       await openShot(page, "notebook", { width: 1440, height: 900 }, theme);
       await openNotebook(page);
-      await page.locator('[data-testid="nb-leave-out"]').first().click();
-      await expect(page.locator(".nb-item[data-line]")).toHaveCount(1);
-      await expect(page.locator('[data-testid="nb-undo"]')).toBeVisible();
+      const leave = page.locator('[data-testid="nb-leave-out"]').first();
+      await expect(leave).toHaveText("Leave out");
+      const pressed = (await leave.boundingBox())!;
+      const next = (await page.locator(".nb-item[data-line]").nth(1).boundingBox())!;
+      await leave.click();
+      await expect(page.locator('[data-testid="nb-leave-out"]')).toHaveCount(1);
+      const undo = page.locator('[data-testid="nb-undo"]');
+      await expect(undo).toBeVisible();
+      // c4a2b, L5: the Undo under the pointer, the next line where it was.
+      const u = (await undo.boundingBox())!;
+      expect(Math.abs(u.y + u.height / 2 - (pressed.y + pressed.height / 2)), "the Undo where Leave out was").toBeLessThan(2);
+      expect(u.x + u.width, "the Undo where Leave out was").toBeGreaterThan(pressed.x);
+      const after = (await page.locator(".nb-item[data-line]").nth(1).boundingBox())!;
+      expect(Math.abs(after.y - next.y), "the next line has not moved").toBeLessThan(1);
       await shot(page, `${theme}-left-out`);
       await holds(page, `${theme} left out`);
-      await page.locator('[data-testid="nb-undo"]').click();
-      await expect(page.locator(".nb-item[data-line]")).toHaveCount(2);
+      await undo.click();
+      await expect(page.locator('[data-testid="nb-leave-out"]')).toHaveCount(2);
     });
 
     test("the empty state, and the goal question a week in", async ({ page }) => {
@@ -104,7 +115,9 @@ test.describe("The Notebook on a phone", () => {
           expect(r.height, `${sel}: 44 px`).toBeGreaterThanOrEqual(44);
         }
       }
-      await expect(page.locator(".sheet--ask .nb-leave-label").first()).toBeVisible();
+      // The words, never a bin: nothing is deleted (c4a2b).
+      await expect(page.locator('.sheet--ask [data-testid="nb-leave-out"]').first()).toHaveText("Leave out");
+      expect(await page.locator('.sheet--ask [data-testid="nb-leave-out"] svg').count()).toBe(0);
       await noSidewaysScroll(page, "phone notebook");
       await shot(page, `${theme}-phone`);
     });

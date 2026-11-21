@@ -162,6 +162,21 @@ export type NotebookSource = {
   sessionStartedAt: number | null;
 };
 
+/**
+ * A question typed and not sent, kept while the Notebook's tab shows (c4a2b,
+ * L4): the Ask tab's box unmounts there and reads it back when it returns.
+ * Memory only, never stored, and no listener hears it (no render per key).
+ */
+let keptDraft = "";
+
+export function askDraft(): string {
+  return keptDraft;
+}
+
+export function keepAskDraft(text: string): void {
+  keptDraft = text;
+}
+
 let notebookSource: (() => NotebookSource) | null = null;
 
 /** The host (`useAskHost`) says where the Takes are; read at the tab's open, never per beat. */
@@ -310,5 +325,6 @@ export function __resetAskStoreForTests(): void {
   held = [];
   nextId = 0;
   notebookSource = null;
+  keptDraft = "";
   for (const l of [...listeners]) l();
 }

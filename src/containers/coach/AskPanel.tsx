@@ -7,7 +7,7 @@ import { useCoachModel } from "../../hooks/useCoachModel";
 import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
-import { consumeAskFocus, noteAskScreen, setAskTab, useAskState, type AskTab, type AskTurn } from "./askStore";
+import { askDraft, consumeAskFocus, keepAskDraft, noteAskScreen, setAskTab, useAskState, type AskTab, type AskTurn } from "./askStore";
 import { Notebook } from "./Notebook";
 import { answerTyped } from "./askTyped";
 import { AskToolTurn } from "./AskToolTurn";
@@ -173,7 +173,9 @@ function AskConversation({
 }) {
   const { t, i18n } = useTranslation();
   const model = useCoachModel().state;
-  const [draft, setDraft] = useState("");
+  // A question typed and not sent survives a visit to the Notebook's tab (c4a2b, L4).
+  const [draft, setDraft] = useState(askDraft);
+  useEffect(() => keepAskDraft(draft), [draft]);
   const threadRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

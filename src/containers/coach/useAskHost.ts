@@ -111,11 +111,13 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
   // The tools read the same context, at each press (leg t1b1).
   useEffect(() => registerAskToolContext(() => buildCoachContext(sources)), [sources]);
   // The Notebook reads the stored Takes when its tab opens (leg c4a2), never per beat.
+  // A Session that runs is a Session on every view (c4a2b, M1): the run's phase
+  // alone says so, as MainWindow's `holdNudges` and the tool host's `sessionActive` read it.
   useEffect(
     () =>
       registerNotebookSource(() => {
         const s = latest.current.session;
-        const inRun = latest.current.view === "session" && s.run.phase !== "idle";
+        const inRun = s.run.phase !== "idle";
         return { rows: s.progress.takes, paths: s.paths, sessionStartedAt: inRun ? s.run.startedAt : null };
       }),
     [],

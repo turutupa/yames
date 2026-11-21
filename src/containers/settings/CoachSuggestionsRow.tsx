@@ -9,10 +9,11 @@
  * being read neither button shows as chosen; when it could not be read the
  * row says so.
  */
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import {
   coachKeyStates,
+  coachPressSettled,
   coachStored,
   coachStoredLoaded,
   loadCoachStored,
@@ -32,6 +33,22 @@ export function CoachSuggestionsRow() {
     if (!coachStoredLoaded()) void loadCoachStored().catch(() => {});
   }, []);
 
+  // A press whose save did not land says so (c4a2b, L2); the next press that lands clears it.
+  const [notSaved, setNotSaved] = useState(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  const choose = (value: Suggestions) => {
+    saveSuggestions(value);
+    void coachPressSettled("suggestions").then((end) => {
+      if (mounted.current) setNotSaved(end === "notSaved");
+    });
+  };
+
   const known = states.suggestions === "read";
   return (
     <div className="setting-row" data-testid="coach-suggestions-row">
@@ -43,6 +60,11 @@ export function CoachSuggestionsRow() {
             {t("notebook.suggestions.unreadable")}
           </span>
         )}
+        {notSaved && (
+          <span className="setting-hint" style={{ marginTop: 4 }} role="status" data-testid="coach-suggestions-not-saved">
+            {t("notebook.ui.notSaved")}
+          </span>
+        )}
       </div>
       <div className="toggle-group">
         {CHOICES.map((value) => (
@@ -52,7 +74,7 @@ export function CoachSuggestionsRow() {
             className={`toggle-btn ${known && stored.suggestions === value ? "active" : ""}`}
             aria-pressed={known && stored.suggestions === value}
             data-testid={`coach-suggestions-${value}`}
-            onClick={() => saveSuggestions(value)}
+            onClick={() => choose(value)}
           >
             {t(`notebook.suggestions.${value}`)}
           </button>

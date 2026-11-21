@@ -334,9 +334,28 @@ export function runCoachUndo(
       return refuse("refused", "coachTools.why.refused.proposal", {}, { detail: "the undo was issued on another screen" });
     }
   }
-  const outcome = runIssuedUndo(issuedUndo, host, ctx, registry);
+  undoDepth += 1;
+  let outcome: ToolResult;
+  try {
+    outcome = runIssuedUndo(issuedUndo, host, ctx, registry);
+  } finally {
+    undoDepth -= 1;
+  }
   if (!outcome.ok && outcome.why === "notNow") undos.set(issuedUndo, place);
   return outcome;
+}
+
+/** Non-zero only while an issued Undo runs (synchronously): see `coachUndoRunning`. */
+let undoDepth = 0;
+
+/**
+ * Is the host being called by a receipt's Undo, not by a new proposal? The
+ * goal's store puts a replaced goal back with its own date only then (c4a2b,
+ * L3); the same words typed again are dated the day they were typed. App-side
+ * only: no model-visible argument carries it.
+ */
+export function coachUndoRunning(): boolean {
+  return undoDepth > 0;
 }
 
 function runIssuedUndo(undo: ToolCall, host: CoachToolHost, ctx: CoachContext, registry: readonly CoachTool[]): ToolResult {

@@ -331,6 +331,21 @@
   background: transparent;
   color: var(--text-secondary);
   font: 600 13px/1 var(--font-body, inherit);
+  white-space: nowrap;
+}
+/* A line just left out: the same place and height, its Undo where Leave out was (c4a2b, L5). */
+.nb-item-left {
+  align-items: center;
+  border-style: dashed;
+  background: transparent;
+}
+.nb-item-left .nb-left-text {
+  grid-column: 1;
+  color: var(--text-secondary);
+}
+.nb-item .nb-said {
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
 }
 @media (hover: hover) {
   .nb-leave:hover {

@@ -33,6 +33,7 @@ import {
   type SafeSettingOption,
   type SafeSettingValue,
 } from "../../coach/tools/host";
+import { coachUndoRunning } from "../../coach/tools/run";
 import {
   coachGoalKnown,
   coachStored,
@@ -329,7 +330,8 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
     goal: () => (coachGoalKnown() ? (coachStored().goal?.text ?? null) : "notWiredYet"),
     setGoal: (text) => {
       if (!coachGoalKnown()) return "notWiredYet";
-      if (!saveGoal(text, Date.now())) throw new Error("not a goal the store keeps");
+      // Only a receipt's Undo puts a replaced goal back with its own date (c4a2b, L3).
+      if (!saveGoal(text, Date.now(), { restore: coachUndoRunning() })) throw new Error("not a goal the store keeps");
       return "done";
     },
     view: () => latest.current.view,

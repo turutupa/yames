@@ -4,6 +4,7 @@
  * yet), Leave out and its Undo, the goal question and its "Not now", and the
  * goal set through `set_goal`. Nothing is written without a press.
  */
+import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { PathTakeRow } from "../../ipc";
@@ -15,7 +16,20 @@ const store = vi.hoisted(() => ({
   fail: new Set<string>(),
   hold: false,
   waiting: [] as Array<() => void>,
+  /** Keys whose save fails. */
+  failSave: new Set<string>(),
+  /** The store answers a press "notRead", as for a key it could not read. */
+  refuse: false,
 }));
+
+vi.mock("../../coach/store", async (importOriginal) => {
+  const real = await importOriginal<typeof import("../../coach/store")>();
+  return {
+    ...real,
+    saveSuppressed: (id: string, now: number) => (store.refuse ? "notRead" : real.saveSuppressed(id, now)),
+    saveCardDismissed: (kind: string, now: number) => (store.refuse ? "notRead" : real.saveCardDismissed(kind, now)),
+  };
+});
 
 vi.mock("../../ipc", async (importOriginal) => {
   const real = await importOriginal<typeof import("../../ipc")>();
@@ -30,6 +44,7 @@ vi.mock("../../ipc", async (importOriginal) => {
       return new Promise((resolve, reject) => store.waiting.push(() => read(key).then(resolve, reject)));
     }),
     storeSave: vi.fn(async (key: string, value: unknown) => {
+      if (store.failSave.has(key)) throw new Error("unwritable");
       store.saves.push([key, value]);
       store.disk.set(key, value);
     }),
@@ -80,6 +95,26 @@ function tempoHistory(extraAgo = 0): PathTakeRow[] {
   ];
 }
 
+/** Seven Takes whose last bar sat late: a second noticed line (`lean:last:late`). */
+function leanHistory(): PathTakeRow[] {
+  return [0, 1, 2, 3, 4, 5, 6].map((i) => {
+    n += 1;
+    return {
+      id: `t${n}`,
+      pathId: "fx",
+      stepId: "s1",
+      exerciseId: "l",
+      startedAt: Date.now() - (i * DAY + 3 * HOUR),
+      bpm: 100,
+      bars: 8,
+      caught: true,
+      passed: false,
+      facts: { lean: [0, 2, -3, 25] },
+    };
+  });
+}
+const LEAN_ID = "lean:last:late";
+
 function source(rows: PathTakeRow[], sessionStartedAt: number | null = null) {
   registerNotebookSource(() => ({ rows, paths: [], sessionStartedAt }));
 }
@@ -98,6 +133,8 @@ beforeEach(() => {
   store.fail.clear();
   store.hold = false;
   store.waiting.length = 0;
+  store.failSave.clear();
+  store.refuse = false;
   resetCoachStored();
   __resetAskStoreForTests();
   __resetCoachLoaderForTests();
@@ -107,9 +144,10 @@ beforeEach(() => {
       {},
       {
         goal: () => (coachGoalKnown() ? (coachStored().goal?.text ?? null) : "notWiredYet"),
+        // As the real host (useCoachToolHost): a goal the store does not keep throws (review c4a2 L7).
         setGoal: (text: string) => {
           if (!coachGoalKnown()) return "notWiredYet";
-          saveGoal(text, Date.now());
+          if (!saveGoal(text, Date.now())) throw new Error("not a goal the store keeps");
           return "done";
         },
       },
@@ -139,6 +177,20 @@ describe("the tab strip", () => {
     expect(screen.queryByTestId("ask-input")).toBeNull();
     expect(screen.queryByTestId("ask-context")).toBeNull();
     expect(screen.getByText(t("notebook.ui.footer"))).toBeInTheDocument();
+  });
+
+  // c4a2b, L4.
+  it("a question typed and not sent is still there after a visit to the Notebook", async () => {
+    source(tempoHistory());
+    openAsk();
+    render(<AskPanel lookingAt={{ text: "Today", key: "today" }} onClose={() => {}} />);
+    fireEvent.change(screen.getByTestId("ask-input"), { target: { value: "how is my timing" } });
+    fireEvent.click(screen.getByTestId("ask-tab-notebook"));
+    await loaded();
+    expect(screen.queryByTestId("ask-input")).toBeNull();
+    fireEvent.click(screen.getByTestId("ask-tab-ask"));
+    expect(screen.getByTestId("ask-input")).toHaveValue("how is my timing");
+    expect(store.saves).toEqual([]);
   });
 
   it("arrow keys move between the tabs; a question always opens on Ask", () => {
@@ -181,32 +233,127 @@ describe("what I've noticed", () => {
     render(<Notebook />);
     await loaded();
     fireEvent.click(screen.getByTestId("nb-leave-out"));
-    expect(screen.queryByTestId("nb-noticed")).toBeNull();
+    // The line's own row says so, in its place; the line itself is gone.
+    expect(screen.queryByTestId("nb-leave-out")).toBeNull();
     expect(screen.getByTestId("nb-left-out")).toHaveTextContent(t("notebook.ui.leftOut"));
+    expect(screen.getByTestId("nb-left-out")).toHaveAttribute("data-line", LINE_ID);
     expect(store.saves).toHaveLength(1);
     expect(store.saves[0][0]).toBe("coach.suppressed");
     expect(Object.keys(store.saves[0][1] as object)).toEqual([LINE_ID]);
     expect(rows).toHaveLength(8);
 
     fireEvent.click(screen.getByTestId("nb-undo"));
-    expect(screen.getByTestId("nb-noticed")).toBeInTheDocument();
+    expect(screen.getByTestId("nb-leave-out")).toBeInTheDocument();
     expect(screen.queryByTestId("nb-left-out")).toBeNull();
     expect(store.saves).toHaveLength(2);
     expect(store.saves[1]).toEqual(["coach.suppressed", {}]);
   });
 
-  it("the Undo is offered for a few seconds, then goes; the line stays left out", async () => {
+  it("Leave out is the words, not a bin icon: nothing is deleted", async () => {
+    source(tempoHistory());
+    render(<Notebook />);
+    await loaded();
+    const button = screen.getByTestId("nb-leave-out");
+    expect(button).toHaveTextContent(t("notebook.ui.leaveOut"));
+    expect(button.querySelector("svg")).toBeNull();
+  });
+
+  it("the Undo is offered for a few seconds, then goes; the line stays left out, and expiry writes nothing", async () => {
     source(tempoHistory());
     render(<Notebook />);
     await loaded();
     vi.useFakeTimers();
     fireEvent.click(screen.getByTestId("nb-leave-out"));
     expect(screen.getByTestId("nb-undo")).toBeInTheDocument();
+    expect(store.saves).toHaveLength(1);
     act(() => {
       vi.advanceTimersByTime(LEAVE_OUT_UNDO_MS + 50);
     });
     expect(screen.queryByTestId("nb-undo")).toBeNull();
     expect(screen.queryByTestId("nb-noticed")).toBeNull();
+    expect(store.saves).toHaveLength(1);
+  });
+
+  // c4a2b, L1: main.tsx renders under StrictMode, which runs every effect's cleanup once.
+  it("under StrictMode the Undo still expires, and a failed save is still said", async () => {
+    source(tempoHistory());
+    store.failSave.add("coach.suppressed");
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      render(
+        <StrictMode>
+          <Notebook />
+        </StrictMode>,
+      );
+      await loaded();
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("nb-leave-out"));
+      });
+      await waitFor(() => expect(screen.getByTestId("nb-said-notSaved")).toHaveTextContent(t("notebook.ui.notSaved")));
+      act(() => {
+        vi.advanceTimersByTime(LEAVE_OUT_UNDO_MS + 50);
+      });
+      expect(screen.queryByTestId("nb-undo")).toBeNull();
+      // Its row has gone: the sentence stays, after the list.
+      expect(screen.getByTestId("nb-said-notSaved")).toBeInTheDocument();
+    } finally {
+      quiet.mockRestore();
+    }
+  });
+
+  // c4a2b, L5: two lines, each its own Undo, each in its own place.
+  it("a second Leave out keeps the first line's Undo, and each Undo sits where its line was", async () => {
+    source([...tempoHistory(), ...leanHistory()]);
+    render(<Notebook />);
+    await loaded();
+    const lines = () => [...screen.getByTestId("nb-noticed").querySelectorAll("li")].map((li) => li.getAttribute("data-line"));
+    const before = lines();
+    expect(before).toEqual([LINE_ID, LEAN_ID]);
+    fireEvent.click(screen.getAllByTestId("nb-leave-out")[0]);
+    fireEvent.click(screen.getAllByTestId("nb-leave-out")[0]);
+    expect(screen.getAllByTestId("nb-undo")).toHaveLength(2);
+    expect(lines()).toEqual(before);
+    // The first line's Undo still works, and brings it back where it was.
+    fireEvent.click(screen.getAllByTestId("nb-undo")[0]);
+    expect(lines()).toEqual(before);
+    expect(screen.getByTestId("nb-noticed").querySelector(`[data-line="${LINE_ID}"] [data-testid="nb-leave-out"]`)).not.toBeNull();
+    expect(screen.getAllByTestId("nb-undo")).toHaveLength(1);
+    expect(Object.keys(store.disk.get("coach.suppressed") as object)).toEqual([LEAN_ID]);
+  });
+
+  // c4a2b, L2: Undo's save is followed too.
+  it("an Undo whose save does not land says so under the line", async () => {
+    source(tempoHistory());
+    render(<Notebook />);
+    await loaded();
+    fireEvent.click(screen.getByTestId("nb-leave-out"));
+    store.failSave.add("coach.suppressed");
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("nb-undo"));
+      });
+      const said = await screen.findByTestId("nb-said-notSaved");
+      expect(said).toHaveTextContent(t("notebook.ui.notSaved"));
+      expect(said.closest("li")).toHaveAttribute("data-line", LINE_ID);
+    } finally {
+      quiet.mockRestore();
+    }
+  });
+
+  it("a Leave out on a list that could not be read says it was not left out (notRead, on screen)", async () => {
+    source(tempoHistory());
+    render(<Notebook />);
+    await loaded();
+    // The list showed; then the store refuses the press as unread (the screen cannot reach that
+    // state by itself: an unread list shows no line): the press says so and changes nothing.
+    store.refuse = true;
+    fireEvent.click(screen.getByTestId("nb-leave-out"));
+    expect(screen.getByTestId("nb-said-notRead")).toHaveTextContent(t("notebook.ui.leftOutNotRead"));
+    expect(screen.getByTestId("nb-leave-out")).toBeInTheDocument();
+    expect(screen.queryByTestId("nb-undo")).toBeNull();
+    expect(store.saves).toEqual([]);
   });
 
   it("fewer than five Takes: the first empty state, with the count so far", async () => {
@@ -311,6 +458,70 @@ describe("what you're working toward", () => {
     expect(store.saves).toHaveLength(1);
     expect(store.saves[0][0]).toBe("coach.cards");
     expect((store.saves[0][1] as Record<string, { dismissed: number }>).goal.dismissed).toBe(1);
+  });
+
+  // c4a2b, L7: Not now's two failure sentences, on screen.
+  it("Not now whose save does not land says it holds until Yames closes", async () => {
+    source(tempoHistory(3 * DAY));
+    render(
+      <StrictMode>
+        <Notebook />
+      </StrictMode>,
+    );
+    await loaded();
+    store.failSave.add("coach.cards");
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("nb-goal-not-now"));
+      });
+      expect(await screen.findByTestId("nb-not-now-notSaved")).toHaveTextContent(t("notebook.ui.notSaved"));
+    } finally {
+      quiet.mockRestore();
+    }
+  });
+
+  it("Not now refused by the store (notRead) says it was not saved, and writes nothing", async () => {
+    source(tempoHistory(3 * DAY));
+    render(<Notebook />);
+    await loaded();
+    store.refuse = true;
+    fireEvent.click(screen.getByTestId("nb-goal-not-now"));
+    expect(screen.getByTestId("nb-not-now-notRead")).toHaveTextContent(t("notebook.ui.notNowNotRead"));
+    expect(store.saves).toEqual([]);
+  });
+
+  // c4a2b, L2: the receipt never stands alone over a goal that is not on disk.
+  it("a goal whose save does not land: the receipt is followed by \"not saved\"", async () => {
+    source(tempoHistory());
+    render(<Notebook />);
+    await loaded();
+    fireEvent.click(screen.getByTestId("nb-goal-add"));
+    fireEvent.change(screen.getByTestId("nb-goal-input"), { target: { value: "Blues in A at 100" } });
+    store.failSave.add("coach.goal");
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("nb-goal-save"));
+      });
+      expect(await screen.findByTestId("nb-goal-not-saved")).toHaveTextContent(t("notebook.ui.notSaved"));
+      expect(screen.getByTestId("nb-goal-receipt")).toContainElement(screen.getByTestId("nb-goal-not-saved"));
+    } finally {
+      quiet.mockRestore();
+    }
+  });
+
+  it("a goal that is saved says nothing more than the receipt", async () => {
+    source(tempoHistory());
+    render(<Notebook />);
+    await loaded();
+    fireEvent.click(screen.getByTestId("nb-goal-add"));
+    fireEvent.change(screen.getByTestId("nb-goal-input"), { target: { value: "Blues in A at 100" } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("nb-goal-save"));
+    });
+    expect(screen.getByTestId("nb-goal-receipt")).toBeInTheDocument();
+    expect(screen.queryByTestId("nb-goal-not-saved")).toBeNull();
   });
 
   it("coach.cards could not be read: the question is not asked, and nothing is written", async () => {
