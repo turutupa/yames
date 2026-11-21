@@ -70,6 +70,7 @@
       "what1": "The coach reads your Takes and your Paths: it gives you Today's line, a note after a Take, and answers when you ask.",
       "question": "Should the coach also answer in its own words?",
       "withoutModel": "Off still gives you the line, the note, the tools and answers from your Takes and Paths.",
+      "modelBuys": "With a model, a question the app's own answers don't cover gets a reply in the model's own words, labelled as general advice. Everything measured comes from the app either way.",
       "privacy": "Everything runs on this machine. Your audio never leaves it, and release builds never record it.",
       "recommended": "Recommended",
       "off": {

@@ -285,6 +285,12 @@ describe("SettingsView on a phone", () => {
     expect(screen.getByTestId("coach-reminder-row")).toBeInTheDocument();
     expect(screen.queryByText("Download voices")).toBeNull();
     expect(screen.queryByText("Voice Name")).toBeNull();
+    // Review c6a L5: Voice and In the tools are absent from the whole page, not
+    // only from the coach section, with the rows they hold.
+    expect(document.querySelector('[data-coach-group="voice"]')).toBeNull();
+    expect(document.querySelector('[data-coach-group="tools"]')).toBeNull();
+    expect(screen.queryByText(/Remove models/)).toBeNull();
+    expect(screen.queryByText("Hear what I play")).toBeNull();
   });
 });
 

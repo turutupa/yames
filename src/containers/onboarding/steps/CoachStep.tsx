@@ -228,6 +228,14 @@ export function CoachStep(_props: WizardStepProps) {
         })}
       </div>
 
+      {/* What a download buys today (review c6a M1): with a model ready, a
+          typed question nothing in the app answers goes to it (`answerAsk`),
+          and its prose is labelled general advice; everything measured comes
+          from the app with or without one. */}
+      <p className="onboarding-coach-note" data-testid="coach-model-buys">
+        {t("onboarding.coach.modelBuys")}
+      </p>
+
       {/* Why the recommendation is what it is. Only shown when there is
           something to explain — a plain "Standard on a capable machine" needs
           no defence, but "we are not recommending the AI" always does. */}

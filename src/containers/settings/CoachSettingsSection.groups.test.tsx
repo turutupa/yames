@@ -9,7 +9,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import i18n from "../../i18n";
 import { __setModelLangsForTests } from "../../coach/ask/model";
 import { CoachSettingsSection } from "./CoachSettingsSection";
-import { answersLine } from "./CoachSettingsGroups";
+import { answersLine, modelUsable } from "./CoachSettingsGroups";
 import type { BrainTier } from "../../types";
 
 const t = i18n.t.bind(i18n);
@@ -98,15 +98,37 @@ describe("Settings → Coach's groups", () => {
 
   it("the Answers line names the languages once one is switched on, for the chosen model only", () => {
     __setModelLangsForTests({ standard: ["en", "es"], full: [] });
-    expect(answersLine("standard", "en")).toEqual({
+    expect(answersLine("standard", "en", true)).toEqual({
       key: "settings.coach.answersLangs",
       params: { langs: "English and Spanish" },
     });
-    expect(answersLine("full", "en").key).toBe("settings.coach.answersRuleMade");
-    expect(answersLine("off", "en").key).toBe("settings.coach.answersRuleMade");
+    expect(answersLine("full", "en", true).key).toBe("settings.coach.answersRuleMade");
+    expect(answersLine("off", "en", true).key).toBe("settings.coach.answersRuleMade");
+  });
+
+  // Review c6a L1: "In its own words in: …" only with a model this device can use.
+  it("with a language switched on, the line names it only while the chosen model is usable here", () => {
+    __setModelLangsForTests({ standard: ["en"], full: ["en"] });
+    for (const state of ["ready", "loading", "waiting", "onDisk"] as const) {
+      expect(modelUsable({ state }), state).toBe(true);
+      expect(answersLine("standard", "en", modelUsable({ state })).key, state).toBe("settings.coach.answersLangs");
+    }
+    for (const state of ["notDownloaded", "failed", "notOnThisDevice"] as const) {
+      expect(modelUsable({ state }), state).toBe(false);
+      expect(answersLine("standard", "en", modelUsable({ state })).key, state).toBe("settings.coach.answersRuleMade");
+    }
+    expect(modelUsable(undefined)).toBe(false);
+    expect(answersLine("full", "en", modelUsable(null)).key).toBe("settings.coach.answersRuleMade");
+  });
+
+  // Review c6a L3: "Remove models" sits in Answers and also removes the voices; its label says so.
+  it("the Remove button in Answers names the voices it also removes", () => {
+    expect(t("settings.coach.removeModels")).toBe("Remove models and voices");
+  });
+
+  it("rendered: Standard chosen with its language on but not downloaded says the coach answers from Takes and Paths", () => {
+    __setModelLangsForTests({ standard: ["en", "es"], full: [] });
     renderSection("standard");
-    expect(screen.getByTestId("coach-answers-line").textContent).toBe(
-      t("settings.coach.answersLangs", { langs: "English and Spanish" }),
-    );
+    expect(screen.getByTestId("coach-answers-line").textContent).toBe(t("settings.coach.answersRuleMade"));
   });
 });

@@ -12,6 +12,7 @@ import { brainTierLabelKey } from "../../coach/brainTiers";
 import { gbText } from "../../coach/brainDisk";
 import { modelLangs } from "../../coach/ask/model";
 import { useCoachModel } from "../../hooks/useCoachModel";
+import type { CoachModelRow, CoachModelRowState } from "../../hooks/coachLoader";
 import { rowStateText } from "../main-window/CoachModelSelector";
 import type { BrainTier, ModelTier } from "../../types";
 import { CoachSuggestionsRow } from "./CoachSuggestionsRow";
@@ -79,17 +80,31 @@ function listOf(names: readonly string[], lang: string): string {
 }
 
 /**
+ * A chosen model this device can answer with: on disk, not failed, and a build
+ * that can run one (a phone or a no-LLM build reads "not on this device").
+ * Loading and waiting count: the model is there and on its way.
+ */
+const USABLE_ROW_STATES: ReadonlySet<CoachModelRowState> = new Set(["ready", "loading", "waiting", "onDisk"]);
+
+export function modelUsable(row: Pick<CoachModelRow, "state"> | null | undefined): boolean {
+  return !!row && USABLE_ROW_STATES.has(row.state);
+}
+
+/**
  * What the Answers group says about free wording, true today: the languages
- * the chosen model answers in its own words (`MODEL_LANGS`, leg c3b2a), or,
- * with none switched on (this build) or no model chosen, that the coach
- * answers from the player's Takes and Paths. Never an empty list, never a promise.
+ * the chosen model answers in its own words (`MODEL_LANGS`, leg c3b2a), only
+ * when that model is usable on this device (`usable`, review c6a L1), or,
+ * with none switched on (this build), no model chosen, or one not downloaded,
+ * failed or not runnable here, that the coach answers from the player's Takes
+ * and Paths. Never an empty list, never a promise.
  */
 export function answersLine(
   tier: BrainTier,
   lang: string,
+  usable: boolean,
   langs: Readonly<Record<ModelTier, readonly string[]>> = modelLangs(),
 ): { key: string; params?: Record<string, string> } {
-  const on = tier === "off" ? [] : langs[tier] ?? [];
+  const on = tier === "off" || !usable ? [] : langs[tier] ?? [];
   if (on.length === 0) return { key: "settings.coach.answersRuleMade" };
   return {
     key: "settings.coach.answersLangs",
@@ -99,7 +114,8 @@ export function answersLine(
 
 export function CoachAnswersLine({ tier }: { tier: BrainTier }) {
   const { t, i18n } = useTranslation();
-  const line = answersLine(tier, i18n.language);
+  const snap = useCoachModel();
+  const line = answersLine(tier, i18n.language, modelUsable(snap.rows.find((r) => r.tier === tier)));
   return (
     <p className="setting-hint coach-answers-line" data-testid="coach-answers-line">
       {t(line.key, line.params)}

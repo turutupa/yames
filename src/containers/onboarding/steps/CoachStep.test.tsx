@@ -181,6 +181,20 @@ describe("W4 — what the screen says", () => {
     ).toBeInTheDocument();
   });
 
+  // Review c6a M1: the question stays (a loaded model does answer, in Ask, a
+  // question nothing else covers: `answerAsk`), and under the tiers one line
+  // says exactly what the download buys, labelled general advice.
+  it("says under the tiers what a model buys today: general advice for what the app does not answer", async () => {
+    await mount();
+    const buys = screen.getByTestId("coach-model-buys");
+    expect(buys).toHaveTextContent(
+      "With a model, a question the app's own answers don't cover gets a reply in the model's own words, labelled as general advice. Everything measured comes from the app either way.",
+    );
+    // After the tier cards, not above them.
+    const tiers = screen.getByTestId("coach-tiers");
+    expect(tiers.compareDocumentPosition(buys) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("offers exactly three choices", async () => {
     await mount();
     expect(within(screen.getByTestId("coach-tiers")).getAllByRole("button")).toHaveLength(3);

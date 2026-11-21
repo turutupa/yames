@@ -30,20 +30,12 @@ import {
 import { tendencies, type NoticedLine } from "../../coach/tendencies";
 import { readNotebookSource, type NotebookSource } from "../coach/askStore";
 import { onePress } from "../coach/askTools";
-import { Goal, LEAVE_OUT_UNDO_MS } from "../coach/Notebook";
+// `dayOf` never throws (review c6a H1): one formatter for both Notebooks.
+import { dayOf, Goal, LEAVE_OUT_UNDO_MS } from "../coach/Notebook";
 import { CoachGroup } from "./CoachGroup";
 import "../../styles/ask.css";
 
 const NO_SOURCE: NotebookSource = { rows: [], paths: [], sessionStartedAt: null };
-
-/** "11 Nov" in the locale's own order and month name. */
-function dayOf(ms: number, lang: string): string {
-  try {
-    return new Intl.DateTimeFormat(lang, { day: "numeric", month: "short" }).format(new Date(ms));
-  } catch {
-    return new Date(ms).toISOString().slice(0, 10);
-  }
-}
 
 /** A line just brought back: its row stays, with an Undo, for a few seconds. */
 type Back = { at: number; until: number };
@@ -118,8 +110,14 @@ export function CoachNotebookGroup() {
   };
 
   const state = states.suppressed;
-  const leftOut = Object.entries(stored.suppressed)
-    .filter(([id]) => isSuppressed(stored.suppressed, id, now) && !back[id])
+  // Only entries with a real time get "Bring back" (review c6a H1): one this
+  // build cannot read (loaded as Infinity) has no day to show, and bringing it
+  // back would not reach the disk (`mapForDisk` keeps it as stored). It is
+  // named in one plain line, with no button, and left as it is.
+  const entries = Object.entries(stored.suppressed);
+  const unreadable = entries.filter(([, at]) => !Number.isFinite(at)).length;
+  const leftOut = entries
+    .filter(([id, at]) => Number.isFinite(at) && isSuppressed(stored.suppressed, id, now) && !back[id])
     .map(([id, at]) => ({ id, at, back: false }));
   const shown = [...leftOut, ...Object.entries(back).map(([id, b]) => ({ id, at: b.at, back: true }))].sort(
     (a, b) => b.at - a.at || a.id.localeCompare(b.id),
@@ -131,7 +129,10 @@ export function CoachNotebookGroup() {
   } else if (state === "unreadable") {
     body = <p className="nb-empty" data-testid="coach-nb-unreadable">{t("notebook.ui.noticedUnreadable")}</p>;
   } else if (shown.length === 0) {
-    body = <p className="nb-empty" data-testid="coach-nb-empty">{t("settings.coach.notebook.empty")}</p>;
+    body =
+      unreadable > 0 ? null : (
+        <p className="nb-empty" data-testid="coach-nb-empty">{t("settings.coach.notebook.empty")}</p>
+      );
   } else {
     body = (
       <ul className="nb-list" data-testid="coach-nb-left-out">
@@ -173,6 +174,11 @@ export function CoachNotebookGroup() {
             {t("settings.coach.notebook.leftOutTitle")}
           </h4>
           {body}
+          {state !== "loading" && state !== "unreadable" && unreadable > 0 && (
+            <p className="nb-empty" data-testid="coach-nb-unreadable-entries">
+              {t("settings.coach.notebook.unreadableEntries")}
+            </p>
+          )}
           {notSaved && (
             <p className="nb-status" role="status" data-testid="coach-nb-not-saved">
               {t("notebook.ui.notSaved")}

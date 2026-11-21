@@ -128,7 +128,7 @@
       "removeTierLabel": "Remove {{name}}",
       "olderCopy": "An older copy of this model is also on disk · {{size}}",
       "removeOlderCopyLabel": "Remove the older copy of {{name}}",
-      "removeModels": "Remove models",
+      "removeModels": "Remove models and voices",
       "stance": "Coaching Style",
       "stanceHint": "How hard the coach is on you while you play in the tools",
       "stanceStrict": "Strict",
@@ -154,7 +154,8 @@
         "bringBack": "Bring back",
         "broughtBack": "Back in your Notebook.",
         "lineGone": "A line your recent Takes no longer show",
-        "comesBack": "A line you leave out comes back by itself after thirty days. Nothing is deleted."
+        "comesBack": "A line you leave out comes back by itself after thirty days. Nothing is deleted.",
+        "unreadableEntries": "Some lines were left out in a way this version can't read. They stay left out, as stored."
       }
     },
     "general": {

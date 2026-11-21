@@ -28,8 +28,9 @@ vi.mock("../../ipc", async (importOriginal) => {
 import i18n from "../../i18n";
 import { coachStored, loadCoachStored, resetCoachStored } from "../../coach/store";
 import { __resetAskStoreForTests, registerNotebookSource } from "../coach/askStore";
-import { LEAVE_OUT_UNDO_MS } from "../coach/Notebook";
+import { dayOf, LEAVE_OUT_UNDO_MS } from "../coach/Notebook";
 import { CoachNotebookGroup } from "./CoachNotebookGroup";
+import { CoachSettingsSection } from "./CoachSettingsSection";
 
 const t = i18n.t.bind(i18n);
 const DAY = 86_400_000;
@@ -150,5 +151,85 @@ describe("Settings → Coach → Notebook", () => {
     expect(screen.getByTestId("nb-goal-none")).toBeTruthy();
     expect(screen.queryByTestId("nb-goal-offer")).toBeNull();
     expect(store.saves).toEqual([]);
+  });
+
+  // Review c6a H1: an entry this build cannot read loads as Infinity; its day
+  // threw a RangeError in the render and blanked the app.
+  it("entries it cannot read: no row and no Bring back for them, one plain line, nothing written", async () => {
+    store.disk.set("coach.suppressed", { x: "bad", y: null });
+    await mount();
+    expect(screen.queryByTestId("coach-nb-bring-back")).toBeNull();
+    expect(screen.queryByTestId("coach-nb-empty")).toBeNull();
+    expect(screen.getByTestId("coach-nb-unreadable-entries").textContent).toBe(
+      t("settings.coach.notebook.unreadableEntries"),
+    );
+    expect(store.saves).toEqual([]);
+    expect(store.disk.get("coach.suppressed")).toEqual({ x: "bad", y: null });
+  });
+
+  it("a readable entry beside unreadable ones keeps its row and its day", async () => {
+    const at = Date.now() - 2 * DAY;
+    store.disk.set("coach.suppressed", { [LEAN_ID]: at, x: "bad", y: -1 });
+    await mount();
+    expect(screen.getAllByTestId("coach-nb-bring-back")).toHaveLength(1);
+    expect(screen.getByTestId("coach-nb-unreadable-entries")).toBeTruthy();
+    expect(store.saves).toEqual([]);
+  });
+
+  it("a stored goal whose day is past what a date holds shows undated, and nothing throws", async () => {
+    store.disk.set("coach.goal", { text: "Play Blackbird at 90", at: 1e20 });
+    await mount();
+    expect(screen.getByTestId("nb-goal").textContent).toContain("Play Blackbird at 90");
+    expect(screen.getByTestId("nb-goal").textContent).toContain(t("notebook.ui.goalSaidUndated"));
+  });
+
+  it("renders the whole of Settings → Coach with unreadable entries seeded", async () => {
+    store.disk.set("coach.suppressed", { x: "bad", y: null });
+    render(
+      <CoachSettingsSection
+        coachBrainTier="off"
+        setCoachBrainTier={vi.fn()}
+        coachVoiceMode="silent"
+        setCoachVoiceMode={vi.fn()}
+        coachVoiceName="lessac"
+        setCoachVoiceName={vi.fn()}
+        coachVerbosity="default"
+        setCoachVerbosity={vi.fn()}
+        coachMode="default"
+        setCoachMode={vi.fn()}
+        coachStance="strict"
+        setCoachStance={vi.fn()}
+        modelStatus={null}
+        setModelStatus={vi.fn()}
+        modelDownloading={false}
+        studioAvailable
+        standardAvailable
+        brainUpdateAvailable={false}
+        availableVoices={[]}
+        voiceDiagnostics={[]}
+        jamCues={false}
+        setJamCues={vi.fn()}
+        jamHear={false}
+        setJamHear={vi.fn()}
+        onStartDownload={vi.fn()}
+        onRequestDownload={vi.fn()}
+      />,
+    );
+    await act(async () => {
+      await loadCoachStored();
+    });
+    expect(document.querySelector('#settings-coach [data-coach-group="notebook"]')).toBeTruthy();
+    expect(screen.getByTestId("coach-nb-unreadable-entries")).toBeTruthy();
+    expect(screen.queryByTestId("coach-nb-bring-back")).toBeNull();
+    expect(store.saves.filter(([k]) => k === "coach.suppressed")).toEqual([]);
+  });
+});
+
+describe("dayOf (both Notebooks)", () => {
+  it("never throws: Infinity, NaN and a time past a Date's range give an empty day", () => {
+    expect(dayOf(Number.POSITIVE_INFINITY, "en")).toBe("");
+    expect(dayOf(Number.NaN, "en")).toBe("");
+    expect(dayOf(1e20, "en")).toBe("");
+    expect(dayOf(Date.UTC(2026, 10, 11, 12), "en")).toMatch(/11/);
   });
 });
