@@ -79,4 +79,7 @@ if [ ! -e /tmp/yames-dgx-full ]; then
   fi
 fi
 
-exec "$@"
+# Evenings and weekends: commands run side by side, but under a shared hold on
+# the same lock, so the orchestrator can take it alone (flock -x) for a
+# click-jitter probe run, which needs a machine with nothing else on it.
+exec flock -s /tmp/coach-heavy.lock "$@"
