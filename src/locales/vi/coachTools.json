@@ -32,10 +32,10 @@
       "clickSubdivision": "Số tiếng click mỗi phách: {{to}}",
       "setSetting": "{{key}}: {{to}}",
       "setGoal": "Đã giữ mục tiêu: “{{to}}”",
-      "makeExercise": "Added {{what}} to My exercises.",
-      "makeExerciseAdding": "Adding {{what}} to My exercises…",
-      "undoMakeExercise": "Taken back out of My exercises.",
-      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
+      "makeExercise": "Đã thêm {{what}} vào Bài của tôi.",
+      "makeExerciseAdding": "Đang thêm {{what}} vào Bài của tôi…",
+      "undoMakeExercise": "Đã gỡ khỏi Bài của tôi.",
+      "undoMakeExerciseDoing": "Đang gỡ khỏi Bài của tôi…"
     },
     "propose": {
       "goTo": "Mở {{screen}}?",
@@ -67,8 +67,8 @@
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Giữ làm mục tiêu của bạn: “{{to}}”",
       "setGoalFrom": "Đổi mục tiêu của bạn từ “{{from}}” thành “{{to}}”",
-      "makeExercise": "Add it to My exercises",
-      "undoMakeExercise": "Take it back out of My exercises"
+      "makeExercise": "Thêm vào Bài của tôi",
+      "undoMakeExercise": "Gỡ khỏi Bài của tôi"
     },
     "stops": {
       "click": "Tiếng click dừng.",
@@ -127,7 +127,7 @@
       "go": "Đi",
       "open": "Mở",
       "loop": "Lặp lại",
-      "add": "Add it"
+      "add": "Thêm"
     },
     "why": {
       "which": "Cái nào?",
@@ -190,34 +190,34 @@
       },
       "failed": "Không được, và chưa có gì bị thay đổi.",
       "make": {
-        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
-        "root": "Say its root too: for example “A minor pentatonic”.",
-        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
-        "needScale": "Say which scale: for example “A minor pentatonic”.",
-        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
-        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
-        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
-        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
-        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
-        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
-        "tooManyNotes": "One time through needs {{count}} bar.",
-        "tooManyNotes_other": "One time through needs {{count}} bars.",
-        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
-        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
-        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
-        "unreachable": "No hand the app knows can play that fast enough to grade it.",
-        "notMade": "The app can't make that one.",
-        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
-        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
-        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
-        "already": "That one is already on My exercises.",
-        "badRecipe": "The app can't make that one.",
-        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
-        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "what": "Hãy nói cần tạo gì: một thang âm hoặc một hợp âm, và nốt gốc của nó. Ví dụ “ngũ cung thứ A, phím 5”.",
+        "root": "Hãy nói thêm nốt gốc: ví dụ “ngũ cung thứ A”.",
+        "chord": "Hãy nói arpeggio là hợp âm nào: ví dụ “arpeggio A thứ 7”.",
+        "needScale": "Hãy nói thang âm nào: ví dụ “ngũ cung thứ A”.",
+        "scale": "Ứng dụng chưa tạo được bài ở {{scale}}. Nó tạo được ngũ cung thứ và trưởng, blues, trưởng, thứ tự nhiên và thứ hòa thanh, dorian và mixolydian.",
+        "boxScale": "Một hộp dành cho ngũ cung thứ, ngũ cung trưởng và blues, không phải {{scale}}.",
+        "threeScale": "Ba nốt mỗi dây dành cho trưởng, thứ tự nhiên, thứ hòa thanh, dorian và mixolydian, không phải {{scale}}.",
+        "mixed": "Câu đó nêu cùng lúc một thang âm và một hợp âm, hoặc một thứ mà hình thế này không nhận. Hãy chỉ nói một.",
+        "noShapeHere": "Hình thế đó không bắt đầu ở phím {{fret}}.",
+        "outOfRange": "Từ phím {{fret}}, nó chạy quá cuối cần đàn.",
+        "tooManyNotes": "Một lượt chơi cần {{count}} ô nhịp.",
+        "tooManyNotes_other": "Một lượt chơi cần {{count}} ô nhịp.",
+        "tooLong": "Một lượt chơi cần hơn {{count}} ô nhịp, mức tối đa của một bài.",
+        "tooFewNotes": "Quá ít nốt cho từng ấy ô nhịp: chúng chỉ lấp đầy {{count}} ô nhịp.",
+        "tooFewNotes_other": "Quá ít nốt cho từng ấy ô nhịp: chúng chỉ lấp đầy {{count}} ô nhịp.",
+        "unreachable": "Không bàn tay nào mà ứng dụng biết có thể chơi nhanh đến mức chấm điểm được.",
+        "notMade": "Ứng dụng không tạo được bài đó.",
+        "loading": "Ứng dụng đang chuẩn bị công cụ tạo bài. Hãy hỏi lại sau một lát.",
+        "loadFailed": "Ứng dụng không tải được công cụ tạo bài, nên chưa tạo gì cả.",
+        "full": "Bài của tôi đã đầy (50), nên bài này chưa được thêm. Hãy xóa bớt một bài ở đó trước.",
+        "already": "Bài đó đã có trong Bài của tôi.",
+        "badRecipe": "Ứng dụng không tạo được bài đó.",
+        "unreadable": "Lúc này không đọc được Bài của tôi, nên chưa thêm gì cả.",
+        "failed": "Lúc này không lưu được Bài của tôi, nên chưa thêm gì cả.",
         "undo": {
-          "gone": "It's no longer on My exercises.",
-          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
-          "failed": "My exercises couldn't be saved just now, so it's still there."
+          "gone": "Nó không còn trong Bài của tôi nữa.",
+          "unreadable": "Lúc này không đọc được Bài của tôi, nên chưa xóa gì cả.",
+          "failed": "Lúc này không lưu được Bài của tôi, nên nó vẫn còn đó."
         }
       }
     },
@@ -296,22 +296,22 @@
       }
     },
     "make": {
-      "source": "Worked out by the app",
-      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
-      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
-      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
-      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
-      "openPaths": "Open Paths",
-      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "source": "Do ứng dụng tính ra",
+      "graded": "Bắt đầu ở {{bpm}} BPM. Nhịp và các nốt nghe được có thể được chấm điểm; phần còn lại là việc của bạn.",
+      "startsOn": "Bắt đầu ở {{note}}: dây {{string}}, phím {{fret}}.",
+      "startsOnString": "Bắt đầu ở dây {{string}}, phím {{fret}}.",
+      "notesLabel": "{{n}} nốt, phím {{from}} đến {{to}}",
+      "openPaths": "Mở Lộ trình",
+      "undoLeft": "Hoàn tác đã hết hiệu lực khi bạn rời màn hình nơi bài này được thêm. Để gỡ bài này ra, hãy dùng Xóa trong Bài của tôi, ở Lộ trình.",
       "chip": {
-        "fret": "Fret {{fret}}",
-        "bars": "{{count}} bar",
-        "bars_other": "{{count}} bars",
-        "quarters": "Quarter notes instead",
-        "eighths": "Eighths instead",
-        "eighthTriplets": "Triplets instead",
-        "sixteenths": "Sixteenths instead",
-        "nextPosition": "Next position"
+        "fret": "Phím {{fret}}",
+        "bars": "{{count}} ô nhịp",
+        "bars_other": "{{count}} ô nhịp",
+        "quarters": "Đổi sang nốt đen",
+        "eighths": "Đổi sang nốt móc đơn",
+        "eighthTriplets": "Đổi sang nốt chùm ba",
+        "sixteenths": "Đổi sang nốt móc kép",
+        "nextPosition": "Vị trí kế tiếp"
       }
     }
   }

@@ -100,7 +100,7 @@
     "naturalMinor": ["thứ", "thứ tự nhiên", "thang thứ", "âm giai thứ", "aeolian"],
     "dorian": ["dorian"],
     "mixolydian": ["mixolydian"],
-    "minorPentatonic": ["ngũ cung thứ", "pentatonic thứ", "ngũ cung", "pentatonic"],
+    "minorPentatonic": ["ngũ cung thứ", "pentatonic thứ", "pentatonic"],
     "majorPentatonic": ["ngũ cung trưởng", "pentatonic trưởng"],
     "blues": ["blues", "blues thứ"],
     "harmonicMinor": ["thứ hòa thanh", "thứ harmonic", "harmonic minor"],
@@ -152,5 +152,32 @@
     "muốn", "cần", "nghĩ", "thấy", "cảm thấy", "thích", "quá", "rất", "lắm", "thật", "khá", "cũng", "còn", "với tôi", "cùng tôi"
   ],
   "polite": ["làm ơn", "vui lòng", "nhé", "nha", "ạ", "đi", "thôi", "hộ", "giúp tôi", "giúp mình", "giúp", "dùm", "giùm", "cho tôi", "cho mình", "cảm ơn", "ok", "oke", "ê", "ơi", "bây giờ", "ngay"],
-  "fillers": ["một chút", "một tí", "chút xíu", "chút", "tí", "hơi", "cái", "các", "những", "một nấc", "một bậc"]
+  "fillers": ["một chút", "một tí", "chút xíu", "chút", "tí", "hơi", "cái", "các", "những", "một nấc", "một bậc"],
+  "recipe": {
+    "shapes": {
+      "box": ["thế hộp", "hộp", "box"],
+      "threePerString": ["ba nốt mỗi dây", "3 nốt mỗi dây", "ba nốt một dây", "3 nốt một dây", "3nps"],
+      "arpeggio": ["rải hợp âm", "arpeggios", "arpeggio", "arp"],
+      "oneString": ["trên một dây", "một dây", "dây đơn"],
+      "chromatic": ["chromatic"]
+    },
+    "chords": {
+      "maj": ["trưởng"],
+      "min": ["thứ"],
+      "dim": ["giảm", "dim"],
+      "aug": ["tăng", "aug"],
+      "7": ["dominant 7", "dominant", "7"],
+      "maj7": ["trưởng 7", "maj7"],
+      "m7": ["thứ 7", "m7"],
+      "m7b5": ["nửa giảm", "m7b5"],
+      "dim7": ["giảm 7", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["nốt đen"],
+      "eighths": ["nốt móc đơn", "móc đơn"],
+      "eighthTriplets": ["liên ba móc đơn", "liên ba nốt móc đơn", "chùm ba", "liên ba"],
+      "sixteenths": ["nốt móc kép", "móc kép"]
+    },
+    "fret": ["phím thứ #", "phím số #", "phím #"]
+  }
 }

@@ -193,13 +193,15 @@ export type ResolvedBars = {
  * rule, or written by a model.
  *
  * - `measured`: from the player's own playing ("Measured · Take 2").
- * - `path`: the Path's own words ("From the Path · Step 2").
+ * - `path`: the Path's own words ("From the Path · Step 2"). `pathId`, when
+ *   the caller knows it, is which Path the Step is on: a press on the line
+ *   opens that Step (leg c2b2b), never a Step of the same number elsewhere.
  * - `app`: a rule computed it from facts, not from this playing ("Worked out by the app").
  * - `general`: a model's prose, about guitar in general ("General advice · not from your playing").
  */
 export type BlockSource =
   | { kind: "measured"; take?: number }
-  | { kind: "path"; step?: number }
+  | { kind: "path"; step?: number; pathId?: string }
   | { kind: "app" }
   | { kind: "general" };
 

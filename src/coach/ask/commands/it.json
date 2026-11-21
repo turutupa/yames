@@ -161,5 +161,37 @@
     "per me", "con me", "a me", "indietro", "sopra"
   ],
   "polite": ["per favore", "per piacere", "per cortesia", "grazie", "ok", "okay", "ehi coach", "ehi", "ora", "adesso", "solo", "dai", "pure"],
-  "fillers": ["il mio", "la mia", "i miei", "le mie", "il", "lo", "la", "le", "i", "gli", "un po'", "un", "uno", "una", "mi", "mio", "mia", "miei", "mie"]
+  "fillers": ["il mio", "la mia", "i miei", "le mie", "il", "lo", "la", "le", "i", "gli", "un po'", "un", "uno", "una", "mi", "mio", "mia", "miei", "mie", "e"],
+  "recipe": {
+    "shapes": {
+      "box": ["box", "scatola"],
+      "threePerString": ["tre note per corda", "3 note per corda", "tre per corda", "3 per corda", "3nps"],
+      "arpeggio": ["arpeggi", "arpeggio"],
+      "oneString": ["su una sola corda", "su una corda", "una sola corda", "una corda"],
+      "chromatic": ["cromatico", "ragno", "spider"]
+    },
+    "chords": {
+      "maj": ["maggiore"],
+      "min": ["minore"],
+      "dim": ["diminuito", "dim"],
+      "aug": ["aumentato", "aug"],
+      "7": ["settima di dominante", "dominante", "settima", "7"],
+      "maj7": ["maggiore 7", "settima maggiore", "maj7"],
+      "m7": ["minore 7", "settima minore", "m7"],
+      "m7b5": ["semidiminuito", "minore 7 bemolle 5", "m7b5"],
+      "dim7": ["diminuito 7", "settima diminuita", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["semiminime", "quarti"],
+      "eighths": ["crome", "croma", "ottavi"],
+      "eighthTriplets": ["terzine di crome", "terzine di ottavi", "terzine", "terzina"],
+      "sixteenths": ["semicrome", "semicroma", "sedicesimi"]
+    },
+    "fret": ["tasto #", "# tasto"],
+    "numberSuffixes": ["o"],
+    "article": {
+      "words": ["e"],
+      "rootAfter": ["in", "di", "su"]
+    }
+  }
 }

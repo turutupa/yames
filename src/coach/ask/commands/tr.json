@@ -160,5 +160,32 @@
     "açma", "gitme", "çalma", "başlatma", "başlama", "yavaşlama", "hızlanma", "yükleme", "değiştirme", "ayarlama", "yapma", "takip etme", "oluşturma", "hazırlama", "odaklanma", "gösterme", "çizme"
   ],
   "polite": ["lütfen", "tamam", "hey koç", "hey", "şimdi", "teşekkürler", "sadece"],
-  "fillers": ["bana", "benim", "bir", "biraz", "azıcık", "birazcık", "şu"]
+  "fillers": ["bana", "benim", "bir", "biraz", "azıcık", "birazcık", "şu"],
+  "recipe": {
+    "shapes": {
+      "box": ["kutu kalıbı", "kutu", "box"],
+      "threePerString": ["telde üç nota", "telde üçer nota", "telde 3 nota", "tel başına üç nota", "tel başına 3 nota", "3nps"],
+      "arpeggio": ["arpejler", "arpej", "arpeggio", "arp"],
+      "oneString": ["tek telde", "tek tel üzerinde", "tek tel"],
+      "chromatic": ["kromatik", "chromatic"]
+    },
+    "chords": {
+      "maj": ["majör"],
+      "min": ["minör"],
+      "dim": ["azaltılmış", "diminished", "dim"],
+      "aug": ["artırılmış", "augmented", "aug"],
+      "7": ["dominant 7", "dominant yedili", "dominant", "7"],
+      "maj7": ["majör 7", "majör yedili", "maj7"],
+      "m7": ["minör 7", "minör yedili", "m7"],
+      "m7b5": ["yarı azaltılmış", "m7b5"],
+      "dim7": ["azaltılmış 7", "azaltılmış yedili", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["dörtlük notalar", "dörtlük nota", "dörtlükler", "dörtlük"],
+      "eighths": ["sekizlik notalar", "sekizlik nota", "sekizlikler", "sekizlik"],
+      "eighthTriplets": ["sekizlik triole", "sekizlik üçleme", "triole", "üçlemeler", "üçleme"],
+      "sixteenths": ["onaltılık notalar", "onaltılık nota", "onaltılıklar", "onaltılık", "on altılık"]
+    },
+    "fret": ["# perde", "# perdede", "# perdeden", "perde #"]
+  }
 }

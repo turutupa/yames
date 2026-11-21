@@ -32,10 +32,10 @@
       "clickSubdivision": "한 박당 클릭: {{to}}",
       "setSetting": "{{key}}: {{to}}",
       "setGoal": "목표를 저장했어요: “{{to}}”",
-      "makeExercise": "Added {{what}} to My exercises.",
-      "makeExerciseAdding": "Adding {{what}} to My exercises…",
-      "undoMakeExercise": "Taken back out of My exercises.",
-      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
+      "makeExercise": "{{what}}을(를) 내 과제에 추가했어요.",
+      "makeExerciseAdding": "{{what}}을(를) 내 과제에 추가하는 중…",
+      "undoMakeExercise": "내 과제에서 뺐어요.",
+      "undoMakeExerciseDoing": "내 과제에서 빼는 중…"
     },
     "propose": {
       "goTo": "{{screen}}을(를) 열까요?",
@@ -67,8 +67,8 @@
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "이것을 목표로 저장: “{{to}}”",
       "setGoalFrom": "목표를 “{{from}}”에서 “{{to}}”(으)로 변경",
-      "makeExercise": "Add it to My exercises",
-      "undoMakeExercise": "Take it back out of My exercises"
+      "makeExercise": "내 과제에 추가",
+      "undoMakeExercise": "내 과제에서 빼기"
     },
     "stops": {
       "click": "클릭이 멈춰요.",
@@ -127,7 +127,7 @@
       "go": "이동",
       "open": "열기",
       "loop": "반복",
-      "add": "Add it"
+      "add": "추가"
     },
     "why": {
       "which": "어느 쪽인가요?",
@@ -190,34 +190,34 @@
       },
       "failed": "되지 않았고, 아무것도 바뀌지 않았어요.",
       "make": {
-        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
-        "root": "Say its root too: for example “A minor pentatonic”.",
-        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
-        "needScale": "Say which scale: for example “A minor pentatonic”.",
-        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
-        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
-        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
-        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
-        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
-        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
-        "tooManyNotes": "One time through needs {{count}} bar.",
-        "tooManyNotes_other": "One time through needs {{count}} bars.",
-        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
-        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
-        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
-        "unreachable": "No hand the app knows can play that fast enough to grade it.",
-        "notMade": "The app can't make that one.",
-        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
-        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
-        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
-        "already": "That one is already on My exercises.",
-        "badRecipe": "The app can't make that one.",
-        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
-        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "what": "무엇을 만들지 말해 주세요. 스케일이나 코드와 그 루트예요. 예: “A 마이너 펜타토닉, 5프렛”.",
+        "root": "루트도 말해 주세요. 예: “A 마이너 펜타토닉”.",
+        "chord": "아르페지오가 어떤 코드인지 말해 주세요. 예: “Am7 아르페지오”.",
+        "needScale": "어떤 스케일인지 말해 주세요. 예: “A 마이너 펜타토닉”.",
+        "scale": "아직 {{scale}} 과제는 만들 수 없어요. 만들 수 있는 건 마이너 펜타토닉, 메이저 펜타토닉, 블루스, 장음계, 자연 단음계, 화성 단음계, 도리안, 믹솔리디안이에요.",
+        "boxScale": "박스는 마이너 펜타토닉, 메이저 펜타토닉, 블루스용이에요. {{scale}}에는 없어요.",
+        "threeScale": "한 줄에 세 음은 장음계, 자연 단음계, 화성 단음계, 도리안, 믹솔리디안용이에요. {{scale}}에는 없어요.",
+        "mixed": "스케일과 코드를 한꺼번에 가리키거나, 그 모양으로는 만들 수 없는 것이에요. 하나만 말해 주세요.",
+        "noShapeHere": "그 모양은 {{fret}}프렛에서 시작하지 않아요.",
+        "outOfRange": "{{fret}}프렛부터는 넥의 끝을 넘어가요.",
+        "tooManyNotes": "한 번 연주하는 데 {{count}}마디가 필요해요.",
+        "tooManyNotes_other": "한 번 연주하는 데 {{count}}마디가 필요해요.",
+        "tooLong": "한 번 연주하는 데 과제가 가질 수 있는 최대인 {{count}}마디보다 많이 필요해요.",
+        "tooFewNotes": "이 마디 수에 비해 음이 너무 적어요. 음은 {{count}}마디만 채워요.",
+        "tooFewNotes_other": "이 마디 수에 비해 음이 너무 적어요. 음은 {{count}}마디만 채워요.",
+        "unreachable": "앱이 아는 어떤 손으로도 채점할 수 있을 만큼 빠르게 연주할 수 없어요.",
+        "notMade": "앱이 그건 만들 수 없어요.",
+        "loading": "앱이 과제 만들기를 준비하고 있어요. 잠시 후에 다시 물어봐 주세요.",
+        "loadFailed": "앱이 과제 만들기를 불러오지 못해서 아무것도 만들지 않았어요.",
+        "full": "내 과제가 가득 차서(50개) 이 과제는 추가하지 않았어요. 먼저 내 과제에서 하나를 삭제해 주세요.",
+        "already": "그건 이미 내 과제에 있어요.",
+        "badRecipe": "앱이 그건 만들 수 없어요.",
+        "unreadable": "내 과제를 지금 읽지 못해서 아무것도 추가하지 않았어요.",
+        "failed": "내 과제를 지금 저장하지 못해서 아무것도 추가하지 않았어요.",
         "undo": {
-          "gone": "It's no longer on My exercises.",
-          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
-          "failed": "My exercises couldn't be saved just now, so it's still there."
+          "gone": "더 이상 내 과제에 없어요.",
+          "unreadable": "내 과제를 지금 읽지 못해서 아무것도 빼지 않았어요.",
+          "failed": "내 과제를 지금 저장하지 못해서 그대로 남아 있어요."
         }
       }
     },
@@ -296,22 +296,22 @@
       }
     },
     "make": {
-      "source": "Worked out by the app",
-      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
-      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
-      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
-      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
-      "openPaths": "Open Paths",
-      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "source": "앱이 계산한 결과",
+      "graded": "{{bpm}} BPM에서 시작해요. 타이밍과 들린 음은 채점할 수 있고, 나머지는 직접 판단하는 몫이에요.",
+      "startsOn": "{{note}}에서 시작해요: {{string}}번 줄, {{fret}}프렛.",
+      "startsOnString": "{{string}}번 줄, {{fret}}프렛에서 시작해요.",
+      "notesLabel": "{{n}}개 음, {{from}}~{{to}}프렛",
+      "openPaths": "코스 열기",
+      "undoLeft": "실행 취소는 이것을 추가한 화면을 떠나면서 끝났어요. 빼려면 코스의 내 과제에서 삭제를 사용하세요.",
       "chip": {
-        "fret": "Fret {{fret}}",
-        "bars": "{{count}} bar",
-        "bars_other": "{{count}} bars",
-        "quarters": "Quarter notes instead",
-        "eighths": "Eighths instead",
-        "eighthTriplets": "Triplets instead",
-        "sixteenths": "Sixteenths instead",
-        "nextPosition": "Next position"
+        "fret": "{{fret}}프렛",
+        "bars": "{{count}}마디",
+        "bars_other": "{{count}}마디",
+        "quarters": "4분음표로",
+        "eighths": "8분음표로",
+        "eighthTriplets": "셋잇단음표로",
+        "sixteenths": "16분음표로",
+        "nextPosition": "다음 포지션"
       }
     }
   }

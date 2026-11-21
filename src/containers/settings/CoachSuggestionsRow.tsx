@@ -48,8 +48,9 @@ export function CoachSuggestionsRow() {
   const choose = (value: Suggestions) => {
     saveSuggestions(value);
     // "On" is how the player asks for the proactive cards again: a card hidden
-    // twice ("Hidden until you ask") may come back (c4b2b). Writes nothing
-    // when no card was hidden.
+    // twice ("Hidden until you ask") may come back (c4b2b), once its last
+    // Hide's seven days are over: On does not lift a Hide (owner,
+    // 2026-11-21). Writes nothing when no card was hidden twice.
     const cards = value === "on" ? saveCardsAsked(BUDGET_ORDER) : "unchanged";
     // The cards' half is followed too (c4b2b's re-read, LOW 4): an unreadable
     // `coach.cards` changes nothing, not even for this run, and says so; a

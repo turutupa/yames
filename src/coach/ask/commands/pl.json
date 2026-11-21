@@ -153,5 +153,46 @@
     "chcę", "chciałbym", "chciałabym", "potrzebuję", "muszę", "myślę", "czuję", "uważam", "lubię", "wolę", "albo", "lub", "razem", "wraz", "wstecz", "z powrotem", "dla mnie", "ze mną"
   ],
   "polite": ["proszę", "ok", "okej", "hej trenerze", "hej", "trenerze", "teraz", "dzięki", "dziękuję", "po prostu", "no"],
-  "fillers": ["mi", "trochę", "troszkę", "troszeczkę", "nieco", "odrobinę", "mój", "moje", "moja", "moją", "moim", "o jeden szczebel", "o szczebel"]
+  "fillers": ["mi", "trochę", "troszkę", "troszeczkę", "nieco", "odrobinę", "mój", "moje", "moja", "moją", "moim", "o jeden szczebel", "o szczebel"],
+  "recipe": {
+    "shapes": {
+      "box": ["pozycja box", "wzorzec box", "box"],
+      "threePerString": ["trzy dźwięki na strunie", "3 dźwięki na strunie", "trzy nuty na strunie", "3 nuty na strunie", "trzy na strunie", "3 na strunie", "3nps"],
+      "arpeggio": ["arpeggia", "arpeggio", "arpedżio", "arp"],
+      "oneString": ["na jednej strunie", "po jednej strunie", "jedna struna"],
+      "chromatic": ["chromatyczne", "chromatyczna", "chromatyczną", "spider"]
+    },
+    "chords": {
+      "maj": ["dur", "durowy", "durowe"],
+      "min": ["moll", "mollowy", "mollowe"],
+      "dim": ["zmniejszony", "zmniejszone", "dim"],
+      "aug": ["zwiększony", "zwiększone", "aug"],
+      "7": ["septakord", "dominantowy", "dominanta", "septyma", "7"],
+      "maj7": ["dur 7", "dur septyma", "maj7"],
+      "m7": ["moll 7", "moll septyma", "m7"],
+      "m7b5": ["półzmniejszony", "półzmniejszone", "m7b5"],
+      "dim7": ["zmniejszony 7", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["ćwierćnuty", "ćwierćnutami", "ćwierćnuta"],
+      "eighths": ["ósemki", "ósemkami", "ósemek", "ósemka"],
+      "eighthTriplets": ["triole ósemkowe", "triolami ósemkowymi", "triole", "triolami", "triola"],
+      "sixteenths": ["szesnastki", "szesnastkami", "szesnastek", "szesnastka"]
+    },
+    "fret": ["próg #", "progu #", "# próg", "# progu", "# progiem"],
+    "rootNames": {
+      "h": "B",
+      "b": null,
+      "fis": "F#",
+      "cis": "C#",
+      "gis": "G#",
+      "dis": "D#",
+      "ais": "A#",
+      "des": "Db",
+      "es": "Eb",
+      "ges": "Gb"
+    },
+    "barFrom": ["od"],
+    "barPlace": ["# takcie", "# taktu"]
+  }
 }

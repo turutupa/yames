@@ -18,6 +18,9 @@ import { askPrompt } from "./askContext";
 import { __resetAskStoreForTests, getAskState, openAsk, registerAskSender } from "./askStore";
 import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { __setAskToolsForTests } from "./askTools";
+import { rememberPaths } from "../../coach/pathSuggest";
+import { cardChipsFor } from "../../coach/ask/suggest";
+import { ALT, SWEEP } from "../../session/testKit";
 
 const t = i18n.t.bind(i18n);
 
@@ -253,6 +256,33 @@ describe("the thread", () => {
     __setAskToolsForTests(fakeHost(), below().ctx);
     askCard({ tool: "early_or_late", args: {} }, "Was I early or late?");
     expect(lastCardShape(getAskState().turns)).toBe("early_or_late");
+  });
+});
+
+describe("'suggest a Path' (leg c4b3, review M2)", () => {
+  afterEach(() => rememberPaths([]));
+
+  it("typed on Paths with no Take: the card, written; on Today and Progress too", () => {
+    rememberPaths([ALT, SWEEP]);
+    for (const screen of ["paths", "today", "progress"] as const) {
+      __resetAskStoreForTests();
+      __setAskToolsForTests(fakeHost({ view: screen === "paths" ? "paths" : "today" }), toolCtx({ screen }));
+      expect(answerCardFor("suggest a path"), screen).not.toBeNull();
+      const card = getAskState().turns[1];
+      expect(card.kind === "card" && card.card.shape, screen).toBe("suggest_path");
+    }
+  });
+
+  it("typed in a Session before its first Take: answered", () => {
+    rememberPaths([ALT, SWEEP]);
+    __setAskToolsForTests(fakeHost(), fixture({}, { lastTake: undefined }).ctx);
+    expect(answerCardFor("Which path should I try next?")).not.toBeNull();
+  });
+
+  it("its chip is offered in Ask's empty state on Paths and Progress, not in a Session", () => {
+    expect(cardChipsFor(toolCtx({ screen: "paths" }), "askEmpty").map((c) => c.kind === "card" && c.shape)).toContain("suggest_path");
+    expect(cardChipsFor(toolCtx({ screen: "progress" }), "askEmpty").map((c) => c.kind === "card" && c.shape)).toContain("suggest_path");
+    expect(cardChipsFor(fixture({}, { lastTake: undefined }).ctx, "askEmpty").map((c) => c.kind === "card" && c.shape)).not.toContain("suggest_path");
   });
 });
 

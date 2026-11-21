@@ -32,10 +32,10 @@
       "clickSubdivision": "Click per battito: {{to}}",
       "setSetting": "{{key}}: {{to}}",
       "setGoal": "Obiettivo tenuto: «{{to}}»",
-      "makeExercise": "Added {{what}} to My exercises.",
-      "makeExerciseAdding": "Adding {{what}} to My exercises…",
-      "undoMakeExercise": "Taken back out of My exercises.",
-      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
+      "makeExercise": "{{what}} aggiunto in “I miei esercizi”.",
+      "makeExerciseAdding": "Aggiungo {{what}} in “I miei esercizi”…",
+      "undoMakeExercise": "Tolto da “I miei esercizi”.",
+      "undoMakeExerciseDoing": "Lo tolgo da “I miei esercizi”…"
     },
     "propose": {
       "goTo": "Aprire {{screen}}?",
@@ -67,8 +67,8 @@
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Tenere questo come obiettivo: «{{to}}»",
       "setGoalFrom": "Cambiare il tuo obiettivo da «{{from}}» a «{{to}}»",
-      "makeExercise": "Add it to My exercises",
-      "undoMakeExercise": "Take it back out of My exercises"
+      "makeExercise": "Aggiungilo in “I miei esercizi”",
+      "undoMakeExercise": "Toglilo da “I miei esercizi”"
     },
     "stops": {
       "click": "Il click si ferma.",
@@ -127,7 +127,7 @@
       "go": "Vai",
       "open": "Apri",
       "loop": "Ripetila",
-      "add": "Add it"
+      "add": "Aggiungi"
     },
     "why": {
       "which": "Quale?",
@@ -190,37 +190,37 @@
       },
       "failed": "Non ha funzionato, e non è stato cambiato nulla.",
       "make": {
-        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
-        "root": "Say its root too: for example “A minor pentatonic”.",
-        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
-        "needScale": "Say which scale: for example “A minor pentatonic”.",
-        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
-        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
-        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
-        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
-        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
-        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
-        "tooManyNotes": "One time through needs {{count}} bar.",
-        "tooManyNotes_other": "One time through needs {{count}} bars.",
-        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
-        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
-        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
-        "unreachable": "No hand the app knows can play that fast enough to grade it.",
-        "notMade": "The app can't make that one.",
-        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
-        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
-        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
-        "already": "That one is already on My exercises.",
-        "badRecipe": "The app can't make that one.",
-        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
-        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "what": "Dimmi cosa creare: una scala o un accordo, e la sua tonica. Per esempio “pentatonica minore di A, tasto 5”.",
+        "root": "Dimmi anche la tonica: per esempio “pentatonica minore di A”.",
+        "chord": "Dimmi di che accordo è l'arpeggio: per esempio “arpeggio di A minore 7”.",
+        "needScale": "Dimmi quale scala: per esempio “pentatonica minore di A”.",
+        "scale": "L'app non sa ancora creare un esercizio in {{scale}}. Crea la pentatonica minore e maggiore, il blues, la maggiore, la minore naturale e armonica, la dorica e la misolidia.",
+        "boxScale": "Un box è per la pentatonica minore, la pentatonica maggiore e il blues, non per {{scale}}.",
+        "threeScale": "Tre note per corda è per la maggiore, la minore naturale, la minore armonica, la dorica e la misolidia, non per {{scale}}.",
+        "mixed": "Qui ci sono una scala e un accordo insieme, oppure uno che questa forma non prevede. Dimmene uno solo.",
+        "noShapeHere": "Questa forma non parte dal tasto {{fret}}.",
+        "outOfRange": "Dal tasto {{fret}} va oltre la fine del manico.",
+        "tooManyNotes": "Un giro richiede {{count}} battuta.",
+        "tooManyNotes_other": "Un giro richiede {{count}} battute.",
+        "tooLong": "Un giro richiede più di {{count}} battute, il massimo che un esercizio può avere.",
+        "tooFewNotes": "Sono troppo poche note per tante battute: riempiono {{count}} battuta.",
+        "tooFewNotes_other": "Sono troppo poche note per tante battute: riempiono {{count}} battute.",
+        "unreachable": "Nessuna mano che l'app conosca può suonare abbastanza veloce da valutarlo.",
+        "notMade": "L'app non sa creare questo.",
+        "loading": "L'app sta preparando il creatore di esercizi. Chiedi di nuovo tra un momento.",
+        "loadFailed": "L'app non ha potuto caricare il creatore di esercizi, quindi non è stato creato nulla.",
+        "full": "“I miei esercizi” è pieno (50), quindi questo non è stato aggiunto. Rimuovine prima uno da quella lista.",
+        "already": "Questo è già in “I miei esercizi”.",
+        "badRecipe": "L'app non sa creare questo.",
+        "unreadable": "Non è stato possibile leggere “I miei esercizi” ora, quindi non è stato aggiunto nulla.",
+        "failed": "Non è stato possibile salvare “I miei esercizi” ora, quindi non è stato aggiunto nulla.",
         "undo": {
-          "gone": "It's no longer on My exercises.",
-          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
-          "failed": "My exercises couldn't be saved just now, so it's still there."
+          "gone": "Non è più in “I miei esercizi”.",
+          "unreadable": "Non è stato possibile leggere “I miei esercizi” ora, quindi non è stato tolto nulla.",
+          "failed": "Non è stato possibile salvare “I miei esercizi” ora, quindi è ancora lì."
         },
-        "tooManyNotes_many": "One time through needs {{count}} bars.",
-        "tooFewNotes_many": "That's too few notes for so many bars: they fill {{count}} bars."
+        "tooManyNotes_many": "Un giro richiede {{count}} battute.",
+        "tooFewNotes_many": "Sono troppo poche note per tante battute: riempiono {{count}} battute."
       }
     },
     "yours": {
@@ -298,23 +298,23 @@
       }
     },
     "make": {
-      "source": "Worked out by the app",
-      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
-      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
-      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
-      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
-      "openPaths": "Open Paths",
-      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "source": "Calcolato dall'app",
+      "graded": "Parte da {{bpm}} BPM. Si possono valutare il tempo e le note sentite; il resto sta a te.",
+      "startsOn": "Parte da {{note}}: corda {{string}}, tasto {{fret}}.",
+      "startsOnString": "Parte dalla corda {{string}}, tasto {{fret}}.",
+      "notesLabel": "{{n}} note, tasti da {{from}} a {{to}}",
+      "openPaths": "Apri Percorsi",
+      "undoLeft": "Annulla è terminato quando hai lasciato la schermata in cui è stato aggiunto. Per toglierlo, usa Rimuovi in “I miei esercizi”, in Percorsi.",
       "chip": {
-        "fret": "Fret {{fret}}",
-        "bars": "{{count}} bar",
-        "bars_other": "{{count}} bars",
-        "quarters": "Quarter notes instead",
-        "eighths": "Eighths instead",
-        "eighthTriplets": "Triplets instead",
-        "sixteenths": "Sixteenths instead",
-        "nextPosition": "Next position",
-        "bars_many": "{{count}} bars"
+        "fret": "Tasto {{fret}}",
+        "bars": "{{count}} battuta",
+        "bars_other": "{{count}} battute",
+        "quarters": "In quarti",
+        "eighths": "In ottavi",
+        "eighthTriplets": "In terzine",
+        "sixteenths": "In sedicesimi",
+        "nextPosition": "Posizione successiva",
+        "bars_many": "{{count}} battute"
       }
     }
   }

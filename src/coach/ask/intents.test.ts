@@ -11,6 +11,9 @@ import { fakeHost } from "../tools/fakeHost";
 import { isCard } from "./cards";
 import { fixture } from "./cardFixtures";
 import { cardsHere, factCardCatalogue, FACT_CARDS, runFactCard } from "./intents";
+import { rememberPaths } from "../pathSuggest";
+import { NO_PROGRESS } from "../../session/progress";
+import { ALT, SWEEP } from "../../session/testKit";
 
 /** Every card, in the list's order (c2b1a's three, then c2b1b's four). */
 const ALL_CARDS = ["where_slipped", "early_or_late", "why_not_counted", "what_changed", "improving", "score_made_of", "pass_mark_distance"] as const;
@@ -29,6 +32,8 @@ const PATH_CARDS = [
   "chord_notes",
   "pass_mark_ms",
   "clean_tempo",
+  // Leg c4b3: reads no Take either.
+  "suggest_path",
 ] as const;
 
 describe("the cards as read tools", () => {
@@ -86,6 +91,14 @@ describe("when: what can be asked here", () => {
     expect(cardsHere(fixture(shape, over).ctx).filter((n) => (ALL_CARDS as readonly string[]).includes(n))).toEqual(cards);
   });
 
+  it("a Path suggestion reads no grade and no Take: here for an ungraded player, with no Take, never in a Take (c4b3)", () => {
+    expect(cardsHere(fixture({}, { grading: "off" }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { run: { ...runIn("result"), ungraded: "chosen" } }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { lastTake: undefined }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({ verdict: "notCaught" }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { run: runIn("playing") }).ctx)).not.toContain("suggest_path");
+  });
+
   it("during a Take: no card at all, the Path's and the plan's included (c2b2a)", () => {
     expect(cardsHere(fixture({}, { run: runIn("playing") }).ctx)).toEqual([]);
   });
@@ -101,6 +114,17 @@ describe("when: what can be asked here", () => {
     const out = runFactCard({ tool: "where_slipped", args: {} }, { ...graded, grading: "off" });
     expect(isCard(out)).toBe(false);
     expect(!isCard(out) && out.line.key).toBe("ask.card.notNow.ungraded");
+  });
+
+  it("an ungraded player asking for a Path suggestion is answered, not refused (c4b3)", () => {
+    rememberPaths([ALT, SWEEP]);
+    try {
+      const out = runFactCard({ tool: "suggest_path", args: {} }, { ...graded, grading: "off", progress: NO_PROGRESS });
+      expect(isCard(out) && out.shape).toBe("suggest_path");
+      expect(isCard(out) && out.source).toEqual({ kind: "path" });
+    } finally {
+      rememberPaths([]);
+    }
   });
 
   it("asked about a Take not caught, the where card says it did not measure it (uncertainty by rule)", () => {

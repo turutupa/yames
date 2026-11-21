@@ -32,10 +32,10 @@
       "clickSubdivision": "每拍點擊數：{{to}}",
       "setSetting": "{{key}}：{{to}}",
       "setGoal": "已記下目標：「{{to}}」",
-      "makeExercise": "Added {{what}} to My exercises.",
-      "makeExerciseAdding": "Adding {{what}} to My exercises…",
-      "undoMakeExercise": "Taken back out of My exercises.",
-      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
+      "makeExercise": "已把{{what}}加入我的練習。",
+      "makeExerciseAdding": "正在把{{what}}加入我的練習…",
+      "undoMakeExercise": "已從我的練習中移除。",
+      "undoMakeExerciseDoing": "正在把它從我的練習中移除…"
     },
     "propose": {
       "goTo": "開啟{{screen}}？",
@@ -67,8 +67,8 @@
       "setSetting": "{{key}}：{{from}} → {{to}}",
       "setGoal": "把這個記為你的目標：「{{to}}」",
       "setGoalFrom": "把你的目標從「{{from}}」改為「{{to}}」",
-      "makeExercise": "Add it to My exercises",
-      "undoMakeExercise": "Take it back out of My exercises"
+      "makeExercise": "把它加入我的練習",
+      "undoMakeExercise": "把它從我的練習中移除"
     },
     "stops": {
       "click": "節拍點擊會停止。",
@@ -127,7 +127,7 @@
       "go": "前往",
       "open": "開啟",
       "loop": "循環",
-      "add": "Add it"
+      "add": "加入"
     },
     "why": {
       "which": "是哪一個？",
@@ -190,34 +190,34 @@
       },
       "failed": "沒有成功，也沒有變更任何內容。",
       "make": {
-        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
-        "root": "Say its root too: for example “A minor pentatonic”.",
-        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
-        "needScale": "Say which scale: for example “A minor pentatonic”.",
-        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
-        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
-        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
-        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
-        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
-        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
-        "tooManyNotes": "One time through needs {{count}} bar.",
-        "tooManyNotes_other": "One time through needs {{count}} bars.",
-        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
-        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
-        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
-        "unreachable": "No hand the app knows can play that fast enough to grade it.",
-        "notMade": "The app can't make that one.",
-        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
-        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
-        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
-        "already": "That one is already on My exercises.",
-        "badRecipe": "The app can't make that one.",
-        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
-        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "what": "說出要做什麼：一個音階或一個和弦，以及它的根音。例如「A 小調五聲，5 琴格」。",
+        "root": "也說出它的根音。例如「A 小調五聲」。",
+        "chord": "說出琶音是哪個和弦。例如「Am7 琶音」。",
+        "needScale": "說出是哪個音階。例如「A 小調五聲」。",
+        "scale": "應用程式暫時還不能做{{scale}}的練習。它能做小調五聲、大調五聲、藍調、大調、自然小調、和聲小調、多利安和米索利地安。",
+        "boxScale": "音階框適用於小調五聲、大調五聲和藍調，不適用於{{scale}}。",
+        "threeScale": "每弦三音適用於大調、自然小調、和聲小調、多利安和米索利地安，不適用於{{scale}}。",
+        "mixed": "這同時指了一個音階和一個和弦，或者是該指型不支援的。請只說一個。",
+        "noShapeHere": "這個指型不是從第 {{fret}} 琴格開始的。",
+        "outOfRange": "從第 {{fret}} 琴格起，會超出琴頸的末端。",
+        "tooManyNotes": "彈一遍需要 {{count}} 小節。",
+        "tooManyNotes_other": "彈一遍需要 {{count}} 小節。",
+        "tooLong": "彈一遍需要的小節數超過 {{count}}，而這是一個練習最多能有的小節數。",
+        "tooFewNotes": "音太少，不夠這麼多小節：它們只填滿 {{count}} 小節。",
+        "tooFewNotes_other": "音太少，不夠這麼多小節：它們只填滿 {{count}} 小節。",
+        "unreachable": "應用程式所知道的任何手，都彈不了這麼快，沒辦法評分。",
+        "notMade": "應用程式做不出這個。",
+        "loading": "應用程式正在準備練習產生器。請稍後再問一次。",
+        "loadFailed": "應用程式沒能載入練習產生器，所以什麼也沒做。",
+        "full": "我的練習已滿（50 個），所以這個沒有加入。請先在那裡移除一個。",
+        "already": "這個已經在我的練習裡了。",
+        "badRecipe": "應用程式做不出這個。",
+        "unreadable": "剛才讀不了我的練習，所以什麼也沒加入。",
+        "failed": "剛才儲存不了我的練習，所以什麼也沒加入。",
         "undo": {
-          "gone": "It's no longer on My exercises.",
-          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
-          "failed": "My exercises couldn't be saved just now, so it's still there."
+          "gone": "它已經不在我的練習裡了。",
+          "unreadable": "剛才讀不了我的練習，所以什麼也沒移除。",
+          "failed": "剛才儲存不了我的練習，所以它還在那裡。"
         }
       }
     },
@@ -296,22 +296,22 @@
       }
     },
     "make": {
-      "source": "Worked out by the app",
-      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
-      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
-      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
-      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
-      "openPaths": "Open Paths",
-      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "source": "由應用程式算出",
+      "graded": "從 {{bpm}} BPM 開始。節奏和聽到的音可以評分，其餘由你自己判斷。",
+      "startsOn": "從 {{note}} 開始：第 {{string}} 弦，第 {{fret}} 琴格。",
+      "startsOnString": "從第 {{string}} 弦，第 {{fret}} 琴格開始。",
+      "notesLabel": "{{n}} 個音，第 {{from}} 到 {{to}} 琴格",
+      "openPaths": "開啟路線",
+      "undoLeft": "離開加入它的那個畫面時，復原就失效了。要移除它，請在路線裡的我的練習中點「移除」。",
       "chip": {
-        "fret": "Fret {{fret}}",
-        "bars": "{{count}} bar",
-        "bars_other": "{{count}} bars",
-        "quarters": "Quarter notes instead",
-        "eighths": "Eighths instead",
-        "eighthTriplets": "Triplets instead",
-        "sixteenths": "Sixteenths instead",
-        "nextPosition": "Next position"
+        "fret": "第 {{fret}} 琴格",
+        "bars": "{{count}} 小節",
+        "bars_other": "{{count}} 小節",
+        "quarters": "改用四分音符",
+        "eighths": "改用八分音符",
+        "eighthTriplets": "改用三連音",
+        "sixteenths": "改用十六分音符",
+        "nextPosition": "下一個把位"
       }
     }
   }

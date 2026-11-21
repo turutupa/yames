@@ -192,7 +192,7 @@
             "Más de cinco minutos enganchado. ¿Quieres que señale algo concreto?",
             "Tramo largo: haz una pausa si quieres, aquí estoy.",
             "Buena racha. ¿Quieres que escuche algo en particular?",
-            "Llevas un rato en esto. Respira si lo necesitas.",
+            "Llevas un rato en esto. Una pausa corta va bien si te apetece.",
             "Todo tranquilo hasta ahora. Dime en qué trabajas y estaré atento.",
             "Nada que señalar todavía. ¿Qué quieres que escuche?",
             "Pocket estable. Sigue, o cambia de marcha si estás listo."
@@ -200,7 +200,7 @@
           "neutral": [
             "Cinco minutos, nada que señalar. Pocket sólido. ¿Sigues o cambias de enfoque?",
             "Tramo tranquilo. Dime en qué estás trabajando.",
-            "Tramo largo sin interrupciones. ¿Quieres comentarios sobre algo?",
+            "Llevo un rato sin decir nada. ¿Quieres comentarios sobre algo?",
             "Cinco minutos metido en ello. Sin problemas que señalar: sigue.",
             "Sesión estable. ¿Quieres otro ángulo o seguir el rumbo?",
             "Tramo largo sin deslices. ¿Qué sigue?",
@@ -208,45 +208,45 @@
             "Sesión tranquila hasta ahora. Elige un objetivo si quieres comentarios más precisos."
           ],
           "correction": [
-            "Ojo: llevas un buen rato en esto. Tómate 10 si tus manos lo necesitan.",
-            "Más de cinco minutos seguidos. Consulta a tu cuerpo antes de exigir más.",
-            "Sesión sostenida: estira los dedos y luego vuelve.",
-            "¿Manos cansadas? Haz una pausa de 60 segundos antes de la siguiente pasada.",
-            "Tramo largo sin pausa. Un descanso corto es una opción antes de continuar.",
-            "Hora de una pausa rápida. Las manos frías tocan descuidado.",
-            "Para y estira. Dos minutos de descanso mantienen sólidos los siguientes veinte.",
-            "Tramo sostenido: deja descansar las manos antes de seguir empujando."
+            "Ojo: llevas un buen rato en esto. Tómate unos minutos de pausa si quieres.",
+            "Más de cinco minutos ya. ¿Quieres una pausa corta antes de seguir?",
+            "Sesión sostenida: aquí va bien una pausa corta y luego vuelves.",
+            "¿Quieres una pausa de 60 segundos antes de la siguiente pasada?",
+            "Tramo largo desde mi último consejo. Un descanso corto es una opción antes de continuar.",
+            "Cinco minutos desde mi último consejo. Una pausa rápida es una opción.",
+            "Para aquí si quieres. Dos minutos de descanso y retomas.",
+            "Tramo sostenido: haz un descanso corto antes de seguir."
           ]
         },
         "fatigue": {
           "encouragement": [
             "La precisión lleva bajando los últimos minutos. Tómate un respiro.",
-            "¿Se tensan las manos? Estira un momento y vuelve fresco.",
-            "La calidad se desvía. Pausa, respira, vuelve.",
-            "Las manos trabajan más de lo que deberían. Descanso breve y vuelta.",
+            "La precisión baja a este tempo. Pausa rápida y vuelves.",
+            "La calidad está bajando. Pausa, empieza de nuevo, vuelve.",
+            "Los fallos suben con el mismo tempo. Descanso breve y vuelta.",
             "Llevas un rato: suelta el instrumento 60 segundos.",
-            "El cuerpo pesa más que la música. Pausa rápida.",
-            "¿Se te ponen rígidos los dedos? Sacúdelos y vuelve.",
-            "Hora de una pausa corta: las manos frescas tocan más limpio."
+            "Las puntuaciones bajan a un mismo tempo. ¿Pausa rápida?",
+            "¿Una pausa corta? Luego vuelves al mismo tempo.",
+            "Una pausa corta va bien aquí: luego retomas."
           ],
           "neutral": [
-            "La precisión bajó en los últimos 3 minutos con el mismo BPM: probablemente fatiga.",
+            "La precisión bajó en los últimos 3 minutos con el mismo BPM. Una pausa es una opción.",
             "La puntuación baja sin cambio de tempo. Descansa.",
             "Caída sostenida de precisión al mismo BPM: llámalo ciclo de descanso.",
-            "Mismo tempo, precisión a la baja. Las manos se están cansando.",
-            "La calidad se deteriora pero el tempo no ha cambiado: eso es fatiga.",
+            "Mismo tempo, precisión a la baja. Un descanso corto es una opción.",
+            "La calidad se deteriora pero el tempo no ha cambiado. ¿Quieres una pausa?",
             "Los fallos suben mientras el clic sigue igual. Hora de una pausa.",
-            "Tres minutos de caída con un solo tempo. Descansa las manos.",
-            "BPM estable, precisión a la baja: tus manos te están diciendo algo."
+            "Tres minutos de caída con un solo tempo. Haz un descanso corto.",
+            "BPM estable, precisión a la baja: buen momento para una pausa."
           ],
           "correction": [
-            "Se nota la fatiga: para ahora, 90 segundos de descanso y vuelve.",
-            "Has pasado tu ventana de mejor rendimiento. Descansa antes de que la calidad caiga más.",
-            "Descansa. Tocar cansado enseña a las manos hábitos descuidados.",
+            "La precisión sigue bajando: para ahora, 90 segundos de descanso y vuelve.",
+            "Las puntuaciones están por debajo de tu mejor nivel en esta sesión. Descansa antes de que bajen más.",
+            "Haz la pausa. Los últimos minutos puntuaron menos que los anteriores.",
             "Para, levántate y camina un minuto. Luego vuelve.",
             "La calidad lleva minutos bajando. Descanso de verdad: 90 segundos como mínimo.",
-            "Las manos han acabado por ahora. Pausa, sacúdelas, hidrátate.",
-            "Seguir cuando estás cansado fija los errores. Para y recupérate.",
+            "Las puntuaciones siguen bajando a este tempo. Pausa y vuelve a revisar.",
+            "Los fallos siguen subiendo a un mismo tempo. Para y haz una pausa.",
             "Deja el instrumento. Dos minutos de descanso y luego vuelve a evaluar."
           ]
         },
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "La puntuación vuelve a caer pasado el minuto {staminaMinutes}: tómate 30 segundos y vuelve al mismo BPM.",
-            "Pasado el minuto {staminaMinutes}, tu precisión tiende a bajar. Descanso breve y vuelta.",
-            "Tiendes a flaquear hacia el minuto {staminaMinutes}. Haz una pausa y vuelve fresco.",
-            "Muro de resistencia hacia el minuto {staminaMinutes}: un descanso corto ahora ahorra calidad después."
+            "Tus sesiones aquí duran de media unos {staminaMinutes} minutos, y las recientes puntuaron menos que las primeras. Tómate 30 segundos si quieres, y luego el mismo BPM.",
+            "En un rango de tempos aquí, tus sesiones recientes de unos {staminaMinutes} minutos puntuaron por debajo de las primeras. Un descanso breve es una opción.",
+            "Tus sesiones aquí duran unos {staminaMinutes} minutos, y las recientes puntuaron menos que las primeras. Una pausa es una opción.",
+            "Tu sesión habitual aquí dura unos {staminaMinutes} minutos, y últimamente las puntuaciones son más bajas que al principio. Un descanso corto ahora es una opción."
           ]
         },
         "ramp_complete": {
@@ -676,22 +676,22 @@
           "encouragement": [
             "Los golpes se van descolocando al mismo tempo. Baquetas abajo un momento y vuelve.",
             "La calidad se desvía: levántate de la banqueta 60 segundos.",
-            "¿Te hablan los antebrazos? Pausa breve y vuelves.",
-            "¿Pesan las baquetas? Déjalas, estira y vuelve.",
-            "¿Se te tensa el agarre? Aléjate de la batería un minuto.",
+            "Los golpes pierden precisión con el mismo tempo. Pausa breve y vuelves.",
+            "¿Quieres una pausa? Deja las baquetas y vuelve.",
+            "Los fallos suben a este tempo. Aléjate de la batería un minuto.",
             "La precisión se va resbalando: descanso rápido y sigue.",
-            "Las manos trabajan más de lo que deberían. Descanso breve.",
-            "Baja las baquetas un momento: deja que los brazos se reinicien."
+            "La precisión baja a un mismo tempo. Descanso breve.",
+            "Baquetas fuera un momento si quieres, y luego empieza de nuevo."
           ],
           "correction": [
-            "Se nota la fatiga: para ya, suelta las baquetas y 90 segundos de descanso. Tocar cansado fija un timing descuidado.",
-            "Has pasado tu mejor momento: baquetas fuera, da una vuelta y luego vuelve a evaluar.",
-            "Los golpes siguen fallando a este tempo. 90 segundos de pausa, bebe agua y vuelve.",
+            "La precisión sigue bajando a este tempo. Para ya, baquetas fuera, 90 segundos de descanso.",
+            "Las puntuaciones están por debajo de tu mejor nivel: baquetas fuera, da una vuelta y luego vuelve a evaluar.",
+            "Los golpes siguen perdiendo precisión a este tempo. 90 segundos de pausa y vuelve.",
             "Los fallos suben en un mismo tempo. Para, baquetas abajo y dos minutos de descanso.",
-            "Si sigues más allá de esto, te harás daño. Descanso de verdad ahora.",
+            "Para si algo duele. En cualquier caso, descanso de verdad ahora.",
             "Deja de tocar. Aléjate de la batería un par de minutos.",
-            "Baquetas fuera. Primero los antebrazos, luego las manos, y vuelve cuando estés suelto.",
-            "Parada total. Dos minutos de descanso y un trago de agua antes de volver."
+            "Baquetas fuera. Dos minutos de descanso y vuelve cuando quieras.",
+            "Parada total. Dos minutos de descanso antes de volver."
           ]
         },
         "tempo_milestone": {
@@ -712,7 +712,7 @@
             "Más de cinco minutos. ¿Quieres que señale el bombo, el hi-hat o ambos?",
             "Llevas un buen rato metido en el pocket. Dime qué quieres después.",
             "Buena pasada en la batería. ¿Quieres comentarios más precisos sobre algo?",
-            "Llevas un rato en esto. ¿Quieres que escuche el bombo, la caja o la sincronía de extremidades?",
+            "Llevas un rato en esto. ¿Hay algo concreto que quieras que escuche?",
             "El pocket ha estado estable. ¿Cuál es el enfoque a partir de ahora?",
             "Llevas un groove largo: elige un objetivo y me centraré en él.",
             "Más de cinco minutos. Dime dónde quieres el siguiente comentario."
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Hacia el minuto {staminaMinutes} se te tensan las manos. Baja el BPM 5 puntos y reconstruye.",
-            "Pasado el minuto {staminaMinutes} las extremidades empiezan a desviarse. Descanso breve y vuelta.",
-            "Tus puntuaciones en la batería bajan hacia el minuto {staminaMinutes}. Un descanso corto y vuelves.",
-            "Tiendes a perder el enganche del bombo hacia el minuto {staminaMinutes}. Tómate un respiro."
+            "Tus sesiones con este groove duran unos {staminaMinutes} minutos, y las recientes puntuaron menos que las primeras. Bajar el BPM 5 puntos es una opción.",
+            "En la batería, tus sesiones aquí duran unos {staminaMinutes} minutos, y tus puntuaciones han bajado desde las primeras. Descanso breve y vuelta, si quieres.",
+            "Tus puntuaciones recientes con este groove están por debajo de las primeras, en sesiones de unos {staminaMinutes} minutos. Un descanso corto es una opción.",
+            "Unos {staminaMinutes} minutos por sesión con este groove, y las sesiones recientes puntuaron menos. ¿Quieres una pausa corta?"
           ]
         },
         "bias_only": {
@@ -946,24 +946,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "¿Se tensa el brazo de la púa? Sacúdelo y vuelve a entrar.",
+            "La precisión baja a un mismo tempo. Pausa corta y vuelves a entrar.",
             "Llevas unos minutos perdiendo precisión. Pausa rápida y vuelve a entrar.",
             "Se cuelan los fallos a este tempo: deja la guitarra 60 segundos.",
-            "Tirada larga a un mismo tempo. Respira y retoma.",
-            "El ataque de la púa se vuelve más duro de lo necesario. Descanso breve.",
-            "¿Se aprieta el agarre en el mástil? Afloja y luego toca.",
-            "El antebrazo trabaja demasiado: sacúdelo y continúa.",
+            "Rato largo a un mismo tempo. Pausa y retoma.",
+            "Los fallos suben a este tempo. Descanso breve.",
+            "¿Quieres una pausa corta? Luego sigue tocando.",
+            "Las puntuaciones bajan a un mismo tempo: pausa corta y continúa.",
             "Un descanso de 30 segundos es una opción, y luego a ello."
           ],
           "correction": [
             "La precisión ha ido bajando al mismo tempo: para, guitarra abajo 90 segundos y vuelve a comprobarlo.",
             "Tus puntuaciones están por debajo de tu mejor nivel: guitarra abajo un minuto y vuelve a entrar.",
-            "Para antes de que los tendones empiecen a quejarse. 90 segundos sin tocar las cuerdas.",
+            "La precisión sigue bajando a este tempo. 90 segundos sin tocar las cuerdas.",
             "Los fallos siguen subiendo a este tempo. Deja la guitarra y dos minutos de descanso.",
             "Descanso de verdad: la guitarra en el soporte y date un paseo.",
-            "El brazo de la púa ha acabado por ahora. 90 segundos como mínimo y luego vuelve a evaluar.",
-            "Para aquí. Dos minutos lejos de la guitarra y vuelve fresco.",
-            "Si fuerzas más allá de esto, te estás comprando una lesión. Parada total."
+            "Las puntuaciones siguen bajando. 90 segundos como mínimo y luego vuelve a evaluar.",
+            "Para aquí. Dos minutos lejos de la guitarra y luego vuelves a ella.",
+            "Parada total aquí, y para en cualquier momento si algo duele."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Pasado el minuto {staminaMinutes}, tu ritmo a este tempo tiende a desviarse. Descanso breve y retoma.",
-            "Hacia el minuto {staminaMinutes} el ataque de la púa empieza a desviarse. Pausa breve y vuelta.",
-            "Muro de resistencia en el minuto {staminaMinutes}: la mano derecha se tensa. Descansa 30 segundos.",
-            "Sueles perder filo con el picado hacia el minuto {staminaMinutes}. Descanso corto y vuelta."
+            "En un rango de tempos con este riff, tus sesiones recientes de unos {staminaMinutes} minutos puntuaron por debajo de las primeras. Un descanso breve es una opción.",
+            "Tus sesiones con este riff duran unos {staminaMinutes} minutos, y las recientes puntuaron menos que las primeras. Pausa breve y vuelta, si quieres.",
+            "Tus sesiones aquí duran de media {staminaMinutes} minutos; las recientes puntuaron menos. Descansa 30 segundos si quieres.",
+            "Últimamente tus puntuaciones con este riff están por debajo de las primeras, en sesiones de unos {staminaMinutes} minutos. ¿Quieres un descanso corto?"
           ]
         },
         "bias_only": {
@@ -1218,24 +1218,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "¿Se tensa el brazo del rasgueo? Sacúdelo y vuelve a entrar.",
+            "Los rasgueos pierden precisión a un mismo tempo. Pausa corta y vuelves a entrar.",
             "La precisión se va resbalando a este tempo. Descanso rápido y vuelve a entrar.",
             "Se cuelan los fallos en el rasgueo: guitarra abajo durante 60 segundos.",
-            "Llevas un rato rasgueando a un mismo tempo. Respira y continúa.",
-            "El rasgueo se vuelve más pesado de lo necesario. Descanso breve.",
-            "¿Se aprieta el agarre en el mástil? Afloja y luego toca.",
-            "El antebrazo trabaja demasiado: sacúdelo y continúa.",
+            "Llevas un rato rasgueando a un mismo tempo. Pausa y continúa.",
+            "Los fallos suben a este tempo. Descanso breve.",
+            "¿Quieres una pausa corta? Luego sigue tocando.",
+            "Las puntuaciones bajan a un mismo tempo: pausa corta y continúa.",
             "Tómate 30 segundos si los quieres, y vuelve a ello."
           ],
           "correction": [
-            "La fatiga se nota en el rasgueo: para y deja las cuerdas 90 segundos.",
+            "Los rasgueos siguen resbalando a este tempo: para y deja las cuerdas 90 segundos.",
             "Tus puntuaciones están por debajo de tu mejor nivel: deja la guitarra un minuto y vuelve.",
-            "Rasguear cansado entierra la dinámica. Para, descansa y reinicia.",
-            "El brazo del rasgueo se está forzando. Deja la guitarra, estira el antebrazo y descansa dos minutos.",
+            "Las puntuaciones siguen bajando a un mismo tempo. Para, descansa y reinicia.",
+            "Los fallos siguen subiendo a este tempo. Deja la guitarra y descansa dos minutos.",
             "Descanso de verdad: la guitarra en el soporte y date un paseo.",
-            "La mano del rasgueo ha acabado. 90 segundos como mínimo y luego vuelve a evaluar.",
+            "La precisión sigue bajando. 90 segundos como mínimo y luego vuelve a evaluar.",
             "Parada total. Dos minutos de pausa y continúa cuando estés listo.",
-            "Si fuerzas más allá de esto, te estás comprando una lesión. Para y recupérate."
+            "Para aquí y haz una pausa de verdad, y para en cualquier momento si algo duele."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Tu presión al pisar las cuerdas sube hacia el minuto {staminaMinutes}. Descansa 30 segundos y vuelve a empezar.",
-            "Hacia el minuto {staminaMinutes} el brazo del rasgueo se tensa. Pausa breve y vuelta.",
-            "Pasado el minuto {staminaMinutes}, tu precisión tiende a bajar. Descanso corto y retoma.",
-            "La fatiga se nota en el minuto {staminaMinutes} con la acústica. Tómate un respiro."
+            "Tus sesiones aquí duran unos {staminaMinutes} minutos, y tus puntuaciones han bajado desde las primeras. Descansar 30 segundos es una opción.",
+            "Las sesiones recientes con este ejercicio puntuaron menos que las primeras; duran de media unos {staminaMinutes} minutos. Pausa breve y vuelta, si quieres.",
+            "En un rango de tempos con este ejercicio, tus sesiones recientes de unos {staminaMinutes} minutos puntuaron menos que las primeras. Un descanso corto es una opción.",
+            "En la acústica, tus sesiones aquí duran de media unos {staminaMinutes} minutos, y las recientes puntuaron menos. ¿Quieres una pausa corta?"
           ]
         },
         "bias_only": {
@@ -1438,7 +1438,7 @@
             "La mano derecha se arrastra. Toca con el clic; no esperes a que caiga el bombo.",
             "Levanta antes el dedo que pulsa: sal al encuentro del clic en el frente de la nota.",
             "Cada nota cae tarde. Apunta al borde delantero de cada clic.",
-            "Empuja desde el antebrazo: el dedo se está volviendo pesado.",
+            "Las notas caen tarde. Empieza cada nota un poco antes.",
             "Baja un poco el tempo y toca con más impulso. El arrastre se va.",
             "Imagina que el clic suena un pelo antes de lo que suena, y sal a su encuentro.",
             "Para, respira y entra empujando ligeramente hacia delante."
@@ -1489,24 +1489,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "¿Se tensan los dedos que pulsan? Estiramiento rápido y vuelve a entrar.",
-            "¿El antebrazo empieza a agarrotarse? Bajo abajo durante 60 segundos.",
+            "Las notas pierden precisión a un mismo tempo. Pausa rápida y vuelves a entrar.",
+            "Los fallos suben a este tempo. Deja el bajo 60 segundos.",
             "Las notas se van descolocando al mismo tempo. Pausa breve y vuelve a entrar.",
-            "¿La mano que pisa las cuerdas se pone pesada? Tómate un momento y continúa.",
-            "¿La mano derecha se siente tensa? Sacúdela y retoma.",
-            "Tirada larga a un mismo tempo. Respira y continúa.",
-            "El antebrazo trabaja demasiado. Descanso rápido.",
+            "¿Quieres un momento? Tómalo y continúa.",
+            "La precisión baja a un mismo tempo. Pausa corta y retoma.",
+            "Rato largo a un mismo tempo. Pausa corta y continúa.",
+            "Las puntuaciones bajan a este tempo. Descanso rápido.",
             "Tómate 30 segundos si los quieres, y vuelve a ello."
           ],
           "correction": [
-            "La fatiga se nota en el ataque: para, 90 segundos de descanso y vuelve a evaluar.",
-            "Has pasado tu mejor momento: bajo abajo, estira y vuelve a entrar.",
-            "Para ya. Pulsar cansado enseña a la mano un ataque descuidado.",
-            "La mano derecha se está forzando. Deja el bajo, estira el antebrazo y descansa dos minutos.",
+            "La precisión sigue bajando a este tempo: para, 90 segundos de descanso y vuelve a evaluar.",
+            "Las puntuaciones están por debajo de tu mejor nivel: deja el bajo un minuto y vuelve a entrar.",
+            "Para ya. Los fallos siguen subiendo al mismo tempo.",
+            "Los fallos siguen subiendo a un mismo tempo. Deja el bajo y descansa dos minutos.",
             "Descanso de verdad: el bajo en el soporte y date un paseo.",
-            "La mano que pulsa ha acabado. 90 segundos como mínimo y luego vuelve a evaluar.",
+            "La precisión sigue bajando. 90 segundos como mínimo y luego vuelve a evaluar.",
             "Parada total. Dos minutos sin el bajo antes de continuar.",
-            "Si fuerzas más allá de esto, te estás comprando una lesión. Para y recupérate."
+            "Haz ahora una pausa de verdad, y para si algo duele."
           ]
         },
         "tempo_milestone": {
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Muro de resistencia en el minuto {staminaMinutes}: tu groove se afloja. Pausa breve y vuelta.",
-            "Hacia el minuto {staminaMinutes} la mano que pulsa empieza a fatigarse. Descansa y vuelve.",
-            "Pasado el minuto {staminaMinutes} el enganche del bajo empieza a escaparse. Descanso breve y retoma.",
-            "Sueles flaquear hacia el minuto {staminaMinutes}. Tómate 30 segundos y vuelve limpio."
+            "Tus sesiones recientes con esta línea puntuaron menos que las primeras, de unos {staminaMinutes} minutos cada una. Una pausa breve es una opción.",
+            "Tus sesiones aquí duran unos {staminaMinutes} minutos, y las recientes puntuaron menos. Descansa y vuelve, si quieres.",
+            "En un rango de tempos con esta línea, tus sesiones recientes de unos {staminaMinutes} minutos puntúan menos que las primeras. Un descanso breve es una opción.",
+            "Unos {staminaMinutes} minutos es una sesión habitual con esta línea, y las recientes puntuaron menos que las primeras. Tómate 30 segundos si quieres."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Baja el tempo y toca con más impulso. El arrastre se irá cuando se sienta fácil.",
             "Imagina que el clic suena un pelo antes de lo que suena y encuéntralo ahí.",
             "Para, respira y entra empujando ligeramente hacia delante.",
-            "Los dedos se vuelven pesados. Aligera el toque y déjalos flotar."
+            "Las notas caen detrás del clic. Apunta cada una un pelín antes."
           ]
         },
         "personal_best_streak": {
@@ -1760,24 +1760,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "La precisión se va resbalando a este tempo. Levanta las manos, respira y vuelve.",
-            "¿Notas los antebrazos bloqueados? Pausa, suelta las manos y respira.",
+            "La precisión baja a este tempo. Pausa corta y vuelves.",
+            "¿Quieres una pausa corta? Aléjate un momento del teclado.",
             "Se cuelan los fallos a este tempo: 60 segundos fuera del teclado.",
-            "¿Pesan los dedos? Estiramiento rápido y sigue.",
-            "Las manos trabajan más de lo que deberían. Descanso breve.",
-            "Llevas un rato en el teclado. Respira y toca.",
+            "Las notas pierden precisión a un mismo tempo. Pausa rápida y sigue.",
+            "Los fallos suben a este tempo. Descanso breve.",
+            "Llevas un rato en el teclado. Pausa corta y toca.",
             "Un descanso de 30 segundos es una opción, y luego a ello.",
-            "La precisión se va resbalando a un mismo tempo. Pausa, manos en el regazo y respira."
+            "La precisión baja a un mismo tempo. Haz una pausa un momento y sigue tocando."
           ],
           "correction": [
-            "Se nota la fatiga en el toque: para, manos abajo 90 segundos.",
-            "Has pasado tu mejor momento: levántate de la banqueta, sacude el cuerpo y vuelve.",
+            "La precisión sigue bajando a este tempo: para, 90 segundos lejos del teclado.",
+            "Las puntuaciones están por debajo de tu mejor nivel: levántate de la banqueta un minuto y vuelve.",
             "Las puntuaciones siguen bajando a este tempo. Para, descansa y reinicia.",
-            "Los fallos siguen subiendo a un mismo tempo. Manos fuera del teclado, dos minutos de descanso.",
-            "Descanso de verdad: levántate, camina y vuelve fresco.",
-            "Las manos han acabado por ahora. 90 segundos como mínimo y luego revisa.",
+            "Los fallos siguen subiendo a un mismo tempo. Dos minutos lejos del teclado.",
+            "Descanso de verdad: levántate, camina y luego vuelve.",
+            "La precisión sigue bajando. 90 segundos como mínimo y luego revisa.",
             "Parada total. Dos minutos fuera del teclado antes de continuar.",
-            "Si sigues más allá de esto, te estás ganando una lesión. Para y recupérate."
+            "Haz ahora una pausa de verdad, y para si algo duele."
           ]
         },
         "tempo_milestone": {
@@ -1795,10 +1795,10 @@
         "check_in": {
           "neutral": [
             "Tramo largo ante el teclado: ¿una pieza, un ejercicio, algo concreto?",
-            "Más de cinco minutos. ¿Quieres que señale la mano izquierda, la derecha o ambas?",
+            "Más de cinco minutos. ¿Hay algo de la pieza sobre lo que quieras comentarios?",
             "Llevas un buen rato concentrado. Dime sobre qué quieres comentarios.",
             "Buena pasada. ¿Quieres comentarios más precisos sobre un pasaje concreto?",
-            "Llevas un rato en esto. ¿Mano izquierda? ¿Derecha? ¿Voicings? Dime dónde escuchar.",
+            "Llevas un rato en esto. ¿Un pasaje? ¿Un tempo? Dime dónde escuchar.",
             "El pocket ha estado estable. Elige un objetivo si quieres comentarios más de cerca.",
             "Tramo largo ante el teclado. ¿Quieres que señale algo?",
             "Llevas un rato muy metido. Dime qué escuchar a continuación."
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Tus puntuaciones a este tempo bajan hacia el minuto {staminaMinutes}. Respira y vuelve limpio.",
-            "Hacia el minuto {staminaMinutes} empiezan a colarse los fallos. Descanso breve y vuelta.",
-            "Pasado el minuto {staminaMinutes} el toque se vuelve más pesado. Pausa corta y vuelta al teclado.",
-            "La fatiga en las manos aparece hacia el minuto {staminaMinutes}. Descansa y vuelve."
+            "Tus sesiones recientes con esta pieza puntuaron menos que las primeras; duran unos {staminaMinutes} minutos. Una pausa es una opción.",
+            "Tus sesiones con esta pieza duran de media unos {staminaMinutes} minutos, y últimamente puntúan menos que al principio. Descanso breve y vuelta, si quieres.",
+            "Tus sesiones al teclado aquí duran unos {staminaMinutes} minutos, y las recientes puntuaron menos. Pausa corta y vuelta al teclado, si quieres.",
+            "Últimamente tus puntuaciones con esta pieza están por debajo de las primeras, en sesiones de unos {staminaMinutes} minutos. ¿Quieres una pausa?"
           ]
         },
         "bias_only": {

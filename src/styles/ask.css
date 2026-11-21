@@ -591,6 +591,11 @@
 .ask-tool-source.coach-block-source {
   margin: 0;
 }
+/* A source line that opens what it cites is a thumb's 44 px on a phone (leg
+   c2b2b; under that it would not be a target at all). */
+.ask-sheet .coach-block-source-press {
+  min-height: 44px;
+}
 .ask-proposal {
   padding: 12px 14px;
   border: 1px solid var(--ask-line);
