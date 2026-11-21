@@ -5,6 +5,7 @@ pub mod alloc_probe;
 /// The click-jitter probe inside the real app, armed by `YAMES_CALLBACK_PROBE=1`.
 mod app_probe;
 pub mod audio_input;
+mod callback_priority;
 mod calibration_cache;
 // Android (M7, the MVP): the phone runs the same grading as a desktop — the
 // mic, the onset detector, the timing analyzer, the scorer and the store are
@@ -116,6 +117,9 @@ pub mod probe {
     /// the span of its own body and the probe's `#[global_allocator]` counts
     /// every allocation and free made while it is up. See `alloc_probe`.
     pub use crate::alloc_probe::in_callback;
+    /// How the cpal callback threads were scheduled: `(mmcss, fallback,
+    /// failed)`. Always `(0, 0, 0)` off Windows. See `callback_priority`.
+    pub use crate::callback_priority::counts as callback_priority_counts;
     pub use crate::clock::now_ns;
     // `--capture`: the recording session's sync chirp goes through these.
     pub use crate::engine::SpeechSlots;

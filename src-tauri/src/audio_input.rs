@@ -640,9 +640,13 @@ impl AudioInput {
                     let take_on_f32 = take_recording_cb.clone();
                     let frames_f32 = input_frames_cb.clone();
                     let drops_f32 = ring_drops_cb.clone();
+                    // Real-time scheduling for cpal's stream thread on Windows, taken
+                    // on the first callback (see `callback_priority`); a no-op elsewhere.
+                    let mut cb_prio = crate::callback_priority::CallbackPriority::new();
                     device.build_input_stream(
                     &config,
                     move |data: &[f32], _: &cpal::InputCallbackInfo| {
+                        cb_prio.on_callback();
                         let g = f32::from_bits(gain.load(Ordering::Relaxed));
                         let mono: Vec<f32> = data.chunks(channels).map(|f| f[ch] * g).collect();
                         if let Ok(mut r) = ring_for_callback.try_lock() {
@@ -726,9 +730,13 @@ impl AudioInput {
                     let take_on_i16 = take_recording_cb.clone();
                     let frames_i16 = input_frames_cb.clone();
                     let drops_i16 = ring_drops_cb.clone();
+                    // Real-time scheduling for cpal's stream thread on Windows, taken
+                    // on the first callback (see `callback_priority`); a no-op elsewhere.
+                    let mut cb_prio = crate::callback_priority::CallbackPriority::new();
                     device.build_input_stream(
                     &config,
                     move |data: &[i16], _: &cpal::InputCallbackInfo| {
+                        cb_prio.on_callback();
                         let g = f32::from_bits(gain.load(Ordering::Relaxed));
                         let mono: Vec<f32> = data.chunks(channels)
                             .map(|f| (f[ch] as f32 / i16::MAX as f32) * g)
@@ -1127,9 +1135,13 @@ impl AudioInput {
             let logged = Arc::new(AtomicBool::new(false));
             let logged_cb = logged.clone();
 
+            // Real-time scheduling for cpal's stream thread on Windows, taken
+            // on the first callback (see `callback_priority`); a no-op elsewhere.
+            let mut cb_prio = crate::callback_priority::CallbackPriority::new();
             let build_result = device.build_output_stream(
                 &config,
                 move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
+                    cb_prio.on_callback();
                     if !alive_for_cb.load(Ordering::Relaxed) {
                         for s in data.iter_mut() { *s = 0.0; }
                         return;
@@ -1181,9 +1193,13 @@ impl AudioInput {
                     let samples_for_cb2 = samples_arc.clone();
                     let cursor_for_cb2 = cursor.clone();
                     let alive_for_cb2 = alive.clone();
+                    // Real-time scheduling for cpal's stream thread on Windows, taken
+                    // on the first callback (see `callback_priority`); a no-op elsewhere.
+                    let mut cb_prio = crate::callback_priority::CallbackPriority::new();
                     match device.build_output_stream(
                         &config2,
                         move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
+                            cb_prio.on_callback();
                             if !alive_for_cb2.load(Ordering::Relaxed) {
                                 for s in data.iter_mut() {
                                     *s = 0.0;

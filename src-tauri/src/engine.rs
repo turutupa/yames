@@ -3810,7 +3810,10 @@ const BEAT_QUEUE_SLOTS: usize = 512;
 ///   (`sync/mpmc/waker.rs::SyncWaker::notify`) — and the event loop slept in
 ///   `recv_timeout` between beats, so it was registered essentially always.
 ///   A `Mutex` shared with a lower-priority thread, acquired from a
-///   `THREAD_PRIORITY_TIME_CRITICAL` callback, is a priority inversion: the
+///   real-time callback (MMCSS "Pro Audio" on Windows since
+///   `callback_priority`; before it, despite what this said, plain normal
+///   priority, because cpal 0.15.3's TIME_CRITICAL boost passes a thread id
+///   where a handle belongs and fails), is a priority inversion: the
 ///   click waits on the UI thread. T06 saw exactly the symptom — promoting
 ///   the *event loop* improved *callback* jitter, which only makes sense if
 ///   the callback depends on the loop.
@@ -8569,9 +8572,18 @@ impl MetronomeEngine {
                 // of it instead and needs no such thing, hence the rebinding
                 // here rather than a `mut` on the definition.
                 let mut render = render;
+                // Real-time scheduling for cpal's stream thread, taken on the
+                // first callback (cpal 0.15.3's own TIME_CRITICAL boost is a
+                // no-op on Windows; see `callback_priority`). Nothing on
+                // other platforms. Outside `render`, so outside the probe's
+                // allocation span — and it allocates nothing either way.
+                let mut priority = crate::callback_priority::CallbackPriority::new();
                 let built = device.build_output_stream(
                     &config,
-                    move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| render(data),
+                    move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| {
+                        priority.on_callback();
+                        render(data)
+                    },
                     |err| {
                         eprintln!("Audio stream error: {}", err);
                     },
@@ -8787,6 +8799,9 @@ impl MetronomeEngine {
                 // below is the only place the matcher learns where a beat
                 // fell, so every one of these is an expected onset the score
                 // is missing. One relaxed load per pass.
+                // How the callback threads got scheduled, said once per
+                // outcome per process: the callback itself may not print.
+                crate::callback_priority::report_once();
                 let dropped_now = dropped_notifications.load(Ordering::Relaxed);
                 if dropped_now != dropped_said {
                     eprintln!(
