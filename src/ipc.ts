@@ -2096,8 +2096,11 @@ export async function listExerciseCeilings(): Promise<ExerciseCeilingRow[]> {
 
 /**
  * One Exercise's clean tempo over every Take kept (`db.rs` `CleanTempoSpan`):
- * the first earned and the best, each with its Take's `startedAt`. The best
- * is the same number `listExerciseCeilings` reports.
+ * the first earned and the best, each with its Take's `startedAt`. A Take the
+ * player marked not fair is left out, so the best is the clean tempo the app
+ * shows (`shownCleanTempoOf`): the ceiling `listExerciseCeilings` reports,
+ * unless only such a Take holds it. An Exercise whose only clean Takes are
+ * marked not fair has no span.
  */
 export type CleanTempoSpanRow = {
   pathId: string;

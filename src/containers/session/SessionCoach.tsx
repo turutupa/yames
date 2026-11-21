@@ -22,11 +22,12 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { cleanTempoOf, heardItOf, takesOf, upstrokeOf } from "../../session/progress";
+import { heardItOf, lastRaisedOutcome, shownCleanTempoOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { currentStep } from "../../session/runner";
 import type { BigAction, TakeOutcome } from "../../session/runner";
 import { loopLine } from "../../coach/loopLine";
+import { suggestChips } from "../../coach/ask/suggest";
 import { noteNameOf } from "../songs/review/marks";
 import { CoachLine, shortCue } from "../coach/CoachLine";
 import { CoachNote, FactLine, NoteAnswer, NoteBars, NoteChips, NoteCue, NoteLine } from "../coach/CoachNote";
@@ -259,17 +260,20 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
   const next = pick && pick.basis === "measured" && big.kind !== "next" && big.kind !== "finish" ? pick : null;
   const stepNumber = pathStepNumber(session);
   const more = next?.cue.more;
-  const chips: NoteChip[] = howTo.length
-    ? [
-        {
-          kind: "ask",
-          label: t("session.note.chip.try"),
-          onClick: () => setHowOpen((open) => !open),
-          testId: "coach-try",
-          expanded: howOpen,
-        },
-      ]
-    : [];
+  // Chosen by the one chooser (`coach/ask/suggest.ts`, leg c2b1a); the same chip as before.
+  const chips: NoteChip[] = suggestChips("resultNote", { howTo: howTo.length > 0 }).flatMap((chip): NoteChip[] =>
+    chip.kind === "try"
+      ? [
+          {
+            kind: "ask",
+            label: t("session.note.chip.try"),
+            onClick: () => setHowOpen((open) => !open),
+            testId: "coach-try",
+            expanded: howOpen,
+          },
+        ]
+      : [],
+  );
   return (
     <CoachNote headline={headline} live kind="result" testId="coach-note" onAsk={onAsk}>
       <CoachAnswerLine />
@@ -419,11 +423,17 @@ export function ReadyNote({
   useBoundaryVoice("ready", headline);
   if (!exercise || headline === null) return null;
   const source = { kind: "path" as const, ...(stepNumber === undefined ? {} : { step: stepNumber }) };
-  const chips: NoteChip[] = [];
-  if (watch?.canWatch && watch.hasSound && watch.soundOn && !watch.showing) {
-    chips.push({ kind: "play", label: t("session.note.chip.hear"), onClick: watch.toggle, testId: "coach-hear" });
-  }
-  if (onTry) chips.push({ kind: "ask", label: t("session.note.chip.try"), onClick: () => onTry(pick?.cue.more), testId: "coach-try" });
+  // Chosen by the one chooser (`coach/ask/suggest.ts`, leg c2b1a); the same two chips as before.
+  const chips: NoteChip[] = suggestChips("readyNote", {
+    hear: !!(watch?.canWatch && watch.hasSound && watch.soundOn && !watch.showing),
+    howTo: !!onTry,
+  }).flatMap((chip): NoteChip[] =>
+    chip.kind === "hear" && watch
+      ? [{ kind: "play", label: t("session.note.chip.hear"), onClick: watch.toggle, testId: "coach-hear" }]
+      : chip.kind === "try" && onTry
+        ? [{ kind: "ask", label: t("session.note.chip.try"), onClick: () => onTry(pick?.cue.more), testId: "coach-try" }]
+        : [],
+  );
 
   // The Take for the eyes: what to watch, and nothing else.
   if (run.ungraded === "eyes") {
@@ -519,9 +529,8 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
   const path = pathId ? session.paths.find((p) => p.id === pathId) : undefined;
   const exercise = path?.steps.flatMap((s) => s.exercises).find((e) => e.id === last.exerciseId);
   const mine = outcomes.filter((o) => o.exerciseId === last.exerciseId);
-  const raised = [...mine]
-    .reverse()
-    .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
+  // "Rose" against the "before" read now (nf1c L2), not the one frozen at settle.
+  const raised = lastRaisedOutcome(session.progress, outcomes, mine);
   const passed = [...mine].reverse().find((o) => o.grade.verdict === "passed");
   const title = last.title;
   // A clean tempo that rose is the recap's own headline: not said twice.
@@ -529,7 +538,7 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
   if (raised && raised.grade.cleanBpm !== null) moved = null;
   else if (passed) moved = t("session.note.recap.passed", { bpm: passed.bpm });
   else if (last.ungraded === undefined) {
-    const clean = pathId ? cleanTempoOf(session.progress, pathId, last.exerciseId) : null;
+    const clean = pathId ? shownCleanTempoOf(session.progress, pathId, last.exerciseId) : null;
     moved = clean !== null ? t("session.note.recap.held", { bpm: clean }) : t("session.note.recap.played", { bpm: last.bpm });
   }
   let back = t("session.note.recap.backNext", { title });

@@ -209,6 +209,60 @@ describe("contextForModel", () => {
     expect(contextForModel(buildCoachContext(sources()))).not.toMatch(/\bthe bar\b/i);
   });
 
+  it("says 'clean tempo now' only for a Take that moved it and is not marked not fair (nf1b L3)", () => {
+    const raisedTake: TakeOutcome = {
+      ...TAKE,
+      takeId: "raise",
+      grade: { ...TAKE.grade, verdict: "passed", cleanBpm: 92, passesExercise: true },
+    };
+    const markedRow: PathTakeRow = { ...row(0), id: "raise", bpm: 92, passed: true, facts: { verdict: "passed", fair: "no" } };
+    const fairRow: PathTakeRow = { ...markedRow, facts: { verdict: "passed", fair: "yes" } };
+    const text = (take: TakeOutcome, takes: PathTakeRow[]) =>
+      contextForModel(buildCoachContext(sources({ lastTake: () => take, progress: () => ({ ...PROGRESS, takes }) })));
+    expect(text(raisedTake, [fairRow])).toContain("clean tempo before 88; clean tempo now 92");
+    expect(text(raisedTake, [markedRow])).not.toContain("clean tempo now");
+    // Clean, but at or under the clean tempo it already had: nothing moved.
+    expect(text({ ...raisedTake, cleanBefore: 95 }, [fairRow])).not.toContain("clean tempo now");
+    expect(text({ ...raisedTake, cleanBefore: 92 }, [fairRow])).not.toContain("clean tempo now");
+  });
+
+  it("reads 'before' now: an earlier Take of the Session marked not fair drops out of it (nf1c L2)", () => {
+    // A at 85 raised the clean tempo from 80; B at 83 settled with 'before' 85.
+    const a: TakeOutcome = {
+      ...TAKE,
+      takeId: "a",
+      bpm: 85,
+      takeNumber: 1,
+      cleanBefore: 80,
+      grade: { ...TAKE.grade, verdict: "passed", cleanBpm: 85, passesExercise: true },
+    };
+    const b: TakeOutcome = {
+      ...TAKE,
+      takeId: "b",
+      bpm: 83,
+      takeNumber: 2,
+      cleanBefore: 85,
+      grade: { ...TAKE.grade, verdict: "passed", cleanBpm: 83, passesExercise: true },
+    };
+    const aRow = (fair: "yes" | "no"): PathTakeRow => ({ ...row(0), id: "a", bpm: 85, passed: true, facts: { verdict: "passed", fair } });
+    const text = (fair: "yes" | "no") =>
+      contextForModel(
+        buildCoachContext(
+          sources({
+            lastTake: () => b,
+            run: () => ({ ...RUN, outcomes: [a, b] }),
+            progress: () => ({ ...PROGRESS, takes: [aRow(fair)] }),
+          }),
+        ),
+      );
+    // A fair: B is under the 85 it had to clear.
+    expect(text("yes")).toContain("clean tempo before 85");
+    expect(text("yes")).not.toContain("clean tempo now");
+    // A marked not fair: 85 is not a fact any more, and B raised the shown tempo to 83.
+    expect(text("no")).not.toContain("clean tempo before");
+    expect(text("no")).toContain("clean tempo now 83");
+  });
+
   const HUGE: CoachContext = {
     ...buildCoachContext(sources()),
     takesHere: Array.from({ length: 5 }, (_, i) => row(i)),

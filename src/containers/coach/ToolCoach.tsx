@@ -38,6 +38,7 @@ import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
 import { shouldHintCoachAsk } from "../onboarding/hints/triggers";
 import { CoachLine } from "./CoachLine";
 import { CoachNote, NoteChips, NoteLine } from "./CoachNote";
+import { suggestChips } from "../../coach/ask/suggest";
 import type { AskHandler } from "./askStore";
 import "../../styles/coach.css";
 
@@ -198,13 +199,21 @@ export const ToolCoach = /* @__PURE__ */ memo(function ToolCoach({
               })}
             </NoteLine>
           )}
+          {/* The run's own chips, through the one chooser (`coach/ask/suggest.ts`, leg c2b1a): unchanged. */}
           <NoteChips
-            chips={chips.map((chip) => ({
-              kind: "ask" as const,
-              label: chip.label,
-              onClick: () => onChipAction({ kind: "answer", messageId: note.id, chip }),
-              testId: `tool-coach-chip-${chip.id}`,
-            }))}
+            chips={suggestChips("toolNote", { feed: chips.length }).flatMap((choice) => {
+              const chip = choice.kind === "feed" ? chips[choice.index] : undefined;
+              return chip
+                ? [
+                    {
+                      kind: "ask" as const,
+                      label: chip.label,
+                      onClick: () => onChipAction({ kind: "answer", messageId: note.id, chip }),
+                      testId: `tool-coach-chip-${chip.id}`,
+                    },
+                  ]
+                : [];
+            })}
           />
           {note.type === "session-end" && onOpenRuns && (
             <div className="tool-coach-actions">

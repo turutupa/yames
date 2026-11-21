@@ -30,7 +30,7 @@ import { findExercise } from "../session/packs";
 import type { PlanStep, SessionPlan } from "../session/planner";
 import { rungsToDrop } from "../session/planner";
 import type { PlayerProgress } from "../session/progress";
-import { calendarDaysBetween, cleanTempoOf, factsOf, isUngradedTake, sessionKeyOf } from "../session/progress";
+import { calendarDaysBetween, factsOf, isUngradedTake, sessionKeyOf, shownCleanTempoTakeOf } from "../session/progress";
 import type { PathTakeRow } from "../ipc";
 
 /**
@@ -222,11 +222,14 @@ function backLine(input: TodayLineInput, session: readonly PathTakeRow[]): Today
         : { key: `${K}.back.plain`, values: { exercise: exercise.title, bpm: last.bpm } },
     );
   }
-  // The days away as a plain number, then the tempo today starts at: no
-  // "rungs lower than it would have", which named neither.
+  // Then the tempo today starts at: no "rungs lower than it would have", which
+  // named neither. The days away are said once, by Today's header ("Last
+  // Session: 12 days ago", hd1) and the plan's reason; after the last number
+  // they are not said again (nf1b: "That was 12 days ago." removed). With no
+  // last number to say, the line still opens with them.
   const said = lines.length > 0;
   const days = plan.daysAway ?? 0;
-  if (days > 0) lines.push({ key: `${K}.${said ? "backAgo" : "backAway"}`, values: { count: days } });
+  if (days > 0 && !said) lines.push({ key: `${K}.backAway`, values: { count: days } });
   const first = firstExerciseStep(plan);
   if (first && first.why.code === "backEased" && rungsToDrop(days) > 0) {
     // The Exercise is named only when it is not the one the sentence before named.
@@ -284,15 +287,10 @@ export function todayLine(input: TodayLineInput): TodayLine | null {
     if (step.kind !== "exercise") continue;
     const then = earnedThen(step);
     if (!then) continue;
-    const clean = cleanTempoOf(progress, step.pathId, step.exerciseId);
-    const raised = session.find(
-      (t) =>
-        t.pathId === step.pathId &&
-        t.exerciseId === step.exerciseId &&
-        isGraded(t) &&
-        factsOf(t).newClean === true &&
-        t.bpm === clean,
-    );
+    // The Take that set the clean tempo the app shows: never one marked not
+    // fair, so a clean tempo that only such a Take raised was not earned.
+    const setter = shownCleanTempoTakeOf(progress, step.pathId, step.exerciseId);
+    const raised = setter && session.includes(setter) && isGraded(setter) ? setter : null;
     if (!raised || markedUnfair(raised)) continue;
     const exercise = exerciseOf(paths, step.pathId, step.exerciseId);
     if (!exercise) continue;
