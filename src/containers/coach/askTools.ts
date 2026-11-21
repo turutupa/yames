@@ -775,6 +775,8 @@ export function pressUndo(id: string): void {
   const undo = body.undo!;
   // Nothing to undo before the store has said it kept the add (review t2c, finding 4): not offered yet.
   if (body.settling && laterDecidesUndo(undo)) return;
+  // Already pressed (settling, done, refused) or gone: a second press changes nothing (review t2cb, LOW 4).
+  if (undo.state !== "live") return;
   if (!undoLive(undo, Date.now())) {
     setBody(id, { ...body, undo: { ...undo, state: "gone" } });
     return;
@@ -841,7 +843,8 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
     }
     if (undo.view === null || undo.view === view) continue;
     // An add's Undo still on its clock (its own "Open Paths" chip moves the view): the receipt says
-    // where it went and what does the same job, rather than losing it silently (review t2c, finding 3).
+    // it ended (it does not come back) and what does the same job, rather than losing it silently
+    // (review t2c, finding 3; review t2cb, MEDIUM 1).
     const said = laterDecidesUndo(undo) && undoLive(undo, Date.now()) ? { note: line("coachTools.make.undoLeft") } : {};
     setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone", ...said } });
   }

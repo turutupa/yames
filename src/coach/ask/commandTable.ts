@@ -300,6 +300,12 @@ export function validateCommandTable(table: CommandTable): string[] {
     if (!Number.isInteger(n) || n < 1) problems.push(`ordinals.${word} is not a whole number from 1`);
   }
   problems.push(...recipeProblems(table.recipe));
+  // An article read as one is passed over only as a filler: without it the whole line fails (review t2cb, LOW 5).
+  const fillers = new Set((Array.isArray(table.fillers) ? table.fillers : []).map((w) => phraseKey(String(w))));
+  const articleWords: unknown = table.recipe?.article?.words;
+  for (const word of Array.isArray(articleWords) ? articleWords : []) {
+    if (typeof word === "string" && !fillers.has(phraseKey(word))) problems.push(`recipe.article.words: "${word}" is not also in fillers`);
+  }
   return problems;
 }
 

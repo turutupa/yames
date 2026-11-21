@@ -12,7 +12,7 @@ import { loadExerciseGenerator } from "../../coach/tools/make";
 import type { MyExerciseAdd } from "../../coach/tools/host";
 import i18n from "../../i18n";
 import { __resetAskStoreForTests, getAskState, useAskState } from "./askStore";
-import { __setAskToolsForTests, noteAskToolView, runAskCall } from "./askTools";
+import { __setAskToolsForTests, noteAskToolView, pressUndo, runAskCall } from "./askTools";
 import { AskToolTurn } from "./AskToolTurn";
 
 function Thread() {
@@ -138,7 +138,68 @@ describe("make_exercise in Ask", () => {
     expect(screen.getByTestId("ask-undone")).toHaveTextContent("Undone. Taken back out of My exercises.");
   });
 
-  it("Open Paths goes to Paths; the receipt says the Undo stayed behind and what does its job there (review t2c, 3)", async () => {
+  it("a second press while the Undo is settling changes nothing; the store's answer decides (review t2cb, LOW 4)", async () => {
+    let takeOut: (answer: "undone") => void = () => {};
+    const undone: number[] = [];
+    const host = fakeHost(
+      { view: "today" },
+      {
+        addMyExercise: () => Promise.resolve("added"),
+        undoAddedExercise: (_key, at) => {
+          undone.push(at);
+          return new Promise<"undone">((resolve) => (takeOut = resolve));
+        },
+      },
+    );
+    __setAskToolsForTests(host, toolCtx());
+    render(<Thread />);
+    act(() => void runAskCall(MOCK_17, ""));
+    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
+    await act(async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve();
+    });
+    const id = getAskState().turns.find((t) => t.kind === "tool" && t.body.kind === "receipt")!.id;
+    const undoState = () => {
+      const turn = getAskState().turns.find((t) => t.id === id);
+      return turn?.kind === "tool" && turn.body.kind === "receipt" ? turn.body.undo?.state : undefined;
+    };
+    act(() => pressUndo(id));
+    expect(undoState()).toBe("settling");
+    act(() => pressUndo(id));
+    expect(undoState()).toBe("settling");
+    expect(undone).toHaveLength(1);
+    await act(async () => {
+      takeOut("undone");
+      for (let i = 0; i < 5; i++) await Promise.resolve();
+    });
+    expect(undoState()).toBe("done");
+    // And a press after the answer leaves "Undone." as it is.
+    act(() => pressUndo(id));
+    expect(undoState()).toBe("done");
+    expect(screen.getByTestId("ask-undone")).toHaveTextContent("Undone. Taken back out of My exercises.");
+  });
+
+  it("an unreadable store: the Undo says nothing was taken out, not that the entry is there (review t2cb, LOW 6)", async () => {
+    const host = fakeHost(
+      { view: "today" },
+      { addMyExercise: () => Promise.resolve("added"), undoAddedExercise: () => Promise.resolve("unreadable") },
+    );
+    __setAskToolsForTests(host, toolCtx());
+    render(<Thread />);
+    act(() => void runAskCall(MOCK_17, ""));
+    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
+    await act(async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve();
+    });
+    act(() => fireEvent.click(screen.getByTestId("ask-undo")));
+    await act(async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve();
+    });
+    expect(screen.getByTestId("ask-receipt")).toHaveTextContent("My exercises couldn't be read just now, so nothing was taken out.");
+    expect(screen.getByTestId("ask-receipt")).not.toHaveTextContent("still there");
+  });
+
+  it("Open Paths goes to Paths; the receipt says the Undo ended there and what does its job instead (review t2c, 3; t2cb, MEDIUM 1)", async () => {
     const { host, undone } = hostWith("added");
     render(<Thread />);
     act(() => void runAskCall(MOCK_17, ""));
@@ -153,8 +214,12 @@ describe("make_exercise in Ask", () => {
     act(() => noteAskToolView("paths", null));
     const receipt = screen.getAllByTestId("ask-receipt")[0];
     expect(receipt.querySelector("[data-testid='ask-undo']")).toBeNull();
-    expect(receipt).toHaveTextContent("The Undo stayed on the screen this was added on. To take it out, use Remove on My exercises in Paths.");
+    expect(receipt).toHaveTextContent("The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.");
+    expect(receipt).not.toHaveTextContent("stayed");
     expect(undone).toEqual([]);
+    // Back on Today: the Undo does not come back.
+    act(() => noteAskToolView("today", null));
+    expect(screen.queryByTestId("ask-undo")).toBeNull();
   });
 
   it("a full list: the receipt says so, and offers no Undo", async () => {

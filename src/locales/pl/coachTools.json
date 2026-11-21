@@ -216,7 +216,7 @@
         "failed": "My exercises couldn't be saved just now, so nothing was added.",
         "undo": {
           "gone": "It's no longer on My exercises.",
-          "unreadable": "My exercises couldn't be read just now, so it's still there.",
+          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
           "failed": "My exercises couldn't be saved just now, so it's still there."
         },
         "tooManyNotes_few": "One time through needs {{count}} bars.",
@@ -306,7 +306,7 @@
       "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
       "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
       "openPaths": "Open Paths",
-      "undoLeft": "The Undo stayed on the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
       "chip": {
         "fret": "Fret {{fret}}",
         "bars": "{{count}} bar",

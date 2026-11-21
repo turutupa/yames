@@ -188,7 +188,7 @@
     "article": {
       "words": ["a"],
       "rootAfter": ["an", "the", "in"],
-      "rootBefore": ["minor pentatonic", "major pentatonic", "minor 7", "minor seventh", "major 7", "major seventh"]
+      "rootBefore": ["minor pentatonic", "major pentatonic", "minor 7", "minor seventh", "major 7", "major seventh", "minor blues"]
     }
   }
 }

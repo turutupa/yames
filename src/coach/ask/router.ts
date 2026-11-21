@@ -794,7 +794,10 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
   let exerciseWord = made;
   // The scale or chord was named with no key ("make a blues exercise"): the tool asks which (`why.make.root`).
   let keyless = false;
-  const once = (name: string, value: string | number): boolean => {
+  // "a" was read as A only because a quality word followed it ("make a minor pentatonic exercise"):
+  // a key the player names at the end ("… in e") is plainer, and wins (review t2cb, LOW 2).
+  let guessed = false;
+  const once =(name: string, value: string | number): boolean => {
     if (name in args) return false;
     args[name] = value;
     return true;
@@ -809,8 +812,9 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
       // "a chromatic exercise": the shape with no key, not A's chromatic scale.
       if (root && music && music.id !== "chromatic") {
         const read = articleOrRoot(t, q, root.rest, c, r, musicOf);
-        if (read === "root") {
+        if (read === "root" || read === "guess") {
           args.root = root.name;
+          guessed = read === "guess";
           args[reading] = music.id;
           q = skip(music.rest, c.nouns.scale);
           continue;
@@ -823,6 +827,13 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
         }
         // The article before a root that follows ("make a c major exercise"): a filler, below.
       }
+    }
+    const key = keyless || guessed ? trailingKey(q, c, r) : null;
+    if (key) {
+      args.root = key;
+      keyless = guessed = false;
+      q = [];
+      continue;
     }
     const shape = leadId(q, r.shapes);
     if (shape) {
@@ -880,18 +891,32 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
  * article with no key said at all? Only a letter in `article.words` ("a") is
  * ever anything but the root.
  */
-function articleOrRoot(t: Toks, q: Toks, afterRoot: Toks, c: Compiled, r: CompiledRecipe, musicOf: Compiled["scales"]): "root" | "article" | "keyless" {
+function articleOrRoot(t: Toks, q: Toks, afterRoot: Toks, c: Compiled, r: CompiledRecipe, musicOf: Compiled["scales"]): "root" | "guess" | "article" | "keyless" {
   const a = r.article;
   // "a#", "ab", "a sharp", "a flat": a root, never an article.
   if (!a.words.includes(q[0]) || afterRoot.length !== q.length - 1) return "root";
   const before = t.slice(0, t.length - q.length);
   if (a.rootAfter.some((p) => endsWith(before, p))) return "root";
-  if (a.rootBefore.some((p) => startsWith(afterRoot, p))) return "root";
+  // "a minor pentatonic": read as A, unless the line names its key at the end (`trailingKey`).
+  if (a.rootBefore.some((p) => startsWith(afterRoot, p))) return "guess";
   for (let i = 1; i < q.length; i++) {
     const later = rootAt(q.slice(i), c);
     if (later && leadId(later.rest, musicOf)) return "article";
   }
   return "keyless";
+}
+
+/**
+ * A key named after the scale, as the line's last words ("make a blues exercise in e"): one of
+ * `article.rootAfter` that is also a connector ("in"), then a root and nothing after it. A table
+ * with no article has none (review t2cb, LOW 2).
+ */
+function trailingKey(q: Toks, c: Compiled, r: CompiledRecipe): string | null {
+  const connectors = [...c.connectors.at, ...c.connectors.of, ...c.connectors.for].map((p) => p.join(" "));
+  const lead = r.article.rootAfter.filter((p) => connectors.includes(p.join(" ")));
+  const rest = lead.length > 0 ? after(q, lead) : null;
+  const root = rest ? rootAt(rest, c) : null;
+  return root && root.rest.length === 0 ? root.name : null;
 }
 
 /** The recipe the words are, or null (not a recipe, or not in this language's table). */

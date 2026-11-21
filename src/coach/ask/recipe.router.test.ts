@@ -39,6 +39,14 @@ export const RECIPE_LINES: ReadonlyArray<[string, ToolArgs]> = [
   ["make a c major exercise", { root: "C", scale: "major" }],
   ["make an exercise in a minor pentatonic", { root: "A", scale: "minorPentatonic" }],
   ["a minor pentatonic box in eighths", { root: "A", scale: "minorPentatonic", shape: "box", subdivision: 2 }],
+  // Review t2cb, LOW 3: "minor blues" reads "a" as A, as "minor pentatonic" does.
+  ["make a minor blues exercise", { root: "A", scale: "blues" }],
+  // Review t2cb, LOW 2: a key named at the end of the line is read, and wins over "a" read as A.
+  ["make a blues exercise in e", { root: "E", scale: "blues" }],
+  ["make a major scale exercise in g", { root: "G", scale: "major" }],
+  ["make a minor pentatonic exercise in e", { root: "E", scale: "minorPentatonic" }],
+  ["make a minor 7 arpeggio in e", { root: "E", chord: "m7", shape: "arpeggio" }],
+  ["make a blues exercise in f sharp", { root: "F#", scale: "blues" }],
 ];
 
 /** Whether a typed line ends in a `make_exercise` proposal (one press from the store). */
@@ -52,6 +60,11 @@ function proposes(text: string, f = today): boolean {
 describe("typed recipes, English", () => {
   it("the English table's recipe words are valid", () => {
     expect(validateCommandTable(EN)).toEqual([]);
+  });
+
+  it("an article's letter that is not also a filler is a problem (review t2cb, LOW 5)", () => {
+    const bad = { ...EN, fillers: EN.fillers.filter((w) => w !== "a") } as CommandTable;
+    expect(validateCommandTable(bad).join("\n")).toContain('recipe.article.words: "a" is not also in fillers');
   });
 
   it.each(RECIPE_LINES)("%s", (text, args) => {
@@ -110,6 +123,11 @@ describe("near-misses: never a recipe", () => {
     "spider",
     "a minor pentatonic position 2",
     "make a minor pentatonic position 2",
+    // Review t2cb, LOW 2: only "in" and a lone root at the end; two keys, or "on e" (a string?), stay unread.
+    "make a c major exercise in e",
+    "make a blues exercise on e",
+    "make a blues exercise in e minor",
+    "make a minor pentatonic exercise in e at the 5th fret",
   ];
   it.each(NONE)("%s", (text) => {
     const r = route(text);
@@ -126,6 +144,11 @@ describe("near-misses: never a recipe", () => {
     ["make a minor arpeggio", { chord: "min", shape: "arpeggio" }],
     ["make me a blues box", { scale: "blues", shape: "box" }],
     ["a blues exercise", { scale: "blues" }],
+    // Review t2cb, LOW 3, left out of `rootBefore` on purpose: "a seventh arpeggio" and "a dominant 7
+    // arpeggio" read as the article and a quality, so reading A would guess a key.
+    ["make a seventh arpeggio", { chord: "7", shape: "arpeggio" }],
+    ["make a dominant 7 arpeggio", { chord: "7", shape: "arpeggio" }],
+    ["make a 7 arpeggio", { chord: "7", shape: "arpeggio" }],
   ];
   it.each(KEYLESS)("%s: no key, so the tool asks which", (text, args) => {
     const r = route(text);
