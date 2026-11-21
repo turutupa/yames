@@ -153,7 +153,8 @@ test.describe("Settings → Practice reminder on a phone", () => {
     await openShot(page, "metronome", { width: 360, height: 800 }, "ember", { reminder: "on" });
     await page.click('.mobile-tab[data-tab="settings"]');
     await page.waitForSelector(".settings-section");
-    await expect(page.locator("#settings-coach-reminder")).toHaveCount(1);
+    // Leg c6a: the row sits in Settings → Coach's Suggestions group on a phone too.
+    await expect(page.locator('#settings-coach [data-coach-group="suggestions"] [data-testid="coach-reminder-row"]')).toHaveCount(1);
     await rowFits(page, 44);
     await noSidewaysScroll(page, "Settings");
     await page.getByTestId("coach-reminder-row").scrollIntoViewIfNeeded();
