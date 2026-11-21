@@ -1523,27 +1523,9 @@ pub async fn start_evaluation(
             // Also persist into the accumulator so the D1 diagnostic log
             // (written at stop_evaluation) includes the segments timeline.
             if let Ok(mut acc) = session_for_segment.lock() {
-                acc.push_segment(crate::session_log::PracticeSegment {
-                    start_ms: segment_end.start_ms,
-                    end_ms: segment_end.end_ms,
-                    start_bpm: segment_end.bpm,
-                    end_bpm: segment_end.bpm,
-                    score: segment_end.score,
-                    component_scores: segment_end.component_scores.clone(),
-                    end_reason: segment_end.end_reason,
-                    // Path B — propagate the inferred divisor so the D1
-                    // diagnostic log records what grid the matcher was
-                    // scoring against (essential for debugging "why did
-                    // this score this way?" from session_*.json).
-                    inferred_divisor: segment_end.inferred_divisor,
-                    inferred_divisor_confidence: segment_end.inferred_divisor_confidence,
-                    // D4c — forward raw IC errors for post-hoc debugging.
-                    interval_errors: segment_end.interval_errors.clone(),
-                    // D4c — and where each burst starts in them, without
-                    // which the errors above cannot reproduce the IC
-                    // score they sit beside.
-                    burst_start_indices: segment_end.burst_start_indices.clone(),
-                });
+                // Field by field: the event's free-play findings are not
+                // stored (`PracticeSegment::from_segment_end`).
+                acc.push_segment(crate::session_log::PracticeSegment::from_segment_end(&segment_end));
             }
         },
         move |converged_offset_ms| {

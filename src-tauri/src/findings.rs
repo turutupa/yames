@@ -37,7 +37,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::score::{ExtraOnset, OnsetResult, OnsetState, ScoreSchedule, SongScore, Technique};
 use crate::srs::COMFORTABLE_MAD_MS;
-use crate::timing::{tempo_aware_window_ms, window_thresholds, BeatFeedback, BeatTick};
+use crate::timing::{tempo_aware_window_ms, window_thresholds, BeatTick};
 
 // ---------------------------------------------------------------------------
 // How much is enough — the constants every rule is stated in
@@ -132,9 +132,6 @@ const CLEAN_COME_BACK_DAYS: u16 = 3;
 /// Free play: BPM is bucketed this coarsely before the ceiling is looked
 /// for. Ten BPM is the granularity a player thinks in.
 const CEILING_BAND_BPM: u16 = 10;
-
-/// …and a band needs this many samples before it may claim a ceiling.
-const CEILING_MIN_SAMPLES: u32 = 8;
 
 /// Free play: a subdivision position this much weaker than the best one is
 /// the weak one.
@@ -296,6 +293,39 @@ pub struct Evidence {
     /// …and how many ms of spread came off.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub spread_delta_ms: Option<f64>,
+    /// Free play only: what the tools' note's sentence counts, so it can
+    /// say what it counted (c5c2b M3).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub free_play: Option<FreePlayCounts>,
+}
+
+/// The counts a free-play sentence quotes beside its number. What each
+/// field holds depends on the finding's kind; a field a kind does not use
+/// is zero (or `None`) and is never quoted.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FreePlayCounts {
+    /// beatPositionBias: notes on that beat · subdivisionWeak: beats played
+    /// through (a note matched somewhere in the beat) · drift: notes in the
+    /// stretch.
+    pub counted: u32,
+    /// beatPositionBias: of `counted`, the notes on the side the sentence
+    /// names · subdivisionWeak: of `counted`, the beats with no note on the
+    /// position · drift: notes in each of the first and the last third.
+    pub agreeing: u32,
+    /// tempoCeiling: the lower band as played, (slowest, fastest) BPM rounded.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub low_bpm: Option<(u16, u16)>,
+    /// tempoCeiling: the higher band as played.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub high_bpm: Option<(u16, u16)>,
+    /// tempoCeiling: notes in each band.
+    pub low_notes: u32,
+    pub high_notes: u32,
+    /// tempoCeiling: each band's median distance from its own median offset
+    /// against the click, ms (half the notes within it, half at it or past).
+    pub low_spread_ms: f64,
+    pub high_spread_ms: f64,
 }
 
 /// One thing the coach found.
@@ -1580,35 +1610,95 @@ fn rule_clean(ctx: &Context, agg: &Aggregate, attempt: &Attempt) -> Option<Findi
 // Stage A, second half — free play (E3)
 // ---------------------------------------------------------------------------
 
-/// One scored beat tick of free play: what the metronome expected, and what
-/// the matcher made of it. Both types come from `timing.rs` unchanged — the
-/// caller pairs them, because `BeatFeedback` alone cannot say which
-/// subdivision of which beat it is.
-#[derive(Debug, Clone)]
+/// One scored tick of free play, compact: what the click sounded and what
+/// the matcher made of it, in 20 bytes and no heap (c5c2b L1). The analysis
+/// loop builds one per hit and per genuine miss; skipped ticks (grace,
+/// rests past the activity tolerance) are never recorded.
+///
+/// Every tick here is one the click really sounded. The positions the
+/// matcher invents between the click's ticks for a finer played grid
+/// (roadmap 1.3's virtual ticks) are counted on a *different* grid from the
+/// click's, so they are recorded only as `invented` — evidence that the
+/// player was playing in that beat, never a position a sentence names, and
+/// never a note any of the four rules measures (c5c2b H1).
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FreePlayBeat {
-    pub tick: BeatTick,
-    pub feedback: BeatFeedback,
+    /// The engine's beat counter. Consecutive records with the same value
+    /// are the same beat (the counter restarts only with the click).
+    pub beat_index: u32,
+    /// The quarter-note length the click ran at, ms.
+    pub beat_ms: f32,
+    /// Onset minus click, ms, *before* the running calibration: a constant
+    /// output-plus-input latency is in it, so only differences between
+    /// notes are ever read from it (c5c2b M1). Zero for a miss.
+    pub raw_offset_ms: f32,
+    /// The engine's bar-local beat (`BeatTick::bar_beat`), 0-based.
+    pub bar_beat: u8,
+    /// Position inside the beat on the click's grid, of `sub_total`.
+    pub sub_index: u8,
+    pub sub_total: u8,
+    pub hit: bool,
+    /// A position the matcher invented (see above).
+    pub invented: bool,
 }
+
+/// The newest this many records of a segment are kept; an older one is
+/// dropped as a new one comes (320 KB at most: 68 minutes of eighths at
+/// 120 BPM). Every sentence counts what it read, so a dropped head changes
+/// a count, never the truth of a sentence.
+pub const FREE_PLAY_MAX_BEATS: usize = 16_384;
 
 impl FreePlayBeat {
-    fn is_hit(&self) -> bool {
-        matches!(
-            self.feedback.classification.as_str(),
-            "perfect" | "good" | "ok"
-        )
+    /// A tick a note was matched to. `invented` = a virtual tick.
+    pub fn played(tick: &BeatTick, raw_offset_ms: f64, invented: bool) -> Self {
+        Self::of(tick, true, raw_offset_ms, invented)
     }
 
-    fn is_scored(&self) -> bool {
-        self.is_hit() || self.feedback.classification == "miss"
+    /// A tick inside the activity tolerance with no note on it, or one the
+    /// matcher ruled a miss.
+    pub fn missed(tick: &BeatTick, invented: bool) -> Self {
+        Self::of(tick, false, 0.0, invented)
     }
 
-    /// `BeatTick::expected_interval_ms` is the quarter-note interval on
-    /// every tick of the beat, subdivisions included — so it is the beat
-    /// length, unmodified.
+    fn of(tick: &BeatTick, hit: bool, raw_offset_ms: f64, invented: bool) -> Self {
+        Self {
+            beat_index: tick.beat_index,
+            beat_ms: tick.expected_interval_ms.max(1.0) as f32,
+            raw_offset_ms: if hit { raw_offset_ms as f32 } else { 0.0 },
+            bar_beat: tick.bar_beat.min(255) as u8,
+            sub_index: tick.subdivision_index,
+            sub_total: tick.subdivision_total.max(1),
+            hit,
+            invented,
+        }
+    }
+
+    /// A note matched to a tick the click sounded: what the rules measure.
+    fn is_click_hit(&self) -> bool {
+        self.hit && !self.invented
+    }
+
     fn beat_ms(&self) -> f64 {
-        self.tick.expected_interval_ms.max(1.0)
+        f64::from(self.beat_ms).max(1.0)
+    }
+
+    fn offset(&self) -> f64 {
+        f64::from(self.raw_offset_ms)
+    }
+
+    fn bpm(&self) -> u16 {
+        (60_000.0 / self.beat_ms()).round().clamp(1.0, 999.0) as u16
     }
 }
+
+/// The least a free-play sentence stands on: notes on one beat of the bar
+/// for (a), beats played through for (b), notes in each tempo band for
+/// (c), notes in each third for (d) (c5c2b M3).
+const FREE_MIN_NOTES: u32 = 8;
+
+/// (a) is said only when at least three in four of that beat's notes sit
+/// on the side the sentence names.
+const FREE_SAME_SIDE_FRACTION: f64 = 0.75;
 
 /// The free-play half of `LEARNING_PATHS_DECISIONS.md` E3: what can be said
 /// about a segment with no score behind it.
@@ -1631,35 +1721,56 @@ pub fn analyze_free_play(beats: &[FreePlayBeat]) -> Vec<Finding> {
 
 /// Per-beat-position bias: one beat of the bar out of line with the others.
 /// Quarter-note positions only — a subdivision tick is not a beat.
+///
+/// The beat is the engine's bar-local one (`bar_beat`), so a meter change
+/// or a setlist's held meter in the middle of play does not shift it (H2).
+/// Offsets are the raw ones: the delta between this beat and the others is
+/// a difference, so a constant latency, and a stale calibration seed, cancel
+/// (M1). Said only on at least `FREE_MIN_NOTES` notes on that beat with
+/// three in four of them on the side named, measured against the mean of
+/// the *other* beats (M3).
 fn free_beat_position(beats: &[FreePlayBeat]) -> Option<Finding> {
-    let mut buckets: Vec<Tally> = vec![Tally::default(); 17];
-    let mut global = Tally::default();
+    let mut sums = [(0u32, 0.0f64, 0.0f64); 16];
     for b in beats {
-        if b.tick.subdivision_index != 0 || !b.is_hit() {
+        if b.sub_index != 0 || !b.is_click_hit() || usize::from(b.bar_beat) >= sums.len() {
             continue;
         }
-        let per_bar = usize::from(b.tick.beats_per_bar.max(1)).min(16);
-        let position = (b.tick.beat_index as usize) % per_bar;
-        buckets[position].hit(b.feedback.deviation_ms, b.beat_ms());
-        global.hit(b.feedback.deviation_ms, b.beat_ms());
+        let s = &mut sums[usize::from(b.bar_beat)];
+        s.0 += 1;
+        s.1 += b.offset();
+        s.2 += b.beat_ms();
     }
-    if global.hits < MIN_ONSETS {
+    let all_n: u32 = sums.iter().map(|s| s.0).sum();
+    let all_sum: f64 = sums.iter().map(|s| s.1).sum();
+    let all_ms: f64 = sums.iter().map(|s| s.2).sum();
+    if all_n == 0 {
         return None;
     }
-    let threshold = bias_threshold_ms(global.beat_ms());
-    let mut worst: Option<(usize, f64)> = None;
-    for (position, tally) in buckets.iter().enumerate() {
-        if tally.hits < MIN_ONSETS {
+    let threshold = bias_threshold_ms(all_ms / f64::from(all_n));
+    // (position, delta, the others' mean)
+    let mut worst: Option<(usize, f64, f64)> = None;
+    for (position, &(n, sum, _)) in sums.iter().enumerate() {
+        let others = all_n - n;
+        if n < FREE_MIN_NOTES || others < FREE_MIN_NOTES {
             continue;
         }
-        let delta = tally.mean_dev() - global.mean_dev();
-        if delta.abs() >= threshold && worst.is_none_or(|(_, d): (usize, f64)| delta.abs() > d.abs())
-        {
-            worst = Some((position, delta));
+        let others_mean = (all_sum - sum) / f64::from(others);
+        let delta = sum / f64::from(n) - others_mean;
+        if delta.abs() >= threshold && worst.is_none_or(|(_, d, _)| delta.abs() > d.abs()) {
+            worst = Some((position, delta, others_mean));
         }
     }
-    let (position, delta) = worst?;
-    let tally = buckets[position];
+    let (position, delta, others_mean) = worst?;
+    let (notes, _, ms_sum) = sums[position];
+    let agreeing = beats
+        .iter()
+        .filter(|b| b.sub_index == 0 && b.is_click_hit() && usize::from(b.bar_beat) == position)
+        .filter(|b| (b.offset() - others_mean) * delta.signum() > 0.0)
+        .count() as u32;
+    if f64::from(agreeing) < FREE_SAME_SIDE_FRACTION * f64::from(notes) {
+        return None;
+    }
+    let beat_ms = ms_sum / f64::from(notes);
     let active = dominant_subdivision(beats);
 
     Some(Finding {
@@ -1668,10 +1779,21 @@ fn free_beat_position(beats: &[FreePlayBeat]) -> Option<Finding> {
         note_ids: Vec::new(),
         severity: (delta.abs() / (3.0 * threshold.max(1.0))).clamp(0.0, 1.0) as f32,
         evidence: Evidence {
+            onsets: notes,
+            hits: notes,
+            hit_rate: 1.0,
+            mean_deviation_ms: delta,
+            deviation_beats: delta / beat_ms.max(1.0),
+            passes: 1,
             beat_position: Some((position + 1) as u8),
-            reference_bpm: Some(60_000.0 / tally.beat_ms().max(1.0)),
+            reference_bpm: Some(60_000.0 / beat_ms.max(1.0)),
             passes_affected: 1,
-            ..evidence_of(&tally, 1)
+            free_play: Some(FreePlayCounts {
+                counted: notes,
+                agreeing,
+                ..FreePlayCounts::default()
+            }),
+            ..Evidence::default()
         },
         fix: denser_subdivision(active).map(|subdivision| Fix::ClickSubdivision {
             start: None,
@@ -1682,22 +1804,39 @@ fn free_beat_position(beats: &[FreePlayBeat]) -> Option<Finding> {
 }
 
 /// Per-subdivision hit rate: the position inside the beat that goes missing.
+///
+/// Counted on the click's own grid only: the position is named by the
+/// click's subdivision, the most common one in the segment, and an invented
+/// tick never lands in a bucket (H1). A beat counts only when it was played
+/// through — a note matched somewhere in it, on the click or between its
+/// ticks. The first ticks of a rest still inside the activity tolerance are
+/// misses in the score, but a beat with no note at all is a rest, not a
+/// position that went missing, and is left out (c5c2b H1, rests).
 fn free_subdivision(beats: &[FreePlayBeat]) -> Option<Finding> {
-    let mut buckets: Vec<Tally> = vec![Tally::default(); 7];
-    let mut total = 0u8;
-    for b in beats {
-        if !b.is_scored() || b.tick.subdivision_total <= 1 {
+    let total = dominant_subdivision(beats);
+    if total <= 1 || total > 6 {
+        return None;
+    }
+    // One tick per position per beat, so a bucket's count is a count of
+    // beats: the beats played through on which the click sounded it.
+    let mut buckets: Vec<Tally> = vec![Tally::default(); 6];
+    for beat in beats.chunk_by(|a, b| a.beat_index == b.beat_index) {
+        if !beat.iter().any(|b| b.hit) {
             continue;
         }
-        total = total.max(b.tick.subdivision_total);
-        let position = usize::from(b.tick.subdivision_index.min(6));
-        if b.is_hit() {
-            buckets[position].hit(b.feedback.deviation_ms, b.beat_ms());
-        } else {
-            buckets[position].misses += 1;
+        for b in beat {
+            if b.invented || b.sub_total != total || b.sub_index >= total {
+                continue;
+            }
+            let position = usize::from(b.sub_index);
+            if b.hit {
+                buckets[position].hit(0.0, b.beat_ms());
+            } else {
+                buckets[position].misses += 1;
+            }
         }
     }
-    let eligible: Vec<usize> = (0..7).filter(|&i| buckets[i].scored() >= MIN_ONSETS).collect();
+    let eligible: Vec<usize> = (0..6).filter(|&i| buckets[i].scored() >= FREE_MIN_NOTES).collect();
     if eligible.len() < 2 {
         return None;
     }
@@ -1732,6 +1871,11 @@ fn free_subdivision(beats: &[FreePlayBeat]) -> Option<Finding> {
             hit_rate_delta: Some(-gap),
             reference_bpm: Some(reference),
             passes_affected: 1,
+            free_play: Some(FreePlayCounts {
+                counted: tally.scored(),
+                agreeing: tally.misses,
+                ..FreePlayCounts::default()
+            }),
             ..evidence_of(&tally, 1)
         },
         // Slow it down and climb back: a position you drop is a position you
@@ -1745,46 +1889,55 @@ fn free_subdivision(beats: &[FreePlayBeat]) -> Option<Finding> {
     })
 }
 
-/// The tempo band where consistency collapses, from a segment that changed
+/// The tempo band where the timing spreads, from a segment that changed
 /// tempo — a ramp, or a drill that climbed.
+///
+/// One quantity, measured the same way at each tempo and quoted with the
+/// tempos as played (c5c2b M3): a band's spread, the median distance of its
+/// notes from their own median offset against the click — at least half the
+/// notes within it, at least half at it or past it. Raw offsets, so the
+/// calibration never enters it (M1). Said when a lower band's spread is
+/// within `COMFORTABLE_MAD_MS` and a higher band's is past it and at least
+/// `FREE_CEILING_GAP_MS` wider, each on at least `FREE_MIN_NOTES` notes on
+/// the click.
 fn free_tempo_ceiling(beats: &[FreePlayBeat]) -> Option<Finding> {
-    let mut bands: Vec<(u16, Vec<f64>, Tally)> = Vec::new();
+    // (band floor, offsets, slowest BPM, fastest BPM)
+    let mut bands: Vec<(u16, Vec<f64>, u16, u16)> = Vec::new();
     for b in beats {
-        if !b.is_scored() {
+        if !b.is_click_hit() {
             continue;
         }
-        let bpm = (60_000.0 / b.tick.expected_interval_ms.max(1.0)).round();
-        let band = ((bpm as u16) / CEILING_BAND_BPM) * CEILING_BAND_BPM;
-        let slot = match bands.iter().position(|(b2, _, _)| *b2 == band) {
+        let bpm = b.bpm();
+        let band = (bpm / CEILING_BAND_BPM) * CEILING_BAND_BPM;
+        let slot = match bands.iter().position(|(floor, ..)| *floor == band) {
             Some(i) => i,
             None => {
-                bands.push((band, Vec::new(), Tally::default()));
+                bands.push((band, Vec::new(), bpm, bpm));
                 bands.len() - 1
             }
         };
-        if b.is_hit() {
-            bands[slot].1.push(b.feedback.deviation_ms);
-            bands[slot].2.hit(b.feedback.deviation_ms, b.beat_ms());
-        } else {
-            bands[slot].2.misses += 1;
-        }
+        let s = &mut bands[slot];
+        s.1.push(b.offset());
+        s.2 = s.2.min(bpm);
+        s.3 = s.3.max(bpm);
     }
-    bands.retain(|(_, _, t)| t.scored() >= CEILING_MIN_SAMPLES);
-    bands.sort_by_key(|(band, _, _)| *band);
+    bands.retain(|(_, offsets, ..)| offsets.len() >= FREE_MIN_NOTES as usize);
+    bands.sort_by_key(|(band, ..)| *band);
     if bands.len() < 2 {
         return None;
     }
 
-    let mad: Vec<f64> = bands.iter().map(|(_, devs, _)| spread(devs).mad_ms).collect();
+    let mad: Vec<f64> = bands.iter().map(|(_, offsets, ..)| centred_mad(offsets)).collect();
     let comfortable = (0..bands.len())
-        .filter(|&i| mad[i] <= COMFORTABLE_MAD_MS && bands[i].2.hit_rate() >= COMFORTABLE_HIT_RATE)
+        .filter(|&i| mad[i] <= COMFORTABLE_MAD_MS)
         .next_back()?;
     let collapse = (comfortable + 1..bands.len())
-        .find(|&i| mad[i] > COMFORTABLE_MAD_MS || bands[i].2.hit_rate() < CEILING_HIT_RATE)?;
+        .find(|&i| mad[i] > COMFORTABLE_MAD_MS && mad[i] >= mad[comfortable] + FREE_CEILING_GAP_MS)?;
 
     let held = bands[comfortable].0;
     let broke = bands[collapse].0;
     let to_percent = ((f64::from(broke) / f64::from(held.max(1))) * 100.0).round() as u16;
+    let high_notes = bands[collapse].1.len() as u32;
 
     Some(Finding {
         kind: FindingKind::TempoCeiling,
@@ -1792,11 +1945,28 @@ fn free_tempo_ceiling(beats: &[FreePlayBeat]) -> Option<Finding> {
         note_ids: Vec::new(),
         severity: ((mad[collapse] / COMFORTABLE_MAD_MS) - 1.0).clamp(0.0, 1.0) as f32,
         evidence: Evidence {
+            onsets: high_notes,
+            hits: high_notes,
+            hit_rate: 1.0,
+            passes: 1,
             spread_ms: mad[collapse],
             bpm_band: Some((held, broke)),
             reference_bpm: Some(f64::from(held)),
             passes_affected: 1,
-            ..evidence_of(&bands[collapse].2, 1)
+            free_play: Some(FreePlayCounts {
+                low_bpm: Some((bands[comfortable].2, bands[comfortable].3)),
+                high_bpm: Some((bands[collapse].2, bands[collapse].3)),
+                low_notes: bands[comfortable].1.len() as u32,
+                high_notes,
+                // Whole ms the sentence can quote and stay true: the
+                // histogram's MAD is to the quarter-ms below, so "within"
+                // rounds the low one up past that and "or more" rounds the
+                // high one down.
+                low_spread_ms: (mad[comfortable] + SPREAD_BIN_MS).ceil(),
+                high_spread_ms: mad[collapse].floor(),
+                ..FreePlayCounts::default()
+            }),
+            ..Evidence::default()
         },
         fix: Some(Fix::Ramp {
             start: None,
@@ -1807,23 +1977,32 @@ fn free_tempo_ceiling(beats: &[FreePlayBeat]) -> Option<Finding> {
     })
 }
 
-/// Drift within a segment: the last third sitting somewhere the first third
-/// did not. A bias that grows is not the same as a bias.
+/// Drift within a segment: the last third of its notes sitting somewhere
+/// against the click the first third did not. A bias that grows is not the
+/// same as a bias.
+///
+/// From the raw offsets (M1): the matcher's `deviation_ms` is measured
+/// against a running median of the last sixteen offsets, which swallows a
+/// slow drift and turns a stale calibration seed into a false one (the
+/// first notes judged against the seed, the rest against the converged
+/// value). A raw offset carries only the click and a constant latency, and
+/// the constant cancels in the difference — the seed never enters it. At
+/// least `FREE_MIN_NOTES` notes in each third (M3).
 fn free_drift(beats: &[FreePlayBeat]) -> Option<Finding> {
-    let hits: Vec<&FreePlayBeat> = beats.iter().filter(|b| b.is_hit()).collect();
-    if hits.len() < (MIN_ONSETS as usize) * 3 {
+    let hits: Vec<&FreePlayBeat> = beats.iter().filter(|b| b.is_click_hit()).collect();
+    let third = hits.len() / 3;
+    if third < FREE_MIN_NOTES as usize {
         return None;
     }
-    let third = hits.len() / 3;
     let mut first = Tally::default();
     let mut last = Tally::default();
     let mut all = Tally::default();
     for (i, b) in hits.iter().enumerate() {
-        all.hit(b.feedback.deviation_ms, b.beat_ms());
+        all.hit(b.offset(), b.beat_ms());
         if i < third {
-            first.hit(b.feedback.deviation_ms, b.beat_ms());
+            first.hit(b.offset(), b.beat_ms());
         } else if i >= hits.len() - third {
-            last.hit(b.feedback.deviation_ms, b.beat_ms());
+            last.hit(b.offset(), b.beat_ms());
         }
     }
     let drift = last.mean_dev() - first.mean_dev();
@@ -1849,6 +2028,11 @@ fn free_drift(beats: &[FreePlayBeat]) -> Option<Finding> {
             },
             reference_bpm: Some(60_000.0 / all.beat_ms().max(1.0)),
             passes_affected: 1,
+            free_play: Some(FreePlayCounts {
+                counted: hits.len() as u32,
+                agreeing: third as u32,
+                ..FreePlayCounts::default()
+            }),
             ..evidence_of(&all, 1)
         },
         fix: denser_subdivision(active).map(|subdivision| Fix::ClickSubdivision {
@@ -1859,11 +2043,27 @@ fn free_drift(beats: &[FreePlayBeat]) -> Option<Finding> {
     })
 }
 
+/// A spread wider than this many ms past the lower band's before a tempo
+/// band counts as where the timing spread (c5c2b M3): the two whole numbers
+/// the sentence quotes then never read as the same.
+const FREE_CEILING_GAP_MS: f64 = 5.0;
+
+/// The MAD of a set of raw offsets, centred on their mean first so a large
+/// constant latency stays inside the histogram's ±256 ms.
+fn centred_mad(offsets: &[f64]) -> f64 {
+    if offsets.is_empty() {
+        return 0.0;
+    }
+    let mean = offsets.iter().sum::<f64>() / offsets.len() as f64;
+    let centred: Vec<f64> = offsets.iter().map(|o| o - mean).collect();
+    spread(&centred).mad_ms
+}
+
 /// The subdivision the segment mostly ran at.
 fn dominant_subdivision(beats: &[FreePlayBeat]) -> u8 {
     let mut counts = [0u32; 8];
     for b in beats {
-        counts[usize::from(b.tick.subdivision_total.min(7))] += 1;
+        counts[usize::from(b.sub_total.min(7))] += 1;
     }
     (1..8)
         .max_by_key(|&i| counts[i])
@@ -2833,35 +3033,197 @@ mod tests {
     // Free play
     // -----------------------------------------------------------------
 
+    /// A tick the click sounded, in 4/4, `offset_ms` the raw offset of the
+    /// note on it ("miss": none).
     fn free_beat(
         index: u32,
         subdivision_index: u8,
         subdivision_total: u8,
         bpm: f64,
-        deviation_ms: f64,
+        offset_ms: f64,
         classification: &str,
     ) -> FreePlayBeat {
-        FreePlayBeat {
-            tick: BeatTick {
-                ts_ns: u64::from(index) * 1_000_000,
-                beat_index: index,
-                is_downbeat: index % 4 == 0 && subdivision_index == 0,
-                expected_interval_ms: 60_000.0 / bpm,
-                subdivision_index,
-                subdivision_total,
-                beats_per_bar: 4,
-            },
-            feedback: BeatFeedback {
-                beat_index: index,
-                deviation_ms,
-                interval_error_ms: 0.0,
-                classification: classification.into(),
-                amplitude: 0.5,
-                calibration_offset_ms: 0.0,
-                calibration_confidence: 1.0,
-                grid_correlation: 0.9,
-            },
+        free_tick(index, index % 4, subdivision_index, subdivision_total, bpm, offset_ms, classification, false)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn free_tick(
+        index: u32,
+        bar_beat: u32,
+        subdivision_index: u8,
+        subdivision_total: u8,
+        bpm: f64,
+        offset_ms: f64,
+        classification: &str,
+        invented: bool,
+    ) -> FreePlayBeat {
+        let tick = BeatTick {
+            ts_ns: u64::from(index) * 1_000_000,
+            beat_index: index,
+            is_downbeat: bar_beat == 0 && subdivision_index == 0,
+            expected_interval_ms: 60_000.0 / bpm,
+            subdivision_index,
+            subdivision_total,
+            beats_per_bar: 4,
+            bar_beat,
+        };
+        if classification == "miss" {
+            FreePlayBeat::missed(&tick, invented)
+        } else {
+            FreePlayBeat::played(&tick, offset_ms, invented)
         }
+    }
+
+    fn kinds(found: &[Finding]) -> Vec<FindingKind> {
+        found.iter().map(|f| f.kind).collect()
+    }
+
+    #[test]
+    fn a_free_play_record_is_small_and_owns_nothing() {
+        // L1: 20 bytes, `Copy` — no `String`, no heap per tick.
+        assert!(std::mem::size_of::<FreePlayBeat>() <= 20, "{}", std::mem::size_of::<FreePlayBeat>());
+        fn is_copy<T: Copy>() {}
+        is_copy::<FreePlayBeat>();
+    }
+
+    #[test]
+    fn swung_eighths_over_an_eighth_click_name_no_missing_position() {
+        // H1, run 1. An eighth click at 120; the player swings, the
+        // inference locks to triplets: the click's "&" is off that grid and
+        // is never scored, the matcher invents triplet 2 (never played) and
+        // triplet 3 (the swung note). Before: "No note landed on the
+        // off-beat eighth in 64 of 64 beats".
+        let mut beats = Vec::new();
+        for i in 0..64u32 {
+            beats.push(free_tick(i, i % 4, 0, 2, 120.0, 0.0, "good", false));
+            beats.push(free_tick(i, i % 4, 1, 2, 120.0, 0.0, "miss", true));
+            beats.push(free_tick(i, i % 4, 2, 2, 120.0, 0.0, "good", true));
+        }
+        let found = analyze_free_play(&beats);
+        assert!(!kinds(&found).contains(&FindingKind::SubdivisionWeak), "{found:?}");
+    }
+
+    #[test]
+    fn sixteenths_over_an_eighth_click_do_not_blame_the_off_beat() {
+        // H1, run 2. 1-e-&-a over an eighth click, the "e" dropped on every
+        // other beat. The "&" (the click's own off-beat) is always played.
+        // The invented "e" and "a" are on the sixteenth grid and stay out.
+        let mut beats = Vec::new();
+        for i in 0..48u32 {
+            beats.push(free_tick(i, i % 4, 0, 2, 100.0, 0.0, "good", false));
+            beats.push(free_tick(i, i % 4, 1, 2, 100.0, 0.0, if i % 2 == 0 { "miss" } else { "good" }, true));
+            beats.push(free_tick(i, i % 4, 1, 2, 100.0, 0.0, "good", false));
+            beats.push(free_tick(i, i % 4, 3, 2, 100.0, 0.0, "good", true));
+        }
+        let found = analyze_free_play(&beats);
+        assert!(!kinds(&found).contains(&FindingKind::SubdivisionWeak), "{found:?}");
+    }
+
+    #[test]
+    fn a_rest_is_not_a_missing_position() {
+        // 24 beats of eighths played through, then whole bars of rest whose
+        // first ticks are still misses inside the activity tolerance (both
+        // positions, no note in the beat): a beat with no note in it is a
+        // rest, and is not counted.
+        let mut beats = Vec::new();
+        for i in 0..24u32 {
+            beats.push(free_beat(i, 0, 2, 120.0, 0.0, "good"));
+            beats.push(free_beat(i, 1, 2, 120.0, 0.0, "good"));
+        }
+        for bar in 0..6u32 {
+            let i = 24 + bar * 8;
+            beats.push(free_beat(i, 0, 2, 120.0, 0.0, "good"));
+            beats.push(free_beat(i, 1, 2, 120.0, 0.0, "good"));
+            beats.push(free_beat(i + 1, 0, 2, 120.0, 0.0, "miss"));
+            beats.push(free_beat(i + 1, 1, 2, 120.0, 0.0, "miss"));
+        }
+        assert!(analyze_free_play(&beats).is_empty());
+
+        // The off-beat dropped on 10 of 30 beats played through, with a rest
+        // after them: the count is of the played beats only.
+        let mut beats = Vec::new();
+        for i in 0..30u32 {
+            beats.push(free_beat(i, 0, 2, 120.0, 0.0, "good"));
+            beats.push(free_beat(i, 1, 2, 120.0, 0.0, if i % 3 == 0 { "miss" } else { "good" }));
+        }
+        for i in 30..34u32 {
+            beats.push(free_beat(i, 0, 2, 120.0, 0.0, "miss"));
+            beats.push(free_beat(i, 1, 2, 120.0, 0.0, "miss"));
+        }
+        let found = analyze_free_play(&beats);
+        let weak = found.iter().find(|f| f.kind == FindingKind::SubdivisionWeak).expect("a dropped off-beat");
+        let counts = weak.evidence.free_play.expect("counts");
+        assert_eq!(weak.evidence.subdivision_position, Some((1, 2)));
+        assert_eq!((counts.counted, counts.agreeing), (30, 10));
+    }
+
+    #[test]
+    fn the_beat_of_the_bar_survives_a_meter_change() {
+        // H2. Ten bars of 4/4 then twelve of 3/4 without stopping; the
+        // downbeat is 40 ms late throughout. `beat_index` runs on from 40,
+        // so `beat_index % 3` would have called the downbeat "beat 2".
+        let mut beats = Vec::new();
+        for i in 0..40u32 {
+            beats.push(free_tick(i, i % 4, 0, 1, 120.0, if i % 4 == 0 { 40.0 } else { 0.0 }, "good", false));
+        }
+        for k in 0..36u32 {
+            beats.push(free_tick(40 + k, k % 3, 0, 1, 120.0, if k % 3 == 0 { 40.0 } else { 0.0 }, "good", false));
+        }
+        let found = analyze_free_play(&beats);
+        let bias = found.iter().find(|f| f.kind == FindingKind::BeatPositionBias).expect("the late downbeat");
+        assert_eq!(bias.evidence.beat_position, Some(1));
+        assert!(bias.evidence.mean_deviation_ms > 35.0);
+        let counts = bias.evidence.free_play.expect("counts");
+        assert_eq!((counts.counted, counts.agreeing), (22, 22));
+    }
+
+    #[test]
+    fn one_late_note_does_not_make_a_beat_late() {
+        // M3 (a). 10 s at 120: four notes on beat 3, one of them 70 ms late.
+        let beats: Vec<_> = (0..16)
+            .map(|i| free_beat(i, 0, 1, 120.0, if i == 2 { 70.0 } else { 0.0 }, "good"))
+            .collect();
+        assert!(analyze_free_play(&beats).is_empty());
+        // Enough notes, but half of them on time: no three in four.
+        let beats: Vec<_> = (0..48)
+            .map(|i| free_beat(i, 0, 1, 120.0, if i % 4 == 2 && i % 8 == 2 { 50.0 } else { 0.0 }, "good"))
+            .collect();
+        assert!(!kinds(&analyze_free_play(&beats)).contains(&FindingKind::BeatPositionBias));
+    }
+
+    #[test]
+    fn a_steady_player_with_a_stale_seed_has_not_drifted() {
+        // M1. A seed 50 ms off moves what the matcher calls the first
+        // notes' deviation, never the raw offset: a steady player's raw
+        // offsets are the latency, constant, and there is nothing to say.
+        let beats: Vec<_> = (0..64)
+            .map(|i| free_beat(i, 0, 1, 120.0, 50.0 + if i % 2 == 0 { 1.0 } else { -1.0 }, "good"))
+            .collect();
+        assert!(analyze_free_play(&beats).is_empty());
+    }
+
+    #[test]
+    fn a_tempo_finding_quotes_the_tempos_as_played() {
+        // M3 (c). A drill ramp 96, 100, 104, 108, 112, 116, 120: tight up to
+        // 108, wide from 112. Bands are floors of ten, but the sentence
+        // quotes what was played in them.
+        let mut beats = Vec::new();
+        let mut i = 0u32;
+        for bpm in [96.0, 100.0, 104.0, 108.0, 112.0, 116.0, 120.0] {
+            for k in 0..12 {
+                let wide = bpm >= 112.0;
+                let offset = if wide { if k % 2 == 0 { 30.0 } else { -30.0 } } else { f64::from(k % 3) - 1.0 };
+                beats.push(free_beat(i, 0, 1, bpm, offset, "good"));
+                i += 1;
+            }
+        }
+        let found = analyze_free_play(&beats);
+        let ceiling = found.iter().find(|f| f.kind == FindingKind::TempoCeiling).expect("a ceiling");
+        let c = ceiling.evidence.free_play.expect("counts");
+        assert_eq!(c.low_bpm, Some((100, 108)));
+        assert_eq!(c.high_bpm, Some((112, 116)));
+        assert_eq!((c.low_notes, c.high_notes), (36, 24));
+        assert!(c.low_spread_ms <= 2.0 && c.high_spread_ms >= 29.0, "{c:?}");
     }
 
     #[test]
@@ -2972,9 +3334,11 @@ mod tests {
     }
 
     #[test]
-    fn free_play_ignores_skipped_ticks() {
+    fn free_play_says_nothing_about_ticks_with_no_notes() {
+        // Skipped ticks are never recorded (`timing.rs`); misses alone are
+        // nothing a sentence can stand on.
         let beats: Vec<FreePlayBeat> = (0..64)
-            .map(|i| free_beat(i, 0, 1, 120.0, 0.0, "skipped"))
+            .map(|i| free_beat(i, (i % 2) as u8, 2, 120.0, 0.0, "miss"))
             .collect();
         assert!(analyze_free_play(&beats).is_empty());
     }
