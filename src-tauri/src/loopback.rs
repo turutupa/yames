@@ -311,10 +311,15 @@ fn open_impl(device_name: Option<&str>) -> Result<LoopbackCapture, String> {
             // thread that cannot wait is allowed to do. The peak is one
             // relaxed read-modify-write for the whole buffer.
             macro_rules! build {
-                ($t:ty) => {
+                ($t:ty) => {{
+                    // Real-time scheduling for cpal's stream thread, taken on
+                    // the first callback: cpal 0.15.3's own boost is a no-op
+                    // on Windows. See `callback_priority`.
+                    let mut cb_prio = crate::callback_priority::CallbackPriority::new();
                     device.build_input_stream(
                         &stream_config,
                         move |data: &[$t], _: &cpal::InputCallbackInfo| {
+                            cb_prio.on_callback();
                             let mut hi = 0f32;
                             for s in data {
                                 let v = <f32 as cpal::Sample>::from_sample(*s);
@@ -329,7 +334,7 @@ fn open_impl(device_name: Option<&str>) -> Result<LoopbackCapture, String> {
                         |e| eprintln!("[loopback] stream error: {e}"),
                         None,
                     )
-                };
+                }};
             }
             let stream = match sample_format {
                 cpal::SampleFormat::F32 => build!(f32),

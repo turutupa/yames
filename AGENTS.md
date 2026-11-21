@@ -309,9 +309,17 @@ Two things the numbers depend on, and one that is not a Yames bug:
 - **Other load on the box invalidates a run.** A parallel `cargo test`
   taking six cores pushed the *baseline* p99 from 0.35 ms to 2.46 ms.
   Check the machine is quiet before believing a failure.
-- **cpal already runs its WASAPI stream thread at
-  `THREAD_PRIORITY_TIME_CRITICAL`** (`cpal-0.15.3/src/host/wasapi/
-  stream.rs`). Do not try to "fix" jitter by touching the callback.
+- **cpal 0.15.3 does NOT raise its WASAPI stream thread**, whatever its
+  source looks like: `boost_current_thread_priority` passes
+  `GetCurrentThreadId()` where `SetThreadPriority` wants a handle, and
+  drops the error (measured on the RTX 2026-11-20: base priority 6, plain
+  normal). `callback_priority.rs` does it instead: every desktop stream's
+  data closure carries a `CallbackPriority`, which registers the thread
+  with MMCSS "Pro Audio" on its first callback (TIME_CRITICAL if MMCSS
+  refuses) and reverts on stream drop. A new cpal stream gets one too. It
+  is Windows-only; nothing changes on Linux, macOS or Android. See
+  `plans/engine/win-mmcss.md`. Do not try to "fix" jitter any further by
+  touching the callback.
 - **ggml's threadpool defeats `with_below_normal_priority`.** That helper
   demotes only the calling thread; llama.cpp's worker threads start at
   `THREAD_PRIORITY_NORMAL` and `ggml_thread_apply_priority` explicitly

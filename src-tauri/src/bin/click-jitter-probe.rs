@@ -2305,6 +2305,15 @@ fn main() -> ExitCode {
         return ExitCode::from(2);
     }
 
+    // Which scheduling the callback thread measured here actually had
+    // (Windows: MMCSS "Pro Audio", the TIME_CRITICAL fallback, or neither).
+    // Informational, not a gate; always 0/0/0 off Windows.
+    let (prio_mmcss, prio_fallback, prio_failed) = yames_lib::probe::callback_priority_counts();
+    eprintln!(
+        "[probe] callback thread priority: mmcss={prio_mmcss} fallback={prio_fallback} \
+         failed={prio_failed}"
+    );
+
     if let Some(ref path) = args.dump_csv {
         // Raw capture, so a run can be re-analysed without re-running it
         // (and so a surprising percentile can be traced to real samples
