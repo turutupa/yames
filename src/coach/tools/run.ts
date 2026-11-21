@@ -461,9 +461,38 @@ export function confirmCoachTool(
   }
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
+  // What stops is asked again at the press (review c3b2a M2): a proposal minted while
+  // nothing sounded must not stop a click started since without saying so. Not now,
+  // and the proposal stays good for a press once it has stopped (as `runIssuedUndo`).
+  const stops = stopsAtPress(tool, resolved, host, ctx);
+  if (stops && proposal.line.values?.stops !== stops) {
+    issued.set(proposal, resolved);
+    return refuse("notNow", "coachTools.why.notNow.sounding", { stops });
+  }
   // A `go` tool's proposal holds its checked arguments: run it for real now.
   if (tool.kind !== "confirm") return guarded(tool.name, () => issue(tool.run(resolved as ToolArgs, host, ctx), host, ctx));
   return guarded(tool.name, () => issue(tool.commit(resolved, host, ctx), host, ctx));
+}
+
+/**
+ * What a leaving proposal would stop if pressed now: for a `go` tool, the
+ * same dry run as when it was minted (`leavingStops`); for a `confirm` tool
+ * that leaves (start_today), what sounds now, as `run` asked it. A tool that
+ * throws here is reported by the press itself.
+ */
+function stopsAtPress(tool: CoachTool, resolved: unknown, host: CoachToolHost, ctx: CoachContext): Sounding | null {
+  try {
+    if (tool.kind === "go") return tool.leaves ? leavingStops(tool, resolved as ToolArgs, host, ctx).stops : null;
+    if (tool.kind === "confirm") return tool.leaves ? host.sounding() : null;
+  } catch {
+    // Left to the press, which runs inside `guarded`.
+  }
+  return null;
+}
+
+/** Whether a proposal this runner minted can still be pressed (not pressed, dismissed or spent). */
+export function proposalOpen(proposal: Proposal): boolean {
+  return issued.has(proposal);
 }
 
 /** Drop a proposal the player turned down ("Not now"), so it can never be confirmed. */

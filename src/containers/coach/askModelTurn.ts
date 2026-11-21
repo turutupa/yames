@@ -6,8 +6,8 @@
  * `MODEL_LANGS` is empty).
  *
  * What the player sees: their words and the plain statement at once; then,
- * when the speed gate says yes (`asksUseModel`), "Looking for more in my own
- * words… Stop" while the model chooses; then what it chose under the plain
+ * when the speed gate says yes (`asksUseModel`), "Looking for more… Stop"
+ * while the model chooses; then what it chose under the plain
  * statement (a card, or a `read` tool's receipt, at once; a `go` or `confirm`
  * call as a one-press proposal labelled as the model's reading), or nothing.
  *
@@ -35,6 +35,7 @@ import { getCoachModelSnapshot } from "../../hooks/coachLoader";
 import { getCoachCapabilities } from "../../ipc";
 import { IS_MOBILE } from "../../platform";
 import { cardBodyFor } from "./askCards";
+import { answeredByTool } from "./askContext";
 import { appendAskTurn, askTakeGate, askTurnId, getAskState, settleAskTurn, type AskTurn } from "./askStore";
 import { askCommandFacts, askTakeNow, askToolContext, askToolHost, modelCallBody, onAskTakeStart } from "./askTools";
 
@@ -72,11 +73,17 @@ export function stopModelTurn(): void {
   if (was.workingId !== null) settleAskTurn(was.workingId, "gone");
 }
 
+/**
+ * The player's last line for the model's `Before:`, skipping one a tool or a
+ * card answered (a chip's words, a typed command): the model sees no tool
+ * turns, so it would read a request the app already carried out (review
+ * c3b2a M1). One rule with the old chat's prompt: `answeredByTool`.
+ */
 function lastUserText(): string | null {
   const turns = getAskState().turns;
   for (let i = turns.length - 1; i >= 0; i -= 1) {
     const turn = turns[i];
-    if (turn.kind === "user") return turn.text;
+    if (turn.kind === "user" && !answeredByTool(turns, i)) return turn.text;
   }
   return null;
 }
@@ -92,7 +99,8 @@ export function answerWithModel(said: string, language: string): void {
   appendAskTurn({ id: askTurnId(), kind: "app", text: i18n.t("ask.model.plain") });
   const model = getCoachModelSnapshot().state;
   if (model === "loading" || model === "waiting") {
-    appendAskTurn({ id: askTurnId(), kind: "app", text: i18n.t("ask.model.gettingReady") });
+    // The fact, not a promise (review c3b2a L2): nothing asks again when it is ready.
+    appendAskTurn({ id: askTurnId(), kind: "app", text: i18n.t("ask.reply.gettingReady") });
     return;
   }
   if (model !== "ready" || askTakeGate() || askTakeNow()) return;

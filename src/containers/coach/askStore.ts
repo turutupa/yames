@@ -32,7 +32,7 @@ export type AskTurn =
   | { id: string; kind: "app"; text: string }
   /** "Now looking at: Progress": the screen changed mid-conversation. */
   | { id: string; kind: "divider"; text: string }
-  /** The model is choosing an answer (leg c3b2a): "Looking for more in my own words… Stop". */
+  /** The model is choosing an answer (leg c3b2a): "Looking for more… Stop". */
   | { id: string; kind: "model" };
 
 /** What an entry point opens Ask with. */

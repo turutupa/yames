@@ -43,13 +43,12 @@
     },
     "model": {
       "plain": "Je n'ai pas de réponse toute prête à cela dans tes prises ou tes parcours.",
-      "working": "Je cherche plus loin avec mes propres mots…",
+      "working": "Je cherche plus loin…",
       "stop": "Arrêter",
-      "gettingReady": "Préparation…",
       "reading": "Ma lecture de ta question. Rien ne se passe tant que tu n'appuies pas."
     },
     "footer": {
-      "choice": "Réponses tirées de tes prises et de tes parcours et, avec ses propres mots, du modèle de cet ordinateur. Rien n'en sort.",
+      "choice": "Réponses tirées de tes prises et de tes parcours, avec l'aide du modèle de cet ordinateur. Rien n'en sort.",
       "model": "Réponse du modèle de cet ordinateur. Rien de ce que tu écris n'en sort.",
       "local": "Rien de ce que tu écris ici ne quitte cet ordinateur.",
       "phone": "Rien de ce que tu écris ici ne quitte ce téléphone."

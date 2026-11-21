@@ -43,13 +43,12 @@
     },
     "model": {
       "plain": "Daar heb ik uit je takes of je leerpaden geen kant-en-klaar antwoord op.",
-      "working": "Ik zoek meer in mijn eigen woorden…",
+      "working": "Ik zoek meer…",
       "stop": "Stop",
-      "gettingReady": "Bezig met voorbereiden…",
       "reading": "Zo lees ik je vraag. Er gebeurt niets tot je drukt."
     },
     "footer": {
-      "choice": "Antwoorden uit je takes en leerpaden en, in eigen woorden, van het model op deze computer. Niets verlaat hem.",
+      "choice": "Antwoorden uit je takes en leerpaden, met hulp van het model op deze computer. Niets verlaat hem.",
       "model": "Beantwoord door het model op deze computer. Wat je typt, verlaat hem niet.",
       "local": "Wat je hier typt, verlaat deze computer niet.",
       "phone": "Wat je hier typt, verlaat deze telefoon niet."

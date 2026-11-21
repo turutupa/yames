@@ -32,6 +32,7 @@ import {
   confirmCoachTool,
   dismissProposal,
   pressCoachChip,
+  proposalOpen,
   retireUndo,
   runCoachTool,
   runCoachUndo,
@@ -95,6 +96,8 @@ export type ToolBody =
       step?: number | null;
       /** The model chose it (leg c3b2a): labelled as the model's reading of the question. */
       via?: "model";
+      /** Why the last press did nothing, while it stays pressable (something sounds now: c3b2ab, M2). */
+      note?: Line;
     }
   | { kind: "refusal"; line: Line; choices: readonly ToolChoice[] }
   | { kind: "yours"; item: NeverItem };
@@ -681,6 +684,11 @@ export function pressProposal(id: string): void {
     return;
   }
   const result = confirmCoachTool(turn.body.proposal, at.host, at.ctx);
+  // Not now (it would stop what started sounding since it was shown): it stays, and says why.
+  if (!result.ok && result.why === "notNow" && proposalOpen(turn.body.proposal)) {
+    setBody(id, { ...turn.body, note: result.line });
+    return;
+  }
   // The same thing changed again: a chip's earlier Undo for it is not this one's to keep,
   // unless this one's Undo puts back exactly the value it guards (leg chip1c, review chip1b
   // LOW 2: in a Session a second chip press is this proposal, and a nudge's Undo is one rung,

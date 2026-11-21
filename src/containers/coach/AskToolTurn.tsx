@@ -138,6 +138,11 @@ function ProposalCard({ id, body }: { id: string; body: ToolBody & { kind: "prop
       {proposal.plan && <PlanList plan={proposal.plan} />}
       {stops && <p className="ask-proposal-fact" data-testid="ask-proposal-stops">{t(stops)}</p>}
       {proposal.noUndo && <p className="ask-proposal-fact" data-testid="ask-proposal-noundo">{t("coachTools.ui.noUndo")}</p>}
+      {open && body.note && (
+        <p className="ask-tool-note" data-testid="ask-proposal-note">
+          {lineText(t, body.note)}
+        </p>
+      )}
       {open ? (
         <div className="ask-proposal-actions">
           <button type="button" className="btn-tonal ask-tool-btn" onClick={onePress(() => pressProposal(id))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat} data-testid="ask-proposal-go">

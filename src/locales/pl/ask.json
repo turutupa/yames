@@ -43,13 +43,12 @@
     },
     "model": {
       "plain": "Nie mam na to gotowej odpowiedzi z twoich podejść ani ścieżek.",
-      "working": "Szukam więcej własnymi słowami…",
+      "working": "Szukam więcej…",
       "stop": "Zatrzymaj",
-      "gettingReady": "Przygotowuję się…",
       "reading": "Tak rozumiem twoje pytanie. Nic się nie stanie, dopóki nie naciśniesz."
     },
     "footer": {
-      "choice": "Odpowiedzi z twoich podejść i ścieżek oraz, własnymi słowami, od modelu na tym komputerze. Nic go nie opuszcza.",
+      "choice": "Odpowiedzi z twoich podejść i ścieżek, z pomocą modelu na tym komputerze. Nic go nie opuszcza.",
       "model": "Odpowiada model na tym komputerze. Nic, co wpiszesz, go nie opuszcza.",
       "local": "Nic, co tu wpiszesz, nie opuszcza tego komputera.",
       "phone": "Nic, co tu wpiszesz, nie opuszcza tego telefonu."

@@ -12,7 +12,7 @@ import { __resetModelForTests, __setModelLangsForTests } from "../../coach/ask/m
 import { fakeHost, toolCtx, type FakeHost } from "../../coach/tools/fakeHost";
 import { runIn, TEST_PATHS } from "../../coach/tools/testPaths";
 import { __resetAskStoreForTests, getAskState, registerAskSender } from "./askStore";
-import { __setAskToolsForTests, noteAskJamTake, noteAskTake, notNowProposal, pressProposal } from "./askTools";
+import { __setAskToolsForTests, noteAskJamTake, noteAskTake, notNowProposal, pressChip, pressProposal } from "./askTools";
 import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { __resetModelTurnForTests, modelTurnLive, stopModelTurn } from "./askModelTurn";
 
@@ -117,6 +117,26 @@ describe("how an answer becomes turns", () => {
     expect(host.where().view).toBe("progress");
   });
 
+  it("a go proposal made while nothing played does not stop a click started since: not now, and it stays (c3b2ab, M2)", async () => {
+    setInvokeResponse("coach_ask", answered('{"tool":"go_to","args":{"screen":"progress"}}'));
+    answerTyped("take me to my progress page please", "en");
+    await flush();
+    const id = getAskState().turns.at(-1)!.id;
+    host.play("click");
+    pressProposal(id);
+    expect(host.where().view).toBe("beat");
+    expect(host.changes()).toEqual([]);
+    const turn = getAskState().turns.at(-1)!;
+    expect(turn.kind === "tool" && turn.body.kind === "proposal" ? [turn.body.state, turn.body.note?.key, turn.body.note?.values.stops] : null).toEqual([
+      "open",
+      "coachTools.why.notNow.sounding",
+      "click",
+    ]);
+    host.play(null);
+    pressProposal(id);
+    expect(host.where().view).toBe("progress");
+  });
+
   it("Not now leaves everything as it was", async () => {
     setInvokeResponse("coach_ask", answered('{"tool":"go_to","args":{"screen":"progress"}}'));
     answerTyped("take me to my progress page please", "en");
@@ -153,11 +173,13 @@ describe("how an answer becomes turns", () => {
     });
   }
 
-  it("a model still loading: Getting ready, and no generation", async () => {
+  it("a model still loading: says so and to ask again (nothing promised), and no generation", async () => {
     snapshot.state = "loading";
     answerTyped("what should I practise for speed", "en");
     await flush();
     expect(kinds()).toEqual(["user", "app", "app"]);
+    const last = getAskState().turns.at(-1)!;
+    expect(last.kind === "app" ? last.text : null).toBe("The model is still getting ready. Ask again in a moment.");
     expect(asks()).toBe(0);
   });
 
@@ -178,6 +200,37 @@ describe("how an answer becomes turns", () => {
     answerTyped("what should I practise for speed", "en");
     await flush();
     expect(asks()).toBe(0);
+  });
+});
+
+describe("the last exchange the model reads (`Before:`): never a line a tool answered (c3b2ab, M1)", () => {
+  const context = () => {
+    const last = mockInvoke.mock.calls.filter(([cmd]) => cmd === "coach_ask").at(-1);
+    return (last?.[1] as { request: { context: string } }).request.context;
+  };
+  beforeEach(() => void setInvokeResponse("coach_ask", answered('{"answer":"none"}')));
+
+  it("a typed command, then a typed line: no Before", async () => {
+    expect(answerTyped("open paths", "en")).toBe("call");
+    answerTyped("what should I practise for speed", "en");
+    await flush();
+    expect(context()).not.toContain("Before:");
+  });
+
+  it("a chip press, then a typed line: no Before", async () => {
+    pressChip({ tool: "go_to", args: { screen: "progress" } }, "Progress");
+    expect(kinds()).toEqual(["user", "tool:receipt"]);
+    answerTyped("what should I practise for speed", "en");
+    await flush();
+    expect(context()).not.toContain("Before:");
+  });
+
+  it("a line nothing but the plain statement answered is the Before", async () => {
+    answerTyped("what should I practise for speed", "en");
+    await flush();
+    answerTyped("and for accuracy", "en");
+    await flush();
+    expect(context()).toContain("Before: what should I practise for speed");
   });
 });
 
