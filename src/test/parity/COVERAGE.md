@@ -26,7 +26,8 @@ behaviour behind it is not exercised.
 | `src/containers/main-window/shellRows.parity.test.tsx` | Behaviour: the rail, Settings over a tool, Escape, the coach card, keyboard ownership, the audio notice, the onboarding nudges |
 | `src/containers/onboarding/helpAndTour.parity.test.tsx` | Behaviour: the header's overflow, Help, the shortcuts sheet, the tour |
 | `src/hooks/useSession.parity.test.tsx` | Behaviour: `useSession`'s order of calls |
-| `src/test/parity/doors.test.ts` | Static: who may call `saveSession`, `getFinalSessionReport`, `startTake`, `stopTake`, `setActiveTab`, `saveAttempt`, `app_ready` |
+| `src/hooks/useSession.split.test.tsx` | Behaviour: every call `useSession` makes to the outside in a scripted run, against a snapshot recorded before its split into `usePracticeHistory` and `useToolCoach` (leg c5c1) |
+| `src/test/parity/doors.test.ts` | Static: who may call `saveSession`, `getFinalSessionReport` (both `usePracticeHistory.ts` since leg c5c1), `startTake`, `stopTake`, `setActiveTab`, `saveAttempt`, `app_ready`; `useSession` and its three parts mounted once |
 
 ## Rows covered
 

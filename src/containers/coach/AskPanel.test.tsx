@@ -101,6 +101,47 @@ describe("the panel", () => {
     expect(box.value).toBe("");
   });
 
+  it("the Enter that commits an IME composition sends nothing, even after compositionend (keyCode 229; review t1b2b, finding 3)", () => {
+    openAsk();
+    const host = fakeHost({ view: "today" });
+    __setAskToolsForTests(host, toolCtx({ screen: "today" }));
+    const asked: string[] = [];
+    registerAskSender((q) => asked.push(q));
+    render(<AskPanel lookingAt={null} onClose={() => {}} />);
+    const box = screen.getByTestId("ask-input") as HTMLTextAreaElement;
+    fireEvent.change(box, { target: { value: "paths" } });
+    fireEvent.keyDown(box, { key: "Enter", keyCode: 229 });
+    fireEvent.keyDown(box, { key: "Enter", isComposing: true });
+    expect(host.changes()).toEqual([]);
+    expect(asked).toEqual([]);
+    expect(box.value).toBe("paths");
+    // The Enter after it sends, once, however fast the second one comes.
+    fireEvent.keyDown(box, { key: "Enter", keyCode: 13 });
+    fireEvent.keyDown(box, { key: "Enter", keyCode: 13 });
+    expect(host.where().view).toBe("paths");
+    expect(getAskState().turns.filter((x) => x.kind === "user")).toHaveLength(1);
+    __setAskToolsForTests(null, null);
+  });
+
+  it("with a model ready, a typed command is done, not handed to the model; a question still is", () => {
+    openAsk();
+    snapshot.state = "ready";
+    const host = fakeHost({ view: "today" });
+    __setAskToolsForTests(host, toolCtx({ screen: "today" }));
+    const asked: string[] = [];
+    registerAskSender((q) => asked.push(q));
+    render(<AskPanel lookingAt={null} onClose={() => {}} />);
+    const box = screen.getByTestId("ask-input") as HTMLTextAreaElement;
+    fireEvent.change(box, { target: { value: "open paths" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+    expect(host.where().view).toBe("paths");
+    expect(asked).toEqual([]);
+    fireEvent.change(box, { target: { value: "why was I late?" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+    expect(asked).toEqual(["why was I late?"]);
+    __setAskToolsForTests(null, null);
+  });
+
   it("is only Ask: no Start, no End, no Feed or History tabs, no sections (leg c2a2)", () => {
     openAsk();
     const { container } = render(<AskPanel lookingAt={null} onClose={() => {}} />);

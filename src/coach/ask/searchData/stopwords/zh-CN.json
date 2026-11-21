@@ -1,0 +1,5 @@
+{
+  "lng": "zh-CN",
+  "words": ["为什么", "是什么", "有什么", "怎么样", "怎么", "怎样", "如何", "什么", "为何", "我的", "可以吗", "可以", "应该", "一下", "的话", "能不能", "有没有", "是否", "请问", "需要", "哪些", "一些", "如果", "还是"],
+  "notes": "Question words and function phrases of two or more characters (how, why, what, can, should, a bit, if, please); none can sit inside 练习, 和弦, 音阶, 节奏, 拍, 琶音, 指法 or similar. Doubtful: 需要 and 一些 (function-like, but never inside a music term); 还是 (could occur in a rare phrase but not a guitar word). Single characters such as 的, 吗, 我 are deliberately not listed."
+}

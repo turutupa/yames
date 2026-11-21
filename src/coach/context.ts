@@ -25,7 +25,7 @@ import { exerciseWords, type ExerciseWords } from "../session/exerciseWords";
 import type { GradingChoice } from "../session/grading";
 import type { InputFailure } from "../session/inputStart";
 import type { SessionPlan } from "../session/planner";
-import { takesOf, type PlayerProgress, type TakeFacts } from "../session/progress";
+import { cleanBeforeOutcome, outcomeCountsTowardCleanTempo, takesOf, type PlayerProgress, type TakeFacts } from "../session/progress";
 import type { DueItem } from "../session/rotation";
 import type { RunState, TakeOutcome } from "../session/runner";
 import { withVariant } from "../session/take";
@@ -250,7 +250,7 @@ function num(value: number | null | undefined, digits = 0): string {
   return digits === 0 ? String(Math.round(value)) : value.toFixed(digits);
 }
 
-function takeLine(take: TakeOutcome): string {
+function takeLine(take: TakeOutcome, progress: PlayerProgress, outcomes: readonly TakeOutcome[] = []): string {
   const g = take.grade;
   const m = take.measures;
   const parts = [`take ${String(take.takeNumber)} at ${String(take.bpm)} bpm: ${g.verdict}`];
@@ -264,8 +264,25 @@ function takeLine(take: TakeOutcome): string {
   else parts.push("not enough heard to judge");
   if (m.evenness !== null) parts.push(`evenness ${num(m.evenness, 2)}`);
   if (m.noteIdentity !== null) parts.push(`right notes ${num(m.noteIdentity, 2)}`);
-  if (take.cleanBefore !== null) parts.push(`clean tempo before ${String(take.cleanBefore)}`);
-  if (g.cleanBpm !== null) parts.push(`clean tempo now ${String(g.cleanBpm)}`);
+  // "Before" read now (nf1c L2): an earlier Take of this Session marked not
+  // fair since drops out of it. The clause is said only while it still equals
+  // the value frozen when the Take settled, so the model is never handed a
+  // not-fair tempo as a fact; the "now" test below reads the live value.
+  const self = outcomes.find((o) => o === take) ?? outcomes.find((o) => o.takeId !== undefined && o.takeId === take.takeId);
+  const before = self ? cleanBeforeOutcome(progress, outcomes, self) : take.cleanBefore;
+  if (take.cleanBefore !== null && before === take.cleanBefore) {
+    parts.push(`clean tempo before ${String(take.cleanBefore)}`);
+  }
+  // "Now" only when this Take moved the clean tempo the app shows: not when it
+  // stayed at or under the one before, and not once the player marked its grade
+  // not fair (nf1b L3: the model must not quote a number Progress never shows).
+  if (
+    g.cleanBpm !== null &&
+    (before === null || g.cleanBpm > before) &&
+    outcomeCountsTowardCleanTempo(progress, take.takeId)
+  ) {
+    parts.push(`clean tempo now ${String(g.cleanBpm)}`);
+  }
   return parts.join("; ");
 }
 
@@ -310,7 +327,7 @@ export function contextForModel(ctx: CoachContext, maxTokens = 450): string {
       `session: ${ctx.run.phase}, block ${String(ctx.run.stepIndex + 1)}${total ? ` of ${String(total)}` : ""}, ${String(ctx.run.bpm)} bpm, ${String(ctx.run.takes)} takes on this block${ctx.run.ungraded ? `, ungraded (${ctx.run.ungraded})` : ""}`,
     );
   }
-  if (ctx.lastTake) add(`last ${takeLine(ctx.lastTake)}`);
+  if (ctx.lastTake) add(`last ${takeLine(ctx.lastTake, ctx.progress, ctx.run?.outcomes)}`);
   if (ctx.review) add(findingsLine(ctx.review));
   if (ctx.takesHere) add(historyLine(ctx.takesHere));
   if (ctx.song) add(`song: ${clip(ctx.song.song.name, 80)}, bars ${String(ctx.song.range.startBar)}-${String(ctx.song.range.endBar)}`);

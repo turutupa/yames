@@ -1698,6 +1698,26 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "coach.cards": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coach.goal": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coach.suggestions": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coach.suppressed": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

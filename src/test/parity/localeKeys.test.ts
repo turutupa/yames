@@ -35,6 +35,10 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "session.today.leftOffValue.accents",
   "session.today.leftOffValue.notes",
   "session.today.leftOffPlain",
+  // Today's header says the plain fact, "Last Session: 12 days ago", in place
+  // of "Welcome back. It has been 12 days" (owner, the 1k questions, item 4):
+  // the new key counts with i18next's plurals, so the old one went.
+  "session.today.leadBack",
   // Grading is a choice, not a switch (owner, 2026-11-18). Played ungraded
   // on purpose, the ready screen says nothing about the input ("Not graded:
   // grading is off in Settings." is gone), and the bar's chip is the quiet
