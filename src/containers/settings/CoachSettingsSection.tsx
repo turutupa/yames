@@ -20,6 +20,8 @@ import { coachStatusLabel, coachTierLabel, withLoaderState } from "./coachStatus
 import { useCoachModel } from "../../hooks/useCoachModel";
 import { CoachSuggestionsRow } from "./CoachSuggestionsRow";
 import { CoachReminderRow } from "./CoachReminderRow";
+import { CoachGroup } from "./CoachGroup";
+import { CoachAnswersLine, CoachSectionHead } from "./CoachSettingsGroups";
 
 // Short per-voice sample line played when the user clicks a voice
 // button. Each line is distinct on purpose so the user can hear timbre
@@ -277,34 +279,12 @@ export function CoachSettingsSection({
   // `settings-appearance` anchors W2's "More themes in Settings".
   return (
     <section className="settings-section" id="settings-coach">
-      {/* EXPERIMENTAL badge: signals to users that the coach is a labs
-          feature and that behaviour may shift between builds. The flask
-          icon mirrors the "labs" visual language people already know
-          from Chrome/Firefox/etc., and the amber palette keeps it
-          tonally distinct from the accent-pink active toggle state so
-          the badge actually reads as a callout rather than chrome. */}
-      <div className="settings-section-title">
-        <h2>{t("settings.coach.title")}</h2>
-        <span
-          className="experimental-badge"
-          title={t("settings.coach.betaHint")}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
-            <path d="M8.5 2h7" />
-            <path d="M7 16h10" />
-          </svg>
-          {t("settings.coach.beta")}
-        </span>
-      </div>
+      {/* The title and the Beta badge (COA-121), shared with the phone's section. */}
+      <CoachSectionHead />
+      {/* Five groups, in this order (DESIGN 8; leg c6a): Answers, Voice,
+          Suggestions, Notebook, In the tools. A row a later leg adds goes
+          into one of them. */}
+      <CoachGroup id="answers">
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.coach.brain")}</label>
@@ -390,6 +370,11 @@ export function CoachSettingsSection({
         </div>
       )}
 
+      {/* What the model answers in its own words, true today (MODEL_LANGS,
+          leg c3b2a): with no language switched on, that the coach answers
+          from the player's Takes and Paths. */}
+      <CoachAnswersLine tier={coachBrainTier} />
+
       {/* Migration affordance. A brain downloaded before the Qwen3
           refresh still loads, but the engine now builds a Qwen3 ChatML
           prompt, so an older family answers with visible template
@@ -419,6 +404,158 @@ export function CoachSettingsSection({
           </button>
         </div>
       )}
+      {/* Manage section — separate from Voices so "Remove models" isn't
+          visually adjacent to "Download voices" (the user pointed out
+          that mixing the two affordances in one row read as
+          duplication). Always visible when the brain is installed so
+          the user can recover the disk space the coach is using. The
+          size label combines brain + voices because both are
+          uninstalled by `deleteModels()` in one shot. */}
+      {modelStatus?.brainReady && (
+        <div className="coach-download-section coach-manage-section">
+          {/* Each model on disk, with its own Remove (leg ms2): the two
+              tiers live side by side, and removing one never touches the
+              other or the voices. The player's press, and nothing else,
+              ever deletes a model. */}
+          {tiersOnDisk(modelStatus).length > 0 && (
+            <ul className="coach-tier-list" data-testid="coach-tier-list">
+              {tiersOnDisk(modelStatus).map((tier) => {
+                const onDisk = tierOnDisk(modelStatus, tier)!;
+                const name = t("coachModel.entry", {
+                  tier: t(brainTierLabelKey(tier)),
+                  model: COACH_MODEL_TIERS.find((x) => x.tier === tier)?.name ?? "",
+                  // The selector's units, so the two say the same size.
+                  size: gbText(onDisk.sizeBytes, i18n.language),
+                });
+                // An older copy of this model left in the old single place
+                // (an older build wrote there again): reported with its own
+                // Remove, and removed by nothing else (ms2b).
+                const olderBytes = onDisk.olderCopyBytes ?? 0;
+                const olderRow = olderBytes > 0 && (
+                  <li key={`${tier}-older`} className="coach-tier-item coach-tier-older" data-tier={tier} data-older-copy="">
+                    <span className="setting-hint coach-tier-name">
+                      {t("settings.coach.olderCopy", { size: gbText(olderBytes, i18n.language) })}
+                    </span>
+                    <button
+                      className="coach-download-btn coach-tier-remove"
+                      disabled={removing || removingTier !== null}
+                      aria-label={t("settings.coach.removeOlderCopyLabel", { name })}
+                      onClick={async () => {
+                        setRemovingTier(`${tier}-older`);
+                        setRemoveError(null);
+                        try {
+                          await deleteModels(tier, { olderCopy: true });
+                          setModelStatus(await getModelStatus());
+                        } catch (err) {
+                          setRemoveError(err instanceof Error ? err.message : String(err));
+                          getModelStatus().then(setModelStatus).catch(() => {});
+                        } finally {
+                          setRemovingTier(null);
+                        }
+                      }}
+                    >
+                      {removingTier === `${tier}-older` ? t("settings.coach.removing") : t("settings.coach.removeTier")}
+                    </button>
+                  </li>
+                );
+                return [
+                  <li key={tier} className="coach-tier-item" data-tier={tier}>
+                    <span className="setting-hint coach-tier-name">{name}</span>
+                    <button
+                      className="coach-download-btn coach-tier-remove"
+                      disabled={removing || removingTier !== null || (modelDownloading && model.download?.tier === tier)}
+                      aria-label={t("settings.coach.removeTierLabel", { name })}
+                      onClick={async () => {
+                        setRemovingTier(tier);
+                        setRemoveError(null);
+                        try {
+                          await deleteModels(tier);
+                          setModelStatus(await getModelStatus());
+                          // The choice goes to Off only when it was this
+                          // model; the other one stays chosen and loaded.
+                          if (coachBrainTier === tier) {
+                            setCoachBrainTier("off");
+                            storeSave("coachBrainTier", "off");
+                          }
+                        } catch (err) {
+                          setRemoveError(err instanceof Error ? err.message : String(err));
+                          getModelStatus().then(setModelStatus).catch(() => {});
+                        } finally {
+                          setRemovingTier(null);
+                        }
+                      }}
+                    >
+                      {removingTier === tier ? t("settings.coach.removing") : t("settings.coach.removeTier")}
+                    </button>
+                  </li>,
+                  olderRow,
+                ];
+              })}
+            </ul>
+          )}
+          <p className="setting-hint" style={{ marginBottom: 8 }}>
+            {t("settings.coach.installed", {
+              tier: tiersOnDisk(modelStatus)
+                .map((x) => t(brainTierLabelKey(x)))
+                .join(" + ") || t(brainTierLabelKey(modelStatus.brainTier)),
+              size: formatBytes(modelStatus.brainSizeBytes + modelStatus.voiceSizeBytes),
+            })}
+          </p>
+          <button
+            className="coach-download-btn"
+            disabled={removing || removingTier !== null || modelDownloading}
+            onClick={async () => {
+              setRemoving(true);
+              setRemoveError(null);
+              try {
+                await deleteModels();
+                setModelStatus(await getModelStatus());
+                setCoachBrainTier("off");
+                storeSave("coachBrainTier", "off");
+              } catch (err) {
+                setRemoveError(err instanceof Error ? err.message : String(err));
+                // Refresh anyway: a partial delete still changed what is
+                // on disk, and the size line must not keep claiming
+                // bytes that are gone.
+                getModelStatus().then(setModelStatus).catch(() => {});
+              } finally {
+                // `finally` (not just the happy path) so a backend
+                // error doesn't leave the button stuck in "Removing…"
+                // forever — the user can retry once the failure is
+                // visible.
+                setRemoving(false);
+              }
+            }}
+          >
+            {/* Lucide-style trash glyph. Same stroke/fill convention as
+                the download icon above so the two buttons read as a
+                matched pair when sitting one on top of the other. */}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+            {removing ? t("settings.coach.removing") : t("settings.coach.removeModels")}
+          </button>
+          {removeError && (
+            <p className="coach-brain-status coach-brain-status-warn" role="alert">
+              {t("settings.coach.removeFailed", { error: removeError })}
+            </p>
+          )}
+        </div>
+      )}
+      </CoachGroup>
       <div className="setting-row">
         <div className="setting-label">
           {/* SET-2: Sessions grade one way, whatever this says (grade.ts
@@ -785,157 +922,6 @@ export function CoachSettingsSection({
             </button>
           </div>
         )}
-      {/* Manage section — separate from Voices so "Remove models" isn't
-          visually adjacent to "Download voices" (the user pointed out
-          that mixing the two affordances in one row read as
-          duplication). Always visible when the brain is installed so
-          the user can recover the disk space the coach is using. The
-          size label combines brain + voices because both are
-          uninstalled by `deleteModels()` in one shot. */}
-      {modelStatus?.brainReady && (
-        <div className="coach-download-section coach-manage-section">
-          {/* Each model on disk, with its own Remove (leg ms2): the two
-              tiers live side by side, and removing one never touches the
-              other or the voices. The player's press, and nothing else,
-              ever deletes a model. */}
-          {tiersOnDisk(modelStatus).length > 0 && (
-            <ul className="coach-tier-list" data-testid="coach-tier-list">
-              {tiersOnDisk(modelStatus).map((tier) => {
-                const onDisk = tierOnDisk(modelStatus, tier)!;
-                const name = t("coachModel.entry", {
-                  tier: t(brainTierLabelKey(tier)),
-                  model: COACH_MODEL_TIERS.find((x) => x.tier === tier)?.name ?? "",
-                  // The selector's units, so the two say the same size.
-                  size: gbText(onDisk.sizeBytes, i18n.language),
-                });
-                // An older copy of this model left in the old single place
-                // (an older build wrote there again): reported with its own
-                // Remove, and removed by nothing else (ms2b).
-                const olderBytes = onDisk.olderCopyBytes ?? 0;
-                const olderRow = olderBytes > 0 && (
-                  <li key={`${tier}-older`} className="coach-tier-item coach-tier-older" data-tier={tier} data-older-copy="">
-                    <span className="setting-hint coach-tier-name">
-                      {t("settings.coach.olderCopy", { size: gbText(olderBytes, i18n.language) })}
-                    </span>
-                    <button
-                      className="coach-download-btn coach-tier-remove"
-                      disabled={removing || removingTier !== null}
-                      aria-label={t("settings.coach.removeOlderCopyLabel", { name })}
-                      onClick={async () => {
-                        setRemovingTier(`${tier}-older`);
-                        setRemoveError(null);
-                        try {
-                          await deleteModels(tier, { olderCopy: true });
-                          setModelStatus(await getModelStatus());
-                        } catch (err) {
-                          setRemoveError(err instanceof Error ? err.message : String(err));
-                          getModelStatus().then(setModelStatus).catch(() => {});
-                        } finally {
-                          setRemovingTier(null);
-                        }
-                      }}
-                    >
-                      {removingTier === `${tier}-older` ? t("settings.coach.removing") : t("settings.coach.removeTier")}
-                    </button>
-                  </li>
-                );
-                return [
-                  <li key={tier} className="coach-tier-item" data-tier={tier}>
-                    <span className="setting-hint coach-tier-name">{name}</span>
-                    <button
-                      className="coach-download-btn coach-tier-remove"
-                      disabled={removing || removingTier !== null || (modelDownloading && model.download?.tier === tier)}
-                      aria-label={t("settings.coach.removeTierLabel", { name })}
-                      onClick={async () => {
-                        setRemovingTier(tier);
-                        setRemoveError(null);
-                        try {
-                          await deleteModels(tier);
-                          setModelStatus(await getModelStatus());
-                          // The choice goes to Off only when it was this
-                          // model; the other one stays chosen and loaded.
-                          if (coachBrainTier === tier) {
-                            setCoachBrainTier("off");
-                            storeSave("coachBrainTier", "off");
-                          }
-                        } catch (err) {
-                          setRemoveError(err instanceof Error ? err.message : String(err));
-                          getModelStatus().then(setModelStatus).catch(() => {});
-                        } finally {
-                          setRemovingTier(null);
-                        }
-                      }}
-                    >
-                      {removingTier === tier ? t("settings.coach.removing") : t("settings.coach.removeTier")}
-                    </button>
-                  </li>,
-                  olderRow,
-                ];
-              })}
-            </ul>
-          )}
-          <p className="setting-hint" style={{ marginBottom: 8 }}>
-            {t("settings.coach.installed", {
-              tier: tiersOnDisk(modelStatus)
-                .map((x) => t(brainTierLabelKey(x)))
-                .join(" + ") || t(brainTierLabelKey(modelStatus.brainTier)),
-              size: formatBytes(modelStatus.brainSizeBytes + modelStatus.voiceSizeBytes),
-            })}
-          </p>
-          <button
-            className="coach-download-btn"
-            disabled={removing || removingTier !== null || modelDownloading}
-            onClick={async () => {
-              setRemoving(true);
-              setRemoveError(null);
-              try {
-                await deleteModels();
-                setModelStatus(await getModelStatus());
-                setCoachBrainTier("off");
-                storeSave("coachBrainTier", "off");
-              } catch (err) {
-                setRemoveError(err instanceof Error ? err.message : String(err));
-                // Refresh anyway: a partial delete still changed what is
-                // on disk, and the size line must not keep claiming
-                // bytes that are gone.
-                getModelStatus().then(setModelStatus).catch(() => {});
-              } finally {
-                // `finally` (not just the happy path) so a backend
-                // error doesn't leave the button stuck in "Removing…"
-                // forever — the user can retry once the failure is
-                // visible.
-                setRemoving(false);
-              }
-            }}
-          >
-            {/* Lucide-style trash glyph. Same stroke/fill convention as
-                the download icon above so the two buttons read as a
-                matched pair when sitting one on top of the other. */}
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              <line x1="10" y1="11" x2="10" y2="17" />
-              <line x1="14" y1="11" x2="14" y2="17" />
-            </svg>
-            {removing ? t("settings.coach.removing") : t("settings.coach.removeModels")}
-          </button>
-          {removeError && (
-            <p className="coach-brain-status coach-brain-status-warn" role="alert">
-              {t("settings.coach.removeFailed", { error: removeError })}
-            </p>
-          )}
-        </div>
-      )}
     </section>
   );
 }

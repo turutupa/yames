@@ -137,7 +137,25 @@
       "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way.",
       "cuesNoVoice": "Needs a coach voice: choose Standard or Studio above. Until then the cues stay on screen.",
       "toolsOnly": "Tools only",
-      "toolsOnlyHint": "Applies in the Metronome, Drill and Jam. Sessions always grade the same way."
+      "toolsOnlyHint": "Applies in the Metronome, Drill and Jam. Sessions always grade the same way.",
+      "groups": {
+        "answers": "Answers",
+        "voice": "Voice",
+        "suggestions": "Suggestions",
+        "notebook": "Notebook",
+        "tools": "In the tools"
+      },
+      "answersRuleMade": "The coach answers from your Takes and Paths.",
+      "answersLangs": "In its own words in: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Lines you left out",
+        "empty": "Nothing left out.",
+        "leftOutOn": "Left out on {{date}}",
+        "bringBack": "Bring back",
+        "broughtBack": "Back in your Notebook.",
+        "lineGone": "A line your recent Takes no longer show",
+        "comesBack": "A line you leave out comes back by itself after thirty days. Nothing is deleted."
+      }
     },
     "general": {
       "title": "General",

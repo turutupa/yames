@@ -293,7 +293,8 @@ function Noticed({ book, lang, played }: { book: Book; lang: string; played: num
 // What you're working toward
 // ---------------------------------------------------------------------------
 
-function Goal({ book, lang, offer }: { book: Book; lang: string; offer: boolean }) {
+/** Also Settings → Coach's Notebook group (leg c6a), with `offer` false: the goal and its Edit, never the question. */
+export function Goal({ book, lang, offer }: { book: Book; lang: string; offer: boolean }) {
   const { t } = useTranslation();
   const { turns } = useAskState();
   const [editing, setEditing] = useState(false);
