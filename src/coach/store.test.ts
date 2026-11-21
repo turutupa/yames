@@ -108,7 +108,11 @@ describe("coach.goal", () => {
 
 describe("coach.suppressed", () => {
   it("reads a malformed value, or null, as nothing left out", () => {
-    for (const raw of MALFORMED) expect(readSuppressed(raw)).toEqual({});
+    // `{ a: 1 }` is a well-formed entry (id "a", left out at 1 ms), so it is not in this list.
+    for (const raw of MALFORMED.filter((r) => !(typeof r === "object" && r !== null && "a" in r))) {
+      expect(readSuppressed(raw)).toEqual({});
+    }
+    expect(readSuppressed({ a: "x", b: null })).toEqual({});
   });
 
   it("keeps ids with a date and drops the rest", () => {
