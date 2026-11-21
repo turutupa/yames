@@ -75,9 +75,9 @@ export type ListenDemoControl = {
 /**
  * Give the input back to the player. Never silently: a lost "off" would leave
  * the input deaf until the engine's own bound runs out, so a failure is said
- * and tried once more.
+ * and tried once more. "Hear bar N" lifts its gate the same way (`useHearBack`).
  */
-async function liftGate(tail: boolean): Promise<void> {
+export async function liftGate(tail: boolean): Promise<void> {
   try {
     await setListenDemo(false, { tail });
   } catch (err) {

@@ -856,6 +856,11 @@
       },
       "chip": {
         "hear": "先に聴く",
+        "hearBack": "{{bar}} 小節目を聴く：自分の演奏、次にお手本",
+        "hearYours": "自分の演奏：{{bar}} 小節目 · 停止",
+        "hearDemo": "お手本：{{bar}} 小節目 · 停止",
+        "hearBackTune": "自分の {{played}} 小節目を聴く、次に曲の {{tune}} 小節目のお手本",
+        "hearDemoTune": "お手本：曲の {{tune}} 小節目 · 停止",
         "try": "何を試せばいいですか？"
       },
       "ungraded": {

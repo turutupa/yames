@@ -877,6 +877,11 @@
       },
       "chip": {
         "hear": "Escúchalo primero",
+        "hearBack": "Escucha el compás {{bar}}: el tuyo y luego la demo",
+        "hearYours": "Tuyo: compás {{bar}} · Parar",
+        "hearDemo": "Demo: compás {{bar}} · Parar",
+        "hearBackTune": "Escucha tu compás {{played}} y luego la demo del compás {{tune}}",
+        "hearDemoTune": "Demo: compás {{tune}} de la melodía · Parar",
         "try": "¿Qué pruebo?"
       },
       "ungraded": {

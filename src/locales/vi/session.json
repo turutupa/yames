@@ -856,6 +856,11 @@
       },
       "chip": {
         "hear": "Nghe thử trước",
+        "hearBack": "Nghe ô nhịp {{bar}}: của bạn, rồi bản mẫu",
+        "hearYours": "Của bạn: ô nhịp {{bar}} · Dừng",
+        "hearDemo": "Bản mẫu: ô nhịp {{bar}} · Dừng",
+        "hearBackTune": "Nghe ô nhịp {{played}} của bạn, rồi bản mẫu ô nhịp {{tune}}",
+        "hearDemoTune": "Bản mẫu: ô nhịp {{tune}} của giai điệu · Dừng",
         "try": "Tôi nên thử gì?"
       },
       "ungraded": {
