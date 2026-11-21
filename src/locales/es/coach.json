@@ -26,12 +26,12 @@
     "sessionScore": "Puntuación de la sesión {{score}} · {{word}}",
     "openRuns": "Abrir Pasadas de herramientas en Progreso",
     "finding": {
-      "beatEarly": "En el pulso {{beat}} del compás tus notas llegaron, de media, {{ms}} ms antes que en los demás pulsos: {{agreeing}} de las {{notes}} notas de ese pulso llegaron antes que ese promedio.",
-      "beatLate": "En el pulso {{beat}} del compás tus notas llegaron, de media, {{ms}} ms después que en los demás pulsos: {{agreeing}} de las {{notes}} notas de ese pulso llegaron después que ese promedio.",
-      "subdivision": "En {{missed}} de los {{total}} pulsos que tocaste, ninguna nota cayó en la posición «{{position}}».",
-      "ceiling": "A {{low}} BPM, al menos la mitad de tus {{lowNotes}} notas cayó a menos de {{lowMs}} ms de su lugar habitual respecto al clic; a {{high}} BPM, al menos la mitad de tus {{highNotes}} notas quedó a {{highMs}} ms o más de él.",
-      "driftEarly": "En un tramo de {{notes}} notas, las últimas {{third}} cayeron, de media, {{ms}} ms antes respecto al clic que las primeras {{third}}.",
-      "driftLate": "En un tramo de {{notes}} notas, las últimas {{third}} cayeron, de media, {{ms}} ms después respecto al clic que las primeras {{third}}.",
+      "beatEarly": "En el pulso {{beat}} del compás tus notas llegaron, de media, {{ms}} ms antes que en los demás pulsos: {{agreeing}} de las {{notes}} notas de ese pulso llegaron antes que el promedio de los demás pulsos.",
+      "beatLate": "En el pulso {{beat}} del compás tus notas llegaron, de media, {{ms}} ms después que en los demás pulsos: {{agreeing}} de las {{notes}} notas de ese pulso llegaron después que el promedio de los demás pulsos.",
+      "subdivision": "En {{missed}} de los {{total}} pulsos en los que se contó, ninguna nota cayó en la posición «{{position}}».",
+      "ceiling": "A {{low}} BPM, al menos la mitad de tus {{lowNotes}} notas sobre el clic cayó a menos de {{lowMs}} ms de su lugar habitual respecto al clic; a {{high}} BPM, al menos la mitad de tus {{highNotes}} notas sobre el clic quedó a {{highMs}} ms o más de él.",
+      "driftEarly": "En un tramo de {{notes}} notas sobre el clic, las últimas {{third}} cayeron, de media, {{ms}} ms antes respecto al clic que las primeras {{third}}.",
+      "driftLate": "En un tramo de {{notes}} notas sobre el clic, las últimas {{third}} cayeron, de media, {{ms}} ms después respecto al clic que las primeras {{third}}.",
       "position": {
         "2": {
           "0": "corchea en el pulso",

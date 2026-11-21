@@ -26,12 +26,12 @@
     "sessionScore": "セッションスコア {{score}} · {{word}}",
     "openRuns": "「上達」でツールの記録を開く",
     "finding": {
-      "beatEarly": "小節の{{beat}}拍目の音は、他の拍の音より平均 {{ms}} ms 早く入っていました。この拍の{{notes}}音のうち{{agreeing}}音が、その平均より早く入っていました。",
-      "beatLate": "小節の{{beat}}拍目の音は、他の拍の音より平均 {{ms}} ms 遅く入っていました。この拍の{{notes}}音のうち{{agreeing}}音が、その平均より遅く入っていました。",
-      "subdivision": "弾いていた{{total}}拍のうち{{missed}}拍で、{{position}}に音が入っていませんでした。",
-      "ceiling": "{{low}} BPM では、{{lowNotes}}音のうち半数以上が、クリックに対する普段の位置から {{lowMs}} ms 以内に入っていました。{{high}} BPM では、{{highNotes}}音のうち半数以上が、そこから {{highMs}} ms 以上離れていました。",
-      "driftEarly": "{{notes}}音の区間で、最後の{{third}}音は最初の{{third}}音より、クリックに対して平均 {{ms}} ms 早く入っていました。",
-      "driftLate": "{{notes}}音の区間で、最後の{{third}}音は最初の{{third}}音より、クリックに対して平均 {{ms}} ms 遅く入っていました。",
+      "beatEarly": "小節の{{beat}}拍目の音は、他の拍の音より平均 {{ms}} ms 早く入っていました。この拍の{{notes}}音のうち{{agreeing}}音が、他の拍の平均より早く入っていました。",
+      "beatLate": "小節の{{beat}}拍目の音は、他の拍の音より平均 {{ms}} ms 遅く入っていました。この拍の{{notes}}音のうち{{agreeing}}音が、他の拍の平均より遅く入っていました。",
+      "subdivision": "その位置を数えた{{total}}拍のうち{{missed}}拍で、{{position}}に音が入っていませんでした。",
+      "ceiling": "{{low}} BPM では、クリック上の{{lowNotes}}音のうち半数以上が、クリックに対する普段の位置から {{lowMs}} ms 以内に入っていました。{{high}} BPM では、クリック上の{{highNotes}}音のうち半数以上が、そこから {{highMs}} ms 以上離れていました。",
+      "driftEarly": "クリック上の{{notes}}音の区間で、最後の{{third}}音は最初の{{third}}音より、クリックに対して平均 {{ms}} ms 早く入っていました。",
+      "driftLate": "クリック上の{{notes}}音の区間で、最後の{{third}}音は最初の{{third}}音より、クリックに対して平均 {{ms}} ms 遅く入っていました。",
       "position": {
         "2": {
           "0": "拍の頭の八分音符",

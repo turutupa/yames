@@ -28,10 +28,10 @@
     "finding": {
       "beatEarly": "No tempo {{beat}} do compasso, suas notas vieram em média {{ms}} ms mais cedo do que as notas dos outros tempos: {{agreeing}} das {{notes}} notas desse tempo vieram mais cedo do que a média dos outros tempos.",
       "beatLate": "No tempo {{beat}} do compasso, suas notas vieram em média {{ms}} ms mais tarde do que as notas dos outros tempos: {{agreeing}} das {{notes}} notas desse tempo vieram mais tarde do que a média dos outros tempos.",
-      "subdivision": "Em {{missed}} dos {{total}} tempos em que você tocou, nenhuma nota caiu na posição “{{position}}”.",
-      "ceiling": "A {{low}} BPM, pelo menos metade das suas {{lowNotes}} notas caiu a até {{lowMs}} ms do lugar onde suas notas costumam cair em relação ao clique; a {{high}} BPM, pelo menos metade das {{highNotes}} notas ficou a {{highMs}} ms ou mais desse lugar.",
-      "driftEarly": "Em um trecho de {{notes}} notas, as últimas {{third}} caíram em média {{ms}} ms mais cedo em relação ao clique do que as primeiras {{third}}.",
-      "driftLate": "Em um trecho de {{notes}} notas, as últimas {{third}} caíram em média {{ms}} ms mais tarde em relação ao clique do que as primeiras {{third}}.",
+      "subdivision": "Em {{missed}} dos {{total}} tempos em que ela foi contada, nenhuma nota caiu na posição “{{position}}”.",
+      "ceiling": "A {{low}} BPM, pelo menos metade das suas {{lowNotes}} notas sobre o clique caiu a até {{lowMs}} ms do lugar onde suas notas costumam cair em relação ao clique; a {{high}} BPM, pelo menos metade das {{highNotes}} notas sobre o clique ficou a {{highMs}} ms ou mais desse lugar.",
+      "driftEarly": "Em um trecho de {{notes}} notas sobre o clique, as últimas {{third}} caíram em média {{ms}} ms mais cedo em relação ao clique do que as primeiras {{third}}.",
+      "driftLate": "Em um trecho de {{notes}} notas sobre o clique, as últimas {{third}} caíram em média {{ms}} ms mais tarde em relação ao clique do que as primeiras {{third}}.",
       "position": {
         "2": {
           "0": "colcheia no tempo",

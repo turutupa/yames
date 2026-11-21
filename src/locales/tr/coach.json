@@ -28,10 +28,10 @@
     "finding": {
       "beatEarly": "Ölçünün {{beat}}. vuruşunda notaların, diğer vuruşlardaki notalarına göre ortalama {{ms}} ms daha erken geldi: o vuruştaki {{notes}} notanın {{agreeing}} tanesi diğer vuruşların ortalamasından daha erkendi.",
       "beatLate": "Ölçünün {{beat}}. vuruşunda notaların, diğer vuruşlardaki notalarına göre ortalama {{ms}} ms daha geç geldi: o vuruştaki {{notes}} notanın {{agreeing}} tanesi diğer vuruşların ortalamasından daha geçti.",
-      "subdivision": "Nota çaldığın {{total}} vuruşun {{missed}} tanesinde “{{position}}” konumuna hiç nota düşmedi.",
-      "ceiling": "{{low}} BPM'de {{lowNotes}} notanın en az yarısı, notalarının tık sesine göre genelde düştüğü yerin {{lowMs}} ms içine düştü; {{high}} BPM'de {{highNotes}} notanın en az yarısı o yerden {{highMs}} ms veya daha fazla uzaktaydı.",
-      "driftEarly": "{{notes}} notalık bir bölümde, son {{third}} nota tık sesine göre ilk {{third}} notadan ortalama {{ms}} ms daha erken düştü.",
-      "driftLate": "{{notes}} notalık bir bölümde, son {{third}} nota tık sesine göre ilk {{third}} notadan ortalama {{ms}} ms daha geç düştü.",
+      "subdivision": "Konumun sayıldığı {{total}} vuruşun {{missed}} tanesinde “{{position}}” konumuna hiç nota düşmedi.",
+      "ceiling": "{{low}} BPM'de tık sesine denk gelen {{lowNotes}} notanın en az yarısı, notalarının tık sesine göre genelde düştüğü yerin {{lowMs}} ms içine düştü; {{high}} BPM'de tık sesine denk gelen {{highNotes}} notanın en az yarısı o yerden {{highMs}} ms veya daha fazla uzaktaydı.",
+      "driftEarly": "Tık sesine denk gelen {{notes}} notalık bir bölümde, son {{third}} nota tık sesine göre ilk {{third}} notadan ortalama {{ms}} ms daha erken düştü.",
+      "driftLate": "Tık sesine denk gelen {{notes}} notalık bir bölümde, son {{third}} nota tık sesine göre ilk {{third}} notadan ortalama {{ms}} ms daha geç düştü.",
       "position": {
         "2": {
           "0": "vuruş üstü sekizlik",

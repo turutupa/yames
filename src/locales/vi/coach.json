@@ -26,12 +26,12 @@
     "sessionScore": "Điểm buổi tập {{score}} · {{word}}",
     "openRuns": "Mở Lần chạy công cụ trong Tiến bộ",
     "finding": {
-      "beatEarly": "Ở nhịp {{beat}} của ô nhịp, các nốt của bạn đến sớm hơn trung bình {{ms}} ms so với các nốt ở những nhịp còn lại: {{agreeing}} trong {{notes}} nốt ở nhịp đó sớm hơn mức trung bình ấy.",
-      "beatLate": "Ở nhịp {{beat}} của ô nhịp, các nốt của bạn đến trễ hơn trung bình {{ms}} ms so với các nốt ở những nhịp còn lại: {{agreeing}} trong {{notes}} nốt ở nhịp đó trễ hơn mức trung bình ấy.",
-      "subdivision": "Ở {{missed}} trên {{total}} nhịp bạn có đánh nốt, không có nốt nào rơi vào vị trí “{{position}}”.",
-      "ceiling": "Ở {{low}} BPM, ít nhất một nửa trong {{lowNotes}} nốt của bạn rơi trong phạm vi {{lowMs}} ms so với vị trí các nốt của bạn thường rơi so với tiếng click; ở {{high}} BPM, ít nhất một nửa trong {{highNotes}} nốt lệch khỏi vị trí đó từ {{highMs}} ms trở lên.",
-      "driftEarly": "Trong đoạn {{notes}} nốt, {{third}} nốt cuối rơi sớm hơn trung bình {{ms}} ms so với tiếng click, so với {{third}} nốt đầu.",
-      "driftLate": "Trong đoạn {{notes}} nốt, {{third}} nốt cuối rơi trễ hơn trung bình {{ms}} ms so với tiếng click, so với {{third}} nốt đầu.",
+      "beatEarly": "Ở nhịp {{beat}} của ô nhịp, các nốt của bạn đến sớm hơn trung bình {{ms}} ms so với các nốt ở những nhịp còn lại: {{agreeing}} trong {{notes}} nốt ở nhịp đó sớm hơn mức trung bình của các nhịp còn lại.",
+      "beatLate": "Ở nhịp {{beat}} của ô nhịp, các nốt của bạn đến trễ hơn trung bình {{ms}} ms so với các nốt ở những nhịp còn lại: {{agreeing}} trong {{notes}} nốt ở nhịp đó trễ hơn mức trung bình của các nhịp còn lại.",
+      "subdivision": "Ở {{missed}} trên {{total}} nhịp mà vị trí đó được tính, không có nốt nào rơi vào vị trí “{{position}}”.",
+      "ceiling": "Ở {{low}} BPM, ít nhất một nửa trong {{lowNotes}} nốt trên tiếng click của bạn rơi trong phạm vi {{lowMs}} ms so với vị trí các nốt của bạn thường rơi so với tiếng click; ở {{high}} BPM, ít nhất một nửa trong {{highNotes}} nốt trên tiếng click lệch khỏi vị trí đó từ {{highMs}} ms trở lên.",
+      "driftEarly": "Trong đoạn {{notes}} nốt trên tiếng click, {{third}} nốt cuối rơi sớm hơn trung bình {{ms}} ms so với tiếng click, so với {{third}} nốt đầu.",
+      "driftLate": "Trong đoạn {{notes}} nốt trên tiếng click, {{third}} nốt cuối rơi trễ hơn trung bình {{ms}} ms so với tiếng click, so với {{third}} nốt đầu.",
       "position": {
         "2": {
           "0": "nốt móc đơn trên nhịp",

@@ -26,12 +26,12 @@
     "sessionScore": "Punteggio della sessione {{score}} · {{word}}",
     "openRuns": "Apri Esecuzioni degli strumenti in Progressi",
     "finding": {
-      "beatEarly": "Sul beat {{beat}} della battuta le tue note sono arrivate in media {{ms}} ms in anticipo rispetto agli altri beat: {{agreeing}} delle {{notes}} note su quel beat sono arrivate prima di quella media.",
-      "beatLate": "Sul beat {{beat}} della battuta le tue note sono arrivate in media {{ms}} ms in ritardo rispetto agli altri beat: {{agreeing}} delle {{notes}} note su quel beat sono arrivate dopo quella media.",
-      "subdivision": "Su {{missed}} dei {{total}} beat in cui stavi suonando, nessuna nota è caduta sulla posizione «{{position}}».",
-      "ceiling": "A {{low}} BPM, almeno metà delle tue {{lowNotes}} note è caduta entro {{lowMs}} ms dal suo punto abituale rispetto al click; a {{high}} BPM, almeno metà delle tue {{highNotes}} note era a {{highMs}} ms o più da esso.",
-      "driftEarly": "Su un tratto di {{notes}} note, le ultime {{third}} sono cadute in media {{ms}} ms prima rispetto al click delle prime {{third}}.",
-      "driftLate": "Su un tratto di {{notes}} note, le ultime {{third}} sono cadute in media {{ms}} ms dopo rispetto al click delle prime {{third}}.",
+      "beatEarly": "Sul beat {{beat}} della battuta le tue note sono arrivate in media {{ms}} ms in anticipo rispetto agli altri beat: {{agreeing}} delle {{notes}} note su quel beat sono arrivate prima della media degli altri beat.",
+      "beatLate": "Sul beat {{beat}} della battuta le tue note sono arrivate in media {{ms}} ms in ritardo rispetto agli altri beat: {{agreeing}} delle {{notes}} note su quel beat sono arrivate dopo la media degli altri beat.",
+      "subdivision": "Su {{missed}} dei {{total}} beat in cui è stata contata, nessuna nota è caduta sulla posizione «{{position}}».",
+      "ceiling": "A {{low}} BPM, almeno metà delle tue {{lowNotes}} note sul click è caduta entro {{lowMs}} ms dal suo punto abituale rispetto al click; a {{high}} BPM, almeno metà delle tue {{highNotes}} note sul click era a {{highMs}} ms o più da esso.",
+      "driftEarly": "Su un tratto di {{notes}} note sul click, le ultime {{third}} sono cadute in media {{ms}} ms prima rispetto al click delle prime {{third}}.",
+      "driftLate": "Su un tratto di {{notes}} note sul click, le ultime {{third}} sono cadute in media {{ms}} ms dopo rispetto al click delle prime {{third}}.",
       "position": {
         "2": {
           "0": "ottavo sul beat",
