@@ -176,13 +176,25 @@ function walk(notes: readonly FingerNote[], groups: Group[], start: number, usua
   const stringBar = new Map<string, number[]>();
   const sbKey = (i: number) => `${notes[i].string}@${Math.floor((notes[i].tick ?? 0) / BAR_TICKS)}`;
   for (const g of groups) for (const i of g.notes) stringBar.set(sbKey(i), [...(stringBar.get(sbKey(i)) ?? []), notes[i].fret]);
-  const fingerOf = (i: number, base: number): Finger | null => {
+  const fingerFor = (i: number, base: number): Finger | null => {
     const own = explicitFinger(notes[i]);
     if (own !== null) return own;
     const plain = fingerAt(base, notes[i].fret);
     if (plain === null) return null;
     const spread = spreadRanks((stringBar.get(sbKey(i)) ?? []).map((f) => f - base).filter((d) => fingerAt(base, d + base) !== null));
     return spread?.get(notes[i].fret - base) ?? plain;
+  };
+  // `moveCost` asks for the same note under the same base once per pair of bases (24 x 24 a group);
+  // the answer depends only on the note and the base, so it is worked out once (-2: not yet, -1: null).
+  const known = new Int8Array(notes.length * (MAX_BASE + 1)).fill(-2);
+  const fingerOf = (i: number, base: number): Finger | null => {
+    if (base < 0 || base > MAX_BASE) return fingerFor(i, base);
+    const at = i * (MAX_BASE + 1) + base;
+    const hit = known[at];
+    if (hit !== -2) return hit === -1 ? null : (hit as Finger);
+    const f = fingerFor(i, base);
+    known[at] = f === null ? -1 : f;
+    return f;
   };
   const groupCost = (g: Group, b: number) => {
     const idle = Math.max(0, (low.get(Math.floor(g.tick / BAR_TICKS)) ?? b) - b);
