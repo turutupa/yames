@@ -24,6 +24,30 @@ line is `coachTools.why.notNow.take`, already in every locale).
 - An Undo still drawn live during a jam take and pressed then is refused ("undo gone"; it was spent
   at the take's start); that press is the player's, so it draws its answer.
 
+## The merge of `coach`
+
+Two conflicts: `AskPanel.tsx`'s imports (both kept: the fact cards' and `pressChip` /
+`noKeyRepeat`), and `useAskHost.test.tsx` (an add/add): `coach`'s file stays as it is and chip1b's
+hook tests moved to `useAskHost.undos.test.tsx` (its `askContext` mock now spreads the real module,
+since `useAskHost` imports `askModelContext`). The loop door, `VERBS.loop_bars`, `STILL_NOT_WIRED
+= []` came through clean.
+
+The choice grammar fixture (`src/coach/ask/choice-grammar.gbnf`, from the registry) was stale on
+this branch since chip1: the `at` guards chip1 added to `click_subdivision` and `set_setting` are
+registry parameters, so they are in the grammar, as `set_tempo`'s already was. Regenerated
+(`UPDATE_CHOICE_GRAMMAR=1`); the Rust precheck test that `include_str!`s it passes. **Open point**:
+whether a model's call should be able to carry an `at` guard at all (it only makes a call stricter)
+is for the grammar's owner (c3b).
+
 ## Gates
 
-(below)
+- tsc: pass (`coach-chip1c-tsc`, job 517, after the merge).
+- vitest full: `coach-chip1c-vitest` (job 518, `/tmp/coach-chip1c/vitest.log`): 49213 passed, 11
+  skipped; failed only the grammar fixture (fixed above) and `TabStage.render.test.tsx` (known, the
+  symlink). `coach-chip1c-vitest-2` (job 527, `/tmp/coach-chip1c/vitest-2.log`, with a cargo build
+  beside it): 49212 passed; two `useSessionRun` timing tests failed that passed in job 518 and pass
+  alone (`coach-chip1c-vt-2`, job 540: 19/19 with the grammar test).
+- `npm run build`: pass (`coach-chip1c-build`, job 519).
+- Rust: `npm run test:rust -- choice_grammar` pass (`coach-chip1c-rust`, job 526).
+- Layout (`coach-chip1c-pw`, job 522): see the report.
+- Nothing a running Take renders changed; the full layout suite is owed.
