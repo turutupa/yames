@@ -224,8 +224,12 @@ const LINT: [string, RegExp][] = [
  * measures timing against the click, not fatigue, stiffness, strain or pain.
  * "Stop if anything hurts" is the one way a line may mention pain.
  */
+// Leg tc2b: + pain / painful (not "painless", which says nothing hurts),
+// exhausted, worn out, numb, hydrate; "stamina" only as a claim about the
+// player's ("your stamina", "stamina wall"), since a Path grades `stamina`
+// and the scenario is called that. "tension" and "posture" are in LINT above.
 const BODY_STATE =
-  /\b(tired|tiring|fatigue[ds]?|fatigue's|sore|aches?|aching|cramp\w*|stiff(en\w*)?|injur\w*|tendons?|strain(s|ed|ing)?|stamina)\b|\bgetting heavy\b|\bfeel(s|ing)? (heavy|tight|locked)\b|\bworking (too hard|harder than)\b|\bpast (your )?peak\b|(?<!\b(anything|something) )\bhurt(s|ing)?\b/i;
+  /\b(tired|tiring|fatigue[ds]?|sore|aches?|aching|cramp\w*|stiff(en\w*)?|injur\w*|tendons?|strain(s|ed|ing)?|pains?|painful|exhausted|worn out|numb|hydrat\w*)\b|\byour stamina\b|\bstamina(?:'s)? (wall|is|runs?|fad\w*|drop\w*|gone)\b|\bgetting heavy\b|\bfeel(s|ing)? (heavy|tight|locked)\b|\bworking (too hard|harder than)\b|\bpast (your )?peak\b|(?<!\b(anything|something) )\bhurt(s|ing)?\b/i;
 /**
  * The slots that fire on time played or on accuracy falling at one tempo
  * (fatigue, check_in, stamina) offer a break and say what was measured; they
@@ -234,8 +238,21 @@ const BODY_STATE =
  * not the player's.
  */
 const BREAK_SCENARIO = /^(fatigue|check_in|stamina)$/;
+// Not "a touch" (an amount: "drop the BPM a touch"), "no pressure" or
+// "fresh start" (leg tc2b). "drink" and "water" are body advice (leg tc2b).
 const BODY_WORD =
-  /\b(hands?|fingers?|wrists?|arms?|forearms?|shoulders?|limbs?|grip\w*|body|breath\w*|breathe|relax\w*|loose\w*|tight\w*|tense|shake|fresh|recover\w*|heav(y|ier)|pressure|touch|attack|(your|lower|upper) back|you (tend to )?fade)\b|(?<!\b(long|quiet|solid|steady|uninterrupted|clean|this|that|a) )\bstretch(es|ing)?\b|(?<!\b(on|up|down|along|across|off) the )\bneck\b(?! (pickup|position))/i;
+  /\b(hands?|fingers?|wrists?|arms?|forearms?|shoulders?|limbs?|grip\w*|body|breath\w*|breathe|relax\w*|loose\w*|tight\w*|tense|shake|recover\w*|heav(y|ier)|attack|drink|water|(your|lower|upper) back|you (tend to )?fade)\b|\bfresh\b(?! start)|(?<!\bno )\bpressure\b|(?<!\ba )\btouch\b|(?<!\b(long|quiet|solid|steady|uninterrupted|clean|this|that|a) )\bstretch(es|ing)?\b|(?<!\b(on|up|down|along|across|off) the )\bneck\b(?! (pickup|position))/i;
+
+/**
+ * The `stamina` slot (leg tc2b). `detectStaminaPattern` compares a preset's
+ * oldest third of sessions with its newest third, in one BPM band, and
+ * `{staminaMinutes}` is the AVERAGE LENGTH of those sessions: nothing scores
+ * a session minute by minute. So a stamina line may say "your sessions here
+ * run about {staminaMinutes} minutes" and "the recent ones scored lower", and
+ * never that something happens at, around or past minute N.
+ */
+const STAMINA_PER_MINUTE =
+  /\bminute \{staminaMinutes\}|\{staminaMinutes\}[- ]minute (mark|point)|\b(around|at|past|after|by) (the )?minute\b|\bat this tempo\b/i;
 
 /** A pitch word in a line about timing ("a half-step earlier"). */
 const PITCH_WORD = /\bhalf[- ]steps?\b|\bwhole[- ]steps?\b|\bsemitones?\b/i;
@@ -261,10 +278,45 @@ describe("toolTips: the English honesty lint", () => {
         const [, vocabulary, scenario] = p.split(".");
         if (BODY_STATE.test(s)) return true;
         if (BREAK_SCENARIO.test(scenario) && BODY_WORD.test(s)) return true;
+        if (scenario === "stamina" && STAMINA_PER_MINUTE.test(s)) return true;
         if (TIMING_SCENARIO.test(scenario) && PITCH_WORD.test(s)) return true;
         return vocabulary === "generic" && GUITAR_WORD.test(s);
       })
       .map(([p]) => p);
     expect(hits.sort()).toEqual([...LINT_KNOWN].sort());
+  });
+
+  // The lint's edges (leg tc2b): what it must catch and what it must let by.
+  it("catches the body and the per-minute claim, and lets ordinary words by", () => {
+    for (const s of [
+      "Tension creeping in.",
+      "Stop if there's any pain.",
+      "That's painful to keep up.",
+      "You sound exhausted.",
+      "Worn out? Take five.",
+      "Fingers going numb?",
+      "90 seconds off, hydrate, return.",
+      "Your stamina is fading.",
+      "You've hit the stamina wall.",
+    ])
+      expect(BODY_STATE.test(s) || LINT.some(([, re]) => re.test(s)), s).toBe(true);
+    for (const s of [
+      "A painless way back in: drop 5 BPM.",
+      "This exercise grades stamina: hold it for the whole Take.",
+      "Stop if anything hurts.",
+    ])
+      expect(BODY_STATE.test(s), s).toBe(false);
+    for (const s of ["Lighten your touch.", "Come back fresh.", "Take the pressure off.", "A drink of water, then back in."])
+      expect(BODY_WORD.test(s), s).toBe(true);
+    for (const s of ["Drop the BPM a touch.", "No pressure — pause if you want.", "Fresh start at the same BPM.", "Long stretch since my last tip."])
+      expect(BODY_WORD.test(s), s).toBe(false);
+    for (const s of [
+      "Your scores dip around minute {staminaMinutes}.",
+      "Past the {staminaMinutes}-minute mark your timing slips.",
+      "Accuracy dips at minute {staminaMinutes}.",
+      "Your scores at this tempo slip.",
+    ])
+      expect(STAMINA_PER_MINUTE.test(s), s).toBe(true);
+    expect(STAMINA_PER_MINUTE.test("Your sessions here run about {staminaMinutes} minutes, and the recent ones scored lower.")).toBe(false);
   });
 });

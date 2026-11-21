@@ -200,7 +200,7 @@
           "neutral": [
             "Five minutes in, nothing to flag. Solid pocket. Keep going or switch focus?",
             "Quiet stretch. Tell me what you're working on.",
-            "Long uninterrupted run. Anything you want feedback on?",
+            "Quiet from me for a while. Anything you want feedback on?",
             "Five minutes deep. No issues to call out — keep going.",
             "Steady session. Want a different angle, or stay the course?",
             "Long run with no slips. What's next?",
@@ -208,12 +208,12 @@
             "Quiet session so far. Pick a target if you want sharper feedback."
           ],
           "correction": [
-            "Heads up — you've been in this a while. Take 10 if you want it.",
-            "Five-plus minutes continuous. Want a short break before you push more?",
+            "Heads up — you've been in this a while. Take a few minutes off if you want.",
+            "Five-plus minutes in. Want a short break before you push more?",
             "Sustained session — a short break is fine here, then come back.",
             "Want a 60-second pause before the next pass?",
-            "Long stretch without a pause. A short break is an option before you continue.",
-            "Long run without a pause. A quick break is an option.",
+            "Long stretch since my last tip. A short break is an option before you continue.",
+            "Five minutes since my last tip. A quick break is an option.",
             "Pause here if you like. Two minutes off, then pick it back up.",
             "Sustained run — take a short rest before pushing further."
           ]
@@ -242,7 +242,7 @@
           "correction": [
             "Accuracy keeps dropping — stop now, 90 seconds off, then come back.",
             "Scores are below your peak this session. Rest before they drop further.",
-            "Take the rest. The last few minutes scored lower than the first.",
+            "Take the rest. The last few minutes scored lower than the ones before.",
             "Stop, stand up, walk around for a minute. Then come back.",
             "Quality's been dropping for minutes. Real rest — 90 seconds minimum.",
             "Scores keep falling at this tempo. Pause, then re-check.",
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Score's dropping past the {staminaMinutes}-minute mark again — take 30 seconds, then come back at the same BPM.",
-            "Past the {staminaMinutes}-minute mark your accuracy tends to slide. Brief rest, then back in.",
-            "Your accuracy tends to fade around minute {staminaMinutes}. Take a break, then return.",
-            "Your scores usually dip around minute {staminaMinutes} — a short rest now is an option."
+            "Your sessions here average about {staminaMinutes} minutes, and the recent ones scored lower than the early ones. Take 30 seconds if you want, then the same BPM.",
+            "In one tempo range here, your recent sessions of about {staminaMinutes} minutes scored below your early ones. A brief rest is an option.",
+            "Your sessions here run about {staminaMinutes} minutes, and your recent ones scored lower than your early ones. A break is an option.",
+            "About {staminaMinutes} minutes is your usual session here, and lately the scores are lower than they were at first. A short rest now is an option."
           ]
         },
         "ramp_complete": {
@@ -676,7 +676,7 @@
           "encouragement": [
             "Hits are slipping at the same tempo. Sticks down a moment, then come back.",
             "Quality's drifting — get off the throne for 60 seconds.",
-            "Hits drifting at the same tempo. Brief pause, then back in.",
+            "Hits slipping at the same tempo. Brief pause, then back in.",
             "Want a break? Set the sticks down, then return.",
             "Misses are up at this tempo. Step away from the kit for a minute.",
             "Accuracy's sliding — quick break, then continue.",
@@ -686,12 +686,12 @@
           "correction": [
             "Accuracy keeps falling at this tempo. Stop now, sticks down, 90 seconds rest.",
             "Scores are below your peak — sticks down, walk a lap, then re-evaluate.",
-            "Hits keep slipping at this tempo. 90 seconds off, hydrate, return.",
+            "Hits keep slipping at this tempo. 90 seconds off, then return.",
             "Misses are climbing at one tempo. Stop, sticks down, two minutes off.",
             "Stop if anything hurts. Either way, a real rest now.",
             "Stop drumming. Walk away from the kit for a couple of minutes.",
             "Sticks down. Two minutes off, then return when you're ready.",
-            "Hard stop. Two minutes off and a drink of water before you come back."
+            "Hard stop. Two minutes off before you come back."
           ]
         },
         "tempo_milestone": {
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Around minute {staminaMinutes} your accuracy tends to dip. Drop the BPM 5 ticks and rebuild.",
-            "Past the {staminaMinutes}-minute mark your hits start to drift. Short break, then back at it.",
-            "Your scores on the kit dip around minute {staminaMinutes}. A short rest, then return.",
-            "Your timing on the kit tends to slip around minute {staminaMinutes}. Take a short break."
+            "Your sessions on this groove run about {staminaMinutes} minutes, and the recent ones scored lower than the early ones. Dropping the BPM 5 ticks is an option.",
+            "On the kit, your sessions here last about {staminaMinutes} minutes, and your scores have come down since the first ones. Short break, then back at it, if you want.",
+            "Your recent scores on this groove sit below your early ones, over sessions of about {staminaMinutes} minutes. A short rest is an option.",
+            "About {staminaMinutes} minutes a session on this groove, and the recent sessions scored lower. Want a short break?"
           ]
         },
         "bias_only": {
@@ -963,7 +963,7 @@
             "Real rest — guitar on the stand, walk around for a bit.",
             "Scores are still falling. 90 seconds minimum, then re-check.",
             "Stop here. Two minutes away from the guitar, then come back to it.",
-            "Hard stop here. Stop any time something hurts."
+            "Hard stop here, and stop any time something hurts."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Past the {staminaMinutes}-minute mark your timing at this tempo tends to slip. A short break, then resume.",
-            "Around minute {staminaMinutes} your timing starts to drift. Quick break, then back in.",
-            "Your scores dip at minute {staminaMinutes}. Rest 30 seconds if you want.",
-            "Notes start landing off the click around minute {staminaMinutes}. Short rest, then return."
+            "In one tempo range on this riff, your recent sessions of about {staminaMinutes} minutes scored below your early ones. A short break is an option.",
+            "Your sessions on this riff run about {staminaMinutes} minutes, and the recent ones scored lower than the early ones. Quick break, then back in, if you want.",
+            "Your sessions here average {staminaMinutes} minutes; the recent ones scored lower. Rest 30 seconds if you want.",
+            "Lately your scores on this riff are below your early ones, in sessions of about {staminaMinutes} minutes. Want a short rest?"
           ]
         },
         "bias_only": {
@@ -1218,7 +1218,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Strums drifting at one tempo. Short pause, then back in.",
+            "Strums slipping at one tempo. Short pause, then back in.",
             "Accuracy's sliding at this tempo. Quick break, then come back in.",
             "Misses creeping into the strum — guitar down for 60 seconds.",
             "Been strumming at one tempo a while. Pause, then continue.",
@@ -1235,7 +1235,7 @@
             "Real rest — guitar on the stand, walk around for a bit.",
             "Accuracy is still falling. 90 seconds minimum, then re-check.",
             "Hard stop. Two minutes off, then continue when you're ready.",
-            "Stop here for a real break. Stop sooner if anything hurts."
+            "Stop here for a real break, and stop any time something hurts."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Your scores dip around minute {staminaMinutes}. Rest 30 seconds and re-approach.",
-            "Around minute {staminaMinutes} the strums start to drift. Brief break, then back in.",
-            "Past the {staminaMinutes}-minute mark your accuracy tends to slip. Short rest, then resume.",
-            "Accuracy dips at minute {staminaMinutes} on the acoustic. Take a short break."
+            "Your sessions here run about {staminaMinutes} minutes, and your scores have come down since the first ones. Resting 30 seconds is an option.",
+            "Recent sessions on this exercise scored lower than your early ones; they average about {staminaMinutes} minutes. Brief break, then back in, if you want.",
+            "In one tempo range on this exercise, your recent sessions of about {staminaMinutes} minutes scored lower than your first ones. A short rest is an option.",
+            "On the acoustic, your sessions here average about {staminaMinutes} minutes, and the recent ones scored lower. Want a short break?"
           ]
         },
         "bias_only": {
@@ -1489,7 +1489,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Notes drifting at one tempo. Quick pause — back in.",
+            "Notes slipping at one tempo. Quick pause — back in.",
             "Misses are up at this tempo. Bass down for 60 seconds.",
             "Notes are slipping at the same tempo. Brief break, then come back in.",
             "Want a moment? Take it, then continue.",
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Your groove starts to slip at minute {staminaMinutes}. Short break, then back in.",
-            "Around minute {staminaMinutes} your accuracy starts to dip. Rest and return.",
-            "Past the {staminaMinutes}-minute mark the bass lock starts to slip. Brief rest, then resume.",
-            "Your scores tend to fade around minute {staminaMinutes}. Take 30 seconds, come back clean."
+            "Your recent sessions on this line scored lower than your early ones, at about {staminaMinutes} minutes each. A short break is an option.",
+            "Your sessions here run about {staminaMinutes} minutes, and the recent ones scored lower. Rest and return, if you want.",
+            "In one tempo range on this line, your recent sessions of about {staminaMinutes} minutes score lower than your first ones. A brief rest is an option.",
+            "About {staminaMinutes} minutes is a usual session on this line, and the recent ones scored lower than the early ones. Take 30 seconds if you want."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Drop the tempo and play with more lift. The drag clears when it feels easy.",
             "Imagine the click is a hair earlier than it is, and meet that.",
             "Stop, take a breath, then come in pushing slightly forward.",
-            "Notes are landing behind the click. Lighten your touch and aim earlier."
+            "Notes are landing behind the click. Aim each one a hair earlier."
           ]
         },
         "personal_best_streak": {
@@ -1763,7 +1763,7 @@
             "Accuracy's slipping at this tempo. Short pause, then back in.",
             "Want a short pause? Step away from the keys for a moment.",
             "Misses creeping in at this tempo — 60 seconds off the keys.",
-            "Notes drifting at one tempo. Quick pause, then resume.",
+            "Notes slipping at one tempo. Quick pause, then resume.",
             "Misses are up at this tempo. Brief rest.",
             "Been at the keys a while. Short pause, then play.",
             "A 30-second break is an option, then back to it.",
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Your scores at this tempo slip around minute {staminaMinutes}. Pause, come back clean.",
-            "Around minute {staminaMinutes} the misses start to creep in. Brief rest, then resume.",
-            "Past the {staminaMinutes}-minute mark your timing gets less even. Short break, then back at the keys.",
-            "Your scores dip around minute {staminaMinutes}. Rest, then return."
+            "Your recent sessions on this piece scored lower than your early ones; they run about {staminaMinutes} minutes. A pause is an option.",
+            "Your sessions on this piece average about {staminaMinutes} minutes, and lately they score lower than at first. Brief rest, then resume, if you want.",
+            "Your sessions at the keys here run about {staminaMinutes} minutes, and the recent ones scored lower. Short break, then back at the keys, if you want.",
+            "Lately your scores on this piece are below your early ones, over sessions of about {staminaMinutes} minutes. Want a rest?"
           ]
         },
         "bias_only": {
