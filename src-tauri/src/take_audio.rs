@@ -16,10 +16,11 @@
 //! its hops by. So sample `i` is at `first_ns + i / rate`, on the same
 //! `clock::now_ns` the onsets are on.
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use crate::audio_input::RingBuffer;
+use crate::take::{TakeHandoff, TakePlayback};
 
 /// The longest Take kept. A Session Take is at most sixteen bars, which is
 /// 96 s at 40 BPM; past this the buffer stops and later notes are not checked.
@@ -250,6 +251,299 @@ impl TakeAudioTap {
     }
 }
 
+// ---------------------------------------------------------------------------
+// The last heard Take, kept for "Hear bar N" (c5b1)
+// ---------------------------------------------------------------------------
+//
+// The pitch pass used to free a Take's audio the moment its grade was
+// published. It now moves it into one slot instead: the LAST heard Take, in
+// RAM only (never on disk, never in an event), replaced by the next Take's,
+// emptied when the input stops (`stop_evaluation`) or on `forget_heard_take`.
+// A Take the tap never kept (input off, MIDI, a pull gap, no capture) puts
+// nothing here, and the answer to "is it held?" is simply no.
+//
+// **Not the audio callback either.** The slot is touched by the notes thread
+// (`timing::start_notes_pass`) and by command threads, never by the detector
+// or the output callback. A bar is played back through the jam's listen-back
+// path, `take::TakeHandoff::set_play`, unchanged: the callback sees a
+// `TakePlayback` like any other and retires it through `TakeParking`.
+
+/// How far before a bar's downbeat a hear-back starts: an attack the player
+/// put a little early is still in it.
+pub const HEAR_LEAD_MS: f64 = 150.0;
+/// How far past the bar's end it runs: the last note's ring, and the input's
+/// round trip, which puts every attack a little after the beat it was played to.
+pub const HEAR_TAIL_MS: f64 = 300.0;
+/// A short fade at each cut edge, so the slice does not start or stop with a
+/// click of its own. Not a gain: the level is the input's, as it was heard.
+const HEAR_FADE_MS: f64 = 5.0;
+
+/// `HeardTakeSlot::playing` when no hear-back is in the take slot.
+/// Generations count up from 0 one `set_play` at a time and never reach it.
+const NO_HEAR: u64 = u64::MAX;
+
+/// One heard Take: its audio and where its bars fall in it.
+#[derive(Debug)]
+pub struct HeardTake {
+    /// The Take's `notes_serial`, which its grade carries to the frontend.
+    pub serial: u64,
+    pub samples: Vec<f32>,
+    pub rate: u32,
+    /// `clock::now_ns` of `samples[0]`.
+    pub first_ns: u64,
+    /// Bar `k` of the Take (1-based, after the count-in) is `bars[k - 1]`: the
+    /// sample it opens on and the one the next bar opens on. Only bars wholly
+    /// inside the audio, from bar 1 on without a hole.
+    pub bars: Vec<(usize, usize)>,
+}
+
+/// Why a hear-back was not started. The frontend shows nothing for any of them.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HearRefused {
+    /// No Take is held, or the one held is not the Take asked about.
+    NotHeld,
+    /// Bar 0, a range backwards, or a bar the audio does not hold.
+    NoSuchBar,
+}
+
+impl std::fmt::Display for HearRefused {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            HearRefused::NotHeld => "that Take's audio is not held",
+            HearRefused::NoSuchBar => "that Take holds no such bar",
+        })
+    }
+}
+
+impl HeardTake {
+    /// A capture and the Take's complete bars in wall ms
+    /// (`ScheduleRun::bar_spans_ms`), with `samples[0]` at `start_ms` on the
+    /// same wall clock. The notes thread's job: the buffer is shrunk to what
+    /// the Take used (the tap sized it for `MAX_TAKE_SECS`), which copies it
+    /// once and frees the rest here.
+    pub fn new(serial: u64, audio: CapturedAudio, start_ms: f64, bars_ms: &[(f64, f64)]) -> Self {
+        let mut samples = audio.samples;
+        samples.shrink_to_fit();
+        let rate = audio.rate;
+        let at = |ms: f64| ((ms - start_ms) * rate as f64 / 1000.0).round();
+        let mut bars = Vec::with_capacity(bars_ms.len());
+        for &(open, close) in bars_ms {
+            let (a, b) = (at(open), at(close));
+            if a < 0.0 || b > samples.len() as f64 || b <= a {
+                break;
+            }
+            bars.push((a as usize, b as usize));
+        }
+        Self { serial, samples, rate, first_ns: audio.first_ns, bars }
+    }
+
+    /// What it costs in memory: its buffer, at four bytes a sample.
+    pub fn bytes(&self) -> usize {
+        self.samples.capacity() * std::mem::size_of::<f32>()
+    }
+
+    /// The samples bars `from_bar..=to_bar` cover (1-based), with
+    /// [`HEAR_LEAD_MS`] before and [`HEAR_TAIL_MS`] after, as far as the
+    /// audio goes.
+    pub fn span(&self, from_bar: u32, to_bar: u32) -> Result<std::ops::Range<usize>, HearRefused> {
+        if from_bar == 0 || to_bar < from_bar || to_bar as usize > self.bars.len() {
+            return Err(HearRefused::NoSuchBar);
+        }
+        let lead = (HEAR_LEAD_MS * self.rate as f64 / 1000.0) as usize;
+        let tail = (HEAR_TAIL_MS * self.rate as f64 / 1000.0) as usize;
+        let start = self.bars[from_bar as usize - 1].0.saturating_sub(lead);
+        let end = (self.bars[to_bar as usize - 1].1 + tail).min(self.samples.len());
+        Ok(start..end)
+    }
+}
+
+/// The Take's bar lines where its audio has them, for [`HeardTake::new`]
+/// (c5b1b, review L4): `ScheduleRun::bar_spans_ms` moved by the Take's
+/// calibrated offset (`TakeCalibration::offset_ms`, its input's latency as
+/// the grader measured it) less the detector's delay: the same shift
+/// `score::notes::lookups` gives every expected attack before it looks in
+/// the audio. Without a grade (the pass failed) they stay where the beat map
+/// has them. The notes thread's arithmetic; no lock.
+pub fn bars_as_heard(bars_ms: &[(f64, f64)], offset_ms: Option<f64>, detection_delay_ms: f64) -> Vec<(f64, f64)> {
+    let shift = offset_ms.map_or(0.0, |offset| offset - detection_delay_ms);
+    bars_ms.iter().map(|&(open, close)| (open + shift, close + shift)).collect()
+}
+
+/// The copy a hear-back plays, faded in and out at its edges.
+fn faded_copy(samples: &[f32], rate: u32) -> Vec<f32> {
+    let mut out = samples.to_vec();
+    let fade = ((HEAR_FADE_MS * rate as f64 / 1000.0) as usize).min(out.len() / 2);
+    let n = out.len();
+    for i in 0..fade {
+        let g = i as f32 / fade as f32;
+        out[i] *= g;
+        out[n - 1 - i] *= g;
+    }
+    out
+}
+
+/// A hear-back's copy, cut and ready for the take slot.
+pub struct HearSlice {
+    pub pcm: Vec<f32>,
+    pub rate: u32,
+}
+
+impl HearSlice {
+    pub fn length_ms(&self) -> u64 {
+        (self.pcm.len() as f64 * 1000.0 / self.rate.max(1) as f64).round() as u64
+    }
+}
+
+/// What `hear_take` answers: the playback's generation (the number
+/// `take-playback-ended` will carry) and how long it runs.
+#[derive(Debug, Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HearBack {
+    pub generation: u64,
+    pub length_ms: u64,
+}
+
+/// What `heard_take` answers.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeldTake {
+    pub held: bool,
+    /// Complete bars of the Take held, from bar 1. 0 when not held.
+    pub bars: u32,
+}
+
+/// The one "last heard Take" slot, and the hear-back it is playing.
+pub struct HeardTakeSlot {
+    take: Mutex<Option<HeardTake>>,
+    /// Moved by every [`Self::forget`], under `take`'s lock. A pass that read
+    /// it before a forget cannot keep its audio after one: the input stopped
+    /// while the pitch pass was running, and nothing outlives that.
+    epoch: AtomicU64,
+    /// The `set_play` generation of the hear-back in the take slot, or
+    /// [`NO_HEAR`]. Only that playback is ever stopped from here.
+    playing: AtomicU64,
+}
+
+pub type SharedHeardTake = Arc<HeardTakeSlot>;
+
+impl HeardTakeSlot {
+    pub fn new() -> SharedHeardTake {
+        Arc::new(Self { take: Mutex::new(None), epoch: AtomicU64::new(0), playing: AtomicU64::new(NO_HEAR) })
+    }
+
+    /// Read before the pitch pass starts; handed back to [`Self::keep`].
+    pub fn epoch(&self) -> u64 {
+        self.epoch.load(Ordering::Acquire)
+    }
+
+    /// The notes thread, after the grade is published: this Take is now the
+    /// last one heard. The one it replaces is freed here, outside the lock.
+    /// Refused (and `take` freed here too) after a forget since `epoch` was
+    /// read, or when a later Take is already held. `true` when kept.
+    pub fn keep(&self, take: HeardTake, epoch: u64) -> bool {
+        let (old, kept) = {
+            let mut slot = self.take.lock().unwrap_or_else(|e| e.into_inner());
+            let stale = self.epoch.load(Ordering::Acquire) != epoch
+                || slot.as_ref().is_some_and(|held| held.serial > take.serial);
+            if stale {
+                (Some(take), false)
+            } else {
+                (slot.replace(take), true)
+            }
+        };
+        drop(old);
+        kept
+    }
+
+    /// Empty the slot: the input stopped, or `forget_heard_take`. A command
+    /// thread's job; the buffer is freed outside the lock. A hear-back already
+    /// playing has its own copy and plays on until it ends or is stopped.
+    pub fn forget(&self) {
+        let old = {
+            let mut slot = self.take.lock().unwrap_or_else(|e| e.into_inner());
+            self.epoch.fetch_add(1, Ordering::AcqRel);
+            slot.take()
+        };
+        drop(old);
+    }
+
+    /// Whether the Take with this serial is held, and how many bars.
+    pub fn held(&self, serial: u64) -> HeldTake {
+        let slot = self.take.lock().unwrap_or_else(|e| e.into_inner());
+        match slot.as_ref().filter(|t| t.serial == serial) {
+            Some(t) => HeldTake { held: true, bars: t.bars.len() as u32 },
+            None => HeldTake { held: false, bars: 0 },
+        }
+    }
+
+    /// The memory the held Take costs, in bytes; 0 when none is.
+    pub fn held_bytes(&self) -> usize {
+        self.take.lock().unwrap_or_else(|e| e.into_inner()).as_ref().map_or(0, HeardTake::bytes)
+    }
+
+    /// Cut bars `from_bar..=to_bar` of the Take `serial` out of the slot:
+    /// a copy, made on the calling (command) thread.
+    pub fn slice(&self, serial: u64, from_bar: u32, to_bar: u32) -> Result<HearSlice, HearRefused> {
+        let slot = self.take.lock().unwrap_or_else(|e| e.into_inner());
+        let take = slot.as_ref().filter(|t| t.serial == serial).ok_or(HearRefused::NotHeld)?;
+        let range = take.span(from_bar, to_bar)?;
+        Ok(HearSlice { pcm: faded_copy(&take.samples[range], take.rate), rate: take.rate })
+    }
+
+    /// Hand a slice to the audio thread through the jam's listen-back path.
+    /// The caller holds the app state's lock and has seen the transport
+    /// stopped, so a Start (which cuts under the same lock) cannot slip
+    /// between the hand-over and the record of its generation.
+    pub fn start(&self, handoff: &TakeHandoff, slice: HearSlice) -> Result<HearBack, String> {
+        let length_ms = slice.length_ms();
+        let generation = handoff
+            .set_play(Some(TakePlayback { pcm: Arc::new(slice.pcm), sample_rate: slice.rate }))
+            .ok_or_else(|| "the bar could not be handed to the audio engine".to_string())?;
+        self.playing.store(generation, Ordering::Release);
+        Ok(HearBack { generation, length_ms })
+    }
+
+    /// `stop_hear_take`: stop the hear-back `generation` named, and nothing
+    /// else. `true` when it was still in the slot.
+    pub fn stop(&self, handoff: &TakeHandoff, generation: u64) -> bool {
+        if self.playing.compare_exchange(generation, NO_HEAR, Ordering::AcqRel, Ordering::Acquire).is_err() {
+            return false;
+        }
+        let cleared = handoff.clear_play_if(generation);
+        handoff.drain_retired();
+        cleared
+    }
+
+    /// A Start: whatever hear-back is in the take slot, playing or finished
+    /// (a finished one still holds the slot, and the take branch runs before
+    /// the click), is taken out before the transport flag rises. One atomic
+    /// swap when there is none. A jam's listen-back is left alone.
+    pub fn cut(&self, handoff: &TakeHandoff) -> bool {
+        let generation = self.playing.swap(NO_HEAR, Ordering::AcqRel);
+        generation != NO_HEAR && handoff.clear_play_if(generation)
+    }
+
+    /// The input stopping (`playing_too`: it ends the Session, so a bar
+    /// still playing goes too) or `forget_heard_take` (a finished hear-back
+    /// only; a playing bar plays out): take the hear-back's slice out of the
+    /// take slot, so none of the player's audio stays there and a finished
+    /// one no longer stops a jam take from starting (review L1). Then drain
+    /// what the audio thread handed back. Command thread; nothing new on the
+    /// callback, which retires its own copy on its next buffer as it does
+    /// after any cut, for the NEXT drain (the input's stop drains again once
+    /// the analyzer has joined). `true` when it cleared the slot.
+    pub fn clear(&self, handoff: &TakeHandoff, playing_too: bool) -> bool {
+        let generation = self.playing.load(Ordering::Acquire);
+        let cleared = generation != NO_HEAR
+            && (playing_too || handoff.has_ended(generation))
+            // a Start's cut or a stop that got here first has it
+            && self.playing.compare_exchange(generation, NO_HEAR, Ordering::AcqRel, Ordering::Acquire).is_ok()
+            && handoff.clear_play_if(generation);
+        handoff.drain_retired();
+        cleared
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -369,5 +663,228 @@ mod tests {
         tap.arm(None);
         tap.disarm();
         assert!(tap.capture().is_none());
+    }
+
+    // ---- The last heard Take (c5b1) ----
+
+    /// `secs` of audio at `rate`, sample `i` = `i`, in a buffer with room to
+    /// spare as the tap leaves it.
+    fn captured(rate: u32, secs: f64) -> CapturedAudio {
+        let n = (rate as f64 * secs) as usize;
+        let mut samples = Vec::with_capacity(n * 3);
+        samples.extend((0..n).map(|i| i as f32));
+        CapturedAudio { samples, rate, first_ns: 7, detection_delay_ns: 0 }
+    }
+
+    /// Bars of `bar_ms` from `first_ms` on, `n` of them.
+    fn bars(first_ms: f64, bar_ms: f64, n: usize) -> Vec<(f64, f64)> {
+        (0..n).map(|k| (first_ms + k as f64 * bar_ms, first_ms + (k + 1) as f64 * bar_ms)).collect()
+    }
+
+    fn take(serial: u64) -> HeardTake {
+        // 1 kHz, 10 s; a one-bar count-in of 2 s, then bars of 2 s from 2 s.
+        HeardTake::new(serial, captured(1000, 10.0), 0.0, &bars(2000.0, 2000.0, 4))
+    }
+
+    #[test]
+    fn a_kept_take_is_shrunk_to_its_length_and_maps_its_bars_after_the_count_in() {
+        let t = take(1);
+        assert_eq!(t.samples.len(), 10_000);
+        assert_eq!(t.samples.capacity(), 10_000, "the tap's spare room was not freed");
+        assert_eq!(t.bytes(), 40_000);
+        assert_eq!(t.bars, vec![(2000, 4000), (4000, 6000), (6000, 8000), (8000, 10_000)]);
+        assert_eq!(t.first_ns, 7);
+        // 40 s at 48 kHz, the size the brief names: 7.68 MB and no more.
+        let long = HeardTake::new(1, captured(48_000, 40.0), 0.0, &[]);
+        assert_eq!(long.bytes(), 7_680_000);
+    }
+
+    #[test]
+    fn bar_arithmetic_takes_its_margins_and_refuses_what_is_not_there() {
+        let t = take(1);
+        // bar 1 with the lead and the tail: into the count-in, into bar 2
+        assert_eq!(t.span(1, 1), Ok(1850..4300));
+        assert_eq!(t.span(2, 3), Ok(3850..8300));
+        // the last bar: the tail runs out with the audio
+        assert_eq!(t.span(4, 4), Ok(7850..10_000));
+        assert_eq!(t.span(0, 1), Err(HearRefused::NoSuchBar));
+        assert_eq!(t.span(3, 2), Err(HearRefused::NoSuchBar));
+        assert_eq!(t.span(5, 5), Err(HearRefused::NoSuchBar), "a bar past the end");
+        assert_eq!(t.span(4, 5), Err(HearRefused::NoSuchBar));
+    }
+
+    #[test]
+    fn a_short_capture_holds_only_the_bars_wholly_inside_it() {
+        // 7 s of audio: bars 1 and 2 end inside it, bar 3 (6-8 s) does not.
+        let t = HeardTake::new(1, captured(1000, 7.0), 0.0, &bars(2000.0, 2000.0, 4));
+        assert_eq!(t.bars.len(), 2);
+        assert_eq!(t.span(3, 3), Err(HearRefused::NoSuchBar));
+        // audio that starts after bar 1 opened holds nothing at all
+        let late = HeardTake::new(1, captured(1000, 10.0), 2500.0, &bars(2000.0, 2000.0, 4));
+        assert!(late.bars.is_empty());
+        // and a capture with no complete bar
+        assert!(HeardTake::new(1, captured(1000, 1.0), 0.0, &bars(2000.0, 2000.0, 4)).bars.is_empty());
+    }
+
+    #[test]
+    fn the_slot_keeps_replaces_and_forgets() {
+        let slot = HeardTakeSlot::new();
+        assert_eq!(slot.held(1), HeldTake { held: false, bars: 0 });
+        assert!(slot.keep(take(1), slot.epoch()));
+        assert_eq!(slot.held(1), HeldTake { held: true, bars: 4 });
+        // replaced by the next
+        assert!(slot.keep(take(2), slot.epoch()));
+        assert!(!slot.held(1).held);
+        assert!(slot.held(2).held);
+        // an earlier Take's pass finishing late does not replace a later one
+        assert!(!slot.keep(take(1), slot.epoch()));
+        assert!(slot.held(2).held);
+        // emptied by forget (the input's stop, `forget_heard_take`)
+        slot.forget();
+        assert!(!slot.held(2).held);
+        assert_eq!(slot.held_bytes(), 0);
+    }
+
+    #[test]
+    fn a_pass_that_outlives_the_inputs_stop_keeps_nothing() {
+        let slot = HeardTakeSlot::new();
+        let epoch = slot.epoch(); // the pass starts
+        slot.forget(); // the input stops while it runs
+        assert!(!slot.keep(take(3), epoch));
+        assert!(!slot.held(3).held);
+    }
+
+    #[test]
+    fn a_slice_is_a_faded_copy_of_the_bars_asked_for() {
+        let slot = HeardTakeSlot::new();
+        assert_eq!(slot.slice(1, 1, 1).err(), Some(HearRefused::NotHeld));
+        slot.keep(take(1), slot.epoch());
+        assert_eq!(slot.slice(2, 1, 1).err(), Some(HearRefused::NotHeld), "another Take's serial");
+        assert_eq!(slot.slice(1, 5, 5).err(), Some(HearRefused::NoSuchBar));
+        let s = slot.slice(1, 2, 2).unwrap();
+        assert_eq!(s.rate, 1000);
+        // bar 2 is 4000..6000: 150 before, 300 after
+        assert_eq!(s.pcm.len(), 6300 - 3850);
+        assert_eq!(s.length_ms(), 2450);
+        // faded at the edges, untouched in the middle
+        assert_eq!(s.pcm[0], 0.0);
+        assert_eq!(s.pcm[100], 3950.0);
+        assert!(s.pcm[s.pcm.len() - 1] < 1.0);
+    }
+
+    #[test]
+    fn a_start_cuts_its_own_hear_back_and_a_stop_names_it() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        slot.keep(take(1), slot.epoch());
+        // nothing to cut: one swap, nothing touched
+        assert!(!slot.cut(&handoff));
+        let first = slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        assert_eq!(first.length_ms, 2450);
+        assert!(handoff.is_playing_back());
+        // a stop for another playback does nothing
+        assert!(!slot.stop(&handoff, first.generation + 1));
+        assert!(handoff.is_playing_back());
+        // a Start clears it, finished or not, and only once
+        assert!(slot.cut(&handoff));
+        assert!(!handoff.is_playing_back());
+        assert!(!slot.cut(&handoff));
+        // its own stop clears it
+        let second = slot.start(&handoff, slot.slice(1, 2, 2).unwrap()).unwrap();
+        assert!(slot.stop(&handoff, second.generation));
+        assert!(!handoff.is_playing_back());
+        assert!(!slot.stop(&handoff, second.generation), "stopped twice");
+    }
+
+    #[test]
+    fn a_start_leaves_a_jams_listen_back_alone() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        slot.keep(take(1), slot.epoch());
+        slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        // the jam's screen plays a take over the top
+        handoff.set_play(Some(TakePlayback { pcm: Arc::new(vec![0.0; 8]), sample_rate: 48_000 }));
+        assert!(!slot.cut(&handoff));
+        assert!(handoff.is_playing_back(), "the jam's take was cut");
+    }
+
+    #[test]
+    fn forgetting_the_take_leaves_a_playing_bar_to_finish() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        slot.keep(take(1), slot.epoch());
+        let h = slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        slot.forget();
+        assert!(handoff.is_playing_back());
+        assert!(slot.stop(&handoff, h.generation));
+    }
+
+    /// c5b1b, review L1: `forget_heard_take` takes a FINISHED hear-back's
+    /// slice out of the take slot (a playing one plays out); the input's
+    /// stop takes it playing or not. A jam's take is never touched, and the
+    /// audio thread's retired copies are drained.
+    #[test]
+    fn a_forget_clears_a_finished_hear_back_and_the_inputs_stop_any() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        slot.keep(take(1), slot.epoch());
+        // nothing in the slot: nothing to clear
+        assert!(!slot.clear(&handoff, true));
+        // a bar still playing: a forget leaves it to finish
+        let h = slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        assert!(!slot.clear(&handoff, false));
+        assert!(handoff.is_playing_back());
+        // it runs off its end: now a forget clears it, and a jam take may start
+        handoff.note_ended(h.generation);
+        assert!(slot.clear(&handoff, false), "a finished bar held the take slot");
+        assert!(!handoff.is_playing_back());
+        // and once its ending was reported (the event thread got there first)
+        let h = slot.start(&handoff, slot.slice(1, 2, 2).unwrap()).unwrap();
+        handoff.note_ended(h.generation);
+        assert_eq!(handoff.take_ended(), Some(h.generation));
+        assert!(slot.clear(&handoff, false));
+        assert!(!handoff.is_playing_back());
+        // the input's stop takes a bar that is still playing
+        slot.start(&handoff, slot.slice(1, 3, 3).unwrap()).unwrap();
+        assert!(slot.clear(&handoff, true));
+        assert!(!handoff.is_playing_back());
+        // never a jam's own take, finished or not
+        slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        let jam = handoff.set_play(Some(TakePlayback { pcm: Arc::new(vec![0.0; 8]), sample_rate: 48_000 })).unwrap();
+        handoff.note_ended(jam);
+        assert!(!slot.clear(&handoff, true));
+        assert!(handoff.is_playing_back(), "the jam's take was cleared");
+    }
+
+    /// c5b1b, review L1: what the audio thread retired is drained by a clear.
+    #[test]
+    fn a_clear_drains_what_the_audio_thread_retired() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        let pcm = Arc::new(vec![0.5f32; 100]);
+        let mut parking = crate::take::TakeParking::new();
+        parking.retire_pcm(&handoff, pcm.clone());
+        assert_eq!(Arc::strong_count(&pcm), 2, "the retired copy is held");
+        slot.clear(&handoff, false);
+        assert_eq!(Arc::strong_count(&pcm), 1, "the retired copy was not drained");
+    }
+
+    /// c5b1b, review L4: the bars are moved where the grader looks for their
+    /// attacks: by the calibrated offset less the detector's delay, the shift
+    /// `score::notes::lookups` gives a due beat (`due + offset - delay`).
+    #[test]
+    fn the_bars_are_moved_by_the_calibrated_input_latency() {
+        let on_the_map = bars(2000.0, 2000.0, 4);
+        // 120 ms of input latency, a detector 20 ms behind its attacks
+        let heard = bars_as_heard(&on_the_map, Some(120.0), 20.0);
+        assert_eq!(heard[0], (2100.0, 4100.0));
+        assert_eq!(heard[3], (8100.0, 10_100.0));
+        let t = HeardTake::new(1, captured(1000, 11.0), 0.0, &heard);
+        assert_eq!(t.bars[0], (2100, 4100), "bar 1 opens where its downbeat was played");
+        assert_eq!(t.span(1, 1), Ok(1950..4400));
+        // no grade: the beat map's own lines
+        assert_eq!(bars_as_heard(&on_the_map, None, 20.0), on_the_map);
+        // an input ahead of the map (a negative offset) moves them earlier
+        assert_eq!(bars_as_heard(&on_the_map, Some(-30.0), 0.0)[0], (1970.0, 3970.0));
     }
 }

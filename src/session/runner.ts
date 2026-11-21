@@ -42,10 +42,11 @@
  * hook tears down whatever was running; there is no state it has to wait for.
  */
 import type { Exercise } from "../paths/format";
-import type { TakeGrade } from "./grade";
+import { takeBarsOf, type TakeGrade } from "./grade";
 import { hasRungAbove, hasRungBelow, rungAbove, rungBelow } from "./ladder";
 import type { LoopStep, PlanStep, SessionPlan } from "./planner";
 import type { TakeMeasures } from "./takeMeasures";
+import { withVariant } from "./take";
 
 export type RunPhase =
   /** No Session. */
@@ -709,23 +710,122 @@ export function loopOffer(
     front = true;
   }
   if (!bars) return null;
+  return { loop: loopStepOf(state, step, exercise, bars), front };
+}
+
+/** The loop of these pattern bars of the Exercise step on screen: two rungs under, no minutes. */
+function loopStepOf(
+  state: RunState,
+  step: Extract<PlanStep, { kind: "exercise" }>,
+  exercise: Exercise,
+  bars: { fromBar: number; toBar: number },
+): LoopStep {
   let bpm = state.bpm;
   for (let i = 0; i < LOOP_RUNGS_DOWN; i += 1) bpm = rungBelow(exercise, bpm);
   return {
-    loop: {
-      kind: "loop",
-      id: `${step.id}#loop`,
-      title: step.title,
-      pathId: step.pathId,
-      exerciseId: step.exerciseId,
-      variantSeed: step.variantSeed,
-      ...bars,
-      bpm,
-      minutes: 0,
-      why: step.why,
-    },
-    front,
+    kind: "loop",
+    id: `${step.id}#loop`,
+    title: step.title,
+    pathId: step.pathId,
+    exerciseId: step.exerciseId,
+    variantSeed: step.variantSeed,
+    ...bars,
+    bpm,
+    minutes: 0,
+    why: step.why,
   };
+}
+
+/**
+ * Why a loop the player asked for cannot start (leg lb1):
+ * - `notHere`: not on an Exercise's ready screen or result (a Take runs, a
+ *   warm-up, the recap, no Session);
+ * - `outsideTune`: a bar before 1 or past the last bar the Take prints;
+ * - `backwards`: the last bar asked is before the first;
+ * - `acrossRounds`: the two bars fall in different rounds of the pattern
+ *   (bars 4 and 5 of a four-bar tune are its last bar and its first again);
+ * - `oneBar`: a range of bars on an Exercise one bar long (lb1b L2).
+ */
+export type LoopRefusal = "notHere" | "outsideTune" | "backwards" | "acrossRounds" | "oneBar";
+
+/**
+ * The door behind `loop_bars` (leg lb1): the loop `loopOffer` would build,
+ * for pattern bars the player chose. Only from an Exercise's ready screen or
+ * its result, as the runner's `loop` event; a fresh step with no Take yet is
+ * allowed (the tempo is still two rungs under the step's).
+ *
+ * A range the player asks for is honoured inside the pattern even past
+ * `LOOP_MAX_BARS` (the orchestrator's decision, lb1b L3): that cap is the
+ * coach's own offer, "the pattern bar (or two)"; this is the player's own
+ * request, made in words and pressed. It stores nothing, moves no plan, writes
+ * no Take, and costs no memory a two-bar loop does not (the schedule is built
+ * once; the deviations are capped at `STRIP_NOTES`).
+ */
+export function loopAt(
+  state: RunState,
+  exercise: Exercise | null,
+  fromBar: number,
+  toBar: number,
+): { loop: LoopStep } | { refused: LoopRefusal } {
+  if (state.phase !== "ready" && state.phase !== "result") return { refused: "notHere" };
+  const step = currentStep(state);
+  if (step?.kind !== "exercise" || !exercise) return { refused: "notHere" };
+  if (!Number.isInteger(fromBar) || !Number.isInteger(toBar)) return { refused: "outsideTune" };
+  if (toBar < fromBar) return { refused: "backwards" };
+  if (fromBar < 1 || toBar > Math.max(1, exercise.bars)) return { refused: "outsideTune" };
+  return { loop: loopStepOf(state, step, exercise, { fromBar, toBar }) };
+}
+
+/**
+ * Bars as the Session prints them, to the pattern's. The tab strip labels
+ * every bar by its bar of the pattern (`tabStripModel.segmentPlace`) and the
+ * coach names pattern bars ("Loop bar 3"), so a number up to the pattern's
+ * length is a pattern bar. A number past it can only be a bar of the Take
+ * (`takeBarsOf`: rounds of the pattern), folded onto its pattern bar as
+ * `rounds.foldBar` does; past the Take's last bar it is outside the tune. Two
+ * bars in different rounds are refused rather than guessed at.
+ */
+export function printedLoopBars(
+  exercise: Exercise,
+  fromBar: number,
+  toBar: number,
+): { fromBar: number; toBar: number } | { refused: LoopRefusal } {
+  if (!Number.isInteger(fromBar) || !Number.isInteger(toBar)) return { refused: "outsideTune" };
+  if (toBar < fromBar) return { refused: "backwards" };
+  const own = Math.max(1, exercise.bars);
+  // A one-bar Exercise: every Take bar is its bar 1, so a range is answered
+  // with that, not with rounds or a bar the tune lacks (lb1b L2).
+  if (own === 1 && fromBar >= 1 && fromBar !== toBar) return { refused: "oneBar" };
+  if (fromBar < 1 || toBar > Math.max(own, takeBarsOf(exercise))) return { refused: "outsideTune" };
+  if (toBar <= own) return { fromBar, toBar };
+  const round = (bar: number) => Math.floor((bar - 1) / own);
+  if (round(fromBar) !== round(toBar)) return { refused: "acrossRounds" };
+  const fold = (bar: number) => ((bar - 1) % own) + 1;
+  return { fromBar: fold(fromBar), toBar: fold(toBar) };
+}
+
+/** A bars argument, and not a click handler's event passed by `onClick={startLoop}`. */
+export function isLoopBars(value: unknown): value is { fromBar: number; toBar: number } {
+  if (typeof value !== "object" || value === null) return false;
+  const { fromBar, toBar } = value as { fromBar?: unknown; toBar?: unknown };
+  return typeof fromBar === "number" && typeof toBar === "number";
+}
+
+/** `printedLoopBars`, then `loopAt`: the loop "loop bars 3-4" starts, or why not. */
+export function loopAsked(
+  state: RunState,
+  exercise: Exercise | null,
+  fromBar: number,
+  toBar: number,
+): { loop: LoopStep } | { refused: LoopRefusal } {
+  // Where the player is comes first: off an Exercise's screen no bar number matters.
+  const here = loopAt(state, exercise, 1, 1);
+  if (!exercise || "refused" in here) return here;
+  // The Take as it was printed: a variant may ask for more bars than the
+  // Exercise as written (`passBars`), and its Take bars are real (lb1b L1).
+  const bars = printedLoopBars(withVariant(exercise, here.loop.variantSeed), fromBar, toBar);
+  if ("refused" in bars) return bars;
+  return loopAt(state, exercise, bars.fromBar, bars.toBar);
 }
 
 /** What a block of the Session bar shows: the one on screen, played out, skipped, or still to come. */

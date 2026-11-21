@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Finding your edge on {{title}}",
       "testOut": "Testing out of Step {{step}}: {{title}}",
+      "loopBar": "Looping bar {{bar}} at {{bpm}} BPM",
+      "loopBars": "Looping bars {{from}} to {{to}} at {{bpm}} BPM",
       "swapPart": "Part {{part}} is now {{to}}",
       "restorePart": "Part {{part}} is {{from}} again",
       "setMinutes": "Today is {{to}} minutes now",
@@ -47,6 +49,8 @@
       "findEdge": "Find your edge on {{title}} ({{path}} · Step {{step}}), from {{bpm}} BPM",
       "findEdgeNoBpm": "Find your edge on {{title}} ({{path}} · Step {{step}})",
       "testOut": "Test out of Step {{step}}: {{title}}, in {{takes}} Takes",
+      "loopBar": "Loop bar {{bar}} at {{bpm}} BPM, until you stop it",
+      "loopBars": "Loop bars {{from}} to {{to}} at {{bpm}} BPM, until you stop it",
       "swapPart": "Part {{part}}: {{from}} → {{to}}",
       "restorePart": "Put part {{part}} back to {{title}}",
       "setMinutes": "Today: {{from}} → {{to}} minutes, {{parts}} parts",
@@ -115,7 +119,8 @@
       "load": "Load it",
       "keep": "Keep it",
       "go": "Go",
-      "open": "Open it"
+      "open": "Open it",
+      "loop": "Loop it"
     },
     "why": {
       "which": "Which one?",
@@ -132,7 +137,10 @@
         "level": "{{path}} has no level called “{{query}}”.",
         "swap": "Nothing called “{{query}}” can go in part {{part}}.",
         "rung": "There's no tempo to set there.",
-        "settingValue": "{{key}} can't be “{{query}}”. These are what it can be:"
+        "settingValue": "{{key}} can't be “{{query}}”. These are what it can be:",
+        "loopBar": "This tune has no bar {{bar}}.",
+        "loopAcross": "Bars {{from}} to {{to}} run off the end of the tune and into its start again. Ask for bars inside one round of it.",
+        "loopOneBar": "This Exercise has one bar: ask for bar 1."
       },
       "notNow": {
         "take": "After this Take.",
@@ -163,13 +171,15 @@
         "following": "You follow {{path}} already.",
         "alreadySubdivision": "It's {{subdivision}} clicks per beat already.",
         "alreadySetting": "{{key}} is {{value}} already.",
-        "alreadyGoal": "That's your goal already."
+        "alreadyGoal": "That's your goal already.",
+        "loopHere": "A loop starts from an Exercise in a Session, between Takes."
       },
       "notWiredYet": "The app can't do that from here yet.",
       "refused": {
         "shape": "That isn't something the app can do.",
         "proposal": "That has changed since, so nothing was done. Ask again.",
-        "cap": "You follow {{cap}} Paths, the most there can be. Leave one on its page first."
+        "cap": "You follow {{cap}} Paths, the most there can be. Leave one on its page first.",
+        "loopBackwards": "Bar {{to}} comes before bar {{from}}. Name the first bar first."
       },
       "failed": "That didn't work, and nothing was changed."
     },

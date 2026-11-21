@@ -42,6 +42,7 @@ import type { PathDoc } from "../../paths/format";
 import type { TodayFocus } from "../../session/focus";
 import type { PlanMinutes, PlanStep, SessionPlan } from "../../session/planner";
 import type { PlayerProgress } from "../../session/progress";
+import type { LoopRefusal } from "../../session/runner";
 import type { SwapChoice, SwapOptions } from "../../session/swap";
 import type { Subdivision } from "../../types";
 
@@ -148,6 +149,13 @@ export type CoachToolHost = {
    * While it is not null a navigating `go` tool waits for a press (t1a2).
    */
   sounding: (target?: MainView) => Sounding | null;
+  /**
+   * A jam take is being written to disk (`useJamTakes().recording`; named
+   * so no never-list word is a member). Leg chip1b (review M2): while it is,
+   * a chip's press is not the press (the owner's rule counts a jam take being
+   * written as a Take for the at-once path). A read; it changes nothing.
+   */
+  jamTakeRunning: () => boolean;
 
   // -- Declared for t1a2 (the `confirm` tools) -----------------------------
 
@@ -216,9 +224,24 @@ export type CoachToolHost = {
   /** The Notebook's goal (DESIGN 9.5), when there is a Notebook. */
   goal: () => string | null | NotWired;
   setGoal: (text: string) => HostOutcome;
-  /** The Songs transport's loop (leg c1c). */
-  loopBars: (fromBar: number, toBar: number) => HostOutcome;
+  /**
+   * The Session's loop of bars as printed (leg lb1), without starting it:
+   * the pattern bars and tempo a press would loop, or why it cannot
+   * (`runner.loopAsked`).
+   */
+  loopAsk: (fromBar: number, toBar: number) => LoopAsk | NotWired;
+  /** `sessionRun.actions.startLoop({ fromBar, toBar })`, bars as printed: "done", or why it did not start. */
+  loopBars: (fromBar: number, toBar: number) => HostOutcome | LoopRefusal;
 };
+
+/**
+ * What `loopAsk` answers: the loop a press would start, in pattern bars, or
+ * the runner's reason. `loopId` (`<step id>#loop`) and `variantSeed` bind a
+ * proposal to the Exercise and the variant it was made on (lb1b L5).
+ */
+export type LoopAsk =
+  | { fromBar: number; toBar: number; bpm: number; loopId: string; variantSeed: number | null }
+  | { refused: LoopRefusal };
 
 /**
  * Every member, at runtime. The check below fails to compile when the
@@ -235,6 +258,7 @@ export const HOST_MEMBERS = [
   "movePaths",
   "openSettingsSection",
   "sounding",
+  "jamTakeRunning",
   "plan",
   "minutes",
   "todayFocus",
@@ -265,6 +289,7 @@ export const HOST_MEMBERS = [
   "setSafeSetting",
   "goal",
   "setGoal",
+  "loopAsk",
   "loopBars",
 ] as const satisfies readonly (keyof CoachToolHost)[];
 
@@ -291,11 +316,11 @@ export const WIRED_IN_T1A1: readonly (keyof CoachToolHost)[] = [
 ];
 
 /**
- * The members the real host still leaves as stubs: a loop of bars named from
- * outside (the Session's loop plays the bar that slipped; no door takes
- * bars). The Notebook's goal was wired by c4a1 (`coach.goal`).
+ * The members the real host still leaves as stubs: none. The Notebook's goal
+ * was wired by c4a1 (`coach.goal`); the loop of bars named from outside has
+ * its door since leg lb1 (`startLoop(bars)`).
  */
-export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = ["loopBars"];
+export const STILL_NOT_WIRED: readonly (keyof CoachToolHost)[] = [];
 
 const NOT_WIRED = "notWiredYet" as const;
 
@@ -316,6 +341,7 @@ export function notWiredHost(): CoachToolHost {
     movePaths: () => {},
     openSettingsSection: () => {},
     sounding: () => null,
+    jamTakeRunning: () => false,
     plan: () => null,
     minutes: () => 15,
     todayFocus: () => "mix",
@@ -346,6 +372,7 @@ export function notWiredHost(): CoachToolHost {
     setSafeSetting: nothing,
     goal: nothing,
     setGoal: nothing,
+    loopAsk: nothing,
     loopBars: nothing,
   };
 }

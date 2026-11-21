@@ -13,8 +13,9 @@
  * gate), the click, and the safe settings' own setters. c4a1 wired `goal` /
  * `setGoal` and the `coachSuggestions` setting to the coach's stored keys
  * (`src/coach/store.ts`: `coach.goal`, `coach.suggestions`), read once on
- * mount; until that read has finished they answer "notWiredYet". Still a stub
- * from `notWiredHost()`: `loopBars` (no bars door on the loop).
+ * mount; until that read has finished they answer "notWiredYet". `loopAsk` /
+ * `loopBars` reach the Session's loop through `startLoop(bars)` since leg
+ * lb1. No member is a stub any more.
  *
  * Review fixes (t1a2b): band volume is read and written as the STORED choice
  * (`bandChoice`, `"auto"` for none, put back as `null`); `sounding(target)`
@@ -45,13 +46,14 @@ import {
 import i18n, { getLanguages } from "../../i18n";
 import { listPresets as listPresetsIpc, storeSave } from "../../ipc";
 import { findExercise } from "../../session/packs";
-import { tempoNudges } from "../../session/runner";
+import { loopAsked, tempoNudges } from "../../session/runner";
 import { THEMES } from "../../themes";
 import type { Preset, Subdivision, VoiceMode } from "../../types";
 import type { MainView } from "../main-window/MainHeader";
 import type { PathsPlace } from "../main-window/hooks/usePathsPlace";
 import type { PracticeView } from "../session/highway/runwayModel";
 import type { SessionRun } from "../session/hooks/useSessionRun";
+import { noteAskJamTake, noteAskLoad } from "./askTools";
 import type { PresetApplied } from "./coachPresetLoad";
 
 /** The safe settings the window holds (the rest are the Session's, or the hook's own: the language). */
@@ -90,6 +92,10 @@ export type CoachToolHostInput = {
   loadJam: (jam: Jam) => "done" | "asked";
   /** The engine plays (the click, a jam's band, a song). */
   isPlaying: boolean;
+  /** A jam take is being written (`useJamTakes().recording`; leg chip1b). Left out: no. */
+  jamTakeRunning?: boolean;
+  /** The engine's speed ramp runs (the Drill's, `state.speedRamp.active`; leg chip1c). Left out: no. */
+  speedRampRunning?: boolean;
   /** The tool screens' tempo, and `handleBpmChange` (clamped; on the jam tab it edits the jam). */
   tempo: number;
   setTempo: (bpm: number) => void;
@@ -223,6 +229,15 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       const can = tempoNudges(session().run, session().exercise);
       return { slower: can.slower, faster: can.faster };
     },
+    // The Session's loop of bars as printed (leg lb1): the same check `startLoop(bars)` makes.
+    loopAsk: (fromBar, toBar) => {
+      const asked = loopAsked(session().run, session().exercise, fromBar, toBar);
+      if ("refused" in asked) return { refused: asked.refused };
+      const { fromBar: from, toBar: to, bpm, id, variantSeed } = asked.loop;
+      return { fromBar: from, toBar: to, bpm, loopId: id, variantSeed: variantSeed ?? null };
+    },
+    // `startLoop` answers null only when the reducer took the loop (lb1b L4): only then "done".
+    loopBars: (fromBar, toBar) => session().actions.startLoop({ fromBar, toBar }) ?? "done",
     findEdge: (pathId, exerciseId) => {
       const { path, step, exercise } = exerciseOf(pathId, exerciseId);
       session().actions.findEdge(path, step, exercise);
@@ -337,6 +352,7 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
     paths: () => latest.current.session.paths,
     instrument: () => (latest.current.instrument === "bass" ? "bass" : "guitar"),
     sessionActive: () => latest.current.session.run.phase !== "idle",
+    jamTakeRunning: () => latest.current.jamTakeRunning === true,
     setView: (view) => latest.current.setView(view),
     movePaths: (at) => latest.current.pathsPlace.move(at),
     openSettingsSection: (section) => {
@@ -368,5 +384,16 @@ export function useCoachToolHost(input: CoachToolHostInput): CoachToolHost {
     setCoachToolHost(built);
     return () => setCoachToolHost(null);
   }, [built]);
+  // A jam take is a Take for a chip's Undo (leg chip1c, review chip1b MEDIUM): spent at its
+  // start, drawn as plain lines at its end; once per flip, never per beat.
+  const jamTakeRunning = input.jamTakeRunning === true;
+  useEffect(() => {
+    noteAskJamTake(jamTakeRunning);
+  }, [jamTakeRunning]);
+  // A speed ramp moves the tempo with no press (review chip1b LOW 4): no chip Undo outlives its start.
+  const speedRampRunning = input.speedRampRunning === true;
+  useEffect(() => {
+    if (speedRampRunning) noteAskLoad();
+  }, [speedRampRunning]);
   return built;
 }

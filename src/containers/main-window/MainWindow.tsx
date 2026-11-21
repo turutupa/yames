@@ -58,6 +58,7 @@ import {
 } from "../../ipc";
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
+import { noteAskLoad } from "../coach/askTools";
 import { useCoachToolHost } from "../coach/useCoachToolHost";
 import { loadPresetAfterReRead } from "../coach/coachPresetLoad";
 import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
@@ -1734,6 +1735,8 @@ export function MainWindow() {
   // as the Rust store migration); the try/catch contains the rest.
   // Resolves true when every step was applied (the coach's receipt reads it).
   const handleLoadPreset = useCallback(async (preset: Preset): Promise<boolean> => {
+    // The coach's chip Undos put back values this preset replaces (leg chip1b, review L2 b).
+    noteAskLoad();
     let allApplied = true;
     const steps: Array<[string, () => Promise<unknown>]> = [
       ["bpm", () => setBpm(preset.bpm)],
@@ -1797,6 +1800,8 @@ export function MainWindow() {
       return ran ? "done" : "asked";
     },
     isPlaying: state.isPlaying,
+    jamTakeRunning: jamTakes.recording,
+    speedRampRunning: !!state.speedRamp?.active,
     tempo: state.bpm,
     setTempo: handleBpmChange,
     subdivision: state.subdivision,

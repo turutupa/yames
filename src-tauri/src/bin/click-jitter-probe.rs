@@ -69,6 +69,9 @@
 //!                        change and the tempo step — the seam every few
 //!                        seconds for the length of the run
 //!   --song-take          --song, and record a take of it
+//!   --hear-take          stop, hear two bars of a fake Take back through the
+//!                        take slot, start again (cutting it half the time),
+//!                        for the whole run; measured over the click's spans
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -122,6 +125,7 @@ use yames_lib::probe::{
     MelodicBank, MetronomeEngine, SongBacking, SongBar, SongNote, SongRange, SongRole, SongSounds,
     SynthPlayer, SynthRing,
     SongTempo, SongTrack, SongTransport, TakeRing, TakeSession, TakeStart,
+    CapturedAudio, HeardTake, HeardTakeSlot,
 };
 
 // ---------------------------------------------------------------------------
@@ -297,6 +301,10 @@ struct Args {
     /// ring fed with strummed chords in real time.
     harmony: bool,
     capture: bool,
+    /// `--hear-take` (c5b1): stop, hear two bars of a fake Take back through
+    /// the take slot, start again (cutting it half the time), for the whole
+    /// run. See `run_hear_takes`.
+    hear_take: bool,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -330,6 +338,7 @@ impl Default for Args {
             late_pass: false,
             harmony: false,
             capture: false,
+            hear_take: false,
             jam_voice: None,
             bpm_set: false,
             subdivision_set: false,
@@ -450,6 +459,10 @@ fn parse_args() -> Result<Args, String> {
             }
             "--capture" => {
                 a.capture = true;
+                consumed = 1;
+            }
+            "--hear-take" => {
+                a.hear_take = true;
                 consumed = 1;
             }
             "-h" | "--help" => return Err("help".into()),
@@ -578,6 +591,16 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --song-take        --song, and record a take of it. `take.rs` does not
                      know whether it is recording a band or a song, and
                      this is the flag that checks that
+  --hear-take        \"Hear bar N\" (c5b1): a fake 40 s Take (44.1 kHz, or
+                     48 kHz on a 44.1 kHz device, so it is resampled) in
+                     the last-heard slot, then for the whole run: the click
+                     (or song) for 3 s, a stop, two bars of the Take handed
+                     to the take slot as `hear_take` does it, played out or
+                     cut by a Start half-way, alternately, and the click
+                     again. Jitter and missed beats are measured over the
+                     click's spans only (a hear-back records no callback
+                     sample); allocations, frees and dropped notifications
+                     over everything. Combines with --song-loop --song-take
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -622,6 +645,7 @@ fn analyse(
     overflow: usize,
     window_start_ns: u64,
     tick_interval_s: f64,
+    click_spans: bool,
 ) -> Result<Report, String> {
     let w: Vec<CallbackSample> = all
         .iter()
@@ -640,8 +664,21 @@ fn analyse(
     let mut max_gap_ms = 0.0f64;
     let mut dropouts = 0usize;
 
+    // `--hear-take`: the transport stops and starts again every few seconds,
+    // and only a buffer the click (or song) plays records a sample — a stopped
+    // or hear-back buffer returns before the probe's stamp, and the engine's
+    // sample counter starts again from nought at every Start. So the run is
+    // cut into spans where the counter goes back, every pair of callbacks is
+    // taken inside one span only, and missed beats are counted span by span:
+    // the time the DAC had no fresh samples while the click was meant to be
+    // sounding. The stopped gaps between spans are not dropouts.
+    let span_breaks = |a: &CallbackSample, b: &CallbackSample| click_spans && b.sample_pos <= a.sample_pos;
+
     for pair in w.windows(2) {
         let (a, b) = (pair[0], pair[1]);
+        if span_breaks(&a, &b) {
+            continue;
+        }
         let delta_ms = (b.entry_ns.saturating_sub(a.entry_ns)) as f64 / 1e6;
         // The device drains the buffer `a` just filled at exactly
         // frames/sample_rate, so that is when `b` is due.
@@ -656,14 +693,28 @@ fn analyse(
     }
     abs_jitter_ms.sort_by(|x, y| x.partial_cmp(y).unwrap());
 
-    let first = w[0];
-    let last = w[w.len() - 1];
-    let wall_s = (last.entry_ns - first.entry_ns) as f64 / 1e9;
-    let audio_s = (last.sample_pos.saturating_sub(first.sample_pos)) as f64 / sr;
+    // One span for the standing modes; one per Start for `--hear-take`.
+    let mut spans: Vec<(CallbackSample, CallbackSample)> = Vec::new();
+    let mut open = w[0];
+    for pair in w.windows(2) {
+        if span_breaks(&pair[0], &pair[1]) {
+            spans.push((open, pair[0]));
+            open = pair[1];
+        }
+    }
+    spans.push((open, w[w.len() - 1]));
+    let mut wall_s = 0.0;
+    let mut audio_s = 0.0;
+    for (first, last) in &spans {
+        wall_s += (last.entry_ns - first.entry_ns) as f64 / 1e9;
+        audio_s += (last.sample_pos.saturating_sub(first.sample_pos)) as f64 / sr;
+    }
     let ticks_rendered: u64 = w.iter().map(|s| s.ticks as u64).sum();
     let ticks_expected = wall_s / tick_interval_s;
     // Time the DAC had no fresh samples, in ticks. Negative (audio clock
-    // running fast) floors at zero.
+    // running fast) floors at zero. Summed over the spans and floored ONCE
+    // (c5b1b, review L2): flooring span by span threw away up to a tick per
+    // span. One span (every standing mode) is the formula it always was.
     let missed_beats = (((wall_s - audio_s) / tick_interval_s).floor()).max(0.0) as u64;
 
     let mut frames: Vec<u32> = w.iter().map(|s| s.frames).collect();
@@ -1492,7 +1543,8 @@ fn main() -> ExitCode {
         s.beat_groups = vec![4];
     }
 
-    let mut engine = MetronomeEngine::new_with_probe(beat_log, cb_probe.clone());
+    // Cloned for `--hear-take`, which reads the first beat after each Start.
+    let mut engine = MetronomeEngine::new_with_probe(beat_log.clone(), cb_probe.clone());
     if args.jam {
         let cfg = busiest_jam();
         match compile_jam(&cfg) {
@@ -2064,10 +2116,96 @@ fn main() -> ExitCode {
         None
     };
 
+    // `--hear-take`: the last heard Take, filled before the run.
+    let heard = args.hear_take.then(|| fake_heard_take(engine.output_sample_rate().unwrap_or(48_000)));
+
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
     window_open_ns.store(window_start_ns.max(1), Ordering::Release);
-    std::thread::sleep(Duration::from_secs(args.seconds));
+    let hear_summary = match heard {
+        None => {
+            std::thread::sleep(Duration::from_secs(args.seconds));
+            None
+        }
+        Some(heard) => {
+            // The hear-back loop, here on the main thread because it is the
+            // one that owns the engine's start and stop, as a command does.
+            let handoff = engine.take_handoff();
+            let end = std::time::Instant::now() + Duration::from_secs(args.seconds);
+            let left = || end.saturating_duration_since(std::time::Instant::now());
+            let mut h = HearSummary { held_bytes: heard.held_bytes(), ..HearSummary::default() };
+            let mut k = 0u32;
+            loop {
+                // The click, for three seconds.
+                std::thread::sleep(left().min(Duration::from_secs(3)));
+                if left().is_zero() {
+                    break;
+                }
+                // Stop, as `set_playing(false)` does.
+                engine.stop();
+                state.lock().unwrap().is_playing = false;
+                std::thread::sleep(left().min(Duration::from_millis(100)));
+                // The span that just ended opened with a Start after a
+                // hear-back: its first logged beat must be what any Start's
+                // is, beat 0 on the downbeat, no subdivision (c5b1b, review
+                // Q8: the real callback, with a hear-back cut from its slot).
+                if let Some(&at) = h.starts_ns.last() {
+                    let log = beat_log.lock().unwrap_or_else(|e| e.into_inner());
+                    let first = log.iter().find(|b| b.ts_ns >= at);
+                    h.first_beats_checked += 1;
+                    if !first.is_some_and(|b| b.beat_index == 0 && b.is_downbeat && b.subdivision_index == 0) {
+                        h.first_beats_wrong += 1;
+                    }
+                }
+                // Two bars handed in, as `hear_take` does it: the copy first,
+                // then the hand-over under the state's lock.
+                let from = 1 + (2 * k) % (FAKE_TAKE_BARS - 1);
+                let started = match heard.slice(1, from, from + 1) {
+                    Ok(slice) => {
+                        let s = state.lock().unwrap();
+                        if s.is_playing {
+                            None
+                        } else {
+                            heard.start(&handoff, slice).ok()
+                        }
+                    }
+                    Err(_) => None,
+                };
+                match started {
+                    // Played out (and left in the slot finished, as the
+                    // screen would leave it), or cut half-way by the Start.
+                    Some(back) if k % 2 == 0 => {
+                        std::thread::sleep(left().min(Duration::from_millis(back.length_ms + 250)));
+                        h.played_out += 1;
+                    }
+                    Some(back) => {
+                        std::thread::sleep(left().min(Duration::from_millis(back.length_ms / 2)));
+                        h.cut_by_start += 1;
+                    }
+                    None => h.refused += 1,
+                }
+                // A Start, as `set_playing(true)` does it: the hear-back out
+                // of the take slot first, under the state's lock, then the
+                // transport. Stamped as it is asked for, so the time to the
+                // first click buffer after it is measured (review L2).
+                h.starts_ns.push(yames_lib::probe::now_ns());
+                {
+                    let mut s = state.lock().unwrap();
+                    heard.cut(&handoff);
+                    s.is_playing = true;
+                }
+                if let Err(e) = engine.start_headless(state.clone()) {
+                    eprintln!("error: the click did not start again after a hear-back: {e}");
+                    return ExitCode::from(2);
+                }
+                k += 1;
+                if left().is_zero() {
+                    break;
+                }
+            }
+            Some(h)
+        }
+    };
 
     // The take stops BEFORE the engine, so the writer's last drain is of a
     // ring the callback is still alive to have filled.
@@ -2195,6 +2333,7 @@ fn main() -> ExitCode {
         overflow,
         window_start_ns,
         tick_interval_s,
+        args.hear_take,
     ) {
         Ok(r) => r,
         Err(e) => {
@@ -2273,9 +2412,26 @@ fn main() -> ExitCode {
     if args.capture {
         mode.push_str(" + --capture");
     }
+    if args.hear_take {
+        mode.push_str(" + --hear-take");
+    }
 
     println!("\n=== click-jitter-probe ===");
     println!("mode              {mode}");
+    if let Some(h) = &hear_summary {
+        println!(
+            "hear-backs        {} played out, {} cut by a Start, {} refused; {} click spans; the held Take {} bytes",
+            h.played_out,
+            h.cut_by_start,
+            h.refused,
+            h.played_out + h.cut_by_start + 1,
+            h.held_bytes
+        );
+        match start_to_first_click_ms(&samples, &h.starts_ns) {
+            Some(ms) => println!("start to click    {ms:.2} ms at most, over {} Starts (advisory)", h.starts_ns.len()),
+            None => println!("start to click    no Start was followed by a click buffer"),
+        }
+    }
     if let Some((takes, played, asked)) = &capture_summary {
         println!("capture           {takes} Takes written, {played} of {asked} chirps played and stamped");
     }
@@ -2371,6 +2527,13 @@ fn main() -> ExitCode {
     // Hard, like the three above: a seek that silences the guitars is a
     // fault the timing numbers are blind to.
     let seek_ok = silent_seeks == 0;
+    // `--hear-take` (c5b1b, review Q8): every Start after a hear-back opens
+    // as any Start does. Hard for the click; printed only under a song, whose
+    // first logged beat this probe has not been taught to read.
+    let start_wrong = hear_summary
+        .as_ref()
+        .map_or(0, |h| h.first_beats_wrong as usize + starts_not_from_zero(&samples, &h.starts_ns));
+    let start_ok = start_wrong == 0 || args.song;
     println!("--- gate (ROADMAP §4) ---");
     println!(
         "p99 < {:.2} ms      {}",
@@ -2396,6 +2559,16 @@ fn main() -> ExitCode {
         println!(
             "silent seeks = 0  {}",
             if seek_ok { "PASS" } else { "FAIL" }
+        );
+    }
+    if let Some(h) = &hear_summary {
+        println!(
+            "starts as fresh   {}  ({} wrong of {} first beats and {} Starts{})",
+            if start_wrong == 0 { "PASS" } else if args.song { "ADVISORY" } else { "FAIL" },
+            start_wrong,
+            h.first_beats_checked,
+            h.starts_ns.len(),
+            if args.song { "; a song's run, not gated" } else { "" }
         );
     }
     if !arena_ok {
@@ -2425,11 +2598,11 @@ fn main() -> ExitCode {
             cb_frees,
             dropped_notifications,
             silent_seeks,
-            jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok && seek_ok
+            jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok && seek_ok && start_ok
         );
     }
 
-    if jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok && seek_ok {
+    if jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok && seek_ok && start_ok {
         println!("\nRESULT PASS");
         ExitCode::SUCCESS
     } else {
@@ -2476,6 +2649,73 @@ fn start_harmony(stop: Arc<AtomicBool>) -> (std::thread::JoinHandle<(u64, u64)>,
         })
         .expect("spawn the harmony input");
     (feeder, worker)
+}
+
+// ---------------------------------------------------------------------------
+// `--hear-take` (c5b1)
+// ---------------------------------------------------------------------------
+
+/// Complete bars in the fake Take: 40 s at 120 BPM in 4/4 after a one-bar
+/// count-in.
+const FAKE_TAKE_BARS: u32 = 19;
+
+#[derive(Default)]
+struct HearSummary {
+    played_out: u64,
+    cut_by_start: u64,
+    refused: u64,
+    held_bytes: usize,
+    /// `now_ns` as each Start was asked for (before the cut).
+    starts_ns: Vec<u64>,
+    /// Spans after a hear-back's Start whose first logged beat was read, and
+    /// those where it was not beat 0 on the downbeat.
+    first_beats_checked: u64,
+    first_beats_wrong: u64,
+}
+
+/// The longest time, ms, from a Start being asked for to the first callback
+/// the click recorded after it: "a Start always wins" as a number (review
+/// L2). Only a click buffer records a sample, so a hear-back's buffer, or the
+/// silent one a cut can leave (review L3), is inside it. `None` when no Start
+/// was followed by a click buffer.
+fn start_to_first_click_ms(all: &[CallbackSample], starts_ns: &[u64]) -> Option<f64> {
+    starts_ns
+        .iter()
+        .filter_map(|&at| all.iter().find(|s| s.entry_ns >= at).map(|s| (s.entry_ns - at) as f64 / 1e6))
+        .reduce(f64::max)
+}
+
+/// Starts whose first click buffer did not open at sample 0 of the engine's
+/// counter: a hear-back's buffers left the counters where a Start does not
+/// (c5b1b, review Q8). A Start with no click buffer after it is not counted.
+fn starts_not_from_zero(all: &[CallbackSample], starts_ns: &[u64]) -> usize {
+    starts_ns
+        .iter()
+        .filter_map(|&at| all.iter().find(|s| s.entry_ns >= at))
+        .filter(|s| s.sample_pos != 0)
+        .count()
+}
+
+/// The last heard Take, as the pitch pass leaves it: 40 s at a rate that is
+/// NOT the output's (so the callback resamples it, as it does a Take heard
+/// through an input running at another rate), a quiet pluck on every beat,
+/// the bars two seconds long from 2 s.
+fn fake_heard_take(output_rate: u32) -> Arc<HeardTakeSlot> {
+    let rate = if output_rate == 44_100 { 48_000u32 } else { 44_100 };
+    let samples: Vec<f32> = (0..rate as usize * 40)
+        .map(|i| {
+            let t = i as f32 / rate as f32;
+            let since_beat = t % 0.5;
+            0.1 * (-since_beat * 8.0).exp() * (std::f32::consts::TAU * 196.0 * t).sin()
+        })
+        .collect();
+    let bars: Vec<(f64, f64)> = (0..FAKE_TAKE_BARS)
+        .map(|k| (2000.0 + k as f64 * 2000.0, 4000.0 + k as f64 * 2000.0))
+        .collect();
+    let slot = HeardTakeSlot::new();
+    let take = HeardTake::new(1, CapturedAudio { samples, rate, first_ns: 0, detection_delay_ns: 0 }, 0.0, &bars);
+    slot.keep(take, slot.epoch());
+    slot
 }
 
 /// `--late-pass`: a 30 s Take of plucked notes (eighths at 120 BPM, some
@@ -2590,7 +2830,49 @@ fn start_capture(
 
 #[cfg(test)]
 mod tests {
-    use super::{loads_in_window, LoadCount};
+    use super::{analyse, loads_in_window, start_to_first_click_ms, starts_not_from_zero, CallbackSample, LoadCount};
+
+    fn cb(entry_ns: u64, sample_pos: u64) -> CallbackSample {
+        CallbackSample { entry_ns, frames: 100, sample_pos, ticks: 0 }
+    }
+
+    /// Review L2 (c5b1b): `--hear-take`'s spans are summed and floored once.
+    /// Two spans each 0.6 of a tick short are one missed beat between them;
+    /// flooring span by span counted none.
+    #[test]
+    fn missed_beats_are_floored_once_across_the_spans() {
+        // 1 kHz, a tick every 100 ms; each span 1 s of wall, 0.94 s of audio
+        let mut all = Vec::new();
+        for span_start_ns in [0u64, 2_000_000_000] {
+            for i in 0..=10u64 {
+                all.push(cb(span_start_ns + i * 100_000_000, i * 94));
+            }
+        }
+        let r = analyse(&all, 1_000, 0, 0, 0.1, true).unwrap();
+        assert!((r.wall_s - 2.0).abs() < 1e-9, "{}", r.wall_s);
+        assert!((r.audio_s - 1.88).abs() < 1e-9, "{}", r.audio_s);
+        assert_eq!(r.missed_beats, 1);
+        // One span (a standing mode) is the formula it always was.
+        let one: Vec<CallbackSample> = all[..11].to_vec();
+        let r = analyse(&one, 1_000, 0, 0, 0.1, false).unwrap();
+        assert_eq!(r.missed_beats, ((1.0f64 - 0.94) / 0.1).floor() as u64);
+    }
+
+    /// Review L2: the time from a Start to the first click buffer after it.
+    #[test]
+    fn the_start_to_click_time_is_the_longest_over_the_starts() {
+        let ms = 1_000_000u64;
+        let all = [cb(10 * ms, 0), cb(25 * ms, 1), cb(100 * ms, 0), cb(140 * ms, 5)];
+        // 5 ms after the first Start, 10 ms after the second
+        assert_eq!(start_to_first_click_ms(&all, &[20 * ms, 90 * ms]), Some(10.0));
+        assert_eq!(start_to_first_click_ms(&all, &[200 * ms]), None);
+        assert_eq!(start_to_first_click_ms(&all, &[]), None);
+        // the first click buffer after each Start opens at sample 0 ...
+        assert_eq!(starts_not_from_zero(&all, &[5 * ms, 90 * ms]), 0);
+        // ... and one that does not is counted
+        assert_eq!(starts_not_from_zero(&all, &[20 * ms, 90 * ms]), 1);
+        assert_eq!(starts_not_from_zero(&all, &[200 * ms]), 0);
+    }
 
     /// `--llm-load` counts a load only against the window it was measured
     /// in: one before it (a slow device setup) is not counted, one still

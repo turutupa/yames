@@ -21,7 +21,7 @@ import type { MainView } from "../main-window/MainHeader";
 import { seedOf, type SessionRun } from "../session/hooks/useSessionRun";
 import { askModelContext, askScreenKey, lookingAtParts } from "./askContext";
 import type { AskLookingAt } from "./AskPanel";
-import { noteAskToolView, registerAskToolContext } from "./askTools";
+import { noteAskLoad, noteAskTake, noteAskToolView, noteAskUndos, registerAskToolContext } from "./askTools";
 import { useAskSessionRules, useCoachPanel, type CoachPanel } from "./useCoachPanel";
 
 /** The screens Ask is shown on: all of them but Settings. */
@@ -120,9 +120,19 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
   useEffect(() => {
     noteAskToolView(view, step);
   }, [view, step]);
+  // A chip's Undo does not outlive a Take's start (leg chip1). Once per Take, never per beat.
+  const takeRunning = run.phase === "playing" || run.phase === "listening";
+  useEffect(() => {
+    if (takeRunning) noteAskTake();
+  }, [takeRunning]);
+  // Nor a loop's start in a Session, whether the panel is open or not (leg chip1b, review L2 c).
+  const looping = inSession && run.phase === "looping";
+  useEffect(() => {
+    if (looping) noteAskLoad();
+  }, [looping]);
   useAskSessionRules({
     inSession,
-    takeRunning: run.phase === "playing" || run.phase === "listening",
+    takeRunning,
     timedRunning: run.phase === "timed" && !run.paused && !run.ended,
     pauseTimed: session.actions.togglePause,
     sounding: isPlaying,
@@ -141,6 +151,13 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
     const key = askScreenKey(ctx);
     setLookingAt((prev) => (prev?.text === text && prev.key === key ? prev : { text, key }));
   }, [panel.open, view, run.phase, exerciseId, outcomes, input.jam?.id, input.song?.id, t, sources]);
+
+  // A chip's Undo goes once the value it changed has moved (leg chip1): asked when the
+  // panel opens and when the screen, the Exercise or the run moves, never per beat, never
+  // during a Take, and not under the Settings overlay (it stops nothing; leg chip1b).
+  useEffect(() => {
+    if (panel.open && !takeRunning && askShownOn(view)) noteAskUndos();
+  }, [panel.open, view, run.phase, exerciseId, outcomes, takeRunning]);
 
   return { panel, lookingAt };
 }
