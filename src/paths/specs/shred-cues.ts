@@ -64,6 +64,18 @@ const SKIP_CLEAR = "Stay clear of the skipped string.";
 const RUN_LATE = "Start each run right on the click.";
 const RUN_EARLY = "Wait for the click before each run.";
 const MOVE_SMALL = "Keep the move to the next string small.";
+const SAME_SIZE = "Keep every stroke the same size.";
+const NEXT_CHORD ="Know the next chord before it comes.";
+const HAMMER_HEARD = "Hammer hard enough to hear the note.";
+const PULL_HEARD = "Pull the string slightly as you lift off.";
+const HAMMER_COUNT = "Count '1 e and a' through the hammered notes.";
+const PULLS_END = "Count the six through the pull-offs to the end.";
+const NEW_STRING_TOP = "Pick each new string's top note on time.";
+const ROLL = "Roll from finger to finger so each note sounds.";
+const LIFT = "Lift each note as the next one sounds.";
+const PUSH_ONE = "Keep the push one smooth stroke.";
+const TAP_LATE = "Put each tap right on the click.";
+const TAP_EARLY = "Wait for the click before each tap.";
 
 export const SHRED_CUES: CueBook = {
   // Level 1, Step 1: one string
@@ -73,7 +85,7 @@ export const SHRED_CUES: CueBook = {
     c("extras", A_ONLY),
     c("late", "Put each '1' right on the click."),
     c("early", "Wait for the click on each '1'."),
-    c("openString", "Keep every stroke the same size."),
+    c("openString", SAME_SIZE),
     c("lastBars", "Keep counting '1 e and a' to the last note."),
   ],
   "one-string.chromatic-on-g": [
@@ -447,7 +459,7 @@ export const SHRED_CUES: CueBook = {
     g("Alternate every stroke, even across strings.", 1),
     c("heard", RIGHT_THROUGH),
     c("extras", IN_USE),
-    c("notes", "Know the next chord before it comes."),
+    c("notes", NEXT_CHORD),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("stringChange", CROSS_CLOSE),
@@ -461,5 +473,170 @@ export const SHRED_CUES: CueBook = {
     c("shift", "Keep the shift small, right as each bar starts.", 0),
     c("stringChange", CROSS_CLOSE),
     c("lastBars", "Keep the second run as even as the first."),
+  ],
+
+  // Level 3, Step 11: legato, one string
+  "legato-one.trill": [
+    g("Keep the hammered notes in the picked time.", 0),
+    c("heard", HAMMER_HEARD),
+    c("extras", ONE_STRING),
+    c("notes", "Keep the lower note fretted the whole trill.", 1),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("lastBars", HAMMER_COUNT),
+  ],
+  "legato-one.five-seven-eight": [
+    g("Pick on each beat; hammer and pull in time.", 0),
+    c("heard", HAMMER_HEARD),
+    c("extras", ONE_STRING),
+    c("notes", "Keep the middle note fretted as you hammer.", 1),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("lastBars", HAMMER_COUNT),
+  ],
+  "legato-one.pentatonic-pulls": [
+    g("Keep the pull-offs as even as the picked notes.", 0),
+    c("heard", PULL_HEARD),
+    c("extras", CROSS_SMALL),
+    c("notes", "Have the lower finger down before you pull."),
+    c("late", SIX_LATE),
+    c("early", SIX_EARLY),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", PULLS_END),
+  ],
+
+  // Level 3, Step 12: legato across strings
+  "legato-two.hammer-ascent": [
+    g("Hammer each string's first note from nowhere.", 0),
+    c("heard", HAMMER_HEARD),
+    c("extras", IN_USE),
+    c("notes", "Put each hammer right on its fret.", 1),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", "Hammer the new string's first note on time."),
+    c("lastBars", "Count the six through every hammer to the top."),
+  ],
+  "legato-two.pull-descent": [
+    g("Have each string's fingers down before you pick.", 1),
+    c("heard", PULL_HEARD),
+    c("extras", IN_USE),
+    c("notes", STRING_THREE),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", HELD_OUT),
+    c("stringChange", NEW_STRING_TOP),
+    c("lastBars", PULLS_END),
+  ],
+  "legato-two.picked-then-legato": [
+    g("Play the pull-offs in the picked notes' time.", 1),
+    c("heard", PULL_HEARD),
+    c("extras", TWO_STRINGS),
+    c("notes", SIX_NOTES),
+    c("late", SIX_LATE),
+    c("early", SIX_EARLY),
+    c("stringChange", NEW_STRING_TOP),
+    c("lastBars", PULLS_END),
+  ],
+
+  // Level 3, Step 13: sweep basics
+  "sweep-basics.two-string-rolls": [
+    g("Push through both strings in one stroke.", 1),
+    c("heard", "Roll the fingertip so each note sounds.", 0),
+    c("extras", "Roll off each note as the next one sounds.", 0),
+    c("late", "Put each pair's first note on the click."),
+    c("early", "Wait for the click before each pair."),
+    c("stringChange", PUSH_ONE),
+  ],
+  "sweep-basics.three-both-ways": [
+    g("Turn the stroke once, right after the top note.", 1),
+    c("heard", ROLL),
+    c("extras", LIFT),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("stringChange", "Keep the turn at the top note small.", 1),
+  ],
+  "sweep-basics.two-string-lick": [
+    g("Land the last note right on beat three.", 0),
+    c("heard", HAMMER_HEARD),
+    c("extras", LIFT),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", "Count the rest out, then start again."),
+    c("stringChange", PUSH_ONE),
+  ],
+
+  // Level 3, Step 14: five-string sweeps
+  "sweep-basics.turnaround": [
+    g("Turn the pick round during the hammer.", 1),
+    c("heard", HAMMER_HEARD),
+    c("extras", LIFT),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("stringChange", "Come round with no extra stroke."),
+  ],
+  "five-string-sweeps.am-five": [
+    g("One note a string: push up, pull back down.", 0),
+    c("heard", ROLL),
+    c("extras", LIFT),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("stringChange", PUSH_ONE),
+  ],
+  "five-string-sweeps.the-link": [
+    g("Carry the sweep across without a stop.", 0),
+    c("heard", ROLL),
+    c("extras", LIFT),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("shift", "Move as little as you can at the change.", 1),
+    c("stringChange", PUSH_ONE),
+    c("lastBars", "Keep the new chord's loops as even as the first."),
+  ],
+
+  // Level 3, Step 15: tapping and the run
+  "tapping-etude.tap-triplets": [
+    g("Tap on every click; pull and hammer between.", 0),
+    c("heard", PULL_HEARD),
+    c("extras", "Tap only on the one string."),
+    c("late", TAP_LATE),
+    c("early", TAP_EARLY),
+  ],
+  "tapping-etude.tap-changes": [
+    g("Move the tap during each chord's last hammer.", 1),
+    c("heard", PULL_HEARD),
+    c("extras", "Tap only on the top string."),
+    c("late", TAP_LATE),
+    c("early", TAP_EARLY),
+    c("lastBars", "Keep the tap still for the second G chord."),
+  ],
+  "tapping-etude.stamina-minute": [
+    g("Start at a tempo you can hold a whole minute.", 0),
+    c("heard", "Pick every note right through to the end."),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("shift", SHIFT_CROSS),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Keep counting '1 e and a' to the last second."),
+  ],
+  "tapping-etude.the-run": [
+    g("Land a chord tone on every '1'.", 0),
+    c("heard", RIGHT_THROUGH),
+    c("extras", IN_USE),
+    c("notes", NEXT_CHORD),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("shift", "Move the hand during each idea's last note."),
+    c("stringChange", CROSS_CLOSE),
+    c("lastBars", "Keep counting through the run home."),
+  ],
+  "warmup-advanced.loop-round": [
+    g(WELL_UNDER, 0),
+    c("heard", RIGHT_THROUGH),
+    c("late", SIX_LATE),
+    c("early", SIX_EARLY),
+    c("shift", "Start each new chord's loop on the '1'."),
+    c("stringChange", SAME_SIZE),
+    c("lastBars", "Count the six right to the last loop."),
   ],
 };

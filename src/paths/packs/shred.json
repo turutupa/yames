@@ -14655,6 +14655,15 @@
             "First finger on the lower note, third finger a tone up (second finger where the variant is a semitone). The first finger stays down for the whole trill; only the upper finger moves."
           ],
           "coachLine": "Hammers and pulls I can't hear cost nothing here, so the picked notes carry the timing. Listen to the legato bar for volume.",
+          "cues": [
+            {"when":"even","say":"Keep the hammered notes in the picked time.","more":0,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the note."},
+            {"when":"extras","say":"Keep the pick on one string only."},
+            {"when":"notes","say":"Keep the lower note fretted the whole trill.","more":1},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"lastBars","say":"Count '1 e and a' through the hammered notes."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -15134,6 +15143,15 @@
             "Keep the middle finger down on its note when you hammer the top one, so the pull back has somewhere to land. Only the top finger moves."
           ],
           "coachLine": "The picked notes on the beat are the anchor I time against most firmly. The volume of the legato notes is for your ear.",
+          "cues": [
+            {"when":"even","say":"Pick on each beat; hammer and pull in time.","more":0,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the note."},
+            {"when":"extras","say":"Keep the pick on one string only."},
+            {"when":"notes","say":"Keep the middle note fretted as you hammer.","more":1},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"lastBars","say":"Count '1 e and a' through the hammered notes."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -15546,6 +15564,16 @@
             "In bar 2 the picked notes alternate down, up, down across the strings."
           ],
           "coachLine": "I'll check the notes where they are far enough apart to be sure of, and the timing. A pull-off I can't hear costs nothing.",
+          "cues": [
+            {"when":"even","say":"Keep the pull-offs as even as the picked notes.","more":0,"general":true},
+            {"when":"heard","say":"Pull the string slightly as you lift off."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Have the lower finger down before you pull."},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Count the six through the pull-offs to the end."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -16070,6 +16098,17 @@
             "Fingers 1-3-4 on the low E (5, 7, 8) and the A (5, 7, 8); 1-2-4 on the D and G (5, 7, 9), so each hammer to the little finger comes from the second finger with the stretch in front of it."
           ],
           "coachLine": "A hammer-on from nowhere is graded like any hammer-on: one too quiet for me to catch costs nothing, so your ear decides whether it spoke. Make them loud.",
+          "cues": [
+            {"when":"even","say":"Hammer each string's first note from nowhere.","more":0,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the note."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Put each hammer right on its fret.","more":1},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the held note out, then start again."},
+            {"when":"stringChange","say":"Hammer the new string's first note on time."},
+            {"when":"lastBars","say":"Count the six through every hammer to the top."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -16322,7 +16361,18 @@
                   "scale": "naturalMinor",
                   "spelled": ["B", "C#", "D", "E", "F#", "G", "A"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Hammer each string's first note from nowhere.","more":0,"general":true},
+                  {"when":"heard","say":"Hammer hard enough to hear the note."},
+                  {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+                  {"when":"notes","say":"Put each hammer right on its fret."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"afterHeld","say":"Count the held note out, then start again."},
+                  {"when":"stringChange","say":"Hammer the new string's first note on time."},
+                  {"when":"lastBars","say":"Count the six through every hammer to the top."}
+                ]
               },
               {
                 "id": "key=C",
@@ -16387,7 +16437,18 @@
                   "scale": "naturalMinor",
                   "spelled": ["C", "D", "Eb", "F", "G", "Ab", "Bb"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Hammer each string's first note from nowhere.","more":0,"general":true},
+                  {"when":"heard","say":"Hammer hard enough to hear the note."},
+                  {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+                  {"when":"notes","say":"Put each hammer right on its fret."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"afterHeld","say":"Count the held note out, then start again."},
+                  {"when":"stringChange","say":"Hammer the new string's first note on time."},
+                  {"when":"lastBars","say":"Count the six through every hammer to the top."}
+                ]
               },
               {
                 "id": "key=D",
@@ -16452,7 +16513,18 @@
                   "scale": "naturalMinor",
                   "spelled": ["D", "E", "F", "G", "A", "Bb", "C"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Hammer each string's first note from nowhere.","more":0,"general":true},
+                  {"when":"heard","say":"Hammer hard enough to hear the note."},
+                  {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+                  {"when":"notes","say":"Put each hammer right on its fret."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"afterHeld","say":"Count the held note out, then start again."},
+                  {"when":"stringChange","say":"Hammer the new string's first note on time."},
+                  {"when":"lastBars","say":"Count the six through every hammer to the top."}
+                ]
               },
               {
                 "id": "key=E",
@@ -16517,7 +16589,18 @@
                   "scale": "naturalMinor",
                   "spelled": ["E", "F#", "G", "A", "B", "C", "D"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Hammer each string's first note from nowhere.","more":0,"general":true},
+                  {"when":"heard","say":"Hammer hard enough to hear the note."},
+                  {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+                  {"when":"notes","say":"Put each hammer right on its fret."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"afterHeld","say":"Count the held note out, then start again."},
+                  {"when":"stringChange","say":"Hammer the new string's first note on time."},
+                  {"when":"lastBars","say":"Count the six through every hammer to the top."}
+                ]
               }
             ]
           }
@@ -16531,6 +16614,17 @@
             "Have every finger of a string down before you pick its top note: you can only pull off to a note that is already fretted."
           ],
           "coachLine": "The picked note on each string is the anchor. Pull-offs I can't hear cost nothing, so judge their volume by ear.",
+          "cues": [
+            {"when":"even","say":"Have each string's fingers down before you pick.","more":1,"general":true},
+            {"when":"heard","say":"Pull the string slightly as you lift off."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Count three notes on each string."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the held note out, then start again."},
+            {"when":"stringChange","say":"Pick each new string's top note on time."},
+            {"when":"lastBars","say":"Count the six through the pull-offs to the end."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -16996,6 +17090,16 @@
             "Listen for the change at the bar line. If the legato bar is quieter or rushes, slow down until it doesn't."
           ],
           "coachLine": "The picked bar is the one I can check most closely. The legato bar's volume is yours to judge against it.",
+          "cues": [
+            {"when":"even","say":"Play the pull-offs in the picked notes' time.","more":1,"general":true},
+            {"when":"heard","say":"Pull the string slightly as you lift off."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Say the six notes once before you start."},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"stringChange","say":"Pick each new string's top note on time."},
+            {"when":"lastBars","say":"Count the six through the pull-offs to the end."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -17697,6 +17801,14 @@
             "Down is one push through both strings; up is one pull back through them."
           ],
           "coachLine": "Timing only: I can time the notes and say if one went missing or rang on as an extra. The roll is for your ear.",
+          "cues": [
+            {"when":"even","say":"Push through both strings in one stroke.","more":1,"general":true},
+            {"when":"heard","say":"Roll the fingertip so each note sounds.","more":0},
+            {"when":"extras","say":"Roll off each note as the next one sounds.","more":0},
+            {"when":"late","say":"Put each pair's first note on the click."},
+            {"when":"early","say":"Wait for the click before each pair."},
+            {"when":"stringChange","say":"Keep the push one smooth stroke."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -17910,6 +18022,14 @@
             "The stroke changes once, right after the top note. Keep that change as small as you can."
           ],
           "coachLine": "Timing only: right notes on a sweep mostly can't be checked, so I'm not claiming them. Evenness and missed notes I can give you.",
+          "cues": [
+            {"when":"even","say":"Turn the stroke once, right after the top note.","more":1,"general":true},
+            {"when":"heard","say":"Roll from finger to finger so each note sounds."},
+            {"when":"extras","say":"Lift each note as the next one sounds."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"stringChange","say":"Keep the turn at the top note small.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -18022,6 +18142,15 @@
             "Only the unmarked notes are picked. The hammer and pulls give you notes for free."
           ],
           "coachLine": "Timing only. A hammer or pull I can't hear costs nothing.",
+          "cues": [
+            {"when":"even","say":"Land the last note right on beat three.","more":0,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the note."},
+            {"when":"extras","say":"Lift each note as the next one sounds."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the rest out, then start again."},
+            {"when":"stringChange","say":"Keep the push one smooth stroke."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -18150,6 +18279,14 @@
             "After the top string's push the next note is a hammer, so the pick has nothing to do: use that moment to turn it round."
           ],
           "coachLine": "Timing only. A quiet hammer or pull doesn't count against you, so don't dig in to please me.",
+          "cues": [
+            {"when":"even","say":"Turn the pick round during the hammer.","more":1,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the note."},
+            {"when":"extras","say":"Lift each note as the next one sounds."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"stringChange","say":"Come round with no extra stroke."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -18415,6 +18552,14 @@
             "Fingers on the A minor shape: first finger 12 on the A and top E, little finger 15 on the A and 17 on the top E, ring finger rolling from the D string's 14 to the G string's 14, middle finger 13 on the B."
           ],
           "coachLine": "Timing only, and only up to the graded rungs. Above them the tempo is yours to judge on a recording.",
+          "cues": [
+            {"when":"even","say":"One note a string: push up, pull back down.","more":0,"general":true},
+            {"when":"heard","say":"Roll from finger to finger so each note sounds."},
+            {"when":"extras","say":"Lift each note as the next one sounds."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"stringChange","say":"Keep the push one smooth stroke."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -18730,6 +18875,16 @@
             "Choose the nearest note of the new chord, not its root. Good links barely move the hand."
           ],
           "coachLine": "Timing only. Listen for a gap at the bar line: it is the one thing a recording shows at once.",
+          "cues": [
+            {"when":"even","say":"Carry the sweep across without a stop.","more":0,"general":true},
+            {"when":"heard","say":"Roll from finger to finger so each note sounds."},
+            {"when":"extras","say":"Lift each note as the next one sounds."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Move as little as you can at the change.","more":1},
+            {"when":"stringChange","say":"Keep the push one smooth stroke."},
+            {"when":"lastBars","say":"Keep the new chord's loops as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -19108,6 +19263,13 @@
             "Mute: the fretting hand's first finger lies lightly across the higher strings, and the picking hand's palm rests on the low strings while it taps."
           ],
           "coachLine": "The taps carry the timing. Pull-offs and hammers I can't hear cost nothing.",
+          "cues": [
+            {"when":"even","say":"Tap on every click; pull and hammer between.","more":0,"general":true},
+            {"when":"heard","say":"Pull the string slightly as you lift off."},
+            {"when":"extras","say":"Tap only on the one string."},
+            {"when":"late","say":"Put each tap right on the click."},
+            {"when":"early","say":"Wait for the click before each tap."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -19365,6 +19527,14 @@
             "Move the tap during the last hammer of the bar, so it lands on the next bar's first click."
           ],
           "coachLine": "The taps carry the timing. With a band, direct input or headphones is the honest way to take this.",
+          "cues": [
+            {"when":"even","say":"Move the tap during each chord's last hammer.","more":1,"general":true},
+            {"when":"heard","say":"Pull the string slightly as you lift off."},
+            {"when":"extras","say":"Tap only on the top string."},
+            {"when":"late","say":"Put each tap right on the click."},
+            {"when":"early","say":"Wait for the click before each tap."},
+            {"when":"lastBars","say":"Keep the tap still for the second G chord."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -19512,6 +19682,15 @@
             "Breathe. If the shoulder comes up, drop it during a bar line without stopping."
           ],
           "coachLine": "If I stop catching notes on a long take, trust that report over your doubts about your hands. Long unbroken playing is something the listening has not been proven on.",
+          "cues": [
+            {"when":"even","say":"Start at a tempo you can hold a whole minute.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through to the end."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep counting '1 e and a' to the last second."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -19787,6 +19966,17 @@
             "Use direct input or headphones for a graded take: the band reaching a microphone has not been tested."
           ],
           "coachLine": "This is the finale: the eight bars twice through, held to the end. Fast notes on a real rig are the hardest for me to place, so trust the evenness and your ear together.",
+          "cues": [
+            {"when":"even","say":"Land a chord tone on every '1'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Know the next chord before it comes."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Move the hand during each idea's last note."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep counting through the run home."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -22717,6 +22907,15 @@
             "Sextuplets. Start well under your clean tempo. The hand moves at the bar line; the strokes don't change."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"shift","say":"Start each new chord's loop on the '1'."},
+            {"when":"stringChange","say":"Keep every stroke the same size."},
+            {"when":"lastBars","say":"Count the six right to the last loop."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {

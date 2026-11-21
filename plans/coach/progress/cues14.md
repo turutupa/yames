@@ -11,8 +11,8 @@ Cues: `src/paths/specs/shred-cues.ts`, attached with `withCues` in `shred.ts`.
   `check`: 0 errors, 0 `cue.refused`, no cue of mine rewritten for a variant (`gc2.log`).
 - [x] Level 2 (Intermediate: chromatic, gilbert, three-per-string, sequences, speed-bursts,
   string-skipping, economy, warm-up scale-round), 27 Exercises. `check`: 0 errors, 0 refused (`gc5.log`).
-- [ ] Level 3 (Advanced: legato-one, legato-two, sweep-basics, five-string-sweeps, tapping-etude,
-  warm-up loop-round), 17 Exercises.
+- [x] Level 3 (Advanced: legato-one, legato-two, sweep-basics, five-string-sweeps, tapping-etude,
+  warm-up loop-round), 17 Exercises. `check`: 0 errors, 0 refused, 0 cues said in other words (`gc8.log`).
 - [ ] Proof-read. - [ ] Translations. - [ ] Gates.
 
 ## Refusals and rewordings
@@ -30,3 +30,11 @@ last note." -> "Arrive at the next pair as each beat starts."; "Let the first fi
 the same two fingers ..." (D-and-B uses other fingers) -> "Rest a finger lightly on the skipped string." and,
 after "Keep the same shape on every pair." was refused too (not a uniform transposition), "Name each
 octave's note before you play it."
+
+Level 3: `cue.specific` (an error) on the advanced warm-up's `openString` cue (only some keys have an open
+string): dropped. Refused on variants: "Keep the first finger down the whole trill." / "Keep the middle
+finger down as you hammer." (the semitone variants use other fingers) -> "Keep the lower note fretted the
+whole trill." / "Keep the middle note fretted as you hammer."; the-link "Move to the nearest note of the
+new chord." (Am-to-Dm declares another chord) -> "Move as little as you can at the change."; the
+advanced warm-up's G-and-B variants refused "Make the hop smaller, not faster." and then "Keep the pick
+close as you cross." ("which string is next") -> "Keep every stroke the same size."
