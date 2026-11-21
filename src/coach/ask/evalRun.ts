@@ -25,7 +25,7 @@ import { resolvePath, wholeTitleWords, normalizeWords } from "../tools/resolve";
 import { resolveStepCall } from "../tools/go";
 import { COACH_TOOLS, toolCatalogue } from "../tools/registry";
 import type { ToolArgs, ToolCall } from "../tools/types";
-import { choiceContext, choicePrefix, type ChoiceFacts } from "./choicePrompt";
+import { choiceContext, choicePrefix, namedTitles, type ChoiceFacts } from "./choicePrompt";
 import { choiceGrammar, parseChoice } from "./grammar";
 import { EVAL_CARDS } from "./evalCards";
 import {
@@ -197,7 +197,8 @@ export function askRequestFor(
     generationId: opts.generationId,
     mode: "choice",
     prefix: choicePrefix(catalogue, EVAL_CARDS, { notes: opts.prompt !== "names" }),
-    context: choiceContext(facts),
+    // The Paths the words could name (leg c3bp), as the app would compute them from the typed text.
+    context: choiceContext({ ...facts, named: namedTitles(item.text, paths.map((p) => p.title), commandTableFor(item.lang)) }),
     question: item.text.trim(),
     ...(opts.grammar === "none" ? {} : { grammar: choiceGrammar(catalogue, EVAL_CARDS, opts.grammar === "situation" ? { possible } : undefined) }),
     deadlineMs: opts.deadlineMs,
