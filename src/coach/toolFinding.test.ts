@@ -142,7 +142,9 @@ describe("the tools' finding sentences, in English", () => {
   });
 
   it.each(FINDING)("%s says no cause and gives no advice", (_key, text) => {
-    expect(text).not.toMatch(/\bbecause\b|\bsince\b|\btry\b|\bshould\b|\bslow (?:it )?down\b|\bgreat\b|\bnice\b|\bwell done\b|\bthe bar\b(?! [oO]f)/);
+    expect(text).not.toMatch(/\bbecause\b|\bsince\b|\btry\b|\bshould\b|\bslow (?:it )?down\b|\bgreat\b|\bnice\b|\bwell done\b/);
+    // The pass mark is never "the bar" (owner decision 2); "beat 3 of the bar" is the measure.
+    expect(text.replace(/\bof the bar\b/g, "")).not.toMatch(/\bthe bar\b|\bpass bar\b/i);
   });
 
   it("every position inside a beat the click can play has a name", () => {
