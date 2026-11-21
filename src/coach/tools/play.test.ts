@@ -43,7 +43,30 @@ describe("load_jam and load_preset", () => {
     expect(proposal.line).toEqual({ key, values });
     expect(h.changes()).toEqual([]);
     expect(done(confirmCoachTool(proposal, h, toolCtx())).undo).toBeUndefined();
-    expect(h.changes()).toEqual([{ member, args: [id] }]);
+    expect(h.changes().map((c) => [c.member, c.args[0]])).toEqual([[member, id]]);
+  });
+
+  it("a preset's receipt waits for the app's re-read: Loading, then Loaded, or gone (review t1a2b, B)", async () => {
+    let report: ((ok: boolean) => void) | undefined;
+    const h = host({ loadPreset: (_id, applied) => ((report = applied), "done") });
+    const out = done(confirmCoachTool(proposalOf(runCoachTool(call("load_preset", { preset: "warm up" }), h, toolCtx())), h, toolCtx()));
+    expect(out.receipt).toEqual({ key: "coachTools.receipt.loadingPreset", values: { preset: "Warm up 80" } });
+    report?.(false);
+    await expect(out.later).resolves.toEqual({ key: "coachTools.receipt.presetGone", values: { preset: "Warm up 80" } });
+
+    const h2 = host({ loadPreset: (_id, applied) => (applied?.(true), "done") });
+    const out2 = done(confirmCoachTool(proposalOf(runCoachTool(call("load_preset", { preset: "warm up" }), h2, toolCtx())), h2, toolCtx()));
+    await expect(out2.later).resolves.toEqual({ key: "coachTools.receipt.loadPreset", values: { preset: "Warm up 80" } });
+  });
+
+  it("a preset names a song stopping only when its own screen says so (leg t1b1)", () => {
+    const named = () => [{ id: "p1", name: "Warm up 80", view: "beat" as const }];
+    const unnamed = () => [{ id: "p1", name: "Warm up 80" }];
+    const ctx = toolCtx({ screen: "songs" });
+    const h = fakeHost({ view: "songs", sounding: "song" }, { presets: named });
+    expect(proposalOf(runCoachTool(call("load_preset", { preset: "warm" }), h, ctx)).line.values.stops).toBe("song");
+    const h2 = fakeHost({ view: "songs", sounding: "song" }, { presets: unnamed });
+    expect(proposalOf(runCoachTool(call("load_preset", { preset: "warm" }), h2, ctx)).line.values.stops).toBeUndefined();
   });
 
   it("several jams are choices; none is notFound; a jam deleted before the press is not loaded", () => {

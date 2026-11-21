@@ -239,6 +239,26 @@ describe("useCoachToolHost", () => {
     expect(result.current.loadPreset("p1")).toBe("asked");
   });
 
+  it("passes the window's re-read result on to the tool (leg t1b1, review t1a2b B)", async () => {
+    const heard: boolean[] = [];
+    const { result } = renderHook(() =>
+      useCoachToolHost(
+        input({
+          loadPreset: (_preset, applied) => {
+            applied?.(false);
+            return "done";
+          },
+          listPresets: () => Promise.resolve([{ id: "p1", name: "Warm up 80", view: "drill" } as Preset]),
+        }),
+      ),
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(result.current.loadPreset("p1", (ok) => heard.push(ok))).toBe("done");
+    expect(heard).toEqual([false]);
+  });
+
   it("goes through the window's and the Session's own doors, only on the press", () => {
     sessionCalls.length = 0;
     const props = input();
@@ -301,6 +321,7 @@ describe("useCoachToolHost", () => {
     });
     expect(result.current.presets()).toEqual([{ id: "p1", name: "Warm up 80" }]);
     expect(result.current.loadPreset("p1")).toBe("done");
-    expect(sessionCalls).toEqual([["loadPreset", [{ id: "p1", name: "Warm up 80" }]]]);
+    // The second argument is the tool's ear for the re-read (none from a plain call).
+    expect(sessionCalls).toEqual([["loadPreset", [{ id: "p1", name: "Warm up 80" }, undefined]]]);
   });
 });

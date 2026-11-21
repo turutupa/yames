@@ -20,6 +20,7 @@ import type { MainView } from "../main-window/MainHeader";
 import { seedOf, type SessionRun } from "../session/hooks/useSessionRun";
 import { askScreenKey, lookingAtParts } from "./askContext";
 import type { AskLookingAt } from "./AskPanel";
+import { noteAskToolView, registerAskToolContext } from "./askTools";
 import { useAskSessionRules, useCoachPanel, type CoachPanel } from "./useCoachPanel";
 
 /** The screens Ask is shown on: all of them but Settings. */
@@ -93,9 +94,19 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
 
   const panel = useCoachPanel({ contextText: () => contextForModel(buildCoachContext(sources)) });
 
+  // The tools read the same context, at each press (leg t1b1).
+  useEffect(() => registerAskToolContext(() => buildCoachContext(sources)), [sources]);
+
   const { session, view, isPlaying } = input;
+
   const run = session.run;
   const inSession = view === "session";
+  // A receipt's way back is good on its own screen only, and an open proposal on
+  // its own screen and Session step only: say when either changes.
+  const step = inSession && run.phase !== "idle" ? run.stepIndex : null;
+  useEffect(() => {
+    noteAskToolView(view, step);
+  }, [view, step]);
   useAskSessionRules({
     inSession,
     takeRunning: run.phase === "playing" || run.phase === "listening",

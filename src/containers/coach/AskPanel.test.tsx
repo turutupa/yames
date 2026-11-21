@@ -18,6 +18,9 @@ import {
 import { __resetCoachLoaderForTests } from "../../hooks/coachLoader";
 import { mockInvoke, setInvokeResponse } from "../../test/mocks";
 import i18n from "../../i18n";
+import { within } from "@testing-library/react";
+import { fakeHost, toolCtx } from "../../coach/tools/fakeHost";
+import { __setAskToolsForTests } from "./askTools";
 
 const t = i18n.t.bind(i18n);
 
@@ -136,6 +139,39 @@ describe("the panel", () => {
     openAsk({ about: "Bar 5 slipped" });
     render(<AskPanel lookingAt={null} onClose={() => {}} />);
     expect(screen.getByTestId("ask-about")).toHaveTextContent("Bar 5 slipped");
+  });
+
+  it("offers the tools' chips in the empty state, then above the text box; a press is a tool call (leg t1b1)", () => {
+    const host = fakeHost({ view: "beat" }, { clickSubdivision: () => 1 });
+    __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
+    openAsk();
+    const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
+    const chips = within(screen.getByTestId("ask-empty")).getAllByRole("button");
+    expect(chips.map((c) => c.textContent)).toEqual(["Slower", "Faster", "Two clicks a beat", "Go to Today"]);
+    act(() => fireEvent.click(chips[3]));
+    expect(host.where().view).toBe("today");
+    expect(screen.getByTestId("ask-receipt")).toHaveTextContent("Opened Today");
+    // The thread has turns now: the chips sit above the text box, once.
+    expect(container.querySelectorAll("[data-testid=ask-tool-chips]").length).toBe(1);
+    expect(container.querySelector(".ask-chip-row [data-testid=ask-tool-chips]")).not.toBeNull();
+    expect(container.querySelector(".btn-primary")).toBeNull();
+    __setAskToolsForTests(null, null);
+  });
+
+  it("the chips are chosen again when a turn is written in place: after the proposal's press, the subdivision chip offers the other value", () => {
+    let now = 1;
+    const host = fakeHost({ view: "beat" }, { clickSubdivision: () => now as 1, setClickSubdivision: (s) => ((now = s), "done") });
+    __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
+    openAsk();
+    const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
+    act(() => fireEvent.click(within(screen.getByTestId("ask-empty")).getByRole("button", { name: "Two clicks a beat" })));
+    const row = () => [...container.querySelectorAll(".ask-chip-row [data-testid=ask-tool-chips] button")].map((b) => b.textContent);
+    expect(row()).toContain("Two clicks a beat");
+    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
+    expect(now).toBe(2);
+    expect(row()).toContain("One click a beat");
+    expect(row()).not.toContain("Two clicks a beat");
+    __setAskToolsForTests(null, null);
   });
 });
 

@@ -15,8 +15,11 @@
  * function that answers a question; this file only keeps the turns.
  */
 import { useSyncExternalStore } from "react";
+import type { ToolBody } from "./askTools";
 
 export type AskTurn =
+  /** What a tool did, would do, could not do, or will not do (leg t1b1, `askTools.ts`). */
+  | { id: string; kind: "tool"; body: ToolBody }
   | { id: string; kind: "user"; text: string }
   /** The model's words. `pending` while it is still writing them. */
   | { id: string; kind: "coach"; text: string; pending?: boolean }
@@ -190,8 +193,26 @@ export function updateAskTurn(id: string, next: AskTurn): void {
   set({ turns: state.turns.map((t) => (t.id === id ? next : t)) });
 }
 
+/**
+ * What to write: a whole turn, or a change applied to the turn as it is when
+ * it is written (so a held change does not undo what happened to the turn
+ * while it was held; review t1b1 N3). The change returns null to leave it be.
+ */
+export type AskTurnChange = AskTurn | ((current: AskTurn) => AskTurn | null);
+
+function applyAskTurn(id: string, next: AskTurnChange): void {
+  if (typeof next !== "function") {
+    updateAskTurn(id, next);
+    return;
+  }
+  const current = state.turns.find((t) => t.id === id);
+  if (!current) return;
+  const out = next(current);
+  if (out) updateAskTurn(id, out);
+}
+
 /** Answers that came back while a Take ran, applied when it ends. */
-let held: Array<{ id: string; next: AskTurn }> = [];
+let held: Array<{ id: string; next: AskTurnChange }> = [];
 
 /**
  * An answer arriving: applied now, or, while a Take runs, held until it ends.
@@ -200,12 +221,12 @@ let held: Array<{ id: string; next: AskTurn }> = [];
  * dropped. The generation itself still runs to its end: cancelling it is the
  * next model leg's (`cancel_generation`, leg c3a).
  */
-export function settleAskTurn(id: string, next: AskTurn): void {
+export function settleAskTurn(id: string, next: AskTurnChange): void {
   if (takeRunning()) {
     held.push({ id, next });
     return;
   }
-  updateAskTurn(id, next);
+  applyAskTurn(id, next);
 }
 
 /** The Take is over: apply what was held during it. */
@@ -213,7 +234,7 @@ export function releaseHeldAsk(): void {
   if (held.length === 0 || takeRunning()) return;
   const pending = held;
   held = [];
-  for (const { id, next } of pending) updateAskTurn(id, next);
+  for (const { id, next } of pending) applyAskTurn(id, next);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { memo, useEffect, useId, useRef, useState } from "react";
+import { memo, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { CoachBlocks } from "../../coach/blocks/CoachBlocks";
@@ -8,6 +8,9 @@ import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
 import { consumeAskFocus, noteAskScreen, sendAsk, useAskState, type AskTurn } from "./askStore";
+import { AskToolTurn } from "./AskToolTurn";
+import { askToolChips, onePress, runAskCall } from "./askTools";
+import { lineText } from "./toolWords";
 import "../../styles/ask.css";
 
 /** "Looking at: …", and the key that decides when the thread gets a divider. */
@@ -95,7 +98,7 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
     </div>
   );
 
-  const body = <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} />;
+  const body = <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} lookingKey={lookingKey} />;
 
   if (IS_MOBILE) {
     return (
@@ -149,10 +152,13 @@ function AskConversation({
   turns,
   inputRef,
   onTyping,
+  lookingKey,
 }: {
   turns: readonly AskTurn[];
   inputRef: React.RefObject<HTMLTextAreaElement>;
   onTyping: (typing: boolean) => void;
+  /** Where the panel is looking: the chips are chosen again when it moves. */
+  lookingKey: string | null;
 }) {
   const { t } = useTranslation();
   const model = useCoachModel().state;
@@ -163,6 +169,24 @@ function AskConversation({
     const el = threadRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [turns]);
+
+  // The tools' chips for where the player is (leg t1b1): chosen when the screen or
+  // the thread is written (a turn updated in place too: a proposal's press changes
+  // what the chips may offer), never per beat (the panel renders from its store alone).
+  const chips = useMemo(() => askToolChips(), [lookingKey, turns]);
+  const chipRow =
+    chips.length > 0 ? (
+      <div className="ask-chips" data-testid="ask-tool-chips">
+        {chips.map((chip) => {
+          const words = lineText(t, chip.label);
+          return (
+            <button key={chip.id} type="button" className="ask-chip" data-chip={chip.id} onClick={onePress(() => runAskCall(chip.call, words))}>
+              {words}
+            </button>
+          );
+        })}
+      </div>
+    ) : null;
 
   const send = (e?: FormEvent) => {
     e?.preventDefault();
@@ -186,11 +210,14 @@ function AskConversation({
           <div className="ask-empty" data-testid="ask-empty">
             <p className="ask-empty-title">{t("ask.empty.title")}</p>
             <p className="ask-empty-text">{t(emptyKey)}</p>
+            {chipRow && <p className="ask-empty-text ask-empty-tools">{t("coachTools.ui.chipsIntro")}</p>}
+            {chipRow}
           </div>
         ) : (
           turns.map((turn) => <Turn key={turn.id} turn={turn} />)
         )}
       </div>
+      {turns.length > 0 && chipRow && <div className="ask-chip-row">{chipRow}</div>}
       <form className="ask-compose" onSubmit={send}>
         <textarea
           ref={inputRef}
@@ -225,6 +252,8 @@ function Turn({ turn }: { turn: AskTurn }) {
       return <div className="ask-turn ask-turn-user">{turn.text}</div>;
     case "app":
       return <div className="ask-turn ask-turn-app">{turn.text}</div>;
+    case "tool":
+      return <AskToolTurn id={turn.id} body={turn.body} />;
     case "divider":
       return (
         <div className="ask-divider" role="separator">
