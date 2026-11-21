@@ -179,9 +179,23 @@ export function choicePrefix(
   for (const [name, values] of lists) lines.push(`${name}=${values.join("|")}`);
   if (cards.length > 0) {
     lines.push("", "Cards:");
-    for (const card of cards) lines.push(cardLine(card, notes));
+    lines.push(...cardLines(cards, notes));
   }
   return lines.join("\n");
+}
+
+/**
+ * The cards' lines within `CHOICE_CARDS_TOKENS`, as the budget's note says:
+ * each with its note to the first stop while they fit, else each with the
+ * first three words of it (leg c2b2ab: twenty cards with the Path's, the
+ * plan's, theory's and the terms' did not fit whole), else by signature.
+ */
+function cardLines(cards: readonly EvalCard[], notes: boolean): string[] {
+  const full = cards.map((card) => cardLine(card, notes));
+  if (!notes || estimateTokens(full.join("\n")) <= CHOICE_CARDS_TOKENS) return full;
+  const short = cards.map((card) => cardLine(card, notes, 3));
+  if (estimateTokens(short.join("\n")) <= CHOICE_CARDS_TOKENS) return short;
+  return cards.map((card) => cardLine(card, false));
 }
 
 /**
@@ -190,11 +204,12 @@ export function choicePrefix(
  * and is left out), and its note to the first stop. A card that declares no
  * arguments is its id and note, as before.
  */
-function cardLine(card: EvalCard, notes: boolean): string {
+function cardLine(card: EvalCard, notes: boolean, words?: number): string {
   const shown = (card.args ?? []).filter((f) => !(f.name === "take" && f.type.kind === "enum" && f.type.values.length === 1));
   const signature = card.args === undefined ? card.id : `${card.id}(${shown.map(argText).join(", ")})`;
   if (!notes) return signature;
-  return `${signature}: ${card.args === undefined ? card.note : shortNote(card.note)}`;
+  const note = card.args === undefined ? card.note : shortNote(card.note);
+  return `${signature}: ${words === undefined ? note : note.split(/\s+/).slice(0, words).join(" ")}`;
 }
 
 /** What the context says: plain facts, already in the player's language where they are titles. */
