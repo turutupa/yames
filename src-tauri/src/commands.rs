@@ -6687,7 +6687,7 @@ mod hear_take_tests {
             if panics {
                 panic!("ta.stop() panicked after its join");
             }
-            let _ = poisoned.lock().map_err(|e| format!("Lock failed: {e}"))?;
+            let _g = poisoned.lock().map_err(|e| format!("Lock failed: {e}"))?;
             unreachable!("the lock is poisoned");
         };
         assert!(stop(false).is_err());

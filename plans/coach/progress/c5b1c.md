@@ -46,7 +46,13 @@ takes a new lock: `cut` is still one swap plus `clear_play_if` when a claim is r
 
 ## Gates
 
-(filled in below as they run)
+- `npm run test:rust` (job `coach-c5b1c-rust-2`): 1255 passed, 0 failed, 4 ignored, 355 s; log
+  `/tmp/coach-c5b1c/rust-2.log`. (The first run, `coach-c5b1c-rust`, did not compile: a
+  `let _ =` on a lock guard in the L4 test, `deny(let_underscore_lock)`; fixed.)
+- The probe's own tests (`node scripts/rust-test.mjs --no-default-features --bin
+  click-jitter-probe`, job `coach-c5b1c-probetests`): 4 passed.
+- `cargo build --release --bin click-jitter-probe` (job `coach-c5b1c-probebuild`): pass, 36 s.
+- No TypeScript changed: no tsc.
 
 ## Owed
 
