@@ -192,7 +192,7 @@
             "Über fünf Minuten eingerastet. Soll ich etwas Bestimmtes ansagen?",
             "Lange Strecke – pausiere, wenn du willst, ich bin da.",
             "Ein solider Lauf. Soll ich auf etwas Bestimmtes hören?",
-            "Du bist schon eine Weile dabei. Atme durch, wenn du es brauchst.",
+            "Du bist schon eine Weile dabei. Eine kurze Pause ist okay, wenn du magst.",
             "Bisher ruhig. Sag mir, woran du arbeitest, und ich achte darauf.",
             "Noch nichts anzusagen. Worauf soll ich hören?",
             "Stabiler Pocket. Mach weiter oder wechsle den Gang, wenn du bereit bist."
@@ -208,45 +208,45 @@
             "Bisher eine ruhige Session. Wähl ein Ziel, wenn du schärferes Feedback willst."
           ],
           "correction": [
-            "Achtung – du bist schon eine Weile dabei. Mach zehn Minuten Pause, wenn deine Hände es brauchen.",
-            "Über fünf Minuten am Stück. Horch in deinen Körper, bevor du weiter schiebst.",
-            "Lange Session – streck deine Finger und komm dann zurück.",
-            "Müde Hände? Mach 60 Sekunden Pause vor dem nächsten Durchgang.",
+            "Achtung – du bist schon eine Weile dabei. Mach zehn Minuten Pause, wenn du willst.",
+            "Über fünf Minuten am Stück. Magst du eine kurze Pause, bevor du weitermachst?",
+            "Lange Session – eine kurze Pause ist hier okay, dann komm zurück.",
+            "Magst du 60 Sekunden Pause vor dem nächsten Durchgang?",
             "Lange Strecke ohne Pause. Eine kurze Pause ist eine Option, bevor du weitermachst.",
-            "Zeit für eine kurze Pause. Kalte Hände spielen schlampig.",
-            "Pausiere und streck dich. Zwei Minuten Pause halten die nächsten zwanzig solide.",
-            "Langer Lauf – gönn den Händen Ruhe, bevor du weiter schiebst."
+            "Lange Zeit ohne Pause. Eine kurze Pause wäre eine Option.",
+            "Pausiere hier, wenn du magst. Zwei Minuten Pause, dann mach weiter.",
+            "Langer Lauf – mach eine kurze Pause, bevor du weiter schiebst."
           ]
         },
         "fatigue": {
           "encouragement": [
             "Die Genauigkeit sinkt seit ein paar Minuten. Gönn dir einen Moment.",
-            "Verspannen sich die Hände? Kurz strecken – dann frisch zurückkommen.",
-            "Die Qualität driftet. Pause, atmen, zurückkommen.",
-            "Die Hände arbeiten härter, als sie müssten. Kurz ausruhen, dann wieder rein.",
+            "Die Genauigkeit sinkt bei diesem Tempo. Kurze Pause, dann komm zurück.",
+            "Die Qualität driftet. Pause, neu ansetzen, zurückkommen.",
+            "Die Fehler nehmen im selben Tempo zu. Kurze Pause, dann wieder rein.",
             "Du bist schon eine Weile dabei – leg das Instrument für 60 Sekunden weg.",
-            "Der Körper wird schwerer als die Musik. Kurze Pause.",
-            "Werden die Finger steif? Schüttel sie aus und komm dann zurück.",
-            "Zeit für eine kurze Pause – frische Hände spielen sauberer."
+            "Die Werte rutschen bei einem Tempo ab. Kurze Pause?",
+            "Magst du eine kurze Pause? Dann komm im selben Tempo zurück.",
+            "Eine kurze Pause ist hier okay – dann mach weiter."
           ],
           "neutral": [
-            "Die Genauigkeit ist in den letzten 3 Minuten bei konstantem BPM gesunken – wahrscheinlich Ermüdung.",
+            "Die Genauigkeit ist in den letzten 3 Minuten bei konstantem BPM gesunken. Eine Pause wäre eine Option.",
             "Der Score sinkt ohne Tempowechsel. Mach eine Pause.",
             "Anhaltender Genauigkeitsverlust beim selben BPM – nimm es als Pausenzyklus.",
-            "Gleiches Tempo, sinkende Genauigkeit. Die Hände werden müde.",
-            "Die Qualität rutscht ab, aber das Tempo hat sich nicht geändert – das ist Ermüdung.",
+            "Gleiches Tempo, sinkende Genauigkeit. Eine kurze Pause wäre eine Option.",
+            "Die Qualität rutscht ab, aber das Tempo hat sich nicht geändert. Magst du eine Pause?",
             "Die Fehlschläge steigen, während der Klick gleich bleibt. Zeit für eine Pause.",
-            "Drei Minuten Abfall bei einem Tempo. Ruh die Hände aus.",
-            "Gleichbleibendes BPM, sinkende Genauigkeit – deine Hände sagen dir etwas."
+            "Drei Minuten Abfall bei einem Tempo. Mach eine kurze Pause.",
+            "Gleichbleibendes BPM, sinkende Genauigkeit – ein guter Moment für eine Pause."
           ],
           "correction": [
-            "Ermüdung ist zu sehen – hör jetzt auf, 90 Sekunden Pause, dann komm zurück.",
-            "Du bist über dein Leistungsfenster hinaus. Ruh dich aus, bevor die Qualität weiter sinkt.",
-            "Mach die Pause. Müdes Spielen lehrt den Händen schlampige Gewohnheiten.",
+            "Die Genauigkeit sinkt weiter – hör jetzt auf, 90 Sekunden Pause, dann komm zurück.",
+            "Die Werte liegen in dieser Session unter deinem Höchstwert. Pausiere, bevor sie weiter sinken.",
+            "Mach die Pause. Die letzten Minuten haben schlechter abgeschnitten als die ersten.",
             "Stopp, steh auf, geh eine Minute herum. Dann komm zurück.",
             "Die Qualität sinkt seit Minuten. Echte Pause – mindestens 90 Sekunden.",
-            "Die Hände sind für jetzt fertig. Pausiere, schüttel sie aus, trink etwas.",
-            "Wer müde weiterspielt, festigt Fehler. Stopp und erhol dich.",
+            "Die Werte fallen bei diesem Tempo weiter. Pausiere, dann prüf noch einmal.",
+            "Die Fehler nehmen bei einem Tempo weiter zu. Stopp und mach eine Pause.",
             "Leg das Instrument ab. Zwei Minuten Pause, dann bewerte neu."
           ]
         },
@@ -399,8 +399,8 @@
           "neutral": [
             "Der Score sinkt wieder jenseits der {staminaMinutes}-Minuten-Marke – mach 30 Sekunden Pause und komm dann beim selben BPM zurück.",
             "Nach der {staminaMinutes}-Minuten-Marke rutscht deine Genauigkeit tendenziell ab. Kurz ausruhen, dann wieder rein.",
-            "Um Minute {staminaMinutes} lässt du tendenziell nach. Mach eine Pause und komm frisch zurück.",
-            "Ausdauer-Wand um Minute {staminaMinutes} – eine kurze Pause jetzt spart später Qualität."
+            "Um Minute {staminaMinutes} sinkt deine Genauigkeit tendenziell. Mach eine Pause, dann komm zurück.",
+            "Deine Werte sinken meist um Minute {staminaMinutes} – eine kurze Pause jetzt wäre eine Option."
           ]
         },
         "ramp_complete": {
@@ -676,21 +676,21 @@
           "encouragement": [
             "Die Schläge rutschen beim selben Tempo ab. Sticks kurz weg, dann komm zurück.",
             "Die Qualität driftet – steh 60 Sekunden vom Hocker auf.",
-            "Melden sich die Unterarme? Kurze Pause, dann wieder rein.",
-            "Fühlen sich die Sticks schwer an? Leg sie ab, streck dich, dann komm zurück.",
-            "Wird der Griff fest? Geh eine Minute weg vom Kit.",
+            "Die Schläge driften im selben Tempo. Kurze Pause, dann wieder rein.",
+            "Magst du eine Pause? Leg die Sticks ab, dann komm zurück.",
+            "Die Fehler nehmen bei diesem Tempo zu. Geh eine Minute weg vom Kit.",
             "Die Genauigkeit sinkt – kurze Pause, dann weitermachen.",
-            "Die Hände arbeiten härter, als sie müssten. Kurze Pause.",
-            "Leg die Sticks für einen Moment ab – lass die Arme zurücksetzen."
+            "Die Genauigkeit sinkt bei einem Tempo. Kurze Pause.",
+            "Sticks für einen Moment ab, wenn du magst, dann fang neu an."
           ],
           "correction": [
-            "Die Ermüdung ist zu sehen – hör jetzt auf, leg die Sticks ab, 90 Sekunden Pause. Müdes Schlagzeugspielen festigt schlampiges Timing.",
-            "Du bist über dem Höhepunkt – Sticks ab, geh eine Runde, dann bewerte neu.",
+            "Die Genauigkeit fällt bei diesem Tempo weiter. Hör jetzt auf, Sticks ab, 90 Sekunden Pause.",
+            "Die Werte liegen unter deinem Höchstwert – Sticks ab, geh eine Runde, dann bewerte neu.",
             "Die Schläge rutschen bei diesem Tempo immer weiter ab. 90 Sekunden Pause, trink etwas, komm zurück.",
             "Die Fehler nehmen bei einem Tempo zu. Stopp, Sticks weg, zwei Minuten Pause.",
-            "Wenn du hier weitermachst, tust du dir weh. Jetzt echte Pause.",
+            "Hör auf, wenn etwas wehtut. So oder so: jetzt eine echte Pause.",
             "Hör auf zu spielen. Geh ein paar Minuten weg vom Kit.",
-            "Sticks ab. Erst die Unterarme, dann die Hände, dann komm zurück, wenn du locker bist.",
+            "Sticks ab. Zwei Minuten Pause, dann komm zurück, wenn du bereit bist.",
             "Harter Stopp. Zwei Minuten Pause und ein Schluck Wasser, bevor du zurückkommst."
           ]
         },
@@ -712,7 +712,7 @@
             "Über fünf Minuten drin. Soll ich die Kick, die Hi-Hat oder beides ansagen?",
             "Du warst tief im Pocket. Sag mir, was du als Nächstes willst.",
             "Ein solider Lauf am Kit. Willst du schärferes Feedback zu etwas?",
-            "Du bist schon eine Weile dabei. Soll ich auf Kick, Snare oder die Synchronität der Gliedmaßen hören?",
+            "Du bist schon eine Weile dabei. Soll ich auf etwas Bestimmtes hören?",
             "Der Pocket war stabil. Was ist ab hier der Fokus?",
             "Langer Groove – wähl ein Ziel, dann achte ich verstärkt darauf.",
             "Über fünf Minuten. Sag mir, wozu du den nächsten Hinweis willst."
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Um Minute {staminaMinutes} werden die Hände fest. Senk das Tempo um 5 BPM und bau neu auf.",
-            "Nach der {staminaMinutes}-Minuten-Marke fangen die Gliedmaßen an zu driften. Kurze Pause, dann weiter.",
+            "Um Minute {staminaMinutes} sinkt deine Genauigkeit tendenziell. Senk das Tempo um 5 BPM und bau neu auf.",
+            "Nach der {staminaMinutes}-Minuten-Marke fangen deine Schläge an zu driften. Kurze Pause, dann weiter.",
             "Deine Werte am Kit sinken um Minute {staminaMinutes}. Kurze Pause, dann komm zurück.",
-            "Um Minute {staminaMinutes} verlierst du tendenziell den Kick-Lock. Mach eine Verschnaufpause."
+            "Dein Timing am Kit rutscht tendenziell um Minute {staminaMinutes}. Mach eine kurze Pause."
           ]
         },
         "bias_only": {
@@ -946,24 +946,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Verspannt sich der Anschlagsarm? Schüttle ihn aus und steig wieder ein.",
+            "Die Genauigkeit sinkt bei einem Tempo. Kurze Pause, dann wieder rein.",
             "Die Genauigkeit rutscht seit ein paar Minuten ab. Kurze Pause, dann wieder rein.",
             "Bei diesem Tempo schleichen sich Fehler ein – leg die Gitarre 60 Sekunden weg.",
-            "Lange Phase im selben Tempo. Atme durch, dann mach weiter.",
-            "Der Plektrumanschlag wird härter, als er sein müsste. Kurze Pause.",
-            "Wird der Griff am Hals fester? Lockere dich, dann spiel.",
-            "Der Unterarm arbeitet zu hart – ausschütteln und weiterspielen.",
+            "Lange Phase im selben Tempo. Pause, dann mach weiter.",
+            "Die Fehler nehmen bei diesem Tempo zu. Kurze Pause.",
+            "Magst du eine kurze Pause? Dann spiel weiter.",
+            "Die Werte rutschen bei einem Tempo ab – kurze Pause, dann weiterspielen.",
             "Eine Pause von 30 Sekunden ist eine Option, dann geh wieder dran."
           ],
           "correction": [
             "Die Genauigkeit sinkt beim selben Tempo – stopp, Gitarre 90 Sekunden weg, dann prüf es noch einmal.",
             "Deine Werte liegen unter deinem Höchstwert – Gitarre eine Minute weg, dann wieder rein.",
-            "Hör auf, bevor sich die Sehnen melden. 90 Sekunden weg von den Saiten.",
+            "Die Genauigkeit fällt bei diesem Tempo weiter. 90 Sekunden weg von den Saiten.",
             "Die Fehler nehmen bei diesem Tempo weiter zu. Leg die Gitarre weg, zwei Minuten Pause.",
             "Echte Pause – Gitarre auf den Ständer, geh ein bisschen herum.",
-            "Der Anschlagsarm ist für jetzt fertig. Mindestens 90 Sekunden, dann prüf noch einmal.",
-            "Stopp hier. Zwei Minuten weg von der Gitarre, dann frisch zurückkommen.",
-            "Wenn du hier weitermachst, holst du dir eine Verletzung. Sofort aufhören."
+            "Die Werte fallen weiter. Mindestens 90 Sekunden, dann prüf noch einmal.",
+            "Stopp hier. Zwei Minuten weg von der Gitarre, dann komm wieder zu ihr zurück.",
+            "Sofort aufhören. Hör jederzeit auf, wenn etwas wehtut."
           ]
         },
         "tempo_milestone": {
@@ -1001,9 +1001,9 @@
         "stamina": {
           "neutral": [
             "Nach der {staminaMinutes}-Minuten-Marke rutscht dein Timing bei diesem Tempo tendenziell ab. Kurze Pause, dann mach weiter.",
-            "Um Minute {staminaMinutes} beginnt der Plektrumanschlag zu driften. Kurze Pause, dann wieder rein.",
-            "Ausdauergrenze bei Minute {staminaMinutes} – die rechte Hand wird fest. Ruh dich 30 Sekunden aus.",
-            "Um Minute {staminaMinutes} verlierst du tendenziell die Schärfe im Anschlag. Kurze Pause, dann zurück."
+            "Um Minute {staminaMinutes} beginnt dein Timing zu driften. Kurze Pause, dann wieder rein.",
+            "Deine Werte sinken um Minute {staminaMinutes}. Ruh dich 30 Sekunden aus, wenn du magst.",
+            "Um Minute {staminaMinutes} landen die Noten neben dem Klick. Kurze Pause, dann zurück."
           ]
         },
         "bias_only": {
@@ -1218,24 +1218,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Verspannt sich der Schlagarm? Schüttle ihn aus und steig wieder ein.",
+            "Die Schläge driften bei einem Tempo. Kurze Pause, dann wieder rein.",
             "Die Genauigkeit rutscht bei diesem Tempo ab. Kurze Pause, dann wieder rein.",
             "Fehler schleichen sich in den Schlag ein – Gitarre 60 Sekunden weglegen.",
-            "Du schlägst schon eine Weile im selben Tempo. Atme durch, dann mach weiter.",
-            "Der Schlag wird schwerer, als er sein müsste. Kurze Pause.",
-            "Wird der Griff am Hals fester? Lockere dich, dann spiel.",
-            "Der Unterarm arbeitet zu hart – ausschütteln und weiterspielen.",
+            "Du schlägst schon eine Weile im selben Tempo. Pause, dann mach weiter.",
+            "Die Fehler nehmen bei diesem Tempo zu. Kurze Pause.",
+            "Magst du eine kurze Pause? Dann spiel weiter.",
+            "Die Werte rutschen bei einem Tempo ab – kurze Pause, dann weiterspielen.",
             "Nimm dir 30 Sekunden, wenn du sie willst, dann geh wieder dran."
           ],
           "correction": [
-            "Die Ermüdung zeigt sich im Schlag – stopp, 90 Sekunden weg von den Saiten.",
+            "Die Schläge rutschen bei diesem Tempo weiter ab – stopp, 90 Sekunden weg von den Saiten.",
             "Deine Werte liegen unter deinem Höchstwert – leg die Gitarre eine Minute weg, dann komm zurück.",
-            "Müdes Strumming begräbt die Dynamik. Stopp, ausruhen, neu starten.",
-            "Der Schlagarm wird überlastet. Leg die Gitarre weg, dehne den Unterarm, zwei Minuten Pause.",
+            "Die Werte fallen bei einem Tempo weiter. Stopp, Pause, neu starten.",
+            "Die Fehler nehmen bei diesem Tempo weiter zu. Leg die Gitarre weg, zwei Minuten Pause.",
             "Echte Pause – Gitarre auf den Ständer, geh ein bisschen herum.",
-            "Die Schlaghand ist fertig. Mindestens 90 Sekunden, dann prüf noch einmal.",
+            "Die Genauigkeit fällt weiter. Mindestens 90 Sekunden, dann prüf noch einmal.",
             "Sofort aufhören. Zwei Minuten Pause, dann weiter, wenn du so weit bist.",
-            "Wenn du hier weitermachst, holst du dir eine Verletzung. Aufhören und erholen."
+            "Mach hier eine echte Pause. Hör früher auf, wenn etwas wehtut."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Dein Greifdruck steigt um Minute {staminaMinutes}. Ruh dich 30 Sekunden aus und setz dann neu an.",
-            "Um Minute {staminaMinutes} verspannt sich der Schlagarm. Kurze Pause, dann wieder rein.",
+            "Deine Werte sinken um Minute {staminaMinutes}. Ruh dich 30 Sekunden aus und setz dann neu an.",
+            "Um Minute {staminaMinutes} beginnen die Schläge zu driften. Kurze Pause, dann wieder rein.",
             "Nach der {staminaMinutes}-Minuten-Marke lässt deine Genauigkeit tendenziell nach. Kurze Pause, dann weiter.",
-            "Um Minute {staminaMinutes} zeigt sich auf der Akustischen die Ermüdung. Mach eine Verschnaufpause."
+            "Um Minute {staminaMinutes} sinkt die Genauigkeit auf der Akustischen. Mach eine kurze Pause."
           ]
         },
         "bias_only": {
@@ -1438,7 +1438,7 @@
             "Die rechte Hand schleppt. Spiel mit dem Klick, warte nicht darauf, dass die Kick landet.",
             "Hebe den Zupffinger früher – triff den Klick am Anfang der Note.",
             "Jede Note kommt zu spät. Ziel auf die Vorderkante jedes Klicks.",
-            "Schieb aus dem Unterarm – der Finger wird schwer.",
+            "Die Noten kommen zu spät. Setz jeden Zupfer ein wenig früher an.",
             "Nimm das Tempo etwas zurück und spiel mit mehr Schwung. Das Schleppen verschwindet.",
             "Stell dir den Klick einen Hauch früher vor, als er ist, und triff den.",
             "Stopp, atme durch, dann steig mit leichtem Druck nach vorn ein."
@@ -1489,24 +1489,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Verspannen sich die Zupffinger? Kurz dehnen – dann wieder rein.",
-            "Blockiert der Unterarm langsam? Bass 60 Sekunden weglegen.",
+            "Die Noten driften bei einem Tempo. Kurze Pause – dann wieder rein.",
+            "Die Fehler nehmen bei diesem Tempo zu. Bass 60 Sekunden weglegen.",
             "Die Töne rutschen beim selben Tempo ab. Kurze Pause, dann wieder rein.",
-            "Wird die Greifhand schwer? Nimm dir einen Moment, dann mach weiter.",
-            "Fühlt sich die rechte Hand fest an? Schüttle sie aus, dann weiter.",
-            "Lange Phase im selben Tempo. Atme durch, dann mach weiter.",
-            "Der Unterarm arbeitet zu hart. Kurze Pause.",
+            "Magst du einen Moment? Nimm ihn dir, dann mach weiter.",
+            "Die Genauigkeit sinkt bei einem Tempo. Kurze Pause, dann weiter.",
+            "Lange Phase im selben Tempo. Kurze Pause, dann mach weiter.",
+            "Die Werte sinken bei diesem Tempo. Kurze Pause.",
             "Nimm dir 30 Sekunden, wenn du sie willst, dann geh wieder dran."
           ],
           "correction": [
-            "Die Ermüdung zeigt sich im Anschlag – stopp, 90 Sekunden Pause, dann prüf noch einmal.",
-            "Du bist über dem Höhepunkt – Bass weg, dehnen, dann wieder rein.",
-            "Hör jetzt auf. Müdes Zupfen bringt der Hand einen schlampigen Anschlag bei.",
-            "Die rechte Hand wird überlastet. Leg den Bass weg, dehne den Unterarm, zwei Minuten Pause.",
+            "Die Genauigkeit fällt bei diesem Tempo weiter – stopp, 90 Sekunden Pause, dann prüf noch einmal.",
+            "Die Werte liegen unter deinem Höchstwert – Bass für eine Minute weg, dann wieder rein.",
+            "Hör jetzt auf. Die Fehler nehmen im selben Tempo weiter zu.",
+            "Die Fehler nehmen bei einem Tempo weiter zu. Leg den Bass weg, zwei Minuten Pause.",
             "Echte Pause – Bass auf den Ständer, geh ein bisschen herum.",
-            "Die Zupfhand ist fertig. Mindestens 90 Sekunden, dann prüf noch einmal.",
+            "Die Genauigkeit fällt weiter. Mindestens 90 Sekunden, dann prüf noch einmal.",
             "Sofort aufhören. Zwei Minuten weg vom Bass, bevor du weitermachst.",
-            "Wenn du hier weitermachst, holst du dir eine Verletzung. Aufhören und erholen."
+            "Mach jetzt eine echte Pause und hör auf, wenn etwas wehtut."
           ]
         },
         "tempo_milestone": {
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Ausdauergrenze bei Minute {staminaMinutes} – dein Groove wird lockerer. Kurze Pause, dann wieder rein.",
-            "Um Minute {staminaMinutes} ermüdet die Zupfhand. Ausruhen und zurückkommen.",
+            "Dein Groove beginnt um Minute {staminaMinutes} zu rutschen. Kurze Pause, dann wieder rein.",
+            "Um Minute {staminaMinutes} beginnt deine Genauigkeit zu sinken. Pause, dann zurückkommen.",
             "Nach der {staminaMinutes}-Minuten-Marke beginnt der Lock mit der Kick zu rutschen. Kurze Pause, dann weiter.",
-            "Um Minute {staminaMinutes} lässt du tendenziell nach. Nimm dir 30 Sekunden und komm sauber zurück."
+            "Deine Werte lassen tendenziell um Minute {staminaMinutes} nach. Nimm dir 30 Sekunden und komm sauber zurück."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Senk das Tempo und spiel mit mehr Leichtigkeit. Das Schleppen verschwindet, sobald es sich leicht anfühlt.",
             "Stell dir vor, der Klick kommt ein Haar früher, als er es tut, und triff den.",
             "Stopp, atme durch, dann komm mit leichtem Druck nach vorn rein.",
-            "Die Finger werden schwer. Spiel mit leichterem Anschlag und lass sie schweben."
+            "Die Noten landen hinter dem Klick. Spiel mit leichterem Anschlag und setz früher an."
           ]
         },
         "personal_best_streak": {
@@ -1760,24 +1760,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Die Genauigkeit rutscht bei diesem Tempo ab. Heb die Hände, atme durch, dann komm zurück.",
-            "Fühlen sich die Unterarme fest an? Pausiere, lass die Hände sinken, atme durch.",
+            "Die Genauigkeit rutscht bei diesem Tempo ab. Kurze Pause, dann komm zurück.",
+            "Magst du eine kurze Pause? Geh einen Moment weg von den Tasten.",
             "Bei diesem Tempo schleichen sich Fehler ein – 60 Sekunden weg von den Tasten.",
-            "Fühlen sich die Finger schwer an? Kurz strecken, dann weiter.",
-            "Die Hände arbeiten härter, als sie müssten. Kurze Pause.",
-            "Du sitzt schon eine Weile an den Tasten. Atme durch, dann spiel.",
+            "Die Noten driften bei einem Tempo. Kurze Pause, dann weiter.",
+            "Die Fehler nehmen bei diesem Tempo zu. Kurze Pause.",
+            "Du sitzt schon eine Weile an den Tasten. Kurze Pause, dann spiel.",
             "Eine Pause von 30 Sekunden ist eine Option, dann weiter.",
-            "Die Genauigkeit sinkt bei einem Tempo. Pausiere, Hände in den Schoß, atme durch."
+            "Die Genauigkeit sinkt bei einem Tempo. Pausiere einen Moment, dann spiel weiter."
           ],
           "correction": [
-            "Die Ermüdung zeigt sich im Anschlag – stopp, Hände 90 Sekunden unten.",
-            "Du bist über dem Höhepunkt – steh von der Bank auf, schüttel dich aus, dann komm zurück.",
+            "Die Genauigkeit fällt bei diesem Tempo weiter – stopp, 90 Sekunden weg von den Tasten.",
+            "Die Werte liegen unter deinem Höchstwert – steh für eine Minute von der Bank auf, dann komm zurück.",
             "Die Werte sinken bei diesem Tempo weiter. Stopp, ruh dich aus, starte neu.",
-            "Die Fehler nehmen bei einem Tempo zu. Hände weg von den Tasten, zwei Minuten Pause.",
-            "Echte Pause – steh auf, geh herum, komm frisch zurück.",
-            "Die Hände sind für jetzt fertig. Mindestens 90 Sekunden, dann prüf neu.",
+            "Die Fehler nehmen bei einem Tempo weiter zu. Zwei Minuten weg von den Tasten.",
+            "Echte Pause – steh auf, geh herum, dann komm zurück.",
+            "Die Genauigkeit fällt weiter. Mindestens 90 Sekunden, dann prüf neu.",
             "Harter Stopp. Zwei Minuten weg von den Tasten, bevor du weitermachst.",
-            "Wenn du hier weitermachst, holst du dir eine Verletzung. Stopp und erhol dich."
+            "Mach jetzt eine echte Pause und hör auf, wenn etwas wehtut."
           ]
         },
         "tempo_milestone": {
@@ -1795,10 +1795,10 @@
         "check_in": {
           "neutral": [
             "Lange Strecke an den Tasten – Stück, Übung, etwas Bestimmtes?",
-            "Über fünf Minuten drin. Soll ich die linke Hand, die rechte Hand oder beide ansagen?",
+            "Über fünf Minuten drin. Gibt es eine Stelle im Stück, zu der du Feedback willst?",
             "Du warst voll drin. Sag mir, wozu du Feedback willst.",
             "Ein solider Lauf. Willst du schärferes Feedback zu einer bestimmten Passage?",
-            "Du bist schon eine Weile dabei. Linke Hand? Rechte Hand? Voicings? Sag mir, worauf ich hören soll.",
+            "Du bist schon eine Weile dabei. Eine Passage? Ein Tempo? Sag mir, worauf ich hören soll.",
             "Der Pocket war stabil. Wähl ein Ziel, wenn du genaueres Feedback willst.",
             "Lange Strecke an den Tasten. Soll ich etwas markieren?",
             "Du steckst tief drin. Sag mir, worauf ich als Nächstes hören soll."
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Deine Werte bei diesem Tempo sinken um Minute {staminaMinutes}. Atme durch, komm sauber zurück.",
+            "Deine Werte bei diesem Tempo sinken um Minute {staminaMinutes}. Pause, dann komm sauber zurück.",
             "Um Minute {staminaMinutes} schleichen sich die Fehler ein. Kurze Pause, dann weiter.",
-            "Nach der {staminaMinutes}-Minuten-Marke wird der Anschlag schwerer. Kurze Pause, dann zurück an die Tasten.",
-            "Ermüdung in den Händen zeigt sich um Minute {staminaMinutes}. Ruh dich aus, dann komm zurück."
+            "Nach der {staminaMinutes}-Minuten-Marke wird dein Timing ungleichmäßiger. Kurze Pause, dann zurück an die Tasten.",
+            "Deine Werte sinken um Minute {staminaMinutes}. Pause, dann komm zurück."
           ]
         },
         "bias_only": {

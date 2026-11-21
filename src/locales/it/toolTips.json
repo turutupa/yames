@@ -192,7 +192,7 @@
             "Più di cinque minuti saldo. Vuoi che segnali qualcosa di specifico?",
             "Tratto lungo: fai una pausa se vuoi, io sono qui.",
             "Buona serie in corso. Vuoi che ascolti qualcosa in particolare?",
-            "Sei dentro da un po'. Respira se ti serve.",
+            "Sei dentro da un po'. Una breve pausa va bene, se vuoi.",
             "Finora silenzio. Dimmi su cosa stai lavorando e lo terrò d'occhio.",
             "Ancora nulla da segnalare. Cosa vuoi che ascolti?",
             "Pocket stabile. Continua, o cambia marcia se sei pronto."
@@ -208,45 +208,45 @@
             "Finora sessione silenziosa. Scegli un obiettivo se vuoi un riscontro più preciso."
           ],
           "correction": [
-            "Attenzione: sei dentro da un po'. Prenditi dieci minuti se le mani ne hanno bisogno.",
-            "Più di cinque minuti di fila. Ascolta il tuo corpo prima di spingere ancora.",
-            "Sessione prolungata: stira le dita, poi torna.",
-            "Mani stanche? Fai una pausa di 60 secondi prima del prossimo passaggio.",
+            "Attenzione: sei dentro da un po'. Prenditi dieci minuti, se vuoi.",
+            "Più di cinque minuti di fila. Vuoi una breve pausa prima di spingere ancora?",
+            "Sessione prolungata: qui va bene una breve pausa, poi torna.",
+            "Vuoi una pausa di 60 secondi prima del prossimo passaggio?",
             "Tratto lungo senza pausa. Una breve pausa è un'opzione prima di continuare.",
-            "È ora di una pausa veloce. Mani fredde suonano male.",
-            "Fermati e stirati. Due minuti di pausa tengono solidi i prossimi venti.",
-            "Serie prolungata: dai un po' di riposo alle mani prima di spingere oltre."
+            "Lungo tratto senza pause. Una pausa veloce è un'opzione.",
+            "Fermati qui, se ti va. Due minuti di pausa, poi riprendi.",
+            "Serie prolungata: fai una breve pausa prima di spingere oltre."
           ]
         },
         "fatigue": {
           "encouragement": [
             "La precisione è calata negli ultimi minuti. Prenditi un attimo.",
-            "Le mani si irrigidiscono? Uno stiramento veloce, poi torna fresco.",
-            "La qualità sta andando alla deriva. Fermati, respira, ritorna.",
-            "Le mani lavorano più del dovuto. Breve riposo, poi di nuovo dentro.",
+            "La precisione cala a questo tempo. Breve pausa, poi torna.",
+            "La qualità sta andando alla deriva. Fermati, riparti da capo, ritorna.",
+            "Gli errori aumentano mantenendo lo stesso tempo. Breve pausa, poi di nuovo dentro.",
             "Sei andato avanti per un po': metti giù lo strumento per 60 secondi.",
-            "Il corpo diventa più pesante della musica. Pausa veloce.",
-            "Le dita si irrigidiscono? Scuotile, poi torna.",
-            "È ora di una breve pausa: mani fresche suonano più pulito."
+            "I punteggi calano a un solo tempo. Pausa veloce?",
+            "Vuoi una breve pausa? Poi torna allo stesso tempo.",
+            "Qui va bene una breve pausa: poi riprendi."
           ],
           "neutral": [
-            "La precisione è calata negli ultimi 3 minuti a BPM costanti: probabilmente stanchezza.",
+            "La precisione è calata negli ultimi 3 minuti a BPM costanti. Una pausa è un'opzione.",
             "Il punteggio è in calo senza cambi di tempo. Fai una pausa.",
             "Calo di precisione prolungato agli stessi BPM: consideralo un ciclo di riposo.",
-            "Stesso tempo, precisione in calo. Le mani si stanno stancando.",
-            "La qualità cala ma il tempo non è cambiato: è stanchezza.",
+            "Stesso tempo, precisione in calo. Un breve stacco è un'opzione.",
+            "La qualità cala ma il tempo non è cambiato. Vuoi una pausa?",
             "Gli errori salgono mentre il clic resta lo stesso. È ora di una pausa.",
-            "Tre minuti di calo a un solo tempo. Riposa le mani.",
-            "BPM costanti, precisione in calo: le tue mani ti stanno dicendo qualcosa."
+            "Tre minuti di calo a un solo tempo. Fai una breve pausa.",
+            "BPM costanti, precisione in calo: un buon momento per una pausa."
           ],
           "correction": [
-            "Si vede la stanchezza: fermati ora, 90 secondi di pausa, poi torna.",
-            "Hai superato la tua finestra migliore. Riposa prima che la qualità cali ancora.",
-            "Riposati. Suonare stanchi insegna alle mani abitudini sbagliate.",
+            "La precisione continua a calare: fermati ora, 90 secondi di pausa, poi torna.",
+            "In questa sessione i punteggi sono sotto il tuo picco. Fai una pausa prima che calino ancora.",
+            "Fai la pausa. Gli ultimi minuti hanno punteggi più bassi dei primi.",
             "Fermati, alzati, cammina per un minuto. Poi torna.",
             "La qualità cala da minuti. Riposo vero: 90 secondi come minimo.",
-            "Le mani per ora hanno finito. Fermati, scuotile, bevi.",
-            "Spingere oltre la stanchezza fissa gli errori. Fermati e recupera.",
+            "I punteggi continuano a calare a questo tempo. Fermati, poi ricontrolla.",
+            "Gli errori continuano a salire a un solo tempo. Fermati e fai una pausa.",
             "Metti giù lo strumento. Due minuti di pausa, poi rivaluta."
           ]
         },
@@ -399,8 +399,8 @@
           "neutral": [
             "Il punteggio cala di nuovo oltre il minuto {staminaMinutes}: fai 30 secondi di pausa, poi torna agli stessi BPM.",
             "Oltre il minuto {staminaMinutes} la tua precisione tende a calare. Breve riposo, poi di nuovo dentro.",
-            "Tendi a calare intorno al minuto {staminaMinutes}. Fai una pausa e torna fresco.",
-            "Muro di resistenza intorno al minuto {staminaMinutes}: un breve riposo ora salva la qualità dopo."
+            "La tua precisione tende a calare intorno al minuto {staminaMinutes}. Fai una pausa, poi torna.",
+            "I tuoi punteggi di solito calano intorno al minuto {staminaMinutes}: un breve stacco ora è un'opzione."
           ]
         },
         "ramp_complete": {
@@ -676,21 +676,21 @@
           "encouragement": [
             "I colpi scivolano allo stesso tempo. Bacchette giù un momento, poi torna.",
             "La qualità sta andando alla deriva: alzati dallo sgabello per 60 secondi.",
-            "Gli avambracci ti parlano? Breve pausa, poi di nuovo dentro.",
-            "Le bacchette ti sembrano pesanti? Posale, stirati, poi ritorna.",
-            "L'impugnatura si irrigidisce? Allontanati dalla batteria per un minuto.",
+            "I colpi vanno alla deriva mantenendo lo stesso tempo. Breve pausa, poi di nuovo dentro.",
+            "Vuoi una pausa? Posa le bacchette, poi ritorna.",
+            "Gli errori aumentano a questo tempo. Allontanati dalla batteria per un minuto.",
             "La precisione cala: una pausa veloce, poi continua.",
-            "Le mani lavorano più del dovuto. Breve riposo.",
-            "Posa le bacchette per un momento: lascia che le braccia si riazzerino."
+            "La precisione cala a un solo tempo. Breve stacco.",
+            "Bacchette giù per un momento, se vuoi, poi ricomincia."
           ],
           "correction": [
-            "Si vede la stanchezza: fermati ora, posa le bacchette, 90 secondi di pausa. Suonare stanchi fissa un timing sciatto.",
-            "Hai superato il picco: bacchette giù, fai un giro, poi rivaluta.",
+            "La precisione continua a calare a questo tempo. Fermati ora, bacchette giù, 90 secondi di pausa.",
+            "I punteggi sono sotto il tuo picco: bacchette giù, fai un giro, poi rivaluta.",
             "I colpi continuano a scivolare a questo tempo. 90 secondi di pausa, bevi, ritorna.",
             "Gli errori salgono a un solo tempo. Fermati, bacchette giù, due minuti di pausa.",
-            "Se spingi oltre questo punto ti farai male. Riposo vero, adesso.",
+            "Fermati se qualcosa fa male. In ogni caso, adesso una pausa vera.",
             "Smetti di suonare. Allontanati dalla batteria per un paio di minuti.",
-            "Bacchette giù. Prima gli avambracci, poi le mani, poi ritorna quando sei sciolto.",
+            "Bacchette giù. Due minuti di pausa, poi ritorna quando vuoi.",
             "Stop deciso. Due minuti di pausa e un sorso d'acqua prima di tornare."
           ]
         },
@@ -712,7 +712,7 @@
             "Più di cinque minuti dentro. Vuoi che segnali la cassa, il charleston o entrambi?",
             "Sei stato a fondo nel pocket. Dimmi cosa vuoi dopo.",
             "Buona serie alla batteria. Vuoi un riscontro più preciso su qualcosa?",
-            "Sei dentro da un po'. Vuoi che ascolti la cassa, il rullante o la sincronia degli arti?",
+            "Sei dentro da un po'. C'è qualcosa in particolare che vuoi che ascolti?",
             "Il pocket è stato stabile. Qual è il focus da qui?",
             "Lungo groove in corso: scegli un obiettivo e ci lavoro sopra.",
             "Più di cinque minuti. Dimmi dove vuoi il prossimo riscontro."
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Verso il minuto {staminaMinutes} le mani si irrigidiscono. Abbassa i BPM di 5 tacche e ricostruisci.",
-            "Oltre i {staminaMinutes} minuti gli arti iniziano ad andare alla deriva. Breve pausa, poi riprendi.",
+            "Verso il minuto {staminaMinutes} la tua precisione tende a calare. Abbassa i BPM di 5 tacche e ricostruisci.",
+            "Oltre i {staminaMinutes} minuti i tuoi colpi iniziano ad andare alla deriva. Breve pausa, poi riprendi.",
             "I tuoi punteggi alla batteria calano verso il minuto {staminaMinutes}. Un breve riposo, poi ritorna.",
-            "Tendi a perdere l'aggancio della cassa verso il minuto {staminaMinutes}. Fai una pausa per respirare."
+            "Il tuo timing alla batteria tende a scivolare verso il minuto {staminaMinutes}. Fai una breve pausa."
           ]
         },
         "bias_only": {
@@ -946,24 +946,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Il braccio del plettro si irrigidisce? Scuotilo, poi torna.",
+            "La precisione cala a un solo tempo. Breve pausa, poi torna.",
             "La precisione cala da qualche minuto. Una breve pausa, poi rientra.",
             "Gli errori salgono a questo tempo: metti giù la chitarra per 60 secondi.",
-            "Lungo tratto a un solo tempo. Respira, poi riprendi.",
-            "L'attacco del plettro sta diventando più duro del necessario. Breve riposo.",
-            "La presa sul manico si stringe? Allenta, poi suona.",
-            "L'avambraccio lavora troppo: scuotilo e continua.",
+            "Lungo tratto a un solo tempo. Pausa, poi riprendi.",
+            "Gli errori aumentano a questo tempo. Breve stacco.",
+            "Vuoi una breve pausa? Poi continua a suonare.",
+            "I punteggi calano a un solo tempo: breve pausa, poi continua.",
             "Una pausa di 30 secondi è un'opzione, poi torna."
           ],
           "correction": [
             "La precisione è calata allo stesso tempo: fermati, chitarra giù 90 secondi, poi ricontrolla.",
             "I punteggi sono sotto il tuo picco: chitarra giù per un minuto, poi rientra.",
-            "Fermati prima che i tendini comincino a lamentarsi. 90 secondi lontano dalle corde.",
+            "La precisione continua a calare a questo tempo. 90 secondi lontano dalle corde.",
             "Gli errori continuano a salire a questo tempo. Metti giù la chitarra, due minuti di pausa.",
             "Riposo vero: chitarra sul supporto, cammina un po'.",
-            "Il braccio del plettro per ora ha finito. 90 secondi come minimo, poi ricontrolla.",
-            "Fermati qui. Due minuti lontano dalla chitarra, poi torna fresco.",
-            "Se spingi oltre ti procurerai un infortunio. Stop netto."
+            "I punteggi continuano a calare. 90 secondi come minimo, poi ricontrolla.",
+            "Fermati qui. Due minuti lontano dalla chitarra, poi riprendila.",
+            "Stop netto, qui. Fermati in qualsiasi momento se qualcosa fa male."
           ]
         },
         "tempo_milestone": {
@@ -1001,9 +1001,9 @@
         "stamina": {
           "neutral": [
             "Oltre il minuto {staminaMinutes} il tuo timing a questo tempo tende a scivolare. Una breve pausa, poi riprendi.",
-            "Intorno al minuto {staminaMinutes} l'attacco del plettro comincia a scivolare. Breve pausa, poi rientra.",
-            "Muro di resistenza al minuto {staminaMinutes}: la mano destra si stringe. Riposa 30 secondi.",
-            "Tendi a perdere mordente nella plettrata intorno al minuto {staminaMinutes}. Breve riposo, poi torna."
+            "Intorno al minuto {staminaMinutes} il tuo timing comincia a scivolare. Breve pausa, poi rientra.",
+            "I tuoi punteggi calano al minuto {staminaMinutes}. Riposa 30 secondi, se vuoi.",
+            "Intorno al minuto {staminaMinutes} le note cominciano a cadere fuori dal click. Breve pausa, poi torna."
           ]
         },
         "bias_only": {
@@ -1218,24 +1218,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Il braccio dello strumming si irrigidisce? Scuotilo, poi torna.",
+            "Gli strumming vanno alla deriva a un solo tempo. Breve pausa, poi torna.",
             "La precisione cala a questo tempo. Una pausa veloce, poi rientra.",
             "Gli errori salgono nello strumming: chitarra giù per 60 secondi.",
-            "Strimpelli a un solo tempo da un po'. Respira, poi continua.",
-            "Lo strumming sta diventando più pesante del necessario. Breve riposo.",
-            "La presa sul manico si stringe? Allenta, poi suona.",
-            "L'avambraccio lavora troppo: scuotilo e continua.",
+            "Strimpelli a un solo tempo da un po'. Pausa, poi continua.",
+            "Gli errori aumentano a questo tempo. Breve stacco.",
+            "Vuoi una breve pausa? Poi continua a suonare.",
+            "I punteggi calano a un solo tempo: breve pausa, poi continua.",
             "Prenditi 30 secondi, se vuoi, poi torna."
           ],
           "correction": [
-            "La stanchezza si vede nello strumming: fermati, 90 secondi lontano dalle corde.",
+            "Gli strumming continuano a scivolare a questo tempo: fermati, 90 secondi lontano dalle corde.",
             "I punteggi sono sotto il tuo picco: metti giù la chitarra per un minuto, poi torna.",
-            "Strimpellare stanchi seppellisce le dinamiche. Fermati, riposa, ricomincia.",
-            "Il braccio dello strumming è sotto sforzo. Metti giù la chitarra, stira l'avambraccio, due minuti di pausa.",
+            "I punteggi continuano a calare a un solo tempo. Fermati, fai una pausa, ricomincia.",
+            "Gli errori continuano a salire a questo tempo. Metti giù la chitarra, due minuti di pausa.",
             "Riposo vero: chitarra sul supporto, cammina un po'.",
-            "La mano dello strumming ha finito. 90 secondi come minimo, poi ricontrolla.",
+            "La precisione continua a calare. 90 secondi come minimo, poi ricontrolla.",
             "Stop netto. Due minuti di pausa, poi continua quando sei pronto.",
-            "Se spingi oltre ti procurerai un infortunio. Fermati e recupera."
+            "Fermati qui per una pausa vera. Fermati prima se qualcosa fa male."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "La pressione della mano sui tasti sale intorno al minuto {staminaMinutes}. Riposa 30 secondi e riparti.",
-            "Intorno al minuto {staminaMinutes} il braccio dello strumming si irrigidisce. Breve pausa, poi rientra.",
+            "I tuoi punteggi calano intorno al minuto {staminaMinutes}. Riposa 30 secondi e riparti.",
+            "Intorno al minuto {staminaMinutes} gli strumming iniziano ad andare alla deriva. Breve pausa, poi rientra.",
             "Oltre il minuto {staminaMinutes} la tua precisione tende a calare. Breve riposo, poi riprendi.",
-            "La stanchezza si vede al minuto {staminaMinutes} sull'acustica. Prenditi una pausa."
+            "La precisione cala al minuto {staminaMinutes} sull'acustica. Fai una breve pausa."
           ]
         },
         "bias_only": {
@@ -1438,7 +1438,7 @@
             "La mano destra trascina. Suona con il clic, non aspettare che cada la cassa.",
             "Solleva prima il dito che pizzica: incontra il clic sul fronte della nota.",
             "Ogni nota cade in ritardo. Punta al bordo anteriore di ogni clic.",
-            "Spingi dall'avambraccio: il dito si fa pesante.",
+            "Le note arrivano in ritardo. Parti con ogni pizzico un attimo prima.",
             "Abbassa un po' il tempo e suona con più slancio. Il trascinamento passa.",
             "Immagina il clic un soffio prima di quando è, e raggiungilo.",
             "Fermati, respira, poi rientra spingendo leggermente in avanti."
@@ -1489,24 +1489,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Le dita che pizzicano si irrigidiscono? Un veloce stiramento e rientra.",
-            "L'avambraccio comincia a bloccarsi? Basso giù per 60 secondi.",
+            "Le note vanno alla deriva a un solo tempo. Breve pausa e rientra.",
+            "Gli errori aumentano a questo tempo. Basso giù per 60 secondi.",
             "Le note scivolano allo stesso tempo. Breve pausa, poi rientra.",
-            "La mano sui tasti si fa pesante? Prenditi un attimo, poi continua.",
-            "La mano destra si sente tesa? Scuotila, poi riprendi.",
-            "Lungo tratto a un solo tempo. Respira, poi continua.",
-            "L'avambraccio lavora troppo. Breve riposo.",
+            "Vuoi un momento? Prendilo, poi continua.",
+            "La precisione cala a un solo tempo. Breve pausa, poi riprendi.",
+            "Lungo tratto a un solo tempo. Breve pausa, poi continua.",
+            "I punteggi calano a questo tempo. Breve stacco.",
             "Prenditi 30 secondi, se vuoi, poi torna."
           ],
           "correction": [
-            "La stanchezza si vede nell'attacco: fermati, 90 secondi di pausa, poi ricontrolla.",
-            "Hai superato il picco: basso giù, stiramento, poi rientra.",
-            "Fermati ora. Pizzicare stanchi insegna alla mano un attacco trascurato.",
-            "La mano destra è sotto sforzo. Metti giù il basso, stira l'avambraccio, due minuti di pausa.",
+            "La precisione continua a calare a questo tempo: fermati, 90 secondi di pausa, poi ricontrolla.",
+            "I punteggi sono sotto il tuo picco: basso giù per un minuto, poi rientra.",
+            "Fermati ora. Gli errori continuano a salire mantenendo lo stesso tempo.",
+            "Gli errori continuano a salire a un solo tempo. Metti giù il basso, due minuti di pausa.",
             "Riposo vero: basso sul supporto, cammina un po'.",
-            "La mano che pizzica ha finito. 90 secondi come minimo, poi ricontrolla.",
+            "La precisione continua a calare. 90 secondi come minimo, poi ricontrolla.",
             "Stop netto. Due minuti lontano dal basso prima di continuare.",
-            "Se spingi oltre ti procurerai un infortunio. Fermati e recupera."
+            "Fai subito una pausa vera, e fermati se qualcosa fa male."
           ]
         },
         "tempo_milestone": {
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Muro di resistenza al minuto {staminaMinutes}: il groove si allenta. Breve pausa, poi rientra.",
-            "Intorno al minuto {staminaMinutes} la mano che pizzica comincia ad affaticarsi. Riposa e torna.",
+            "Il tuo groove comincia a scivolare al minuto {staminaMinutes}. Breve pausa, poi rientra.",
+            "Intorno al minuto {staminaMinutes} la tua precisione comincia a calare. Fermati e torna.",
             "Oltre il minuto {staminaMinutes} l'aggancio del basso comincia a scivolare. Breve riposo, poi riprendi.",
-            "Tendi a calare intorno al minuto {staminaMinutes}. Prenditi 30 secondi e torna pulito."
+            "I tuoi punteggi tendono a calare intorno al minuto {staminaMinutes}. Prenditi 30 secondi e torna pulito."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Abbassa il tempo e suona con più slancio. Il trascinamento passa quando diventa facile.",
             "Immagina il clic appena più in anticipo di com'è, e raggiungilo.",
             "Fermati, respira, poi rientra spingendo leggermente in avanti.",
-            "Le dita si fanno pesanti. Alleggerisci il tocco e lasciale fluttuare."
+            "Le note cadono dietro al click. Alleggerisci il tocco e anticipa un po'."
           ]
         },
         "personal_best_streak": {
@@ -1760,24 +1760,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "La precisione cala a questo tempo. Solleva le mani, respira, poi torna dentro.",
-            "Gli avambracci si bloccano? Fermati, abbassa le mani, respira.",
+            "La precisione cala a questo tempo. Breve pausa, poi torna dentro.",
+            "Vuoi una breve pausa? Allontanati un momento dai tasti.",
             "Gli errori salgono a questo tempo: 60 secondi lontano dai tasti.",
-            "Le dita si fanno pesanti? Uno stiramento veloce, poi riprendi.",
-            "Le mani lavorano più del dovuto. Breve riposo.",
-            "Sei ai tasti da un po'. Respira, poi suona.",
+            "Le note vanno alla deriva a un solo tempo. Breve pausa, poi riprendi.",
+            "Gli errori aumentano a questo tempo. Breve stacco.",
+            "Sei ai tasti da un po'. Breve pausa, poi suona.",
             "Una pausa di 30 secondi è un'opzione, poi riprendi.",
-            "La precisione cala a un solo tempo. Fermati, mani in grembo, respira."
+            "La precisione cala a un solo tempo. Fermati un momento, poi continua a suonare."
           ],
           "correction": [
-            "La stanchezza si vede nel tocco: fermati, mani giù per 90 secondi.",
-            "Hai superato il picco: alzati dallo sgabello, scuoti tutto, poi ritorna.",
+            "La precisione continua a calare a questo tempo: fermati, 90 secondi lontano dai tasti.",
+            "I punteggi sono sotto il tuo picco: alzati dallo sgabello per un minuto, poi ritorna.",
             "I punteggi continuano a calare a questo tempo. Fermati, riposa, riparti.",
-            "Gli errori continuano a salire a un solo tempo. Mani fuori dai tasti, due minuti di pausa.",
-            "Riposo vero: alzati, cammina un po', ritorna fresco.",
-            "Le mani per ora hanno finito. 90 secondi come minimo, poi ricontrolla.",
+            "Gli errori continuano a salire a un solo tempo. Due minuti lontano dai tasti.",
+            "Pausa vera: alzati, cammina un po', poi ritorna.",
+            "La precisione continua a calare. 90 secondi come minimo, poi ricontrolla.",
             "Stop deciso. Due minuti lontano dai tasti prima di continuare.",
-            "Se spingi oltre questo punto ti procuri un infortunio. Fermati e recupera."
+            "Fai subito una pausa vera, e fermati se qualcosa fa male."
           ]
         },
         "tempo_milestone": {
@@ -1795,10 +1795,10 @@
         "check_in": {
           "neutral": [
             "Lungo tratto ai tasti: un brano, un esercizio, qualcosa di specifico?",
-            "Più di cinque minuti dentro. Vuoi che segnali la mano sinistra, la destra o entrambe?",
+            "Più di cinque minuti dentro. C'è un punto del brano su cui vuoi un riscontro?",
             "Sei stato concentrato. Dimmi su cosa vuoi un riscontro.",
             "Buona serie in corso. Vuoi un riscontro più preciso su un passaggio?",
-            "Sei dentro da un po'. Mano sinistra? Mano destra? Voicing? Dimmi dove ascoltare.",
+            "Sei dentro da un po'. Un passaggio? Un tempo? Dimmi dove ascoltare.",
             "Il pocket è stato stabile. Scegli un obiettivo se vuoi un riscontro più da vicino.",
             "Lungo tratto ai tasti. C'è qualcosa che vuoi che segnali?",
             "Sei stato dentro a fondo. Dimmi cosa ascoltare dopo."
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "I tuoi punteggi a questo tempo calano verso il minuto {staminaMinutes}. Respira, ritorna pulito.",
+            "I tuoi punteggi a questo tempo calano verso il minuto {staminaMinutes}. Fermati, ritorna pulito.",
             "Verso il minuto {staminaMinutes} iniziano ad arrivare gli errori. Breve riposo, poi riprendi.",
-            "Oltre i {staminaMinutes} minuti il tocco si fa più pesante. Breve pausa, poi di nuovo ai tasti.",
-            "La stanchezza nelle mani si vede verso il minuto {staminaMinutes}. Riposa, poi ritorna."
+            "Oltre i {staminaMinutes} minuti il tuo timing diventa meno regolare. Breve pausa, poi di nuovo ai tasti.",
+            "I tuoi punteggi calano verso il minuto {staminaMinutes}. Riposa, poi ritorna."
           ]
         },
         "bias_only": {
