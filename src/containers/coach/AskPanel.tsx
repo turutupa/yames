@@ -7,7 +7,8 @@ import { useCoachModel } from "../../hooks/useCoachModel";
 import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
-import { consumeAskFocus, noteAskScreen, sendAsk, useAskState, type AskTurn } from "./askStore";
+import { consumeAskFocus, noteAskScreen, useAskState, type AskTurn } from "./askStore";
+import { answerTyped } from "./askTyped";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
 import { askCardChips, askUngradedHere, withinChipCap } from "./askCards";
@@ -162,7 +163,7 @@ function AskConversation({
   /** Where the panel is looking: the chips are chosen again when it moves. */
   lookingKey: string | null;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const model = useCoachModel().state;
   const [draft, setDraft] = useState("");
   const threadRef = useRef<HTMLDivElement>(null);
@@ -203,7 +204,8 @@ function AskConversation({
   const send = (e?: FormEvent) => {
     e?.preventDefault();
     if (!draft.trim()) return;
-    sendAsk(draft);
+    // A typed command first, then the next answerer, then the model or the plain statement (leg t1b2b).
+    answerTyped(draft, i18n.language);
     setDraft("");
   };
 
@@ -250,11 +252,21 @@ function AskConversation({
           onFocus={() => onTyping(true)}
           onBlur={() => onTyping(false)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) send(e);
+            // WebKit's Enter that commits an IME composition comes after compositionend, as keyCode 229 (review t1b2b, finding 3).
+            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.nativeEvent.keyCode !== 229) send(e);
           }}
           data-testid="ask-input"
         />
-        <button type="submit" className="ask-send" disabled={!draft.trim()} aria-label={t("ask.send")} data-testid="ask-send">
+        <button
+          type="submit"
+          className="ask-send"
+          disabled={!draft.trim()}
+          aria-label={t("ask.send")}
+          data-testid="ask-send"
+          // The box keeps the focus: a blur on the press brought the sheet's footer back
+          // (`data-typing`), which moved this button from under the pointer before the click (leg t1b2b).
+          onMouseDown={(e) => e.preventDefault()}
+        >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />
