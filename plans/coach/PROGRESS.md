@@ -155,7 +155,8 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 | c6a Settings → Coach in five groups, the wizard (+ c6ab) | merged | `coach-c6a` | 2026-11-21 | Review `c6a-review.md` (H1: an unreadable left-out entry blanked the app). c6b (docs) is last. |
 | c2cb the help set and the answer order (+ c2cc) | merged | `coach-c2cb` | 2026-11-21 | Review `c2cb-review.md` (the tuning refusal; help stealing "this step"). **Delivery 2.** |
 | c3da the router's misses, analysed | merged (a note) | `coach-c3da` | 2026-11-21 | `progress/c3da.md`: sections 3 and 5 are for the leg that renders training data; 1c lists fifteen rules defects (leg rules1). |
-| t2e, t2g, pol2, rtx2, rules1 (session 6) | **running or on branches** | `coach-<leg>` | 2026-11-21 | See `HANDOFF-S6.md`. |
+| t2g, pol2, t2e (+ t2eb), rtx2 (session 6) | merged | `coach-<leg>` | 2026-11-21 | Delivery 2a. Reviews `pol2-review.md` (M1, L1 to L3 are pol3's first items), `t2e-review.md`, `t2eb-review.md`: MERGE. `progress/rtx2.md`: the router on Vulkan equals CUDA answer for answer. |
+| rules1 (+ rules1b) the typed rules' defects | **on a branch, not merged** | `coach-rules1` | 2026-11-21 | Two re-reads, each MERGE AFTER FIXES (`rules1-review.md`, `rules1b-review.md`: musical-note lines refused as grades). rules1c, then a third reader: `HANDOFF-S6.md`. |
 
 **`smooth.spec.ts` on a quiet machine (session 4, 20:10 PT, load 7 falling, nothing else running, in
 `~/yames-coach-night` at `coach` + t2a): 17 passed in 45 s.** The gate owed since delivery 1j is paid.
