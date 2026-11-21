@@ -194,6 +194,9 @@ const COMMANDS: ReadonlyArray<[string, keyof typeof facts, string, ToolArgs]> = 
   ["go home", "paths", "go_to", { screen: "today" }],
   ["paths", "today", "go_to", { screen: "paths" }],
   ["please open progress", "paths", "go_to", { screen: "progress" }],
+  // "show" and a screen's own name, nothing else (pol2 item 15).
+  ["show me my progress", "today", "go_to", { screen: "progress" }],
+  ["show me the metronome", "paths", "go_to", { screen: "beat" }],
   ["settings", "today", "go_to", { screen: "settings" }],
   ["open the settings", "today", "go_to", { screen: "settings" }],
   ["open practice settings", "today", "open_settings", { section: "practice" }],
@@ -273,6 +276,15 @@ describe("commands", () => {
     for (const text of ["slower now and then", "loop bar 3 and 9", "show a minor pentatonic in the shed", "set the tempo to fast", "swap part 2 for a sandwich", "explain the plan"]) {
       expect(route(text, facts.beat).kind, text).toBe("none");
     }
+  });
+
+  it("'show' and a screen's own name is going there, in another language too (pol2 item 15)", () => {
+    const es = commandTableFor("es")!;
+    const de = commandTableFor("de")!;
+    expectCall(routeCommand("muéstrame mi progreso", es, facts.today), "go_to", { screen: "progress" });
+    expectCall(routeCommand("zeig mir meinen fortschritt", de, facts.today), "go_to", { screen: "progress" });
+    // Something after the screen's name is not that.
+    expect(route("show me my progress on the blues", facts.today).kind).toBe("none");
   });
 });
 
