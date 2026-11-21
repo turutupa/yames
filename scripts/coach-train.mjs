@@ -2,7 +2,7 @@
 // The router's training data (leg c3d1, TOOLS 3.4; plans/tasks/coach/c3d-small-router.md).
 //
 //   node scripts/coach-train.mjs generate [--out DIR] [--size N] [--seed S] [--lang L,...]
-//   node scripts/coach-train.mjs render   --in FILE --out FILE [--check]
+//   node scripts/coach-train.mjs render   --in FILE --out FILE [--check] [--with-grammar]
 //   node scripts/coach-train.mjs sample   --lang L --n 50 --out FILE [--seed S]
 //
 // `generate` writes DIR/train.jsonl, DIR/validation.jsonl and DIR/stats.json
@@ -218,7 +218,9 @@ async function cmdRender(ev, opt) {
         console.log(`${r.id}: ${okGrammar ? "" : "grammar "}${okCall ? "" : "checkCall "}${out.answer}`);
       }
     }
-    rows.push({ id: out.id, prompt: out.prompt, completion: out.completion });
+    // --with-grammar (leg c3d2): the record's grammar and bare answer ride along, so the
+    // validation pass can send the same turn to the eval binary under the same grammar.
+    rows.push(opt["with-grammar"] ? { id: out.id, prompt: out.prompt, completion: out.completion, grammar: out.grammar, answer: out.answer } : { id: out.id, prompt: out.prompt, completion: out.completion });
   }
   writeJsonl(opt.out, rows);
   console.log(`rendered ${rows.length}${opt.check ? `, ${bad} failing the grammar or checkCall` : ""}`);
