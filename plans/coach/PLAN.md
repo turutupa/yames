@@ -86,7 +86,12 @@ file names which hunks it owns, and the second branch to merge rebases.
 
 ## Not in this plan (recorded so nobody builds them by accident)
 
-- Fine-tuning (T4, T5): decided from c3b's numbers, by the owner.
+- ~~Fine-tuning (T4, T5): decided from c3b's numbers, by the owner.~~ **Approved by the owner on
+  2026-11-20 18:35** as leg **c3d**, after c3b: if stock Qwen3 4B / 8B fall short on tool choice or
+  latency, build and train the small router for speed (a LoRA of the 4B on our tool set is also
+  allowed if the numbers say it helps); training runs as queue jobs (`--gpu`, `--est`); the trained
+  router is measured against the stock models on a held-out set before anything ships behind the
+  selector.
 - Cloud in the selector: a hidden entry point only; no hosted model, on a phone or anywhere.
 - "Check your tuning": the sentence is not written until the app has a tuner (owner decision 9).
 - Notifications other than the one opt-in reminder.
