@@ -166,7 +166,7 @@ export const OTHER_STRINGS: StepSpec = {
       howTo: [
         "Count '1, (2), 3 and, 4', then '1 and, 2, (3), 4'. Say the rests as loudly as the notes.",
         "Bar 1: E at fret 2 on the D string, a rest, the open D string twice, the open G string. Bar 2: A at fret 2 on the G string, the open G string, E, a rest, the open D string.",
-        "Both rests come straight after the E, a fretted note. Relax the fretting finger without lifting it off the string, and lay the side of the picking hand on the strings to stop any open string that is still ringing.",
+        "Both rests come straight after a fretted note. Relax the fretting finger without lifting it off the string, and lay the side of the picking hand on the strings to stop any open string that is still ringing.",
         VARIANT_NOTE,
       ],
       coach: "The notes are timed and checked after the take. A note played in a rest counts as an extra note; a string left ringing is for your ear.",

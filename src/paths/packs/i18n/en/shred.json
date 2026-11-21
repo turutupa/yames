@@ -681,6 +681,8 @@
     "exercise.tapping-etude.tap-triplets.selfCheck.0": "Was the pulled-off note as loud as the tapped one?",
     "exercise.tapping-etude.tap-triplets.variant.stringSet=B:-17-10-13.purpose": "The tapping cell on A minor's notes: tap the high note, pull off to the low fretted note, hammer the middle one.",
     "exercise.tapping-etude.tap-triplets.variant.stringSet=B:-17-10-13.howTo.0": "Eighth-note triplets, three to the click.",
+    "exercise.tapping-etude.tap-triplets.variant.stringSet=G:-14-5-9.purpose": "The tapping cell on A minor's notes: tap the high note, pull off to the low fretted note, hammer the middle one.",
+    "exercise.tapping-etude.tap-triplets.variant.stringSet=G:-14-5-9.howTo.0": "Eighth-note triplets, three to the click.",
     "exercise.tapping-etude.tap-changes.title": "Tap, pull, hammer over Am, F and G",
     "exercise.tapping-etude.tap-changes.purpose": "The same cell with the tap moving to each chord over a band: E for Am, F for F, G for G. The fretting hand moves only for the G.",
     "exercise.tapping-etude.tap-changes.howTo.0": "Eighth-note triplets, one chord a bar. Am: tap 12, pull to 5, hammer 8. F: tap 13, pull to 5, hammer 8. G: tap 15, pull to 7, hammer 10, twice. Then round again.",
