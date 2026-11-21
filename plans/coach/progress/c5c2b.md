@@ -84,6 +84,15 @@ contradict themselves; the segment is under 10 s; a number is under 3 ms.
 - `session_log.rs`: `from_segment_end`.
 - `tests/highbpm_fixtures.rs`: `bar_beat` in its literal.
 
-## Gates
+## Gates (job logs under ~/scratch/jobq/)
 
-See the final report.
+- test:rust: 1252 passed, 0 failed (#513; `/tmp/coach-c5c2b/rust.log`).
+- test:dsp: passed (#530).
+- tsc: passed (#555).
+- vitest: 49111 passed; the only failure is the known TabStage.render.test.tsx (#529). Run #524
+  failed `findingsWire.test.ts`, the Evidence parity check, until `freePlay` was added to Songs'
+  type.
+- build: passed (#536).
+- layout `tool-coach.spec.ts`: 57 passed (#554). Run #537 failed the two finding scenes because the
+  shot mock sent `endMs` 30000, which the L3 filter rejects; the mock now sends wall-clock ms.
+- Owed: the full layout suite, and an audio-reviewer read of the `engine.rs` hunk.
