@@ -64,6 +64,19 @@ describe("choiceGrammar", () => {
     expect(full.includes('"\\"card\\""')).toBe(EVAL_CARDS.length > 0);
     const withCards = choiceGrammar(catalogue, [{ id: "best_tempo", note: "x" }]);
     expect(withCards).toContain('"\\"best_tempo\\""');
+    // A card with no declared arguments keeps the generic bounded argument.
+    expect(withCards).toContain("card-arg ::=");
+  });
+
+  it("types each card's own arguments as a tool's are (c3b1b)", () => {
+    expect(EVAL_CARDS.map((c) => c.id)).toEqual(expect.arrayContaining(["where_slipped", "early_or_late", "why_not_counted", "improving"]));
+    // Every card on `coach` declares its arguments: no free-form card argument in the shipped grammar.
+    expect(full).not.toContain("card-arg ::=");
+    expect(full).toMatch(/c-early-or-late ::= .*"\\"premise\\"".*v-card-early-or-late-premise/);
+    expect(full).toContain('v-card-early-or-late-premise ::= ( "\\"early\\"" | "\\"late\\"" )');
+    expect(full).toMatch(/v-card-why-not-counted-what ::= \( "\\"take\\"" \| "\\"pitch\\""/);
+    // A card with no arguments takes only an empty object.
+    expect(full).toContain('c-improving ::= "\\"card\\"" ws ":" ws "\\"improving\\"" ( "," ws "\\"args\\"" ws ":" ws "{" ws "}" )?');
   });
 
   it("escapes a literal the way GBNF reads it", () => {

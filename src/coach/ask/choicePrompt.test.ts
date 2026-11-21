@@ -26,12 +26,25 @@ describe("choicePrefix", () => {
     expect(estimateTokens(prefix)).toBeLessThanOrEqual(CHOICE_PREFIX_TOKENS);
   });
 
-  it("still fits with a card list as long as the cards' (about 40 one-liners)", () => {
+  it("lists each card with its arguments and its note to the first stop (c3b1b)", () => {
+    const prefix = choicePrefix(catalogue(), EVAL_CARDS);
+    expect(prefix).toContain("\nearly_or_late(premise?=early|late): ");
+    expect(prefix).toContain("\nimproving(): ");
+    expect(prefix).toMatch(/\nwhy_not_counted\(what\?=take\|pitch\|.*\|feel\): /);
+    // The `take` every last-Take card carries has one value: not shown.
+    expect(prefix).not.toContain("take?=last");
+    const names = choicePrefix(catalogue(), EVAL_CARDS, { notes: false });
+    expect(names).toContain("\nearly_or_late(premise?=early|late)\n");
+  });
+
+  it("with the real cards, and with a card list as long as 40 one-liners", () => {
+    const real = estimateTokens(choicePrefix(catalogue(), EVAL_CARDS));
     const cards = Array.from({ length: 40 }, (_, i) => ({ id: `card_${i}`, note: "What the player's best clean tempo is here." }));
     const prefix = choicePrefix(catalogue(), cards);
     expect(prefix).toContain("card_39: ");
-    // Reported, not gated: c3b1b decides how cards are described once they exist.
-    expect(estimateTokens(prefix)).toBeGreaterThan(0);
+    // The real cards are gated (above); forty is reported for c2b2a's cards, which will add to them.
+    console.info(`choice prefix: ${real} tokens with the ${EVAL_CARDS.length} cards; ${estimateTokens(prefix)} with 40 one-line cards`);
+    expect(real).toBeLessThanOrEqual(CHOICE_PREFIX_TOKENS);
   });
 });
 
