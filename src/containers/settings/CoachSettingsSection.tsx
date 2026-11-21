@@ -18,10 +18,8 @@ import type { CoachStance } from "../../coach/learningMode";
 import { formatBytes } from "./formatBytes";
 import { coachStatusLabel, coachTierLabel, withLoaderState } from "./coachStatus";
 import { useCoachModel } from "../../hooks/useCoachModel";
-import { CoachSuggestionsRow } from "./CoachSuggestionsRow";
-import { CoachReminderRow } from "./CoachReminderRow";
 import { CoachGroup } from "./CoachGroup";
-import { CoachAnswersLine, CoachSectionHead } from "./CoachSettingsGroups";
+import { CoachAnswersLine, CoachSectionHead, CoachSuggestionsGroup } from "./CoachSettingsGroups";
 
 // Short per-voice sample line played when the user clicks a voice
 // button. Each line is distinct on purpose so the user can hear timbre
@@ -556,81 +554,7 @@ export function CoachSettingsSection({
         </div>
       )}
       </CoachGroup>
-      <div className="setting-row">
-        <div className="setting-label">
-          {/* SET-2: Sessions grade one way, whatever this says (grade.ts
-              reads neither), so the row says which side it is for. */}
-          <span className="setting-label-line">
-            <label>{t("settings.coach.scoringMode")}</label>
-            <span className="setting-scope-tag" title={t("settings.coach.toolsOnlyHint")}>
-              {t("settings.coach.toolsOnly")}
-            </span>
-          </span>
-          <span className="setting-hint">{t("settings.coach.scoringModeHint")}</span>
-          <span className="setting-hint" style={{ marginTop: 4 }}>
-            {coachMode === "pro"
-              ? t("settings.coach.scoringProDesc")
-              : t("settings.coach.scoringDefaultDesc")}
-          </span>
-        </div>
-        <div className="toggle-group">
-          {(["default", "pro"] as const).map((mode) => (
-            <button
-              key={mode}
-              className={`toggle-btn ${coachMode === mode ? "active" : ""}`}
-              onClick={() => {
-                setCoachMode(mode);
-                storeSave("coachMode", mode);
-              }}
-            >
-              {mode === "default" ? t("settings.coach.scoringDefault") : t("settings.coach.scoringPro")}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* ROADMAP 1.5. Sits under Scoring Mode on purpose: the two are
-          easy to confuse and the pairing is the clearest way to show
-          they are different questions. Scoring Mode decides how the
-          number is worked out; this decides how the coach talks about
-          it, and its hint says outright that the score does not move. */}
-      <div className="setting-row">
-        <div className="setting-label">
-          {/* SET-2: Sessions grade one way, whatever this says (grade.ts
-              reads neither), so the row says which side it is for. */}
-          <span className="setting-label-line">
-            <label>{t("settings.coach.stance")}</label>
-            <span className="setting-scope-tag" title={t("settings.coach.toolsOnlyHint")}>
-              {t("settings.coach.toolsOnly")}
-            </span>
-          </span>
-          <span className="setting-hint">{t("settings.coach.stanceHint")}</span>
-          <span className="setting-hint" style={{ marginTop: 4 }}>
-            {coachStance === "learning"
-              ? t("settings.coach.stanceLearningDesc")
-              : t("settings.coach.stanceStrictDesc")}
-          </span>
-        </div>
-        <div className="toggle-group">
-          {(["strict", "learning"] as const).map((stance) => (
-            <button
-              key={stance}
-              className={`toggle-btn ${coachStance === stance ? "active" : ""}`}
-              onClick={() => {
-                setCoachStance(stance);
-                storeSave("coachStance", stance);
-              }}
-            >
-              {stance === "strict"
-                ? t("settings.coach.stanceStrict")
-                : t("settings.coach.stanceLearning")}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* Suggestions: On / Only when I ask (DESIGN 6.6; leg c4a2). c6 regroups. */}
-      <CoachSuggestionsRow />
-      {/* Practice reminder: in the app only, Today mentions it (leg rem2). */}
-      <CoachReminderRow />
+      <CoachGroup id="voice">
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.coach.voice")}</label>
@@ -653,96 +577,6 @@ export function CoachSettingsSection({
               }}
             >
               {t(`settings.coach.voiceModes.${mode}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* The jam's spoken cues (plans/JAM_UX_DECISIONS.md A4).
-          It used to be a switch on every jam's setup screen, which made a
-          preference into a property of a tune: a player who wanted to be told
-          "your four" had to say so once per jam they owned. It is one switch
-          now, here with the other things that speak, and it is silent without
-          a voice installed for exactly the same reason the rest of this
-          section is. */}
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("jam.cues.label")}</label>
-          <span className="setting-hint">
-            {modelStatus?.voiceReady ? t("jam.cues.hint") : t("settings.coach.cuesNoVoice")}
-          </span>
-        </div>
-        <div className="toggle-group">
-          {([false, true] as const).map((on) => (
-            <button
-              key={String(on)}
-              className={`toggle-btn ${jamCues === on ? "active" : ""}`}
-              disabled={!modelStatus?.voiceReady}
-              onClick={() => {
-                setJamCues(on);
-                storeSave("jamCues", on);
-              }}
-            >
-              {t(on ? "common.on" : "common.off")}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* Hear what I play (detection M7). Off unless turned on: it runs the
-          note model beside the band, and what it names is an estimate that
-          says "couldn't tell" when the evidence is weak. Nothing to do with
-          the voice, so it is not disabled without one. */}
-      {setJamHear && (
-        <div className="setting-row">
-          <div className="setting-label">
-            <label>{t("jam.hear.label")}</label>
-            <span className="setting-hint">{t("jam.hear.hint")}</span>
-          </div>
-          <div className="toggle-group">
-            {([false, true] as const).map((on) => (
-              <button
-                key={String(on)}
-                className={`toggle-btn ${jamHear === on ? "active" : ""}`}
-                data-testid={`jam-hear-${on ? "on" : "off"}`}
-                onClick={() => {
-                  setJamHear(on);
-                  storeSave("jamHear", on);
-                }}
-              >
-                {t(on ? "common.on" : "common.off")}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-      {/* C5 verbosity — controls how often spoken events fire. "Default"
-          honours the gatekeeper's tier decision verbatim. "More" promotes
-          written-tier events to spoken so the coach is more talkative
-          mid-session. The setting is silent when Voice is off (TTS is
-          gated by `voiceMode` regardless). */}
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.coach.verbosity")}</label>
-          <span className="setting-hint">{t("settings.coach.verbosityHint")}</span>
-        </div>
-        <div className="toggle-group">
-          {(["less", "default", "more"] as const).map((mode) => (
-            <button
-              key={mode}
-              className={`toggle-btn ${coachVerbosity === mode ? "active" : ""}`}
-              data-tooltip={
-                mode === "less"
-                  ? t("settings.coach.verbosityLessHint")
-                  : mode === "default"
-                    ? t("settings.coach.verbosityDefaultHint")
-                    : t("settings.coach.verbosityMoreHint")
-              }
-              disabled={coachBrainTier === "off" || coachVoiceMode !== "voice"}
-              onClick={() => {
-                setCoachVerbosity(mode);
-                storeSave("coachVerbosity", mode);
-              }}
-            >
-              {t(`settings.coach.verbosityModes.${mode}`)}
             </button>
           ))}
         </div>
@@ -922,6 +756,172 @@ export function CoachSettingsSection({
             </button>
           </div>
         )}
+      {/* The jam's spoken cues (plans/JAM_UX_DECISIONS.md A4).
+          It used to be a switch on every jam's setup screen, which made a
+          preference into a property of a tune: a player who wanted to be told
+          "your four" had to say so once per jam they owned. It is one switch
+          now, here with the other things that speak, and it is silent without
+          a voice installed for exactly the same reason the rest of this
+          section is. */}
+      <div className="setting-row">
+        <div className="setting-label">
+          <label>{t("jam.cues.label")}</label>
+          <span className="setting-hint">
+            {modelStatus?.voiceReady ? t("jam.cues.hint") : t("settings.coach.cuesNoVoice")}
+          </span>
+        </div>
+        <div className="toggle-group">
+          {([false, true] as const).map((on) => (
+            <button
+              key={String(on)}
+              className={`toggle-btn ${jamCues === on ? "active" : ""}`}
+              disabled={!modelStatus?.voiceReady}
+              onClick={() => {
+                setJamCues(on);
+                storeSave("jamCues", on);
+              }}
+            >
+              {t(on ? "common.on" : "common.off")}
+            </button>
+          ))}
+        </div>
+      </div>
+      </CoachGroup>
+      {/* Suggestions: On / Only when I ask (c4a2), then the practice reminder (rem2). */}
+      <CoachSuggestionsGroup />
+      <CoachGroup id="tools">
+      <div className="setting-row">
+        <div className="setting-label">
+          {/* SET-2: Sessions grade one way, whatever this says (grade.ts
+              reads neither), so the row says which side it is for. */}
+          <span className="setting-label-line">
+            <label>{t("settings.coach.scoringMode")}</label>
+            <span className="setting-scope-tag" title={t("settings.coach.toolsOnlyHint")}>
+              {t("settings.coach.toolsOnly")}
+            </span>
+          </span>
+          <span className="setting-hint">{t("settings.coach.scoringModeHint")}</span>
+          <span className="setting-hint" style={{ marginTop: 4 }}>
+            {coachMode === "pro"
+              ? t("settings.coach.scoringProDesc")
+              : t("settings.coach.scoringDefaultDesc")}
+          </span>
+        </div>
+        <div className="toggle-group">
+          {(["default", "pro"] as const).map((mode) => (
+            <button
+              key={mode}
+              className={`toggle-btn ${coachMode === mode ? "active" : ""}`}
+              onClick={() => {
+                setCoachMode(mode);
+                storeSave("coachMode", mode);
+              }}
+            >
+              {mode === "default" ? t("settings.coach.scoringDefault") : t("settings.coach.scoringPro")}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* ROADMAP 1.5. Sits under Scoring Mode on purpose: the two are
+          easy to confuse and the pairing is the clearest way to show
+          they are different questions. Scoring Mode decides how the
+          number is worked out; this decides how the coach talks about
+          it, and its hint says outright that the score does not move. */}
+      <div className="setting-row">
+        <div className="setting-label">
+          {/* SET-2: Sessions grade one way, whatever this says (grade.ts
+              reads neither), so the row says which side it is for. */}
+          <span className="setting-label-line">
+            <label>{t("settings.coach.stance")}</label>
+            <span className="setting-scope-tag" title={t("settings.coach.toolsOnlyHint")}>
+              {t("settings.coach.toolsOnly")}
+            </span>
+          </span>
+          <span className="setting-hint">{t("settings.coach.stanceHint")}</span>
+          <span className="setting-hint" style={{ marginTop: 4 }}>
+            {coachStance === "learning"
+              ? t("settings.coach.stanceLearningDesc")
+              : t("settings.coach.stanceStrictDesc")}
+          </span>
+        </div>
+        <div className="toggle-group">
+          {(["strict", "learning"] as const).map((stance) => (
+            <button
+              key={stance}
+              className={`toggle-btn ${coachStance === stance ? "active" : ""}`}
+              onClick={() => {
+                setCoachStance(stance);
+                storeSave("coachStance", stance);
+              }}
+            >
+              {stance === "strict"
+                ? t("settings.coach.stanceStrict")
+                : t("settings.coach.stanceLearning")}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* C5 verbosity — controls how often spoken events fire. "Default"
+          honours the gatekeeper's tier decision verbatim. "More" promotes
+          written-tier events to spoken so the coach is more talkative
+          mid-session. The setting is silent when Voice is off (TTS is
+          gated by `voiceMode` regardless). */}
+      <div className="setting-row">
+        <div className="setting-label">
+          <label>{t("settings.coach.verbosity")}</label>
+          <span className="setting-hint">{t("settings.coach.verbosityHint")}</span>
+        </div>
+        <div className="toggle-group">
+          {(["less", "default", "more"] as const).map((mode) => (
+            <button
+              key={mode}
+              className={`toggle-btn ${coachVerbosity === mode ? "active" : ""}`}
+              data-tooltip={
+                mode === "less"
+                  ? t("settings.coach.verbosityLessHint")
+                  : mode === "default"
+                    ? t("settings.coach.verbosityDefaultHint")
+                    : t("settings.coach.verbosityMoreHint")
+              }
+              disabled={coachBrainTier === "off" || coachVoiceMode !== "voice"}
+              onClick={() => {
+                setCoachVerbosity(mode);
+                storeSave("coachVerbosity", mode);
+              }}
+            >
+              {t(`settings.coach.verbosityModes.${mode}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Hear what I play (detection M7). Off unless turned on: it runs the
+          note model beside the band, and what it names is an estimate that
+          says "couldn't tell" when the evidence is weak. Nothing to do with
+          the voice, so it is not disabled without one. */}
+      {setJamHear && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("jam.hear.label")}</label>
+            <span className="setting-hint">{t("jam.hear.hint")}</span>
+          </div>
+          <div className="toggle-group">
+            {([false, true] as const).map((on) => (
+              <button
+                key={String(on)}
+                className={`toggle-btn ${jamHear === on ? "active" : ""}`}
+                data-testid={`jam-hear-${on ? "on" : "off"}`}
+                onClick={() => {
+                  setJamHear(on);
+                  storeSave("jamHear", on);
+                }}
+              >
+                {t(on ? "common.on" : "common.off")}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      </CoachGroup>
     </section>
   );
 }
