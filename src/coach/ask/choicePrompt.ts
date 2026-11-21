@@ -188,14 +188,12 @@ export function choicePrefix(
  * The cards' lines within `CHOICE_CARDS_TOKENS`, as the budget's note says:
  * each with its note to the first stop while they fit, else each with the
  * first three words of it (leg c2b2ab: twenty cards with the Path's, the
- * plan's, theory's and the terms' did not fit whole), else by signature.
+ * plan's, theory's and the terms' did not fit whole).
  */
 function cardLines(cards: readonly EvalCard[], notes: boolean): string[] {
   const full = cards.map((card) => cardLine(card, notes));
   if (!notes || estimateTokens(full.join("\n")) <= CHOICE_CARDS_TOKENS) return full;
-  const short = cards.map((card) => cardLine(card, notes, 3));
-  if (estimateTokens(short.join("\n")) <= CHOICE_CARDS_TOKENS) return short;
-  return cards.map((card) => cardLine(card, false));
+  return cards.map((card) => cardLine(card, notes, 3));
 }
 
 /**
