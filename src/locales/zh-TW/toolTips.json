@@ -561,272 +561,272 @@
       "drums": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking the kick from your first hit.",
-            "Settle in and start whenever — I'll catch the timing from the first stroke.",
-            "Take your time warming up the hands. I'll start listening when you play.",
-            "Good to have you. Start when the sticks feel ready.",
-            "Whenever you're set — hit the kit and I'll start picking up your timing.",
-            "No rush. Get loose, then play when you're ready.",
-            "Ready when you are. I'll track from the first beat.",
-            "Set up whenever — I'm listening from your first stroke."
+            "準備好就開始，我會從你的第一下擊打開始追蹤大鼓。",
+            "坐定後隨時開始，我會從第一下擊打抓你的節奏。",
+            "慢慢暖手，你一開始演奏，我就開始聆聽。",
+            "很高興見到你。鼓棒覺得準備好了再開始。",
+            "準備好就敲鼓組，我會開始抓你的節奏。",
+            "不急。先放鬆，準備好再演奏。",
+            "準備好就開始，我會從第一拍開始追蹤。",
+            "準備好就開始，我從你的第一下擊打就在聽。"
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's see if the groove comes back quick.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — kick's got a baseline now.",
-            "Back at the kit. {lastScore} at {lastBpm} BPM last session. Let's build on it.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session on the kit: {lastScore} at {lastBpm} BPM. Let's keep that going.",
-            "Back at it. You were at {lastScore} / {lastBpm} BPM last time — solid starting point.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the line last time. Let's hit it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last session — let's go."
+            "歡迎回來。上次練習：{lastBpm} BPM，{lastScore}。看看律動能不能很快回來。",
+            "很高興見到你。上次你在 {lastBpm} BPM 拿到 {lastScore}，大鼓現在有基準了。",
+            "回到鼓組前了。上次練習 {lastBpm} BPM，{lastScore}。我們在這個基礎上繼續。",
+            "歡迎回來，上次是 {lastScore} / {lastBpm} BPM。準備好就開始。",
+            "上次鼓組練習：{lastBpm} BPM，{lastScore}。我們繼續保持。",
+            "又回來了。你上次是 {lastScore} / {lastBpm} BPM，是個扎實的起點。",
+            "歡迎回來。上次的水準是 {lastBpm} BPM，{lastScore}。我們來達到它。",
+            "很高興你回來。上次練習 {lastBpm} BPM，{lastScore}，開始吧。"
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Kick is drifting. Lock the right foot to the click before the snare.",
-            "Hits are scattering. Bring the kick and snare back to the grid.",
-            "Stop, count a bar, restart with just the foot.",
-            "Pull back to kick-and-hat only for a bar, then add the snare.",
-            "Slow down. Play just the foot on every click for four bars.",
-            "Pattern's falling apart. Drop everything but the kick, then layer back in.",
-            "Stop the whole kit. One bar of just the click, then come in with the foot.",
-            "Hands and feet are out of sync. Reset on the next downbeat."
+            "大鼓在偏移。在小鼓之前，先讓右腳鎖定節拍器。",
+            "擊音很分散。把大鼓和小鼓帶回格點上。",
+            "停下，數一個小節，只用腳重新開始。",
+            "退回只留大鼓和踩鈸一個小節，再加入小鼓。",
+            "放慢。四個小節內，每個滴答只用腳踩一下。",
+            "節奏型散掉了。除了大鼓，其他都放掉，再逐步加回來。",
+            "整組鼓都停下。先聽一個小節的節拍器，再用腳進入。",
+            "雙手和雙腳不同步了。在下一個強拍重設。"
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Sticks are arriving before the click. Let the hat wait for it.",
-            "You're ahead of the beat — put the kick on the click, not just before it.",
-            "Pulse is creeping up. Play the backbeat a shade later than feels right."
+            "鼓棒落在節拍器之前。讓踩鈸等它。",
+            "你在拍子前面，把大鼓放在節拍器上，不要提前一點。",
+            "脈動在往上爬。把反拍打得比感覺對的位置稍微晚一點。"
           ],
           "correction": [
-            "Right hand is leading the kick — lay it back.",
-            "Snare's rushing. Count the in-between 16ths and place beat 2 right on the click.",
-            "You're driving the click. Slow the right hand; the foot will follow.",
-            "Hi-hat's pushing ahead. Relax the right hand and let the click set the pace.",
-            "Snare's racing. Ease into the groove and let it breathe.",
-            "Drop a few BPM. Get the kick-snare to sit ON the click before bringing it back up.",
-            "Sticks are leading. Hold them back — let the metronome arrive first.",
-            "Pause the kit. Tap the click with just the foot for a bar, then bring the hands."
+            "右手領先大鼓，把它放鬆往後放。",
+            "小鼓在搶拍。數出中間的十六分音符，把第 2 拍正好放在節拍器上。",
+            "你在推著節拍器走。放慢右手，腳會跟上。",
+            "踩鈸在往前衝。放鬆右手，讓節拍器決定速度。",
+            "小鼓在趕。輕鬆進入律動，讓它有呼吸的空間。",
+            "降低幾個 BPM。先讓大鼓和小鼓坐在節拍器上，再把速度調回來。",
+            "鼓棒在領先。把它們收住，讓節拍器先到。",
+            "暫停鼓組。只用腳跟著節拍器敲一個小節，再加入雙手。"
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "Sitting behind the click. Bring the kick up to meet it.",
-            "The groove is leaning late — lift the hat back onto the beat.",
-            "You're a little behind. Play the snare where you think it is, not after."
+            "坐在節拍器後面。把大鼓抬上來對上它。",
+            "律動往晚的方向偏，把踩鈸抬回拍子上。",
+            "你有點落後。把小鼓打在你認為它該在的位置，不要在它之後。"
           ],
           "correction": [
-            "Right hand is lagging the kick — lean into the hi-hat.",
-            "Snare's dragging. Lead beats 2 and 4 a touch, don't wait for the click.",
-            "Push the hi-hat ahead; the kick should sit ON the click, not after.",
-            "Stick attack's heavy. Lift earlier — meet the click on top.",
-            "Backbeat's late. Push beats 2 and 4 forward.",
-            "Hi-hat's behind. Come in earlier and play with more bounce.",
-            "Drop the tempo and play with more lift. The drag clears when it feels easy.",
-            "Sticks landing late. Imagine the click is a hair earlier than it is."
+            "右手落後大鼓，靠向踩鈸。",
+            "小鼓在拖。稍微領先第 2 拍和第 4 拍，不要等節拍器。",
+            "把踩鈸往前推，大鼓應該坐在節拍器上，不是之後。",
+            "鼓棒的擊打很沉。早一點抬起，在節拍器的上方對上它。",
+            "反拍晚了。把第 2 拍和第 4 拍往前推。",
+            "踩鈸落後。早一點進入，打得更有彈性。",
+            "降低速度，彈得更輕盈。等它變輕鬆，拖拍就會消失。",
+            "鼓棒落得晚。想像節拍器比實際早一點點。"
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Kick-snare locked.",
-            "Pocket. Stay.",
-            "Streak going — stay there.",
-            "Limbs talking. Keep it.",
-            "Yes. Don't change a thing.",
-            "That's the groove. Sit in it.",
-            "Tight. Keep going.",
-            "Feet and hands synced. Hold."
+            "大鼓和小鼓鎖住了。",
+            "Pocket。留在這裡。",
+            "連擊進行中，留在那裡。",
+            "四肢在對話。保持。",
+            "對。什麼都不要改。",
+            "這就是律動。坐進去。",
+            "緊密。繼續。",
+            "雙腳和雙手同步了。保持。"
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — kick-snare relationship is locked.",
-            "Pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — that's the new floor.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. Foot and hands are talking.",
-            "Locked groove at {bpmLow}–{bpmHigh} BPM. Don't lose it.",
-            "{bpmLow}–{bpmHigh} BPM owned. Stay here.",
-            "Kit's behaving at {bpmLow}–{bpmHigh} BPM. New baseline.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "{bpmLow}–{bpmHigh} BPM 區間已維持住，大鼓與小鼓的關係鎖定了。",
+            "pocket 守在 {bpmLow}–{bpmHigh} BPM。",
+            "在 {bpmLow}–{bpmHigh} BPM 維持住了，這是新的底線。",
+            "乾淨地守住了 {bpmLow}–{bpmHigh} BPM。腳和手在對話。",
+            "律動鎖定在 {bpmLow}–{bpmHigh} BPM。別丟掉。",
+            "掌握了 {bpmLow}–{bpmHigh} BPM。留在這裡。",
+            "鼓組在 {bpmLow}–{bpmHigh} BPM 很聽話。新的基準。",
+            "pocket 在 {bpmLow}–{bpmHigh} BPM 維持了整整一分鐘。"
           ]
         },
         "recovery": {
           "encouragement": [
-            "Groove's back. Stay here.",
-            "Kick-snare lock recovered. Hold it.",
-            "Limbs talking again — keep it.",
-            "You pulled the groove back. Don't change anything.",
-            "Pocket recovered. Sit in it.",
-            "Foot and hands re-synced. Hold.",
-            "Back in the seat. Stay loose.",
-            "Caught the slip before it ran away. Nice."
+            "律動回來了。留在這裡。",
+            "大鼓與小鼓的鎖定恢復了。保持。",
+            "四肢又在對話了，保持。",
+            "你把律動拉回來了。什麼都不要改。",
+            "pocket 恢復了。坐進去。",
+            "雙腳和雙手重新同步了。保持。",
+            "回到座位上了。保持放鬆。",
+            "在它跑掉之前抓住了失誤。不錯。"
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Back in the pocket.",
-            "Groove's back. Hold it.",
-            "Kick-snare lock — stay there."
+            "回到 pocket 裡了。",
+            "律動回來了。保持。",
+            "大鼓與小鼓鎖定，留在那裡。"
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Hands tightening up? Shake the wrists out and come back.",
-            "Quality's drifting — get off the throne for 60 seconds.",
-            "Forearms talking to you? Brief pause, then back in.",
-            "Sticks feeling heavy? Set them down, stretch, then return.",
-            "Grip getting tight? Step away from the kit for a minute.",
-            "Wrists locking up — quick shake-out, then continue.",
-            "Hands working harder than they should. Brief rest.",
-            "Take the sticks down for a moment — let the arms reset."
+            "雙手越來越緊了嗎？甩一甩手腕，再回來。",
+            "品質在偏移，離開鼓椅 60 秒。",
+            "前臂在跟你說話嗎？短暫暫停，再回來。",
+            "鼓棒變沉了嗎？放下，伸展一下，再回來。",
+            "握棒的手越來越緊嗎？離開鼓組一分鐘。",
+            "手腕卡住了，快速甩一甩，再繼續。",
+            "雙手比該有的更吃力。短暫休息。",
+            "把鼓棒放下一下，讓手臂重設。"
           ],
           "correction": [
-            "Fatigue's showing — stop now, drop the sticks, 90 seconds rest. Tired drumming locks in sloppy timing.",
-            "You're past peak — sticks down, walk a lap, then re-evaluate.",
-            "Stop before tension takes over. 90 seconds off, hydrate, return.",
-            "Wrists are tight. Stop, stretch the forearms, two minutes off.",
-            "Push past this and you'll hurt yourself. Real rest now.",
-            "Stop drumming. Walk away from the kit for a couple of minutes.",
-            "Sticks down. Forearms first, then hands, then return when loose.",
-            "Hard stop. Two minutes off and a drink of water before you come back."
+            "疲勞出現了，現在停下，放下鼓棒，休息 90 秒。疲累的打鼓會把草率的節奏鎖進去。",
+            "你已經過了高峰，鼓棒放下，走一圈，再重新評估。",
+            "在緊繃接管之前停下。離開 90 秒，補充水分，再回來。",
+            "手腕很緊。停下，伸展前臂，休息兩分鐘。",
+            "硬撐過這一關，你會傷到自己。現在真正休息。",
+            "停止打鼓。離開鼓組幾分鐘。",
+            "鼓棒放下。先前臂，再雙手，放鬆了再回來。",
+            "立刻停下。離開兩分鐘，喝口水，再回來。"
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — stay here until the kick is automatic. Don't push higher yet.",
-            "{bpmLow} BPM milestone. Make sure both feet are clean before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Play one stroke per beat to the click before climbing.",
-            "{bpmLow} BPM is fresh. Lock the kick on every click before adding fills.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Stay flat and let the limbs catch up.",
-            "Earn {bpmLow} BPM before chasing more. Hold it until it feels easy."
+            "在 {bpmLow} BPM，留在這裡，直到大鼓變成自動的。先不要往更高推。",
+            "{bpmLow} BPM 里程碑。往上推之前，先確認雙腳都很乾淨。",
+            "新區間：{bpmLow}-{bpmHigh}。往上爬之前，先跟著節拍器每拍打一下。",
+            "{bpmLow} BPM 還很新。加入過門之前，先把大鼓鎖在每個滴答上。",
+            "停在 {bpmLow} BPM。下一次跳升，要在乾淨的一分鐘之後。",
+            "打到 {bpmLow} BPM，現在先累積幾個乾淨的小節，再往更高走。",
+            "{bpmLow}-{bpmHigh} BPM 是全新的。保持平穩，讓四肢跟上來。",
+            "先賺到 {bpmLow} BPM，再追更多。守住它，直到它變輕鬆。"
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch on the kit — anything specific you're working on?",
-            "Five-plus minutes in. Want me to call out the kick, the hat, or both?",
-            "You've been deep in the pocket. Tell me what you want next.",
-            "Solid run on the kit. Anything you want sharper feedback on?",
-            "Been at it a while. Want me listening for kick, snare, or limb sync?",
-            "Pocket's been steady. What's the focus from here?",
-            "Long groove going — pick a target and I'll lean into it.",
-            "Five-plus minutes. Tell me where you want the next note of feedback."
+            "在鼓組前練了很長一段，有什麼特別在練的嗎？",
+            "已經五分鐘以上。要我特別指出大鼓、踩鈸，還是兩者都要？",
+            "你已經很深地在 pocket 裡了。告訴我接下來想要什麼。",
+            "鼓組上進行得很扎實。有什麼想要更精準回饋的嗎？",
+            "已經練一陣子了。要我聽大鼓、小鼓，還是四肢同步？",
+            "pocket 一直很穩。接下來的重點是什麼？",
+            "長長的律動進行著，選一個目標，我會特別留意。",
+            "五分鐘以上了。告訴我下一則回饋你想要什麼。"
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm} on the kit. Solid climb.",
-            "Made it to {endBpm} BPM. Kick held the ramp from {startBpm}.",
-            "Ramp finished. {startBpm} → {endBpm} BPM — limbs stayed locked.",
-            "Target reached: {endBpm} BPM. You drove it from {startBpm} on the kit."
+            "漸進完成，鼓組從 {startBpm} 到 {endBpm}。爬升很扎實。",
+            "到達 {endBpm} BPM。大鼓撐住了從 {startBpm} 開始的漸進。",
+            "漸進結束。{startBpm} → {endBpm} BPM，四肢一直保持鎖定。",
+            "達到目標：{endBpm} BPM。你在鼓組上從 {startBpm} 一路推上來。"
           ]
         },
         "stamina": {
           "neutral": [
-            "Around minute {staminaMinutes} your hands tighten up. Drop the BPM 5 ticks and rebuild.",
-            "Past the {staminaMinutes}-minute mark the limbs start to drift. Short break, then back at it.",
-            "Fatigue shows around minute {staminaMinutes} on the kit. Rest the wrists, then return.",
-            "You tend to lose the kick lock around minute {staminaMinutes}. Take a breather."
+            "大約第 {staminaMinutes} 分鐘，你的雙手會變緊。把 BPM 降低 5 格，重新建立。",
+            "過了 {staminaMinutes} 分鐘，四肢開始偏移。短暫休息，再回來。",
+            "鼓組上的疲勞在第 {staminaMinutes} 分鐘左右出現。讓手腕休息，再回來。",
+            "你往往在第 {staminaMinutes} 分鐘左右失去和大鼓的鎖定。喘口氣。"
           ]
         },
         "bias_only": {
           "neutral": [
-            "{biasMs}ms {direction} the click, very tight. Shift your strike point {correctionDirection}.",
-            "Your hits are locked together but sitting {biasMs}ms {direction}. Move the whole groove {correctionDirection}.",
-            "Low scatter but consistently {direction} — bring the whole kit's feel {correctionDirection} to center."
+            "比節拍器{direction} {biasMs} ms，非常緊密。把你的擊打點{correctionDirection}一點。",
+            "你的擊打彼此鎖在一起，但整體{direction} {biasMs} ms。把整個律動{correctionDirection}一點。",
+            "離散度低，但一直{direction}，把整組鼓的感覺{correctionDirection}一點來置中。"
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Ceiling at {bpm} — {attemptCount} attempts. Two sessions at {suggestedBpm} will lock the groove.",
-            "{attemptCount} hits at {bpm} BPM and the kit score's stuck. Drop to {suggestedBpm}, groove it solid, then push."
+            "上限在 {bpm}，{attemptCount} 次嘗試。在 {suggestedBpm} 練兩次，就能把律動鎖住。",
+            "在 {bpm} BPM 打了 {attemptCount} 次，鼓組的分數卡住了。降到 {suggestedBpm}，把律動打扎實，再往上推。"
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Four beats without the grid — fill incoming or off-click?",
-            "Lost the grid there. Planned fill or just drifting?"
+            "四拍沒有格點，是過門要來了，還是偏離節拍器了？",
+            "那裡失去格點了。是計畫好的過門，還是只是在飄？"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "Every beat landed but the hits feel soft — try punching harder into the kick.",
-            "Good coverage but the stroke is light. Drive through the head, don't tap.",
-            "Landing every beat, just quietly. Put more weight into the stroke.",
-            "Beats are there but the signal is weak — increase velocity on the downstroke."
+            "每一拍都有落到，但擊打偏軟，試著更用力地打進大鼓。",
+            "涵蓋率不錯，但擊打偏輕。打穿鼓皮，不要輕點。",
+            "每一拍都落到了，只是很小聲。把更多重量放進擊打。",
+            "拍點都在，但訊號偏弱，下擊時加大力道。"
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your kit wandered from the click. Come back in on the downbeat and lock it.",
-            "Grid tracking dropped — stop the fill, find the pulse, re-enter clean.",
-            "The tempo drifted from the click. Reset your kick pattern and re-lock.",
-            "Went off-grid there. Take a rest, then re-enter with your hi-hat on the beat."
+            "你的鼓組偏離了節拍器。在強拍重新進入並鎖定。",
+            "格點追蹤中斷了，停下過門，找到脈動，乾淨地重新進入。",
+            "速度偏離了節拍器。重設你的大鼓節奏型，重新鎖定。",
+            "那裡偏離了格點。先休息一下，再用踩鈸正好在拍上重新進入。"
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're hitting about half the expected beats — try to play every stroke in the pattern.",
-            "Coverage is low — make sure your kit lands each beat, not just the accents.",
-            "Around half the beats are going unplayed. Focus on completing the full drum pattern.",
-            "Beat coverage is low. Count aloud and make sure every hit has its place."
+            "你只打到大約一半的預期拍點，試著把節奏型裡的每一下都打到。",
+            "涵蓋率偏低，確保你的鼓組每一拍都落到，不只是重音。",
+            "大約一半的拍點沒有演奏。專心完成整個鼓的節奏型。",
+            "拍點涵蓋率偏低。出聲數拍，確保每一下都有它的位置。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your hits are landing on the beat, but the gaps between strokes keep shifting. Count the subdivisions out loud — let your mouth set the subdivision grid.",
-            "Groove placement is solid, but stroke spacing is uneven. Tap your hi-hat on every subdivision to lock the feel.",
-            "On the beat consistently, but the space between hits is wandering. Count sixteenths out loud while you play — let the words anchor the gaps.",
-            "Beat placement looks good — spacing between strokes is drifting though. Slow the tempo down until the gaps feel equal, then ramp back up."
+            "你的擊打落在拍上，但擊打之間的間隔一直在變。出聲數細分拍，讓你的嘴來設定細分格點。",
+            "律動的落點很扎實，但擊打間距不均。每個細分拍都用踩鈸敲一下來鎖定感覺。",
+            "一直都在拍上，但擊打之間的間距在飄。演奏時出聲數十六分音符，讓這些字來錨定間隔。",
+            "拍點落得很好，但擊打之間的間距在飄。把速度放慢到間隔感覺相等，再慢慢加速回來。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your stroke spacing is even — but the hits are landing off the click. Anticipate the beat slightly and drive your kick or snare right on it.",
-            "Even spacing between strokes, but the placement relative to the click is drifting. Lock your downbeat kick to the pulse first, then build around it.",
-            "The groove feel between strokes is consistent — work on where the whole pattern sits relative to the click. Try playing right on top of the beat, not slightly behind.",
-            "Spacing is there. Now anchor the pattern to the grid — aim to land each stroke exactly with the click."
+            "你的擊打間距均勻，但落在節拍器之外。稍微提前預期拍點，把大鼓或小鼓正好打在上面。",
+            "擊打之間的間距均勻，但相對於節拍器的落點在飄。先把強拍的大鼓鎖在脈動上，再圍繞它建立。",
+            "擊打之間的律動感一致，處理整個節奏型相對於節拍器坐在哪裡。試著正好打在拍子上方，不要稍微落後。",
+            "間距有了。現在把節奏型錨定到格點上，瞄準讓每一下擊打正好和節拍器一起落下。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Stroke placement and spacing between hits are both locked in. That's pocket drumming.",
-            "Spacing and beat placement both on point. Solid groove.",
-            "Both dimensions dialed — you're playing with real precision right now.",
-            "Timing's locked across the board. That's the feel you're building toward."
+            "擊打落點和擊打之間的間距都鎖定了。這就是 pocket 鼓。",
+            "間距和拍點落點都很準。扎實的律動。",
+            "兩個面向都到位，你現在演奏得很精準。",
+            "整體節奏都鎖定了。這就是你正在努力邁向的感覺。"
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The kit is washing together on my end — I'm reading it less clearly than usual.",
-            "Cymbals are bleeding into everything. My read on the last half-minute is rough.",
-            "Hard to pick single hits out of the kit right now. Take the numbers loosely."
+            "我這邊鼓組的聲音混在一起，我讀得比平常更不清楚。",
+            "銅鈸的聲音滲進了所有東西。過去半分鐘我的判讀很粗略。",
+            "現在很難從鼓組中分辨單一擊打。數字請稍微保留一點。"
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here — the kit starts fresh.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next stroke."
+            "{change}。新的一段從這裡開始，鼓組重新起算。",
+            "{change}。上一段已結束並計分。",
+            "{change}，從下一下擊打開始重新計分。"
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "Sticks went down long enough to close the segment — {score}% at {bpm} BPM.",
-            "The pause closed that stretch behind the kit: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that one."
+            "鼓棒放下夠久而結束了這一段：在 {bpm} BPM 拿到 {score}%。",
+            "暫停結束了鼓組上的這一段：在 {bpm} BPM 拿到 {score}%。",
+            "這一段已記錄在 {bpm} BPM 拿到 {score}%。"
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops holding together — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. The kit has landed around {score} here {attemptCount} times.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play."
+            "{bpmLow}–{bpmHigh} 是這段開始撐不住的地方，{attemptCount} 次練習，每次都接近 {score}。",
+            "你又回到 {bpmLow}–{bpmHigh}。鼓組在這裡已經 {attemptCount} 次落在 {score} 左右。",
+            "在這個速度已經 {attemptCount} 次練習，每次都接近 {score}。演奏時記著這一點。"
           ]
         }
       },
@@ -1647,271 +1647,271 @@
       "piano": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking from your first note.",
-            "Warm up the hands, then play whenever — I'll start listening.",
-            "Get settled at the keys, then start when you're ready.",
-            "Good to have you. Start when the hands feel loose.",
-            "Whenever you're set — play and I'll start catching your timing.",
-            "No rush. Let the hands warm up, then start when ready.",
-            "Ready when you are. I'll track from the first key.",
-            "Settle in and start whenever — I'm listening."
+            "準備好就開始，我會從你的第一個音開始追蹤。",
+            "先暖手，想彈時再彈，我會開始聆聽。",
+            "在琴鍵前坐定，準備好再開始。",
+            "很高興見到你。雙手放鬆了再開始。",
+            "準備好就彈，我會開始抓你的節奏。",
+            "不急。先讓雙手暖起來，準備好再開始。",
+            "準備好就開始，我會從第一個琴鍵開始追蹤。",
+            "坐定後隨時開始，我在聽。"
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — good to be back.",
-            "Back at the keys. {lastScore} at {lastBpm} BPM last session. Let's push it.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Pick up where you left off.",
-            "Back at it. {lastScore} at {lastBpm} BPM last time — solid baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the mark last session. Let's match it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last time — let's go."
+            "歡迎回來。上次練習：{lastBpm} BPM，{lastScore}。我們在這個基礎上繼續。",
+            "很高興見到你。上次你在 {lastBpm} BPM 拿到 {lastScore}，很高興你回來。",
+            "回到琴鍵前了。上次練習 {lastBpm} BPM，{lastScore}。我們往上推。",
+            "歡迎回來，上次是 {lastScore} / {lastBpm} BPM。準備好就開始。",
+            "上次練習：{lastBpm} BPM，{lastScore}。從你停下的地方接著來。",
+            "又回來了。上次 {lastBpm} BPM，{lastScore}，是個扎實的基準。",
+            "歡迎回來。上次練習的水準是 {lastBpm} BPM，{lastScore}。我們來追平它。",
+            "很高興你回來。上次 {lastBpm} BPM，{lastScore}，開始吧。"
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Hands are drifting apart. Lock the left hand to the click first.",
-            "Hits are scattering. Slow down — left hand alone, then add the right.",
-            "Just left hand to the click for a bar, then bring the right hand in.",
-            "Stop both hands. Play the click with just the left for four beats, then layer the right.",
-            "Pull back to one note per click with the left hand, then build the piece back up.",
-            "Drop the tempo and play hands separately before putting them together.",
-            "Pause and breathe. Find the click, then start fresh.",
-            "Slow it down five BPM and play it clean."
+            "雙手在分開偏移。先讓左手鎖定節拍器。",
+            "擊音很分散。放慢，先只彈左手，再加上右手。",
+            "一個小節內只用左手跟著節拍器，再加入右手。",
+            "雙手都停下。只用左手跟著節拍器彈四拍，再疊上右手。",
+            "退回左手每個滴答一個音，再把曲子重新建立起來。",
+            "降低速度，先分手彈，再合起來。",
+            "暫停，呼吸。找到節拍器，再重新開始。",
+            "放慢五個 BPM，乾淨地彈。"
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Your hands are arriving before the click. Let it come to you.",
-            "You're a touch ahead — hear the click, then drop the chord.",
-            "The right hand is leading. Sit further back in each beat."
+            "你的雙手落在節拍器之前。讓它來找你。",
+            "你稍微領先了，先聽節拍器，再按下和弦。",
+            "右手在領先。在每一拍裡往後坐一點。"
           ],
           "correction": [
-            "Right hand is leading the left — land the bass note right on the click.",
-            "Rushing — sit deeper into the keys; let the click pull each note.",
-            "Count the in-betweens — place each note where the click lands, not before.",
-            "Pull the tempo back five BPM and let the click pull each note out of you.",
-            "Pause one bar. Hear the click, then come in on beat 1.",
-            "Drop your hands to your lap, breathe, then start playing again.",
-            "Right hand's racing. Play just the left hand to the click for a bar first.",
-            "Stop trying to push the metronome. Let it pull you for one full bar."
+            "右手領先左手，把低音正好落在節拍器上。",
+            "在搶拍，更深地沉入琴鍵，讓節拍器帶動每個音。",
+            "數出中間的拍，把每個音放在節拍器落下的位置，不要提前。",
+            "把速度降低五個 BPM，讓節拍器把每個音從你手中帶出來。",
+            "暫停一個小節。聽節拍器，然後在第 1 拍進入。",
+            "把雙手放到大腿上，呼吸，然後重新開始演奏。",
+            "右手在趕。先只用左手跟著節拍器彈一個小節。",
+            "別再想推著節拍器走。讓它帶你一整個小節。"
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "Your hands are landing behind the click. Bring them forward.",
-            "You're sitting late — start the chord a fraction sooner.",
-            "The left hand is trailing. Aim at the front of the beat."
+            "你的雙手落在節拍器之後。把它們往前帶。",
+            "你坐在拍子後面，和弦提早一點點開始。",
+            "左手落在後面。瞄準拍子的前緣。"
           ],
           "correction": [
-            "Left hand is lagging — lead with the bass, not the melody.",
-            "Dragging — lead the downbeat with the left hand; don't wait for the click.",
-            "Lead with the attack — meet the click on the front of each note.",
-            "Each note's landing late. Aim for the front edge of every click.",
-            "Drop the tempo and play with more lift. The drag clears when it feels easy.",
-            "Imagine the click is a hair earlier than it is, and meet that.",
-            "Stop, take a breath, then come in pushing slightly forward.",
-            "The fingers are getting heavy. Lighten your touch and let them float."
+            "左手在落後，用低音帶頭，不是旋律。",
+            "在拖拍，用左手帶領強拍，不要等節拍器。",
+            "用觸鍵帶領，在每個音的前緣對上節拍器。",
+            "每個音都落得晚。瞄準每個滴答的前緣。",
+            "降低速度，彈得更輕盈。等它變輕鬆，拖拍就會消失。",
+            "想像節拍器比實際早一點點，然後去對上它。",
+            "停下，呼吸，然後稍微往前推著進入。",
+            "手指變沉了。把觸鍵放輕，讓它們浮起來。"
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Hands locked. Stay.",
-            "Both hands synced.",
-            "Streak going — stay there.",
-            "Two-hand lock is clean. Hold.",
-            "Yes. Don't change anything.",
-            "Left and right are talking. Keep going.",
-            "Tight. Sit in this.",
-            "Eyes closed. Keep going."
+            "雙手鎖住了。保持。",
+            "雙手同步了。",
+            "連擊進行中，留在那裡。",
+            "雙手的鎖定很乾淨。保持。",
+            "對。什麼都不要改。",
+            "左右手在對話。繼續。",
+            "緊密。坐進去。",
+            "閉上眼睛，繼續。"
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — both hands locked to the click.",
-            "Hand-sync pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this voicing.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. Both hands are settled.",
-            "Locked at {bpmLow}–{bpmHigh} BPM. New baseline for this piece.",
-            "{bpmLow}–{bpmHigh} BPM owned. Don't drop below it.",
-            "Two-hand sync steady at {bpmLow}–{bpmHigh} BPM.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "{bpmLow}–{bpmHigh} BPM 區間已維持住，雙手都鎖在節拍器上。",
+            "雙手同步的 pocket 守在 {bpmLow}–{bpmHigh} BPM。",
+            "在 {bpmLow}–{bpmHigh} BPM 維持住了，這是這個和弦排列的新底線。",
+            "乾淨地守住了 {bpmLow}–{bpmHigh} BPM。雙手都穩定下來了。",
+            "鎖定在 {bpmLow}–{bpmHigh} BPM。這首曲子的新基準。",
+            "掌握了 {bpmLow}–{bpmHigh} BPM。別掉到它下面。",
+            "雙手同步在 {bpmLow}–{bpmHigh} BPM 很穩。",
+            "pocket 在 {bpmLow}–{bpmHigh} BPM 維持了整整一分鐘。"
           ]
         },
         "recovery": {
           "encouragement": [
-            "Hands back in sync. Hold it.",
-            "Two-hand lock back. Don't change anything.",
-            "Recovered — stay loose in the shoulders.",
-            "You caught the drift. Sit in this.",
-            "Left and right re-synced. Stay there.",
-            "Back from the dip. Don't change anything.",
-            "Pocket recovered. Hold this exact feel.",
-            "Brought it home. Stay there a minute."
+            "雙手重新同步了。保持。",
+            "雙手的鎖定回來了。什麼都不要改。",
+            "恢復了，肩膀保持放鬆。",
+            "你抓住了偏移。坐進去。",
+            "左右手重新對上了。留在這裡。",
+            "從低谷回來了。什麼都不要改。",
+            "pocket 恢復了。維持這個確切的感覺。",
+            "帶回家了。在這裡待一分鐘。"
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Touch is clean again.",
-            "Hands back in sync. Hold it.",
-            "Back on the keys. Stay."
+            "觸鍵又乾淨了。",
+            "雙手重新同步了。保持。",
+            "回到琴鍵上了。留在這裡。"
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Wrists tightening up? Lift the hands, breathe, then back in.",
-            "Forearms feeling locked? Pause, drop the hands, breathe.",
-            "Tension creeping into the shoulders — 60 seconds off the keys.",
-            "Fingers feeling heavy? Quick stretch, then resume.",
-            "Hands working harder than they should. Brief rest.",
-            "Shoulders climbing? Drop them, breathe, then play.",
-            "Take 30 seconds, roll the wrists, then back to it.",
-            "Wrist tension building. Pause, drop the hands to your lap, breathe."
+            "手腕越來越緊了嗎？抬起雙手，呼吸，再回來。",
+            "前臂覺得卡住了嗎？暫停，放下雙手，呼吸。",
+            "緊繃感在肩膀出現，離開琴鍵 60 秒。",
+            "手指覺得沉了嗎？快速伸展一下，再繼續。",
+            "雙手比該有的更吃力。短暫休息。",
+            "肩膀在往上爬嗎？放下，呼吸，再彈。",
+            "休息 30 秒，轉轉手腕，再回來。",
+            "手腕的緊繃在累積。暫停，把雙手放到大腿上，呼吸。"
           ],
           "correction": [
-            "Fatigue's showing in the touch — stop, hands down 90 seconds.",
-            "You're past peak — get off the bench, shake it out, then return.",
-            "Tired playing buries the dynamics. Stop, rest the wrists, restart.",
-            "Wrists are straining. Set the hands down, stretch the forearms, two minutes off.",
-            "Real rest — stand up, walk around, come back fresh.",
-            "Hands are done for now. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles and shoulder rolls before continuing.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "疲勞已經出現在觸鍵上，停下，雙手放下 90 秒。",
+            "你已經過了高峰，離開琴椅，甩一甩，再回來。",
+            "疲累的演奏會埋沒強弱變化。停下，讓手腕休息，再重新開始。",
+            "手腕在吃力。把雙手放下，伸展前臂，休息兩分鐘。",
+            "真正的休息，站起來，走動一下，清爽地回來。",
+            "雙手暫時到此為止。至少 90 秒，再重新檢查。",
+            "立刻停下。繼續之前先轉手腕、轉肩膀。",
+            "硬撐過這一關，你會把傷痛買回來。停下來恢復。"
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — make sure the left hand is rock-solid before climbing.",
-            "{bpmLow} BPM milestone. Hold here until both hands are independent.",
-            "New band: {bpmLow}-{bpmHigh}. Hands separately first, then together.",
-            "{bpmLow} BPM is fresh. Stay flat until both hands are independent.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Hold it until it feels easy.",
-            "Earn {bpmLow} BPM before chasing more. Stay flat."
+            "在 {bpmLow} BPM，往上爬之前，先確認左手穩如磐石。",
+            "{bpmLow} BPM 里程碑。守在這裡，直到雙手各自獨立。",
+            "新區間：{bpmLow}-{bpmHigh}。先分手，再合手。",
+            "{bpmLow} BPM 還很新。保持平穩，直到雙手各自獨立。",
+            "停在 {bpmLow} BPM。下一次跳升，要在乾淨的一分鐘之後。",
+            "打到 {bpmLow} BPM，現在先累積幾個乾淨的小節，再往更高走。",
+            "{bpmLow}-{bpmHigh} BPM 是全新的。守住它，直到它變輕鬆。",
+            "先賺到 {bpmLow} BPM，再追更多。保持平穩。"
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch at the keys — piece, exercise, something specific?",
-            "Five-plus minutes in. Want me to call out the left hand, right hand, or both?",
-            "You've been locked in. Tell me what you want feedback on.",
-            "Solid run going. Want sharper feedback on a specific passage?",
-            "Been at it a while. Left hand? Right hand? Voicings? Tell me where to listen.",
-            "Pocket's been steady. Pick a target if you want closer feedback.",
-            "Long stretch at the keys. Anything you want me to flag?",
-            "You've been deep in it. Tell me what to listen for next."
+            "在琴鍵前練了很長一段，是曲子、練習，還是特定的東西？",
+            "已經五分鐘以上。要我特別指出左手、右手，還是兩者都要？",
+            "你一直很專注。告訴我你想要哪方面的回饋。",
+            "進行得很扎實。要對某個段落更精準的回饋嗎？",
+            "已經練一陣子了。左手？右手？和弦排列？告訴我聽哪裡。",
+            "pocket 一直很穩。想要更貼近的回饋，就選一個目標。",
+            "在琴鍵前練了很長一段。有什麼想要我標記的嗎？",
+            "你已經投入很深了。告訴我接下來聽什麼。"
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm} at the keys. Both hands held the climb.",
-            "Made it to {endBpm} BPM. You played through the ramp from {startBpm}.",
-            "Target reached: {endBpm} BPM. Ramp from {startBpm} complete — hands stayed locked.",
-            "{endBpm} BPM reached. Good ramp from {startBpm} on the keys."
+            "漸進完成，琴鍵上從 {startBpm} 到 {endBpm}。雙手撐住了這段爬升。",
+            "到達 {endBpm} BPM。從 {startBpm} 開始的漸進你都彈過來了。",
+            "達到目標：{endBpm} BPM。從 {startBpm} 開始的漸進完成，雙手一直保持鎖定。",
+            "到達 {endBpm} BPM。琴鍵上從 {startBpm} 開始的漸進很不錯。"
           ]
         },
         "stamina": {
           "neutral": [
-            "Tension in your touch around minute {staminaMinutes}. Release, breathe, come back clean.",
-            "Around minute {staminaMinutes} the wrist tension creeps in. Brief rest, then resume.",
-            "Past the {staminaMinutes}-minute mark the touch gets heavier. Short break, then back at the keys.",
-            "Fatigue in the hands shows around minute {staminaMinutes}. Rest, then return."
+            "大約第 {staminaMinutes} 分鐘，你的觸鍵會出現緊繃。放鬆，呼吸，乾淨地回來。",
+            "大約第 {staminaMinutes} 分鐘，手腕的緊繃會悄悄出現。短暫休息，再繼續。",
+            "過了 {staminaMinutes} 分鐘，觸鍵會變重。短暫休息，再回到琴鍵上。",
+            "雙手的疲勞在第 {staminaMinutes} 分鐘左右出現。休息，再回來。"
           ]
         },
         "bias_only": {
           "neutral": [
-            "Keys are falling {biasMs}ms {direction} the click with low scatter. Shift your attack timing {correctionDirection}.",
-            "Consistent {biasMs}ms {direction} — that's a lean, not jitter. Move everything {correctionDirection} to center it."
+            "琴鍵比節拍器{direction} {biasMs} ms，離散度很低。把你的觸鍵時機{correctionDirection}一點。",
+            "一致地{direction} {biasMs} ms，這是個傾向，不是抖動。把一切{correctionDirection}一點來置中。"
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Keys ceiling at {bpm} — {attemptCount} attempts. Two sessions at {suggestedBpm} to consolidate.",
-            "{attemptCount} tries at {bpm} and the hands aren't settling. Park at {suggestedBpm} and groove it in."
+            "琴鍵的上限在 {bpm}，{attemptCount} 次嘗試。在 {suggestedBpm} 練兩次來鞏固。",
+            "在 {bpm} 試了 {attemptCount} 次，雙手還沒有穩住。停在 {suggestedBpm}，把它練進去。"
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Grid correlation dropped. Still with the click, or running a phrase?",
-            "Lost the metric grid there. Fill or free passage?"
+            "格點相關性下降了。還跟著節拍器，還是在彈一個樂句？",
+            "那裡失去節拍格點了。是填補還是自由的段落？"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "Beats are all there but the attack is gentle — try a more intentional finger weight.",
-            "Good coverage but the keystrokes are soft. Push into the keys with more intention.",
-            "Every beat lands, just quietly. Commit more weight to each keypress.",
-            "Landing every note but the signal is weak — increase velocity through the key bed."
+            "拍點都在，但觸鍵偏輕，試著用更有意圖的指力。",
+            "涵蓋率不錯，但按鍵偏軟。更有意圖地壓進琴鍵。",
+            "每一拍都落到了，只是很小聲。每次按鍵多投入一點重量。",
+            "每個音都有落到，但訊號偏弱，讓力道一路壓到琴鍵底。"
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your playing drifted from the click. Pause and re-enter on the downbeat.",
-            "Grid tracking dropped — let the click run a bar, then come back in.",
-            "Went off-tempo there. Lift your hands, find the pulse, and re-enter.",
-            "The phrase wandered from the grid. Take a beat and lock back to the click."
+            "你的演奏偏離了節拍器。暫停，在強拍重新進入。",
+            "格點追蹤中斷了，讓節拍器走一個小節，再回來。",
+            "那裡速度跑掉了。抬起雙手，找到脈動，再重新進入。",
+            "樂句偏離了格點。停一拍，重新鎖回節拍器。"
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're playing about half the expected beats — try to land every note in the phrase.",
-            "Coverage is low — make sure each beat gets a note, not just the melodic peaks.",
-            "Around half the beats are going unplayed. Focus on completing the full passage.",
-            "Beat coverage is low. Slow down and make sure every beat lands before moving on."
+            "你只彈到大約一半的預期拍點，試著把樂句裡的每個音都彈到。",
+            "涵蓋率偏低，確保每一拍都有音，不只是旋律的高點。",
+            "大約一半的拍點沒有演奏。專心完成整個段落。",
+            "拍點涵蓋率偏低。放慢，確保每一拍都落到，再往下走。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your note placement is solid — but the space between keystrokes keeps wandering. Try counting the subdivisions out loud as you play.",
-            "On the beat well, but the gap between notes is uneven. Tap your foot on every subdivision to lock the spacing between keystrokes.",
-            "Beat placement is there — but the space between notes is shifting. Count the subdivisions aloud and let your voice keep the gaps even.",
-            "Good beat placement — note spacing is drifting though. Slow the passage down until the gaps feel equal, then build speed again."
+            "你的音符落點很扎實，但按鍵之間的間距一直在飄。試著一邊彈一邊出聲數細分拍。",
+            "拍點對得很好，但音符之間的間隔不均。每個細分拍都踏一下腳，來鎖定按鍵之間的間距。",
+            "拍點的落點有了，但音符之間的間距在變動。出聲數細分拍，讓你的聲音把間隔保持均勻。",
+            "拍點落得很好，但音符間距在飄。把段落放慢到間隔感覺相等，再重新加速。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your note spacing is really even — but you're landing off the beat. Anticipate the click by a hair and drive each keystroke right on it.",
-            "Even spacing between notes, but the keystrokes are sitting off the grid. Lock the first note of each phrase to the beat, then let the rest follow.",
-            "The rhythm between keystrokes is consistent — now anchor the whole phrase to the click. Aim for the center of each beat.",
-            "Good spacing feel. Focus on where each note lands relative to the click — try playing slightly ahead of where you expect the beat."
+            "你的音符間距非常均勻，但落在拍外。比節拍器稍微提前一點點，把每一次按鍵正好打在上面。",
+            "音符之間的間距均勻，但按鍵偏離了格點。把每個樂句的第一個音鎖在拍上，其餘的跟著走。",
+            "按鍵之間的節奏一致，現在把整個樂句錨定到節拍器上。瞄準每一拍的中心。",
+            "間距的感覺不錯。專心處理每個音相對於節拍器落在哪裡，試著演奏得比你預期的拍點稍微超前一點。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing and beat placement both locked in. That's clean piano timing.",
-            "Spacing and placement both on point. The phrase is sitting exactly where it should.",
-            "Both dimensions dialed — you're playing with real precision right now.",
-            "Timing locked across the board. That's the feel you've been building toward."
+            "音符間距和拍點落點都鎖定了。這是乾淨的鋼琴節奏。",
+            "間距和落點都很準。樂句正好坐在該在的位置。",
+            "兩個面向都到位，你現在演奏得很精準。",
+            "整體節奏都鎖定了。這就是你一路在建立的感覺。"
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The notes are blurring together on my end — I'm reading this stretch less clearly.",
-            "Pedal is smearing the attacks. Take the last half-minute's numbers loosely.",
-            "Hard to pick single attacks out of the chords right now. My read is softer than usual."
+            "我這邊音符糊在一起，這一段我讀得比較不清楚。",
+            "踏板把起音抹開了。過去半分鐘的數字請稍微保留一點。",
+            "現在很難從和弦中分辨單一起音，我的判讀比平常更不確定。"
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next chord."
+            "{change}。新的一段從這裡開始。",
+            "{change}。上一段已結束並計分。",
+            "{change}，從下一個和弦開始重新計分。"
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "The pause closed that segment — {score}% at {bpm} BPM.",
-            "Your hands came off the keys long enough to end it: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that stretch."
+            "暫停結束了這一段：在 {bpm} BPM 拿到 {score}%。",
+            "你的雙手離開琴鍵夠久而結束了這一段：在 {bpm} BPM 拿到 {score}%。",
+            "這一段已記錄在 {bpm} BPM 拿到 {score}%。"
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play."
+            "{bpmLow}–{bpmHigh} 是這段對你不再乾淨的地方，{attemptCount} 次練習，每次都接近 {score}。",
+            "你又回到 {bpmLow}–{bpmHigh}。你在這裡最近 {attemptCount} 次的結果都在 {score} 左右。",
+            "在這個速度已經 {attemptCount} 次練習，每次都接近 {score}。演奏時記著這一點。"
           ]
         }
       }

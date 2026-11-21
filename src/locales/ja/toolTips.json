@@ -561,272 +561,272 @@
       "drums": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking the kick from your first hit.",
-            "Settle in and start whenever — I'll catch the timing from the first stroke.",
-            "Take your time warming up the hands. I'll start listening when you play.",
-            "Good to have you. Start when the sticks feel ready.",
-            "Whenever you're set — hit the kit and I'll start picking up your timing.",
-            "No rush. Get loose, then play when you're ready.",
-            "Ready when you are. I'll track from the first beat.",
-            "Set up whenever — I'm listening from your first stroke."
+            "準備ができたら始めてください。最初のキックからタイミングを追い始めます。",
+            "落ち着いたらいつでも始めてください。最初のストロークからタイミングを拾います。",
+            "ゆっくり手を温めてください。弾き始めたら聴き始めます。",
+            "ようこそ。スティックの準備ができたら始めてください。",
+            "準備ができたら、キットを叩いてください。タイミングを拾い始めます。",
+            "急がなくて大丈夫です。体をほぐしてから、準備ができたら叩いてください。",
+            "準備ができたらどうぞ。最初の拍から追います。",
+            "いつでも構いません。最初のストロークから聴いています。"
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's see if the groove comes back quick.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — kick's got a baseline now.",
-            "Back at the kit. {lastScore} at {lastBpm} BPM last session. Let's build on it.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session on the kit: {lastScore} at {lastBpm} BPM. Let's keep that going.",
-            "Back at it. You were at {lastScore} / {lastBpm} BPM last time — solid starting point.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the line last time. Let's hit it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last session — let's go."
+            "おかえりなさい。前回は{lastBpm} BPMで{lastScore}でした。グルーヴがすぐ戻るか見てみましょう。",
+            "また会えましたね。前回は{lastBpm} BPMで{lastScore}でした。キックの基準ができました。",
+            "またキットの前ですね。前回は{lastBpm} BPMで{lastScore}でした。ここから積み上げましょう。",
+            "おかえりなさい。前回は{lastScore} / {lastBpm} BPMでした。準備ができたらどうぞ。",
+            "前回のキットでの練習は{lastBpm} BPMで{lastScore}でした。この流れを続けましょう。",
+            "再開です。前回は{lastScore} / {lastBpm} BPMでした。良い出発点です。",
+            "おかえりなさい。前回のラインは{lastBpm} BPMで{lastScore}でした。そこを叩きにいきましょう。",
+            "おかえりなさい。前回は{lastBpm} BPMで{lastScore}でした。始めましょう。"
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Kick is drifting. Lock the right foot to the click before the snare.",
-            "Hits are scattering. Bring the kick and snare back to the grid.",
-            "Stop, count a bar, restart with just the foot.",
-            "Pull back to kick-and-hat only for a bar, then add the snare.",
-            "Slow down. Play just the foot on every click for four bars.",
-            "Pattern's falling apart. Drop everything but the kick, then layer back in.",
-            "Stop the whole kit. One bar of just the click, then come in with the foot.",
-            "Hands and feet are out of sync. Reset on the next downbeat."
+            "キックがずれてきています。スネアの前に、右足をクリックに合わせてください。",
+            "ヒットが散らばっています。キックとスネアをグリッドに戻してください。",
+            "止めて、1小節数えてから、足だけで再開してください。",
+            "1小節だけキックとハットに絞って、それからスネアを足してください。",
+            "ゆっくりにしてください。4小節の間、クリックごとに足だけで叩いてください。",
+            "パターンが崩れています。キック以外をやめて、また重ねていってください。",
+            "キット全体を止めてください。1小節はクリックだけにして、足から入ってください。",
+            "手と足がずれています。次の表拍でリセットしてください。"
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Sticks are arriving before the click. Let the hat wait for it.",
-            "You're ahead of the beat — put the kick on the click, not just before it.",
-            "Pulse is creeping up. Play the backbeat a shade later than feels right."
+            "スティックがクリックより先に来ています。ハットにクリックを待たせてください。",
+            "拍より前に出ています。キックはクリックの直前ではなく、クリックの上に置いてください。",
+            "パルスが上がってきています。バックビートを、合っていると感じるより少し後ろで叩いてください。"
           ],
           "correction": [
-            "Right hand is leading the kick — lay it back.",
-            "Snare's rushing. Count the in-between 16ths and place beat 2 right on the click.",
-            "You're driving the click. Slow the right hand; the foot will follow.",
-            "Hi-hat's pushing ahead. Relax the right hand and let the click set the pace.",
-            "Snare's racing. Ease into the groove and let it breathe.",
-            "Drop a few BPM. Get the kick-snare to sit ON the click before bringing it back up.",
-            "Sticks are leading. Hold them back — let the metronome arrive first.",
-            "Pause the kit. Tap the click with just the foot for a bar, then bring the hands."
+            "右手がキックを引っ張っています。後ろに置いてください。",
+            "スネアが走っています。間の16分を数えて、2拍目をクリックにぴったり置いてください。",
+            "クリックを押しています。右手をゆっくりにしてください。足がついてきます。",
+            "ハイハットが前に出ています。右手の力を抜いて、クリックにペースを決めさせてください。",
+            "スネアが急いでいます。グルーヴに楽に入って、余裕を持たせてください。",
+            "数BPM下げてください。キックとスネアをクリックの上に乗せてから、また上げてください。",
+            "スティックが先行しています。抑えて、メトロノームを先に来させてください。",
+            "キットを止めてください。1小節は足だけでクリックを刻んで、それから手を足してください。"
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "Sitting behind the click. Bring the kick up to meet it.",
-            "The groove is leaning late — lift the hat back onto the beat.",
-            "You're a little behind. Play the snare where you think it is, not after."
+            "クリックの後ろにいます。キックを前に出して合わせてください。",
+            "グルーヴが遅めに傾いています。ハットを拍の上に持ち上げてください。",
+            "少し後ろです。スネアは、あると思う位置で叩いてください。その後ではなく。"
           ],
           "correction": [
-            "Right hand is lagging the kick — lean into the hi-hat.",
-            "Snare's dragging. Lead beats 2 and 4 a touch, don't wait for the click.",
-            "Push the hi-hat ahead; the kick should sit ON the click, not after.",
-            "Stick attack's heavy. Lift earlier — meet the click on top.",
-            "Backbeat's late. Push beats 2 and 4 forward.",
-            "Hi-hat's behind. Come in earlier and play with more bounce.",
-            "Drop the tempo and play with more lift. The drag clears when it feels easy.",
-            "Sticks landing late. Imagine the click is a hair earlier than it is."
+            "右手がキックに遅れています。ハイハットに体重を乗せてください。",
+            "スネアが遅れています。2拍目と4拍目を少し先に入れてください。クリックを待たないでください。",
+            "ハイハットを前に押し出してください。キックはクリックの後ではなく、クリックの上に置いてください。",
+            "スティックのアタックが重いです。もっと早く持ち上げて、クリックの上で合わせてください。",
+            "バックビートが遅れています。2拍目と4拍目を前に押してください。",
+            "ハイハットが後ろです。もっと早く入って、弾むように叩いてください。",
+            "テンポを下げて、もっと持ち上げるように叩いてください。楽に感じられれば、遅れは消えます。",
+            "スティックが遅れて着いています。クリックが実際より少し早いと想像してください。"
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Kick-snare locked.",
-            "Pocket. Stay.",
-            "Streak going — stay there.",
-            "Limbs talking. Keep it.",
-            "Yes. Don't change a thing.",
-            "That's the groove. Sit in it.",
-            "Tight. Keep going.",
-            "Feet and hands synced. Hold."
+            "キックとスネアが合っています。",
+            "ポケットです。そのままで。",
+            "連続中です。そのままで。",
+            "手足が噛み合っています。続けてください。",
+            "いいです。何も変えないでください。",
+            "それがグルーヴです。その中に座ってください。",
+            "タイトです。続けてください。",
+            "足と手が揃っています。保ってください。"
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — kick-snare relationship is locked.",
-            "Pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — that's the new floor.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. Foot and hands are talking.",
-            "Locked groove at {bpmLow}–{bpmHigh} BPM. Don't lose it.",
-            "{bpmLow}–{bpmHigh} BPM owned. Stay here.",
-            "Kit's behaving at {bpmLow}–{bpmHigh} BPM. New baseline.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "{bpmLow}〜{bpmHigh} BPMの帯を保ちました。キックとスネアの関係が合っています。",
+            "{bpmLow}〜{bpmHigh} BPMでポケットを保っています。",
+            "{bpmLow}〜{bpmHigh} BPMで保ちました。これが新しい下限です。",
+            "{bpmLow}〜{bpmHigh} BPMをきれいに保ちました。足と手が噛み合っています。",
+            "{bpmLow}〜{bpmHigh} BPMでグルーヴが合っています。そのままで。",
+            "{bpmLow}〜{bpmHigh} BPMを物にしました。ここに留まってください。",
+            "{bpmLow}〜{bpmHigh} BPMでキットが揃っています。新しい基準です。",
+            "{bpmLow}〜{bpmHigh} BPMでポケットを丸1分保ちました。"
           ]
         },
         "recovery": {
           "encouragement": [
-            "Groove's back. Stay here.",
-            "Kick-snare lock recovered. Hold it.",
-            "Limbs talking again — keep it.",
-            "You pulled the groove back. Don't change anything.",
-            "Pocket recovered. Sit in it.",
-            "Foot and hands re-synced. Hold.",
-            "Back in the seat. Stay loose.",
-            "Caught the slip before it ran away. Nice."
+            "グルーヴが戻りました。そのままで。",
+            "キックとスネアが合い直しました。保ってください。",
+            "手足がまた噛み合っています。続けてください。",
+            "グルーヴを引き戻しました。何も変えないでください。",
+            "ポケットが戻りました。その中に座ってください。",
+            "足と手が揃い直しました。保ってください。",
+            "席に戻りました。力を抜いたままで。",
+            "ずれが広がる前に止めました。いいです。"
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Back in the pocket.",
-            "Groove's back. Hold it.",
-            "Kick-snare lock — stay there."
+            "ポケットに戻りました。",
+            "グルーヴが戻りました。保ってください。",
+            "キックとスネアが合っています。そのままで。"
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Hands tightening up? Shake the wrists out and come back.",
-            "Quality's drifting — get off the throne for 60 seconds.",
-            "Forearms talking to you? Brief pause, then back in.",
-            "Sticks feeling heavy? Set them down, stretch, then return.",
-            "Grip getting tight? Step away from the kit for a minute.",
-            "Wrists locking up — quick shake-out, then continue.",
-            "Hands working harder than they should. Brief rest.",
-            "Take the sticks down for a moment — let the arms reset."
+            "手が固くなってきていますか。手首を振ってほぐしてから戻ってください。",
+            "質が流れてきています。60秒、スローンから離れてください。",
+            "前腕が訴えていますか。短く休んでから戻ってください。",
+            "スティックが重く感じますか。置いて、ストレッチしてから戻ってください。",
+            "グリップが固くなってきていますか。1分、キットから離れてください。",
+            "手首が固まってきています。さっと振ってほぐして、続けてください。",
+            "手が必要以上に働いています。少し休んでください。",
+            "少しスティックを置いて、腕をリセットしてください。"
           ],
           "correction": [
-            "Fatigue's showing — stop now, drop the sticks, 90 seconds rest. Tired drumming locks in sloppy timing.",
-            "You're past peak — sticks down, walk a lap, then re-evaluate.",
-            "Stop before tension takes over. 90 seconds off, hydrate, return.",
-            "Wrists are tight. Stop, stretch the forearms, two minutes off.",
-            "Push past this and you'll hurt yourself. Real rest now.",
-            "Stop drumming. Walk away from the kit for a couple of minutes.",
-            "Sticks down. Forearms first, then hands, then return when loose.",
-            "Hard stop. Two minutes off and a drink of water before you come back."
+            "疲れが出ています。今すぐ止めて、スティックを置いて、90秒休んでください。疲れたドラミングはタイミングの乱れを定着させます。",
+            "ピークを過ぎています。スティックを置いて、ひと回り歩いてから、見直してください。",
+            "緊張に支配される前に止めてください。90秒休んで、水分を取ってから戻ってください。",
+            "手首が固いです。止めて、前腕をストレッチして、2分休んでください。",
+            "これ以上続けると体を痛めます。今はしっかり休んでください。",
+            "ドラムをやめてください。数分、キットから離れてください。",
+            "スティックを置いてください。まず前腕、次に手をほぐして、ほぐれたら戻ってください。",
+            "完全に止めてください。2分休んで、水を一口飲んでから戻ってください。"
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — stay here until the kick is automatic. Don't push higher yet.",
-            "{bpmLow} BPM milestone. Make sure both feet are clean before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Play one stroke per beat to the click before climbing.",
-            "{bpmLow} BPM is fresh. Lock the kick on every click before adding fills.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Stay flat and let the limbs catch up.",
-            "Earn {bpmLow} BPM before chasing more. Hold it until it feels easy."
+            "{bpmLow} BPMです。キックが自然に出るまでここに留まってください。まだ上げないでください。",
+            "{bpmLow} BPMの節目です。上げる前に、両足がきれいか確かめてください。",
+            "新しい帯です。{bpmLow}-{bpmHigh}。上げる前に、クリックに1拍1ストロークで合わせてください。",
+            "{bpmLow} BPMは新しいテンポです。フィルを足す前に、すべてのクリックにキックを合わせてください。",
+            "{bpmLow} BPMで止まってください。次の上げは、きれいな1分の後です。",
+            "{bpmLow} BPMに届きました。上げる前に、きれいな小節をいくつか作ってください。",
+            "{bpmLow}-{bpmHigh} BPMは新しい帯です。フラットを保って、手足が追いつくのを待ってください。",
+            "もっと追う前に、{bpmLow} BPMを自分のものにしてください。楽に感じられるまで保ってください。"
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch on the kit — anything specific you're working on?",
-            "Five-plus minutes in. Want me to call out the kick, the hat, or both?",
-            "You've been deep in the pocket. Tell me what you want next.",
-            "Solid run on the kit. Anything you want sharper feedback on?",
-            "Been at it a while. Want me listening for kick, snare, or limb sync?",
-            "Pocket's been steady. What's the focus from here?",
-            "Long groove going — pick a target and I'll lean into it.",
-            "Five-plus minutes. Tell me where you want the next note of feedback."
+            "キットでの時間が長いですね。何か特に取り組んでいることはありますか。",
+            "5分以上経ちました。キック、ハット、両方、どれを指摘しましょうか。",
+            "ポケットの深いところにいますね。次に何をしたいか教えてください。",
+            "キットでしっかり続いています。もっと細かく聞きたいことはありますか。",
+            "しばらく続けていますね。キック、スネア、手足の同期のどれを聴きましょうか。",
+            "ポケットは安定しています。ここから何に絞りますか。",
+            "長いグルーヴが続いています。狙いを選んでください。そこに集中します。",
+            "5分以上経ちました。次のフィードバックをどこに欲しいか教えてください。"
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm} on the kit. Solid climb.",
-            "Made it to {endBpm} BPM. Kick held the ramp from {startBpm}.",
-            "Ramp finished. {startBpm} → {endBpm} BPM — limbs stayed locked.",
-            "Target reached: {endBpm} BPM. You drove it from {startBpm} on the kit."
+            "ランプ完了です。キットで{startBpm}から{endBpm}まで。しっかり上りました。",
+            "{endBpm} BPMに到達しました。キックは{startBpm}からのランプを保ちました。",
+            "ランプ終了です。{startBpm} → {endBpm} BPM。手足は合ったままでした。",
+            "目標に到達しました。{endBpm} BPM。キットで{startBpm}から引っ張ってきました。"
           ]
         },
         "stamina": {
           "neutral": [
-            "Around minute {staminaMinutes} your hands tighten up. Drop the BPM 5 ticks and rebuild.",
-            "Past the {staminaMinutes}-minute mark the limbs start to drift. Short break, then back at it.",
-            "Fatigue shows around minute {staminaMinutes} on the kit. Rest the wrists, then return.",
-            "You tend to lose the kick lock around minute {staminaMinutes}. Take a breather."
+            "{staminaMinutes}分あたりで手が固くなります。BPMを5つ下げて、作り直してください。",
+            "{staminaMinutes}分を過ぎると手足がずれ始めます。短い休憩をはさんで、また戻ってください。",
+            "キットでは{staminaMinutes}分あたりで疲れが出ます。手首を休ませてから戻ってください。",
+            "{staminaMinutes}分あたりでキックの合いを失いがちです。ひと息入れてください。"
           ]
         },
         "bias_only": {
           "neutral": [
-            "{biasMs}ms {direction} the click, very tight. Shift your strike point {correctionDirection}.",
-            "Your hits are locked together but sitting {biasMs}ms {direction}. Move the whole groove {correctionDirection}.",
-            "Low scatter but consistently {direction} — bring the whole kit's feel {correctionDirection} to center."
+            "クリックより{biasMs}ms{direction}で、とてもタイトです。打点を{correctionDirection}にずらしてください。",
+            "ヒットはまとまっていますが、{biasMs}ms{direction}にあります。グルーヴ全体を{correctionDirection}にずらしてください。",
+            "ばらつきは小さいですが、一貫して{direction}です。キット全体のフィールを{correctionDirection}にずらして、中心に戻してください。"
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Ceiling at {bpm} — {attemptCount} attempts. Two sessions at {suggestedBpm} will lock the groove.",
-            "{attemptCount} hits at {bpm} BPM and the kit score's stuck. Drop to {suggestedBpm}, groove it solid, then push."
+            "{bpm}が上限です。{attemptCount}回の試行。{suggestedBpm}で2セッションやると、グルーヴが固まります。",
+            "{bpm} BPMで{attemptCount}ヒットして、キットのスコアが止まっています。{suggestedBpm}に下げて、しっかり固めてから上げてください。"
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Four beats without the grid — fill incoming or off-click?",
-            "Lost the grid there. Planned fill or just drifting?"
+            "4拍の間グリッドがありません。フィルの予定ですか、それともクリックを外れていますか。",
+            "グリッドを見失いました。予定したフィルですか、それとも流れているだけですか。"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "Every beat landed but the hits feel soft — try punching harder into the kick.",
-            "Good coverage but the stroke is light. Drive through the head, don't tap.",
-            "Landing every beat, just quietly. Put more weight into the stroke.",
-            "Beats are there but the signal is weak — increase velocity on the downstroke."
+            "すべての拍に入っていますが、ヒットが弱いです。キックにもっと力を込めてみてください。",
+            "拍は拾えていますが、ストロークが軽いです。ヘッドを突き抜けるように叩いてください。軽く触れないでください。",
+            "すべての拍に入っていますが、音が小さいです。ストロークにもっと重みを乗せてください。",
+            "拍は来ていますが、信号が弱いです。振り下ろしのベロシティを上げてください。"
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your kit wandered from the click. Come back in on the downbeat and lock it.",
-            "Grid tracking dropped — stop the fill, find the pulse, re-enter clean.",
-            "The tempo drifted from the click. Reset your kick pattern and re-lock.",
-            "Went off-grid there. Take a rest, then re-enter with your hi-hat on the beat."
+            "キットがクリックから外れました。表拍で入り直して、合わせてください。",
+            "グリッドの追跡が途切れました。フィルを止めて、パルスを見つけて、きれいに入り直してください。",
+            "テンポがクリックからずれました。キックのパターンをリセットして、合わせ直してください。",
+            "そこでグリッドを外れました。少し休んでから、ハイハットを拍に合わせて入り直してください。"
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're hitting about half the expected beats — try to play every stroke in the pattern.",
-            "Coverage is low — make sure your kit lands each beat, not just the accents.",
-            "Around half the beats are going unplayed. Focus on completing the full drum pattern.",
-            "Beat coverage is low. Count aloud and make sure every hit has its place."
+            "期待される拍のおよそ半分しか叩いていません。パターンのストロークをすべて叩いてみてください。",
+            "カバー率が低いです。アクセントだけでなく、キットですべての拍を叩いてください。",
+            "拍のおよそ半分が叩かれていません。ドラムパターン全体を完成させることに集中してください。",
+            "拍のカバー率が低いです。声に出して数えて、すべてのヒットに居場所があるようにしてください。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your hits are landing on the beat, but the gaps between strokes keep shifting. Count the subdivisions out loud — let your mouth set the subdivision grid.",
-            "Groove placement is solid, but stroke spacing is uneven. Tap your hi-hat on every subdivision to lock the feel.",
-            "On the beat consistently, but the space between hits is wandering. Count sixteenths out loud while you play — let the words anchor the gaps.",
-            "Beat placement looks good — spacing between strokes is drifting though. Slow the tempo down until the gaps feel equal, then ramp back up."
+            "ヒットは拍に乗っていますが、ストローク間の間隔が揺れ続けています。サブディビジョンを声に出して数えてください。口にサブディビジョンのグリッドを決めさせてください。",
+            "グルーヴの位置は安定していますが、ストロークの間隔が不均一です。すべてのサブディビジョンでハイハットを叩いて、フィールを固めてください。",
+            "拍には一貫して乗っていますが、ヒット間の間隔がさまよっています。弾きながら16分音符を声に出して数えてください。言葉に間隔を支えてもらってください。",
+            "拍の位置は良好です。ただ、ストローク間の間隔がずれてきています。間隔が等しく感じられるまでテンポを落として、また上げてください。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your stroke spacing is even — but the hits are landing off the click. Anticipate the beat slightly and drive your kick or snare right on it.",
-            "Even spacing between strokes, but the placement relative to the click is drifting. Lock your downbeat kick to the pulse first, then build around it.",
-            "The groove feel between strokes is consistent — work on where the whole pattern sits relative to the click. Try playing right on top of the beat, not slightly behind.",
-            "Spacing is there. Now anchor the pattern to the grid — aim to land each stroke exactly with the click."
+            "ストロークの間隔は均一です。ただ、ヒットがクリックから外れて落ちています。拍を少し先取りして、キックやスネアをちょうどそこに打ち込んでください。",
+            "ストローク間の間隔は均一ですが、クリックに対する位置がずれてきています。まず表拍のキックをパルスに合わせて、その周りを組み立ててください。",
+            "ストローク間のグルーヴ感は一貫しています。パターン全体がクリックに対してどこに座るかに取り組んでください。拍の少し後ろではなく、ちょうど上で弾いてみてください。",
+            "間隔はできています。次はパターンをグリッドに固定してください。すべてのストロークをクリックとぴったり合わせることを狙ってください。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Stroke placement and spacing between hits are both locked in. That's pocket drumming.",
-            "Spacing and beat placement both on point. Solid groove.",
-            "Both dimensions dialed — you're playing with real precision right now.",
-            "Timing's locked across the board. That's the feel you're building toward."
+            "ストロークの位置も、ヒット間の間隔も合っています。これがポケットのドラミングです。",
+            "間隔も拍の位置も的確です。しっかりしたグルーヴです。",
+            "両方の面が揃っています。今は本当に正確に弾けています。",
+            "タイミングが全面で合っています。目指してきたフィールです。"
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The kit is washing together on my end — I'm reading it less clearly than usual.",
-            "Cymbals are bleeding into everything. My read on the last half-minute is rough.",
-            "Hard to pick single hits out of the kit right now. Take the numbers loosely."
+            "こちらではキットの音が混ざり合っています。いつもより読み取りがはっきりしません。",
+            "シンバルがすべてに被っています。直近30秒の読みは粗いです。",
+            "今はキットから1つ1つのヒットを拾いにくいです。数字は緩めに受け取ってください。"
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here — the kit starts fresh.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next stroke."
+            "{change}。ここから新しいセグメントです。キットは新しく始まります。",
+            "{change}。前の区間は閉じて、集計しました。",
+            "{change}。次のストロークから採点がまた始まります。"
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "Sticks went down long enough to close the segment — {score}% at {bpm} BPM.",
-            "The pause closed that stretch behind the kit: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that one."
+            "スティックを置いた時間が長く、セグメントを閉じました。{bpm} BPMで{score}%です。",
+            "その休止でキットの区間が閉じました。{bpm} BPMで{score}%です。",
+            "その区間は{bpm} BPMで{score}%と記録しました。"
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops holding together — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. The kit has landed around {score} here {attemptCount} times.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play."
+            "{bpmLow}〜{bpmHigh}がまとまりを保てなくなるところです。{attemptCount}セッション、どれも{score}あたりです。",
+            "また{bpmLow}〜{bpmHigh}に戻ってきました。キットはここで{attemptCount}回、{score}あたりに着地しています。",
+            "このテンポで{attemptCount}セッション、すべて{score}あたりです。弾きながら知っておく価値があります。"
           ]
         }
       },
@@ -1647,271 +1647,271 @@
       "piano": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking from your first note.",
-            "Warm up the hands, then play whenever — I'll start listening.",
-            "Get settled at the keys, then start when you're ready.",
-            "Good to have you. Start when the hands feel loose.",
-            "Whenever you're set — play and I'll start catching your timing.",
-            "No rush. Let the hands warm up, then start when ready.",
-            "Ready when you are. I'll track from the first key.",
-            "Settle in and start whenever — I'm listening."
+            "準備ができたら始めてください。最初の音から追い始めます。",
+            "手を温めて、いつでも弾き始めてください。聴き始めます。",
+            "鍵盤の前で落ち着いて、準備ができたら始めてください。",
+            "ようこそ。手がほぐれたら始めてください。",
+            "準備ができたらいつでも。弾いたらタイミングを拾い始めます。",
+            "急がなくて大丈夫です。手を温めてから、準備ができたら始めてください。",
+            "準備ができたらどうぞ。最初の鍵から追います。",
+            "落ち着いたらいつでも始めてください。聴いています。"
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — good to be back.",
-            "Back at the keys. {lastScore} at {lastBpm} BPM last session. Let's push it.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Pick up where you left off.",
-            "Back at it. {lastScore} at {lastBpm} BPM last time — solid baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the mark last session. Let's match it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last time — let's go."
+            "おかえりなさい。前回は{lastBpm} BPMで{lastScore}でした。そこから積み上げましょう。",
+            "また会えましたね。前回は{lastBpm} BPMで{lastScore}でした。戻ってこられてうれしいです。",
+            "また鍵盤の前ですね。前回は{lastBpm} BPMで{lastScore}でした。上げていきましょう。",
+            "おかえりなさい。前回は{lastScore} / {lastBpm} BPMでした。準備ができたらどうぞ。",
+            "前回は{lastBpm} BPMで{lastScore}でした。前回の続きから始めましょう。",
+            "再開です。前回は{lastBpm} BPMで{lastScore}でした。良い基準です。",
+            "おかえりなさい。前回のラインは{lastBpm} BPMで{lastScore}でした。そこに合わせにいきましょう。",
+            "おかえりなさい。前回は{lastBpm} BPMで{lastScore}でした。始めましょう。"
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Hands are drifting apart. Lock the left hand to the click first.",
-            "Hits are scattering. Slow down — left hand alone, then add the right.",
-            "Just left hand to the click for a bar, then bring the right hand in.",
-            "Stop both hands. Play the click with just the left for four beats, then layer the right.",
-            "Pull back to one note per click with the left hand, then build the piece back up.",
-            "Drop the tempo and play hands separately before putting them together.",
-            "Pause and breathe. Find the click, then start fresh.",
-            "Slow it down five BPM and play it clean."
+            "両手がずれてきています。まず左手をクリックに合わせてください。",
+            "ヒットが散らばっています。ゆっくりにして、左手だけで、それから右手を足してください。",
+            "1小節、左手だけでクリックに合わせて、それから右手を入れてください。",
+            "両手を止めてください。4拍、左手だけでクリックを弾いて、それから右手を重ねてください。",
+            "左手でクリックごとに1音に戻して、それから曲を組み直してください。",
+            "テンポを下げて、両手を合わせる前に片手ずつ弾いてください。",
+            "止めて、息を整えてください。クリックを見つけてから、最初からやり直してください。",
+            "5 BPM下げて、きれいに弾いてください。"
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Your hands are arriving before the click. Let it come to you.",
-            "You're a touch ahead — hear the click, then drop the chord.",
-            "The right hand is leading. Sit further back in each beat."
+            "両手がクリックより先に来ています。クリックが来るのを待ってください。",
+            "少し前に出ています。クリックを聴いてから、和音を落としてください。",
+            "右手が先行しています。各拍の、もっと後ろに座ってください。"
           ],
           "correction": [
-            "Right hand is leading the left — land the bass note right on the click.",
-            "Rushing — sit deeper into the keys; let the click pull each note.",
-            "Count the in-betweens — place each note where the click lands, not before.",
-            "Pull the tempo back five BPM and let the click pull each note out of you.",
-            "Pause one bar. Hear the click, then come in on beat 1.",
-            "Drop your hands to your lap, breathe, then start playing again.",
-            "Right hand's racing. Play just the left hand to the click for a bar first.",
-            "Stop trying to push the metronome. Let it pull you for one full bar."
+            "右手が左手を引っ張っています。低音をクリックにぴったり置いてください。",
+            "走っています。鍵盤にもっと深く座って、クリックに1音ずつ引っ張ってもらってください。",
+            "間の拍を数えてください。各音を、クリックの前ではなくクリックが来る位置に置いてください。",
+            "テンポを5 BPM戻して、クリックに1音ずつ引き出してもらってください。",
+            "1小節止めてください。クリックを聴いてから、拍1で入ってください。",
+            "手を膝に下ろして、息を整えてから、また弾き始めてください。",
+            "右手が走っています。まず1小節、左手だけでクリックに合わせて弾いてください。",
+            "メトロノームを押すのをやめてください。丸1小節、メトロノームに引っ張ってもらってください。"
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "Your hands are landing behind the click. Bring them forward.",
-            "You're sitting late — start the chord a fraction sooner.",
-            "The left hand is trailing. Aim at the front of the beat."
+            "両手がクリックの後ろに着いています。前に出してください。",
+            "遅めに座っています。和音を少し早く始めてください。",
+            "左手が遅れています。拍の前の側を狙ってください。"
           ],
           "correction": [
-            "Left hand is lagging — lead with the bass, not the melody.",
-            "Dragging — lead the downbeat with the left hand; don't wait for the click.",
-            "Lead with the attack — meet the click on the front of each note.",
-            "Each note's landing late. Aim for the front edge of every click.",
-            "Drop the tempo and play with more lift. The drag clears when it feels easy.",
-            "Imagine the click is a hair earlier than it is, and meet that.",
-            "Stop, take a breath, then come in pushing slightly forward.",
-            "The fingers are getting heavy. Lighten your touch and let them float."
+            "左手が遅れています。メロディではなく低音から先導してください。",
+            "遅れています。左手で表拍を先導してください。クリックを待たないでください。",
+            "アタックで先導してください。各音の前の側でクリックに合わせてください。",
+            "1音ずつ遅れて着いています。各クリックの前の端を狙ってください。",
+            "テンポを下げて、もっと持ち上げるように弾いてください。楽に感じられれば、遅れは消えます。",
+            "クリックが実際より少し早いと想像して、そこに合わせてください。",
+            "止めて、息を整えてから、少し前に押すつもりで入ってください。",
+            "指が重くなってきています。タッチを軽くして、浮かせてください。"
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Hands locked. Stay.",
-            "Both hands synced.",
-            "Streak going — stay there.",
-            "Two-hand lock is clean. Hold.",
-            "Yes. Don't change anything.",
-            "Left and right are talking. Keep going.",
-            "Tight. Sit in this.",
-            "Eyes closed. Keep going."
+            "両手が合っています。そのままで。",
+            "両手が揃っています。",
+            "連続中です。そのままで。",
+            "両手のロックがきれいです。保ってください。",
+            "いいです。何も変えないでください。",
+            "左手と右手が噛み合っています。続けてください。",
+            "タイトです。その中に座ってください。",
+            "目を閉じて。続けてください。"
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — both hands locked to the click.",
-            "Hand-sync pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this voicing.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. Both hands are settled.",
-            "Locked at {bpmLow}–{bpmHigh} BPM. New baseline for this piece.",
-            "{bpmLow}–{bpmHigh} BPM owned. Don't drop below it.",
-            "Two-hand sync steady at {bpmLow}–{bpmHigh} BPM.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "{bpmLow}〜{bpmHigh} BPMの帯を保ちました。両手がクリックに合っています。",
+            "{bpmLow}〜{bpmHigh} BPMで、両手の同期のポケットを保っています。",
+            "{bpmLow}〜{bpmHigh} BPMで保ちました。このボイシングの新しい下限です。",
+            "{bpmLow}〜{bpmHigh} BPMをきれいに保ちました。両手が落ち着いています。",
+            "{bpmLow}〜{bpmHigh} BPMで合っています。この曲の新しい基準です。",
+            "{bpmLow}〜{bpmHigh} BPMを物にしました。これより下げないでください。",
+            "{bpmLow}〜{bpmHigh} BPMで両手の同期が安定しています。",
+            "{bpmLow}〜{bpmHigh} BPMでポケットを丸1分保ちました。"
           ]
         },
         "recovery": {
           "encouragement": [
-            "Hands back in sync. Hold it.",
-            "Two-hand lock back. Don't change anything.",
-            "Recovered — stay loose in the shoulders.",
-            "You caught the drift. Sit in this.",
-            "Left and right re-synced. Stay there.",
-            "Back from the dip. Don't change anything.",
-            "Pocket recovered. Hold this exact feel.",
-            "Brought it home. Stay there a minute."
+            "両手の同期が戻りました。保ってください。",
+            "両手のロックが戻りました。何も変えないでください。",
+            "戻りました。肩の力を抜いたままで。",
+            "ずれに気づきました。その中に座ってください。",
+            "左手と右手が合い直しました。そのままで。",
+            "落ち込みから戻りました。何も変えないでください。",
+            "ポケットが戻りました。この感覚のまま保ってください。",
+            "持ち直しました。1分ほどそのままで。"
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Touch is clean again.",
-            "Hands back in sync. Hold it.",
-            "Back on the keys. Stay."
+            "タッチがまたきれいです。",
+            "両手の同期が戻りました。保ってください。",
+            "鍵盤に戻りました。そのままで。"
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Wrists tightening up? Lift the hands, breathe, then back in.",
-            "Forearms feeling locked? Pause, drop the hands, breathe.",
-            "Tension creeping into the shoulders — 60 seconds off the keys.",
-            "Fingers feeling heavy? Quick stretch, then resume.",
-            "Hands working harder than they should. Brief rest.",
-            "Shoulders climbing? Drop them, breathe, then play.",
-            "Take 30 seconds, roll the wrists, then back to it.",
-            "Wrist tension building. Pause, drop the hands to your lap, breathe."
+            "手首が固くなってきていますか。手を上げて、息を整えてから戻ってください。",
+            "前腕が固まっている感じですか。止めて、手を下ろして、息を整えてください。",
+            "肩に緊張が忍び込んでいます。60秒、鍵盤から離れてください。",
+            "指が重く感じますか。さっとストレッチしてから再開してください。",
+            "手が必要以上に働いています。少し休んでください。",
+            "肩が上がっていますか。下ろして、息を整えてから弾いてください。",
+            "30秒取って、手首を回してから、続けてください。",
+            "手首の緊張が強まっています。止めて、手を膝に下ろして、息を整えてください。"
           ],
           "correction": [
-            "Fatigue's showing in the touch — stop, hands down 90 seconds.",
-            "You're past peak — get off the bench, shake it out, then return.",
-            "Tired playing buries the dynamics. Stop, rest the wrists, restart.",
-            "Wrists are straining. Set the hands down, stretch the forearms, two minutes off.",
-            "Real rest — stand up, walk around, come back fresh.",
-            "Hands are done for now. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles and shoulder rolls before continuing.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "タッチに疲れが出ています。止めて、手を下ろして90秒休んでください。",
+            "ピークを過ぎています。ベンチから離れて、体を振ってほぐしてから、戻ってください。",
+            "疲れた演奏はダイナミクスを埋もれさせます。止めて、手首を休ませてから、再開してください。",
+            "手首に負担がかかっています。手を置いて、前腕をストレッチして、2分休んでください。",
+            "しっかり休んでください。立ち上がって、歩き回って、すっきりして戻ってください。",
+            "手は今は終わりです。最低90秒休んで、それから見直してください。",
+            "完全に止めてください。続ける前に、手首を回して、肩を回してください。",
+            "これ以上続けると、怪我をします。止めて、回復してください。"
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — make sure the left hand is rock-solid before climbing.",
-            "{bpmLow} BPM milestone. Hold here until both hands are independent.",
-            "New band: {bpmLow}-{bpmHigh}. Hands separately first, then together.",
-            "{bpmLow} BPM is fresh. Stay flat until both hands are independent.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Hold it until it feels easy.",
-            "Earn {bpmLow} BPM before chasing more. Stay flat."
+            "{bpmLow} BPMです。上げる前に、左手が盤石か確かめてください。",
+            "{bpmLow} BPMの節目です。両手が独立するまでここに留まってください。",
+            "新しい帯です。{bpmLow}-{bpmHigh}。まず片手ずつ、それから両手で。",
+            "{bpmLow} BPMは新しいテンポです。両手が独立するまでフラットを保ってください。",
+            "{bpmLow} BPMで止まってください。次の上げは、きれいな1分の後です。",
+            "{bpmLow} BPMに届きました。上げる前に、きれいな小節をいくつか作ってください。",
+            "{bpmLow}-{bpmHigh} BPMは新しい帯です。楽に感じられるまで保ってください。",
+            "もっと追う前に、{bpmLow} BPMを自分のものにしてください。フラットを保ってください。"
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch at the keys — piece, exercise, something specific?",
-            "Five-plus minutes in. Want me to call out the left hand, right hand, or both?",
-            "You've been locked in. Tell me what you want feedback on.",
-            "Solid run going. Want sharper feedback on a specific passage?",
-            "Been at it a while. Left hand? Right hand? Voicings? Tell me where to listen.",
-            "Pocket's been steady. Pick a target if you want closer feedback.",
-            "Long stretch at the keys. Anything you want me to flag?",
-            "You've been deep in it. Tell me what to listen for next."
+            "鍵盤での時間が長いですね。曲ですか、練習曲ですか、何か特別なものですか。",
+            "5分以上経ちました。左手、右手、両方、どれを指摘しましょうか。",
+            "集中していますね。何についてフィードバックが欲しいか教えてください。",
+            "しっかり続いています。特定のパッセージについて、もっと細かく聞きたいですか。",
+            "しばらく続けていますね。左手ですか、右手ですか、ボイシングですか。どこを聴くか教えてください。",
+            "ポケットは安定しています。もっと近くで聞きたければ、狙いを選んでください。",
+            "鍵盤での時間が長いですね。指摘してほしいことはありますか。",
+            "深く入っていますね。次に何を聴くか教えてください。"
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm} at the keys. Both hands held the climb.",
-            "Made it to {endBpm} BPM. You played through the ramp from {startBpm}.",
-            "Target reached: {endBpm} BPM. Ramp from {startBpm} complete — hands stayed locked.",
-            "{endBpm} BPM reached. Good ramp from {startBpm} on the keys."
+            "ランプ完了です。鍵盤で{startBpm}から{endBpm}まで。両手が上りきりました。",
+            "{endBpm} BPMに到達しました。{startBpm}からのランプを弾き通しました。",
+            "目標に到達しました。{endBpm} BPM。{startBpm}からのランプが完了。両手は合ったままでした。",
+            "{endBpm} BPMに到達しました。鍵盤で{startBpm}から良いランプでした。"
           ]
         },
         "stamina": {
           "neutral": [
-            "Tension in your touch around minute {staminaMinutes}. Release, breathe, come back clean.",
-            "Around minute {staminaMinutes} the wrist tension creeps in. Brief rest, then resume.",
-            "Past the {staminaMinutes}-minute mark the touch gets heavier. Short break, then back at the keys.",
-            "Fatigue in the hands shows around minute {staminaMinutes}. Rest, then return."
+            "{staminaMinutes}分あたりでタッチに緊張が出ます。力を抜いて、息を整えて、きれいに戻ってください。",
+            "{staminaMinutes}分あたりで手首の緊張が忍び込みます。少し休んでから再開してください。",
+            "{staminaMinutes}分を過ぎるとタッチが重くなります。短い休憩をはさんで、鍵盤に戻ってください。",
+            "{staminaMinutes}分あたりで手に疲れが出ます。休んでから戻ってください。"
           ]
         },
         "bias_only": {
           "neutral": [
-            "Keys are falling {biasMs}ms {direction} the click with low scatter. Shift your attack timing {correctionDirection}.",
-            "Consistent {biasMs}ms {direction} — that's a lean, not jitter. Move everything {correctionDirection} to center it."
+            "ばらつきは小さいですが、鍵がクリックより{biasMs}ms{direction}に落ちています。アタックのタイミングを{correctionDirection}にずらしてください。",
+            "一貫して{biasMs}ms{direction}です。ジッターではなく、傾きです。全体を{correctionDirection}にずらして、中心に合わせてください。"
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Keys ceiling at {bpm} — {attemptCount} attempts. Two sessions at {suggestedBpm} to consolidate.",
-            "{attemptCount} tries at {bpm} and the hands aren't settling. Park at {suggestedBpm} and groove it in."
+            "鍵盤は{bpm}が上限です。{attemptCount}回の試行。{suggestedBpm}で2セッションやって、固めてください。",
+            "{bpm}で{attemptCount}回弾いて、手が落ち着いていません。{suggestedBpm}に留まって、体に入れてください。"
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Grid correlation dropped. Still with the click, or running a phrase?",
-            "Lost the metric grid there. Fill or free passage?"
+            "グリッドとの相関が落ちました。まだクリックに合っていますか、それともフレーズを弾いていますか。",
+            "拍のグリッドを見失いました。フィルですか、自由なパッセージですか。"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "Beats are all there but the attack is gentle — try a more intentional finger weight.",
-            "Good coverage but the keystrokes are soft. Push into the keys with more intention.",
-            "Every beat lands, just quietly. Commit more weight to each keypress.",
-            "Landing every note but the signal is weak — increase velocity through the key bed."
+            "拍はすべてありますが、アタックが穏やかです。指の重みをもっと意識してみてください。",
+            "拍は拾えていますが、打鍵が柔らかいです。もっと意識して鍵盤に押し込んでください。",
+            "すべての拍に入っていますが、音が小さいです。1回ごとの打鍵にもっと重みを込めてください。",
+            "すべての音に入っていますが、信号が弱いです。鍵の底に向けてベロシティを上げてください。"
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your playing drifted from the click. Pause and re-enter on the downbeat.",
-            "Grid tracking dropped — let the click run a bar, then come back in.",
-            "Went off-tempo there. Lift your hands, find the pulse, and re-enter.",
-            "The phrase wandered from the grid. Take a beat and lock back to the click."
+            "演奏がクリックから外れました。止めて、表拍で入り直してください。",
+            "グリッドの追跡が途切れました。1小節クリックを流してから、入り直してください。",
+            "そこでテンポを外れました。手を上げて、パルスを見つけて、入り直してください。",
+            "フレーズがグリッドからさまよいました。1拍置いて、クリックに合わせ直してください。"
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're playing about half the expected beats — try to land every note in the phrase.",
-            "Coverage is low — make sure each beat gets a note, not just the melodic peaks.",
-            "Around half the beats are going unplayed. Focus on completing the full passage.",
-            "Beat coverage is low. Slow down and make sure every beat lands before moving on."
+            "期待される拍のおよそ半分しか弾いていません。フレーズのすべての音を弾いてみてください。",
+            "カバー率が低いです。メロディの頂点だけでなく、すべての拍に音を置いてください。",
+            "拍のおよそ半分が弾かれていません。パッセージ全体を完成させることに集中してください。",
+            "拍のカバー率が低いです。ゆっくりにして、先へ進む前にすべての拍に入れてください。"
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your note placement is solid — but the space between keystrokes keeps wandering. Try counting the subdivisions out loud as you play.",
-            "On the beat well, but the gap between notes is uneven. Tap your foot on every subdivision to lock the spacing between keystrokes.",
-            "Beat placement is there — but the space between notes is shifting. Count the subdivisions aloud and let your voice keep the gaps even.",
-            "Good beat placement — note spacing is drifting though. Slow the passage down until the gaps feel equal, then build speed again."
+            "音の位置は安定していますが、打鍵間の間隔がさまよい続けています。弾きながらサブディビジョンを声に出して数えてみてください。",
+            "拍にはよく乗っていますが、音の間隔が不均一です。すべてのサブディビジョンで足を踏んで、打鍵間の間隔を固めてください。",
+            "拍の位置はできています。ただ、音の間隔がずれてきています。サブディビジョンを声に出して数えて、声に間隔を揃えてもらってください。",
+            "拍の位置は良好です。ただ、音の間隔がずれてきています。間隔が等しく感じられるまでパッセージを遅くして、また速くしてください。"
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your note spacing is really even — but you're landing off the beat. Anticipate the click by a hair and drive each keystroke right on it.",
-            "Even spacing between notes, but the keystrokes are sitting off the grid. Lock the first note of each phrase to the beat, then let the rest follow.",
-            "The rhythm between keystrokes is consistent — now anchor the whole phrase to the click. Aim for the center of each beat.",
-            "Good spacing feel. Focus on where each note lands relative to the click — try playing slightly ahead of where you expect the beat."
+            "音の間隔は本当に均一です。ただ、拍から外れて着地しています。クリックをほんの少し先取りして、1打ごとにちょうどそこに打ち込んでください。",
+            "音の間隔は均一ですが、打鍵がグリッドから外れています。各フレーズの最初の音を拍に合わせて、残りをそれに続けてください。",
+            "打鍵間のリズムは一貫しています。次はフレーズ全体をクリックに固定してください。各拍の中心を狙ってください。",
+            "間隔の感覚は良好です。クリックに対して各音がどこに着地するかに集中してください。拍があると思う位置より少し前で弾いてみてください。"
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing and beat placement both locked in. That's clean piano timing.",
-            "Spacing and placement both on point. The phrase is sitting exactly where it should.",
-            "Both dimensions dialed — you're playing with real precision right now.",
-            "Timing locked across the board. That's the feel you've been building toward."
+            "音の間隔も拍の位置も合っています。きれいなピアノのタイミングです。",
+            "間隔も位置も的確です。フレーズが、あるべき場所にぴったり座っています。",
+            "両方の面が揃っています。今は本当に正確に弾けています。",
+            "タイミングが全面で合っています。積み上げてきたフィールです。"
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The notes are blurring together on my end — I'm reading this stretch less clearly.",
-            "Pedal is smearing the attacks. Take the last half-minute's numbers loosely.",
-            "Hard to pick single attacks out of the chords right now. My read is softer than usual."
+            "こちらでは音がにじんでいます。この区間は読み取りがはっきりしません。",
+            "ペダルがアタックをぼかしています。直近30秒の数字は緩めに受け取ってください。",
+            "今は和音から1つ1つのアタックを拾いにくいです。読みはいつもより柔らかいです。"
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next chord."
+            "{change}。ここから新しいセグメントです。",
+            "{change}。前の区間は閉じて、集計しました。",
+            "{change}。次の和音から採点がまた始まります。"
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "The pause closed that segment — {score}% at {bpm} BPM.",
-            "Your hands came off the keys long enough to end it: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that stretch."
+            "その休止でセグメントが閉じました。{bpm} BPMで{score}%です。",
+            "手が鍵盤から離れていた時間が長く、区切りました。{bpm} BPMで{score}%です。",
+            "その区間は{bpm} BPMで{score}%と記録しました。"
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play."
+            "{bpmLow}〜{bpmHigh}がきれいに保てなくなるところです。{attemptCount}セッション、どれも{score}あたりです。",
+            "また{bpmLow}〜{bpmHigh}に戻ってきました。ここでの直近{attemptCount}回は{score}あたりでした。",
+            "このテンポで{attemptCount}セッション、すべて{score}あたりです。弾きながら知っておく価値があります。"
           ]
         }
       }

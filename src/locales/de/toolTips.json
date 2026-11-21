@@ -1243,7 +1243,7 @@
             "Bei {bpmLow} BPM – achte darauf, dass jeder Schlag gleich viel Gewicht hat, bevor du steigst.",
             "Meilenstein {bpmLow} BPM. Bleib hier, bis das Verhältnis von Ab- und Aufschlag gleichmäßig ist.",
             "Neues Band: {bpmLow}-{bpmHigh}. Probier das Muster zuerst auf einem Akkord, dann geh weiter.",
-            "{bpmLow} BPM ist neu. Bleib auf der Stelle, bis sich der Schlag leicht anfühlt.",
+            "{bpmLow} BPM ist neu. Bleib bei diesem Tempo, bis sich der Schlag leicht anfühlt.",
             "Bleib bei {bpmLow} BPM. Der nächste Sprung kommt nach einer sauberen Minute.",
             "{bpmLow} BPM erreicht – baue jetzt ein paar saubere Takte auf, bevor es höher geht.",
             "{bpmLow}-{bpmHigh} BPM ist ganz neu. Halte es, bis es langweilig wird.",
@@ -1315,7 +1315,7 @@
         "low_completeness": {
           "neutral": [
             "Du schlägst etwa die Hälfte der erwarteten Schläge an – versuch, jeden Schlag im Muster zu spielen.",
-            "Die Abdeckung ist gering – gib jedem Schlag einen Anschlag, nicht nur den betonten.",
+            "Die Abdeckung ist gering – achte darauf, dass jeder Beat einen Schlag bekommt, nicht nur die betonten.",
             "Etwa die Hälfte der Schläge bleibt ungespielt. Konzentrier dich darauf, das ganze Schlagmuster zu spielen.",
             "Die Schlagabdeckung ist gering. Zähl laut mit und achte darauf, dass jeder Ab- und Aufschlag sitzt."
           ]
@@ -2126,7 +2126,7 @@
           "neutral": [
             "Du kommst durchgehend zu spät – eine gerichtete Spät-Abweichung im Anschlag-Timing.",
             "Die Noten-Anschläge landen nach dem Beat – schärfe den Anschlag leicht.",
-            "Später Anschlag-Muster – die Noten hängen durchgehend hinter dem Beat.",
+            "Muster später Anschläge – die Noten hängen durchgehend hinter dem Beat.",
             "Konstante Spät-Abweichung – der Anschlag bremst den Puls.",
             "Das Timing ist nach spät verschoben – schieb den Anschlag nach vorn, um den Beat zu treffen."
           ]

@@ -35,21 +35,9 @@ const PENDING_FILE = path.resolve(process.cwd(), "src/coach/toolTipsPending.json
  * (locale, section) pairs not translated yet. Must equal toolTipsPending.json,
  * so a section cannot quietly stay English: emptying this list is the leg's end.
  */
-const G1 = ["generic", "defaultMode", "proMode", "words"];
-const G2 = ["electric-guitar", "acoustic-guitar", "bass"];
-const G3 = ["drums", "piano"];
-const STILL_PENDING: Record<string, string[]> = {
-  ja: G3,
-  ko: G3,
-  nl: G3,
-  pl: G3,
-  "pt-BR": ["piano"],
-  ru: ["piano"],
-  tr: G3,
-  vi: G3,
-  "zh-CN": G3,
-  "zh-TW": G3,
-};
+// Empty since 2026-11-21: all fourteen locales carry every section. A new
+// section or locale lands here, by name, until it is translated.
+const STILL_PENDING: Record<string, string[]> = {};
 
 type Tree = { [k: string]: Tree | Tree[] | string | string[] };
 const read = (lang: string) =>

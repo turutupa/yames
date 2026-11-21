@@ -561,272 +561,272 @@
       "drums": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking the kick from your first hit.",
-            "Settle in and start whenever — I'll catch the timing from the first stroke.",
-            "Take your time warming up the hands. I'll start listening when you play.",
-            "Good to have you. Start when the sticks feel ready.",
-            "Whenever you're set — hit the kit and I'll start picking up your timing.",
-            "No rush. Get loose, then play when you're ready.",
-            "Ready when you are. I'll track from the first beat.",
-            "Set up whenever — I'm listening from your first stroke."
+            "Jestem gotowy, kiedy ty. Zacznę śledzić stopę od twojego pierwszego uderzenia.",
+            "Usiądź wygodnie i zacznij, kiedy chcesz — złapię rytm od pierwszego uderzenia.",
+            "Spokojnie rozgrzej ręce. Zacznę słuchać, kiedy zagrasz.",
+            "Dobrze, że jesteś. Zacznij, gdy pałki będą gotowe.",
+            "Kiedy będziesz gotów — uderz w zestaw, a zacznę łapać twój rytm.",
+            "Bez pośpiechu. Rozluźnij się, potem graj, kiedy będziesz gotów.",
+            "Jestem gotowy, kiedy ty. Zacznę śledzić od pierwszego uderzenia.",
+            "Ustaw się, kiedy chcesz — słucham od twojego pierwszego uderzenia."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's see if the groove comes back quick.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — kick's got a baseline now.",
-            "Back at the kit. {lastScore} at {lastBpm} BPM last session. Let's build on it.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session on the kit: {lastScore} at {lastBpm} BPM. Let's keep that going.",
-            "Back at it. You were at {lastScore} / {lastBpm} BPM last time — solid starting point.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the line last time. Let's hit it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last session — let's go."
+            "Witaj z powrotem. Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Zobaczmy, czy groove szybko wróci.",
+            "Dobrze cię widzieć. Ostatnio było {lastScore} przy {lastBpm} BPM — stopa ma teraz punkt odniesienia.",
+            "Znowu przy zestawie. {lastScore} przy {lastBpm} BPM w ostatniej sesji. Budujmy na tym.",
+            "Witaj z powrotem — ostatnio {lastScore} / {lastBpm} BPM. Jestem gotowy, kiedy ty.",
+            "Ostatnia sesja przy zestawie: {lastScore} przy {lastBpm} BPM. Grajmy to dalej.",
+            "Znowu do roboty. Ostatnio było {lastScore} / {lastBpm} BPM — solidny punkt wyjścia.",
+            "Witaj z powrotem. {lastScore} przy {lastBpm} BPM było poziomem z ostatniego razu. Trafmy w niego.",
+            "Dobrze, że wracasz. {lastScore} przy {lastBpm} BPM w ostatniej sesji — zaczynajmy."
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Kick is drifting. Lock the right foot to the click before the snare.",
-            "Hits are scattering. Bring the kick and snare back to the grid.",
-            "Stop, count a bar, restart with just the foot.",
-            "Pull back to kick-and-hat only for a bar, then add the snare.",
-            "Slow down. Play just the foot on every click for four bars.",
-            "Pattern's falling apart. Drop everything but the kick, then layer back in.",
-            "Stop the whole kit. One bar of just the click, then come in with the foot.",
-            "Hands and feet are out of sync. Reset on the next downbeat."
+            "Stopa dryfuje. Zgraj prawą nogę z klikiem przed werblem.",
+            "Uderzenia się rozpraszają. Przywróć stopę i werbel na siatkę.",
+            "Zatrzymaj się, odlicz takt, zacznij od nowa samą stopą.",
+            "Cofnij się do samej stopy i hi-hatu na jeden takt, potem dołóż werbel.",
+            "Zwolnij. Graj samą stopą na każdy klik przez cztery takty.",
+            "Wzór się rozpada. Zostaw wszystko poza stopą, potem dokładaj z powrotem.",
+            "Zatrzymaj cały zestaw. Jeden takt samego klika, potem wejdź stopą.",
+            "Ręce i nogi nie są zsynchronizowane. Zresetuj się na następnym mocnym uderzeniu."
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Sticks are arriving before the click. Let the hat wait for it.",
-            "You're ahead of the beat — put the kick on the click, not just before it.",
-            "Pulse is creeping up. Play the backbeat a shade later than feels right."
+            "Pałki przychodzą przed klikiem. Niech hi-hat na niego poczeka.",
+            "Jesteś przed uderzeniem — połóż stopę na kliku, nie tuż przed nim.",
+            "Puls się podkrada. Zagraj backbeat odrobinę później, niż się wydaje słuszne."
           ],
           "correction": [
-            "Right hand is leading the kick — lay it back.",
-            "Snare's rushing. Count the in-between 16ths and place beat 2 right on the click.",
-            "You're driving the click. Slow the right hand; the foot will follow.",
-            "Hi-hat's pushing ahead. Relax the right hand and let the click set the pace.",
-            "Snare's racing. Ease into the groove and let it breathe.",
-            "Drop a few BPM. Get the kick-snare to sit ON the click before bringing it back up.",
-            "Sticks are leading. Hold them back — let the metronome arrive first.",
-            "Pause the kit. Tap the click with just the foot for a bar, then bring the hands."
+            "Prawa ręka wyprzedza stopę — odchyl ją do tyłu.",
+            "Werbel się spieszy. Licz szesnastki pomiędzy i połóż uderzenie 2 dokładnie na kliku.",
+            "Gonisz klik. Zwolnij prawą rękę; stopa za nią pójdzie.",
+            "Hi-hat wysuwa się do przodu. Rozluźnij prawą rękę i niech klik wyznacza tempo.",
+            "Werbel goni. Wejdź łagodnie w groove i pozwól mu oddychać.",
+            "Zmniejsz tempo o kilka BPM. Niech stopa i werbel siedzą NA kliku, zanim podniesiesz je z powrotem.",
+            "Pałki prowadzą. Przytrzymaj je — niech metronom przyjdzie pierwszy.",
+            "Zatrzymaj zestaw. Wystukuj klik samą stopą przez jeden takt, potem dołóż ręce."
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "Sitting behind the click. Bring the kick up to meet it.",
-            "The groove is leaning late — lift the hat back onto the beat.",
-            "You're a little behind. Play the snare where you think it is, not after."
+            "Siedzisz za klikiem. Podciągnij stopę, by go spotkać.",
+            "Groove przechyla się do tyłu — unieś hi-hat z powrotem na uderzenie.",
+            "Jesteś trochę z tyłu. Zagraj werbel tam, gdzie myślisz, że jest, nie po nim."
           ],
           "correction": [
-            "Right hand is lagging the kick — lean into the hi-hat.",
-            "Snare's dragging. Lead beats 2 and 4 a touch, don't wait for the click.",
-            "Push the hi-hat ahead; the kick should sit ON the click, not after.",
-            "Stick attack's heavy. Lift earlier — meet the click on top.",
-            "Backbeat's late. Push beats 2 and 4 forward.",
-            "Hi-hat's behind. Come in earlier and play with more bounce.",
-            "Drop the tempo and play with more lift. The drag clears when it feels easy.",
-            "Sticks landing late. Imagine the click is a hair earlier than it is."
+            "Prawa ręka opóźnia się względem stopy — oprzyj się na hi-hacie.",
+            "Werbel ciągnie. Prowadź uderzenia 2 i 4 odrobinę, nie czekaj na klik.",
+            "Pchnij hi-hat do przodu; stopa powinna siedzieć NA kliku, nie po nim.",
+            "Atak pałki jest ciężki. Unieś ją wcześniej — spotkaj klik na górze.",
+            "Backbeat jest spóźniony. Pchnij uderzenia 2 i 4 do przodu.",
+            "Hi-hat jest z tyłu. Wejdź wcześniej i graj z większym odbiciem.",
+            "Zmniejsz tempo i graj z większym uniesieniem. Ciągnięcie ustępuje, gdy zrobi się łatwo.",
+            "Pałki lądują za późno. Wyobraź sobie, że klik jest o włos wcześniej, niż jest."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Kick-snare locked.",
-            "Pocket. Stay.",
-            "Streak going — stay there.",
-            "Limbs talking. Keep it.",
-            "Yes. Don't change a thing.",
-            "That's the groove. Sit in it.",
-            "Tight. Keep going.",
-            "Feet and hands synced. Hold."
+            "Stopa i werbel zgrane.",
+            "Pocket. Zostań.",
+            "Seria trwa — zostań tam.",
+            "Kończyny się dogadują. Zachowaj to.",
+            "Tak. Niczego nie zmieniaj.",
+            "To jest groove. Siedź w nim.",
+            "Ciasno. Graj dalej.",
+            "Nogi i ręce zsynchronizowane. Trzymaj."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — kick-snare relationship is locked.",
-            "Pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — that's the new floor.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. Foot and hands are talking.",
-            "Locked groove at {bpmLow}–{bpmHigh} BPM. Don't lose it.",
-            "{bpmLow}–{bpmHigh} BPM owned. Stay here.",
-            "Kit's behaving at {bpmLow}–{bpmHigh} BPM. New baseline.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "Pasmo {bpmLow}–{bpmHigh} BPM utrzymane — relacja stopy i werbla jest zgrana.",
+            "Pocket trzyma się przy {bpmLow}–{bpmHigh} BPM.",
+            "Utrzymane przy {bpmLow}–{bpmHigh} BPM — to nowa podłoga.",
+            "Czysto utrzymane {bpmLow}–{bpmHigh} BPM. Noga i ręce się dogadują.",
+            "Zgrany groove przy {bpmLow}–{bpmHigh} BPM. Nie trać go.",
+            "{bpmLow}–{bpmHigh} BPM opanowane. Zostań tutaj.",
+            "Zestaw zachowuje się przy {bpmLow}–{bpmHigh} BPM. Nowa podstawa.",
+            "Pocket utrzymany przy {bpmLow}–{bpmHigh} BPM przez pełną minutę."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Groove's back. Stay here.",
-            "Kick-snare lock recovered. Hold it.",
-            "Limbs talking again — keep it.",
-            "You pulled the groove back. Don't change anything.",
-            "Pocket recovered. Sit in it.",
-            "Foot and hands re-synced. Hold.",
-            "Back in the seat. Stay loose.",
-            "Caught the slip before it ran away. Nice."
+            "Groove wrócił. Zostań tutaj.",
+            "Zgranie stopy i werbla odzyskane. Trzymaj.",
+            "Kończyny znowu się dogadują — zachowaj to.",
+            "Przywróciłeś groove. Niczego nie zmieniaj.",
+            "Pocket odzyskany. Siedź w nim.",
+            "Noga i ręce znowu zsynchronizowane. Trzymaj.",
+            "Z powrotem w siodle. Zostań rozluźniony.",
+            "Złapane potknięcie, zanim uciekło. Ładnie."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Back in the pocket.",
-            "Groove's back. Hold it.",
-            "Kick-snare lock — stay there."
+            "Z powrotem w pocket.",
+            "Groove wrócił. Trzymaj.",
+            "Zgranie stopy i werbla — zostań tam."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Hands tightening up? Shake the wrists out and come back.",
-            "Quality's drifting — get off the throne for 60 seconds.",
-            "Forearms talking to you? Brief pause, then back in.",
-            "Sticks feeling heavy? Set them down, stretch, then return.",
-            "Grip getting tight? Step away from the kit for a minute.",
-            "Wrists locking up — quick shake-out, then continue.",
-            "Hands working harder than they should. Brief rest.",
-            "Take the sticks down for a moment — let the arms reset."
+            "Ręce się napinają? Otrząśnij nadgarstki i wróć.",
+            "Jakość dryfuje — zejdź ze stołka na 60 sekund.",
+            "Przedramiona dają ci znać? Krótka pauza, potem wróć.",
+            "Pałki wydają się ciężkie? Odłóż je, rozciągnij się, potem wróć.",
+            "Chwyt robi się mocny? Odejdź od zestawu na minutę.",
+            "Nadgarstki się blokują — krótkie otrząśnięcie, potem kontynuuj.",
+            "Ręce pracują ciężej, niż powinny. Krótki odpoczynek.",
+            "Odłóż pałki na chwilę — pozwól ramionom się zresetować."
           ],
           "correction": [
-            "Fatigue's showing — stop now, drop the sticks, 90 seconds rest. Tired drumming locks in sloppy timing.",
-            "You're past peak — sticks down, walk a lap, then re-evaluate.",
-            "Stop before tension takes over. 90 seconds off, hydrate, return.",
-            "Wrists are tight. Stop, stretch the forearms, two minutes off.",
-            "Push past this and you'll hurt yourself. Real rest now.",
-            "Stop drumming. Walk away from the kit for a couple of minutes.",
-            "Sticks down. Forearms first, then hands, then return when loose.",
-            "Hard stop. Two minutes off and a drink of water before you come back."
+            "Zmęczenie widać — zatrzymaj się teraz, odłóż pałki, 90 sekund odpoczynku. Zmęczone granie utrwala niechlujny rytm.",
+            "Minął twój szczyt — pałki na bok, przejdź się, potem oceń na nowo.",
+            "Zatrzymaj się, zanim napięcie przejmie kontrolę. 90 sekund przerwy, napij się, wróć.",
+            "Nadgarstki są napięte. Zatrzymaj się, rozciągnij przedramiona, dwie minuty przerwy.",
+            "Jeśli przepchniesz to dalej, zrobisz sobie krzywdę. Prawdziwy odpoczynek teraz.",
+            "Przestań grać. Odejdź od zestawu na kilka minut.",
+            "Pałki na bok. Najpierw przedramiona, potem dłonie, wróć, gdy będziesz luźny.",
+            "Twardy stop. Dwie minuty przerwy i łyk wody, zanim wrócisz."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — stay here until the kick is automatic. Don't push higher yet.",
-            "{bpmLow} BPM milestone. Make sure both feet are clean before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Play one stroke per beat to the click before climbing.",
-            "{bpmLow} BPM is fresh. Lock the kick on every click before adding fills.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Stay flat and let the limbs catch up.",
-            "Earn {bpmLow} BPM before chasing more. Hold it until it feels easy."
+            "Przy {bpmLow} BPM — zostań tutaj, aż stopa będzie automatyczna. Jeszcze nie pchaj wyżej.",
+            "Kamień milowy {bpmLow} BPM. Upewnij się, że obie nogi są czyste, zanim zaczniesz pchać.",
+            "Nowe pasmo: {bpmLow}-{bpmHigh}. Zagraj jedno uderzenie na uderzenie do klika, zanim zaczniesz się wspinać.",
+            "{bpmLow} BPM jest świeże. Zgraj stopę z każdym klikiem, zanim dodasz przejścia.",
+            "Zaparkuj przy {bpmLow} BPM. Następny skok przyjdzie po jednej czystej minucie.",
+            "Trafione {bpmLow} BPM — teraz zbuduj kilka czystych taktów, zanim pójdziesz wyżej.",
+            "{bpmLow}-{bpmHigh} BPM jest zupełnie nowe. Zostań na płasko i pozwól kończynom nadążyć.",
+            "Zasłuż na {bpmLow} BPM, zanim pogonisz za więcej. Trzymaj to, aż zrobi się łatwo."
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch on the kit — anything specific you're working on?",
-            "Five-plus minutes in. Want me to call out the kick, the hat, or both?",
-            "You've been deep in the pocket. Tell me what you want next.",
-            "Solid run on the kit. Anything you want sharper feedback on?",
-            "Been at it a while. Want me listening for kick, snare, or limb sync?",
-            "Pocket's been steady. What's the focus from here?",
-            "Long groove going — pick a target and I'll lean into it.",
-            "Five-plus minutes. Tell me where you want the next note of feedback."
+            "Długi odcinek przy zestawie — nad czymś konkretnym pracujesz?",
+            "Ponad pięć minut za nami. Mam wskazywać stopę, hi-hat, czy jedno i drugie?",
+            "Byłeś głęboko w pocket. Powiedz, czego chcesz dalej.",
+            "Solidna seria przy zestawie. Chcesz ostrzejszych uwag do czegoś?",
+            "Grasz już jakiś czas. Mam nasłuchiwać stopy, werbla, czy synchronu kończyn?",
+            "Rytm był stały. Na czym się teraz skupiamy?",
+            "Długi groove trwa — wybierz cel, a się na nim skupię.",
+            "Ponad pięć minut. Powiedz, do czego chcesz kolejnej uwagi."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm} on the kit. Solid climb.",
-            "Made it to {endBpm} BPM. Kick held the ramp from {startBpm}.",
-            "Ramp finished. {startBpm} → {endBpm} BPM — limbs stayed locked.",
-            "Target reached: {endBpm} BPM. You drove it from {startBpm} on the kit."
+            "Rampa skończona — od {startBpm} do {endBpm} na zestawie. Solidna wspinaczka.",
+            "Doszedłeś do {endBpm} BPM. Stopa wytrzymała rampę od {startBpm}.",
+            "Rampa zakończona. {startBpm} → {endBpm} BPM — kończyny pozostały zgrane.",
+            "Cel osiągnięty: {endBpm} BPM. Poprowadziłeś to od {startBpm} na zestawie."
           ]
         },
         "stamina": {
           "neutral": [
-            "Around minute {staminaMinutes} your hands tighten up. Drop the BPM 5 ticks and rebuild.",
-            "Past the {staminaMinutes}-minute mark the limbs start to drift. Short break, then back at it.",
-            "Fatigue shows around minute {staminaMinutes} on the kit. Rest the wrists, then return.",
-            "You tend to lose the kick lock around minute {staminaMinutes}. Take a breather."
+            "Około {staminaMinutes}. minuty twoje ręce się napinają. Zmniejsz BPM o 5 kresek i odbuduj.",
+            "Po {staminaMinutes}. minucie kończyny zaczynają dryfować. Krótka przerwa, potem wróć do gry.",
+            "Zmęczenie widać około {staminaMinutes}. minuty przy zestawie. Odpocznij nadgarstkami, potem wróć.",
+            "Masz tendencję do gubienia zgrania stopy około {staminaMinutes}. minuty. Złap oddech."
           ]
         },
         "bias_only": {
           "neutral": [
-            "{biasMs}ms {direction} the click, very tight. Shift your strike point {correctionDirection}.",
-            "Your hits are locked together but sitting {biasMs}ms {direction}. Move the whole groove {correctionDirection}.",
-            "Low scatter but consistently {direction} — bring the whole kit's feel {correctionDirection} to center."
+            "{biasMs} ms {direction} względem klika, bardzo ciasno. Przesuń punkt uderzenia {correctionDirection}.",
+            "Twoje uderzenia są zgrane między sobą, ale siedzą {biasMs} ms {direction}. Przesuń cały groove {correctionDirection}.",
+            "Niski rozrzut, ale stale {direction} — przesuń wyczucie całego zestawu {correctionDirection}, by wycentrować."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Ceiling at {bpm} — {attemptCount} attempts. Two sessions at {suggestedBpm} will lock the groove.",
-            "{attemptCount} hits at {bpm} BPM and the kit score's stuck. Drop to {suggestedBpm}, groove it solid, then push."
+            "Pułap przy {bpm} — {attemptCount} podejść. Dwie sesje przy {suggestedBpm} utrwalą groove.",
+            "{attemptCount} uderzeń przy {bpm} BPM, a wynik na zestawie stoi w miejscu. Zejdź do {suggestedBpm}, zagraj groove solidnie, potem pchnij."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Four beats without the grid — fill incoming or off-click?",
-            "Lost the grid there. Planned fill or just drifting?"
+            "Cztery uderzenia bez siatki — wypełnienie w drodze czy poza klikiem?",
+            "Zgubiona siatka. Zaplanowane wypełnienie czy po prostu dryf?"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "Every beat landed but the hits feel soft — try punching harder into the kick.",
-            "Good coverage but the stroke is light. Drive through the head, don't tap.",
-            "Landing every beat, just quietly. Put more weight into the stroke.",
-            "Beats are there but the signal is weak — increase velocity on the downstroke."
+            "Każde uderzenie jest, ale brzmią miękko — spróbuj mocniej uderzyć w stopę.",
+            "Dobre pokrycie, ale uderzenie jest lekkie. Przeprowadź je przez naciąg, nie stukaj.",
+            "Trafiasz w każde uderzenie, tylko cicho. Włóż więcej ciężaru w uderzenie.",
+            "Uderzenia są, ale sygnał jest słaby — zwiększ siłę uderzenia w dół."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your kit wandered from the click. Come back in on the downbeat and lock it.",
-            "Grid tracking dropped — stop the fill, find the pulse, re-enter clean.",
-            "The tempo drifted from the click. Reset your kick pattern and re-lock.",
-            "Went off-grid there. Take a rest, then re-enter with your hi-hat on the beat."
+            "Twój zestaw odpłynął od klika. Wejdź ponownie na mocnym uderzeniu i zgraj się.",
+            "Śledzenie siatki spadło — zatrzymaj przejście, znajdź puls, wejdź czysto.",
+            "Tempo odpłynęło od klika. Zresetuj wzór stopy i zgraj się na nowo.",
+            "Wyszedłeś z siatki. Zrób pauzę, potem wejdź hi-hatem na uderzeniu."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're hitting about half the expected beats — try to play every stroke in the pattern.",
-            "Coverage is low — make sure your kit lands each beat, not just the accents.",
-            "Around half the beats are going unplayed. Focus on completing the full drum pattern.",
-            "Beat coverage is low. Count aloud and make sure every hit has its place."
+            "Uderzasz mniej więcej w połowę oczekiwanych uderzeń — spróbuj zagrać każde uderzenie we wzorze.",
+            "Pokrycie jest niskie — upewnij się, że zestaw trafia w każde uderzenie, nie tylko w akcenty.",
+            "Mniej więcej połowa uderzeń zostaje niezagrana. Skup się na dokończeniu pełnego wzoru perkusyjnego.",
+            "Pokrycie uderzeń jest niskie. Licz na głos i upewnij się, że każde uderzenie ma swoje miejsce."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your hits are landing on the beat, but the gaps between strokes keep shifting. Count the subdivisions out loud — let your mouth set the subdivision grid.",
-            "Groove placement is solid, but stroke spacing is uneven. Tap your hi-hat on every subdivision to lock the feel.",
-            "On the beat consistently, but the space between hits is wandering. Count sixteenths out loud while you play — let the words anchor the gaps.",
-            "Beat placement looks good — spacing between strokes is drifting though. Slow the tempo down until the gaps feel equal, then ramp back up."
+            "Twoje uderzenia lądują na uderzeniu, ale odstępy między nimi ciągle się przesuwają. Licz podziały na głos — niech to usta ustawią siatkę podziałów.",
+            "Położenie groove'u jest pewne, ale odstępy między uderzeniami są nierówne. Stukaj hi-hatem w każdy podział, by zakotwiczyć wyczucie.",
+            "Konsekwentnie na uderzeniu, ale przerwa między uderzeniami błądzi. Licz szesnastki na głos podczas gry — niech słowa zakotwiczą odstępy.",
+            "Położenie na uderzeniu wygląda dobrze — odstępy między uderzeniami jednak dryfują. Zwolnij tempo, aż przerwy będą wydawać się równe, potem znowu przyspiesz."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your stroke spacing is even — but the hits are landing off the click. Anticipate the beat slightly and drive your kick or snare right on it.",
-            "Even spacing between strokes, but the placement relative to the click is drifting. Lock your downbeat kick to the pulse first, then build around it.",
-            "The groove feel between strokes is consistent — work on where the whole pattern sits relative to the click. Try playing right on top of the beat, not slightly behind.",
-            "Spacing is there. Now anchor the pattern to the grid — aim to land each stroke exactly with the click."
+            "Twoje odstępy między uderzeniami są równe — ale uderzenia lądują obok klika. Uprzedź uderzenie odrobinę i wejdź stopą albo werblem dokładnie na nie.",
+            "Równe odstępy między uderzeniami, ale położenie względem klika dryfuje. Najpierw zgraj stopę na mocnym uderzeniu z pulsem, potem buduj wokół niej.",
+            "Wyczucie groove'u między uderzeniami jest stałe — popracuj nad tym, gdzie cały wzór siedzi względem klika. Spróbuj grać dokładnie na uderzeniu, nie odrobinę za nim.",
+            "Odstępy są. Teraz zakotwicz wzór w siatce — celuj w to, by każde uderzenie wylądowało dokładnie z klikiem."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Stroke placement and spacing between hits are both locked in. That's pocket drumming.",
-            "Spacing and beat placement both on point. Solid groove.",
-            "Both dimensions dialed — you're playing with real precision right now.",
-            "Timing's locked across the board. That's the feel you're building toward."
+            "Położenie uderzeń i odstępy między nimi są zgrane. To jest pocket.",
+            "Odstępy i położenie na uderzeniu w punkt. Solidny groove.",
+            "Oba wymiary dopracowane — grasz teraz z prawdziwą precyzją.",
+            "Czas zgrany w każdym względzie. To jest wyczucie, do którego dążysz."
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The kit is washing together on my end — I'm reading it less clearly than usual.",
-            "Cymbals are bleeding into everything. My read on the last half-minute is rough.",
-            "Hard to pick single hits out of the kit right now. Take the numbers loosely."
+            "Zestaw zlewa mi się w całość — czytam go mniej wyraźnie niż zwykle.",
+            "Talerze przenikają we wszystko. Mój odczyt ostatniej pół minuty jest nierówny.",
+            "Trudno teraz wyłowić pojedyncze uderzenia z zestawu. Traktuj liczby luźno."
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here — the kit starts fresh.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next stroke."
+            "{change}. Od tego miejsca nowy fragment — zestaw zaczyna od nowa.",
+            "{change}. Poprzedni odcinek jest zamknięty i policzony.",
+            "{change} — ocena zaczyna się od nowa na następnym uderzeniu."
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "Sticks went down long enough to close the segment — {score}% at {bpm} BPM.",
-            "The pause closed that stretch behind the kit: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that one."
+            "Pałki odłożone na tyle długo, by zamknąć fragment — {score}% przy {bpm} BPM.",
+            "Pauza zamknęła ten odcinek za zestawem: {score}% przy {bpm} BPM.",
+            "{score}% przy {bpm} BPM zapisane dla tego."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops holding together — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. The kit has landed around {score} here {attemptCount} times.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play."
+            "{bpmLow}–{bpmHigh} to miejsce, w którym to przestaje się trzymać kupy — {attemptCount} sesji, każda blisko {score}.",
+            "Wróciłeś do {bpmLow}–{bpmHigh}. Zestaw wylądował tu około {score} {attemptCount} razy.",
+            "{attemptCount} sesji przy tym tempie, wszystkie blisko {score}. Warto to wiedzieć, grając."
           ]
         }
       },
@@ -1647,271 +1647,271 @@
       "piano": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking from your first note.",
-            "Warm up the hands, then play whenever — I'll start listening.",
-            "Get settled at the keys, then start when you're ready.",
-            "Good to have you. Start when the hands feel loose.",
-            "Whenever you're set — play and I'll start catching your timing.",
-            "No rush. Let the hands warm up, then start when ready.",
-            "Ready when you are. I'll track from the first key.",
-            "Settle in and start whenever — I'm listening."
+            "Jestem gotowy, kiedy ty. Zacznę śledzić od twojej pierwszej nuty.",
+            "Rozgrzej ręce i graj, kiedy chcesz — zacznę słuchać.",
+            "Usiądź wygodnie przy klawiaturze, a potem zacznij, kiedy będziesz gotów.",
+            "Dobrze, że jesteś. Zacznij, gdy ręce będą luźne.",
+            "Kiedy będziesz gotów — zagraj, a zacznę łapać twój rytm.",
+            "Bez pośpiechu. Pozwól rękom się rozgrzać, potem zacznij, kiedy chcesz.",
+            "Jestem gotowy, kiedy ty. Zacznę śledzić od pierwszego klawisza.",
+            "Usiądź wygodnie i zacznij, kiedy chcesz — słucham."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — good to be back.",
-            "Back at the keys. {lastScore} at {lastBpm} BPM last session. Let's push it.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Pick up where you left off.",
-            "Back at it. {lastScore} at {lastBpm} BPM last time — solid baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the mark last session. Let's match it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last time — let's go."
+            "Witaj z powrotem. Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Budujmy na tym.",
+            "Dobrze cię widzieć. Ostatnio było {lastScore} przy {lastBpm} BPM — miło znowu grać.",
+            "Znowu przy klawiszach. {lastScore} przy {lastBpm} BPM w ostatniej sesji. Podkręćmy to.",
+            "Witaj z powrotem — ostatnio {lastScore} / {lastBpm} BPM. Jestem gotowy, kiedy ty.",
+            "Ostatnia sesja: {lastScore} przy {lastBpm} BPM. Podejmij tam, gdzie skończyło się ostatnio.",
+            "Znowu do roboty. Ostatnio {lastScore} przy {lastBpm} BPM — solidna baza.",
+            "Witaj z powrotem. {lastScore} przy {lastBpm} BPM było poziomem z ostatniej sesji. Dorównajmy mu.",
+            "Dobrze, że wracasz. Ostatnio {lastScore} przy {lastBpm} BPM — zaczynajmy."
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Hands are drifting apart. Lock the left hand to the click first.",
-            "Hits are scattering. Slow down — left hand alone, then add the right.",
-            "Just left hand to the click for a bar, then bring the right hand in.",
-            "Stop both hands. Play the click with just the left for four beats, then layer the right.",
-            "Pull back to one note per click with the left hand, then build the piece back up.",
-            "Drop the tempo and play hands separately before putting them together.",
-            "Pause and breathe. Find the click, then start fresh.",
-            "Slow it down five BPM and play it clean."
+            "Ręce się rozchodzą. Najpierw zgraj lewą rękę z klikiem.",
+            "Uderzenia się rozpraszają. Zwolnij — sama lewa ręka, potem dołóż prawą.",
+            "Tylko lewa ręka do klika przez jeden takt, potem wprowadź prawą.",
+            "Zatrzymaj obie ręce. Zagraj klik samą lewą przez cztery uderzenia, potem dołóż prawą.",
+            "Cofnij się do jednej nuty na klik lewą ręką, potem odbuduj utwór.",
+            "Zmniejsz tempo i zagraj rękami osobno, zanim je połączysz.",
+            "Zatrzymaj się i oddychaj. Znajdź klik, potem zacznij od nowa.",
+            "Zwolnij o pięć BPM i zagraj to czysto."
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Your hands are arriving before the click. Let it come to you.",
-            "You're a touch ahead — hear the click, then drop the chord.",
-            "The right hand is leading. Sit further back in each beat."
+            "Twoje ręce przychodzą przed klikiem. Niech klik przyjdzie do ciebie.",
+            "Jesteś odrobinę z przodu — usłysz klik, potem zagraj akord.",
+            "Prawa ręka prowadzi. Usiądź głębiej w każdym uderzeniu."
           ],
           "correction": [
-            "Right hand is leading the left — land the bass note right on the click.",
-            "Rushing — sit deeper into the keys; let the click pull each note.",
-            "Count the in-betweens — place each note where the click lands, not before.",
-            "Pull the tempo back five BPM and let the click pull each note out of you.",
-            "Pause one bar. Hear the click, then come in on beat 1.",
-            "Drop your hands to your lap, breathe, then start playing again.",
-            "Right hand's racing. Play just the left hand to the click for a bar first.",
-            "Stop trying to push the metronome. Let it pull you for one full bar."
+            "Prawa ręka wyprzedza lewą — połóż nutę basową dokładnie na kliku.",
+            "Spieszysz się — usiądź głębiej w klawisze; niech klik pociąga każdą nutę.",
+            "Licz to, co pomiędzy — kładź każdą nutę tam, gdzie ląduje klik, nie przed nim.",
+            "Zmniejsz tempo o pięć BPM i niech klik wyciąga z ciebie każdą nutę.",
+            "Zatrzymaj się na jeden takt. Usłysz klik, potem wejdź na uderzeniu 1.",
+            "Opuść ręce na kolana, oddychaj, potem zacznij grać znowu.",
+            "Prawa ręka goni. Najpierw zagraj samą lewą do klika przez jeden takt.",
+            "Przestań próbować prowadzić metronom. Pozwól, by przez jeden pełny takt prowadził ciebie."
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "Your hands are landing behind the click. Bring them forward.",
-            "You're sitting late — start the chord a fraction sooner.",
-            "The left hand is trailing. Aim at the front of the beat."
+            "Twoje ręce lądują za klikiem. Przynieś je do przodu.",
+            "Siedzisz za późno — zacznij akord o ułamek wcześniej.",
+            "Lewa ręka zostaje w tyle. Celuj w przód uderzenia."
           ],
           "correction": [
-            "Left hand is lagging — lead with the bass, not the melody.",
-            "Dragging — lead the downbeat with the left hand; don't wait for the click.",
-            "Lead with the attack — meet the click on the front of each note.",
-            "Each note's landing late. Aim for the front edge of every click.",
-            "Drop the tempo and play with more lift. The drag clears when it feels easy.",
-            "Imagine the click is a hair earlier than it is, and meet that.",
-            "Stop, take a breath, then come in pushing slightly forward.",
-            "The fingers are getting heavy. Lighten your touch and let them float."
+            "Lewa ręka się opóźnia — prowadź basem, nie melodią.",
+            "Ciągniesz — prowadź mocne uderzenie lewą ręką; nie czekaj na klik.",
+            "Prowadź atakiem — spotkaj klik na przodzie każdej nuty.",
+            "Każda nuta ląduje za późno. Celuj w przedni brzeg każdego klika.",
+            "Zmniejsz tempo i graj z większym uniesieniem. Ciągnięcie ustępuje, gdy zrobi się łatwo.",
+            "Wyobraź sobie, że klik jest o włos wcześniej, niż jest, i spotkaj go tam.",
+            "Zatrzymaj się, weź oddech, potem wejdź, lekko pchając do przodu.",
+            "Palce robią się ciężkie. Zmniejsz nacisk i pozwól im unosić się lekko."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Hands locked. Stay.",
-            "Both hands synced.",
-            "Streak going — stay there.",
-            "Two-hand lock is clean. Hold.",
-            "Yes. Don't change anything.",
-            "Left and right are talking. Keep going.",
-            "Tight. Sit in this.",
-            "Eyes closed. Keep going."
+            "Ręce zgrane. Zostań.",
+            "Obie ręce zsynchronizowane.",
+            "Seria trwa — zostań tam.",
+            "Zgranie obu rąk jest czyste. Trzymaj.",
+            "Tak. Niczego nie zmieniaj.",
+            "Lewa i prawa się dogadują. Graj dalej.",
+            "Ciasno. Siedź w tym.",
+            "Z zamkniętymi oczami. Graj dalej."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — both hands locked to the click.",
-            "Hand-sync pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this voicing.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. Both hands are settled.",
-            "Locked at {bpmLow}–{bpmHigh} BPM. New baseline for this piece.",
-            "{bpmLow}–{bpmHigh} BPM owned. Don't drop below it.",
-            "Two-hand sync steady at {bpmLow}–{bpmHigh} BPM.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "Pasmo {bpmLow}–{bpmHigh} BPM utrzymane — obie ręce zgrane z klikiem.",
+            "Synchron rąk trzyma się przy {bpmLow}–{bpmHigh} BPM.",
+            "Utrzymane przy {bpmLow}–{bpmHigh} BPM — nowa podłoga dla tego układu akordów.",
+            "Czysto utrzymane {bpmLow}–{bpmHigh} BPM. Obie ręce się ustabilizowały.",
+            "Zgrane przy {bpmLow}–{bpmHigh} BPM. Nowa podstawa dla tego utworu.",
+            "{bpmLow}–{bpmHigh} BPM opanowane. Nie schodź poniżej niego.",
+            "Synchron obu rąk stabilny przy {bpmLow}–{bpmHigh} BPM.",
+            "Rytm utrzymany przy {bpmLow}–{bpmHigh} BPM przez pełną minutę."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Hands back in sync. Hold it.",
-            "Two-hand lock back. Don't change anything.",
-            "Recovered — stay loose in the shoulders.",
-            "You caught the drift. Sit in this.",
-            "Left and right re-synced. Stay there.",
-            "Back from the dip. Don't change anything.",
-            "Pocket recovered. Hold this exact feel.",
-            "Brought it home. Stay there a minute."
+            "Ręce znowu w synchronie. Trzymaj.",
+            "Zgranie obu rąk wróciło. Niczego nie zmieniaj.",
+            "Odzyskane — zostań rozluźniony w barkach.",
+            "Złapałeś dryf. Siedź w tym.",
+            "Lewa i prawa znowu zsynchronizowane. Zostań tam.",
+            "Wyszedłeś ze spadku. Niczego nie zmieniaj.",
+            "Rytm odzyskany. Trzymaj dokładnie to wyczucie.",
+            "Doprowadzone do domu. Zostań tam minutę."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Touch is clean again.",
-            "Hands back in sync. Hold it.",
-            "Back on the keys. Stay."
+            "Dotyk znowu czysty.",
+            "Ręce znowu w synchronie. Trzymaj.",
+            "Z powrotem na klawiszach. Zostań."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Wrists tightening up? Lift the hands, breathe, then back in.",
-            "Forearms feeling locked? Pause, drop the hands, breathe.",
-            "Tension creeping into the shoulders — 60 seconds off the keys.",
-            "Fingers feeling heavy? Quick stretch, then resume.",
-            "Hands working harder than they should. Brief rest.",
-            "Shoulders climbing? Drop them, breathe, then play.",
-            "Take 30 seconds, roll the wrists, then back to it.",
-            "Wrist tension building. Pause, drop the hands to your lap, breathe."
+            "Nadgarstki się napinają? Unieś ręce, oddychaj, potem wróć.",
+            "Przedramiona czują się zablokowane? Zatrzymaj się, opuść ręce, oddychaj.",
+            "Napięcie wkrada się w barki — 60 sekund przerwy od klawiszy.",
+            "Palce wydają się ciężkie? Krótkie rozciągnięcie, potem wznów.",
+            "Ręce pracują ciężej, niż powinny. Krótki odpoczynek.",
+            "Barki się unoszą? Opuść je, oddychaj, potem graj.",
+            "Weź 30 sekund, porusz nadgarstkami, potem wróć do gry.",
+            "Napięcie w nadgarstkach narasta. Zatrzymaj się, opuść ręce na kolana, oddychaj."
           ],
           "correction": [
-            "Fatigue's showing in the touch — stop, hands down 90 seconds.",
-            "You're past peak — get off the bench, shake it out, then return.",
-            "Tired playing buries the dynamics. Stop, rest the wrists, restart.",
-            "Wrists are straining. Set the hands down, stretch the forearms, two minutes off.",
-            "Real rest — stand up, walk around, come back fresh.",
-            "Hands are done for now. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles and shoulder rolls before continuing.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "Zmęczenie widać w dotyku — zatrzymaj się, ręce w dół na 90 sekund.",
+            "Minął twój szczyt — wstań z ławki, otrząśnij się, potem wróć.",
+            "Zmęczona gra zakopuje dynamikę. Zatrzymaj się, odpocznij nadgarstkami, zacznij od nowa.",
+            "Nadgarstki się przeciążają. Odłóż ręce, rozciągnij przedramiona, dwie minuty przerwy.",
+            "Prawdziwy odpoczynek — wstań, przejdź się, wróć świeży.",
+            "Ręce mają na razie dość. Minimum 90 sekund, potem oceń na nowo.",
+            "Twardy stop. Krążenia nadgarstkami i barkami, zanim będziesz kontynuować.",
+            "Jeśli przepchniesz to dalej, kupisz sobie kontuzję. Zatrzymaj się i odpocznij."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — make sure the left hand is rock-solid before climbing.",
-            "{bpmLow} BPM milestone. Hold here until both hands are independent.",
-            "New band: {bpmLow}-{bpmHigh}. Hands separately first, then together.",
-            "{bpmLow} BPM is fresh. Stay flat until both hands are independent.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Hold it until it feels easy.",
-            "Earn {bpmLow} BPM before chasing more. Stay flat."
+            "Przy {bpmLow} BPM — upewnij się, że lewa ręka jest pewna jak skała, zanim zaczniesz się wspinać.",
+            "Kamień milowy {bpmLow} BPM. Trzymaj tutaj, aż obie ręce będą niezależne.",
+            "Nowe pasmo: {bpmLow}-{bpmHigh}. Najpierw ręce osobno, potem razem.",
+            "{bpmLow} BPM jest świeże. Zostań na płasko, aż obie ręce będą niezależne.",
+            "Zaparkuj przy {bpmLow} BPM. Następny skok przyjdzie po jednej czystej minucie.",
+            "Trafione {bpmLow} BPM — teraz zbuduj kilka czystych taktów, zanim pójdziesz wyżej.",
+            "{bpmLow}-{bpmHigh} BPM jest zupełnie nowe. Trzymaj to, aż zrobi się łatwo.",
+            "Zasłuż na {bpmLow} BPM, zanim pogonisz za więcej. Zostań na płasko."
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch at the keys — piece, exercise, something specific?",
-            "Five-plus minutes in. Want me to call out the left hand, right hand, or both?",
-            "You've been locked in. Tell me what you want feedback on.",
-            "Solid run going. Want sharper feedback on a specific passage?",
-            "Been at it a while. Left hand? Right hand? Voicings? Tell me where to listen.",
-            "Pocket's been steady. Pick a target if you want closer feedback.",
-            "Long stretch at the keys. Anything you want me to flag?",
-            "You've been deep in it. Tell me what to listen for next."
+            "Długi odcinek przy klawiszach — utwór, ćwiczenie, coś konkretnego?",
+            "Ponad pięć minut za nami. Mam wskazywać lewą rękę, prawą, czy obie?",
+            "Jesteś mocno w tym. Powiedz, do czego chcesz uwag.",
+            "Dobra seria trwa. Chcesz ostrzejszych uwag do konkretnego fragmentu?",
+            "Grasz już jakiś czas. Lewa ręka? Prawa? Układy akordów? Powiedz, gdzie mam słuchać.",
+            "Rytm był stały. Wybierz cel, jeśli chcesz bliższych uwag.",
+            "Długi odcinek przy klawiszach. Chcesz, żebym coś wskazał?",
+            "Byłeś głęboko w tym. Powiedz, czego mam nasłuchiwać dalej."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm} at the keys. Both hands held the climb.",
-            "Made it to {endBpm} BPM. You played through the ramp from {startBpm}.",
-            "Target reached: {endBpm} BPM. Ramp from {startBpm} complete — hands stayed locked.",
-            "{endBpm} BPM reached. Good ramp from {startBpm} on the keys."
+            "Rampa skończona — od {startBpm} do {endBpm} przy klawiszach. Obie ręce wytrzymały wspinaczkę.",
+            "Doszedłeś do {endBpm} BPM. Przeszedłeś całą rampę od {startBpm}.",
+            "Cel osiągnięty: {endBpm} BPM. Rampa od {startBpm} ukończona — ręce pozostały zgrane.",
+            "Osiągnięto {endBpm} BPM. Dobra rampa od {startBpm} na klawiszach."
           ]
         },
         "stamina": {
           "neutral": [
-            "Tension in your touch around minute {staminaMinutes}. Release, breathe, come back clean.",
-            "Around minute {staminaMinutes} the wrist tension creeps in. Brief rest, then resume.",
-            "Past the {staminaMinutes}-minute mark the touch gets heavier. Short break, then back at the keys.",
-            "Fatigue in the hands shows around minute {staminaMinutes}. Rest, then return."
+            "Napięcie w dotyku około {staminaMinutes}. minuty. Rozluźnij się, oddychaj, wróć czysto.",
+            "Około {staminaMinutes}. minuty napięcie w nadgarstkach się wkrada. Krótki odpoczynek, potem wznów.",
+            "Po {staminaMinutes}. minucie dotyk robi się cięższy. Krótka przerwa, potem wróć do klawiszy.",
+            "Zmęczenie rąk widać około {staminaMinutes}. minuty. Odpocznij, potem wróć."
           ]
         },
         "bias_only": {
           "neutral": [
-            "Keys are falling {biasMs}ms {direction} the click with low scatter. Shift your attack timing {correctionDirection}.",
-            "Consistent {biasMs}ms {direction} — that's a lean, not jitter. Move everything {correctionDirection} to center it."
+            "Klawisze padają {biasMs} ms {direction} względem klika przy niskim rozrzucie. Przesuń czas ataku {correctionDirection}.",
+            "Stałe {biasMs} ms {direction} — to przechył, nie jitter. Przesuń wszystko {correctionDirection}, by to wycentrować."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Keys ceiling at {bpm} — {attemptCount} attempts. Two sessions at {suggestedBpm} to consolidate.",
-            "{attemptCount} tries at {bpm} and the hands aren't settling. Park at {suggestedBpm} and groove it in."
+            "Pułap na klawiszach przy {bpm} — {attemptCount} podejść. Dwie sesje przy {suggestedBpm}, żeby to utrwalić.",
+            "{attemptCount} prób przy {bpm}, a ręce się nie układają. Zaparkuj przy {suggestedBpm} i wgraj to sobie."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Grid correlation dropped. Still with the click, or running a phrase?",
-            "Lost the metric grid there. Fill or free passage?"
+            "Korelacja z siatką spadła. Nadal z klikiem, czy grasz frazę?",
+            "Zgubiona siatka metryczna. Wypełnienie czy swobodny fragment?"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "Beats are all there but the attack is gentle — try a more intentional finger weight.",
-            "Good coverage but the keystrokes are soft. Push into the keys with more intention.",
-            "Every beat lands, just quietly. Commit more weight to each keypress.",
-            "Landing every note but the signal is weak — increase velocity through the key bed."
+            "Uderzenia są wszystkie, ale atak jest delikatny — spróbuj bardziej zamierzonego ciężaru palców.",
+            "Dobre pokrycie, ale naciśnięcia klawiszy są miękkie. Wciskaj klawisze z większym zamiarem.",
+            "Każde uderzenie jest, tylko cicho. Włóż więcej ciężaru w każde naciśnięcie klawisza.",
+            "Trafiasz w każdą nutę, ale sygnał jest słaby — zwiększ szybkość naciśnięcia aż do dna klawisza."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your playing drifted from the click. Pause and re-enter on the downbeat.",
-            "Grid tracking dropped — let the click run a bar, then come back in.",
-            "Went off-tempo there. Lift your hands, find the pulse, and re-enter.",
-            "The phrase wandered from the grid. Take a beat and lock back to the click."
+            "Twoja gra odpłynęła od klika. Zatrzymaj się i wejdź ponownie na mocnym uderzeniu.",
+            "Śledzenie siatki spadło — pozwól klikowi pobiec przez jeden takt, potem wejdź z powrotem.",
+            "Wyszedłeś z tempa. Unieś ręce, znajdź puls i wejdź na nowo.",
+            "Fraza odpłynęła od siatki. Weź chwilę i zgraj się z powrotem z klikiem."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're playing about half the expected beats — try to land every note in the phrase.",
-            "Coverage is low — make sure each beat gets a note, not just the melodic peaks.",
-            "Around half the beats are going unplayed. Focus on completing the full passage.",
-            "Beat coverage is low. Slow down and make sure every beat lands before moving on."
+            "Grasz mniej więcej połowę oczekiwanych uderzeń — spróbuj trafić w każdą nutę frazy.",
+            "Pokrycie jest niskie — upewnij się, że każde uderzenie dostaje nutę, nie tylko melodyczne szczyty.",
+            "Mniej więcej połowa uderzeń zostaje niezagrana. Skup się na dokończeniu całego fragmentu.",
+            "Pokrycie uderzeń jest niskie. Zwolnij i upewnij się, że każde uderzenie jest zagrane, zanim pójdziesz dalej."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your note placement is solid — but the space between keystrokes keeps wandering. Try counting the subdivisions out loud as you play.",
-            "On the beat well, but the gap between notes is uneven. Tap your foot on every subdivision to lock the spacing between keystrokes.",
-            "Beat placement is there — but the space between notes is shifting. Count the subdivisions aloud and let your voice keep the gaps even.",
-            "Good beat placement — note spacing is drifting though. Slow the passage down until the gaps feel equal, then build speed again."
+            "Położenie nut jest pewne — ale odstęp między naciśnięciami klawiszy ciągle błądzi. Spróbuj liczyć podziały na głos podczas gry.",
+            "Dobrze na uderzeniu, ale przerwa między nutami jest nierówna. Stukaj stopą w każdy podział, by zakotwiczyć odstępy między naciśnięciami.",
+            "Położenie na uderzeniu jest — ale odstęp między nutami się przesuwa. Licz podziały na głos i pozwól, by głos trzymał przerwy równo.",
+            "Dobre położenie na uderzeniu — odstępy między nutami jednak dryfują. Zwolnij fragment, aż przerwy będą wydawać się równe, potem znowu przyspiesz."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your note spacing is really even — but you're landing off the beat. Anticipate the click by a hair and drive each keystroke right on it.",
-            "Even spacing between notes, but the keystrokes are sitting off the grid. Lock the first note of each phrase to the beat, then let the rest follow.",
-            "The rhythm between keystrokes is consistent — now anchor the whole phrase to the click. Aim for the center of each beat.",
-            "Good spacing feel. Focus on where each note lands relative to the click — try playing slightly ahead of where you expect the beat."
+            "Twoje odstępy między nutami są naprawdę równe — ale lądujesz obok uderzenia. Uprzedź klik o włos i wejdź każdym naciśnięciem dokładnie na niego.",
+            "Równe odstępy między nutami, ale naciśnięcia klawiszy siedzą poza siatką. Zgraj pierwszą nutę każdej frazy z uderzeniem, resztę pozwól dopasować się za nią.",
+            "Rytm między naciśnięciami klawiszy jest stały — teraz zakotwicz całą frazę w kliku. Celuj w środek każdego uderzenia.",
+            "Dobre wyczucie odstępów. Skup się na tym, gdzie każda nuta ląduje względem klika — spróbuj grać odrobinę przed miejscem, gdzie spodziewasz się uderzenia."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Note spacing and beat placement both locked in. That's clean piano timing.",
-            "Spacing and placement both on point. The phrase is sitting exactly where it should.",
-            "Both dimensions dialed — you're playing with real precision right now.",
-            "Timing locked across the board. That's the feel you've been building toward."
+            "Odstępy i położenie nut zgrane. To jest czysty rytm na pianinie.",
+            "Odstępy i położenie w punkt. Fraza siedzi dokładnie tam, gdzie powinna.",
+            "Oba wymiary dopracowane — grasz teraz z prawdziwą precyzją.",
+            "Czas zgrany w każdym względzie. To jest wyczucie, do którego dążysz."
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The notes are blurring together on my end — I'm reading this stretch less clearly.",
-            "Pedal is smearing the attacks. Take the last half-minute's numbers loosely.",
-            "Hard to pick single attacks out of the chords right now. My read is softer than usual."
+            "Nuty zlewają mi się w całość — ten odcinek czytam mniej wyraźnie.",
+            "Pedał rozmazuje ataki. Traktuj liczby z ostatnich pół minuty luźno.",
+            "Trudno teraz wyłowić pojedyncze ataki z akordów. Mój odczyt jest słabszy niż zwykle."
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next chord."
+            "{change}. Od tego miejsca nowy fragment.",
+            "{change}. Poprzedni odcinek jest zamknięty i policzony.",
+            "{change} — ocena zaczyna się od nowa na następnym akordzie."
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "The pause closed that segment — {score}% at {bpm} BPM.",
-            "Your hands came off the keys long enough to end it: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that stretch."
+            "Pauza zamknęła ten fragment — {score}% przy {bpm} BPM.",
+            "Twoje ręce zeszły z klawiszy na tyle długo, by go zakończyć: {score}% przy {bpm} BPM.",
+            "{score}% przy {bpm} BPM zapisane dla tego odcinka."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play."
+            "{bpmLow}–{bpmHigh} to miejsce, w którym to przestaje być u ciebie czyste — {attemptCount} sesji, każda blisko {score}.",
+            "Wróciłeś do {bpmLow}–{bpmHigh}. Twoje ostatnie {attemptCount} przejść tutaj wyszło około {score}.",
+            "{attemptCount} sesji przy tym tempie, wszystkie blisko {score}. Warto to wiedzieć, grając."
           ]
         }
       }
