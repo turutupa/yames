@@ -19,6 +19,7 @@ import { formatBytes } from "./formatBytes";
 import { coachStatusLabel, coachTierLabel, withLoaderState } from "./coachStatus";
 import { useCoachModel } from "../../hooks/useCoachModel";
 import { CoachGroup } from "./CoachGroup";
+import { CoachNotebookGroup } from "./CoachNotebookGroup";
 import { CoachAnswersLine, CoachSectionHead, CoachSuggestionsGroup } from "./CoachSettingsGroups";
 
 // Short per-voice sample line played when the user clicks a voice
@@ -789,6 +790,8 @@ export function CoachSettingsSection({
       </CoachGroup>
       {/* Suggestions: On / Only when I ask (c4a2), then the practice reminder (rem2). */}
       <CoachSuggestionsGroup />
+      {/* The lines left out with Bring back, and the goal with its Edit (judgement call 27). */}
+      <CoachNotebookGroup />
       <CoachGroup id="tools">
       <div className="setting-row">
         <div className="setting-label">
