@@ -17,8 +17,56 @@ Cues: `src/paths/specs/chords-in-a-key-cues.ts`, attached with `withCues` in `ch
 - [x] Proof-read (below): three sonnet readers, one per Level, 20 objections, 19 taken, 1 answered. 600 cues, 159
   distinct sentences, 0 refusals, check 0 errors (`gc9.log`). Two more refusals while rewording: "Walk the root
   down the G string to D minor." (`cue.specific`: "to D" reads as the D string) -> "..., three chords."
-- [ ] Translations: four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 159 sentences.
-- [ ] Gates
+- [x] Translations: four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 159 sentences
+  each, each file checked again by me with `/tmp/coach-cues3/check_i18n.py` (problems 0 in all fourteen; the `it`
+  file's first draft had twelve over 48, its helper fixed them before handing back). Merged (`/tmp/coach-cues3/merge.log`: every
+  overlay 1311 of 1311, 0 errors; all 1928 warnings are "different numbers" where a translation writes "fret
+  five" as 5).
+- [x] Gates (below)
+
+## Gates
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`/tmp/coach-cues3/check-all.log`).
+- `npx tsc --noEmit`: clean (`/tmp/coach-cues3/tsc.log`).
+- `npm run test`: 401 of 402 files, 23,538 of 23,538 tests passed (`/tmp/coach-cues3/vitest.log`); the one file
+  is the known worktree-only `TabStage.render.test.tsx`.
+- `npm run build`: ok (`/tmp/coach-cues3/build.log`).
+- No Rust file changed (no `test:paths:rust`); no layout run (the orchestrator's).
+
+## The numbers
+
+600 cues on 73 Exercises (69 in 20 Steps, 4 warm-ups; the 6 self-checked with the general cue only), 159 distinct
+sentences, 0 refusals, 0 `cueTexts` drops. By trigger: general 73, heard 67, late 67, early 67, stringChange 67,
+lastBars 67, shift 66, notes 63, extras 63. No `afterHeld` or `openString`: every graded bar is eight fretted
+eighths. Longest cue per language (characters): en 48 · de 48 · es 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 ·
+tr 48 · fr 47 · vi 46 · ko 34 · ja 33 · zh-CN 24 · zh-TW 24.
+
+Want a native read: pl, pt-BR and ru write some seventh chords short ("G7", "Cmaj7", "Dm7") to fit, where their
+overlays spell them out; ru says "мажорная септима" in places beside the overlay's "мажорный септаккорд"; vi keeps
+"verse" and "bridge" in English as its overlay does for verse; de writes fingers as Zeigefinger / Mittelfinger /
+Ringfinger / kleiner Finger (the English numbers them). fr and it shortened a few cues to fit.
+
+## For the next chord Path
+
+- A distance is refused even on a one-version Exercise ("Drop three frets for C": `cue.specific`): name the
+  target fret instead ("Move finger one down to fret three for C.").
+- "to D", "for E", "the last A" read as strings: write "chord five", "the last A chord", "for D minor".
+- Chord numbers as words ("one, six, two, five", "chord five") pass on key-varied Exercises.
+
+## Twelve cues to read
+
+- **"One, four, five, one in F"** (Level 1). F, B flat, C, F around fret 5. general "Say one, four, five, one as
+  each chord starts." · notes "Lay finger one across fret six for B flat." · shift "Put finger two on the G
+  string, fret seven."
+- **"C and A minor, F and D minor"** (Level 1). Each major chord, then its minor partner: one note moves. general
+  "Move just one note in each pair." · notes "For D minor, put the G string at fret seven." · lastBars "From D
+  minor, go straight back to C on '1'."
+- **"One, six, four, five in G"** (Level 2). G, E minor, C, D; the top string holds G for three bars. general
+  "Keep fret three on the top string, G to C." · notes "Slide finger two up a fret from E minor to C." · shift
+  "Keep the C shape and move it up for D."
+- **"G seven and B half-diminished"** (Level 3). G, G7, B diminished, B half-diminished; a long move from fret 10
+  to fret 2. general "Look at fret two before you leave G seven." · notes "Lay finger one flat at fret ten for G
+  seven." · lastBars "From fret two, jump up to fret ten for G."
 
 ## How the cues are built
 
