@@ -2,9 +2,10 @@
 // The coach's tool eval (DESIGN C3b, TOOLS 3.5; leg c3b1a).
 //
 //   node scripts/coach-eval.mjs rules    --out DIR [--lang L,...]
-//   node scripts/coach-eval.mjs requests --out DIR [--lang L,...] [--limit N] [--grammar situation|full] [--deadline-ms MS]
-//   node scripts/coach-eval.mjs model    --out DIR --bin PATH --gguf FILE [--lang L,...] [--limit N] [--grammar ...] [--deadline-ms MS]
-//   node scripts/coach-eval.mjs score    --out DIR --outcomes FILE [--lang L,...] [--limit N]
+//   node scripts/coach-eval.mjs requests --out DIR [--lang L,...] [--limit N] [--grammar situation|full|none] [--prompt notes|names] [--deadline-ms MS]
+//   node scripts/coach-eval.mjs model    --out DIR --bin PATH --gguf FILE [--lang L,...] [--limit N] [--grammar ...] [--prompt ...] [--deadline-ms MS]
+//   node scripts/coach-eval.mjs score    --out DIR --outcomes FILE [--lang L,...] [--limit N] [--grammar ...] [--prompt ...]
+//   node scripts/coach-eval.mjs chain    --out DIR --outcomes FILE [--order rules-first|model-first] [--label TEXT] [--lang L,...] [--limit N]
 //   node scripts/coach-eval.mjs titles   --out FILE --lang L
 //   node scripts/coach-eval.mjs prompt   --out FILE
 //   node scripts/coach-eval.mjs check    [--lang L,...]   (each expected call judged by the runner)
@@ -22,6 +23,7 @@
 // reads the files and runs the process.
 import { build } from "esbuild";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -185,8 +187,10 @@ function writeResults(dir, title, note, ev, scored) {
     all.scores.push(...scores);
   }
   rows.push(ev.summarize("all", all.items, all.scores));
-  writeFileSync(path.join(dir, "results.json"), `${JSON.stringify({ title, rows, scores: all.scores }, null, 1)}\n`);
+  const errors = ev.commonErrors(all.items, all.scores, 10, 3);
+  writeFileSync(path.join(dir, "results.json"), `${JSON.stringify({ title, note, rows, errors, scores: all.scores }, null, 1)}\n`);
   writeFileSync(path.join(dir, "summary.md"), ev.summaryMarkdown(title, rows, note));
+  writeFileSync(path.join(dir, "errors.md"), ev.errorsMarkdown(title, errors));
   const total = rows[rows.length - 1];
   console.log(`${title}: ${total.n} items, right ${total.right}, right tool ${total.rightTool}/${total.calls}, wrong actions ${total.wrongActions}, asked ${total.asked}/${total.which}, no answer ${total.noAnswer}`);
 }
@@ -206,39 +210,107 @@ async function cmdRules(ev, opt) {
   writeResults(dir, "Tool eval: the rules (no model)", "Router as `answerTyped` runs it, then Path search. No fact cards (not on `coach` yet).", ev, scored);
 }
 
+/** `--grammar situation|full|none` and `--prompt notes|names` (leg c3b2m): the arm, checked. */
+function armsOf(opt) {
+  const grammar = opt.grammar === undefined ? "situation" : opt.grammar;
+  const prompt = opt.prompt === undefined ? "notes" : opt.prompt;
+  if (!["situation", "full", "none"].includes(grammar)) fail(`--grammar ${grammar}: situation, full or none`);
+  if (!["notes", "names"].includes(prompt)) fail(`--prompt ${prompt}: notes or names`);
+  return { grammar, prompt };
+}
+
+function armNote(opt) {
+  const { grammar, prompt } = armsOf(opt);
+  const g = { situation: "the tools possible in the situation", full: "every player tool", none: "none (the raw answer parsed strictly; anything else is no answer)" }[grammar];
+  const p = prompt === "names" ? "tool names and arguments only (no descriptions)" : "each tool's description (as the app sends it)";
+  return `Grammar: ${g}. Prompt: ${p}. Only \`answered\` is an answer.`;
+}
+
+/** The set's files against the hashes in evals/coach/README.md: a run on an edited set is refused. */
+function checkHashes(langs) {
+  const readme = readFileSync(path.join(root, "evals/coach/README.md"), "utf8");
+  for (const lng of langs) {
+    const file = path.join(setDir, `${lng}.jsonl`);
+    if (!existsSync(file)) continue;
+    const m = readme.match(new RegExp(`\\| ${lng.replace(/[-]/g, "\\-")}\\.jsonl \\| ([0-9a-f]{64}) \\|`));
+    const sha = createHash("sha256").update(readFileSync(file)).digest("hex");
+    if (!m || m[1] !== sha) fail(`${lng}.jsonl does not match its hash in evals/coach/README.md`);
+  }
+}
+
 function writeRequests(ev, opt, dir) {
-  const grammar = opt.grammar === "full" ? "full" : "situation";
+  const { grammar, prompt } = armsOf(opt);
   const deadlineMs = Number(opt["deadline-ms"]) || 8000;
+  checkHashes(langsOf(ev, opt));
   const sets = limitItems(loadSet(ev, langsOf(ev, opt)), Number(opt.limit) || 0);
   const lines = [];
   let id = 1;
   for (const { lng, items } of sets) {
     const paths = loadPacks(ev, lng);
-    for (const item of items) lines.push(JSON.stringify(ev.askRequestFor(item, paths, { generationId: id++, deadlineMs, grammar })));
+    for (const item of items) lines.push(JSON.stringify(ev.askRequestFor(item, paths, { generationId: id++, deadlineMs, grammar, prompt })));
   }
   const file = path.join(dir, "requests.jsonl");
   writeFileSync(file, `${lines.join("\n")}\n`);
   return { file, sets };
 }
 
-function scoreOutcomes(ev, sets, outcomesFile, dir, title, note) {
-  const outcomes = new Map(
+function readOutcomes(outcomesFile) {
+  return new Map(
     readFileSync(outcomesFile, "utf8")
       .split("\n")
       .filter((l) => l.trim())
       .map((l) => JSON.parse(l))
       .map((o) => [o.id, o]),
   );
+}
+
+const cachedOf = (o) => (typeof o.prefixCached === "boolean" ? o.prefixCached : undefined);
+const msOf = (o) => (typeof o.totalMs === "number" ? o.totalMs : undefined);
+
+function scoreOutcomes(ev, sets, outcomesFile, dir, title, note) {
+  const outcomes = readOutcomes(outcomesFile);
   const scored = [];
   for (const { lng, items } of sets) {
     const paths = loadPacks(ev, lng);
     const scores = items.map((item) => {
       const o = outcomes.get(item.id) ?? { id: item.id, status: "error", error: "no outcome" };
-      return ev.scoreItem(item, ev.modelAnswer(o), paths, typeof o.totalMs === "number" ? o.totalMs : undefined);
+      return ev.scoreItem(item, ev.modelAnswer(o), paths, msOf(o), cachedOf(o));
     });
     scored.push({ lng, items, scores });
   }
   writeResults(dir, title, note, ev, scored);
+}
+
+/**
+ * The chain (leg c3b2m): the rules and a model run's outcomes combined in one
+ * order. `rules-first` is the app's: a turn the rules answered took no model
+ * time (0 ms); `model-first`: the model ran on every turn (its time).
+ */
+async function cmdChain(ev, opt) {
+  const dir = outDir(opt);
+  if (typeof opt.outcomes !== "string") fail("--outcomes FILE is required");
+  const order = opt.order === undefined ? "rules-first" : opt.order;
+  if (!["rules-first", "model-first"].includes(order)) fail(`--order ${order}: rules-first or model-first`);
+  const outcomes = readOutcomes(opt.outcomes);
+  const sets = limitItems(loadSet(ev, langsOf(ev, opt)), Number(opt.limit) || 0);
+  const scored = [];
+  let reached = 0;
+  for (const { lng, items } of sets) {
+    const paths = loadPacks(ev, lng);
+    const scores = items.map((item) => {
+      const o = outcomes.get(item.id) ?? { id: item.id, status: "error", error: "no outcome" };
+      const { answer, usedModel } = ev.chainAnswer(order, ev.rulesAnswer(item, paths), ev.modelAnswer(o));
+      const modelRan = order === "model-first" || usedModel;
+      if (usedModel) reached++;
+      return ev.scoreItem(item, answer, paths, modelRan ? msOf(o) : 0, modelRan ? cachedOf(o) : undefined);
+    });
+    scored.push({ lng, items, scores });
+  }
+  const label = typeof opt.label === "string" ? opt.label : path.basename(path.dirname(path.resolve(opt.outcomes)));
+  const note =
+    `Chain ${order}: ${order === "rules-first" ? "the rules (router, then Path search) answer; the model only where they said none" : "the model answers; the rules only where it said none or gave no answer"}. ` +
+    `The model's answer used on ${reached} items. Outcomes from ${label}. ${order === "rules-first" ? "A turn the rules answered counts 0 ms." : ""}`;
+  writeResults(dir, `Tool eval: chain ${order} (${label})`, note, ev, scored);
 }
 
 async function cmdRequests(ev, opt) {
@@ -251,7 +323,7 @@ async function cmdScore(ev, opt) {
   const dir = outDir(opt);
   if (typeof opt.outcomes !== "string") fail("--outcomes FILE is required");
   const sets = limitItems(loadSet(ev, langsOf(ev, opt)), Number(opt.limit) || 0);
-  scoreOutcomes(ev, sets, opt.outcomes, dir, "Tool eval: a model", `Outcomes from ${opt.outcomes}.`);
+  scoreOutcomes(ev, sets, opt.outcomes, dir, "Tool eval: a model", `${armNote(opt)} Outcomes from ${path.basename(opt.outcomes)}.`);
 }
 
 async function cmdModel(ev, opt) {
@@ -261,7 +333,8 @@ async function cmdModel(ev, opt) {
   const outcomes = path.join(dir, "outcomes.jsonl");
   const run = spawnSync(opt.bin, ["--gguf", opt.gguf, "--requests", file, "--outcomes", outcomes], { stdio: "inherit" });
   if (run.status !== 0) fail(`${opt.bin} exited ${run.status}`);
-  scoreOutcomes(ev, sets, outcomes, dir, `Tool eval: ${path.basename(opt.gguf)}`, `Grammar: ${opt.grammar === "full" ? "every player tool" : "the tools possible in the situation"}. Only \`answered\` is an answer.`);
+  const { grammar, prompt } = armsOf(opt);
+  scoreOutcomes(ev, sets, outcomes, dir, `Tool eval: ${path.basename(opt.gguf)} (grammar ${grammar}, prompt ${prompt})`, armNote(opt));
 }
 
 async function cmdTitles(ev, opt) {
@@ -328,7 +401,7 @@ async function cmdGrammar(ev, opt) {
   writeFileSync(opt.out, ev.choiceGrammar(ev.toolCatalogue(ev.COACH_TOOLS), ev.EVAL_CARDS));
 }
 
-const commands = { grammar: cmdGrammar, rules: cmdRules, requests: cmdRequests, score: cmdScore, model: cmdModel, titles: cmdTitles, prompt: cmdPrompt, check: cmdCheck };
+const commands = { grammar: cmdGrammar, rules: cmdRules, requests: cmdRequests, score: cmdScore, model: cmdModel, chain: cmdChain, titles: cmdTitles, prompt: cmdPrompt, check: cmdCheck };
 if (!commands[command]) fail(`usage: coach-eval.mjs <${Object.keys(commands).join("|")}> --out ...`);
 const ev = await loadEval();
 await commands[command](ev, opt);

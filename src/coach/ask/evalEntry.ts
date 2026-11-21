@@ -9,4 +9,4 @@ export { EVAL_CARDS, CARD_IDS } from "./evalCards";
 export { choiceGrammar, parseChoice } from "./grammar";
 export { choicePrefix, choiceContext } from "./choicePrompt";
 export { EVAL_LANGUAGES, parseSetFile, judgeExpected, WORLD_FOLLOWED, WORLD_JAMS, WORLD_PRESETS } from "./evalWorld";
-export { rulesAnswer, askRequestFor, modelAnswer, scoreItem, summarize, summaryMarkdown, choiceFactsFor } from "./evalRun";
+export { rulesAnswer, askRequestFor, modelAnswer, scoreItem, summarize, summaryMarkdown, choiceFactsFor, chainAnswer, commonErrors, errorsMarkdown } from "./evalRun";

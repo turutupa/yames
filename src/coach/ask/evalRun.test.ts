@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PathDoc } from "../../paths/format";
 import { loadAllPacks } from "../../session/packs";
-import { askRequestFor, modelAnswer, rulesAnswer, scoreItem, summarize } from "./evalRun";
+import { askRequestFor, chainAnswer, commonErrors, errorsMarkdown, modelAnswer, rulesAnswer, scoreItem, summarize } from "./evalRun";
 import type { EvalItem } from "./evalWorld";
 
 let paths: PathDoc[];
@@ -79,5 +79,69 @@ describe("the engines' inputs", () => {
     expect(b.grammar).not.toContain('"\\"set_tempo\\""');
     expect(full.grammar.length).toBeGreaterThan(a.grammar.length);
     expect(a.context).toContain("Tempo: 100 bpm");
+  });
+
+  it("the c3b2m arms: no grammar sends none; a plain prompt names the tools without their lines", () => {
+    const shipped = askRequestFor(item({}), paths, { generationId: 1, deadlineMs: 8000, grammar: "situation" });
+    const bare = askRequestFor(item({}), paths, { generationId: 2, deadlineMs: 8000, grammar: "none" });
+    const plain = askRequestFor(item({}), paths, { generationId: 3, deadlineMs: 8000, grammar: "situation", prompt: "names" });
+    expect(bare.grammar).toBeUndefined();
+    expect("grammar" in bare).toBe(false);
+    expect(bare.prefix).toBe(shipped.prefix);
+    expect(plain.grammar).toBe(shipped.grammar);
+    expect(shipped.prefix).toMatch(/^set_tempo\([^)\n]*\): \S/m);
+    expect(plain.prefix).toMatch(/^set_tempo\([^)\n]*\)$/m);
+    expect(plain.prefix.length).toBeLessThan(shipped.prefix.length);
+    // The answer's format is the same in both.
+    expect(plain.prefix.split("Tools:")[0]).toBe(shipped.prefix.split("Tools:")[0]);
+  });
+
+  it("a raw answer without a grammar is read strictly", () => {
+    expect(modelAnswer({ id: "t-1", status: "answered", text: '```json\n{"answer":"none"}\n```' })).toMatchObject({ kind: "noAnswer", status: "unread" });
+    expect(modelAnswer({ id: "t-1", status: "answered", text: 'Sure! {"answer":"none"}' })).toMatchObject({ kind: "noAnswer", status: "unread" });
+    expect(modelAnswer({ id: "t-1", status: "answered", text: ' {"answer":"none"}\n' })).toEqual({ kind: "none" });
+  });
+});
+
+describe("the chain and the error list (c3b2m)", () => {
+  const call = { kind: "call", call: { tool: "set_tempo", args: { direction: "slower" } } } as const;
+  it("rules first: the rules' answer stands unless it is none", () => {
+    expect(chainAnswer("rules-first", call, { kind: "which" })).toEqual({ answer: call, usedModel: false });
+    expect(chainAnswer("rules-first", { kind: "search", step: "p/s" }, call)).toEqual({ answer: { kind: "search", step: "p/s" }, usedModel: false });
+    expect(chainAnswer("rules-first", { kind: "none" }, call)).toEqual({ answer: call, usedModel: true });
+    expect(chainAnswer("rules-first", { kind: "none" }, { kind: "noAnswer", status: "truncated" })).toMatchObject({ usedModel: true });
+  });
+
+  it("model first: the model's answer stands unless it is none or no answer", () => {
+    expect(chainAnswer("model-first", { kind: "none" }, call)).toEqual({ answer: call, usedModel: true });
+    expect(chainAnswer("model-first", call, { kind: "none" })).toEqual({ answer: call, usedModel: false });
+    expect(chainAnswer("model-first", call, { kind: "noAnswer", status: "timedOut" })).toEqual({ answer: call, usedModel: false });
+    expect(chainAnswer("model-first", call, { kind: "yours" })).toEqual({ answer: { kind: "yours" }, usedModel: true });
+  });
+
+  it("groups wrong answers by tool or kind, most frequent first, with examples", () => {
+    const a = item({ id: "a", text: "slower please" });
+    const b = item({ id: "b", text: "bit slower" });
+    const c = item({ id: "c", text: "thanks", expect: { kind: "none" } });
+    const d = item({ id: "d" });
+    const go = { kind: "call", call: { tool: "go_to", args: { screen: "paths" } } } as const;
+    const scores = [scoreItem(a, { kind: "none" }, paths), scoreItem(b, { kind: "none" }, paths), scoreItem(c, go, paths), scoreItem(d, call, paths, 900, true)];
+    const errors = commonErrors([a, b, c, d], scores);
+    expect(errors.map((e) => [e.expected, e.got, e.count])).toEqual([
+      ["call set_tempo", "none", 2],
+      ["none", "call go_to", 1],
+    ]);
+    expect(errors[0].examples[0]).toMatchObject({ id: "a", text: "slower please" });
+    const md = errorsMarkdown("t", errors);
+    expect(md).toContain('"slower please"');
+    const sum = summarize("en", [a, b, c, d], scores);
+    expect(sum).toMatchObject({ prefixCached: 1, prefixKnown: 1 });
+  });
+
+  it("counts no answers by status", () => {
+    const a = item({ id: "a" });
+    const b = item({ id: "b" });
+    const s = summarize("en", [a, b], [scoreItem(a, { kind: "noAnswer", status: "truncated" }, paths), scoreItem(b, { kind: "noAnswer", status: "deadEnd" }, paths)]);
+    expect(s.noAnswerBy).toEqual({ truncated: 1, deadEnd: 1 });
   });
 });
