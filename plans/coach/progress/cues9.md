@@ -17,8 +17,17 @@ Cues: `src/paths/specs/funk-lines-cues.ts`, attached with `withCues` in `funk-li
 - [x] Proof-read: three sonnet readers, one per Level (`/tmp/coach-cues9/proof-funk-lines/`); 16
   objections, all taken (`3ddc7b7f`; below). `check`: 0 errors, 0 refused (`gc6.log`). 209 distinct
   sentences to translate.
-- [ ] Translations.
-- [ ] Gates.
+- [x] Translations (`b737712e`; below).
+- [x] Gates (logs in `/tmp/coach-cues9/`, all through the job queue):
+  - `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`check-all.log`).
+  - `npx tsc --noEmit`: clean (`tsc.log`).
+  - `npm run build`: ok (`build.log`).
+  - `npm run test`: 412 of 415 files, 31,101 of 31,103 tests passed (`vitest.log`), under a busy queue.
+    The two failures were 20 s timeouts (`generate.test.ts` "subdivisions mostly", `packs.test.ts` "an
+    overlay for every Path in every locale"); re-run alone, both files pass, 100 of 100
+    (`vitest-2.log`, with the known "Timeout calling onTaskUpdate" under load). The third file is the
+    known worktree-only `TabStage.render.test.tsx`.
+  - No Rust file changed; no layout run (the orchestrator's).
 
 ## The proof-read (three separate sonnet readers, one per Level: cues, tabs, purposes, how-tos, the guide's rules)
 
@@ -56,6 +65,41 @@ afterHeld 13, shift 9. Final `check`: 0 errors, 0 `cue.refused`, 0 cues said in 
 none mine; read, they read true). The longest English cue is 48 ("Strike the strings only where a stab is
 written."). One refusal on the way (`cue.specific`, twice: a sentence naming E and D, then E and A, on the
 octave Exercise with the band, read as strings) -> reworded to name no letter.
+
+## Translations
+
+Four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 209 sentences each, every
+file checked again by me with `check_i18n.py` (problems 0 in all fourteen), merged: every overlay 878 of 878
+(`/tmp/coach-cues9/merge1.log`, `merge2.log`; the "different numbers" warnings are fret numbers written as
+digits where the English spells them, which the brief allows). Three German cues were not imperatives and
+were fixed by hand ("Tipp den Schlag mit dem Fuß, betone das „und“.", "Spiel die zweite Hälfte so
+gleichmäßig.", "Setz den ersten Ton jeder Figur auf ihre Zahl."). `check funk-lines` after: 0 errors
+(`gc7.log`).
+
+Longest cue per language: en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 47 ·
+vi 48 · ko 42 · ja 41 · zh-CN 38 · zh-TW 38 (the CJK longest is the count '1, and a, 2 e (and) a, (3) e and a').
+
+Want a native read: **it** first (its overlay counts '1 e e a', so the 'e' and the 'and' are both "e"; the
+helper wrote "la seconda 'e'" for the 'and' where it fitted and a bare 'e' where it did not: read
+holes.no-and and the stabs cues); **pl** ("Zostaw każdą „2” ciszą.", "pryma" for root); **ru** (the hammered
+general is compressed); **ja** (plain form and ます/ましょう mixed to fit); **tr** ("klik", "basamak" for
+rung); fr ("passage" and "tour" both for a round; "position" for box); es ("la caja" for box, which is also
+the snare); zh-CN 把位 / zh-TW 指型 for box; "hi-hat" in pt-BR, 踩镲 / 踩鑔 in zh.
+
+## Twelve cues to read
+
+- **"One, and-a"** (Level 1). A long note and two short ones on every beat, the 'e' left out. general
+  "Count '1, and a' and leave each 'e' silent." · extras "Leave the 'e' of every beat silent." · early
+  "Wait the full eighth before the 'and'."
+- **"A line from the top"** (Level 1). Two bars from the D string's fret 7 down to a held low A, mostly one
+  note at a time. general "Count '1, and a', then play the 'e' of '2'." · stringChange "Move to the A
+  string in the rests of '2'." · afterHeld "Count the low A's beat, then start again."
+- **"The vamp with the band"** (Level 2). Line and stabs on Am7, then the same shape on D9 with F#.
+  general "Put your stabs just after the snare." · shift "Reach back to fret four for the F sharp." ·
+  early "Let the snare sound before each stab."
+- **"Starting on the 'e'"** (Level 3). A low A on '1', then pairs on the 'e' and the 'a' answered on the
+  next beat and its 'and'. general "Count '1 e (and) a, 2 (e) and (a)' aloud." · extras "Leave '3' itself
+  silent." · late "Put '1', '2' and '4' right on the click."
 
 ## How these cues are written
 
