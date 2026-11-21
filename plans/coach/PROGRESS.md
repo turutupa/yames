@@ -46,6 +46,18 @@ orchestrator keeps. Newest last.
   for `generate.test.ts` "mostly" and `smooth.spec.ts` "Ask commits nothing").
 - 2026-11-20 20:05 (relay): the Vulkan probe (pv1) runs on the RTX by the relay, with Qwen3 4B Q4_K_M;
   its numbers will be appended to OWNER-UPDATES. Not run on the DGX. c3b uses them when they land.
+- 2026-11-20 ~21:45 (owner): training may run all night and through the weekend, as queue jobs, with
+  16 GB kept free. Applies to c3d if c3b2b's numbers call for it.
+- 2026-11-20 ~22:00 (relay): **pv1's numbers landed** (OWNER-UPDATES has the table; `coach` at
+  `406d0841`, Qwen3 4B Q4_K_M on Vulkan, 37 / 37 layers on the GPU, quiet machine). All four hard
+  gates pass in all five LLM runs; p99 0.552 (`--llm-load`), 0.544 (`--llm-cancel`), 0.991
+  (continuous chat: a pass with no margin), 0.654 (jam), 0.596 (song). The no-model baseline misses
+  p99 twice (1.19, 1.10 ms): that machine's idle audio path, not the coach (the relay's reading,
+  unverified). Advisory: gaps over two buffers in the jam (5), song (3) and cancel (1) runs, the
+  longest 28.8 ms, with no missed beat: worth a re-run. **Speed: rephrase p50 0.333 s (55.9 tok/s),
+  chat p50 0.511 s for 34 tokens (66.0 tok/s).** For c3b2b: on this GPU the 8 s turn gate is met
+  many times over by the stock 4B, so the router question is decided by tool-choice accuracy and
+  by slower machines, not by this machine's speed.
 
 ## What happened to wave 1's first run
 
