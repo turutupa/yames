@@ -22,6 +22,20 @@ Brief: `plans/tasks/coach/rem2-in-app-reminder.md`. Branch `coach-rem2`. Logs `/
 - English in `locales/en/notebook.json` `notebook.reminder.*`.
 - Shots: `?reminder=on` in `src/shots/mockIpc.ts`.
 
-## Next
+- Phone: a phone's Settings never names the coach (`mobileComposition.test.tsx`), so the phone section
+  is titled "Practice reminder" (`#settings-coach-reminder`), not "Coach".
+- Locales: 14 by a sonnet helper. Native read wanted: es/it/pt-BR/pl/ru (preposition before a time like
+  1:00), de (um + 12-hour), ja/ko (loanword for "reminder", since 通知/알림 mean notification), vi ("Ngày"
+  for Days), nl (pronoun for herinnering), zh (quiet says "no practice" rather than Session).
+- Tests: `src/coach/reminder.test.ts` (table, midnight, quiet rule), `store.test.ts` (reminder block, one
+  test per malformed shape), `src/containers/settings/CoachReminderRow.test.tsx` (row + Today line).
+  Layout: `tests/layout/reminder.spec.ts`.
 
-Gates, locales (14), layout scenes.
+## Gates
+
+- tsc 0; `npm run build` 0; `npm run test`: 2 files failed: TabStage.render (known symlink one) and
+  mobileComposition (fixed, see above; re-run green). SupportSection failed once in a loaded re-run and
+  passed alone (load flake, not touched here).
+- Layout (first run, box at the queue's limit): today-line, settings, short-window green; reminder's
+  phone-settings scene could not build through `settings-update` on a phone (fixed: through the tab);
+  smooth.spec 4 long-task failures and phone-learning:374 (2 px) under load: re-run queued.
