@@ -64,7 +64,7 @@
       "label": "A Path to try next, from the coach",
       "kick": "A Path to try next",
       "chip": "Suggest a Path",
-      "next": "{{path}} is the next Path in the curriculum's order that you have not started, and nothing it builds on is missing.",
+      "next": "Of the Paths you have not started, {{path}} is the first in the curriculum's order with everything it builds on in place.",
       "readyGoal": "{{path}} matches what you said you are working toward, and nothing it builds on is missing.",
       "buildsOn": "{{path}} builds on {{on}}, which you have started.",
       "buildsOnLevel": "{{path}} builds on {{on}}, and you are through {{level}} there.",

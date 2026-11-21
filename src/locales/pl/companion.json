@@ -64,7 +64,7 @@
       "label": "Ścieżka do spróbowania dalej, od trenera",
       "kick": "Ścieżka do spróbowania dalej",
       "chip": "Zaproponuj ścieżkę",
-      "next": "Ścieżka {{path}} jest następna w kolejności programu spośród jeszcze nierozpoczętych, a niczego, na czym się opiera, nie brakuje.",
+      "next": "Spośród jeszcze nierozpoczętych ścieżek {{path}} jest pierwsza w kolejności programu, u której wszystko, na czym się opiera, jest na miejscu.",
       "readyGoal": "Ścieżka {{path}} pasuje do tego, ku czemu według własnych słów zmierzasz, a niczego, na czym się opiera, nie brakuje.",
       "buildsOn":"{{path}} opiera się na ścieżce: {{on}}. Tę masz już rozpoczętą.",
       "buildsOnLevel": "{{path}} opiera się na ścieżce: {{on}}. Masz tam za sobą: {{level}}.",
