@@ -1,0 +1,168 @@
+{
+  "language": "fr",
+  "noSpaces": false,
+  "verbs": {
+    "open": ["ouvre les", "ouvre le", "ouvre la", "ouvre", "ouvrir", "ouvrez", "va à", "va a", "va au", "va aux", "va sur", "aller à", "aller a", "aller au", "aller aux", "aller sur", "emmène-moi à", "emmene-moi a"],
+    "start": ["démarre", "demarre", "démarrer", "demarrer", "lance", "lancer", "commence", "commencer", "joue", "jouer"],
+    "slower": ["plus lent", "plus lentement", "ralentis", "ralentir", "moins vite", "va plus lentement", "va plus lent"],
+    "faster": ["plus rapide", "plus rapidement", "plus vite", "accélère", "accelere", "accélérer", "accelerer", "va plus vite", "va plus rapide"],
+    "loop": ["répète", "repete", "répéter", "repeter", "boucle", "boucler", "loop"],
+    "show": ["montre", "montrer", "montre-moi", "affiche", "afficher", "affiche-moi", "dessine"],
+    "follow": ["suis", "suivre", "suivez"],
+    "load": ["charge", "charger"],
+    "set": ["mets", "mettre", "règle", "regle", "régler", "regler", "change", "changer", "définis", "definis", "fixe", "fixer"],
+    "focus": ["concentre-toi sur", "concentre toi sur", "concentre-toi", "concentre toi", "mets l'accent sur", "focus sur", "focus"],
+    "swap": ["remplace", "remplacer", "échange", "echange", "échanger", "change la partie", "changer la partie"],
+    "findEdge": ["trouve ma limite sur", "trouve ma limite dans", "trouve ma limite", "trouver ma limite", "cherche ma limite sur", "cherche ma limite dans", "cherche ma limite"],
+    "testOut": ["fais le test de", "fais le test", "passe le test de", "passe le test", "teste", "tester"],
+    "explain": ["explique-moi", "explique", "expliquer"],
+    "make": ["fais-moi", "crée-moi", "cree-moi", "fais", "crée", "cree", "créer", "construis", "génère", "genere"]
+  },
+  "screens": {
+    "today": ["aujourd'hui", "accueil", "l'accueil"],
+    "paths": ["parcours"],
+    "progress": ["progrès", "progres"],
+    "tools": ["outils"],
+    "beat": ["métronome", "metronome"],
+    "drill": ["rampe", "rampes"],
+    "setlist": ["setlist", "set list"],
+    "jam": ["jam", "jams"],
+    "songs": ["morceaux"],
+    "settings": ["paramètres", "parametres", "réglages", "reglages", "préférences", "preferences"]
+  },
+  "sections": {
+    "general": ["général", "general"],
+    "appearance": ["apparence"],
+    "instrument": ["instrument"],
+    "practice": ["pratique"],
+    "coach": ["coach"],
+    "tools": ["outils"],
+    "songs": ["morceaux"],
+    "keepTakes": ["garder les prises", "garder prises"],
+    "about": ["à propos", "a propos"]
+  },
+  "settingKeys": {
+    "theme": ["thème", "theme"],
+    "language": ["langue"],
+    "practiceView": ["vue d'entraînement", "vue d'entrainement", "vue de pratique"],
+    "bandVolume": ["volume du groupe"],
+    "countIn": ["décompte", "decompte"],
+    "coachVoice": ["voix du coach", "voix"],
+    "coachSuggestions": ["suggestions du coach", "suggestions", "conseils"]
+  },
+  "onOff": {
+    "on": ["activé", "activée", "active", "on", "oui", "allumé", "allumée"],
+    "off": ["désactivé", "désactivée", "désactive", "desactive", "off", "éteint", "éteinte", "eteint"]
+  },
+  "units": {
+    "bpm": ["bpm", "battements par minute"],
+    "minutes": ["minutes", "minute", "mins", "min"],
+    "bar": ["mesures", "mesure"],
+    "step": ["étape", "etape", "l'étape", "l'etape"],
+    "part": ["partie"],
+    "clicks": ["clics par temps", "clic par temps", "clics par battement", "clic par battement", "clics", "clic", "clicks"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "vitesse"],
+    "path": ["parcours"],
+    "jam": ["jam"],
+    "preset": ["préréglage", "prereglage", "preset"],
+    "chord": ["accord", "l'accord"],
+    "scale": ["gamme", "la gamme"],
+    "exercise": ["exercice", "l'exercice"],
+    "goal": ["mon objectif", "objectif", "mon but", "but"],
+    "session": ["séance d'aujourd'hui", "seance d'aujourd'hui", "séance du jour", "seance du jour", "la séance", "la seance", "séance", "seance", "aujourd'hui"],
+    "mix": ["le mélange", "le melange", "mélange", "melange", "le mix", "mix"],
+    "screen": ["cet écran", "cet ecran", "l'écran", "l'ecran", "écran", "ecran", "ceci"]
+  },
+  "connectors": {
+    "to": ["à", "a", "jusqu'à", "jusqu'a", "au", "-"],
+    "at": ["à", "a", "au", "depuis"],
+    "of": ["de", "du", "sur", "dans", "en"],
+    "for": ["pour", "avec", "par"]
+  },
+  "swapChoices": {
+    "harder": ["quelque chose de plus difficile", "quelque chose de plus dur", "plus difficile", "plus dur"],
+    "different": ["quelque chose de différent", "quelque chose de different", "quelque chose d'autre", "autre chose", "différent", "different"],
+    "style": ["un autre style", "autre style", "un style différent", "un style different", "style"]
+  },
+  "ordinals": {
+    "premier": 1,
+    "première": 1,
+    "premiere": 1,
+    "deuxième": 2,
+    "deuxieme": 2,
+    "second": 2,
+    "seconde": 2,
+    "troisième": 3,
+    "troisieme": 3,
+    "quatrième": 4,
+    "quatrieme": 4
+  },
+  "roots": {
+    "sharp": ["dièse", "diese"],
+    "flat": ["bémol", "bemol"]
+  },
+  "scales": {
+    "major": ["majeur", "majeure", "ionien"],
+    "naturalMinor": ["mineur naturel", "mineure naturelle", "mineur", "mineure", "éolien", "eolien"],
+    "dorian": ["dorien"],
+    "mixolydian": ["mixolydien"],
+    "minorPentatonic": ["pentatonique mineure", "pentatonique mineur", "mineure pentatonique", "mineur pentatonique", "pentatonique"],
+    "majorPentatonic": ["pentatonique majeure", "pentatonique majeur", "majeure pentatonique", "majeur pentatonique"],
+    "blues": ["blues", "blues mineur"],
+    "harmonicMinor": ["mineur harmonique", "mineure harmonique", "harmonique mineure", "harmonique mineur"],
+    "melodicMinor": ["mineur mélodique", "mineure mélodique", "mineur melodique", "mineure melodique", "mélodique mineure", "melodique mineure"],
+    "lydian": ["lydien"],
+    "phrygian": ["phrygien"],
+    "majorBlues": ["blues majeur"],
+    "altered": ["altérée", "alteree", "altéré", "altere"],
+    "locrian": ["locrien"],
+    "wholeTone": ["par tons", "tons entiers", "ton entier", "par ton"],
+    "diminishedWholeHalf": ["diminuée ton demi-ton", "diminuee ton demi-ton", "diminuée ton demi ton", "diminuee ton demi ton"],
+    "diminishedHalfWhole": ["diminuée demi-ton ton", "diminuee demi-ton ton", "diminuée demi ton ton", "diminuee demi ton ton"],
+    "phrygianDominant": ["phrygien dominant"],
+    "lydianDominant": ["lydien dominant"],
+    "harmonicMajor": ["majeur harmonique", "majeure harmonique", "harmonique majeure", "harmonique majeur"],
+    "hungarianMinor": ["mineur hongrois", "mineure hongroise", "hongrois mineur", "hongroise mineure"],
+    "augmentedScale": ["augmentée", "augmentee"],
+    "bebopDominant": ["bebop dominant"],
+    "bebopMajor": ["bebop majeur"],
+    "bebopMinor": ["bebop mineur"],
+    "chromatic": ["chromatique"]
+  },
+  "positions": {
+    "open": ["position ouverte"],
+    "rootOn6": ["fondamentale sur 6", "fondamentale sur la 6", "fondamentale sur la sixième corde", "fondamentale sur la sixieme corde", "tonique sur 6", "tonique sur la 6", "tonique sur la sixième corde", "tonique sur la sixieme corde"],
+    "rootOn5": ["fondamentale sur 5", "fondamentale sur la 5", "fondamentale sur la cinquième corde", "fondamentale sur la cinquieme corde", "tonique sur 5", "tonique sur la 5", "tonique sur la cinquième corde", "tonique sur la cinquieme corde"],
+    "rootOn4": ["fondamentale sur 4", "fondamentale sur la 4", "fondamentale sur la quatrième corde", "fondamentale sur la quatrieme corde", "tonique sur 4", "tonique sur la 4", "tonique sur la quatrième corde", "tonique sur la quatrieme corde"],
+    "rootOn3": ["fondamentale sur 3", "fondamentale sur la 3", "fondamentale sur la troisième corde", "fondamentale sur la troisieme corde", "tonique sur 3", "tonique sur la 3", "tonique sur la troisième corde", "tonique sur la troisieme corde"]
+  },
+  "never": {
+    "input": ["microphone", "micro", "mic", "entrée", "entree", "entrées", "entrees", "input", "écoute", "ecoute", "écouter", "ecouter", "écoute-moi", "ecoute-moi"],
+    "devices": ["périphérique", "peripherique", "périphériques", "peripheriques", "appareil", "appareils", "interface", "sortie", "sorties", "haut-parleur", "haut-parleurs", "enceintes", "casque", "écouteurs", "ecouteurs"],
+    "grading": ["évaluation", "evaluation", "évaluer", "evaluer", "évalue", "evalue", "évalue-moi", "evalue-moi", "évaluée", "evaluee", "évalué", "evalue", "notation", "noter"],
+    "recording": ["enregistrement", "enregistrements", "enregistrer", "enregistre", "enregistres", "enregistrant", "enregistré", "enregistre-moi"],
+    "deleting": ["supprime", "supprimer", "supprime-le", "supprime-la", "efface", "effacer", "efface-le", "retire", "retirer", "enlève", "enleve", "enlever", "vide", "vider", "oublie", "oublier"],
+    "unfollowing": ["arrête de suivre", "arrete de suivre", "arrêter de suivre", "arreter de suivre", "quitte le parcours", "quitter le parcours", "quitte parcours", "quitter parcours", "abandonne le parcours", "abandonner le parcours", "désabonne", "desabonne", "se désabonner"],
+    "model": ["télécharge", "telecharge", "télécharger", "telecharger", "téléchargement", "telechargement", "modèle", "modele", "modèles", "llm"],
+    "grades": ["note", "notes", "score", "scores", "résultat", "résultats", "resultat", "resultats", "moyenne", "tempo propre"]
+  },
+  "questions": [
+    "pourquoi", "comment", "quand", "où", "qui", "quoi", "que", "qu'est-ce", "qu'est", "quel", "quelle", "quels", "quelles", "combien", "lequel", "laquelle",
+    "est-ce", "peux-tu", "peux tu", "peut-on", "peut-il", "pourrais-tu", "pourrais tu", "pourriez-vous", "pouvez-vous", "puis-je", "dois-je", "faut-il",
+    "est", "es", "sont", "suis-je", "ai-je", "as-tu", "est-il", "avez-vous", "fait-il", "fais-tu", "vas-tu", "veux-tu", "voulez-vous", "sais-tu", "sommes-nous", "y a-t-il", "a-t-il"
+  ],
+  "notCommand": [
+    "je", "j'", "j'ai", "j'étais", "j'etais", "j'avais", "j'aimerais", "j'aime", "j'suis", "j'veux", "j'peux", "j'dois", "tu", "t'es", "t'as", "il", "elle", "on", "nous", "vous", "ils", "elles", "ça", "ca", "c'est", "c'était", "c'etait", "cela", "toi", "lui", "eux",
+    "est", "sont", "était", "etait", "étaient", "etaient", "été", "sera", "serait", "serais", "soit",
+    "ne", "n'", "pas", "jamais", "non", "aucun", "aucune", "rien",
+    "plus tard", "tard", "demain", "hier", "ce soir", "après", "apres", "avant", "encore", "de nouveau", "à nouveau", "a nouveau", "recommence", "recommencer", "prochain", "prochaine", "déjà", "deja", "tout à l'heure", "puis",
+    "que", "qu'", "qu'il", "qu'elle", "qu'on", "qu'avant", "qu'hier", "parce", "car", "mais", "si", "alors", "ou", "quand", "pourquoi", "comment", "lorsque",
+    "trop", "très", "tres", "vraiment", "aussi", "assez",
+    "veux", "veut", "voudrais", "besoin", "faut", "dois", "doit", "pense", "penses", "crois", "aimerais", "peux", "peut", "peux-tu", "pourrais", "pourriez", "pouvez", "devrais", "devrait",
+    "pour moi", "avec moi", "en arrière", "arrière", "retour", "revenir"
+  ],
+  "polite": ["s'il te plaît", "s'il te plait", "s'il vous plaît", "s'il vous plait", "svp", "stp", "merci", "ok", "okay", "hey coach", "hé coach", "salut", "maintenant", "juste", "allez"],
+  "fillers": ["me", "moi", "le", "la", "les", "un peu", "un", "une", "des", "mon", "ma", "mes", "ce", "cette", "au", "aux"]
+}
