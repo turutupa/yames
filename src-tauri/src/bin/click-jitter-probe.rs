@@ -2865,7 +2865,7 @@ mod tests {
         let all = [cb(10 * ms, 0), cb(25 * ms, 1), cb(100 * ms, 0), cb(140 * ms, 5)];
         // 5 ms after the first Start, 10 ms after the second
         assert_eq!(start_to_first_click_ms(&all, &[20 * ms, 90 * ms]), Some(10.0));
-        assert_eq!(start_to_first_click_ms(&all, &[200]), None);
+        assert_eq!(start_to_first_click_ms(&all, &[200 * ms]), None);
         assert_eq!(start_to_first_click_ms(&all, &[]), None);
         // the first click buffer after each Start opens at sample 0 ...
         assert_eq!(starts_not_from_zero(&all, &[5 * ms, 90 * ms]), 0);
