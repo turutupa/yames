@@ -393,7 +393,7 @@
             {"when":"extras","say":"Keep the pick on the low E only."},
             {"when":"late","say":"Land each accent right on its count."},
             {"when":"early","say":"Wait for the count before each accent."},
-            {"when":"openString","say":"Keep the quiet open Es as even as the accents."},
+            {"when":"openString","say":"Keep the quiet open Es even with each other."},
             {"when":"lastBars","say":"Accent both fretted notes at the end.","more":1}
           ],
           "grading": "graded",
@@ -3403,7 +3403,7 @@
             {"when":"late","say":"Land each new chord right on beat one."},
             {"when":"early","say":"Wait for beat one before each new chord."},
             {"when":"openString","say":"Gallop on the open string right to beat four."},
-            {"when":"shift","say":"Move as the last eighth sounds, not after.","more":2},
+            {"when":"shift","say":"Lift the hand off as the last eighth starts.","more":2},
             {"when":"stringChange","say":"Hit two strings on chords, one on chugs."},
             {"when":"lastBars","say":"Come back to the open chord right on the click."}
           ],
@@ -4336,7 +4336,7 @@
             {"when":"heard","say":"Pick both short notes right after each chord."},
             {"when":"extras","say":"Strike just the two strings of each chord."},
             {"when":"late","say":"Land each new chord with the band's beat one."},
-            {"when":"early","say":"Wait for the kick before each chord."},
+            {"when":"early","say":"Wait for the beat before each chord."},
             {"when":"afterHeld","say":"Cut the held C a little short to go round.","more":4},
             {"when":"openString","say":"Drop to E with the first finger only.","more":4},
             {"when":"shift","say":"Move to the next root as beat four ends."},
@@ -4512,7 +4512,7 @@
           "coachLine": "I time each chug against where it is written. A sound in a rest counts as an extra note.",
           "cues": [
             {"when":"even","say":"Count '1 2 3' in sixteenths; play on 1 and 2.","more":0,"general":true},
-            {"when":"heard","say":"Pick both chugs of every group."},
+            {"when":"heard","say":"Pick every chug of every group."},
             {"when":"extras","say":"Keep the pick off the string on each rest."},
             {"when":"late","say":"Put each group's first chug on its count."},
             {"when":"early","say":"Wait out each rest before the next chug."},
@@ -5422,7 +5422,7 @@
             {"when":"even","say":"Change note exactly on the beat.","more":1,"general":true},
             {"when":"heard","say":"Pick every note four times, right through."},
             {"when":"extras","say":"Keep the pick on the A string only."},
-            {"when":"notes","say":"Fingers one, three, four on frets 7, 9 and 10.","more":0},
+            {"when":"notes","say":"Fingers one, three, four first: frets 7, 9, 10.","more":0},
             {"when":"late","say":"Put each new note right on the click."},
             {"when":"early","say":"Wait for the click before each new note."},
             {"when":"shift","say":"Move up two frets: first finger on fret 9.","more":0},
@@ -5866,7 +5866,7 @@
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           "cues": [
-            {"when":"even","say":"Lay each finger flat across both strings.","more":1,"general":true},
+            {"when":"even","say":"Lay one finger flat over each climbing pair.","more":1,"general":true},
             {"when":"heard","say":"Pick each open E as firmly as the melody."},
             {"when":"extras","say":"Pick one string at a time under the flat finger.","more":1},
             {"when":"notes","say":"Start the way down on the D string's fret 9.","more":0},
@@ -6478,7 +6478,7 @@
             {"when":"late","say":"Put each melody note right on its count."},
             {"when":"early","say":"Wait for the count before each melody note."},
             {"when":"openString","say":"Keep the open pedal even across the change."},
-            {"when":"stringChange","say":"Move the pedal down to the low E on bar three.","more":4},
+            {"when":"stringChange","say":"Drop the pedal to the low E at the change.","more":4},
             {"when":"lastBars","say":"Go back to the open A right on beat one."}
           ],
           "grading": "graded",
@@ -7436,7 +7436,7 @@
             {"when":"early","say":"Wait for the click before each new part."},
             {"when":"openString","say":"Move the hand down during the four open notes.","more":1},
             {"when":"stringChange","say":"Move up during the last gallop to fret 7.","more":2},
-            {"when":"lastBars","say":"Keep the gallops this slow right to the end.","more":3}
+            {"when":"lastBars","say":"Land the last gallop's long note on beat four."}
           ],
           "grading": "graded",
           "feedback": "livePerNote",
@@ -7956,7 +7956,7 @@
                   {"when":"early","say":"Wait for the click before each new part."},
                   {"when":"openString","say":"Move the hand down during the four open notes."},
                   {"when":"stringChange","say":"Move up during the last gallop to fret 7."},
-                  {"when":"lastBars","say":"Keep the gallops this slow right to the end.","more":3}
+                  {"when":"lastBars","say":"Land the last gallop's long note on beat four."}
                 ]
               }
             ]
@@ -8621,8 +8621,8 @@
             {"when":"heard","say":"Pick each answer note as firmly as the gallop."},
             {"when":"extras","say":"Keep the pick on the two low strings only."},
             {"when":"notes","say":"Fingers one, two, four on frets 2, 3 and 5.","more":1},
-            {"when":"late","say":"Put each answer right on beat three."},
-            {"when":"early","say":"Wait for beat three before each answer."},
+            {"when":"late","say":"Put each answer note right on its count."},
+            {"when":"early","say":"Wait for the count before each answer note."},
             {"when":"openString","say":"Keep the first finger over fret 2 throughout.","more":1},
             {"when":"stringChange","say":"Cross to the A string for each answer and back."},
             {"when":"lastBars","say":"Run down frets 5, 3, 2, then 3 on the low E.","more":2}
@@ -8918,7 +8918,7 @@
             {"when":"afterHeld","say":"Count the long chord's two beats, then play."},
             {"when":"openString","say":"Bring the hand down to fret 2 in the gallops.","more":2},
             {"when":"shift","say":"Cut the last eighth short and move on it."},
-            {"when":"stringChange","say":"Begin C and D on the A string."},
+            {"when":"stringChange","say":"Cross to the A string right on its count."},
             {"when":"lastBars","say":"Bring the palm down first, then gallop.","more":2}
           ],
           "grading": "graded",
@@ -9102,9 +9102,9 @@
             {"when":"late","say":"Land each chorus chord with the band."},
             {"when":"early","say":"Wait for the band's beat one at each change."},
             {"when":"afterHeld","say":"Count the long chord's two beats, then play."},
-            {"when":"openString","say":"Let the chorus open with two ringing beats.","more":2},
-            {"when":"shift","say":"Drop from fret 5 to 2 on the last eighth.","more":2},
-            {"when":"stringChange","say":"Begin C and D on the A string."},
+            {"when":"openString","say":"Keep the open E even under every gallop."},
+            {"when":"shift","say":"Cut the last eighth short and move on it.","more":2},
+            {"when":"stringChange","say":"Cross to the A string right on its count."},
             {"when":"lastBars","say":"Go back to the verse right on beat one.","more":3}
           ],
           "grading": "graded",

@@ -89,6 +89,7 @@ const MOVE_LAST_EIGHTH = "Move on the last eighth; chord on the click.";
 const CUT_LAST_EIGHTH = "Cut the last eighth short and move on it.";
 const LONG_TWO = "Count the long chord's two beats, then play.";
 const C_D_ON_A = "Begin C and D on the A string.";
+const CROSS_ON_COUNT = "Cross to the A string right on its count.";
 const EVERY_ATTACK = "Strike every gallop note and every chord.";
 const PART_STRINGS = "Keep the pick on the strings each part uses.";
 const CHANGE_EARLY = "Wait for the band's beat one at each change.";
@@ -123,7 +124,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("extras", LOW_E_ONLY),
     c("late", ACCENT_LATE),
     c("early", ACCENT_EARLY),
-    c("openString", "Keep the quiet open Es as even as the accents."),
+    c("openString", "Keep the quiet open Es even with each other."),
     c("lastBars", "Accent both fretted notes at the end.", 1),
   ],
 
@@ -356,7 +357,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("late", "Land each new chord right on beat one."),
     c("early", "Wait for beat one before each new chord."),
     c("openString", "Gallop on the open string right to beat four."),
-    c("shift", "Move as the last eighth sounds, not after.", 2),
+    c("shift", "Lift the hand off as the last eighth starts.", 2),
     c("stringChange", TWO_ONE),
     c("lastBars", "Come back to the open chord right on the click."),
   ],
@@ -387,7 +388,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("heard", SHORTS_AFTER_CHORD),
     c("extras", JUST_TWO),
     c("late", "Land each new chord with the band's beat one."),
-    c("early", "Wait for the kick before each chord."),
+    c("early", "Wait for the beat before each chord."),
     c("afterHeld", "Cut the held C a little short to go round.", 4),
     c("openString", "Drop to E with the first finger only.", 4),
     c("shift", "Move to the next root as beat four ends."),
@@ -417,7 +418,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
   // Step 9: stop and start (chug-rest changes string between Takes)
   "stop-start.chug-rest": [
     g("Count '1 2 3' in sixteenths; play on 1 and 2.", 0),
-    c("heard", "Pick both chugs of every group."),
+    c("heard", "Pick every chug of every group."),
     c("extras", OFF_IN_RESTS),
     c("late", "Put each group's first chug on its count."),
     c("early", "Wait out each rest before the next chug."),
@@ -470,7 +471,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     g("Change note exactly on the beat.", 1),
     c("heard", "Pick every note four times, right through."),
     c("extras", "Keep the pick on the A string only."),
-    c("notes", FINGERS_7910, 0),
+    c("notes", "Fingers one, three, four first: frets 7, 9, 10.", 0),
     c("late", "Put each new note right on the click."),
     c("early", "Wait for the click before each new note."),
     c("shift", "Move up two frets: first finger on fret 9.", 0),
@@ -501,7 +502,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("lastBars", LAST_TWOS),
   ],
   "pedal-riffs.pedal-both": [
-    g("Lay each finger flat across both strings.", 1),
+    g("Lay one finger flat over each climbing pair.", 1),
     c("heard", OPEN_E_FIRM),
     c("extras", "Pick one string at a time under the flat finger.", 1),
     c("notes", "Start the way down on the D string's fret 9.", 0),
@@ -554,7 +555,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("late", MELODY_LATE),
     c("early", MELODY_EARLY),
     c("openString", "Keep the open pedal even across the change."),
-    c("stringChange", "Move the pedal down to the low E on bar three.", 4),
+    c("stringChange", "Drop the pedal to the low E at the change.", 4),
     c("lastBars", "Go back to the open A right on beat one."),
   ],
 
@@ -588,7 +589,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("early", "Wait for the click before each new part."),
     c("openString", "Move the hand down during the four open notes.", 1),
     c("stringChange", "Move up during the last gallop to fret 7.", 2),
-    c("lastBars", "Keep the gallops this slow right to the end.", 3),
+    c("lastBars", "Land the last gallop's long note on beat four."),
   ],
 
   // Step 14: riffs at length (the two minutes change string between Takes)
@@ -627,8 +628,8 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("heard", "Pick each answer note as firmly as the gallop."),
     c("extras", LOW_TWO),
     c("notes", "Fingers one, two, four on frets 2, 3 and 5.", 1),
-    c("late", "Put each answer right on beat three."),
-    c("early", "Wait for beat three before each answer."),
+    c("late", "Put each answer note right on its count."),
+    c("early", "Wait for the count before each answer note."),
     c("openString", "Keep the first finger over fret 2 throughout.", 1),
     c("stringChange", "Cross to the A string for each answer and back."),
     c("lastBars", "Run down frets 5, 3, 2, then 3 on the low E.", 2),
@@ -654,7 +655,7 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("afterHeld", LONG_TWO),
     c("openString", "Bring the hand down to fret 2 in the gallops.", 2),
     c("shift", CUT_LAST_EIGHTH),
-    c("stringChange", C_D_ON_A),
+    c("stringChange", CROSS_ON_COUNT),
     c("lastBars", "Bring the palm down first, then gallop.", 2),
   ],
   "verse-and-chorus.song-form": [
@@ -664,9 +665,9 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("late", "Land each chorus chord with the band."),
     c("early", CHANGE_EARLY),
     c("afterHeld", LONG_TWO),
-    c("openString", "Let the chorus open with two ringing beats.", 2),
-    c("shift", "Drop from fret 5 to 2 on the last eighth.", 2),
-    c("stringChange", C_D_ON_A),
+    c("openString", "Keep the open E even under every gallop."),
+    c("shift", CUT_LAST_EIGHTH, 2),
+    c("stringChange", CROSS_ON_COUNT),
     c("lastBars", "Go back to the verse right on beat one.", 3),
   ],
 
