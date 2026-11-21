@@ -22,7 +22,51 @@ Cues: `src/paths/specs/tapping-cues.ts`, attached with `withCues` in `tapping.ts
   every overlay 947 of 947 (`/tmp/coach-cues12/merge.log`; the "different numbers" warnings on cue keys are
   ja/ko/pt-BR/vi writing spelled numbers or finger names as digits, which the brief allows). `check
   tapping` after the merge: 0 errors (`gc11.log`).
-- [ ] Gates
+- [x] Gates (logs in `/tmp/coach-cues12/`, all through the job queue):
+  - `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`check-all.log`).
+  - `npx tsc --noEmit`: clean (`tsc.log`).
+  - `npm run test`: 413 of 415 files, 30,958 of 30,959 tests passed (`vitest.log`). The two files: the
+    known worktree-only `TabStage.render.test.tsx`, and `generate.test.ts`'s "mostly names a grid" test,
+    which timed out at 20 s on a busy queue; re-run alone it passed, 96 of 96 in 9.7 s (`vt-generate.log`).
+  - `npm run build`: ok (job `coach-cues12-build`).
+  - No Rust file changed; no layout run (the orchestrator's).
+
+## The numbers
+
+301 cues on 52 Exercises (all covered: 49 graded in 15 Steps, 3 warm-ups), 120 distinct sentences. By
+trigger: general 52, heard 52, late 52, early 52, extras 48, lastBars 33, stringChange 11, afterHeld 1 (no
+Exercise can produce `shift`, `openString` or `notes`). Final `check`: 0 errors, 0 `cue.refused`, 0 cues said
+in other words for a variant (the Path's 55 `variant.rewritten` lines are all purposes and how-tos, none
+mine).
+
+How the cues teach tapping: the tap is the count ("Put each tap right on the click", "Put each beat's first
+tap on the click" in sextuplets, "Put both taps of each beat on the count" for the double tap); the move is
+named by the note it happens during ("Move the tap during the last hammer-on.", "Fret the new note before
+the tap pulls off.", "Move the whole hand as the tap lands."); `heard` cues are about making the note exist
+(the flick of the pull-off, the hammer-on landing, the fretting hand ready), never about force having been
+heard; `extras` cues keep the tap on its string and name no muting.
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · ru 48 · tr 48 · pl 47 · pt-BR 45 · vi 44 · ko 35 · ja 27 ·
+zh-CN 27 · zh-TW 27. Read first: the spoken syllables ('1-trip-let' kept in de fr es it; ja '1-トリ-プル';
+the 'and' as und / et / y / e / en / i / и / &), tr "klikı" (the helper's note: an accusative it was not
+sure of), and the finger names where the overlay had none (pl, ru, nl third finger, "top string").
+
+## Twelve cues to read
+
+- **"Tap, pull, hammer"** (Level 1). The cell: tap 12, pull off to 5, hammer 8, in triplets.
+  general "Count '1-trip-let' with the tap on the '1'." · late "Bring the tap down as the hammer-on
+  lands." · heard "Land each hammer-on firmly enough to sound."
+- **"D to B"** (Level 1). Both hands go down three frets on the B string and back.
+  general "Move both hands down three frets each." · late "Move the tap during the last hammer-on." ·
+  heard "Fret the new note before the tap pulls off."
+- **"Am to Em, one string over"** (Level 2). The cell on the top string, then on the B string, same frets.
+  general "Cross both hands during the last hammer-on." · stringChange "Keep both hands at the same frets
+  as you cross." · lastBars "Cross back to the top string for Am."
+- **"Two taps, the taps move"** (Level 3, a new key each Take). The fretting hand stays; both taps go up two
+  frets. general "Keep the fretting hand still; move the taps." · late "Put both taps of each beat on the
+  count." · lastBars "Slide the whole tapping hand, thumb and all."
 
 ## The proof-read (three separate sonnet readers, one per Level: cues, tabs, purposes, how-tos, the guide's rules)
 
