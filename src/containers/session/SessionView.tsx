@@ -1873,6 +1873,8 @@ function RecapScreen({ session }: { session: SessionRun }) {
     progress: session.progress,
     ...(session.today.focusedPath ? { focused: true } : {}),
     ungraded: session.grading === "off",
+    // The same exercises the player added to today as Today's plan (t2e).
+    chosen: session.chosenToday,
   });
   const origin = session.origin;
   const lastExercise = [...steps].reverse().find((s) => s.kind === "exercise");
