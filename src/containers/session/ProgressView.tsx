@@ -21,6 +21,7 @@ import { useNeck3d } from "./hooks/useNeck";
 import { rise } from "./TodayView";
 import { IS_MOBILE } from "../../platform";
 import { ToolRuns } from "../coach/ToolRuns";
+import { CompanionCard } from "../coach/CompanionCard";
 import "../../styles/session.css";
 
 type Point = { at: number; bpm: number };
@@ -289,6 +290,8 @@ export function ProgressView({ session, onStart }: { session: SessionRun; onStar
           {t(session.grading === "off" ? "session.progress.introOff" : "session.progress.intro")}
         </div>
       </div>
+      {/* The coach's one proactive card of this run, first (leg c4b2, mock 10). */}
+      <CompanionCard session={session} />
       {groups.length === 0 ? (
         <EmptyProgress onStart={onStart} />
       ) : (

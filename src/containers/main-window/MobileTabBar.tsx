@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { MainView } from "./MainHeader";
 import { isLearnTab, type AppTab } from "./hooks/useTabRouting";
-import { LEARN } from "./Rail";
+import { LEARN, ProgressDot } from "./Rail";
 
 interface MobileTabBarProps {
   view: MainView;
@@ -152,6 +152,7 @@ export function MobileTabBar({
         >
           <Glyph>{tab.icon}</Glyph>
           <span className="mobile-tab-label">{t(tab.labelKey)}</span>
+          {tab.id === "progress" && <ProgressDot view={view} />}
         </button>
       ))}
 

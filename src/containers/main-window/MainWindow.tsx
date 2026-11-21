@@ -112,6 +112,8 @@ import { ZenTransition } from "../zen/ZenTransition";
 import { useEvaluation } from "../../hooks/useEvaluation";
 import { useSession } from "../../hooks/useSession";
 import { useCoachVoice } from "../../coach/useCoachVoice";
+import { useCompanionWatch } from "../../coach/companion";
+import { playerWeekStart } from "../../coach/weekly";
 import { useCoachKeys } from "../session/hooks/useCoachKeys";
 import AudioInputTestModal from "../settings/AudioInputTestModal";
 import SettingsTimeline from "../settings/SettingsTimeline";
@@ -625,6 +627,17 @@ export function MainWindow() {
     // "Where do you start?" lists the Paths, over whichever screen the wizard opened on.
     preload: onboarding.isOpen,
   });
+
+  // The coach's proactive card for this app run (leg c4b2): the look-back or
+  // the plateau question, and the dot on Progress. Nothing in a Session or
+  // the wizard (DESIGN 6.6); recomputed when the stored Takes change, not per beat.
+  useCompanionWatch(
+    sessionRun.progress,
+    sessionRun.paths,
+    sessionRun.grading !== "off",
+    playerWeekStart(i18n.language),
+    view === "session" || onboarding.isOpen,
+  );
 
   // Ask (leg c2a1): the panel, the coach's context for it, and the drawer's
   // rules in a Session. The conversation lives for the app run.
