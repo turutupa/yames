@@ -14,7 +14,62 @@ Cues: `src/paths/specs/shred-cues.ts`, attached with `withCues` in `shred.ts`.
 - [x] Level 3 (Advanced: legato-one, legato-two, sweep-basics, five-string-sweeps, tapping-etude,
   warm-up loop-round), 17 Exercises. `check`: 0 errors, 0 refused, 0 cues said in other words (`gc8.log`).
 - [x] Proof-read (below); `check` after the fixes: 0 errors, 0 refused (`gc10.log`).
-- [ ] Translations. - [ ] Gates.
+- [x] Translations: four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 191
+  sentences each, every file checked again by me with `check_i18n.py` (problems 0 in all fourteen), merged:
+  every overlay 1365 of 1365 (`/tmp/coach-cues14/merge.log`).
+- [x] Gates (below).
+
+## Gates (logs in `/tmp/coach-cues14/`, all through the job queue)
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`check-all.log`). (First Chords prints 14
+  `cue.refused`: not this leg's Path.)
+- `npx tsc --noEmit`: clean (`tsc.log`).
+- `npm run test`: 414 of 415 files, 32,167 of 32,167 tests passed (`vitest.log`); the one file is the known
+  worktree-only `TabStage.render.test.tsx`.
+- `npm run build`: ok (`build.log`).
+- No Rust file changed; no layout run (the orchestrator's).
+
+## The numbers
+
+420 cues on 56 Exercises (all covered: 53 graded in 15 Steps, 3 warm-ups), 191 distinct sentences. By
+trigger: general 56, heard 56, late 56, early 56, extras 52, stringChange 40, notes 36, lastBars 33, shift
+21, afterHeld 12, openString 2. Final `check`: 0 errors, 0 `cue.refused`, 0 cues said in other words for a
+variant (the Path's 139 `variant.rewritten` lines are all how-to and purpose sentences, none mine).
+Wording shared with Alternate Picking where the drill is the same (sequences, bursts, crossings, the beat
+and group pairs, "Lean a little on the first of each six.").
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 47 · vi 47 · ko 34 · ja 33 ·
+zh-CN 26 · zh-TW 26. Read first: the spoken counts, which the translators rendered differently ('1 e and a'
+is left in English in pl and partly in ja/vi, "1-е-и-а" in ru; '1-trip-let' is "1-trio-la" in pl,
+"1-три-оль" in ru, English in tr/vi/ja); "click", tap, hammer-on and pull-off left as English loan words
+in several; the de/fr/es/it helper took terms from the Shred overlay by grep and did not compare with
+Alternate Picking cue by cue, so the shared sentences may be worded differently in those two Paths there.
+The nl/pl/pt-BR/ru helper reused Alternate Picking's translation for 50 identical sentences.
+
+## Twelve cues to read
+
+- **"Walk the accent through the beat"** (Level 1). One note, four bars, the accent moving from the first
+  sixteenth to the last. general "Keep the time still as the accent moves." · late "Put each '1' on the
+  click, accent or not." · lastBars "Accent the last of each four, right on time."
+- **"Groups of six, as sextuplets"** (Level 2, three string sets). Six to the click up four strings and down.
+  general "Lean a little on the first of each six." · late "Put the first of each six on the click." ·
+  lastBars "Keep the falling sixes as even as the climb."
+- **"Expanding bursts"** (Level 2). One, two, three, then four beats on, each landing on the start note.
+  general "Add one beat to the burst in each bar." · afterHeld "Count the rest out, then start the burst." ·
+  lastBars "Keep going through the last four beats."
+- **"The eight-bar run over the band"** (Level 3). One idea of the Path in each of eight bars over Am, F, C, G.
+  general "Land a chord tone on every '1'." · shift "Move the hand during each idea's last note." · lastBars
+  "Count '1 e and a' through the run home."
+
+## For the generator's owner (not changed, not mine)
+
+`shift` can fire on the string-set variants of three-strings, the four sequences and the stamina minute
+(the base tab has no shift), but those same variants refuse every sentence about the hand's position ("the
+hand's position, and the frets moved differently"), so the shift cue there has to talk about the next
+string's note. "Keep the pick close as you cross." is refused on the advanced warm-up's G-and-B variants
+("which string is next"), though it names no string.
 
 ## The proof-read (three separate sonnet readers, one per Level)
 
