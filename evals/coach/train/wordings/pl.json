@@ -648,6 +648,14 @@
       "denerwują mnie barre",
       "tęsknię za graniem w zespole"
     ],
+    "none_unmeasured": [
+      "czy moje vibrato brzmiało dobrze?",
+      "czy bend doszedł do właściwego dźwięku?",
+      "czy grałem za głośno?",
+      "jak wypadły moje dynamiki?",
+      "dobrze mi wyszły te slajdy?",
+      "czy vibrato było równe?"
+    ],
     "card_where_slipped": [
       "gdzie mi się wysypało w ostatnim podejściu?",
       "w którym miejscu się pomyliłem?",
@@ -659,8 +667,25 @@
       "czy się spieszyłem czy ciągnąłem?",
       "byłem przed czy za rytmem?",
       "czy grałem za wcześnie, czy za późno?",
+      "czy mi uciekało tempo czy zostawałem z tyłu?",
+      "w którą stronę mnie ciągnęło w tym podejściu?",
+      "jak z moim timingiem, wcześnie czy późno?"
+    ],
+    "card_rushing": [
       "spieszę się w tym podejściu?",
-      "czy mi uciekało tempo czy zostawałem z tyłu?"
+      "czy się spieszyłem w ostatnim podejściu?",
+      "przyspieszałem tam?",
+      "uciekałem do przodu przed metronomem?",
+      "czy grałem przed rytmem?",
+      "chyba mi uciekało tempo, tak?"
+    ],
+    "card_dragging": [
+      "czy zostawałem z tyłu w tym podejściu?",
+      "ciągnąłem tam?",
+      "czy grałem za rytmem?",
+      "zwalniałem w ostatnim podejściu?",
+      "wlokłem się za metronomem?",
+      "chyba grałem spóźniony, prawda?"
     ],
     "card_why_not_counted": [
       "dlaczego to podejście się nie zaliczyło?",
@@ -668,6 +693,14 @@
       "czemu to nie wpadło do zaliczonych?",
       "dlaczego nie liczy mi tego podejścia?",
       "czemu nie przeszło? grałem czysto"
+    ],
+    "card_metric_graded": [
+      "czy takie coś jak {metric} jest oceniane?",
+      "dlaczego {metric} nie wchodzi w ocenę?",
+      "czy aplikacja sprawdza coś takiego jak {metric}?",
+      "czy {metric} wchodzi do wyniku?",
+      "{metric} się tu liczy?",
+      "czy ocena obejmuje takie rzeczy jak {metric}?"
     ],
     "card_what_changed": [
       "co się zmieniło od poprzedniego podejścia?",
@@ -725,6 +758,17 @@
       "devices": ["urządzenia"],
       "grading": ["ocenianie"],
       "recording": ["nagrywanie"]
+    },
+    "metric": {
+      "pitch": ["trafianie w dźwięki", "czystość dźwięków"],
+      "pickDirection": ["kierunek uderzeń kostką", "naprzemienne uderzanie"],
+      "muting": ["wyciszanie strun", "kontrola szumów strun"],
+      "posture": ["postawa przy graniu", "pozycja, w jakiej siedzę z gitarą"],
+      "tension": ["napięcie w dłoniach", "napięcie w ramionach"],
+      "handAttribution": ["to, która ręka zrobiła błąd", "przypisanie błędu do ręki"],
+      "fingering": ["palcowanie", "dobór palców"],
+      "tone": ["brzmienie", "barwa dźwięku"],
+      "feel": ["wyczucie rytmu", "groove"]
     }
   }
 }

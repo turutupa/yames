@@ -37,7 +37,11 @@ import { ONE_OF } from "./grammar";
  * (a prose one; a choice is 48): ~2,200 of the 4,096 window.
  */
 export const CHOICE_TOOLS_TOKENS = 1100;
-/** The "Cards:" section of the prefix (leg c3int): about seven to ten more one-line cards fit. */
+/**
+ * The "Cards:" section of the prefix (leg c3int). The seven cards take 245;
+ * a one-line card costs ~18, so about three more fit. Past that, every card
+ * goes by its id and three words (~7 each), which holds some twenty-five.
+ */
 export const CHOICE_CARDS_TOKENS = 300;
 export const CHOICE_PREFIX_TOKENS = CHOICE_TOOLS_TOKENS + CHOICE_CARDS_TOKENS;
 /** DESIGN 5.5, and `coach::ASK_CONTEXT_MAX_TOKENS`. */

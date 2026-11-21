@@ -648,6 +648,14 @@
       "lại chơi mấy thứ giống nhau, chán ghê",
       "một ngày nào đó chơi trọn bài hát yêu thích thì mình vui lắm"
     ],
+    "none_unmeasured": [
+      "vibrato của mình nghe ổn không?",
+      "mấy nốt bend có lên tới đúng nốt không",
+      "mình chơi to nhỏ thế nào, dynamics ra sao",
+      "các đoạn slide của mình mượt không",
+      "mình rung vibrato có đều không nhỉ",
+      "nốt bend của mình lên chuẩn chưa"
+    ],
     "card_where_slipped": [
       "lượt chơi vừa rồi mình vấp ở đâu?",
       "mình hỏng ở chỗ nào trong lượt vừa rồi",
@@ -660,7 +668,27 @@
       "mình đang vội hay bị kéo chậm vậy",
       "mình chơi trước nhịp hay sau nhịp?",
       "lần gần nhất mình có bị kéo chậm hay chạy nhanh không",
-      "sớm hay muộn vậy"
+      "sớm hay muộn vậy",
+      "nhịp của mình lệch về phía nào trong lượt vừa rồi",
+      "mình lệch nhịp theo hướng nào vậy",
+      "lượt gần nhất mình hay đánh trước hay sau nhịp?",
+      "so với máy đếm nhịp thì mình đang lệch kiểu gì"
+    ],
+    "card_rushing": [
+      "lượt vừa rồi mình có chơi vội không?",
+      "mình có chạy nhanh lên không vậy",
+      "mình đánh trước nhịp à?",
+      "hình như mình bị nhanh, đúng không",
+      "lần gần nhất tempo của mình có tăng lên không",
+      "mình có vượt lên trước máy đếm nhịp không"
+    ],
+    "card_dragging": [
+      "lượt vừa rồi mình có bị kéo chậm không?",
+      "mình có chậm lại không vậy",
+      "mình đánh sau nhịp à?",
+      "hình như mình bị trễ, đúng không",
+      "lần gần nhất tempo của mình có tụt xuống không",
+      "mình có tụt lại sau máy đếm nhịp không"
     ],
     "card_why_not_counted": [
       "tại sao lượt vừa rồi không được tính?",
@@ -668,6 +696,14 @@
       "lần chơi này sao không được chấp nhận",
       "vì sao lượt gần nhất của mình không hợp lệ, giải thích giúp nhé",
       "sao không tính vậy"
+    ],
+    "card_metric_graded": [
+      "{metric} có được chấm điểm không?",
+      "sao {metric} không được tính vậy?",
+      "ứng dụng có kiểm tra {metric} của mình không",
+      "{metric} có nằm trong điểm số không?",
+      "{metric} có tính ở đây không",
+      "cho mình hỏi {metric} có được xét khi chấm không"
     ],
     "card_what_changed": [
       "lượt này khác gì lượt trước?",
@@ -725,6 +761,17 @@
       "devices": ["thiết bị âm thanh"],
       "grading": ["chấm điểm"],
       "recording": ["ghi âm"]
+    },
+    "metric": {
+      "pitch": ["các nốt đúng cao độ", "việc chơi đúng nốt"],
+      "pickDirection": ["hướng gảy", "các nhát gảy xuôi ngược"],
+      "muting": ["việc chặn tiếng", "kiểm soát tiếng ồn dây"],
+      "posture": ["tư thế ngồi", "cách mình cầm đàn"],
+      "tension": ["sự căng cứng ở tay và vai", "độ căng của tay"],
+      "handAttribution": ["việc tay nào gây ra lỗi", "tay nào đánh sai"],
+      "fingering": ["cách bấm ngón", "việc mình dùng ngón nào"],
+      "tone": ["âm sắc", "chất lượng âm thanh"],
+      "feel": ["cảm giác nhịp", "groove"]
     }
   }
 }

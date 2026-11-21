@@ -648,6 +648,14 @@
       "yine aynı şeyleri çalmaktan bıktım",
       "bir gün favori şarkımı baştan sona çalarsam çok mutlu olurum"
     ],
+    "none_unmeasured": [
+      "vibratom iyi miydi?",
+      "bend yaptığımda doğru notaya ulaştı mı",
+      "ne kadar yüksek sesle çaldım, dinamiklerim nasıldı",
+      "kaydırmalarım düzgün muydu",
+      "vibrato yaparken sesim titrek mi çıkıyor",
+      "bendlerim tam yerine oturuyor mu sence"
+    ],
     "card_where_slipped": [
       "son denemede nerede takıldım?",
       "son denemenin neresinde bozuldum",
@@ -660,7 +668,27 @@
       "acele mi ediyorum yoksa geride mi kalıyorum",
       "tempoyu önde mi arkada mı tuttum?",
       "son denemede sürüklendim mi, yoksa koştum mu",
-      "önde miydim, geride mi"
+      "önde miydim, geride mi",
+      "zamanlamam hangi yöne kaydı son denemede",
+      "ritimden hangi tarafa saptım",
+      "son denemede vuruşlarım nereye kaydı, öne mi arkaya mı",
+      "metronoma göre önde mi kaldım geride mi?"
+    ],
+    "card_rushing": [
+      "son denemede acele mi ettim?",
+      "hızlanmış mıyım orada",
+      "vuruşun önüne mi geçtim",
+      "sanırım koştum, doğru mu?",
+      "son denemede tempoyu yukarı mı çektim",
+      "metronomun önüne geçip koşturdum mu"
+    ],
+    "card_dragging": [
+      "son denemede geride mi kaldım?",
+      "yavaşlamış mıyım orada",
+      "vuruşun arkasında mı çaldım",
+      "sanırım sürüklendim, doğru mu?",
+      "son denemede tempo düştü mü",
+      "metronomun gerisinde mi kaldım"
     ],
     "card_why_not_counted": [
       "son deneme neden sayılmadı?",
@@ -668,6 +696,14 @@
       "bu çalış neden kabul edilmedi",
       "son denemem niye geçerli olmadı, açıklar mısın",
       "neden sayılmadı"
+    ],
+    "card_metric_graded": [
+      "{metric} puanlanıyor mu?",
+      "{metric} neden sayılmadı?",
+      "uygulama {metric} konusunda bir şey ölçüyor mu",
+      "{metric} skora dahil mi?",
+      "{metric} burada sayılıyor mu",
+      "{metric} de değerlendirmeye giriyor mu acaba"
     ],
     "card_what_changed": [
       "bu deneme öncekinden ne farklıydı?",
@@ -730,6 +766,17 @@
       "devices": ["ses cihazları"],
       "grading": ["değerlendirme"],
       "recording": ["kayıt"]
+    },
+    "metric": {
+      "pitch": ["doğru notalar", "notaların doğruluğu"],
+      "pickDirection": ["pena yönü", "alternatif pena vuruşları"],
+      "muting": ["susturma", "tel gürültüsünü kontrol"],
+      "posture": ["duruşum", "gitarı tutuş şeklim"],
+      "tension": ["el ve omuz gerginliği", "kaslardaki gerginlik"],
+      "handAttribution": ["hatayı hangi elin yaptığı", "hangi elin hata yaptığı"],
+      "fingering": ["parmak düzeni", "hangi parmakları kullandığım"],
+      "tone": ["ses kalitesi", "tını"],
+      "feel": ["ritim hissi", "groove"]
     }
   }
 }

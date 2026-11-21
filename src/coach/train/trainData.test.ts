@@ -22,7 +22,9 @@ import { COACH_TOOLS } from "../tools/registry";
 import { checkCall } from "../tools/run";
 import { EVAL_LANGUAGES, effectOf, parseSetFile } from "../ask/evalWorld";
 import { gbnfToRegExp } from "./gbnf";
-import { ALREADY, WRONG_SCREEN } from "./generate";
+import { FACT_CARDS } from "../ask/intents";
+import { ALREADY, WRONG_SCREEN, judgeCard } from "./generate";
+import { intentById } from "./intents";
 import { LeakGuard } from "./leakage";
 import { renderRecord, type TrainRecord } from "./render";
 
@@ -73,6 +75,12 @@ describe("the training files", () => {
       }
       // Weighted to the decisions the stock models miss: calls well under the held-out set's two in three.
       expect(mine.filter((r) => r.kind === "call").length / mine.length, lng).toBeLessThan(0.5);
+      // Cards on (leg c3int): about a fifth are card answers, and some card questions are turned away.
+      const cards = mine.filter((r) => r.kind === "card").length / mine.length;
+      expect(cards, `${lng} card share`).toBeGreaterThan(0.15);
+      expect(cards, `${lng} card share`).toBeLessThan(0.25);
+      expect(mine.some((r) => r.tags.includes("card-near")), `${lng} card near-misses`).toBe(true);
+      expect(VALIDATION.some((r) => r.language === lng && r.kind === "card"), `${lng} card validation`).toBe(true);
     }
     expect(VALIDATION.length / ALL.length).toBeGreaterThan(0.03);
     expect(VALIDATION.length / ALL.length).toBeLessThan(0.08);
@@ -98,6 +106,12 @@ describe("the training files", () => {
         if (r.expect.kind === "which" && !e?.which) wrong.push(`${r.id}: not several`);
         if (r.tags.includes("wrong-screen") && !WRONG_SCREEN.test(e?.refused ?? "")) wrong.push(`${r.id}: not refused here`);
         if (r.tags.includes("withheld") && r.call && r.tools.includes(r.call.tool)) wrong.push(`${r.id}: shown`);
+        // A card question: the card's own rule, judged again from the intent (leg c3int).
+        if (intentById(r.intent)?.kind === "card" && !r.card) wrong.push(`${r.id}: a card question without its card`);
+        if (r.card) {
+          const j = judgeCard(r.card.card, r.card.args, r.situation, lng, paths);
+          if ("drop" in j || JSON.stringify(j.expect) !== JSON.stringify(r.expect)) wrong.push(`${r.id}: the card's rule says ${JSON.stringify("drop" in j ? j : j.expect)}`);
+        }
       }
       expect(wrong).toEqual([]);
     });
@@ -107,8 +121,9 @@ describe("the training files", () => {
       for (const r of mine) {
         const out = renderRecord(r, paths);
         if (!out.completion.endsWith("<|im_end|>") || !gbnfToRegExp(out.grammar).test(out.answer)) bad.push(`${r.id} grammar: ${out.answer}`);
-        const parsed = JSON.parse(out.answer) as { tool?: string; args?: unknown };
+        const parsed = JSON.parse(out.answer) as { tool?: string; card?: string; args?: unknown };
         if (parsed.tool !== undefined && !checkCall({ tool: parsed.tool, args: parsed.args }, COACH_TOOLS).ok) bad.push(`${r.id} checkCall: ${out.answer}`);
+        if (parsed.card !== undefined && !checkCall({ tool: parsed.card, args: parsed.args ?? {} }, FACT_CARDS, "player").ok) bad.push(`${r.id} card: ${out.answer}`);
       }
       expect(bad).toEqual([]);
     }, 300_000);
