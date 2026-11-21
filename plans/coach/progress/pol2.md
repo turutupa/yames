@@ -38,6 +38,16 @@ Extras copied from `/tmp/coach-orch/s6/pol2-extras.md` (below, verbatim index).
 | B12 | report only | see the final report. |
 | C13 | left | not reached. |
 
+## Gates (after `git merge coach`: already up to date at 51464eaf)
+
+- tsc: pass (`coach-pol2-tsc`).
+- vitest: 52,036 passed, 10 skipped; only the known `TabStage.render.test.tsx` load failure (`/tmp/coach-pol2/test.log`).
+- build: pass (`coach-pol2-build`).
+- layout, 14 specs (brief's 8 with `tool-coach` for the tools, the five named, `ask-path-cards`), `--workers=4`:
+  314 passed, 55 skipped, 2 failed, both item 1's own CSS (`/tmp/coach-pol2/layout-2.log`); reverted, then
+  `ask.spec` alone, `--workers=2`: 20 passed (`coach-pol2-layout-ask`). No other spec re-run.
+- No Rust changed: `test:rust` not owed.
+
 ## The extras list (copy of /tmp/coach-orch/s6/pol2-extras.md)
 
 Each names the review file (under `/tmp/coach-orch/`) or the progress file (in the repo,
