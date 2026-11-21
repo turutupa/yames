@@ -17,8 +17,12 @@ Intermediate Steps 10 to 14 (`the-link` 3, `link-chains` 3, `minor-progressions`
 - [x] Step 1: read; cues13a's dump reused (`/tmp/coach-cues13a/sweep-picking-dump.txt`, same tabs).
 - [x] Step 2: Intermediate Steps 10 to 14 (commit 1), Advanced (commit 2); `check` 0 errors,
   0 `cue.refused`, none of the new cues said in other words for a variant (`gc5.log`).
-- [ ] Step 3: proof-read (two sonnet readers: Intermediate, Advanced).
-- [ ] Step 4: translations.
+- [x] Step 3: proof-read (two sonnet readers: Intermediate, Advanced; below); `check` after: 0 errors,
+  0 refused (`gc6.log`).
+- [ ] Step 4: translations: of 286 new cue keys per language, 181 have an English already translated
+  in the overlay (cues13a's constants and reused sentences): filled from it
+  (`/tmp/coach-cues13b/prefill.mjs`, `i18n-sweep-picking/prefill.<lng>.json`); 73 new sentences to
+  four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW).
 - [ ] Step 5: gates.
 
 ## Constants added (reuse them)
@@ -29,6 +33,29 @@ The link (the first note of a new shape, hammered, pulled or slid on the same st
 `TOP_NOTE_EARLY`. `REST_MOVE`, `ONE_PER_STRING` (extras on six-string shapes, where "the strings in
 use" is every string), `THREE_TO_TWO` (quarter-note triplets), `TWO_LOOPS_EACH`, `HELD_E_COUNT` /
 `HELD_E_LAND` (the etude's last bar), `SWAP_ONE` (the two self-checked "your own" Exercises).
+
+## The proof-read (two separate sonnet readers)
+
+14 objections (`/tmp/coach-cues13b/proof-sweep-picking/objections-{a,b}.md`), 9 taken, 5 answered.
+Taken (was -> now): round-the-loop lastBars "Run the last loop straight into the first." repeated the
+general -> `END_AS_START` · chain-five lastBars `SEPARATE_TO_END` repeated the general -> `END_AS_START`
+· `LINK_HEARD` "Press the link note hard enough to hear it." ("press" is wrong where the link is a
+pull-off: six-string-links, linked-phrase, band-six-links) -> "Sound the link note firmly, fretting hand
+only." · octave-jump shift "Look at where you land before you jump." (the eyes, not the hands) ->
+"Leave each loop's last note early to jump."; lastBars "Jump back down on the last note." (the last note
+is played high; the drop comes after it) -> "Drop back down right after the last note." · band-six-links
+stringChange `CROSS_AFTER_LINK` repeated heard and bar 1 has no link -> `OWN_MOMENT` · walking-triads
+general "Keep your place by the chord names on the tab." (reading, not hands) -> "Start each new shape
+right on beat one." · `SWAP_ONE` "Swap one bar for your own, then record it." (two ideas) -> "Swap one
+bar for a line of your own."
+
+Answered, not changed:
+- *band-four and etude shift `MOVE_ON_LAST` "Move to the next shape on each bar's last note.": the shape
+  changes after the last note*: it is the first half's stock order, read as "start the move while the
+  last note sounds" (that note is on one string; the other fingers are free); kept for consistency.
+- *minor-six general "Hammer on the low E and on the top string." and minor-into-major shift "Drop the
+  index two frets for the top string." name strings / frets on key-varied Exercises*: their key variants
+  are plain transpositions on the same strings, and `check` neither refused nor rewrote either cue.
 
 ## Refusals and rewordings
 
