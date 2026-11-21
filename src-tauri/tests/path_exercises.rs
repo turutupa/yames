@@ -30,12 +30,23 @@ struct Row {
 }
 
 fn rows() -> Vec<Row> {
+    rows_from("schedules.jsonl", "npm run paths -- gen")
+}
+
+/// Custom Exercises ("My exercises", `src/paths/custom.ts`): one per shape, scale,
+/// grid and direction of the recipe grid, written by
+/// `node scripts/custom-exercises.mjs gen`.
+fn custom_rows() -> Vec<Row> {
+    rows_from("custom_schedules.jsonl", "node scripts/custom-exercises.mjs gen")
+}
+
+fn rows_from(name: &str, how: &str) -> Vec<Row> {
     let file = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("path_fixtures")
-        .join("schedules.jsonl");
+        .join(name);
     fs::read_to_string(&file)
-        .unwrap_or_else(|e| panic!("{}: {e}. Run: npm run paths -- gen", file.display()))
+        .unwrap_or_else(|e| panic!("{}: {e}. Run: {how}", file.display()))
         .lines()
         .map(|line| serde_json::from_str(line).expect("a schedule the app can read"))
         .collect()
@@ -145,6 +156,47 @@ fn a_dropped_picked_note_shows_up_in_the_field_a_pass_bar_uses() {
         checked += 1;
     }
     assert!(checked > 60, "only {checked} Exercises long enough to test");
+}
+
+/// A custom Exercise is scored by the same matcher: every note played right is a
+/// hit and clears the evenness bar, and one dropped is a miss the pass bar sees.
+#[test]
+fn every_custom_exercise_is_scorable_and_a_dropped_note_is_seen() {
+    let rows = custom_rows();
+    assert!(rows.len() > 100, "only {} custom schedules", rows.len());
+    for (index, row) in rows.iter().enumerate() {
+        let name = format!("{}/{}", row.path, row.exercise);
+        let report = report(row, &played(row, 2.0, 500 + index as u64));
+        assert_eq!(
+            hits(&report),
+            row.schedule.onsets.len(),
+            "{name}: all written notes played, all should be hits"
+        );
+        assert_eq!(report.extras.len(), 0, "{name}: nothing extra was played");
+        assert!(
+            report.hit_completeness > 0.99,
+            "{name}: hit completeness {}",
+            report.hit_completeness
+        );
+        assert!(
+            report.interval_consistency >= 0.85,
+            "{name}: evenness {} at 2 ms of jitter should clear the 0.85 bar",
+            report.interval_consistency
+        );
+        assert!(
+            row.schedule.onsets.iter().all(|o| !o.soft),
+            "{name}: every note of a custom Exercise is picked"
+        );
+        let mut notes = played(row, 2.0, 900 + index as u64);
+        notes.remove(notes.len() / 2);
+        let dropped = report(row, &notes);
+        assert!(misses(&dropped) >= 1, "{name}: a dropped note must be a miss");
+        assert!(
+            dropped.hit_completeness < 1.0,
+            "{name}: hit completeness {} should fall",
+            dropped.hit_completeness
+        );
+    }
 }
 
 #[test]
