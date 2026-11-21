@@ -56,6 +56,38 @@ code picked it wrongly.
 | `distance.tempo` | `bpm < passAtBpm` | Exercise | at or above: no line |
 | `distance.none` | nothing to say | – | – |
 
+## Locales
+
+Every `ask.card.*` key (c2b1a's, c2b1c's and c2b1d's, and this leg's) is translated in fourteen locales by sonnet
+helpers given `COACH_I18N_BRIEF.md`; the plural forms follow each file's `tooShort` (pl/ru `_few` `_many`,
+es/fr/it/pt-BR `_many`). The helpers flagged these for a native read:
+- **All locales:** the singular `improving.window` / `windowSame` read "In your last measured Take ({{count}})" (never shown: the window is at least 3).
+- **es:** "regular" for "even" (it can read as "so-so").
+- **it:** the file writes "il take", masculine; the glossary says "take (f.)".
+- **ja:** 早い/遅い in the sentences, not the glossary's 走り/遅れ.
+- **ko:** 악센트 적중 and 힘 들어감.
+- **zh-TW:** 應用程式 for "app".
+- **tr:** vowel harmony around `%{{value}}`.
+- **pl:** masculine first person, as `session.json` has it.
+
+## Layout scenes (`tests/layout/ask-cards.spec.ts`, pictures with `YAMES_SHOT_DIR`)
+
+- At 1024 x 700 in Ember: typed "How far is the pass mark?" over a Take below the pass mark answers with the card, not the plain statement.
+- At 1440 in Manuscript: the chip's measured card; "how do I stop rushing?" gives the early-or-late card; "do you check my pick direction?" gives "I didn't measure that".
+- On a phone in Ember: the typed card.
+- On a phone in German, Manuscript: a chip answers with a card, and English typed text goes on to the plain statement.
+
+## Gates (logs in /tmp/coach-c2b1b/)
+
+- `tsc`: pass (jobs `coach-c2b1b-tsc`, `-tsc-2`). `npm run build`: pass (`coach-c2b1b-build`).
+- **vitest, full (`vitest.log`):** 49241 passed and 10 skipped. The only failing file is the known `TabStage.render.test.tsx` load failure (symlink).
+- **i18n:** locales, parity, plural forms and coverage, plus `src/coach/ask`: all pass (`coach-c2b1b-vt-i18n`).
+- **Layout (`layout.log`):** `ask-cards`, `ask`, `ask-tools`, `ask-typed`, `coach-session`, `short-window` and `smooth` gave 169 passed, 52 skipped and 1 failed. The failure was a 30 s timeout in `coach-session` "ungraded: nothing about the microphone…", under load; that test alone passes (`coach-c2b1b-layout-ungraded`). The full layout suite is owed: text changed on Ask.
+
+## Seen, not changed
+
+- A card longer than 240 characters is cut into two text blocks, and each block carries its own source line, so "Measured · Take 1" shows twice (visible in the 1024 picture). This is c2b1a's `cardAnswer` rule. One source line per card would need the resolver to allow a longer block, or Ask to draw the line once.
+
 ## Decisions
 
 - **Not-fair Takes: one helper, `cards.ts` `markedNotFair`.** It should become nf1's
