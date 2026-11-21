@@ -171,7 +171,7 @@
           "even": "Even: {{before}}% in that Take, {{now}}% in Take {{take}}.",
           "heard": "Notes heard: {{before}}% in that Take, {{now}}% in Take {{take}}.",
           "extras": "Extra notes: {{before}} in that Take, {{now}} in Take {{take}}.",
-          "accents": "Accents landed: {{before}}% in that Take, {{now}}% in Take {{take}}.",
+          "accents": "Accents louder than the other notes, on average: {{before}}% in that Take, {{now}}% in Take {{take}}.",
           "notes": "Right notes: {{before}}% in that Take, {{now}}% in Take {{take}}.",
           "hold": "Evenness held to the end: {{before}}% in that Take, {{now}}% in Take {{take}}."
         },
@@ -240,8 +240,8 @@
           "heard": "Notes heard: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
           "heard_other": "Notes heard: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
           "extras": "Extra notes: {{value}} in Take {{take}}, {{gap}} more than the pass mark allows ({{bar}} or fewer in {{over}} bars).",
-          "accents": "Accents landed: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
-          "accents_other": "Accents landed: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
+          "accents": "Accents louder than the other notes, on average: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
+          "accents_other": "Accents louder than the other notes, on average: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
           "notes": "Right notes: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
           "notes_other": "Right notes: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
           "hold": "Evenness held to the end: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
@@ -250,7 +250,7 @@
         "under": {
           "even": "Even in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
           "heard": "Notes heard in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
-          "accents": "Accents landed in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
+          "accents": "Accents louder than the other notes, on average, in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
           "notes": "Right notes in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
           "hold": "Evenness held to the end in Take {{take}}: less than a point short of the pass mark of {{bar}}%."
         },
@@ -260,7 +260,7 @@
           "even": "Even: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%.",
           "heard": "Notes heard: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%.",
           "extras": "Extra notes: {{value}} in Take {{take}}, within the pass mark of {{bar}} or fewer in {{over}} bars.",
-          "accents": "Accents landed: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%.",
+          "accents": "Accents louder than the other notes, on average: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%.",
           "notes": "Right notes: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%.",
           "hold": "Evenness held to the end: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%."
         },

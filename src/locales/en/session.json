@@ -27,7 +27,7 @@
       "even": "even",
       "heard": "of the notes heard",
       "extras": "extra notes",
-      "accents": "accents landed",
+      "accents": "louder on the accents",
       "notes": "right notes"
     },
     "today": {
@@ -71,7 +71,7 @@
         "back": {
           "even": "Last Session, {{exercise}}: {{value}}% even at {{bpm}} BPM.",
           "heard": "Last Session, {{exercise}}: {{value}}% of the notes heard at {{bpm}} BPM.",
-          "accents": "Last Session, {{exercise}}: {{value}}% of the accents landed at {{bpm}} BPM.",
+          "accents": "Last Session, {{exercise}}: the accents {{value}}% louder than the other notes on average, at {{bpm}} BPM.",
           "notes": "Last Session, {{exercise}}: {{value}}% right notes at {{bpm}} BPM.",
           "plain": "Last Session ended on {{exercise}} at {{bpm}} BPM."
         },
@@ -214,7 +214,7 @@
         "even": "Because evenness was {{value}}% at {{bpm}} BPM. The pass mark is {{bar}}%.",
         "heard": "Because I heard {{value}}% of the notes at {{bpm}} BPM. The pass mark is {{bar}}%.",
         "extras": "Because of extra notes at {{bpm}} BPM. The pass mark is {{bar}} or fewer in four bars.",
-        "accents": "Because {{value}}% of the accents landed at {{bpm}} BPM. The pass mark is {{bar}}%.",
+        "accents": "Because at {{bpm}} BPM the accents came out {{value}}% louder than the other notes on average. The pass mark is {{bar}}%.",
         "plain": "Because the last Take at {{bpm}} BPM didn't meet the pass mark.",
         "notes": "Because {{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM. The pass mark is {{bar}}%."
       },
@@ -222,7 +222,7 @@
         "even": "Evenness was {{value}}% at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
         "heard": "I heard {{value}}% of the notes at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
         "extras": "There were extra notes at {{bpm}} BPM, so this is {{next}} BPM.",
-        "accents": "{{value}}% of the accents landed at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
+        "accents": "At {{bpm}} BPM the accents came out {{value}}% louder than the other notes on average and the pass mark is {{bar}}%, so this is {{next}} BPM.",
         "plain": "The last Takes at {{bpm}} BPM didn't meet the pass mark, so this is {{next}} BPM.",
         "notes": "{{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM."
       },
