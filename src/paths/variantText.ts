@@ -486,6 +486,10 @@ function rewriteSentence(
   const rigid = move.transposition !== null && move.fretShift !== null && move.sameOpen;
   const counting = toks.some((t) => t.quoted) || hasWord("count", "beat", "beats", "clap", "say");
   let specific = false;
+  /** A key, scale or chart name left as it was because the key did not move, while the notes did. */
+  let keptKey = false;
+  /** A note said by another name. */
+  let renamedNote = false;
   const sentenceFrets = new Map<number, number>();
   const sentenceStrings = new Map<number, number>();
   const sentencePcs = new Map<number, number>();
@@ -719,7 +723,10 @@ function rewriteSentence(
       if (ctx.sameDeclared) {
         if (move.pcShift === 0) return original;
         // The same key, other notes: a key or scale name still holds; what the notes spell does not.
-        if (!ofNotes || slot.kind !== "harmony") return original;
+        if (!ofNotes || slot.kind !== "harmony") {
+          keptKey = true;
+          return original;
+        }
         if (move.pcShift === null) return refuse("a chord name, and the notes did not all move the same interval");
         const spelled = spellPc(v, (pc + move.pcShift) % 12);
         return spelled === null ? refuse("a note with no spelling in the variant's harmony") : style(spelled, original);
@@ -779,6 +786,7 @@ function rewriteSentence(
         for (const bar of bars) targets.add(v.chords?.[bar] ?? "");
         if (arpeggio && v.harmony?.kind === "arpeggio") targets.add(v.harmony.chord);
         if (targets.size !== 1 || targets.has("")) refuse("a chord symbol that becomes two chords");
+        if (ctx.sameDeclared && move.pcShift !== 0) keptKey = true;
         edits.push({ start: t.start, end: t.end, text: [...targets][0], article: true });
         t.used = true;
         named.add(i);
@@ -787,7 +795,10 @@ function rewriteSentence(
       }
 
       // A letter and a kind: "A minor", "E minor pentatonic", "A Dorian".
-      const phrase = QUALITY_PHRASES.find(([words]) => words.every((w, k) => word(end + 1 + k) === w));
+      // "G major's names" is the key too: the possessive is one token, "major's".
+      const phrase = QUALITY_PHRASES.find(([words]) =>
+        words.every((w, k) => word(end + 1 + k) === w || (k === words.length - 1 && /^(.+)['’]s$/.exec(word(end + 1 + k))?.[1] === w)),
+      );
       const article = match[1] === "A" && !match[2] && end === i && sentenceStart(i);
       if (phrase) {
         const [words, family, scaleWord] = phrase;
@@ -873,6 +884,13 @@ function rewriteSentence(
       const to = move.pcs.get(pc);
       if (to === null || to === undefined) return refuse("a note that becomes two notes");
       specific = true;
+      if (to !== pc) {
+        // A name is said again only where the variant is that transposition: every note moved the same
+        // interval. The same key on another string, or another box of it, puts another note at the same
+        // place, and "F sharp, the one sharp in G major" read as "A, the one sharp in G major".
+        if (move.pcShift === null) return refuse("a note name, and the notes did not all move the same interval");
+        renamedNote = true;
+      }
       sentencePcs.set(pc, to);
       const spelled = spellPc(v, to);
       if (spelled !== null) return style(spelled, original);
@@ -1232,6 +1250,9 @@ function rewriteSentence(
       }
     }
 
+    // "Play B, the third of G major" with the figure a string over in the same key: B became D, G major
+    // stayed G major, and D is not its third. A note renamed beside a key that stayed is not written.
+    if (keptKey && renamedNote) refuse("a note renamed beside a key name that did not move");
     const distinct = (map: Map<number, number>) => new Set(map.values()).size === map.size;
     if (!distinct(sentenceFrets)) refuse("two frets that become one fret");
     if (!distinct(sentenceStrings)) refuse("two strings that become one string");
