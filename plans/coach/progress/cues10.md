@@ -22,7 +22,47 @@ Cues: `src/paths/specs/metal-rhythm-cues.ts`, attached with `withCues` in `metal
   `check_i18n.py` (problems 0 in all fourteen), merged: every overlay 1031 of 1031 (`merge*.log`; the
   "different numbers" warnings are finger numbers written as digits). `check metal-rhythm`: 0 errors
   (`gc10.log`).
-- [ ] Gates.
+- [x] Gates (logs in `/tmp/coach-cues10/`), all through the job queue:
+  - `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`check-all.log`).
+  - `npx tsc --noEmit`: clean (job coach-cues10-tsc, exit 0).
+  - `npm run test`: 413 of 415 files, 31,558 of 31,559 tests passed (`vitest.log`). The two files: the
+    known worktree-only `TabStage.render.test.tsx`, and one test of `generate.test.ts` ("mostly" names a
+    grid, QA 2 #14) that timed out at 20 s on a busy machine. Re-run alone: 96 of 96 passed
+    (`vitest-gen.log`), with only the known "Timeout calling onTaskUpdate" under load.
+  - `npm run build`: ok (job coach-cues10-build).
+  - No Rust file changed; no layout run (the orchestrator's).
+
+## The numbers
+
+445 cues on 54 Exercises (all covered: 49 graded in Steps, 5 warm-ups), 271 distinct sentences. By trigger:
+general 54, heard 54, late 54, early 54, lastBars 53, openString 48, extras 47, stringChange 31, shift 20,
+notes 18, afterHeld 12. Final `check`: 0 errors, 0 `cue.refused`, 0 cues said in other words for a variant
+(the Path's 12 `variant.rewritten` lines are all purpose and how-to sentences, none mine; read, true).
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · fr 48 · es 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 47 · vi 46 · ko 43 · zh-CN 39 ·
+zh-TW 39 · ja 38. Read first: the spoken counts the translators took from each overlay ('1, and a', '1 e and
+a', '1-trip-let': pt-BR writes the triplet '1-&-a', ja / tr / ko / zh keep the English syllables); "kick"
+(ru "бочка", vi "trống kick", tr "bas davul"); de "Sprungsaite" (coined, for the skipped string); ja in the
+plain 〜しよう form where its overlay prose is ですます; vi uses "bạn" in a few cues; zh 持续音 for "pedal"
+(the overlay has 持续低音 in titles); several pt-BR / it / pl cues are noun phrases rather than orders after
+cutting to 48.
+
+## Twelve cues to read
+
+- **"Muted and ringing"** (Level 1). The open E chug with G, A and B flat let out of the mute.
+  general "Lift the palm for the fretted notes only." · notes "Fingers one, three, four on frets 3, 5 and
+  6." · openString "Move the fretting hand while the open E chugs."
+- **"Both gallops in one riff"** (Level 2). Gallop, reverse gallop, gallop, two ringing eighths; the answer
+  ends on a long G. general "Say '1, and a, 2 e and' before you start." · afterHeld "Hold the last G its
+  full beat, then gallop." · lastBars "Put B flat on '3', A on its 'and', G on '4'."
+- **"Melody on the D string"** (Level 3). A, B and C on the D string over the muted open low E pedal,
+  the A string skipped on every crossing. general "Rest a spare finger on the string you skip." · stringChange "Make
+  the skip smaller, not faster." · lastBars "Count the last beat in twos: melody, pedal."
+- **"The chorus riff"** (Level 3). E, C, G and D, a chord held two beats, one beat and two eighths a bar.
+  general "Count '1, 2, 3, 4 and': play on 1, 3, 4, 'and'." · shift "Cut the last eighth short and move
+  on it." · stringChange "Begin C and D on the A string."
 
 ## How the cues were written
 
