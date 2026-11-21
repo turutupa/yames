@@ -1546,6 +1546,8 @@ export function installShotMock(shot: Shot, theme: string): void {
     get_active_tab: () => shot.tab ?? "beat",
     list_path_states: () => pathStore.states,
     list_path_takes: () => pathStore.takes,
+    // The practice reminder's Songs read (rem2c): no Songs attempt in any scene.
+    list_attempt_times_since: () => [],
     list_exercise_ceilings: () => pathStore.ceilings,
     save_path_state: (a) => {
       const row = a?.state as PathStateRow;

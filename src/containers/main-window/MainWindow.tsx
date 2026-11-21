@@ -2790,6 +2790,7 @@ export function MainWindow() {
             onOpenTools={() => setView("tools")}
             onOpenPaths={() => setView("paths")}
             instrument={instrument}
+            instrumentChosen={instrumentChosen}
             onOpenToolsList={() => setView("tools")}
             onChangeInstrument={openInstrumentSettings}
           />

@@ -15,16 +15,19 @@ import { CoachLine } from "../coach/CoachLine";
 export const TodayReminder = memo(function TodayReminder({
   takes,
   sessionBusy = false,
+  instrument,
 }: {
-  /** The Session's Takes (read once, by `useSessionRun`), or null while they load. */
+  /** The Session's Takes (read once, by `useSessionRun`), or null while they load or when the read failed. */
   takes: ReadonlyArray<{ startedAt: number }> | null;
   /** A Session is in progress (between its Takes): nothing is said or read. */
   sessionBusy?: boolean;
+  /** The instrument the player chose (rem2c); absent when none is known, and the line names none. */
+  instrument?: string;
 }) {
   const { t, i18n } = useTranslation();
   const { reminder } = useStoredReminder();
   const { practised, now, held } = useReminderPractised(reminder, { takes, held: sessionBusy });
-  const line = reminder && practised && !held ? reminderLine(reminder, now, practised) : null;
+  const line = reminder && practised && !held ? reminderLine(reminder, now, practised, instrument) : null;
   if (!line) return null;
   return (
     <div className="session-today-reminder">

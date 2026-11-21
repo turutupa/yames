@@ -8,8 +8,10 @@ import {
   practisedFrom,
   reminderDueLaterToday,
   reminderLine,
+  reminderLineKey,
   reminderNextCheck,
   reminderQuiet,
+  reminderReadFrom,
   reminderTimeText,
 } from "./reminder";
 import type { Practised } from "./reminder";
@@ -25,6 +27,49 @@ const NONE: Practised = { days: new Set(), knownFrom: 0 };
 const played = (...stamps: number[]): Practised => ({ days: new Set(stamps.map(dayKey)), knownFrom: 0 });
 /** Played every day of the month before the 20th, so the quiet rule does not hold. */
 const DAILY = played(...Array.from({ length: 19 }, (_, i) => at(i + 1, 12)));
+
+describe("reminderReadFrom: the Songs read's bound (rem2c M1)", () => {
+  it("is local midnight 21 days back", () => {
+    expect(reminderReadFrom(NOW)).toBe(at(-1)); // 30 October, 00:00
+    expect(reminderReadFrom(at(20, 0, 0))).toBe(at(-1));
+  });
+
+  it("answers the line and the quiet rule exactly as the whole history does", () => {
+    const fridays: CoachReminder = { on: true, time: "18:00", days: [FRI], since: at(-60) };
+    const histories = [
+      [],
+      [at(-2, 12)], // before the bound only
+      [at(-2, 12), at(-1, 0)], // one on the bound's first moment
+      [at(-30, 9), at(6, 12)],
+      [at(13, 20)],
+      [at(20, 9)], // today
+    ];
+    for (const reminder of [ON, fridays]) {
+      for (const stamps of histories) {
+        const whole = practisedFrom([{ at: stamps, full: false }]);
+        const bounded = practisedFrom([{ at: stamps.filter((s) => s >= reminderReadFrom(NOW)), full: false }]);
+        expect(reminderQuiet(reminder, NOW, bounded)).toBe(reminderQuiet(reminder, NOW, whole));
+        expect(reminderLine(reminder, NOW, bounded)).toEqual(reminderLine(reminder, NOW, whole));
+      }
+    }
+  });
+});
+
+describe("reminderLineKey: the player's instrument (rem2c)", () => {
+  it.each([
+    ["electric-guitar", "notebook.reminder.lineGuitar"],
+    ["acoustic-guitar", "notebook.reminder.lineGuitar"],
+    ["bass", "notebook.reminder.lineBass"],
+    ["drums", "notebook.reminder.lineDrums"],
+    ["piano", "notebook.reminder.linePiano"],
+    ["other", "notebook.reminder.line"],
+    [undefined, "notebook.reminder.line"],
+    [null, "notebook.reminder.line"],
+  ])("%s → %s", (instrument, key) => {
+    expect(reminderLineKey(instrument)).toBe(key);
+    expect(reminderLine(ON, NOW, NONE, instrument)?.key).toBe(key);
+  });
+});
 
 describe("reminderLine: the table", () => {
   it.each<[string, CoachReminder, number, Practised, boolean]>([

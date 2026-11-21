@@ -200,7 +200,8 @@ use commands::{
     get_models_path, get_score, get_session_history, get_session_log, get_session_report, get_state,
     get_system_memory_mb,
     // W2 — the practice store (ROADMAP 1.1).
-    get_score_source, list_scores, query_attempts, query_history, save_attempt, save_score,
+    get_score_source, list_attempt_times_since, list_scores, query_attempts, query_history,
+    save_attempt, save_score,
     // W14 — "come back to this", off settings.json and onto migration three.
     clear_due, list_due, save_due,
     // The learning paths' store: migration five.
@@ -1008,6 +1009,7 @@ pub fn run() {
             delete_score,
             save_attempt,
             query_attempts,
+            list_attempt_times_since,
             // W14 — the promise the coach's fourth button makes.
             save_due,
             list_due,

@@ -15,18 +15,22 @@
  * armed while the reminder is off, while the click sounds, or while a
  * Session is in progress (`coachHeld`, or `held` from the caller).
  *
- * A read that rejects leaves `practised` null, and a null says nothing. The
- * practice store's commands do not reject when the store is unavailable
- * (corrupt, locked, a newer build's file, still opening at launch): they
- * answer an empty list (`SharedPracticeStore::read_or`), and this side cannot
- * tell that from "nothing played". So with the store unavailable the line can
- * show on a day the player practised, and the quiet rule can hold.
+ * A read that rejects leaves `practised` null, and a null says nothing; so do
+ * Takes handed in as null (Today passes null until its Session's read of them
+ * answered, and when that read failed: rem2c). Most of the practice store's
+ * commands answer an empty list rather than reject when the store is
+ * unavailable (`SharedPracticeStore::read_or`), but the Songs read here
+ * (`listAttemptTimesSince`, rem2c) rejects, and it shares that store: with
+ * the store unavailable, nothing is said. One case is left: a store that took
+ * longer than `OPEN_WAIT` to open at launch and opened later, after Today's
+ * Session had already read its Takes as empty; until the next launch, those
+ * Takes look like none.
  */
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { getSessionHistory, listPathTakes, listScores, queryAttempts } from "../ipc";
+import { getSessionHistory, listAttemptTimesSince, listPathTakes } from "../ipc";
 import { TAKES_TO_READ } from "../containers/session/hooks/useSessionRun";
 import { coachHeld, subscribeCoachSessionBusy } from "../hooks/coachLoadGate";
-import { practisedFrom, reminderNextCheck, type Practised } from "./reminder";
+import { practisedFrom, reminderNextCheck, reminderReadFrom, type Practised } from "./reminder";
 import {
   coachKeyStates,
   coachStored,
@@ -49,13 +53,6 @@ export function useStoredReminder(): { reminder: CoachReminder | null; state: Co
     if (!coachStoredLoaded()) void loadCoachStored().catch(() => {});
   }, []);
   return { reminder: states.reminder === "read" ? stored.reminder : null, state: states.reminder };
-}
-
-/** Every stored Songs attempt's start: each song in the library, its attempts without their onsets. */
-async function songAttemptTimes(): Promise<number[]> {
-  const scores = await listScores();
-  const lists = await Promise.all(scores.map((s) => queryAttempts({ scoreId: s.id, includeOnsets: false })));
-  return lists.flatMap((list) => list.map((a) => a.startedAt));
 }
 
 type Read = { takes: number[] | null; runs: number[]; songs: number[] };
@@ -118,7 +115,10 @@ export function useReminderPractised(
     Promise.all([
       ownTakes ? listPathTakes(TAKES_TO_READ).then((takes) => takes.map((t) => t.startedAt)) : null,
       getSessionHistory().then((runs) => runs.map((r) => r.timestamp)),
-      songAttemptTimes(),
+      // rem2c: only the starts, only from the look-back's first midnight, every
+      // song in one call (it rejects, rather than answering empty, when the
+      // store is unavailable).
+      listAttemptTimesSince(reminderReadFrom(Date.now())),
     ]).then(
       ([takes, runs, songs]) => {
         if (!live) return;
@@ -142,7 +142,8 @@ export function useReminderPractised(
     return practisedFrom([
       { at: takes, full: takes.length >= TAKES_TO_READ },
       { at: read.runs, full: read.runs.length >= TOOL_RUNS_READ },
-      // Every attempt of every song is read: the list is never cut.
+      // Every attempt since `reminderReadFrom` is read: complete for every day
+      // the line and the quiet rule look at, so not cut for them.
       { at: read.songs, full: false },
     ]);
   }, [read, ownTakes, given]);

@@ -18,7 +18,11 @@ const store = vi.hoisted(() => ({
   reads: 0,
   runReads: 0,
   songReads: 0,
+  /** The `since` of every Songs read (rem2c). */
+  songSince: [] as number[],
+  perSongReads: 0,
   failRead: false,
+  failSongs: false,
 }));
 
 vi.mock("../../ipc", async (importOriginal) => {
@@ -42,13 +46,22 @@ vi.mock("../../ipc", async (importOriginal) => {
       store.runReads += 1;
       return store.runs;
     }),
-    listScores: vi.fn(async () => {
+    // rem2c: one bounded read of every song's attempt starts; it rejects when the store is unavailable.
+    listAttemptTimesSince: vi.fn(async (since: number) => {
       store.songReads += 1;
-      return [...store.attempts.keys()].map((id) => ({ id }));
+      store.songSince.push(since);
+      if (store.failSongs) throw new Error("practice store unavailable");
+      return [...store.attempts.values()].flat().filter((at) => at >= since).sort((a, b) => a - b);
     }),
-    queryAttempts: vi.fn(async (query: { scoreId: string }) =>
-      (store.attempts.get(query.scoreId) ?? []).map((startedAt) => ({ scoreId: query.scoreId, startedAt })),
-    ),
+    // The per-song reads rem2b used: the reminder must not call them any more.
+    listScores: vi.fn(async () => {
+      store.perSongReads += 1;
+      return [];
+    }),
+    queryAttempts: vi.fn(async () => {
+      store.perSongReads += 1;
+      return [];
+    }),
   };
 });
 
@@ -59,8 +72,12 @@ import { CoachReminderRow } from "./CoachReminderRow";
 import { TodayReminder } from "../session/TodayReminder";
 
 /** Today's line as TodayView mounts it: with the Session's Takes handed in. */
-function today(takes: ReadonlyArray<{ startedAt: number }> | null = store.takes, sessionBusy = false) {
-  return <TodayReminder takes={takes} sessionBusy={sessionBusy} />;
+function today(
+  takes: ReadonlyArray<{ startedAt: number }> | null = store.takes,
+  sessionBusy = false,
+  instrument: string | undefined = "electric-guitar",
+) {
+  return <TodayReminder takes={takes} sessionBusy={sessionBusy} instrument={instrument} />;
 }
 
 const t = i18n.t.bind(i18n);
@@ -83,7 +100,10 @@ beforeEach(() => {
   store.reads = 0;
   store.runReads = 0;
   store.songReads = 0;
+  store.songSince.length = 0;
+  store.perSongReads = 0;
   store.failRead = false;
+  store.failSongs = false;
   setCoachSessionBusy(false);
   setCoachClickPlaying(false);
   resetCoachStored();
@@ -311,6 +331,51 @@ describe("Today's reminder line", () => {
     render(today([]));
     await loaded();
     expect(await screen.findByTestId("today-reminder")).toBeInTheDocument();
+  });
+
+  it("asks for Songs once, bounded at local midnight 21 days back, never song by song (rem2c M1)", async () => {
+    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - 30 * DAY });
+    render(today());
+    await loaded();
+    expect(await screen.findByTestId("today-reminder")).toBeInTheDocument();
+    const d = new Date();
+    expect(store.songSince).toEqual([new Date(d.getFullYear(), d.getMonth(), d.getDate() - 21).getTime()]);
+    expect(store.perSongReads).toBe(0);
+  });
+
+  it("a Songs read that rejects (the store unavailable) says nothing (rem2c)", async () => {
+    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - 30 * DAY });
+    store.failSongs = true;
+    render(today([{ startedAt: Date.now() - DAY }]));
+    await loaded();
+    await act(async () => {});
+    expect(store.songReads).toBe(1);
+    expect(screen.queryByTestId("today-reminder")).toBeNull();
+  });
+
+  it("Takes handed in as null (Today's read failed or has not answered) say nothing (rem2c L1, L2)", async () => {
+    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - DAY });
+    render(today(null));
+    await loaded();
+    await act(async () => {});
+    expect(store.reads).toBe(0);
+    expect(screen.queryByTestId("today-reminder")).toBeNull();
+  });
+
+  it.each([
+    ["bass", /^Your reminder: bass at .+\.$/],
+    ["acoustic-guitar", /^Your reminder: guitar at .+\.$/],
+    ["drums", /^Your reminder: drums at .+\.$/],
+    ["piano", /^Your reminder: piano at .+\.$/],
+    ["other", /^Your reminder: practice at .+\.$/],
+    [undefined, /^Your reminder: practice at .+\.$/],
+  ])("names the instrument the player chose (%s), and never guitar to anyone else (rem2c)", async (instrument, text) => {
+    store.disk.set("coach.reminder", { on: true, time: "00:00", days: ALL, since: Date.now() - 30 * DAY });
+    render(today(store.takes, false, instrument));
+    await loaded();
+    const line = await screen.findByTestId("today-reminder");
+    expect(line).toHaveTextContent(text);
+    if (instrument !== "acoustic-guitar") expect(line.textContent).not.toMatch(/guitar/i);
   });
 
   it("a read that rejects says nothing", async () => {

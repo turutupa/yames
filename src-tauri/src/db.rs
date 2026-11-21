@@ -1423,6 +1423,30 @@ impl Db {
         Ok(out)
     }
 
+    /// When each stored Songs attempt at a song in the library started, for
+    /// every attempt that started at or after `since` (ms), oldest first.
+    /// Only the start, nothing else of the row: the practice reminder asks
+    /// "was there a Songs pass on this day" over its three-week look-back
+    /// (rem2c), and reading every attempt of every song for that cost
+    /// megabytes on a big library.
+    pub fn attempt_times_since(&self, since: i64) -> DbResult<Vec<i64>> {
+        let mut stmt = self
+            .conn
+            .prepare(Db::ATTEMPT_TIMES_SINCE_SQL)
+            .map_err(DbError::from)?;
+        let rows = stmt
+            .query_map([since], |r| r.get::<_, i64>(0))
+            .map_err(DbError::from)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    /// The join keeps the answer to the songs `listScores` lists, as the
+    /// per-song reads it replaces did.
+    const ATTEMPT_TIMES_SINCE_SQL: &'static str = "SELECT a.started_at
+         FROM attempts a JOIN scores s ON s.id = a.score_id
+         WHERE a.started_at >= ?1
+         ORDER BY a.started_at ASC";
+
     /// Load the per-onset verdicts for a page of attempts in two
     /// statements rather than two per attempt.
     fn attach_onsets(&self, attempts: &mut [Attempt]) -> DbResult<()> {
@@ -3677,6 +3701,42 @@ mod tests {
         assert!(
             ranged[0].onsets.is_empty(),
             "onsets are not loaded unless asked for"
+        );
+    }
+
+    #[test]
+    fn attempt_times_since_leaves_out_what_started_before_the_bound() {
+        let mut db = Db::open_in_memory().unwrap();
+        db.save_score(&sample_score("song1"), None, None, 1).unwrap();
+        db.save_score(&sample_score("song2"), None, None, 1).unwrap();
+        db.save_attempt(&sample_attempt("old", "song1", 99, 17, 24))
+            .unwrap();
+        db.save_attempt(&sample_attempt("at", "song2", 100, 1, 4))
+            .unwrap();
+        db.save_attempt(&sample_attempt("late", "song1", 300, 40, 48))
+            .unwrap();
+        db.save_attempt(&sample_attempt("mid", "song2", 200, 5, 8))
+            .unwrap();
+
+        // Across every song, oldest first, the bound itself included.
+        assert_eq!(db.attempt_times_since(100).unwrap(), vec![100, 200, 300]);
+        assert_eq!(db.attempt_times_since(301).unwrap(), Vec::<i64>::new());
+        assert_eq!(db.attempt_times_since(0).unwrap(), vec![99, 100, 200, 300]);
+
+        // A song deleted takes its attempts out of the answer.
+        db.delete_score("song1").unwrap();
+        assert_eq!(db.attempt_times_since(0).unwrap(), vec![100, 200]);
+
+        // The per-song read every other caller uses is untouched.
+        let all = db
+            .query_attempts(&AttemptQuery {
+                score_id: "song2".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        assert_eq!(
+            all.iter().map(|a| a.id.as_str()).collect::<Vec<_>>(),
+            vec!["at", "mid"]
         );
     }
 

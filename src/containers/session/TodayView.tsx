@@ -259,6 +259,7 @@ export function TodayView({
   onOpenTools,
   onOpenPaths,
   instrument,
+  instrumentChosen = false,
   onOpenToolsList,
   onChangeInstrument,
 }: {
@@ -269,6 +270,11 @@ export function TodayView({
    * that predate it, which then read as a guitar.
    */
   instrument?: string;
+  /**
+   * `instrument` is the player's own choice, not the electric-guitar fallback
+   * (rem2c): only then does the reminder line name it.
+   */
+  instrumentChosen?: boolean;
   /** To the Tools list, from that note. */
   onOpenToolsList?: () => void;
   /** To the instrument setting, from that note. */
@@ -284,12 +290,14 @@ export function TodayView({
   // TODAY-9). The input's state is the header's chip (TODAY-10).
   const neck3d = useNeck3d();
   const [endRef, endInView] = useEndInView();
-  // rem2b: the reminder reuses the Session's Takes (null until they are read),
-  // and says nothing while a Session is in progress.
+  // rem2b: the reminder reuses the Session's Takes (null until a read of them
+  // answered: rem2c, a failed read is not "no Takes"), and says nothing while
+  // a Session is in progress.
   const runPhase = session.run?.phase ?? "idle";
   const reminder = (
     <TodayReminder
-      takes={!progress || progress === NO_PROGRESS ? null : progress.takes}
+      takes={session.takesKnown && progress && progress !== NO_PROGRESS ? progress.takes : null}
+      instrument={instrumentChosen ? instrument : undefined}
       sessionBusy={runPhase !== "idle" && runPhase !== "recap"}
     />
   );

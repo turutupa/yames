@@ -3,7 +3,8 @@
  * in the app only, no notification). Pure: the stored reminder, the clock and
  * the days the player practised in; one `Line` or null out.
  *
- * Today says "Your reminder: guitar at 18:00." when, and only when:
+ * Today says "Your reminder: guitar at 18:00." (the player's own instrument,
+ * or none named: `reminderLineKey`) when, and only when:
  * - the reminder is on (only the player's press in Settings → Coach does that);
  * - today, in local time, is one of its days;
  * - `now` is at or past its time today;
@@ -53,6 +54,16 @@ function dayStart(now: number, daysBack: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() - daysBack);
 }
 
+/**
+ * How far back a read of practice must reach (rem2c): local midnight
+ * `LOOK_BACK_DAYS` days before `now`'s day. `reminderQuiet` looks at days
+ * 1 to `LOOK_BACK_DAYS` back and `reminderLine` at today, so a list holding
+ * everything from here on answers both exactly; nothing older is ever asked.
+ */
+export function reminderReadFrom(now: number): number {
+  return dayStart(now, LOOK_BACK_DAYS).getTime();
+}
+
 /** The reminder's moment on a local day. */
 function momentOn(day: Date, time: string): number {
   const [h, m] = time.split(":").map(Number);
@@ -96,15 +107,45 @@ export function reminderQuiet(reminder: CoachReminder, now: number, practised: P
   return false;
 }
 
-/** Today's reminder line, or null. `time` is "HH:MM": the screen words it in the locale's own format. */
-export function reminderLine(reminder: CoachReminder, now: number, practised: Practised): Line | null {
+/**
+ * The line's key for the instrument the player chose (rem2c, owner 2026-11-21:
+ * a bass player is never told "guitar"). Both guitars are "guitar"; an
+ * instrument the app does not know, "other", or no choice yet gets the line
+ * that names none ("Your reminder: practice at 18:00.").
+ */
+export function reminderLineKey(instrument: string | null | undefined): string {
+  switch (instrument) {
+    case "electric-guitar":
+    case "acoustic-guitar":
+      return "notebook.reminder.lineGuitar";
+    case "bass":
+      return "notebook.reminder.lineBass";
+    case "drums":
+      return "notebook.reminder.lineDrums";
+    case "piano":
+      return "notebook.reminder.linePiano";
+    default:
+      return "notebook.reminder.line";
+  }
+}
+
+/**
+ * Today's reminder line, or null. `time` is "HH:MM": the screen words it in the
+ * locale's own format. `instrument` is the player's chosen one, if any.
+ */
+export function reminderLine(
+  reminder: CoachReminder,
+  now: number,
+  practised: Practised,
+  instrument?: string | null,
+): Line | null {
   if (!reminder.on) return null;
   const today = dayStart(now, 0);
   if (!reminder.days.includes(today.getDay())) return null;
   if (now < momentOn(today, reminder.time)) return null;
   if (practised.days.has(dayKey(now))) return null;
   if (reminderQuiet(reminder, now, practised)) return null;
-  return { key: "notebook.reminder.line", values: { time: reminder.time } };
+  return { key: reminderLineKey(instrument), values: { time: reminder.time } };
 }
 
 /** The next moment today at which the line may appear, or null (Today sets one timer for it). */
