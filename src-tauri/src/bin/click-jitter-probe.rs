@@ -591,7 +591,8 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --song-take        --song, and record a take of it. `take.rs` does not
                      know whether it is recording a band or a song, and
                      this is the flag that checks that
-  --hear-take        \"Hear bar N\" (c5b1): a fake 40 s Take at 44.1 kHz in
+  --hear-take        \"Hear bar N\" (c5b1): a fake 40 s Take (44.1 kHz, or
+                     48 kHz on a 44.1 kHz device, so it is resampled) in
                      the last-heard slot, then for the whole run: the click
                      (or song) for 3 s, a stop, two bars of the Take handed
                      to the take slot as `hear_take` does it, played out or
@@ -2116,7 +2117,7 @@ fn main() -> ExitCode {
     };
 
     // `--hear-take`: the last heard Take, filled before the run.
-    let heard = args.hear_take.then(fake_heard_take);
+    let heard = args.hear_take.then(|| fake_heard_take(engine.output_sample_rate().unwrap_or(48_000)));
 
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
@@ -2635,11 +2636,12 @@ struct HearSummary {
     held_bytes: usize,
 }
 
-/// The last heard Take, as the pitch pass leaves it: 40 s at 44.1 kHz (so the
-/// callback resamples it, as it would a Take heard through another device's
-/// rate), a quiet pluck on every beat, the bars two seconds long from 2 s.
-fn fake_heard_take() -> Arc<HeardTakeSlot> {
-    let rate = 44_100u32;
+/// The last heard Take, as the pitch pass leaves it: 40 s at a rate that is
+/// NOT the output's (so the callback resamples it, as it does a Take heard
+/// through an input running at another rate), a quiet pluck on every beat,
+/// the bars two seconds long from 2 s.
+fn fake_heard_take(output_rate: u32) -> Arc<HeardTakeSlot> {
+    let rate = if output_rate == 44_100 { 48_000u32 } else { 44_100 };
     let samples: Vec<f32> = (0..rate as usize * 40)
         .map(|i| {
             let t = i as f32 / rate as f32;
