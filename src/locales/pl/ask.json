@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "Co chcesz wiedzieć?",
-      "model": "Zapytaj o ten ekran, swoje podejścia lub ścieżki. Model na tym komputerze odpowiada własnymi słowami, jako ogólna rada.",
-      "loading": "Wybrany model się przygotowuje. Gdy będzie gotowy, możesz pytać o ten ekran, swoje podejścia lub ścieżki."
+      "model": "Zapytaj o ten ekran, swoje podejścia lub ścieżki: aplikacja odpowiada z tego, co zmierzyła, z twoich ścieżek i własnej pomocy. Na to, na co one nie odpowiadają, model na tym komputerze odpowiada własnymi słowami, jako ogólna rada.",
+      "loading": "Zapytaj o ten ekran, swoje podejścia lub ścieżki: aplikacja odpowiada już teraz, z tego, co zmierzyła, z twoich ścieżek i własnej pomocy. Wybrany model się przygotowuje; gdy będzie gotowy, doda ogólną radę własnymi słowami, oznaczoną jako taka."
     },
     "reply": {
       "gettingReady": "Model wciąż się przygotowuje. Zapytaj ponownie za chwilę.",

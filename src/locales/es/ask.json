@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "¿Qué quieres saber?",
-      "model": "Pregunta sobre esta pantalla, tus tomas o tus rutas. El modelo de este ordenador responde con sus propias palabras, como consejo general.",
-      "loading": "El modelo que elegiste se está preparando. Cuando esté listo, podrás preguntar sobre esta pantalla, tus tomas o tus rutas."
+      "model": "Pregunta sobre esta pantalla, tus tomas o tus rutas: la app responde con lo que midió, tus rutas y su propia ayuda. Lo que estas no responden, lo responde el modelo de este ordenador con sus propias palabras, indicado como consejo general.",
+      "loading": "Pregunta sobre esta pantalla, tus tomas o tus rutas: la app responde ahora, con lo que midió, tus rutas y su propia ayuda. El modelo que elegiste se está preparando; cuando esté listo, añade consejo general con sus propias palabras, indicado como tal."
     },
     "reply": {
       "gettingReady": "El modelo aún se está preparando. Vuelve a preguntar en un momento.",

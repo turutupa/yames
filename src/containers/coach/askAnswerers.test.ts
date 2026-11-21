@@ -104,6 +104,18 @@ describe("tuning never reaches search or help", () => {
   });
 });
 
+describe("'the tune' as the piece is not a tuning question (c2cc, review H1)", () => {
+  it.each(["How do I fine-tune my picking?", "can I slow the tune down?", "loop the tune to bar 4", "how do I play the tune a bit faster"])(
+    "'%s' does not get the tuning sentence",
+    (text) => {
+      __setAskToolsForTests(fakeHost({ view: "today", paths: en }), toolCtx({ screen: "today", locale: "en" }));
+      expect(answerByRules(text, () => "en")).not.toBe("tuning");
+      const keys = cardsOf(getAskState().turns).flatMap((c) => (c.shape === "help" ? c.lines.map((l) => l.key) : []));
+      expect(keys).not.toContain("help.tuning.none");
+    },
+  );
+});
+
 describe("cards come before help and search", () => {
   it("'where did it slip?' after a Take below the pass mark is the card", () => {
     __setAskToolsForTests(fakeHost({ paths: en }), fixture({ slipped: [0, 4], failOn: "timingEvenness" }).ctx);

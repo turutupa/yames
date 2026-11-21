@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "Bạn muốn biết điều gì?",
-      "model": "Hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn. Mô hình trên máy tính này trả lời bằng lời của chính nó, như lời khuyên chung.",
-      "loading": "Mô hình bạn chọn đang được chuẩn bị. Khi xong, bạn có thể hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn."
+      "model": "Hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn: ứng dụng trả lời từ những gì nó đã đo, các lộ trình của bạn và phần trợ giúp riêng của nó. Phần chúng không trả lời, mô hình trên máy tính này trả lời bằng lời của chính nó, như lời khuyên chung.",
+      "loading": "Hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn: ứng dụng trả lời ngay bây giờ, từ những gì nó đã đo, các lộ trình của bạn và phần trợ giúp riêng của nó. Mô hình bạn chọn đang được chuẩn bị; khi xong, nó thêm lời khuyên chung bằng lời của chính nó, đánh dấu là như vậy."
     },
     "reply": {
       "gettingReady": "Mô hình vẫn đang được chuẩn bị. Hãy hỏi lại sau một lát.",

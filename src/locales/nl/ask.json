@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "Wat wil je weten?",
-      "model": "Vraag iets over dit scherm, je takes of je leerpaden. Het model op deze computer antwoordt in eigen woorden, als algemeen advies.",
-      "loading": "Het model dat je koos, maakt zich klaar. Zodra het klaar is, kun je iets vragen over dit scherm, je takes of je leerpaden."
+      "model": "Vraag iets over dit scherm, je takes of je leerpaden: de app antwoordt uit wat ze mat, je leerpaden en haar eigen help. Wat die niet beantwoorden, beantwoordt het model op deze computer in eigen woorden, gemarkeerd als algemeen advies.",
+      "loading": "Vraag iets over dit scherm, je takes of je leerpaden: de app antwoordt nu, uit wat ze mat, je leerpaden en haar eigen help. Het model dat je koos, maakt zich klaar; zodra het klaar is, voegt het algemeen advies toe in eigen woorden, als zodanig gemarkeerd."
     },
     "reply": {
       "gettingReady": "Het model maakt zich nog klaar. Vraag het zo nog eens.",

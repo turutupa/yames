@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "Que veux-tu savoir ?",
-      "model": "Demande à propos de cet écran, de tes prises ou de tes parcours. Le modèle de cet ordinateur répond avec ses propres mots, comme un conseil général.",
-      "loading": "Le modèle que tu as choisi se prépare. Dès qu'il est prêt, tu peux poser tes questions sur cet écran, tes prises ou tes parcours."
+      "model": "Demande à propos de cet écran, de tes prises ou de tes parcours : l'appli répond d'après ce qu'elle a mesuré, tes parcours et sa propre aide. Ce qu'ils ne couvrent pas, le modèle de cet ordinateur y répond avec ses propres mots, signalé comme conseil général.",
+      "loading": "Demande à propos de cet écran, de tes prises ou de tes parcours : l'appli répond tout de suite, d'après ce qu'elle a mesuré, tes parcours et sa propre aide. Le modèle que tu as choisi se prépare ; dès qu'il est prêt, il ajoute des conseils généraux avec ses propres mots, signalés comme tels."
     },
     "reply": {
       "gettingReady": "Le modèle se prépare encore. Pose ta question de nouveau dans un instant.",

@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "Cosa vuoi sapere?",
-      "model": "Chiedi di questa schermata, dei tuoi take o dei tuoi percorsi. Il modello su questo computer risponde con parole sue, come consiglio generale.",
-      "loading": "Il modello che hai scelto si sta preparando. Quando è pronto, puoi chiedere di questa schermata, dei tuoi take o dei tuoi percorsi."
+      "model": "Chiedi di questa schermata, dei tuoi take o dei tuoi percorsi: l'app risponde da ciò che ha misurato, dai tuoi percorsi e dal suo aiuto. A ciò a cui non rispondono, risponde il modello su questo computer con parole sue, indicato come consiglio generale.",
+      "loading": "Chiedi di questa schermata, dei tuoi take o dei tuoi percorsi: l'app risponde subito, da ciò che ha misurato, dai tuoi percorsi e dal suo aiuto. Il modello che hai scelto si sta preparando; quando è pronto, aggiunge consigli generali con parole sue, indicati come tali."
     },
     "reply": {
       "gettingReady": "Il modello si sta ancora preparando. Chiedi di nuovo tra un attimo.",

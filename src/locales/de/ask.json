@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "Was willst du wissen?",
-      "model": "Frag zu diesem Bildschirm, deinen Takes oder deinen Pfaden. Das Modell auf diesem Computer antwortet mit eigenen Worten, als allgemeiner Rat.",
-      "loading": "Das gewählte Modell wird gerade vorbereitet. Sobald es bereit ist, kannst du zu diesem Bildschirm, deinen Takes oder deinen Pfaden fragen."
+      "model": "Frag zu diesem Bildschirm, deinen Takes oder deinen Pfaden: Die App antwortet aus dem, was sie gemessen hat, deinen Pfaden und ihrer eigenen Hilfe. Was diese nicht beantworten, beantwortet das Modell auf diesem Computer in eigenen Worten, als allgemeiner Rat gekennzeichnet.",
+      "loading": "Frag zu diesem Bildschirm, deinen Takes oder deinen Pfaden: Die App antwortet jetzt, aus dem, was sie gemessen hat, deinen Pfaden und ihrer eigenen Hilfe. Das gewählte Modell wird gerade vorbereitet; sobald es bereit ist, ergänzt es allgemeinen Rat in eigenen Worten, als solcher gekennzeichnet."
     },
     "reply": {
       "gettingReady": "Das Modell wird noch vorbereitet. Frag gleich noch einmal.",

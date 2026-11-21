@@ -30,8 +30,8 @@
     },
     "empty": {
       "title": "Ne öğrenmek istiyorsun?",
-      "model": "Bu ekranı, denemelerini veya yollarını sor. Bu bilgisayardaki model, genel bir tavsiye olarak kendi sözleriyle yanıtlar.",
-      "loading": "Seçtiğin model hazırlanıyor. Hazır olunca bu ekranı, denemelerini veya yollarını sorabilirsin."
+      "model": "Bu ekranı, denemelerini veya yollarını sor: uygulama ölçtüklerinden, yollarından ve kendi yardımından yanıtlar. Bunların yanıtlamadığını bu bilgisayardaki model, genel tavsiye diye işaretleyip kendi sözleriyle yanıtlar.",
+      "loading": "Bu ekranı, denemelerini veya yollarını sor: uygulama şimdi, ölçtüklerinden, yollarından ve kendi yardımından yanıtlar. Seçtiğin model hazırlanıyor; hazır olunca kendi sözleriyle, öyle işaretlenmiş genel tavsiye ekler."
     },
     "reply": {
       "gettingReady": "Model hâlâ hazırlanıyor. Biraz sonra tekrar sor.",
