@@ -24,6 +24,10 @@ if "--no-cast" in sys.argv:
         if hasattr(m, "cast_input_dtype_enabled") or hasattr(m, "lora_A"):
             m.cast_input_dtype_enabled = False
 print("attn impl", model.get_base_model().config._attn_implementation, "dropout", drop, "no-cast", "--no-cast" in sys.argv)
+if "--compile" in sys.argv:
+    for layer in model.get_base_model().model.layers:
+        layer.compile()
+    print("decoder layers compiled")
 ids = torch.randint(0, 150000, (bs, T), device="cuda")
 
 
@@ -34,8 +38,11 @@ def step():
     loss.backward()
 
 
+t = time.time()
 for _ in range(2):
     step()
+torch.cuda.synchronize()
+print(f"warm-up (2 steps, incl. any compile) {time.time() - t:.1f} s")
 torch.cuda.synchronize()
 torch.cuda.reset_peak_memory_stats()
 t = time.time()

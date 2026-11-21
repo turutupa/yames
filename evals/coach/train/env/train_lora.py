@@ -57,6 +57,9 @@ def parse_args():
     p.add_argument("--no-eos", action="store_true")
     p.add_argument("--log-every", type=int, default=10)
     p.add_argument("--no-save", action="store_true", help="timing runs: train, report, save nothing")
+    p.add_argument("--save-every", type=int, default=0,
+                   help="LoRA: also save the adapter to <out>/step-<n> every n steps (a long run that is "
+                        "stopped keeps its last snapshot; there is no optimizer resume)")
     return p.parse_args()
 
 
@@ -204,6 +207,9 @@ def main():
           f"warmup {warm} batch {a.batch_size}x{a.grad_accum} max_len {a.max_len} fixed_len {a.fixed_len} "
           f"grad_ckpt {a.grad_checkpointing} load_dtype {load_dtype} seed {a.seed}", flush=True)
 
+    load_start = os.getloadavg()[0]
+    print(f"load average at start {load_start:.1f} (the GB10's memory is shared with the CPU: a busy box "
+          f"slows every memory-bound kernel)", flush=True)
     rng = random.Random(a.seed)
     it = batches(data, a.batch_size, rng, not a.no_group_by_length)
     torch.cuda.reset_peak_memory_stats()
@@ -237,6 +243,9 @@ def main():
             history.append(rec)
             print(json.dumps({k: round(v, 5) if isinstance(v, float) else v for k, v in rec.items()}), flush=True)
             t_win, tok_win, loss_win = time.time(), 0, []
+        if a.save_every and not a.full_finetune and not a.no_save and step % a.save_every == 0 and step < steps:
+            model.save_pretrained(os.path.join(a.out, f"step-{step}"), safe_serialization=True)
+            print(f"snapshot {a.out}/step-{step}", flush=True)
     torch.cuda.synchronize()
     total = time.time() - t0
     steady = (total - t_first) / max(1, steps - 1)
@@ -251,6 +260,7 @@ def main():
         "peak_reserved_gib": torch.cuda.max_memory_reserved() / 2**30,
         "final_loss": history[-1]["loss"] if history else None, "history": history,
         "torch": torch.__version__, "device": torch.cuda.get_device_name(0),
+        "load_avg_start": load_start, "load_avg_end": os.getloadavg()[0],
     }
     if a.eval_data:
         ev, _, _ = encode(load_jsonl(a.eval_data), tok, a.max_len, not a.no_eos)

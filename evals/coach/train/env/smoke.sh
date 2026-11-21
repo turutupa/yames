@@ -53,8 +53,7 @@ step "base GGUF from the same safetensors (Q8_0 and BF16)"
 "$PY" "$LLAMA/convert_hf_to_gguf.py" "$W" --outtype bf16 --outfile "$S/base-bf16.gguf" 2>&1 | tail -n 3
 
 step "adapter to GGUF"
-"$PY" "$LLAMA/convert_lora_to_gguf.py" --base "$W" --outtype f16 --outfile "$S/lora-f16.gguf" "$S/lora" 2>&1 | tail -n 3
-ls -la "$S/lora-f16.gguf"
+bash "$HERE/convert.sh" lora "$S/lora" "$W" "$S/lora-f16.gguf" f16 2>&1 | tail -n 3
 
 if [ -x "$QUANT" ]; then
   step "Q4_K_M of the base (the app ships 4B as Q4_K_M)"
@@ -83,10 +82,9 @@ step "full fine-tune, 50 steps"
 "$PY" -I "$HERE/train_lora.py" --model "$W" --data "$S/data/train.jsonl" --out "$S/full" --full-finetune \
   --steps 50 --batch-size 8 --lr 1e-5 --max-len 512 --log-every 10
 ls -la "$S/full"
-"$PY" "$LLAMA/convert_hf_to_gguf.py" "$S/full" --outtype q8_0 --outfile "$S/full-q8_0.gguf" 2>&1 | tail -n 3
+bash "$HERE/convert.sh" full "$S/full" "$S/full-q8_0.gguf" Q8_0 2>&1 | tail -n 2
 if [ -x "$QUANT" ]; then
-  "$PY" "$LLAMA/convert_hf_to_gguf.py" "$S/full" --outtype bf16 --outfile "$S/full-bf16.gguf" 2>&1 | tail -n 1
-  "$QUANT" "$S/full-bf16.gguf" "$S/full-q4_k_m.gguf" Q4_K_M 2>&1 | tail -n 1
+  bash "$HERE/convert.sh" full "$S/full" "$S/full-q4_k_m.gguf" Q4_K_M 2>&1 | tail -n 2
 fi
 n=0
 while IFS= read -r probe; do
