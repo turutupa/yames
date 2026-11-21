@@ -1,0 +1,164 @@
+{
+  "language": "tr",
+  "noSpaces": false,
+  "verbFinal": true,
+  "verbs": {
+    "open": ["aç", "açın", "git", "gidin"],
+    "start": ["başlat", "başlatın", "başla", "çal", "çalın", "oynat"],
+    "slower": ["yavaşla", "yavaşlat", "yavaşlayın", "daha yavaş çal", "daha yavaş", "yavaş çal"],
+    "faster": ["hızlan", "hızlandır", "hızlanın", "daha hızlı çal", "daha hızlı", "hızlı çal"],
+    "loop": ["tekrarla", "döngüye al", "döngü yap", "döngüye alın"],
+    "show": ["göster", "gösterin", "çiz", "çizin"],
+    "follow": ["takip et", "takip edin"],
+    "load": ["yükle", "yükleyin"],
+    "set": ["ayarla", "ayarlayın", "yap"],
+    "focus": ["odaklan", "odaklanın"],
+    "swap": ["değiştir", "değiştirin", "yerine koy", "takas et"],
+    "findEdge": ["sınırımı bul"],
+    "testOut": ["sınava gir", "sınav ol", "test et"],
+    "explain": ["açıkla", "açıklayın"],
+    "make": ["oluştur", "hazırla", "yarat", "üret"]
+  },
+  "screens": {
+    "today": ["bugün", "bugünü", "bugüne"],
+    "paths": ["yollar", "yolları", "yollara"],
+    "progress": ["ilerleme", "ilerlemeyi", "ilerlemeye", "i̇lerleme", "i̇lerlemeyi", "i̇lerlemeye"],
+    "tools": ["araçlar", "araçları", "araçlara"],
+    "beat": ["metronom", "metronomu", "metronoma"],
+    "drill": ["tempo antrenmanı", "tempo antrenmanını", "tempo antrenmanına"],
+    "setlist": ["set listesi", "set listesini", "set listesine"],
+    "jam": ["jam", "jamı", "jamlar", "jama"],
+    "songs": ["şarkılar", "şarkıları", "şarkılara"],
+    "settings": ["ayarlar", "ayarları", "ayarlara", "ayarlarını"]
+  },
+  "sections": {
+    "general": ["genel"],
+    "appearance": ["görünüm"],
+    "instrument": ["enstrüman"],
+    "practice": ["pratik"],
+    "coach": ["koç"],
+    "tools": ["araçlar"],
+    "songs": ["parçalar"],
+    "keepTakes": ["denemeleri saklama", "deneme saklama"],
+    "about": ["hakkında"]
+  },
+  "settingKeys": {
+    "theme": ["tema"],
+    "language": ["dil"],
+    "practiceView": ["pratik görünümü"],
+    "bandVolume": ["grup sesi", "grup sesini"],
+    "countIn": ["sayım", "ön sayım", "count in", "count-in"],
+    "coachVoice": ["koç sesi", "koç sesini"],
+    "coachSuggestions": ["koç önerileri", "koç önerilerini", "öneriler", "ipuçları"]
+  },
+  "onOff": {
+    "on": ["açık", "evet"],
+    "off": ["kapalı", "hayır"]
+  },
+  "units": {
+    "bpm": ["bpm", "dakikada vuruş"],
+    "minutes": ["dakika", "dk"],
+    "bar": ["ölçüler", "ölçü", "ölçüyü"],
+    "step": ["adım"],
+    "part": ["bölüm"],
+    "clicks": ["vuruş başına tık", "vuruşta tık", "tıklama", "tık"]
+  },
+  "nouns": {
+    "tempo": ["tempo", "tempoyu", "hız", "hızı"],
+    "path": ["yolunu", "yolu", "yol"],
+    "jam": ["jam", "jamı"],
+    "preset": ["ön ayarı", "ön ayar", "preset"],
+    "chord": ["akor", "akoru"],
+    "scale": ["gam", "gamı"],
+    "exercise": ["alıştırmayı", "alıştırma"],
+    "goal": ["hedefimi", "hedefim", "hedefi", "hedef"],
+    "session": ["bugünün oturumunu", "bugünün oturumu", "bugünkü oturumu", "bugünkü oturum", "oturumu", "oturum", "bugünü", "bugün"],
+    "mix": ["miks", "mix", "karışım", "karışıma"],
+    "screen": ["bu ekranı", "bu ekran", "bu sayfayı", "bu sayfa", "ekranı", "ekran"]
+  },
+  "connectors": {
+    "to": ["olarak", "ila", "-"],
+    "at": ["itibaren", "başlayarak"],
+    "of": ["içinde", "üzerine"],
+    "for": ["için", "ile"]
+  },
+  "swapChoices": {
+    "harder": ["daha zor bir şeyle", "daha zor bir şey", "daha zorla", "daha zor"],
+    "different": ["başka bir şeyle", "başka bir şey", "başka şeyle", "başka"],
+    "style": ["başka bir stille", "başka bir stil", "farklı bir stil", "farklı stil", "başka stil", "stil"]
+  },
+  "ordinals": {
+    "ilk": 1,
+    "i̇lk": 1,
+    "birinci": 1,
+    "ikinci": 2,
+    "i̇kinci": 2,
+    "üçüncü": 3,
+    "dördüncü": 4
+  },
+  "roots": {
+    "sharp": ["diyez", "sharp"],
+    "flat": ["bemol", "flat"]
+  },
+  "scales": {
+    "major": ["majör", "ionian"],
+    "naturalMinor": ["doğal minör", "minör", "aeolian"],
+    "dorian": ["dorian"],
+    "mixolydian": ["mixolydian"],
+    "minorPentatonic": ["minör pentatonik", "pentatonik minör", "pentatonik"],
+    "majorPentatonic": ["majör pentatonik", "pentatonik majör"],
+    "blues": ["blues", "minör blues"],
+    "harmonicMinor": ["armonik minör"],
+    "melodicMinor": ["melodik minör"],
+    "lydian": ["lidyen"],
+    "phrygian": ["frigyen"],
+    "majorBlues": ["majör blues"],
+    "altered": ["altered"],
+    "locrian": ["lokriyen"],
+    "wholeTone": ["tam ton", "bütün ton"],
+    "diminishedWholeHalf": ["azaltılmış tam yarım"],
+    "diminishedHalfWhole": ["azaltılmış yarım tam"],
+    "phrygianDominant": ["frigyen dominant"],
+    "lydianDominant": ["lidyen dominant"],
+    "harmonicMajor": ["armonik majör"],
+    "hungarianMinor": ["macar minör"],
+    "augmentedScale": ["artırılmış"],
+    "bebopDominant": ["bebop dominant"],
+    "bebopMajor": ["bebop majör"],
+    "bebopMinor": ["bebop minör"],
+    "chromatic": ["kromatik"]
+  },
+  "positions": {
+    "open": ["açık pozisyon", "açık konum"],
+    "rootOn6": ["kök 6", "kök 6 tel", "kök altıncı tel"],
+    "rootOn5": ["kök 5", "kök 5 tel", "kök beşinci tel"],
+    "rootOn4": ["kök 4", "kök 4 tel", "kök dördüncü tel"],
+    "rootOn3": ["kök 3", "kök 3 tel", "kök üçüncü tel"]
+  },
+  "never": {
+    "input": ["mikrofon", "mikrofonu", "mikrofonumu", "mikrofona", "mikrofonlar", "giriş", "girişi", "girişini", "dinle", "dinleme", "dinlemeyi", "dinliyor"],
+    "devices": ["ses cihazı", "ses cihazları", "ses cihazım", "ses cihazımı", "ses cihazlarını", "cihaz", "cihazı", "cihazlar", "cihazları", "cihazımı", "çıkış", "çıkışı", "hoparlör", "hoparlörler", "kulaklık", "kulaklığı", "arayüz", "ses kartı"],
+    "grading": ["değerlendirme", "değerlendirmeyi", "değerlendirmeli", "değerlendirilmedi", "değerlendir", "puanlama", "puanlamayı", "puanla", "notlandırma", "notlandırmayı", "notlandır"],
+    "recording": ["kayıt", "kaydı", "kayıtlar", "kayıtları", "kaydet", "kaydetme", "kayda al", "kaydını", "kaydedin", "record", "recording"],
+    "deleting": ["sil", "silin", "silme", "silmeyi", "silmek", "kaldır", "kaldırma", "kaldırmak", "temizle", "temizleme", "temizlemek", "unut", "unutma"],
+    "unfollowing": ["takibi bırak", "takipten çık", "takipten çıkar", "yolu bırak", "yoldan çık", "takibi kaldır", "takip etmeyi bırak", "abonelikten çık"],
+    "model": ["indir", "i̇ndir", "indirme", "i̇ndirme", "indirmek", "i̇ndirmek", "indirin", "model", "modeli", "modelleri", "llm", "dil modeli"],
+    "grades": ["not", "notlar", "notu", "notlarım", "notlarımı", "puan", "puanlar", "puanları", "puanım", "skor", "skorlar", "temiz tempo"]
+  },
+  "questions": [
+    "neden", "niçin", "niye", "ne", "nasıl", "nerede", "nereye", "nereden", "kim", "kimin", "hangi", "hangisi", "kaç", "nedir", "ne zaman",
+    "mi", "mı", "mu", "mü"
+  ],
+  "notCommand": [
+    "mi", "mı", "mu", "mü", "mısın", "misin", "musun", "müsün", "mısınız", "misiniz", "musunuz", "müsünüz", "mıyım", "miyim", "mıyız", "miyiz", "midir", "mıdır", "değil mi", "ne", "nedir", "nasıl", "neden", "niçin",
+    "ben", "beni", "benden", "bende", "bence", "benimle", "sen", "senin", "sana", "seni", "sende", "sence", "o", "onu", "ona", "onun", "bunu", "şunu", "biz", "bizim", "bize", "onlar",
+    "değil", "yok", "hiç", "asla", "hiçbir", "olmadan",
+    "dün", "yarın", "sonra", "daha sonra", "az önce", "akşam", "geçen", "gelecek", "sonraki", "önceki", "önce", "tekrar", "yine", "yeniden", "bir daha", "baştan", "geri",
+    "ama", "fakat", "çünkü", "eğer", "ise", "ya da", "veya",
+    "çok", "fazla", "gerçekten", "oldukça", "pek",
+    "istiyorum", "istiyor", "istiyorsun", "i̇stiyorum", "i̇stiyor", "i̇stiyorsun", "istedim", "istemiyorum", "istemem", "lazım", "gerek", "gerekiyor", "zorundayım", "düşünüyorum", "hissediyorum", "sanırım",
+    "açma", "gitme", "çalma", "başlatma", "başlama", "yavaşlama", "hızlanma", "yükleme", "değiştirme", "ayarlama", "yapma", "takip etme", "oluşturma", "hazırlama", "odaklanma", "gösterme", "çizme"
+  ],
+  "polite": ["lütfen", "tamam", "hey koç", "hey", "şimdi", "teşekkürler", "sadece"],
+  "fillers": ["bana", "benim", "bir", "biraz", "azıcık", "birazcık", "şu"]
+}
