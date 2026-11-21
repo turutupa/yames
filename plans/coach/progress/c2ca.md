@@ -56,6 +56,8 @@ Most misses are vocabulary: the player's word is not the overlay's (ja プリン
 ru "питч-оффы", zh 勾弦). A model choosing among the five candidates (c3b) or synonyms per language would help; a
 miss that falls under the floor is none, not a wrong passage.
 
+Rows "answered" are what the player is told; everything else under the floor is none.
+
 Index, all sixteen Paths, on the DGX under a shared queue: en 50-117 ms, ja 170-397 ms (de 121-249, zh-CN 156-337).
 5,735 passages, 265 Steps; en 1,463 terms / 122k postings, ja 9,955 terms / 409k postings. Heap right after the
 build (garbage included): en +12 to +14 MB, ja +23 to +38 MB.
@@ -80,4 +82,10 @@ with content syllables). Native reads wanted most for vi, tr, ko, ja, zh-TW.
 
 ## Gates
 
-See the report: tsc, vitest, build.
+- tsc: pass (job `coach-c2ca-tsc`).
+- `npm run build`: pass (`/tmp/coach-c2ca/build.log`).
+- vitest full: 47938 passed; failures only `TabStage.render.test.tsx` (known, symlink) and
+  `useSessionRun.input.test.tsx` "turns the input on by itself..." under the queue's load ("Timeout calling
+  onTaskUpdate" in the same run) (`vitest.log`). Re-run of that file with `src/coach/ask`: all pass (`vt-rerun.log`).
+  This leg's modules are imported by nothing outside their tests.
+- No layout run: nothing visible changes.
