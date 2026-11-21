@@ -9,7 +9,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PathDoc } from "../../paths/format";
 import { loadAllPacks } from "../../session/packs";
-import { buildSearchIndex, searchPaths, SEARCH_FLOOR, type SearchHit, type SearchIndex } from "./search";
+import { buildSearchIndex, searchPaths, type SearchHit, type SearchIndex } from "./search";
 
 type Fixture = {
   lng: string;
@@ -34,7 +34,7 @@ const KEEP: Readonly<Record<string, { at1: number; at3: number }>> = {
 const isHit = (hit: SearchHit, expected: string[]) => expected.includes(`${hit.pathId}/${hit.stepId}`);
 
 const where = (h: SearchHit | undefined) =>
-  h ? `${h.score.toFixed(2)} ${h.pathId}/${h.stepId}${h.exerciseId ? `/${h.exerciseId}` : ""}.${h.field}` : "-";
+  h ? `${h.score.toFixed(2)}/${h.coverage.toFixed(2)}/${h.strength.toFixed(3)} ${h.pathId}/${h.stepId}` : "-";
 
 describe.each([...BY_LNG.keys()].sort())("search fixtures: %s", (lng) => {
   const fixture = BY_LNG.get(lng)!;
@@ -50,11 +50,12 @@ describe.each([...BY_LNG.keys()].sort())("search fixtures: %s", (lng) => {
     if (REPORT) {
       const heapMb = (process.memoryUsage().heapUsed - heapBefore) / 2 ** 20;
       let entries = 0;
-      for (const list of index.postings.values()) entries += list.docs.length;
+      for (const list of index.byPassage.postings.values()) entries += list.docs.length;
+      for (const list of index.bySteps.postings.values()) entries += list.docs.length;
       const textChars = index.passages.reduce((n, p) => n + p.text.length, 0);
       console.log(
         `[search-report] ${lng} build ${ms.toFixed(0)} ms, packs ${packs.length}, passages ${index.passages.length}, ` +
-          `terms ${index.postings.size}, postings ${entries}, text ${textChars} chars, heap +${heapMb.toFixed(1)} MB`,
+          `terms ${index.byPassage.postings.size}, steps ${index.bySteps.lengths.length}, postings ${entries}, text ${textChars} chars, heap +${heapMb.toFixed(1)} MB`,
       );
     }
   }, 180_000);
@@ -63,7 +64,7 @@ describe.each([...BY_LNG.keys()].sort())("search fixtures: %s", (lng) => {
     let at1 = 0;
     let at3 = 0;
     for (const { q, expect: expected } of fixture.questions) {
-      const hits = searchPaths(q, index, { floor: 0 });
+      const hits = searchPaths(q, index, { floor: 0, minCoverage: 0 });
       const one = hits[0] && isHit(hits[0], expected);
       const three = hits.slice(0, 3).some((h) => isHit(h, expected));
       if (one) at1++;
@@ -81,9 +82,9 @@ describe.each([...BY_LNG.keys()].sort())("search fixtures: %s", (lng) => {
   it(`answers none to every near-miss (${fixture.none.length})`, () => {
     const wrong: string[] = [];
     for (const q of fixture.none) {
-      const best = searchPaths(q, index, { floor: 0 })[0];
-      if (REPORT) console.log(`[search-report] ${lng} NONE ${where(best)} :: ${q}`);
-      if (best && best.score >= SEARCH_FLOOR) wrong.push(`${q} -> ${where(best)}`);
+      if (REPORT) console.log(`[search-report] ${lng} NONE ${where(searchPaths(q, index, { floor: 0, minCoverage: 0 })[0])} :: ${q}`);
+      const answered = searchPaths(q, index)[0];
+      if (answered) wrong.push(`${q} -> ${where(answered)}`);
     }
     expect(wrong).toEqual([]);
   });

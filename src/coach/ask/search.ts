@@ -54,7 +54,12 @@ export type Passage = {
   text: string;
 };
 
-export type SearchHit = Passage & { score: number };
+/**
+ * A passage found. `score` is its Step's BM25 (the Steps are ranked, then the
+ * Step's best passage is quoted); `coverage` the share of the question's
+ * weight (idf) the Step holds; `passageScore` the passage's own BM25.
+ */
+export type SearchHit = Passage & { score: number; coverage: number; strength: number; passageScore: number };
 
 // ---------------------------------------------------------------------------
 // Tokens
@@ -137,9 +142,37 @@ export function tokenize(text: string, lng: string, asDocument = false): string[
     }
     if ([...token].length < 2 && !DIGITS.test(token)) continue;
     if (lang.stop.has(token)) continue;
-    out.push(token);
+    out.push(stem(token, lng));
   }
   return out;
+}
+
+/** Languages whose words are cut to their first `PREFIX_STEM` letters: a stem without a stemmer. */
+const PREFIX_LNGS = new Set(["de", "nl", "es", "fr", "it", "pt-BR", "pl", "ru", "tr"]);
+export const PREFIX_STEM = 6;
+
+/**
+ * A light stem. English: the plural and the -ing / -ed endings ("pull-offs",
+ * "picking", "tapped" meet "pull-off", "pick", "tap"). The inflected languages
+ * with spaces: the first six letters, which joins "Akkord", "Akkorde",
+ * "Akkorden" and "аккорд", "аккорды", "аккордов" at the cost of a rare
+ * collision. Vietnamese (syllables) and the bigram languages: none.
+ */
+export function stem(token: string, lng: string): string {
+  if (DIGITS.test(token)) return token;
+  if (PREFIX_LNGS.has(lng)) return [...token].slice(0, PREFIX_STEM).join("");
+  if (lng !== "en" || !/^[a-z]+$/.test(token)) return token;
+  let t = token;
+  if (t.length > 4 && t.endsWith("ies")) return t.slice(0, -3) + "y";
+  // A vowel must be left: "string", "speed" keep their endings.
+  if (t.length > 5 && t.endsWith("ing") && /[aeiouy]/.test(t.slice(0, -3))) t = t.slice(0, -3);
+  else if (t.length > 4 && t.endsWith("ed") && !t.endsWith("eed") && /[aeiouy]/.test(t.slice(0, -2))) t = t.slice(0, -2);
+  else if (t.length > 4 && /(ss|x|ch|sh)es$/.test(t)) return t.slice(0, -2);
+  else if (t.length > 3 && t.endsWith("s") && !t.endsWith("ss") && !t.endsWith("us")) return t.slice(0, -1);
+  else return t;
+  // "tapp", "strumm" → "tap", "strum"; "pull", "pass" keep their pair.
+  if (/([b-df-hj-km-pr-tv-z])\1$/.test(t) && !/(ll|ss|zz|ff)$/.test(t)) t = t.slice(0, -1);
+  return t;
 }
 
 // ---------------------------------------------------------------------------
@@ -150,16 +183,76 @@ export function tokenize(text: string, lng: string, asDocument = false): string[
 export const BM25_K1 = 1.2;
 export const BM25_B = 0.75;
 
+/**
+ * How many times a Step's own title counts in the Step's document. The
+ * fixtures' grid (2026-11-20, progress/c2ca.md): weight 0, 1, 3, 5, 8 against
+ * Step b 0.5 to 1 and ranking by the Step alone or Step plus passage; 8 with
+ * the usual b and the Step alone found the most at 1 over the six languages
+ * (39 of 84, against 26 with no titles).
+ */
+export const TITLE_WEIGHT = 8;
+
+/** term → the documents holding it and how often, as parallel arrays. */
+type Postings = Map<string, { docs: number[]; tfs: number[] }>;
+
+/** One BM25 collection: its postings and its documents' lengths. */
+type Collection = { postings: Postings; lengths: Float64Array; averageLength: number };
+
 export type SearchIndex = {
   lng: string;
   passages: Passage[];
-  /** term → the passages holding it and how often, as parallel arrays. */
-  postings: Map<string, { docs: number[]; tfs: number[] }>;
-  lengths: Float64Array;
-  averageLength: number;
+  /** The passages, each one document. */
+  byPassage: Collection;
+  /** The Steps, each one document of all its passages (variants' own words left out). */
+  bySteps: Collection;
+  /** passage → its Step's number in `bySteps`. */
+  stepOf: Int32Array;
   /** `<exerciseId>|<variantId>` → the fields that variant words for itself. */
   variantFields: Map<string, Set<SearchField>>;
 };
+
+function collection(docs: string[][]): Collection {
+  const postings: Postings = new Map();
+  const lengths = new Float64Array(docs.length);
+  let total = 0;
+  docs.forEach((terms, doc) => {
+    lengths[doc] = terms.length;
+    total += terms.length;
+    const counts = new Map<string, number>();
+    for (const t of terms) counts.set(t, (counts.get(t) ?? 0) + 1);
+    for (const [t, tf] of counts) {
+      let list = postings.get(t);
+      if (!list) postings.set(t, (list = { docs: [], tfs: [] }));
+      list.docs.push(doc);
+      list.tfs.push(tf);
+    }
+  });
+  return { postings, lengths, averageLength: docs.length > 0 ? total / docs.length : 0 };
+}
+
+const idfOf = (n: number, df: number) => Math.log(1 + (n - df + 0.5) / (df + 0.5));
+
+/** BM25 of `terms` over a collection: document → score, and document → the idf it matched. */
+function bm25(c: Collection, terms: readonly string[]): { scores: Map<number, number>; matched: Map<number, number> } {
+  const b = BM25_B;
+  const n = c.lengths.length;
+  const scores = new Map<number, number>();
+  const matched = new Map<number, number>();
+  for (const term of terms) {
+    const list = c.postings.get(term);
+    if (!list) continue;
+    const df = list.docs.length;
+    const idf = idfOf(n, df);
+    for (let i = 0; i < df; i++) {
+      const doc = list.docs[i];
+      const tf = list.tfs[i];
+      const norm = 1 - b + (b * c.lengths[doc]) / (c.averageLength || 1);
+      scores.set(doc, (scores.get(doc) ?? 0) + (idf * tf * (BM25_K1 + 1)) / (tf + BM25_K1 * norm));
+      matched.set(doc, (matched.get(doc) ?? 0) + idf);
+    }
+  }
+  return { scores, matched };
+}
 
 function passagesOf(
   paths: readonly PathDoc[],
@@ -221,30 +314,32 @@ export function buildSearchIndex(
   fields: readonly SearchField[] = INDEXED_FIELDS,
 ): SearchIndex {
   const { passages, variantFields } = passagesOf(paths, fields);
-  const postings = new Map<string, { docs: number[]; tfs: number[] }>();
-  const lengths = new Float64Array(passages.length);
-  let total = 0;
-  passages.forEach((p, doc) => {
-    const terms = tokenize(p.text, lng, true);
-    lengths[doc] = terms.length;
-    total += terms.length;
-    const counts = new Map<string, number>();
-    for (const t of terms) counts.set(t, (counts.get(t) ?? 0) + 1);
-    for (const [t, tf] of counts) {
-      let list = postings.get(t);
-      if (!list) postings.set(t, (list = { docs: [], tfs: [] }));
-      list.docs.push(doc);
-      list.tfs.push(tf);
+  const terms = passages.map((p) => tokenize(p.text, lng, true));
+  const stepOf = new Int32Array(passages.length);
+  const stepDocs: string[][] = [];
+  const titles = new Map<string, string[]>();
+  for (const path of paths) {
+    for (const step of path.steps) {
+      // The titles name the topic ("Power chords", "The quick change"): the Step is ranked
+      // with them, its own title counted TITLE_WEIGHT times. A title is never quoted.
+      const words: string[] = [];
+      const own = tokenize(step.title, lng, true);
+      for (let i = 0; i < TITLE_WEIGHT; i++) words.push(...own);
+      for (const ex of step.exercises) words.push(...tokenize(ex.title, lng, true));
+      titles.set(`${path.id}/${step.id}`, words);
     }
+  }
+  let last = "";
+  passages.forEach((p, i) => {
+    const key = `${p.pathId}/${p.stepId}`;
+    if (key !== last) {
+      stepDocs.push([...(titles.get(key) ?? [])]);
+      last = key;
+    }
+    stepOf[i] = stepDocs.length - 1;
+    if (!p.variantId) for (const t of terms[i]) stepDocs[stepDocs.length - 1].push(t);
   });
-  return {
-    lng,
-    passages,
-    postings,
-    lengths,
-    averageLength: passages.length > 0 ? total / passages.length : 0,
-    variantFields,
-  };
+  return { lng, passages, byPassage: collection(terms), bySteps: collection(stepDocs), stepOf, variantFields };
 }
 
 const CACHE = new WeakMap<readonly PathDoc[], Map<string, SearchIndex>>();
@@ -271,7 +366,10 @@ export function searchIndexFor(paths: readonly PathDoc[], lng: string): SearchIn
  * (`search.test.ts`, "the floor"): above the best score of every question in
  * the near-miss tables, below the best score of the questions that hit.
  */
-export const SEARCH_FLOOR = 6;
+export const SEARCH_FLOOR = 0;
+
+/** The share of the question's weight the Step must hold (see `SEARCH_FLOOR`). */
+export const SEARCH_MIN_COVERAGE = 0;
 
 /** How many candidates a search returns: the model (c3b) may later choose among them. */
 export const SEARCH_LIMIT = 5;
@@ -283,6 +381,8 @@ export type SearchOptions = {
   played?: { exerciseId: string; variantId: string } | null;
   /** Defaults to `SEARCH_FLOOR`; the calibration test passes 0. */
   floor?: number;
+  /** Defaults to `SEARCH_MIN_COVERAGE`; the calibration test passes 0. */
+  minCoverage?: number;
   /** Defaults to `SEARCH_LIMIT`. */
   limit?: number;
 };
@@ -305,38 +405,32 @@ function eligible(index: SearchIndex, p: Passage, opts: SearchOptions): boolean 
  */
 export function searchPaths(query: string, index: SearchIndex, opts: SearchOptions = {}): SearchHit[] {
   const terms = [...new Set(tokenize(query, index.lng))];
-  const n = index.passages.length;
-  if (terms.length === 0 || n === 0) return [];
-  const scores = new Map<number, number>();
-  for (const term of terms) {
-    const list = index.postings.get(term);
-    if (!list) continue;
-    const df = list.docs.length;
-    const idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));
-    for (let i = 0; i < df; i++) {
-      const doc = list.docs[i];
-      const tf = list.tfs[i];
-      const norm = 1 - BM25_B + (BM25_B * index.lengths[doc]) / (index.averageLength || 1);
-      const s = (idf * tf * (BM25_K1 + 1)) / (tf + BM25_K1 * norm);
-      scores.set(doc, (scores.get(doc) ?? 0) + s);
-    }
+  const steps = index.bySteps.lengths.length;
+  if (terms.length === 0 || index.passages.length === 0) return [];
+  // What the whole question says, in the Steps' idf; a word no Step has counts in full.
+  const said = terms.reduce((sum, t) => sum + idfOf(steps, index.bySteps.postings.get(t)?.docs.length ?? 0), 0);
+  const stepRank = bm25(index.bySteps, terms);
+  const passageRank = bm25(index.byPassage, terms).scores;
+  // The best passage each Step has for the question, among the ones this player can be quoted.
+  const best = new Map<number, { doc: number; score: number }>();
+  for (const [doc, score] of passageRank) {
+    if (!eligible(index, index.passages[doc], opts)) continue;
+    const step = index.stepOf[doc];
+    const now = best.get(step);
+    if (!now || score > now.score || (score === now.score && doc < now.doc)) best.set(step, { doc, score });
   }
   const floor = opts.floor ?? SEARCH_FLOOR;
-  const limit = opts.limit ?? SEARCH_LIMIT;
-  const ranked = [...scores]
-    .filter(([doc, score]) => score >= floor && eligible(index, index.passages[doc], opts))
-    .sort((a, b) => b[1] - a[1] || a[0] - b[0]);
-  const out: SearchHit[] = [];
-  const owners = new Set<string>();
-  for (const [doc, score] of ranked) {
-    const p = index.passages[doc];
-    const owner = `${p.pathId}/${p.stepId}/${p.exerciseId ?? ""}`;
-    if (owners.has(owner)) continue;
-    owners.add(owner);
-    out.push({ ...p, score });
-    if (out.length >= limit) break;
+  const minCoverage = opts.minCoverage ?? SEARCH_MIN_COVERAGE;
+  const ranked: SearchHit[] = [];
+  for (const [step, { doc, score: passageScore }] of best) {
+    const score = stepRank.scores.get(step) ?? 0;
+    const coverage = said > 0 ? (stepRank.matched.get(step) ?? 0) / said : 0;
+    const strength = said > 0 ? score / (said * (BM25_K1 + 1)) : 0;
+    if (score < floor || coverage < minCoverage) continue;
+    ranked.push({ ...index.passages[doc], score, coverage, strength, passageScore });
   }
-  return out;
+  ranked.sort((a, b) => b.score - a.score || b.passageScore - a.passageScore);
+  return ranked.slice(0, opts.limit ?? SEARCH_LIMIT);
 }
 
 // ---------------------------------------------------------------------------
