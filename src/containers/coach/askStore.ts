@@ -15,8 +15,11 @@
  * function that answers a question; this file only keeps the turns.
  */
 import { useSyncExternalStore } from "react";
+import type { ToolBody } from "./askTools";
 
 export type AskTurn =
+  /** What a tool did, would do, could not do, or will not do (leg t1b1, `askTools.ts`). */
+  | { id: string; kind: "tool"; body: ToolBody }
   | { id: string; kind: "user"; text: string }
   /** The model's words. `pending` while it is still writing them. */
   | { id: string; kind: "coach"; text: string; pending?: boolean }

@@ -192,8 +192,15 @@ export type CoachToolHost = {
   loadJam: (jamId: string) => LoadOutcome;
   /** The saved presets, by name, with the screen each opens on (re-read at every call). */
   presets: () => readonly PresetRef[] | NotWired;
-  /** `CoachActionHost.loadPreset`, behind the unsaved-work gate. */
-  loadPreset: (presetId: string) => LoadOutcome;
+  /**
+   * `CoachActionHost.loadPreset`, behind the unsaved-work gate. The app re-reads
+   * the presets at the press before it applies one, which takes a moment:
+   * `applied` hears how that went (true: applied; false: the preset was gone,
+   * or the store could not be read, and nothing was applied). Leg t1b1, so a
+   * receipt never says "Loaded" for a preset deleted while its proposal sat in
+   * the panel (review t1a2b, B).
+   */
+  loadPreset: (presetId: string, applied?: (ok: boolean) => void) => LoadOutcome;
   /** The click's subdivision now. */
   clickSubdivision: () => Subdivision | NotWired;
   /** `CoachActionHost.setClickSubdivision`. */

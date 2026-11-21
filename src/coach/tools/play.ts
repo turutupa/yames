@@ -92,7 +92,10 @@ function loaded(tool: string, outcome: LoadOutcome, receipt: Line, values: Recor
 function presetStops(host: CoachToolHost, view: MainView | undefined): Sounding | null {
   const playing = host.sounding();
   if (playing === null) return null;
-  if (playing !== "click") return playing;
+  // The band: `handleLoadPreset` closes the jam, so it stops for certain.
+  if (playing === "band") return playing;
+  // The click or a song stops only if the preset opens another screen, and only
+  // the preset's own screen says so: a preset that names none says nothing (leg t1b1).
   return view ? host.sounding(view) : null;
 }
 
@@ -123,7 +126,15 @@ const loadPreset = defineConfirmTool<Loaded>({
     const presets = host.presets();
     if (presets === "notWiredYet") return notWiredYet("load_preset");
     if (!presets.some((preset) => preset.id === id)) return gone("the preset is not there any more");
-    return loaded("load_preset", host.loadPreset(id), line("coachTools.receipt.loadPreset", { preset: name }), { preset: name });
+    // The app re-reads the store before it applies the preset: the receipt waits for that
+    // (review t1a2b, B). Until then it says the app is loading it; then "Loaded", or gone.
+    let settle: (ok: boolean) => void = () => {};
+    const later = new Promise<Line>((resolve) => {
+      settle = (ok) => resolve(line(ok ? "coachTools.receipt.loadPreset" : "coachTools.receipt.presetGone", { preset: name }));
+    });
+    const outcome = host.loadPreset(id, (ok) => settle(ok));
+    if (outcome !== "done") return loaded("load_preset", outcome, line("coachTools.receipt.loadPreset", { preset: name }), { preset: name });
+    return { ok: true, receipt: line("coachTools.receipt.loadingPreset", { preset: name }), later };
   },
 });
 

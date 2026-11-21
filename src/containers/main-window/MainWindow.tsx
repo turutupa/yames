@@ -1791,17 +1791,19 @@ export function MainWindow() {
     setTempo: handleBpmChange,
     subdivision: state.subdivision,
     setSubdivision: (subdivision) => void setSubdivision(subdivision).catch(() => {}),
-    loadPreset: (preset) => {
+    loadPreset: (preset, applied) => {
       let ran = false;
       guarded(() => {
         ran = true;
-        // Re-read at the press: a preset deleted since the coach proposed it is not applied.
+        // Re-read at the press: a preset deleted since the coach proposed it is not applied,
+        // and the receipt hears which it was (`applied`).
         void listPresets()
           .then((list) => {
             const fresh = list.find((p) => p.id === preset.id);
             if (fresh) void handleLoadPreset(fresh);
+            applied?.(fresh !== undefined);
           })
-          .catch(() => {});
+          .catch(() => applied?.(false));
       });
       return ran ? "done" : "asked";
     },

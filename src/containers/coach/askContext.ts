@@ -53,7 +53,9 @@ export function askPrompt(
   about?: string | null,
 ): string {
   if (about) contextText = `${contextText}\nThe player is asking about this: "${about}"`;
-  const recent = turns.filter((x) => x.kind === "user" || (x.kind === "coach" && !x.pending)).slice(-TURNS_IN_PROMPT);
+  const recent = turns
+    .filter((x): x is AskTurn & { kind: "user" | "coach" } => x.kind === "user" || (x.kind === "coach" && !x.pending))
+    .slice(-TURNS_IN_PROMPT);
   const conversation =
     recent.length > 0
       ? "\nConversation so far:\n" +

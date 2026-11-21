@@ -88,9 +88,10 @@ export type CoachToolHostInput = {
   /**
    * `handleLoadPreset` behind the unsaved-work gate, the preset re-read from
    * the store first (one deleted since is not applied): `"asked"` when the
-   * gate's question opened instead.
+   * gate's question opened instead. `applied` hears the re-read's result
+   * (true: applied; false: gone or unreadable, nothing applied).
    */
-  loadPreset: (preset: Preset) => "done" | "asked";
+  loadPreset: (preset: Preset, applied?: (ok: boolean) => void) => "done" | "asked";
   settings: CoachToolSettingsInput;
   /** The saved presets (the `list_presets` IPC). A test passes its own. */
   listPresets?: () => Promise<Preset[]>;
@@ -240,10 +241,10 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       refreshPresets();
       return presets ? presets.map((p) => ({ id: p.id, name: p.name, ...(isPresetView(p.view) ? { view: p.view } : {}) })) : "notWiredYet";
     },
-    loadPreset: (presetId) => {
+    loadPreset: (presetId, applied) => {
       const preset = presets?.find((p) => p.id === presetId);
       if (!preset) throw new Error(`no preset ${presetId}`);
-      return latest.current.loadPreset(preset) === "asked" ? "asked" : "done";
+      return latest.current.loadPreset(preset, applied) === "asked" ? "asked" : "done";
     },
     clickSubdivision: () => latest.current.subdivision,
     setClickSubdivision: (subdivision) => {
