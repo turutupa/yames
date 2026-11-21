@@ -159,9 +159,16 @@ export type RecipeWords = {
    * that cannot mean "for" or "of": "von 4 Takten" is a length.
    */
   barFrom?: Words;
+  /**
+   * Leg t2dc. A number and a unit form that can only name one bar, `#` for
+   * the number ("# takcie": "w 4 takcie" is in the 4th bar; "# такте"): read
+   * in a recipe only, where it leaves the line unread. Not `ordinalPlaces`,
+   * which would also change what loop_bars reads.
+   */
+  barPlace?: Words;
 };
 
-const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article" | "rootNames" | "barFrom">, readonly string[]>> = {
+const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article" | "rootNames" | "barFrom" | "barPlace">, readonly string[]>> = {
   shapes: MAKE_SHAPES,
   chords: MAKE_CHORDS,
   subdivisions: MAKE_SUBDIVISIONS,
@@ -229,6 +236,10 @@ function recipeProblems(table: CommandTable): string[] {
     }
   }
   if (recipe.barFrom !== undefined) check("recipe.barFrom", recipe.barFrom);
+  if (recipe.barPlace !== undefined) {
+    check("recipe.barPlace", recipe.barPlace);
+    for (const word of recipe.barPlace) if (word.split("#").length !== 2) problems.push(`recipe.barPlace: "${word}" does not have exactly one #`);
+  }
   return problems;
 }
 

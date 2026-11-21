@@ -192,6 +192,7 @@
       "es": "Eb",
       "ges": "Gb"
     },
-    "barFrom": ["od"]
+    "barFrom": ["od"],
+    "barPlace": ["# takcie", "# taktu"]
   }
 }

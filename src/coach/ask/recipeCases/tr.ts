@@ -33,6 +33,11 @@ export const CASES: RecipeCases = {
     "a minör arpej nasıl çalınır",
     // "4." is the fourth bar, not four bars (review t2d, L1).
     "a minör pentatonik sekizlik 4. ölçü oluştur",
+    // Leg t2dc, a sonnet writer's lines: a bar's place, a tempo.
+    "a minör pentatonik sekizlik 4. ölçüden itibaren oluştur",
+    "a minör pentatonik sekizlik ölçü 4 başlayarak oluştur",
+    "a minör pentatonik sekizlik 90 bpm oluştur",
+    "a minör pentatonik sekizlik tempo 90 oluştur",
   ],
   yours: ["a minör pentatonik sekizlik 5. perde kaydet"],
 };

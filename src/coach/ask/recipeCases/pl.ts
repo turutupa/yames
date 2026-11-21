@@ -39,6 +39,15 @@ export const CASES: RecipeCases = {
     "zrób a moll ósemkami w tempie 90",
     "zrób ćwiczenie a moll ósemkami od 4 taktu",
     "zrób ćwiczenie a moll ósemkami od 4 takty",
+    // The conjunction "a" (and, whereas) before a quality word (leg t2dc, a sonnet writer's lines).
+    "zrób ćwiczenie w dur a moll ósemkami",
+    "zrób pentatonikę dur a pentatonikę moll ósemkami",
+    "zrób ćwiczenie dur a blues ósemkami",
+    "zrób arpeggio moll a 7 ósemkami",
+    "zrób a moll ósemkami w 4 takcie",
+    "zrób a moll ósemkami od taktu 4",
+    "zrób a moll ósemkami 90 bpm",
+    "zrób a moll ósemkami na 90",
   ],
   yours: ["zrób a moll ósemkami nagranie"],
 };

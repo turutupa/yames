@@ -175,6 +175,8 @@ type CompiledRecipe = {
   rootNames: ReadonlyMap<string, string | null>;
   /** The words after which a number is a bar's place, not a count (`RecipeWords.barFrom`). */
   barFrom: Phrases;
+  /** A number and a unit form that name one bar, not how many (`RecipeWords.barPlace`). */
+  barPlace: readonly Place[];
 };
 
 const compiledTables = new WeakMap<CommandTable, Compiled>();
@@ -244,6 +246,7 @@ function compile(table: CommandTable): Compiled {
           },
           rootNames: new Map(Object.entries(table.recipe.rootNames ?? {}).map(([w, root]) => [phraseKey(w), root])),
           barFrom: phrases(table.recipe.barFrom),
+          barPlace: places(table.recipe.barPlace),
         }
       : null,
   };
@@ -897,11 +900,11 @@ function recipeAs(
       if (bars < 1 || bars > MAX_RECIPE_BARS || !once("bars", bars)) return null;
       // A bar's place is not a count of bars (review t2d, L1): "ab dem 4. Takt", "od 4 taktu", "с 4 такта",
       // "4. ölçü". Not after a word that says "from" (`recipe.barFrom`), not typed as an ordinal ("4."), not
-      // the table's ordinal place ("4 takt").
+      // the table's ordinal place ("4 takt") or a unit form that names one bar ("w 4 takcie", `recipe.barPlace`).
       let lead: Toks = t.slice(0, t.length - q.length);
       for (let back = before(lead, c.fillers); back; back = before(lead, c.fillers)) lead = back;
       if (r.barFrom.some((p) => endsWith(lead, p)) || ordinals.has(q[0])) return null;
-      if (placeAt(q, c.places.bar)?.start === 0) return null;
+      if (placeAt(q, c.places.bar)?.start === 0 || placeAt(q, r.barPlace)?.start === 0) return null;
       exerciseWord = true;
       q = barsRest;
       continue;
