@@ -274,6 +274,75 @@ for (const theme of THEMES) {
       await expect(page.locator('[data-testid="tool-runs"]')).toBeVisible();
     });
 
+    // Leg c5c2: the note a run gets when it stops leads with what
+    // `analyze_free_play` measured; with nothing measured it is the note above.
+    test("tool-note-finding at 1440: a measured sentence leads; the report's own follows", async ({ page }) => {
+      test.skip(theme === "neon", "the scene is Ember and Manuscript");
+      test.slow();
+      const size = SIZES[0];
+      await page.clock.install();
+      await openShot(page, "metronome", size, theme, { coachReport: "1", toolFinding: "subdivisionWeak" });
+      await page.locator(LISTEN).click();
+      await expect(page.locator(LISTEN)).toHaveAttribute("aria-checked", "true");
+      await page.locator(".transport-play").click();
+      await expect(page.locator(".transport-play.playing")).toBeVisible();
+      await pauseClock(page);
+      for (let i = 0; i < 12; i++) {
+        await page.clock.runFor(1000);
+        await page.waitForTimeout(40);
+      }
+      // Nothing of the finding while the click runs.
+      expect(await page.locator('[data-testid="tool-coach-finding"]').count(), "a finding during play").toBe(0);
+      await page.locator(".transport-play").click();
+      await expect(page.locator(".transport-play.playing")).toHaveCount(0);
+      await page.clock.resume();
+
+      const note = page.locator('[data-testid="tool-coach-note"]');
+      await expect(note).toBeVisible({ timeout: 15_000 });
+      const finding = note.locator('[data-testid="tool-coach-finding"]');
+      await expect(finding).toBeVisible();
+      await expect(finding).toHaveAttribute("data-kind", "subdivisionWeak");
+      await expect(note.locator('[data-testid="tool-coach-said"]')).toBeVisible();
+      await expect(note.locator('[data-testid="tool-coach-score"]')).toBeVisible();
+      if (IN_ENGLISH) {
+        await expect(finding).toHaveText("No note landed on the off-beat eighth in 32 of 48 beats.");
+        await expect(note.locator('[data-testid="tool-coach-said"]')).toContainText("Even spacing through most of that run");
+      }
+      // The sentence is the headline: above the report's own line, inside the note.
+      const head = await rect(page, '[data-testid="tool-coach-finding"]');
+      const said = await rect(page, '[data-testid="tool-coach-said"]');
+      expect(head.bottom, "the finding above the report's sentence").toBeLessThanOrEqual(said.top + 1);
+      await settleAnimations(page);
+      await insideViewport(page, `${COACH}, .transport, [data-testid="tool-coach-finding"]`, "finding 1440", size);
+      const coach = await rect(page, COACH);
+      const bar = await rect(page, ".transport");
+      expect(coach.bottom, "the note above the transport").toBeLessThanOrEqual(bar.top + 1);
+      await noSidewaysScroll(page, "finding 1440");
+      await shot(page, `${theme}-tool-note-finding-1440`);
+    });
+
+    test("tool-note without a finding is the note it was", async ({ page }) => {
+      test.skip(theme === "neon", "the scene is Ember and Manuscript");
+      test.slow();
+      await page.clock.install();
+      await openShot(page, "metronome", MID, theme, { coachReport: "1" });
+      await page.locator(LISTEN).click();
+      await page.locator(".transport-play").click();
+      await expect(page.locator(".transport-play.playing")).toBeVisible();
+      await pauseClock(page);
+      for (let i = 0; i < 12; i++) {
+        await page.clock.runFor(1000);
+        await page.waitForTimeout(40);
+      }
+      await page.locator(".transport-play").click();
+      await page.clock.resume();
+      const note = page.locator('[data-testid="tool-coach-note"]');
+      await expect(note).toBeVisible({ timeout: 15_000 });
+      await expect(note.locator('[data-testid="tool-coach-finding"]')).toHaveCount(0);
+      await expect(note.locator('[data-testid="tool-coach-said"]')).toHaveCount(0);
+      if (IN_ENGLISH) await expect(note.locator(".coach-note-head")).toContainText("Even spacing through most of that run");
+    });
+
     for (const size of [SIZES[0], MID]) {
       test(`progress-tool-runs at ${size.width}x${size.height}: the list, then a run's detail`, async ({ page }) => {
         await openShot(page, "progress", size, theme, { toolRuns: "4" });

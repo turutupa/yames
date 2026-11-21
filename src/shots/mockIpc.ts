@@ -30,6 +30,8 @@ import {
   COACH_REPORT_SENTENCE,
   coachFeedOption,
   coachReportOption,
+  freePlayFinding,
+  toolFindingOption,
   inputFailOption,
   lowConfidenceFeedback,
   reportableRun,
@@ -1174,6 +1176,7 @@ export function installShotMock(shot: Shot, theme: string): void {
   /** The tools' coach options on the query string (`toolCoachFixtures.ts`). */
   const coachFeed = coachFeedOption();
   const coachReport = coachReportOption();
+  const toolFinding = toolFindingOption();
   const toolRuns = toolRunsOption();
   const inputFail = inputFailOption();
   /** The input is on: between `start_evaluation` and `stop_evaluation`. */
@@ -2226,6 +2229,27 @@ export function installShotMock(shot: Shot, theme: string): void {
           playMode: "structured",
           onsetResults: script.pass.results,
           extraOnsets: script.pass.extras,
+        });
+      } else if (coachReport && toolFinding) {
+        // `?toolFinding=K` (leg c5c2): the free-play close of the run that just
+        // stopped, carrying what `analyze_free_play` ranked first.
+        emit("practice-segment-ended", {
+          startMs: 0,
+          endMs: 30_000,
+          score: 82,
+          componentScores: { intervalConsistency: 0.84, gridAlignment: 0.81, hitCompleteness: 0.88, onsetEfficiency: 0.92 },
+          bpm: 120,
+          instrument: "electric-guitar",
+          endReason: "user-stopped",
+          onsetCount: 28,
+          beatCount: 32,
+          totalOnsets: 30,
+          spuriousOnsets: 2,
+          onsetEfficiency: 0.92,
+          inferredDivisor: 2,
+          inferredDivisorConfidence: 0.9,
+          playMode: "structured",
+          findings: [freePlayFinding(toolFinding)],
         });
       }
       return null;
