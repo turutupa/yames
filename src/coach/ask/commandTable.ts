@@ -68,6 +68,20 @@ export type CommandTable = {
    * the characters it contains rather than by whole words.
    */
   noSpaces: boolean;
+  /**
+   * Optional (leg t1b2b). Written with spaces and the verb last (de and nl
+   * infinitives, tr): when no verb leads the text, a verb that ends it is
+   * taken ("pfade öffnen", "yolları aç").
+   */
+  verbFinal?: boolean;
+  /**
+   * Optional (leg t1b2b). The nth bar or Step written around its number, `#`
+   * standing for it ("第#小节", "#小節目", "#번째 마디", "#단계"): for
+   * languages that put the counter after the number. Only phrases that can
+   * only mean "the nth" belong here, never "three bars". `units.bar` and
+   * `units.step` are still read before a number ("bar 3").
+   */
+  ordinalPlaces?: { bar?: Words; step?: Words };
   verbs: WordsOf<VerbId>;
   /** `go_to`'s screens. */
   screens: WordsOf<(typeof GO_TO_SCREENS)[number]>;
@@ -113,6 +127,7 @@ function lists(table: CommandTable): Array<[string, Words]> {
     }
   }
   out.push(["questions", table.questions], ["notCommand", table.notCommand], ["polite", table.polite], ["fillers", table.fillers]);
+  for (const [id, words] of Object.entries(table.ordinalPlaces ?? {})) if (words) out.push([`ordinalPlaces.${id}`, words]);
   return out;
 }
 
@@ -129,6 +144,15 @@ export function validateCommandTable(table: CommandTable): string[] {
   const problems: string[] = [];
   if (!table.language) problems.push("no language");
   if (typeof table.noSpaces !== "boolean") problems.push("noSpaces is not a boolean");
+  if (table.verbFinal !== undefined && typeof table.verbFinal !== "boolean") problems.push("verbFinal is not a boolean");
+  if (table.verbFinal === true && table.noSpaces) problems.push("verbFinal is for a language written with spaces (without them the verb is found anywhere)");
+  for (const [id, words] of Object.entries(table.ordinalPlaces ?? {})) {
+    if (id !== "bar" && id !== "step") problems.push(`ordinalPlaces.${id} is not bar or step`);
+    for (const word of words ?? []) {
+      if (typeof word === "string" && word.split("#").length !== 2) problems.push(`ordinalPlaces.${id}: "${word}" does not have exactly one #`);
+      else if (typeof word === "string" && word.replace("#", "").trim() === "") problems.push(`ordinalPlaces.${id}: "${word}" is only the number`);
+    }
+  }
 
   const known: Record<string, readonly string[]> = {
     verbs: VERB_IDS,

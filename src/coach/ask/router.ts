@@ -25,7 +25,8 @@
  * 3. A never-list word answers `yours`, before any verb is looked at, so
  *    "start recording" or "open grading settings" can never become a call.
  * 4. Then the command itself, matched whole: a verb first (anywhere, in a
- *    language written without spaces) and everything after it accounted for.
+ *    language written without spaces; first or last in one whose table says
+ *    `verbFinal`) and everything else accounted for.
  *    A word left over that the command does not use means `none`.
  *
  * Names (a Path, a Step, an Exercise, a jam, a preset) go to the tool as
@@ -129,8 +130,13 @@ const QUERY_CHARS = 80;
 type Toks = readonly string[];
 type Phrases = readonly Toks[];
 
+/** An ordinal place, "第#小节": the tokens before the number and after it. */
+type Place = { pre: Toks; post: Toks };
+
 type Compiled = {
   noSpaces: boolean;
+  verbFinal: boolean;
+  places: { bar: readonly Place[]; step: readonly Place[] };
   verbs: Array<{ id: VerbId; words: Toks }>;
   screens: Array<{ id: string; words: Toks }>;
   sections: Array<{ id: string; words: Toks }>;
@@ -177,8 +183,15 @@ function compile(table: CommandTable): Compiled {
   const record = <K extends string>(ids: readonly K[], group: Partial<Record<K, readonly string[]>>): Record<K, Phrases> =>
     Object.fromEntries(ids.map((id) => [id, phrases(group[id])])) as Record<K, Phrases>;
   const units = record(UNIT_IDS, table.units);
+  const places = (words: readonly string[] | undefined): Place[] =>
+    (words ?? [])
+      .map((w) => phraseKey(w).split("#"))
+      .filter((parts) => parts.length === 2)
+      .map(([pre, post]) => ({ pre: tokenize(pre.trim(), ns), post: tokenize(post.trim(), ns) }));
   const compiled: Compiled = {
     noSpaces: ns,
+    verbFinal: table.verbFinal === true && !ns,
+    places: { bar: places(table.ordinalPlaces?.bar), step: places(table.ordinalPlaces?.step) },
     verbs: entries(table.verbs),
     screens: entries(table.screens),
     sections: entries(table.sections),
@@ -375,9 +388,26 @@ function numberWithUnit(t: Toks, c: Compiled): { n: number; unit: UnitId | null 
   return null;
 }
 
-/** "3", "3 to 4", "3 - 4", "the first": a range of bars. */
+/** The first ordinal place in `t` ("第7步"): where it starts and ends, and its number. */
+function placeAt(t: Toks, places: readonly Place[]): { start: number; end: number; n: number } | null {
+  for (let i = 0; i < t.length; i++) {
+    for (const p of places) {
+      if (p.pre.length > 0 && !startsWith(t, p.pre, i)) continue;
+      const n = num(t[i + p.pre.length]);
+      if (n === null || n < 1) continue;
+      const end = i + p.pre.length + 1;
+      if (p.post.length > 0 && !startsWith(t, p.post, end)) continue;
+      return { start: i, end: end + p.post.length, n };
+    }
+  }
+  return null;
+}
+
+/** "3", "3 to 4", "3 - 4", "the first", "第3小节": a range of bars. */
 function barRange(t: Toks, c: Compiled): { from: number; to?: number } | null {
   let q = skip(t, c.fillers);
+  const place = placeAt(q, c.places.bar);
+  if (place && place.start === 0 && place.end === q.length) return { from: place.n };
   const ordinal = q.length > 0 ? c.ordinals.get(q[0]) : undefined;
   if (ordinal !== undefined) {
     const rest = after(q.slice(1), c.units.bar);
@@ -395,13 +425,24 @@ function barRange(t: Toks, c: Compiled): { from: number; to?: number } | null {
 
 /** "step 7", "step 7 of alternate picking", "alternate picking step 7": a Step, and its Path's words. */
 function stepPlace(t: Toks, c: Compiled): { step: number; path?: string } | null {
-  const i = t.findIndex((_, k) => c.units.step.some((p) => startsWith(t, p, k)));
-  if (i < 0) return null;
-  const stepLen = (c.units.step.find((p) => startsWith(t, p, i)) ?? []).length;
-  const n = num(t[i + stepLen]);
-  if (n === null || n < 1) return null;
-  const head = t.slice(0, i);
-  const tail = t.slice(i + stepLen + 1);
+  let n: number | null;
+  let head: Toks;
+  let tail: Toks;
+  const place = placeAt(t, c.places.step);
+  if (place) {
+    // "第7步", "7단계": the number inside an ordinal place.
+    n = place.n;
+    head = t.slice(0, place.start);
+    tail = t.slice(place.end);
+  } else {
+    const i = t.findIndex((_, k) => c.units.step.some((p) => startsWith(t, p, k)));
+    if (i < 0) return null;
+    const stepLen = (c.units.step.find((p) => startsWith(t, p, i)) ?? []).length;
+    n = num(t[i + stepLen]);
+    if (n === null || n < 1) return null;
+    head = t.slice(0, i);
+    tail = t.slice(i + stepLen + 1);
+  }
   if (head.length === 0 && tail.length === 0) return { step: n };
   if (head.length > 0 && tail.length === 0) {
     const path = query(skip(head, c.nouns.path), c);
@@ -545,7 +586,13 @@ function chordCall(t: Toks, c: Compiled): ToolCall | null {
 // ---------------------------------------------------------------------------
 
 function verbAt(t: Toks, c: Compiled): { id: VerbId; rest: Toks } | null {
-  if (!c.noSpaces) return leadId(t, c.verbs);
+  if (!c.noSpaces) {
+    const first = leadId(t, c.verbs);
+    if (first || !c.verbFinal) return first;
+    // A language that puts the verb last ("pfade öffnen", "yolları aç"): a verb that ends the text.
+    for (const v of c.verbs) if (t.length > v.words.length && endsWith(t, v.words)) return { id: v.id, rest: t.slice(0, t.length - v.words.length) };
+    return null;
+  }
   // Without spaces the verb may sit anywhere (Japanese and Korean put it last).
   // What is left keeps its particles in the middle; the ones at either end are dropped ("パスを" → "パス").
   for (const v of c.verbs) {

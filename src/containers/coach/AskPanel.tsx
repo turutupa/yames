@@ -7,7 +7,8 @@ import { useCoachModel } from "../../hooks/useCoachModel";
 import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
-import { consumeAskFocus, noteAskScreen, sendAsk, useAskState, type AskTurn } from "./askStore";
+import { consumeAskFocus, noteAskScreen, useAskState, type AskTurn } from "./askStore";
+import { answerTyped } from "./askTyped";
 import { AskToolTurn } from "./AskToolTurn";
 import { askToolChips, onePress, runAskCall } from "./askTools";
 import { lineText } from "./toolWords";
@@ -160,7 +161,7 @@ function AskConversation({
   /** Where the panel is looking: the chips are chosen again when it moves. */
   lookingKey: string | null;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const model = useCoachModel().state;
   const [draft, setDraft] = useState("");
   const threadRef = useRef<HTMLDivElement>(null);
@@ -191,7 +192,8 @@ function AskConversation({
   const send = (e?: FormEvent) => {
     e?.preventDefault();
     if (!draft.trim()) return;
-    sendAsk(draft);
+    // A typed command first, then the next answerer, then the model or the plain statement (leg t1b2b).
+    answerTyped(draft, i18n.language);
     setDraft("");
   };
 
