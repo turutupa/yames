@@ -65,7 +65,7 @@ export interface Shot {
      * Path is subscribed (QA 2026-11-17 #7).
      */
     /** `slipped`: `returning`, its last Take with per-bar figures in which the tune's first bar slipped (Today's line). */
-    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped";
+    seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped" | "notebook";
     /** Today's focus (`session.todayFocus`): "mix" or a Path's id. Absent: the mix. */
     focus?: string;
     /** Paths switched out of the daily mix (`session.offMix`). */
@@ -937,6 +937,16 @@ export const SHOTS: Shot[] = [
     window: "main",
     session: { seed: "returning", minutes: 15, stop: "today" },
     width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    // The Notebook (leg c4a2, mock 10): two noticed lines and a goal.
+    id: "notebook",
+    suffix: "notebook",
+    window: "main",
+    session: { seed: "notebook", minutes: 15, stop: "today" },
+    width: 1440,
     height: 900,
     settleMs: 300,
   },
@@ -2359,6 +2369,12 @@ for (const id of PHONE_LEARNING_SCENES) {
 for (const id of ["session-variant-runway", "step-line", "today-back"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
+}
+
+// The Notebook on a phone (leg c4a2): the sheet's "Ask | Notebook".
+{
+  const notebook = SHOTS.find((s) => s.id === "notebook");
+  if (notebook) SHOTS.push({ ...notebook, id: "phone-notebook", suffix: "phone-notebook", width: 360, height: 800 });
 }
 
 export function shotById(id: string): Shot | undefined {

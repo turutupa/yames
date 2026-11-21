@@ -7,7 +7,8 @@ import { useCoachModel } from "../../hooks/useCoachModel";
 import { IS_MOBILE } from "../../platform";
 import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
-import { consumeAskFocus, noteAskScreen, useAskState, type AskTurn } from "./askStore";
+import { askDraft, consumeAskFocus, keepAskDraft, noteAskScreen, setAskTab, useAskState, type AskTab, type AskTurn } from "./askStore";
+import { Notebook } from "./Notebook";
 import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
@@ -43,7 +44,7 @@ type AskPanelProps = {
  */
 export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelProps) {
   const { t } = useTranslation();
-  const { turns, focusPending, about } = useAskState();
+  const { turns, focusPending, about, tab } = useAskState();
   const titleId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [typing, setTyping] = useState(false);
@@ -88,12 +89,13 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
           <CoachModelSelector placement="down" />
         </div>
       )}
-      {lookingText && (
+      <AskTabs tab={tab} />
+      {tab === "ask" && lookingText && (
         <p className="ask-context" data-testid="ask-context">
           <span className="ask-context-label">{t("ask.lookingAt")}</span> <b>{lookingText}</b>
         </p>
       )}
-      {about && (
+      {tab === "ask" && about && (
         <p className="ask-about" data-testid="ask-about">
           <q>{about}</q>
         </p>
@@ -101,7 +103,13 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
     </div>
   );
 
-  const body = <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} lookingKey={lookingKey} />;
+  // The Notebook is built when its tab opens, and only then (leg c4a2).
+  const body =
+    tab === "notebook" ? (
+      <Notebook />
+    ) : (
+      <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} lookingKey={lookingKey} />
+    );
 
   if (IS_MOBILE) {
     return (
@@ -116,7 +124,7 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
         >
           {head}
           {body}
-          <AskFooter />
+          <AskFooter tab={tab} />
         </div>
       </Sheet>
     );
@@ -144,7 +152,7 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
       {body}
       <div className="ask-foot">
         <CoachModelSelector />
-        <AskFooter />
+        <AskFooter tab={tab} />
       </div>
     </aside>
   );
@@ -165,7 +173,9 @@ function AskConversation({
 }) {
   const { t, i18n } = useTranslation();
   const model = useCoachModel().state;
-  const [draft, setDraft] = useState("");
+  // A question typed and not sent survives a visit to the Notebook's tab (c4a2b, L4).
+  const [draft, setDraft] = useState(askDraft);
+  useEffect(() => keepAskDraft(draft), [draft]);
   const threadRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -318,12 +328,55 @@ function Turn({ turn }: { turn: AskTurn }) {
   }
 }
 
-/** One line: what this device does with what you type (DESIGN 5.5). */
-function AskFooter() {
+/** One line: what this device does with what you type (DESIGN 5.5); on the Notebook, where its lines come from (5.4, guardrail 7). */
+function AskFooter({ tab }: { tab: AskTab }) {
   const { t } = useTranslation();
   const model = useCoachModel().state;
-  const key = IS_MOBILE ? "ask.footer.phone" : model === "ready" ? "ask.footer.model" : "ask.footer.local";
+  const key =
+    tab === "notebook"
+      ? "notebook.ui.footer"
+      : IS_MOBILE
+        ? "ask.footer.phone"
+        : model === "ready"
+          ? "ask.footer.model"
+          : "ask.footer.local";
   return <p className="ask-footer">{t(key)}</p>;
+}
+
+/** "Ask | Notebook" (DESIGN 6.7, mocks 10 and 17): a tab strip in the head, in every shape. */
+function AskTabs({ tab }: { tab: AskTab }) {
+  const { t } = useTranslation();
+  const tabs: AskTab[] = ["ask", "notebook"];
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  return (
+    <div className="ask-tabs" role="tablist" aria-label={t("notebook.ui.tabsLabel")} data-testid="ask-tabs">
+      {tabs.map((id, i) => (
+        <button
+          key={id}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          type="button"
+          role="tab"
+          aria-selected={tab === id}
+          tabIndex={tab === id ? 0 : -1}
+          className="ask-tab"
+          data-tab={id}
+          data-testid={`ask-tab-${id}`}
+          onClick={() => setAskTab(id)}
+          onKeyDown={(e) => {
+            if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+            e.preventDefault();
+            const next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+            setAskTab(next);
+            refs.current[tabs.indexOf(next)]?.focus();
+          }}
+        >
+          {t(id === "ask" ? "notebook.ui.tabAsk" : "notebook.ui.tabNotebook")}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 /** The sheet is modal: Tab and Shift+Tab stay inside it. */

@@ -21,6 +21,7 @@ import type { MainView } from "../main-window/MainHeader";
 import { seedOf, type SessionRun } from "../session/hooks/useSessionRun";
 import { askModelContext, askScreenKey, lookingAtParts } from "./askContext";
 import type { AskLookingAt } from "./AskPanel";
+import { registerNotebookSource } from "./askStore";
 import { noteAskLoad, noteAskTake, noteAskToolView, noteAskUndos, registerAskToolContext } from "./askTools";
 import { useAskSessionRules, useCoachPanel, type CoachPanel } from "./useCoachPanel";
 
@@ -109,6 +110,18 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
 
   // The tools read the same context, at each press (leg t1b1).
   useEffect(() => registerAskToolContext(() => buildCoachContext(sources)), [sources]);
+  // The Notebook reads the stored Takes when its tab opens (leg c4a2), never per beat.
+  // A Session that runs is a Session on every view (c4a2b, M1): the run's phase
+  // alone says so, as MainWindow's `holdNudges` and the tool host's `sessionActive` read it.
+  useEffect(
+    () =>
+      registerNotebookSource(() => {
+        const s = latest.current.session;
+        const inRun = s.run.phase !== "idle";
+        return { rows: s.progress.takes, paths: s.paths, sessionStartedAt: inRun ? s.run.startedAt : null };
+      }),
+    [],
+  );
 
   const { session, view, isPlaying } = input;
 
