@@ -323,7 +323,9 @@ pub struct CleanTempoSpan {
     pub first_bpm: i64,
     /// `started_at` of the Take that earned the first clean tempo.
     pub first_at: i64,
-    /// The highest clean tempo: the ceiling `list_exercise_ceilings` reports.
+    /// The highest clean tempo: the ceiling `list_exercise_ceilings` reports,
+    /// unless a Take marked not fair holds that ceiling; then the best clean
+    /// Take not marked so (`shownCleanTempoOf` in `src/session/progress.ts`).
     pub best_bpm: i64,
     /// `started_at` of the first Take that earned it.
     pub best_at: i64,
@@ -1821,15 +1823,23 @@ fn history_sql(filter: &HistoryFilter) -> (String, Vec<Box<dyn rusqlite::ToSql>>
 /// `facts.newClean` is true: `useSessionRun` sets it exactly when it hands
 /// `save_path_take` a clean tempo. So a Take not caught, a Take below the
 /// pass mark, an ungraded Take and a Take that passed slower than the clean
-/// tempo already was are all left out, as the ceiling leaves them out; a
-/// Take the player later called unfair stays in, because the ceiling keeps it
-/// too.
+/// tempo already was are all left out, as the ceiling leaves them out.
+///
+/// A Take the player marked not fair (`facts.fair = "no"`) is left out too
+/// (owner, 1k questions, item 3), although the ceiling keeps it: the first
+/// and best here are the clean tempo the app shows (`shownCleanTempoOf`), and
+/// milestones read them. With that Take gone, the next best is whichever Take
+/// held a clean tempo, so a row whose `newClean` is false still counts when
+/// the scorer said it counts for a clean tempo
+/// (`measures.pass.countsForCleanTempo`). Without a Take marked not fair that
+/// changes nothing: such a row passed no faster than the ceiling already
+/// stood, and later than the Take that raised it.
 ///
 /// Rows saved before `newClean` existed (2026-11-08 to 11-16) carry no such
 /// flag; for those alone, a caught, passed Take counts when the scorer said
 /// it counts for a clean tempo (`measures.pass.countsForCleanTempo`) or, with
 /// no such answer, when it ran at least `CLEAN_TEMPO_MIN_BARS` bars: the same
-/// reading as `countsClean` in `ProgressView.tsx`. Such a row may be a pass
+/// reading as `heldCleanTempo` in `src/session/progress.ts`. Such a row may be a pass
 /// slower than the clean tempo already was; first-and-best is untouched by it.
 /// Facts that are not JSON are read as having no flag, as `list_path_takes`
 /// keeps such a row.
@@ -1846,17 +1856,24 @@ fn clean_tempo_spans_sql() -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
                            THEN json_type(facts_json, '$.newClean') END,
                       'null')
                  WHEN 'true' THEN 1
-                 WHEN 'null' THEN
+                 ELSE
                    CASE COALESCE(
                           CASE WHEN json_valid(facts_json)
                                THEN json_type(facts_json, '$.measures.pass.countsForCleanTempo') END,
                           'null')
                      WHEN 'true' THEN 1
                      WHEN 'false' THEN 0
-                     ELSE bars >= ?1
+                     ELSE COALESCE(
+                            CASE WHEN json_valid(facts_json)
+                                 THEN json_type(facts_json, '$.newClean') END,
+                            'null') = 'null'
+                          AND bars >= ?1
                    END
-                 ELSE 0
                END
+           AND COALESCE(
+                 CASE WHEN json_valid(facts_json)
+                      THEN json_extract(facts_json, '$.fair') END,
+                 '') <> 'no'
          ORDER BY exercise_id ASC, started_at DESC",
     );
     (sql, vec![Box::new(CLEAN_TEMPO_MIN_BARS)])
@@ -3134,7 +3151,7 @@ mod tests {
 
     /// What earned no clean tempo is not in the span: not caught, below the
     /// pass mark, ungraded, or passed without raising it. A Take the player
-    /// called unfair stays, because the ceiling (`cleanTempoOf`) keeps it.
+    /// marked not fair is left out too, though the ceiling keeps it.
     #[test]
     fn a_clean_tempo_span_leaves_out_what_the_ceiling_leaves_out() {
         let mut db = Db::open_in_memory().unwrap();
@@ -3158,8 +3175,55 @@ mod tests {
         unfair.facts["fair"] = serde_json::json!("no");
         save_clean(&mut db, &unfair);
 
-        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 40), (72, 60))]);
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 40), (66, 40))]);
         assert_eq!(db.list_exercise_ceilings().unwrap()[0].clean_bpm, 72);
+    }
+
+    /// A Take marked not fair (owner, 1k questions, item 3): the three cases
+    /// `shownCleanTempoOf` has in `progress.test.ts`, on the same rows.
+    #[test]
+    fn a_take_marked_not_fair_is_not_a_clean_tempo() {
+        let (p, e) = ("p", "x");
+        // A clean pass that raised nothing (the ceiling already stood higher),
+        // as `useSessionRun` keeps it: the scorer said it counts.
+        let held = |id: &str, at: i64, bpm: i64| {
+            let mut take = clean_take(id, p, e, at, bpm, Some(false));
+            take.facts["measures"]["pass"] = serde_json::json!({ "countsForCleanTempo": true });
+            take
+        };
+        let mark = |db: &mut Db, take: &PathTake, fair: &str| {
+            let mut again = take.clone();
+            again.facts["fair"] = serde_json::json!(fair);
+            // As `answerFair` saves it: the same row, no clean tempo with it.
+            db.save_path_take(&again, None).unwrap();
+        };
+
+        // The fastest clean Take is marked not fair: the best is the next
+        // fastest clean Take, whether or not it raised the ceiling.
+        let mut db = Db::open_in_memory().unwrap();
+        save_clean(&mut db, &clean_take("first", p, e, 10, 66, Some(true)));
+        let fastest = clean_take("fastest", p, e, 20, 72, Some(true));
+        save_clean(&mut db, &fastest);
+        save_clean(&mut db, &held("after", 30, 70));
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 10), (72, 20))]);
+        mark(&mut db, &fastest, "no");
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 10), (70, 30))]);
+        assert_eq!(db.list_exercise_ceilings().unwrap()[0].clean_bpm, 72, "the ceiling is not touched");
+        // Unmarking ("yes") brings it back.
+        mark(&mut db, &fastest, "yes");
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 10), (72, 20))]);
+
+        // Its only clean Takes are marked not fair: no clean tempo at all.
+        let mut db = Db::open_in_memory().unwrap();
+        let only = clean_take("only", p, e, 10, 66, Some(true));
+        save_clean(&mut db, &only);
+        let again = held("again", 20, 60);
+        save_clean(&mut db, &again);
+        mark(&mut db, &only, "no");
+        mark(&mut db, &again, "no");
+        assert!(db.list_clean_tempo_spans().unwrap().is_empty());
+        mark(&mut db, &only, "yes");
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 10), (66, 10))]);
     }
 
     /// Rows from before `newClean`: a caught, passed Take over eight bars
@@ -3255,6 +3319,8 @@ mod tests {
                         "role": "focus",
                         "reason": "nextUp",
                         "newClean": i % 30 == 0,
+                        // Some marked, as players answer "Was this grade fair?".
+                        "fair": if i % 7 == 0 { "no" } else { "yes" },
                     })
                     .to_string();
                     stmt.execute(rusqlite::params![

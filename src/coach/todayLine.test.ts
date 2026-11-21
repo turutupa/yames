@@ -190,6 +190,31 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
     null,
   ],
   [
+    // nf1 (owner, 1k questions, item 3): the clean tempo shown is the fastest
+    // clean Take not marked not fair, here a later one that raised no ceiling.
+    "returning, the raising Take was marked not fair, a slower clean Take after it",
+    input({
+      takes: [
+        take({
+          startedAt: NOW - DAY + 120_000,
+          bpm: 85,
+          passed: true,
+          facts: {
+            verdict: "passed",
+            newClean: false,
+            session: NOW - DAY - 60_000,
+            measures: { perBar: perBar(3, {}), barsPlayed: BARS * 3, pass: { countsForCleanTempo: true } as NonNullable<TakeFacts["measures"]>["pass"] },
+          },
+        }),
+        take({ passed: true, facts: { verdict: "passed", newClean: true, fair: "no", measures: { perBar: perBar(3, {}), barsPlayed: BARS * 3 } } }),
+      ],
+      ceilings: [{ exerciseKey: `${PATH}/${TUNE}`, cleanBpm: 90, lastPracticed: NOW - DAY }],
+      steps: [WARM, exerciseStep({ bpm: 90, why: { code: "climb", values: { bpm: 85, next: 90 } } })],
+    }),
+    "earned",
+    `${tune.title}: your clean tempo went up to 85 BPM yesterday. Today it goes faster.`,
+  ],
+  [
     "back after twelve days, eased a rung",
     input({
       mood: "back",

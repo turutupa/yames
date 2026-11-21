@@ -8,6 +8,7 @@ import type { Exercise, Level, PathDoc, Step } from "../paths/format";
 import type { ExerciseCeilingRow, PathStateRow, PathTakeRow } from "../ipc";
 import type { TakeMeasures } from "./takeMeasures";
 import type { TakeVerdict } from "./grade";
+import { CLEAN_TEMPO_MIN_BARS } from "./grade";
 
 /** What `PathTakeRow.facts` holds. Everything optional: old rows stay readable. */
 export type TakeFacts = {
@@ -129,6 +130,92 @@ export function cleanTempoOf(
 ): number | null {
   const key = ceilingKey(pathId, exerciseId);
   return progress.ceilings.find((c) => c.exerciseKey === key)?.cleanBpm ?? null;
+}
+
+/** The player answered "no" to "Was this grade fair?" for this Take. */
+export function isMarkedNotFair(take: PathTakeRow): boolean {
+  return factsOf(take).fair === "no";
+}
+
+/**
+ * Did this Take hold a clean tempo, whatever the player said about it after:
+ * caught, passed, and eight bars in a row that held. The same reading as
+ * `clean_tempo_spans_sql` in `src-tauri/src/db.rs`, in the same order: a Take
+ * that raised the ceiling (`newClean`) counts; else the scorer's own answer
+ * (`measures.pass.countsForCleanTempo`); else a row that says it did not raise
+ * it holds no record and does not count; else (a row from before `newClean`)
+ * eight bars or more.
+ */
+export function heldCleanTempo(take: PathTakeRow): boolean {
+  if (!take.caught || !take.passed) return false;
+  const facts = factsOf(take);
+  if (facts.newClean === true) return true;
+  const scorer = facts.measures?.pass?.countsForCleanTempo;
+  if (typeof scorer === "boolean") return scorer;
+  if (facts.newClean !== undefined && facts.newClean !== null) return false;
+  return take.bars >= CLEAN_TEMPO_MIN_BARS;
+}
+
+/**
+ * Does this Take count toward a clean tempo the app shows or quotes: it held
+ * one, and the player did not mark its grade not fair (owner, 1k questions,
+ * item 3). Unmarking it (answering "yes") counts it again.
+ */
+export function countsTowardCleanTempo(take: PathTakeRow): boolean {
+  return heldCleanTempo(take) && !isMarkedNotFair(take);
+}
+
+/**
+ * The clean tempo the app shows and quotes for one Exercise, or null.
+ *
+ * The stored ceiling (`cleanTempoOf`) keeps only the highest clean tempo ever
+ * saved, Takes marked not fair included, and it stays what the planner, the
+ * Step's pass and the standing read. This is the number a player sees: the
+ * ceiling, unless a Take marked not fair is what holds it; then the fastest
+ * clean Take not marked so, from the Takes in memory (the store's newest 500),
+ * and null when there is none. Not zero: no clean tempo.
+ */
+export function shownCleanTempoOf(
+  progress: PlayerProgress,
+  pathId: string,
+  exerciseId: string,
+): number | null {
+  return shownCleanTempo(progress, pathId, exerciseId).bpm;
+}
+
+/** `shownCleanTempoOf`, and whether it is the ceiling as stored (no Take marked not fair holds it). */
+function shownCleanTempo(
+  progress: PlayerProgress,
+  pathId: string,
+  exerciseId: string,
+): { bpm: number | null; stored: boolean } {
+  const ceiling = cleanTempoOf(progress, pathId, exerciseId);
+  if (ceiling === null) return { bpm: null, stored: true };
+  const takes = takesOf(progress, pathId, exerciseId);
+  const notFair = takes.some((t) => t.bpm >= ceiling && isMarkedNotFair(t) && heldCleanTempo(t));
+  if (!notFair) return { bpm: ceiling, stored: true };
+  const fair = takes.filter(countsTowardCleanTempo);
+  return { bpm: fair.length > 0 ? Math.max(...fair.map((t) => t.bpm)) : null, stored: false };
+}
+
+/**
+ * The Take that set the shown clean tempo (`shownCleanTempoOf`), when the
+ * Takes in memory hold it: the earliest Take not marked not fair that counts
+ * at that tempo. When the shown tempo is the stored ceiling, only the Take
+ * that raised it (`newClean`) is that Take: a later one at the same tempo
+ * moved nothing.
+ */
+export function shownCleanTempoTakeOf(
+  progress: PlayerProgress,
+  pathId: string,
+  exerciseId: string,
+): PathTakeRow | null {
+  const shown = shownCleanTempo(progress, pathId, exerciseId);
+  if (shown.bpm === null) return null;
+  const at = takesOf(progress, pathId, exerciseId).filter(
+    (t) => t.bpm === shown.bpm && countsTowardCleanTempo(t) && (!shown.stored || factsOf(t).newClean === true),
+  );
+  return at.length > 0 ? at[at.length - 1] : null;
 }
 
 /** Takes on one Exercise, newest first. Ungraded ones included. */

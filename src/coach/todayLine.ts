@@ -30,7 +30,7 @@ import { findExercise } from "../session/packs";
 import type { PlanStep, SessionPlan } from "../session/planner";
 import { rungsToDrop } from "../session/planner";
 import type { PlayerProgress } from "../session/progress";
-import { calendarDaysBetween, cleanTempoOf, factsOf, isUngradedTake, sessionKeyOf } from "../session/progress";
+import { calendarDaysBetween, factsOf, isUngradedTake, sessionKeyOf, shownCleanTempoTakeOf } from "../session/progress";
 import type { PathTakeRow } from "../ipc";
 
 /**
@@ -284,15 +284,10 @@ export function todayLine(input: TodayLineInput): TodayLine | null {
     if (step.kind !== "exercise") continue;
     const then = earnedThen(step);
     if (!then) continue;
-    const clean = cleanTempoOf(progress, step.pathId, step.exerciseId);
-    const raised = session.find(
-      (t) =>
-        t.pathId === step.pathId &&
-        t.exerciseId === step.exerciseId &&
-        isGraded(t) &&
-        factsOf(t).newClean === true &&
-        t.bpm === clean,
-    );
+    // The Take that set the clean tempo the app shows: never one marked not
+    // fair, so a clean tempo that only such a Take raised was not earned.
+    const setter = shownCleanTempoTakeOf(progress, step.pathId, step.exerciseId);
+    const raised = setter && session.includes(setter) && isGraded(setter) ? setter : null;
     if (!raised || markedUnfair(raised)) continue;
     const exercise = exerciseOf(paths, step.pathId, step.exerciseId);
     if (!exercise) continue;

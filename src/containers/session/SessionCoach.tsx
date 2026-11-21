@@ -22,7 +22,7 @@ import type { Line } from "../../session/coachWords";
 import { displayValue, metricKey, reasonLine } from "../../session/coachWords";
 import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
-import { cleanTempoOf, heardItOf, takesOf, upstrokeOf } from "../../session/progress";
+import { heardItOf, shownCleanTempoOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
 import { currentStep } from "../../session/runner";
 import type { BigAction, TakeOutcome } from "../../session/runner";
@@ -529,7 +529,7 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
   if (raised && raised.grade.cleanBpm !== null) moved = null;
   else if (passed) moved = t("session.note.recap.passed", { bpm: passed.bpm });
   else if (last.ungraded === undefined) {
-    const clean = pathId ? cleanTempoOf(session.progress, pathId, last.exerciseId) : null;
+    const clean = pathId ? shownCleanTempoOf(session.progress, pathId, last.exerciseId) : null;
     moved = clean !== null ? t("session.note.recap.held", { bpm: clean }) : t("session.note.recap.played", { bpm: last.bpm });
   }
   let back = t("session.note.recap.backNext", { title });
