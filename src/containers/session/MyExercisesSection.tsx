@@ -5,11 +5,22 @@
  * stays mounted for the visit, so the Undo of the last one removed is still there.
  */
 import { lazy, Suspense, useState } from "react";
-import type { CSSProperties } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import { useMyExercises } from "../../session/myExercises";
 import type { SessionRun } from "./hooks/useSessionRun";
 
-const MyExercisesList = lazy(() => import("./MyExercises"));
+/** The list's chunk, or (it failed to load) a section that shows nothing: never an error thrown to the app's root. */
+export function loadMyExercisesList<P>(
+  load: () => Promise<{ default: ComponentType<P> }>,
+): Promise<{ default: ComponentType<P> }> {
+  return load().catch((err: unknown) => {
+    console.warn("[yames] could not load My exercises", err);
+    const Nothing: ComponentType<P> = () => null;
+    return { default: Nothing };
+  });
+}
+
+const MyExercisesList = lazy(() => loadMyExercisesList(() => import("./MyExercises")));
 
 export function MyExercisesSection({ session, style }: { session: SessionRun; style?: CSSProperties }) {
   const list = useMyExercises();

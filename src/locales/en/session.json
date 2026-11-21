@@ -462,7 +462,10 @@
       "removeLabel": "Remove {{what}} from My exercises",
       "removed": "Removed from My exercises.",
       "undo": "Undo",
-      "cantBuild": "This one can't be built any more: this version of Yames no longer makes it. It stays here until you remove it.",
+      "notSaved": "My exercises couldn't be read or saved just now, so nothing changed.",
+      "undoFull": "My exercises is full (50). Remove one, then Undo puts this one back.",
+      "undoAlready": "That one is already back on My exercises.",
+      "cantBuild":"This one can't be built any more: this version of Yames no longer makes it. It stays here until you remove it.",
       "howTo": "Play it as written, with the click."
     },
     "paths": {

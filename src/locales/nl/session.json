@@ -462,6 +462,9 @@
       "removeLabel": "{{what}} verwijderen uit Mijn oefeningen",
       "removed": "Verwijderd uit Mijn oefeningen.",
       "undo": "Ongedaan maken",
+      "notSaved": "Mijn oefeningen kon net niet worden gelezen of opgeslagen, dus er is niets veranderd.",
+      "undoFull": "Mijn oefeningen is vol (50). Verwijder er een, dan zet Ongedaan maken deze terug.",
+      "undoAlready": "Deze staat al weer in Mijn oefeningen.",
       "cantBuild": "Deze oefening kan niet meer worden gemaakt: deze versie van Yames maakt hem niet meer. Hij blijft hier staan tot je hem verwijdert.",
       "howTo": "Speel het zoals geschreven, met de klik."
     },

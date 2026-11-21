@@ -15,14 +15,8 @@ import { CUSTOM_PATH_ID, customPathDoc } from "../../paths/custom";
 import type { CustomSummary } from "../../paths/custom";
 import { tempoRange } from "../../session/coachWords";
 import { cleanTempoOf, takesOf } from "../../session/progress";
-import {
-  myExercisesNow,
-  removeMyExercise,
-  restoreMyExercise,
-  saveMyExercises,
-  useMyExercises,
-} from "../../session/myExercises";
-import type { MyExercise } from "../../session/myExercises";
+import { removeMyExercise, restoreMyExercise, updateMyExercises, useMyExercises } from "../../session/myExercises";
+import type { MyExercise, RemovedMyExercise } from "../../session/myExercises";
 import { buildMyExercises, keyOf, myExerciseLine } from "../../session/myExerciseBuild";
 import type { SessionRun } from "./hooks/useSessionRun";
 
@@ -43,19 +37,43 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
   const { t } = useTranslation();
   const list = useMyExercises();
   const rows = useMemo(() => buildMyExercises(list), [list]);
-  const [removed, setRemoved] = useState<{ entry: MyExercise; index: number } | null>(null);
-  if (list.length === 0 && !removed) return null;
+  const [removed, setRemoved] = useState<RemovedMyExercise | null>(null);
+  /** Why the last press changed nothing, said under the list (`session.myExercises.<notice>`). */
+  const [notice, setNotice] = useState<null | "notSaved" | "undoFull" | "undoAlready">(null);
+  if (list.length === 0 && !removed && !notice) return null;
 
-  const remove = (index: number) => {
-    const out = removeMyExercise(myExercisesNow(), index);
-    if (!out.removed) return;
-    saveMyExercises(out.list);
-    setRemoved(out.removed);
+  // Both go through the store's one writer: it waits for the load and refuses
+  // (and the player is told) when the stored list could not be read.
+  const remove = async (entry: MyExercise) => {
+    const got: { removed: RemovedMyExercise | null } = { removed: null };
+    const result = await updateMyExercises((now) => {
+      const r = removeMyExercise(now, entry);
+      got.removed = r.removed;
+      return r.removed ? r.list : null;
+    });
+    if (result === "saved" && got.removed) {
+      setRemoved(got.removed);
+      setNotice(null);
+    } else if (result !== "unchanged") setNotice("notSaved");
   };
-  const undo = () => {
+  const undo = async () => {
     if (!removed) return;
-    saveMyExercises(restoreMyExercise(myExercisesNow(), removed));
-    setRemoved(null);
+    const got: { refused: null | "already" | "full" } = { refused: null };
+    const result = await updateMyExercises((now) => {
+      const r = restoreMyExercise(now, removed, keyOf);
+      got.refused = r.refused;
+      return r.refused ? null : r.list;
+    });
+    const refused = got.refused;
+    if (result === "saved") {
+      setRemoved(null);
+      setNotice(null);
+    } else if (refused === "already") {
+      // The same notes are on the list again: nothing to undo, and no second row.
+      setRemoved(null);
+      setNotice("undoAlready");
+    } else if (refused === "full") setNotice("undoFull"); // the Undo stays: remove another, then press it
+    else setNotice("notSaved"); // the Undo stays
   };
 
   return (
@@ -83,7 +101,7 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
                   <button
                     type="button"
                     className="session-secondary session-myex-remove"
-                    onClick={() => remove(index)}
+                    onClick={() => void remove(entry)}
                     data-testid="my-exercise-remove"
                   >
                     {t("session.myExercises.remove")}
@@ -138,7 +156,7 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
                 <button
                   type="button"
                   className="session-link session-myex-remove"
-                  onClick={() => remove(index)}
+                  onClick={() => void remove(entry)}
                   aria-label={t("session.myExercises.removeLabel", { what: line })}
                   data-testid="my-exercise-remove"
                 >
@@ -149,12 +167,16 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
           );
         })}
       </div>
-      {removed && (
+      {(removed || notice) && (
         <div className="session-myex-undo" role="status">
-          <span className="session-quiet">{t("session.myExercises.removed")}</span>
-          <button type="button" className="session-link" onClick={undo} data-testid="my-exercise-undo">
-            {t("session.myExercises.undo")}
-          </button>
+          <span className="session-quiet" data-testid="my-exercise-notice">
+            {t(notice ? `session.myExercises.${notice}` : "session.myExercises.removed")}
+          </span>
+          {removed && (
+            <button type="button" className="session-link" onClick={() => void undo()} data-testid="my-exercise-undo">
+              {t("session.myExercises.undo")}
+            </button>
+          )}
         </div>
       )}
     </section>

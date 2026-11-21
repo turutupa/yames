@@ -462,6 +462,9 @@
       "removeLabel": "{{what}} alıştırmasını Alıştırmalarım'dan kaldır",
       "removed": "Alıştırmalarım'dan kaldırıldı.",
       "undo": "Geri al",
+      "notSaved": "Alıştırmalarım şu anda okunamadı veya kaydedilemedi, bu yüzden hiçbir şey değişmedi.",
+      "undoFull": "Alıştırmalarım dolu (50). Birini kaldır, sonra Geri al bunu geri koyar.",
+      "undoAlready": "Bu alıştırma zaten Alıştırmalarım'da.",
       "cantBuild": "Bu artık oluşturulamıyor: Yames'in bu sürümü onu artık üretmiyor. Sen kaldırana kadar burada durur.",
       "howTo": "Yazıldığı gibi çal, klikle birlikte."
     },

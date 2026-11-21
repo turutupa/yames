@@ -474,6 +474,9 @@
       "removeLabel": "Quitar {{what}} de Mis ejercicios",
       "removed": "Quitado de Mis ejercicios.",
       "undo": "Deshacer",
+      "notSaved": "Mis ejercicios no se pudieron leer o guardar en este momento, así que no ha cambiado nada.",
+      "undoFull": "Mis ejercicios está lleno (50). Quita uno y Deshacer lo vuelve a poner.",
+      "undoAlready": "Ese ya está de vuelta en Mis ejercicios.",
       "cantBuild": "Este ya no se puede construir: esta versión de Yames ya no lo crea. Se queda aquí hasta que lo quites.",
       "howTo": "Tócalo tal como está escrito, con el clic."
     },
