@@ -279,11 +279,12 @@ describe("the coach's voice", () => {
     setVoiceInSession(false); // Escape to Today
     s.stop();
     expect(s.out.said).toEqual([]);
-    // Nor does a key or a late note speak outside the Session.
-    expect(sayNow("Next: Jam.")).toBe(false);
+    // Not a gate either way: a note's effect runs before the window reports
+    // the Session, and the next boundary must still be heard.
+    s.take(1, 10);
+    expect(s.out.said).toEqual([FINDING]);
     setVoiceInSession(true);
     // A line in flight is cut when the Session is left.
-    expect(sayNow("Next: Jam.")).toBe(true);
     setVoiceInSession(false);
     expect(s.out.stops).toBe(1);
   });

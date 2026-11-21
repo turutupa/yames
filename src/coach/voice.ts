@@ -23,7 +23,7 @@
  *   how a Start pressed mid-sentence cuts it at the count-in's start, not
  *   after the engine reports it; and until that report, the coach keys do
  *   nothing either (`soundIsStarting`);
- * - outside the Session (`setVoiceInSession`).
+ * - once the Session is left (`setVoiceInSession(false)` cuts and forgets).
  *
  * A cut is `ttsStop()`, and only for speech this module started: the voice
  * preview in Settings is not the coach's to stop. It is sent again on every
@@ -63,8 +63,6 @@ type State = {
    */
   speaking: number;
   token: number;
-  /** The Session is the view (`useCoachVoice`). Leaving it hushes and forgets. */
-  inSession: boolean;
   /**
    * When a Start was last asked for (`soundGate`), until the engine reports
    * sound, playback stops or a Session boundary passes; null when none. Read
@@ -85,7 +83,6 @@ const state: State = {
   armed: null,
   speaking: 0,
   token: 0,
-  inSession: true,
   startingAt: null,
 };
 
@@ -113,14 +110,7 @@ function startingHeard(): void {
 }
 
 function canSpeak(): boolean {
-  return (
-    state.enabled &&
-    state.inSession &&
-    !state.sounding &&
-    !state.inTake &&
-    !soundIsStarting() &&
-    state.out !== null
-  );
+  return state.enabled && !state.sounding && !state.inTake && !soundIsStarting() && state.out !== null;
 }
 
 function speak(text: string): void {
@@ -189,7 +179,7 @@ export function sayAtBoundary(kind: VoiceBoundary, text: string): void {
   if (!armed || armed.kind !== kind || armed.text !== undefined) return;
   // The engine still winding down from what came before (a warm-up's last
   // bar, a loop): kept, and said when it stops, if nothing else happens first.
-  if (state.enabled && state.inSession && state.out && !state.inTake && state.sounding) {
+  if (state.enabled && state.out && !state.inTake && state.sounding) {
     state.armed = { ...armed, text };
     return;
   }
@@ -220,7 +210,11 @@ export function setVoiceEnabled(on: boolean): void {
  * on Today or the Metronome.
  */
 export function setVoiceInSession(on: boolean): void {
-  state.inSession = on;
+  // Leaving hushes; it is not a gate on speaking. Entering cannot be one: the
+  // ready note's effect (a child) runs before the window's effect that would
+  // report the Session, so the first order would be refused. Nothing arms a
+  // boundary outside a Session (the bus carries Session events only) and the
+  // coach keys are Session-only, so the hush is all leaving needs.
   if (!on) hushCoachVoice();
 }
 
@@ -270,6 +264,5 @@ export function resetCoachVoice(): void {
   state.armed = null;
   state.speaking = 0;
   state.token = 0;
-  state.inSession = true;
   state.startingAt = null;
 }
