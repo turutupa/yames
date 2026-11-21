@@ -46,6 +46,8 @@ import type { NeverItem } from "../../containers/coach/neverList";
 import { ROOT_NAMES } from "../blocks/spec";
 import { chordNamePattern } from "../blocks/schema";
 import { COACH_TOOLS } from "../tools/registry";
+import { perBeatOf } from "../tools/make";
+import type { RecipeSubdivision } from "../../paths/custom";
 import { line, type CoachTool, type Line, type ToolArgs, type ToolCall, type ToolChoice } from "../tools/types";
 import {
   CONNECTOR_IDS,
@@ -165,7 +167,6 @@ type CompiledRecipe = {
   shapes: Array<{ id: string; words: Toks }>;
   chords: Array<{ id: string; words: Toks }>;
   subdivisions: Array<{ id: string; words: Toks }>;
-  directions: Array<{ id: string; words: Toks }>;
   fret: readonly Place[];
   numberSuffixes: readonly string[];
 };
@@ -228,7 +229,6 @@ function compile(table: CommandTable): Compiled {
           shapes: entries(table.recipe.shapes ?? {}),
           chords: entries(table.recipe.chords ?? {}),
           subdivisions: entries(table.recipe.subdivisions ?? {}),
-          directions: entries(table.recipe.directions ?? {}),
           fret: places(table.recipe.fret),
           numberSuffixes: (table.recipe.numberSuffixes ?? []).map(phraseKey),
         }
@@ -775,8 +775,7 @@ function fretAt(t: Toks, r: CompiledRecipe): { n: number; rest: Toks } | null {
 
 /**
  * The text read as a recipe, every word accounted for: a root and its scale
- * (or, with an arpeggio word, its chord), a shape, a subdivision, a direction,
- * the fret it starts at, a number of bars, the word "exercise", and fillers
+ * (or, with an arpeggio word, its chord), a shape, a subdivision, the fret it starts at, a number of bars, the word "exercise", and fillers
  * and connectors between them. `reading` says whether the words after the root
  * are a scale or a chord ("a minor" is both).
  */
@@ -812,16 +811,10 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
     }
     const sub = leadId(q, r.subdivisions);
     if (sub) {
-      if (!once("subdivision", sub.id)) return null;
+      // The tool takes notes per beat (1 quarters … 4 sixteenths).
+      if (!once("subdivision", perBeatOf(sub.id as RecipeSubdivision))) return null;
       exerciseWord = true;
       q = sub.rest;
-      continue;
-    }
-    const dir = leadId(q, r.directions);
-    if (dir) {
-      if (!once("direction", dir.id)) return null;
-      exerciseWord = true;
-      q = dir.rest;
       continue;
     }
     const fret = fretAt(q, r);

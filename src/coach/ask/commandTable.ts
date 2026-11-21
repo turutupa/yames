@@ -20,7 +20,7 @@
 import { NECK_POSITIONS, SCALE_NAMES } from "../blocks/spec";
 import { SAFE_SETTING_KEYS, SETTINGS_SECTIONS } from "../tools/host";
 import { GO_TO_SCREENS } from "../tools/go";
-import { MAKE_CHORDS, MAKE_DIRECTIONS, MAKE_SHAPES, MAKE_SUBDIVISIONS } from "../tools/make";
+import { MAKE_CHORDS, MAKE_SHAPES, MAKE_SUBDIVISIONS } from "../tools/make";
 import { NEVER_ITEMS, type NeverItem } from "../../containers/coach/neverList";
 
 /**
@@ -132,7 +132,6 @@ export type RecipeWords = {
   /** An arpeggio's chord after its root: "minor 7", "major". Read only with an arpeggio word. */
   chords?: Partial<WordsOf<(typeof MAKE_CHORDS)[number]>>;
   subdivisions?: Partial<WordsOf<(typeof MAKE_SUBDIVISIONS)[number]>>;
-  directions?: Partial<WordsOf<(typeof MAKE_DIRECTIONS)[number]>>;
   /** The fret it starts at, `#` standing for the number: "fret #", "# fret", "position #". */
   fret?: Words;
   /** What may follow a number to make it an ordinal, read as the number: "st", "nd", "rd", "th" ("5th"). */
@@ -143,7 +142,6 @@ const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuf
   shapes: MAKE_SHAPES,
   chords: MAKE_CHORDS,
   subdivisions: MAKE_SUBDIVISIONS,
-  directions: MAKE_DIRECTIONS,
 };
 
 /** What is wrong with a table's recipe words (leg t2c). */

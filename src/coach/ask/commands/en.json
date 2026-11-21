@@ -183,11 +183,6 @@
       "eighthTriplets": ["eighth note triplets", "eighth triplets", "triplets"],
       "sixteenths": ["sixteenth notes", "sixteenths", "16th notes", "16ths", "semiquavers"]
     },
-    "directions": {
-      "up": ["ascending", "going up", "up"],
-      "down": ["descending", "going down", "down"],
-      "upAndBack": ["up and down", "ascending and descending"]
-    },
     "fret": ["fret #", "# fret", "position #"],
     "numberSuffixes": ["st", "nd", "rd", "th"]
   }

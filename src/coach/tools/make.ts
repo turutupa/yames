@@ -87,9 +87,16 @@ export const MAKE_ROOTS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A",
 export const MAKE_MAX_POSITION = 15;
 export const MAKE_MAX_BARS = 8;
 
-/** What a recipe left unsaid becomes (mock 17: eighths, up the box and back down). */
+/**
+ * What a recipe left unsaid becomes (mock 17: eighths, up the box and back down).
+ * The direction is not an argument: the choice prompt's budget (DESIGN 5.5) had
+ * no room for it, and up-and-back is the one that loops (t2a).
+ */
 const DEFAULT_SUBDIVISION: RecipeSubdivision = "eighths";
-const DEFAULT_DIRECTION = "upAndBack";
+const DEFAULT_DIRECTION: Recipe["direction"] = "upAndBack";
+
+/** `subdivision` is notes per beat, 1 to 4: the recipe's id for it. */
+export const perBeatOf = (s: RecipeSubdivision): number => MAKE_SUBDIVISIONS.indexOf(s) + 1;
 
 /** Mock 17's other subdivision chip: from eighths, sixteenths; from any other, eighths. */
 const OTHER_SUBDIVISION: Readonly<Record<RecipeSubdivision, RecipeSubdivision>> = {
@@ -130,12 +137,13 @@ export function recipeOf(args: ToolArgs): { recipe: Recipe; barsAsked: boolean }
   if (chord !== undefined && shape !== "arpeggio") return why("mixed");
   if (scale !== undefined && (shape === "arpeggio" || shape === "chromatic")) return why("mixed");
   const bars = argNumber(args, "bars");
+  const perBeat = argNumber(args, "subdivision");
   const common = {
     v: 1 as const,
     position: argNumber(args, "position") ?? ("root" as const),
-    subdivision: (argString(args, "subdivision") ?? DEFAULT_SUBDIVISION) as RecipeSubdivision,
+    subdivision: perBeat === undefined ? DEFAULT_SUBDIVISION : MAKE_SUBDIVISIONS[perBeat - 1],
     bars: bars ?? 1,
-    direction: (argString(args, "direction") ?? DEFAULT_DIRECTION) as Recipe["direction"],
+    direction: DEFAULT_DIRECTION,
   };
   const barsAsked = bars !== undefined;
   if (shape === "chromatic") return { recipe: { ...common, shape }, barsAsked };
@@ -171,13 +179,27 @@ type Made = { recipe: Recipe; built: Custom.BuildResult & { ok: true } };
 export function makeFrom(args: ToolArgs, gen: Generator): Made | { recipe: Recipe; why: Why } | Refusal {
   const asked = recipeOf(args);
   if ("ok" in asked) return asked;
-  let recipe = asked.recipe;
-  let built = gen.buildCustomExercise(recipe);
-  if (!built.ok && !asked.barsAsked && built.why.why === "tooManyNotes" && built.why.needsBars <= MAKE_MAX_BARS) {
-    recipe = { ...recipe, bars: built.why.needsBars };
-    built = gen.buildCustomExercise(recipe);
+  const attempt = (start: Recipe): Made | { recipe: Recipe; why: Why } => {
+    let recipe = start;
+    let built = gen.buildCustomExercise(recipe);
+    if (!built.ok && !asked.barsAsked && built.why.why === "tooManyNotes" && built.why.needsBars <= MAKE_MAX_BARS) {
+      recipe = { ...recipe, bars: built.why.needsBars };
+      built = gen.buildCustomExercise(recipe);
+    }
+    return built.ok ? { recipe, built } : { recipe, why: built.why };
+  };
+  const first = attempt(asked.recipe);
+  if ("built" in first || argNumber(args, "position") !== undefined) return first;
+  // No fret was named and the root's own does not hold the shape (an arpeggio from fret 5 runs off
+  // the neck): the nearest fret that does, as a default the preview shows, never in place of one asked.
+  if (first.why.why !== "noShapeHere" && first.why.why !== "outOfRange") return first;
+  const from = gen.resolvePosition(asked.recipe);
+  const frets = gen.positionsFor(asked.recipe).sort((a, b) => Math.abs(a - from) - Math.abs(b - from) || a - b);
+  for (const fret of frets) {
+    const next = attempt({ ...asked.recipe, position: fret });
+    if ("built" in next) return next;
   }
-  return built.ok ? { recipe, built } : { recipe, why: built.why };
+  return first;
 }
 
 const builds = (args: ToolArgs, gen: Generator): boolean => "built" in makeFrom(args, gen);
@@ -241,7 +263,7 @@ function refusalOf(args: ToolArgs, made: { recipe: Recipe; why: Why }, gen: Gene
 function variantsOf(args: ToolArgs, recipe: Recipe, barsAsked: boolean, gen: Generator): ToolChoice[] {
   const out: ToolChoice[] = [];
   const other = OTHER_SUBDIVISION[recipe.subdivision];
-  const sub = changed(args, barsAsked, { subdivision: other });
+  const sub = changed(args, barsAsked, { subdivision: perBeatOf(other) });
   if (builds(sub, gen)) out.push({ label: line(`coachTools.make.chip.${other}`), call: callOf(sub) });
   const next = gen.nextRecipe(recipe, { change: "nextPosition" });
   if (next.recipe && typeof next.recipe.position === "number") {
@@ -287,7 +309,8 @@ const makeExercise = defineConfirmTool<MakeResolved>({
   name: "make_exercise",
   kind: "confirm",
   audience: "player",
-  note: "Make a custom Exercise from a recipe and add it to My exercises, shown as a preview first.",
+  // The first sentence is what the model reads (`choicePrompt.shortNote`): kept short for DESIGN 5.5's budget.
+  note: "Make a custom Exercise. It is shown first, and added to My exercises by one press.",
   args: [
     {
       name: "shape",
@@ -309,9 +332,13 @@ const makeExercise = defineConfirmTool<MakeResolved>({
       optional: true,
       note: "The fret the shape starts at on its lowest string. Left out: where the root is.",
     },
-    { name: "subdivision", type: { kind: "enum", values: MAKE_SUBDIVISIONS }, optional: true, note: "Notes per beat. Left out: eighths." },
+    {
+      name: "subdivision",
+      type: { kind: "integer", min: 1, max: MAKE_SUBDIVISIONS.length },
+      optional: true,
+      note: "Notes per beat: 1 quarters, 2 eighths, 3 eighth triplets, 4 sixteenths. Left out: 2.",
+    },
     { name: "bars", type: { kind: "integer", min: 1, max: MAKE_MAX_BARS }, optional: true, note: "How long. Left out: what one time through needs." },
-    { name: "direction", type: { kind: "enum", values: MAKE_DIRECTIONS }, optional: true, note: "Which way. Left out: up and back down." },
   ],
   when: (ctx) => !takeRunning(ctx),
   propose(args, host): ProposeResult<MakeResolved> {
