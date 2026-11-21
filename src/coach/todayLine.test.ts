@@ -254,6 +254,13 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
   ],
 ];
 
+/** A row of the table by its name: an index moves when a row is added. */
+function row(name: string): TodayLineInput {
+  const found = TABLE.find(([n]) => n === name);
+  if (!found) throw new Error(`no table row "${name}"`);
+  return found[1];
+}
+
 describe("Today's line, by history", () => {
   it.each(TABLE)("%s", (_name, given, kind, sentence) => {
     const line = todayLine(given);
@@ -262,7 +269,7 @@ describe("Today's line, by history", () => {
   });
 
   it("an ungraded line says minutes and tempo, nothing about the playing", () => {
-    const text = say(TABLE[11][1])!;
+    const text = say(row("ungraded player: minutes and tempo, same place today"))!;
     const quarters = tune.meter.numerator * (4 / tune.meter.denominator);
     const minutes = Math.floor((4 * 40 * quarters * 60) / 90 / 60);
     expect(text).toBe(`${minutes} minutes of Takes yesterday, ending with ${tune.title} at 90 BPM. Same place today.`);
@@ -270,7 +277,7 @@ describe("Today's line, by history", () => {
   });
 
   it("a graded Session read with grading off now says no percentage and no place", () => {
-    const text = say(TABLE[13][1])!;
+    const text = say(row("grading off, with a graded last Session: still no claim about the playing"))!;
     expect(text).not.toMatch(/%|slipped|clean/);
   });
 
