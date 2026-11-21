@@ -230,6 +230,216 @@
   overflow-wrap: anywhere;
 }
 
+/* "Ask | Notebook" (leg c4a2; DESIGN 6.7, mocks 10 and 17): two tabs, the
+   chosen one tinted, never solid. */
+.ask-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+.ask-tab {
+  min-height: 32px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 14px/1.1 var(--font-display, inherit);
+  overflow-wrap: anywhere;
+}
+.ask-tab[aria-selected="true"] {
+  color: var(--btn-tint-ink, var(--text-primary));
+  background: var(--btn-sel, color-mix(in srgb, var(--accent) 22%, transparent));
+  box-shadow: var(--btn-sel-ring, none);
+}
+@media (hover: hover) {
+  .ask-tab[aria-selected="false"]:hover {
+    color: var(--text-primary);
+  }
+}
+.ask-sheet .ask-tab {
+  min-height: 44px;
+}
+
+/* ── The Notebook (leg c4a2; DESIGN 6.7, mock 10) ─────────────────────── */
+.ask-thread.nb {
+  gap: 16px;
+}
+.ask-thread.nb > :first-child {
+  margin-top: 0;
+}
+.nb-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nb-h {
+  margin: 0;
+  font: 600 12px/1.2 var(--font-display, inherit);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.nb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nb-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  padding: 9px 6px 9px 11px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+.nb-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+.nb-evidence {
+  grid-column: 1;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-tertiary, var(--text-secondary));
+  overflow-wrap: anywhere;
+}
+.nb-leave {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 13px/1 var(--font-body, inherit);
+  white-space: nowrap;
+}
+/* A line just left out: the same place and height, its Undo where Leave out was (c4a2b, L5). */
+.nb-item-left {
+  align-items: center;
+  border-style: dashed;
+  background: transparent;
+}
+.nb-item-left .nb-left-text {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--text-secondary);
+}
+.nb-item .nb-said {
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
+}
+@media (hover: hover) {
+  .nb-leave:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--text-primary);
+  }
+}
+.nb-empty,
+.nb-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.nb-question {
+  margin: 0;
+  font: 600 15px/1.35 var(--font-display, inherit);
+  color: var(--text-primary);
+}
+.nb-status {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+/* A quiet text button: Undo, Not now, Cancel, Add a goal. */
+.nb-quiet {
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 13px/1.2 var(--font-body, inherit);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  .nb-quiet:hover {
+    color: var(--text-primary);
+  }
+}
+.nb-goal-none {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.nb-goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nb-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.nb-input {
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+}
+.nb-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.nb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+/* A thumb's 44 px on a phone (the sheet). */
+.ask-sheet :is(.nb-leave, .nb-quiet, .nb-input) {
+  min-height: 44px;
+}
+.ask-sheet .nb-leave {
+  min-width: 44px;
+}
+
 /* ── The thread ──────────────────────────────────────────────────────── */
 .ask-thread {
   flex: 1 1 auto;

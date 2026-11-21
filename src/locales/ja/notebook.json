@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "{{fast}} BPMでのテイクは均一度が{{fastScore}}%、{{slow}} BPMでは{{slowScore}}%でした。",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "パターンの最初の小節は、ほかの小節より遅れていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "early": "パターンの最初の小節は、ほかの小節より走っていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。"
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "パターンの最後の小節は、ほかの小節より遅れていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "early": "パターンの最後の小節は、ほかの小節より走っていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。"
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "伸ばした音の次に音が来る小節は、ほかの小節より遅れていました。そのような小節があり測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "early": "伸ばした音の次に音が来る小節は、ほかの小節より走っていました。そのような小節があり測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "lateOne": "{{exercise}}では、伸ばした音の次に音が来る小節は、ほかの小節より遅れていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "earlyOne": "{{exercise}}では、伸ばした音の次に音が来る小節は、ほかの小節より走っていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。"
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "開放弦を含む小節は、ほかの小節より遅れていました。そのような小節があり測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "early": "開放弦を含む小節は、ほかの小節より走っていました。そのような小節があり測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "lateOne": "{{exercise}}では、開放弦を含む小節は、ほかの小節より遅れていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "earlyOne": "{{exercise}}では、開放弦を含む小節は、ほかの小節より走っていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。"
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "ポジション移動を含む小節は、ほかの小節より遅れていました。そのような小節があり測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "early": "ポジション移動を含む小節は、ほかの小節より走っていました。そのような小節があり測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "lateOne": "{{exercise}}では、ポジション移動を含む小節は、ほかの小節より遅れていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。",
+          "earlyOne": "{{exercise}}では、ポジション移動を含む小節は、ほかの小節より走っていました。測定できた直近{{count}}テイクのうち{{hits}}テイクです。"
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "{{exercise}}は、最初は{{fromBpm}} BPM、直近は{{toBpm}} BPMで弾きました。",
+        "unnamed": "ある課題を、最初は{{fromBpm}} BPM、直近は{{toBpm}} BPMで弾きました。"
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "直近{{sessions}}回のセッションは、テイクで弾いた時間が平均{{now}}分でした。その前の{{sessions}}回は{{then}}分です。"
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "{{count}}テイクより · {{from}}から{{to}}まで",
+      "exercises": "{{exercises}}課題の{{count}}テイクより · {{from}}から{{to}}まで"
+    },
+    "ui": {
+      "tabsLabel": "コーチ",
+      "tabAsk": "聞く",
+      "tabNotebook": "ノート",
+      "noticedTitle": "気づいたこと",
+      "goalTitle": "目標",
+      "loading": "少々お待ちください。コーチのノートを読み込んでいます。",
+      "noticedUnreadable": "外した項目の一覧を読み込めなかったため、今回は何も表示しません。テイクはすべて保存されています。",
+      "tooFewTakes": "ここに何か表示するには5テイク必要です。現在のテイク数は{{count}}です。項目を外すと、30日間その項目は使いません。",
+      "nothingYet": "目立つ点はまだありません。読み取ったテイク数は{{count}}です。同じ傾向が5テイク以上で見られると、ここに表示します。",
+      "leaveOutHint": "項目を外すと、30日間その項目は使いません。",
+      "leaveOut": "外す",
+      "leftOut": "30日間外しました。テイクはすべて残っています。",
+      "undo": "元に戻す",
+      "leftOutNotRead": "外していません。外した項目の一覧を今回は読み込めませんでした。",
+      "notSaved": "この設定はYamesを閉じるまで有効です。保存できませんでした。",
+      "sessionNote": "セッション中は、セッション開始前に保存された内容だけを表示します。",
+      "goalSaid": "あなたの言葉 · {{date}}",
+      "goalSaidUndated": "あなたの言葉",
+      "goalEdit": "編集",
+      "goalAdd": "目標を追加",
+      "goalNone": "目標はまだありません。",
+      "goalUnreadable": "目標を今回は読み込めなかったため、表示せず、ここでは変更できません。",
+      "goalQuestion": "目標は何ですか?",
+      "goalHint": "曲、テンポ、スタイル、ただ弾くこと、または自分の言葉。",
+      "goalInputLabel": "あなたの目標",
+      "goalSave": "保存",
+      "goalCancel": "キャンセル",
+      "goalChoice": {
+        "song": "曲",
+        "tempo": "テンポ",
+        "style": "スタイル",
+        "justPlaying": "ただ弾く"
+      },
+      "goalStarter": {
+        "song": "弾きたい曲：",
+        "tempo": "クリーンに弾きたいテンポ：",
+        "style": "弾きたいスタイル：",
+        "justPlaying": "ただ弾く"
+      },
+      "notNow": "今はしない",
+      "notNowDone": "今はしません。7日間は再度たずねません。この種の質問は、設定 → 練習コーチ → 提案でオフにできます。",
+      "notNowNotRead": "保存していません。コーチのノートを今回は読み込めませんでした。",
+      "footer": "ここにあるものはすべて、保存されたテイクか、あなたが入力した内容です。"
+    },
+    "suggestions": {
+      "label": "提案",
+      "hint": "目標についての質問など、コーチが自分から何か出すかどうか。「聞く」とノートは常に使えます。",
+      "on": "オン",
+      "asked": "聞いたときだけ",
+      "unreadable": "選択を今回は読み込めませんでした。押すと保存されます。"
     }
   }
 }

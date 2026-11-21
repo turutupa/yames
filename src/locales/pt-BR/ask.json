@@ -47,100 +47,236 @@
       "phone": "Nada do que você digita aqui sai deste celular."
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "Sobre a sua última tomada:",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "Onde ela falhou?",
+        "lean": "Eu estava adiantado ou atrasado?",
+        "count": "Por que ela não contou?",
+        "changed": "O que mudou desde a última tomada?",
+        "improving": "Estou melhorando?",
+        "madeOf": "Do que é feita a pontuação?",
+        "distance": "Quanto falta para a meta?"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "Você está tocando sem avaliação, então não há medições para responder perguntas sobre as suas tomadas."
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "A tomada {{take}} parou após {{bars}} compasso, pouco demais para avaliar.",
+      "tooShort_many": "A tomada {{take}} parou após {{bars}} compassos, poucos demais para avaliar.",
+      "tooShort_other": "A tomada {{take}} parou após {{bars}} compassos, poucos demais para avaliar.",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "Nenhum compasso falhou na tomada {{take}}: todos os compassos que puderam ser avaliados se mantiveram.",
+        "noBars": "Eu não medi a tomada {{take}} compasso a compasso, então não posso dizer onde ela falhou."
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "Na tomada {{take}}, os compassos que se desviaram ficaram adiantados em relação ao resto da tomada, não atrasados. Um desvio que a tomada inteira compartilha é algo que eu não meço.",
+          "late": "Na tomada {{take}}, os compassos que se desviaram ficaram atrasados em relação ao resto da tomada, não adiantados. Um desvio que a tomada inteira compartilha é algo que eu não meço."
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "Na tomada {{take}}, nenhum dos compassos que consegui medir ({{measured}} de {{bars}}) ficou mais de {{ms}} ms adiantado em relação ao resto da tomada. Um desvio que a tomada inteira compartilha é algo que eu não meço.",
+          "late": "Na tomada {{take}}, nenhum dos compassos que consegui medir ({{measured}} de {{bars}}) ficou mais de {{ms}} ms atrasado em relação ao resto da tomada. Um desvio que a tomada inteira compartilha é algo que eu não meço."
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "Compasso {{bar}} da música: {{ms}} ms adiantado em relação ao resto da tomada.",
+          "late": "Compasso {{bar}} da música: {{ms}} ms atrasado em relação ao resto da tomada."
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "Na tomada {{take}}, nenhum dos compassos que consegui medir ({{measured}} de {{bars}}) ficou mais de {{ms}} ms adiantado ou atrasado em relação ao resto da tomada.",
+        "notMeasured": "Eu não medi para que lado a tomada {{take}} se desviou: nenhum compasso dela tinha tempo nota a nota suficiente para dizer."
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "As notas ali ficaram adiantadas em relação ao resto da tomada.",
+        "late": "As notas ali ficaram atrasadas em relação ao resto da tomada.",
+        "earlyOpen": "As notas {{note}} soltas ali ficaram adiantadas em relação ao resto da tomada.",
+        "lateOpen": "As notas {{note}} soltas ali ficaram atrasadas em relação ao resto da tomada.",
+        "earlyNote": "As notas {{note}} na casa {{fret}} ali ficaram adiantadas em relação ao resto da tomada.",
+        "lateNote": "As notas {{note}} na casa {{fret}} ali ficaram atrasadas em relação ao resto da tomada."
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "A tomada {{take}} ficou abaixo da meta a {{bpm}} BPM.",
+        "even": "A tomada {{take}} foi {{value}}% regular, contra uma meta de {{bar}}%.",
+        "evenSome": "A tomada {{take}} foi {{value}}% regular, contra uma meta de {{bar}}%, e eu ouvi {{heard}} de {{expected}} notas.",
+        "heard": "Eu ouvi {{heard}} de {{expected}} notas na tomada {{take}}, contra uma meta de {{bar}}%.",
+        "extras": "A tomada {{take}} teve mais notas a mais do que a meta permite: {{bar}} ou menos em quatro compassos.",
+        "accents": "Na tomada {{take}}, {{value}}% dos acentos marcados saíram mais fortes que as notas ao redor, contra uma meta de {{bar}}%.",
+        "notes": "Na tomada {{take}}, {{value}}% das notas cuja altura consegui identificar eram as escritas, contra uma meta de {{bar}}%."
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "A tomada {{take}} contou: atingiu a meta a {{bpm}} BPM.",
+        "below": "A tomada {{take}} foi mantida, abaixo da meta a {{bpm}} BPM.",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "Eu não consegui avaliar a tomada {{take}}: não ouvi nenhuma das notas dela, então ela não conta contra você.",
+          "tooFewHeard": "Eu não consegui avaliar a tomada {{take}}: ouvi {{heard}} de {{expected}} notas, poucas demais para avaliar, então ela não conta contra você.",
+          "tooManyExtras": "Eu não consegui avaliar a tomada {{take}}: ouvi mais notas que não estavam escritas do que notas que estavam, então ela não conta contra você.",
+          "lowConfidence": "Eu não consegui avaliar a tomada {{take}}: não tive certeza suficiente das notas que ouvi, então ela não conta contra você.",
+          "unknown": "Eu não consegui avaliar a tomada {{take}}."
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "A tomada {{take}} parou após {{bars}} compasso, curta demais para avaliar, então não conta nem a favor nem contra.",
+        "tooShort_many": "A tomada {{take}} parou após {{bars}} compassos, curta demais para avaliar, então não conta nem a favor nem contra.",
+        "tooShort_other": "A tomada {{take}} parou após {{bars}} compassos, curta demais para avaliar, então não conta nem a favor nem contra.",
+        "notClean": "Ela não mexeu no seu andamento limpo: isso exige {{need}} compassos limpos seguidos, e a maior sequência na tomada {{take}} foi de {{held}}.",
+        "notCleanPlain": "Ela não mexeu no seu andamento limpo: isso exige {{need}} compassos limpos seguidos, e a tomada {{take}} não os teve.",
+        "unfair": "Você marcou esta avaliação como não justa. Ela é mantida como foi medida, com a sua resposta ao lado.",
+        "pitchGraded": "A altura das suas notas faz parte da avaliação deste exercício.",
+        "pitchNotGraded": "A altura das suas notas não faz parte da avaliação deste exercício.",
+        "rightNotes": "Na tomada {{take}}, {{value}}% das {{base}} notas cuja altura consegui identificar eram as escritas.",
+        "notesUnchecked": "Eu não consegui verificar as alturas na tomada {{take}}.",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "Eu não medi a tomada {{take}}: era a que era só para os seus olhos, então nada foi avaliado.",
+          "chosen": "Eu não medi a tomada {{take}}: você escolheu apenas tocá-la, então nada foi avaliado.",
+          "inputOff": "Eu não medi a tomada {{take}}: a entrada não estava ligada, então nada foi avaliado.",
+          "gradingOff": "Eu não medi a tomada {{take}}: a avaliação está desligada, então nada foi avaliado.",
+          "selfChecked": "Eu não medi a tomada {{take}}: este exercício é um que você mesmo confere, então nada foi avaliado.",
+          "selfCheckedTempo": "Eu não medi a tomada {{take}}: a {{bpm}} BPM este exercício é um que você mesmo confere, então nada foi avaliado.",
+          "practiceOnly": "Eu não medi a tomada {{take}}: este exercício é só de prática, sem avaliação.",
+          "landings": "Eu não medi a tomada {{take}}: este exercício ainda não é avaliado."
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "Eu não medi isso. A altura das suas notas não faz parte da avaliação deste exercício.",
+        "pickDirection": "Eu não medi isso. O app só tem som, e uma palhetada para baixo e uma para cima podem soar iguais.",
+        "muting": "Eu não medi isso. O app não distingue uma corda abafada de uma forte ao lado.",
+        "posture": "Eu não medi isso. O app não tem nenhuma imagem de você.",
+        "tension": "Eu não medi isso. Só você pode sentir a tensão, e ela vem antes de poder ser ouvida.",
+        "handAttribution": "Eu não medi isso. Uma nota atrasada soa igual com qualquer uma das mãos.",
+        "fingering": "Eu não medi isso. A mesma altura soa igual com qualquer dedo.",
+        "tone": "Eu não medi isso. Timbre e toque não são medidos.",
+        "feel": "Eu não medi isso. Se soa bem não é algo que o app meça."
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "Ainda não há nenhuma tomada deste exercício para responder.",
+        "notSaved": "A tomada {{take}} ainda não foi salva, então não consigo ler as tomadas anteriores a ela.",
+        "ungraded": "Você está tocando sem avaliação, então eu não medi nada para responder a isso."
+      },
+      "history": {
+        "leftOut": "Deixei de fora {{count}} tomada que você marcou como não justa.",
+        "leftOut_many": "Deixei de fora {{count}} tomadas que você marcou como não justas.",
+        "leftOut_other": "Deixei de fora {{count}} tomadas que você marcou como não justas.",
+        "otherNotes": "Deixei de fora {{count}} tomada tocada em outra variante deste exercício.",
+        "otherNotes_many": "Deixei de fora {{count}} tomadas tocadas em outras variantes deste exercício.",
+        "otherNotes_other": "Deixei de fora {{count}} tomadas tocadas em outras variantes deste exercício."
+      },
+      "changed": {
+        "first": "Não tenho nenhuma tomada medida deste exercício antes da tomada {{take}}, então não há com o que compará-la.",
+        "onlyUnfair": "As únicas tomadas medidas deste exercício antes da tomada {{take}} são tomadas que você marcou como não justas, então não a comparo com elas.",
+        "thisUnfair": "Você marcou a avaliação da tomada {{take}} como não justa, então não a comparo com outras tomadas.",
+        "noneAlike": "Não tenho nenhuma tomada medida desta variante do exercício antes da tomada {{take}} com a qual eu possa compará-la.",
+        "sameTempo": "A tomada {{take}} e a última tomada medida antes dela estavam as duas a {{bpm}} BPM.",
+        "tempo": "A última tomada medida antes da tomada {{take}} estava a {{before}} BPM; a tomada {{take}} estava a {{bpm}} BPM.",
+        "metric": {
+          "even": "Regular: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
+          "heard": "Notas ouvidas: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
+          "extras": "Notas a mais: {{before}} nessa tomada, {{now}} na tomada {{take}}.",
+          "accents": "Acentos certeiros: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
+          "notes": "Notas certas: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
+          "hold": "Regularidade mantida até o fim: {{before}}% nessa tomada, {{now}}% na tomada {{take}}."
+        },
+        "noPair": "Essa tomada e a tomada {{take}} não compartilham nenhum número medido que eu possa colocar lado a lado.",
+        "verdict": {
+          "bothPassed": "As duas atingiram a meta.",
+          "bothBelow": "As duas ficaram abaixo da meta.",
+          "nowPassed": "Essa tomada ficou abaixo da meta; a tomada {{take}} a atingiu.",
+          "nowBelow": "Essa tomada atingiu a meta; a tomada {{take}} ficou abaixo."
+        }
+      },
+      "improving": {
+        "tooFew": "Posso comparar {{count}} tomada medida deste exercício, e são necessárias {{need}}.",
+        "tooFew_many": "Posso comparar {{count}} tomadas medidas deste exercício, e são necessárias {{need}}.",
+        "tooFew_other": "Posso comparar {{count}} tomadas medidas deste exercício, e são necessárias {{need}}.",
+        "window": "Na sua última tomada medida deste exercício ({{count}}), o andamento foi de {{to}} BPM.",
+        "window_many": "Nas suas últimas {{count}} tomadas medidas deste exercício, o andamento foi de {{from}} BPM na mais antiga a {{to}} BPM na mais recente.",
+        "window_other": "Nas suas últimas {{count}} tomadas medidas deste exercício, o andamento foi de {{from}} BPM na mais antiga a {{to}} BPM na mais recente.",
+        "windowSame": "Na sua última tomada medida deste exercício ({{count}}), o andamento foi de {{to}} BPM.",
+        "windowSame_many": "Nas suas últimas {{count}} tomadas medidas deste exercício, a mais antiga e a mais recente estavam as duas a {{to}} BPM.",
+        "windowSame_other": "Nas suas últimas {{count}} tomadas medidas deste exercício, a mais antiga e a mais recente estavam as duas a {{to}} BPM.",
+        "clean": "{{count}} delas conseguiu um andamento limpo, a {{bpm}} BPM.",
+        "clean_many": "{{count}} delas conseguiram um andamento limpo; a mais rápida foi a {{bpm}} BPM.",
+        "clean_other": "{{count}} delas conseguiram um andamento limpo; a mais rápida foi a {{bpm}} BPM.",
+        "cleanNone": "Nenhuma delas conseguiu um andamento limpo.",
+        "cleanUnknown": "Não consigo contar os andamentos limpos que elas conseguiram: algumas delas não guardaram se conseguiram um.",
+        "even": "Regularidade, nas {{count}} delas que a mantiveram: {{first}}% na mais antiga dessas, a {{firstBpm}} BPM; {{last}}% na mais recente dessas, a {{lastBpm}} BPM; {{best}}% no melhor caso, a {{bestBpm}} BPM.",
+        "even_many": "Regularidade, nas {{count}} delas que a mantiveram: {{first}}% na mais antiga dessas, a {{firstBpm}} BPM; {{last}}% na mais recente dessas, a {{lastBpm}} BPM; {{best}}% no melhor caso, a {{bestBpm}} BPM.",
+        "even_other": "Regularidade, nas {{count}} delas que a mantiveram: {{first}}% na mais antiga dessas, a {{firstBpm}} BPM; {{last}}% na mais recente dessas, a {{lastBpm}} BPM; {{best}}% no melhor caso, a {{bestBpm}} BPM.",
+        "evenNone": "Menos de duas delas mantiveram um número de regularidade, então não o comparo."
+      },
+      "made": {
+        "intro": "A meta deste exercício tem {{count}} verificação.",
+        "intro_many": "A meta deste exercício tem {{count}} verificações.",
+        "intro_other": "A meta deste exercício tem {{count}} verificações.",
+        "check": {
+          "even": "Regular: pelo menos {{bar}}% em {{over}} compassos seguidos.",
+          "heard": "Notas ouvidas: pelo menos {{bar}}% das notas escritas.",
+          "extras": "Notas a mais: {{bar}} ou menos em {{over}} compassos.",
+          "accents": "Acentos: pelo menos {{bar}}% dos acentos marcados mais fortes que as notas ao redor.",
+          "notes": "Notas certas: pelo menos {{bar}}% das notas cuja altura consigo identificar são as escritas.",
+          "hold": "Regularidade mantida até o fim: pelo menos {{bar}}% nos últimos compassos do trecho avaliado."
+        },
+        "unnamed": "{{count}} delas é uma verificação que ainda não sei descrever.",
+        "unnamed_many": "{{count}} delas são verificações que ainda não sei descrever.",
+        "unnamed_other": "{{count}} delas são verificações que ainda não sei descrever.",
+        "clean": "Uma tomada que passa, com {{need}} compassos limpos seguidos, conquista um andamento limpo no seu próprio andamento e sobe o seu andamento limpo quando é mais rápida.",
+        "tempo": "Uma tomada limpa a {{passAt}} BPM ou mais rápida passa no exercício.",
+        "ungraded": {
+          "selfChecked": "Este exercício é um que você mesmo confere: o app não o avalia, então não há pontuação para detalhar.",
+          "practiceOnly": "Este exercício é só de prática, sem avaliação, então não há pontuação para detalhar.",
+          "landings": "Este exercício ainda não é avaliado, então não há pontuação para detalhar."
+        },
+        "not": {
+          "pickDirection": "A direção da palhetada não faz parte da avaliação.",
+          "muting": "O abafamento não faz parte da avaliação.",
+          "posture": "A postura não faz parte da avaliação.",
+          "tension": "A tensão não faz parte da avaliação.",
+          "handAttribution": "De qual mão veio um deslize não faz parte da avaliação.",
+          "fingering": "Qual dedo tocou uma nota não faz parte da avaliação.",
+          "tone": "Timbre e toque não fazem parte da avaliação.",
+          "feel": "A sensação, e se soa bem, não fazem parte da avaliação.",
+          "bendPitch": "Quanto um bend percorre não faz parte da avaliação.",
+          "vibrato": "O vibrato não faz parte da avaliação.",
+          "noteChoice": "Quais notas você escolhe entre as notas de chegada não faz parte da avaliação.",
+          "notesWritten": "A altura das suas notas não faz parte da avaliação."
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "Regular: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "even_many": "Regular: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "even_other": "Regular: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "heard": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "heard_many": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "heard_other": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "extras": "Notas a mais: {{value}} na tomada {{take}}, {{gap}} a mais do que a meta permite ({{bar}} ou menos em {{over}} compassos).",
+          "accents": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "accents_many": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "accents_other": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "notes": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "notes_many": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "notes_other": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "hold": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "hold_many": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "hold_other": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%."
+        },
+        "under": {
+          "even": "Regular na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "heard": "Notas ouvidas na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "accents": "Acentos certeiros na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "notes": "Notas certas na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "hold": "Regularidade mantida até o fim na tomada {{take}}: a menos de um ponto da meta de {{bar}}%."
+        },
+        "unnamed": "A meta também tem {{count}} verificação que ainda não sei descrever, então não consigo dizer como a tomada {{take}} se saiu nela.",
+        "unnamed_many": "A meta também tem {{count}} verificações que ainda não sei descrever, então não consigo dizer como a tomada {{take}} se saiu nelas.",
+        "unnamed_other": "A meta também tem {{count}} verificações que ainda não sei descrever, então não consigo dizer como a tomada {{take}} se saiu nelas.",
+        "met": {
+          "even": "Regular: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
+          "heard": "Notas ouvidas: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
+          "extras": "Notas a mais: {{value}} na tomada {{take}}, dentro da meta de {{bar}} ou menos em {{over}} compassos.",
+          "accents": "Acentos certeiros: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
+          "notes": "Notas certas: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
+          "hold": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%."
+        },
+        "unmeasured": "{{count}} verificação da meta não foi medida na tomada {{take}}.",
+        "unmeasured_many": "{{count}} verificações da meta não foram medidas na tomada {{take}}.",
+        "unmeasured_other": "{{count}} verificações da meta não foram medidas na tomada {{take}}.",
+        "tempo": "A tomada {{take}} estava a {{bpm}} BPM; uma tomada limpa a {{passAt}} BPM ou mais rápida passa no exercício.",
+        "none": "Eu não medi nenhuma verificação da meta na tomada {{take}}."
       }
     }
   }

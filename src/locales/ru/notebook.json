@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "На {{fast}} BPM ровность ваших дублей была {{fastScore}}%; на {{slow}} BPM — {{slowScore}}%.",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "Первый такт паттерна оказался позже остальных. Среди последних дублей, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "early": "Первый такт паттерна оказался раньше остальных. Среди последних дублей, где это удалось измерить (всего {{count}}), так было: {{hits}}."
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "Последний такт паттерна оказался позже остальных. Среди последних дублей, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "early": "Последний такт паттерна оказался раньше остальных. Среди последних дублей, где это удалось измерить (всего {{count}}), так было: {{hits}}."
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Такты, где нота идёт после выдержанной, оказались позже остальных. Среди последних дублей с такими тактами, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "early": "Такты, где нота идёт после выдержанной, оказались раньше остальных. Среди последних дублей с такими тактами, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "lateOne": "В упражнении {{exercise}} такты, где нота идёт после выдержанной, оказались позже остальных. Среди последних дублей этого упражнения, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "earlyOne": "В упражнении {{exercise}} такты, где нота идёт после выдержанной, оказались раньше остальных. Среди последних дублей этого упражнения, где это удалось измерить (всего {{count}}), так было: {{hits}}."
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Такты с открытой струной оказались позже остальных. Среди последних дублей с такими тактами, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "early": "Такты с открытой струной оказались раньше остальных. Среди последних дублей с такими тактами, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "lateOne": "В упражнении {{exercise}} такты с открытой струной оказались позже остальных. Среди последних дублей этого упражнения, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "earlyOne": "В упражнении {{exercise}} такты с открытой струной оказались раньше остальных. Среди последних дублей этого упражнения, где это удалось измерить (всего {{count}}), так было: {{hits}}."
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Такты со сменой позиции оказались позже остальных. Среди последних дублей с такими тактами, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "early": "Такты со сменой позиции оказались раньше остальных. Среди последних дублей с такими тактами, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "lateOne": "В упражнении {{exercise}} такты со сменой позиции оказались позже остальных. Среди последних дублей этого упражнения, где это удалось измерить (всего {{count}}), так было: {{hits}}.",
+          "earlyOne": "В упражнении {{exercise}} такты со сменой позиции оказались раньше остальных. Среди последних дублей этого упражнения, где это удалось измерить (всего {{count}}), так было: {{hits}}."
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "Вы играли {{exercise}} сначала на {{fromBpm}} BPM, а в последнее время — на {{toBpm}} BPM.",
+        "unnamed": "Вы играли одно упражнение сначала на {{fromBpm}} BPM, а в последнее время — на {{toBpm}} BPM."
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "Среднее время игры в дублях на сессию, мин: последние сессии (их {{sessions}}) — {{now}}, предыдущие (их {{sessions}}) — {{then}}."
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "Дублей: {{count}} · с {{from}} по {{to}}",
+      "exercises": "Дублей: {{count}}, упражнений: {{exercises}} · с {{from}} по {{to}}"
+    },
+    "ui": {
+      "tabsLabel": "Тренер",
+      "tabAsk": "Спросить",
+      "tabNotebook": "Блокнот",
+      "noticedTitle": "Что я заметил",
+      "goalTitle": "К чему вы идёте",
+      "loading": "Минуту: читаю заметки тренера.",
+      "noticedUnreadable": "Список строк, которые вы убрали, не удалось прочитать, поэтому на этот раз строки не показаны. Все дубли сохранены.",
+      "tooFewTakes": "Мне нужно пять дублей, прежде чем что-то здесь сказать. Дублей пока: {{count}}. Уберите строку, и я не буду использовать её 30 дней.",
+      "nothingYet": "Пока ничего не выделяется. Прочитано дублей: {{count}}. Строка появится здесь, когда одно и то же встретится в пяти дублях или больше.",
+      "leaveOutHint": "Уберите строку, и я не буду использовать её 30 дней.",
+      "leaveOut": "Убрать",
+      "leftOut": "Убрано на 30 дней. Все дубли сохранены.",
+      "undo": "Отменить",
+      "leftOutNotRead": "Не убрано: список убранных строк не удалось прочитать на этот раз.",
+      "notSaved": "Это действует, пока Yames не закрыт: сохранить не удалось.",
+      "sessionNote": "Во время сессии здесь только то, что было сохранено до её начала.",
+      "goalSaid": "Вы сказали · {{date}}",
+      "goalSaidUndated": "Вы сказали",
+      "goalEdit": "Изменить",
+      "goalAdd": "Добавить цель",
+      "goalNone": "Цели пока нет.",
+      "goalUnreadable": "Вашу цель не удалось прочитать, поэтому она не показана и здесь её нельзя изменить.",
+      "goalQuestion": "К чему вы идёте?",
+      "goalHint": "Песня, темп, стиль, просто игра или ваши собственные слова.",
+      "goalInputLabel": "Ваша цель",
+      "goalSave": "Сохранить",
+      "goalCancel": "Отмена",
+      "goalChoice": {
+        "song": "Песня",
+        "tempo": "Темп",
+        "style": "Стиль",
+        "justPlaying": "Просто играть"
+      },
+      "goalStarter": {
+        "song": "Сыграть песню",
+        "tempo": "Играть чисто на",
+        "style": "Играть в стиле",
+        "justPlaying": "Просто играть"
+      },
+      "notNow": "Не сейчас",
+      "notNowDone": "Не сейчас. Я не буду спрашивать снова минимум 7 дней. Настройки → Тренер → Предложения отключают такие вопросы.",
+      "notNowNotRead": "Не сохранено: заметки тренера не удалось прочитать на этот раз.",
+      "footer": "Всё здесь берётся из ваших сохранённых дублей или набрано вами."
+    },
+    "suggestions": {
+      "label": "Предложения",
+      "hint": "Предлагает ли тренер что-то сам, например вопрос о вашей цели. «Спросить» и Блокнот есть всегда.",
+      "on": "Вкл.",
+      "asked": "Только по моему запросу",
+      "unreadable": "Ваш выбор не удалось прочитать на этот раз; нажатие сохранит его."
     }
   }
 }

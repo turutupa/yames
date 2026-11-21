@@ -24,6 +24,7 @@ import { readyHonestLineKey } from "../../session/caveats";
 import type { PlanStep } from "../../session/planner";
 import { heardItOf, lastRaisedOutcome, shownCleanTempoOf, takesOf, upstrokeOf } from "../../session/progress";
 import { parkedUntil, reviewStateOf } from "../../session/rotation";
+import { MY_EXERCISES_PATH_ID } from "../../session/myExercises";
 import { currentStep } from "../../session/runner";
 import type { BigAction, TakeOutcome } from "../../session/runner";
 import { loopLine } from "../../coach/loopLine";
@@ -565,6 +566,9 @@ export function recapLineText(t: T, session: SessionRun, now: number): string | 
     const clean = pathId ? shownCleanTempoOf(session.progress, pathId, last.exerciseId) : null;
     moved = clean !== null ? t("session.note.recap.held", { bpm: clean }) : t("session.note.recap.played", { bpm: last.bpm });
   }
+  // A custom Exercise (My exercises, t2bb) is never planned by Today: no
+  // "comes back" of any kind, only what moved.
+  if (pathId === MY_EXERCISES_PATH_ID) return moved;
   let back = t("session.note.recap.backNext", { title });
   const pathStep = path?.steps.find((s) => s.exercises.some((e) => e.id === last.exerciseId));
   if (path && pathStep && exercise) {

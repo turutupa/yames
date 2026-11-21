@@ -94,6 +94,28 @@ describe("answerTyped", () => {
     expect(host.changes()).toEqual([]);
   });
 
+  it("two answerers plugged in (two Ask views): either unplugging first leaves the other answering", () => {
+    const host = fakeHost({ view: "beat" });
+    __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
+    const unplugA = setAskNextAnswerer((text) => text === "a?");
+    const unplugB = setAskNextAnswerer((text) => text === "b?");
+    // The last one plugged in answers.
+    expect(answerTyped("b?", "en")).toBe("next");
+    expect(answerTyped("a?", "en")).toBe("asked");
+    // The first one unmounting does not unplug the second.
+    unplugA();
+    expect(answerTyped("b?", "en")).toBe("next");
+    // Plugged again, then the second unmounting first: the first answers again.
+    const unplugA2 = setAskNextAnswerer((text) => text === "a?");
+    const unplugC = setAskNextAnswerer((text) => text === "c?");
+    unplugC();
+    expect(answerTyped("a?", "en")).toBe("next");
+    unplugA2();
+    expect(answerTyped("b?", "en")).toBe("next");
+    unplugB();
+    expect(answerTyped("b?", "en")).toBe("asked");
+  });
+
   it("a language with no table never runs English words as commands", () => {
     const host = fakeHost({ view: "today" });
     __setAskToolsForTests(host, toolCtx({ screen: "today" }));

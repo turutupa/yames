@@ -47,98 +47,218 @@
       "phone": "你在這裡輸入的內容不會離開這支手機。"
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "關於上一遍：",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "哪裡出了問題？",
+        "lean": "我偏早還是偏晚？",
+        "count": "為什麼沒算？",
+        "changed": "和上一遍相比有什麼變化？",
+        "improving": "我在進步嗎？",
+        "madeOf": "分數由什麼構成？",
+        "distance": "離及格線還有多遠？"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "你現在是不評分地彈，所以沒有可用來回答關於你這幾遍的問題的測量資料。"
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "第{{take}}遍彈了 {{bars}} 個小節就停了，太短，無法判斷。",
+      "tooShort_other": "第{{take}}遍彈了 {{bars}} 個小節就停了，太短，無法判斷。",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "第{{take}}遍沒有出問題的小節：能判斷的小節都保持住了。",
+        "noBars": "我沒有逐小節測量第{{take}}遍，所以說不出問題出在哪裡。"
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "第{{take}}遍裡有偏差的小節比其餘部分偏早，不是偏晚。整遍共有的偏差，我不測量。",
+          "late": "第{{take}}遍裡有偏差的小節比其餘部分偏晚，不是偏早。整遍共有的偏差，我不測量。"
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "第{{take}}遍裡，我能測量的小節（{{bars}} 個中的 {{measured}} 個）沒有一個比其餘部分偏早超過 {{ms}} ms。整遍共有的偏差，我不測量。",
+          "late": "第{{take}}遍裡，我能測量的小節（{{bars}} 個中的 {{measured}} 個）沒有一個比其餘部分偏晚超過 {{ms}} ms。整遍共有的偏差，我不測量。"
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "曲子的第{{bar}}小節：比這一遍的其餘部分偏早 {{ms}} ms。",
+          "late": "曲子的第{{bar}}小節：比這一遍的其餘部分偏晚 {{ms}} ms。"
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "第{{take}}遍裡，我能測量的小節（{{bars}} 個中的 {{measured}} 個）沒有一個比其餘部分偏早或偏晚超過 {{ms}} ms。",
+        "notMeasured": "我沒有測量第{{take}}遍偏向哪一邊：它沒有一個小節有足夠的逐音時間資料來判斷。"
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "那裡的音比這一遍的其餘部分偏早。",
+        "late": "那裡的音比這一遍的其餘部分偏晚。",
+        "earlyOpen": "那裡的空弦 {{note}} 比這一遍的其餘部分偏早。",
+        "lateOpen": "那裡的空弦 {{note}} 比這一遍的其餘部分偏晚。",
+        "earlyNote": "那裡第{{fret}}格的 {{note}} 比這一遍的其餘部分偏早。",
+        "lateNote": "那裡第{{fret}}格的 {{note}} 比這一遍的其餘部分偏晚。"
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "第{{take}}遍在 {{bpm}} BPM 時低於及格線。",
+        "even": "第{{take}}遍的均勻度是 {{value}}%，及格線是 {{bar}}%。",
+        "evenSome": "第{{take}}遍的均勻度是 {{value}}%，及格線是 {{bar}}%，我聽到了 {{expected}} 個音中的 {{heard}} 個。",
+        "heard": "第{{take}}遍裡，我聽到了 {{expected}} 個音中的 {{heard}} 個，及格線是 {{bar}}%。",
+        "extras": "第{{take}}遍的多餘音超過了及格線允許的範圍：每四小節 {{bar}} 個或更少。",
+        "accents": "第{{take}}遍裡，標記的重音有 {{value}}% 比周圍的音更響，及格線是 {{bar}}%。",
+        "notes": "第{{take}}遍裡，我能判定音高的音有 {{value}}% 是譜上寫的音，及格線是 {{bar}}%。"
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "第{{take}}遍算了：在 {{bpm}} BPM 時達到了及格線。",
+        "below": "第{{take}}遍已保留，在 {{bpm}} BPM 時低於及格線。",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "我沒能給第{{take}}遍評分：它的音我一個都沒聽到，所以不會對你不利。",
+          "tooFewHeard": "我沒能給第{{take}}遍評分：我聽到了 {{expected}} 個音中的 {{heard}} 個，太少，無法評分，所以不會對你不利。",
+          "tooManyExtras": "我沒能給第{{take}}遍評分：我聽到的譜上沒有的音比譜上有的音還多，所以不會對你不利。",
+          "lowConfidence": "我沒能給第{{take}}遍評分：我對聽到的音不夠確定，所以不會對你不利。",
+          "unknown": "我沒能給第{{take}}遍評分。"
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "第{{take}}遍彈了 {{bars}} 個小節就停了，太短，無法判斷，所以無論哪一方面都不算。",
+        "tooShort_other": "第{{take}}遍彈了 {{bars}} 個小節就停了，太短，無法判斷，所以無論哪一方面都不算。",
+        "notClean": "它沒有讓你的乾淨速度提升：那需要連續 {{need}} 個乾淨的小節，而第{{take}}遍裡最長的一段是 {{held}} 個。",
+        "notCleanPlain": "它沒有讓你的乾淨速度提升：那需要連續 {{need}} 個乾淨的小節，而第{{take}}遍沒有達到。",
+        "unfair": "你把這次評分標記為不公平。它按測量結果保留，你的標記放在旁邊。",
+        "pitchGraded": "音高是這個練習評分的一部分。",
+        "pitchNotGraded": "音高不是這個練習評分的一部分。",
+        "rightNotes": "第{{take}}遍裡，我能判定音高的 {{base}} 個音中，有 {{value}}% 是譜上寫的音。",
+        "notesUnchecked": "我沒能核對第{{take}}遍的音高。",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "我沒有測量第{{take}}遍：它是給你看的那一遍，所以沒有評分。",
+          "chosen": "我沒有測量第{{take}}遍：你選擇了只是彈一遍，所以沒有評分。",
+          "inputOff": "我沒有測量第{{take}}遍：輸入沒有開啟，所以沒有評分。",
+          "gradingOff": "我沒有測量第{{take}}遍：評分是關閉的，所以沒有評分。",
+          "selfChecked": "我沒有測量第{{take}}遍：這個練習由你自己檢查，所以沒有評分。",
+          "selfCheckedTempo": "我沒有測量第{{take}}遍：在 {{bpm}} BPM 時，這個練習由你自己檢查，所以沒有評分。",
+          "practiceOnly": "我沒有測量第{{take}}遍：這個練習只用於練習，不評分。",
+          "landings": "我沒有測量第{{take}}遍：這個練習還沒有評分。"
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "我沒有測量這一項。音高不是這個練習評分的一部分。",
+        "pickDirection": "我沒有測量這一項。應用程式只有聲音，下撥和上撥聽起來可能一樣。",
+        "muting": "我沒有測量這一項。應用程式分辨不出被悶住的弦和旁邊一根響的弦。",
+        "posture": "我沒有測量這一項。應用程式沒有你的畫面。",
+        "tension": "我沒有測量這一項。緊繃只有你自己能感覺到，而且它出現在能被聽到之前。",
+        "handAttribution": "我沒有測量這一項。偏晚的音，不管是哪隻手彈的，聽起來都一樣。",
+        "fingering": "我沒有測量這一項。同一個音高，不管用哪根手指，聽起來都一樣。",
+        "tone": "我沒有測量這一項。音色和觸弦的手感不在測量之內。",
+        "feel": "我沒有測量這一項。聽起來好不好，不是應用程式測量的內容。"
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "這個練習還沒有可以用來回答的一遍。",
+        "notSaved": "第{{take}}遍還沒有儲存，所以我讀不到它之前的幾遍。",
+        "ungraded": "你現在是不評分地彈，所以我沒有測量任何可以用來回答這個問題的資料。"
+      },
+      "history": {
+        "leftOut": "我略去了 {{count}} 遍你標記為不公平的演奏。",
+        "leftOut_other": "我略去了 {{count}} 遍你標記為不公平的演奏。",
+        "otherNotes": "我略去了 {{count}} 遍在這個練習的其他變體上彈的演奏。",
+        "otherNotes_other": "我略去了 {{count}} 遍在這個練習的其他變體上彈的演奏。"
+      },
+      "changed": {
+        "first": "這個練習在第{{take}}遍之前沒有我測量過的一遍，所以沒有可以比較的對象。",
+        "onlyUnfair": "這個練習在第{{take}}遍之前我測量過的幾遍都是你標記為不公平的，所以我不拿它和它們比較。",
+        "thisUnfair": "你把第{{take}}遍的評分標記為不公平，所以我不拿它和其他幾遍比較。",
+        "noneAlike": "這個練習的這個變體在第{{take}}遍之前沒有我測量過的一遍，所以沒有可以拿來比較的對象。",
+        "sameTempo": "第{{take}}遍和它之前最近一次測量的那一遍，都是 {{bpm}} BPM。",
+        "tempo": "第{{take}}遍之前最近一次測量的那一遍是 {{before}} BPM；第{{take}}遍是 {{bpm}} BPM。",
+        "metric": {
+          "even": "均勻度：那一遍 {{before}}%，第{{take}}遍 {{now}}%。",
+          "heard": "聽到的音：那一遍 {{before}}%，第{{take}}遍 {{now}}%。",
+          "extras": "多餘的音：那一遍 {{before}} 個，第{{take}}遍 {{now}} 個。",
+          "accents": "重音命中：那一遍 {{before}}%，第{{take}}遍 {{now}}%。",
+          "notes": "正確的音：那一遍 {{before}}%，第{{take}}遍 {{now}}%。",
+          "hold": "保持到最後的均勻度：那一遍 {{before}}%，第{{take}}遍 {{now}}%。"
+        },
+        "noPair": "那一遍和第{{take}}遍沒有可以並排比較的共同測量數字。",
+        "verdict": {
+          "bothPassed": "兩遍都達到了及格線。",
+          "bothBelow": "兩遍都低於及格線。",
+          "nowPassed": "那一遍低於及格線；第{{take}}遍達到了。",
+          "nowBelow": "那一遍達到了及格線；第{{take}}遍低於它。"
+        }
+      },
+      "improving": {
+        "tooFew": "這個練習我能比較的已測量遍數是 {{count}} 遍，而需要 {{need}} 遍。",
+        "tooFew_other": "這個練習我能比較的已測量遍數是 {{count}} 遍，而需要 {{need}} 遍。",
+        "window": "在這個練習最近 {{count}} 遍已測量的演奏中，速度是 {{to}} BPM。",
+        "window_other": "在這個練習最近 {{count}} 遍已測量的演奏中，速度從最早一遍的 {{from}} BPM 變到最新一遍的 {{to}} BPM。",
+        "windowSame": "在這個練習最近 {{count}} 遍已測量的演奏中，速度是 {{to}} BPM。",
+        "windowSame_other": "在這個練習最近 {{count}} 遍已測量的演奏中，最早一遍和最新一遍都是 {{to}} BPM。",
+        "clean": "其中 {{count}} 遍獲得了乾淨速度，是 {{bpm}} BPM。",
+        "clean_other": "其中 {{count}} 遍獲得了乾淨速度；最快的是 {{bpm}} BPM。",
+        "cleanNone": "其中沒有一遍獲得乾淨速度。",
+        "cleanUnknown": "我數不出其中獲得乾淨速度的遍數：有幾遍沒有保留是否獲得過。",
+        "even": "均勻度，在其中保留了該數字的 {{count}} 遍裡：這幾遍中最早的一遍 {{first}}%，速度 {{firstBpm}} BPM；這幾遍中最新的一遍 {{last}}%，速度 {{lastBpm}} BPM；最高 {{best}}%，速度 {{bestBpm}} BPM。",
+        "even_other": "均勻度，在其中保留了該數字的 {{count}} 遍裡：這幾遍中最早的一遍 {{first}}%，速度 {{firstBpm}} BPM；這幾遍中最新的一遍 {{last}}%，速度 {{lastBpm}} BPM；最高 {{best}}%，速度 {{bestBpm}} BPM。",
+        "evenNone": "其中保留了均勻度數字的不到兩遍，所以我不做比較。"
+      },
+      "made": {
+        "intro": "這個練習的及格線有 {{count}} 項檢查。",
+        "intro_other": "這個練習的及格線有 {{count}} 項檢查。",
+        "check": {
+          "even": "均勻度：連續 {{over}} 個小節至少 {{bar}}%。",
+          "heard": "聽到的音：至少是譜上所寫音的 {{bar}}%。",
+          "extras": "多餘的音：{{over}} 個小節裡 {{bar}} 個或更少。",
+          "accents": "重音：標記的重音至少有 {{bar}}% 比周圍的音更響。",
+          "notes": "正確的音：我能判定音高的音中，至少 {{bar}}% 是譜上寫的音。",
+          "hold": "保持到最後的均勻度：在所判斷那一段的最後幾個小節裡至少 {{bar}}%。"
+        },
+        "unnamed": "其中有 {{count}} 項是我還說不清的檢查。",
+        "unnamed_other": "其中有 {{count}} 項是我還說不清的檢查。",
+        "clean": "通過的一遍，若有連續 {{need}} 個乾淨的小節，就會按它自己的速度獲得乾淨速度；它更快時，會把你的乾淨速度提上去。",
+        "tempo": "{{passAt}} BPM 或更快的一遍乾淨演奏，就通過這個練習。",
+        "ungraded": {
+          "selfChecked": "這個練習由你自己檢查：應用程式不給它評分，所以沒有可以拆開看的分數。",
+          "practiceOnly": "這個練習只用於練習，不評分，所以沒有可以拆開看的分數。",
+          "landings": "這個練習還沒有評分，所以沒有可以拆開看的分數。"
+        },
+        "not": {
+          "pickDirection": "撥弦方向不是評分的一部分。",
+          "muting": "悶音不是評分的一部分。",
+          "posture": "姿勢不是評分的一部分。",
+          "tension": "緊繃不是評分的一部分。",
+          "handAttribution": "失誤來自哪隻手，不是評分的一部分。",
+          "fingering": "哪根手指彈了某個音，不是評分的一部分。",
+          "tone": "音色和觸弦的手感不是評分的一部分。",
+          "feel": "感覺，以及聽起來好不好，不是評分的一部分。",
+          "bendPitch": "推弦推到多高，不是評分的一部分。",
+          "vibrato": "揉弦不是評分的一部分。",
+          "noteChoice": "你在落點之間選了哪些音，不是評分的一部分。",
+          "notesWritten": "音高不是評分的一部分。"
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "均勻度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "even_other": "均勻度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "heard": "聽到的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "heard_other": "聽到的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "extras": "多餘的音：第{{take}}遍 {{value}} 個，比及格線允許的多 {{gap}} 個（{{over}} 個小節裡 {{bar}} 個或更少）。",
+          "accents": "重音命中：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "accents_other": "重音命中：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "notes": "正確的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "notes_other": "正確的音：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "hold": "保持到最後的均勻度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。",
+          "hold_other": "保持到最後的均勻度：第{{take}}遍 {{value}}%，比 {{bar}}% 的及格線低 {{count}} 個百分點。"
+        },
+        "under": {
+          "even": "均勻度：第{{take}}遍比 {{bar}}% 的及格線低不到 1 個百分點。",
+          "heard": "聽到的音：第{{take}}遍比 {{bar}}% 的及格線低不到 1 個百分點。",
+          "accents": "重音命中：第{{take}}遍比 {{bar}}% 的及格線低不到 1 個百分點。",
+          "notes": "正確的音：第{{take}}遍比 {{bar}}% 的及格線低不到 1 個百分點。",
+          "hold": "保持到最後的均勻度：第{{take}}遍比 {{bar}}% 的及格線低不到 1 個百分點。"
+        },
+        "unnamed": "及格線還有 {{count}} 項我說不清的檢查，所以我說不出第{{take}}遍在這些檢查上的表現。",
+        "unnamed_other": "及格線還有 {{count}} 項我說不清的檢查，所以我說不出第{{take}}遍在這些檢查上的表現。",
+        "met": {
+          "even": "均勻度：第{{take}}遍 {{value}}%，達到了 {{bar}}% 的及格線。",
+          "heard": "聽到的音：第{{take}}遍 {{value}}%，達到了 {{bar}}% 的及格線。",
+          "extras": "多餘的音：第{{take}}遍 {{value}} 個，在及格線 {{over}} 個小節裡 {{bar}} 個或更少的範圍內。",
+          "accents": "重音命中：第{{take}}遍 {{value}}%，達到了 {{bar}}% 的及格線。",
+          "notes": "正確的音：第{{take}}遍 {{value}}%，達到了 {{bar}}% 的及格線。",
+          "hold": "保持到最後的均勻度：第{{take}}遍 {{value}}%，達到了 {{bar}}% 的及格線。"
+        },
+        "unmeasured": "及格線的 {{count}} 項檢查在第{{take}}遍裡沒有測量。",
+        "unmeasured_other": "及格線的 {{count}} 項檢查在第{{take}}遍裡沒有測量。",
+        "tempo": "第{{take}}遍是 {{bpm}} BPM；{{passAt}} BPM 或更快的一遍乾淨演奏，就通過這個練習。",
+        "none": "第{{take}}遍裡，我沒有測量及格線的任何一項檢查。"
       }
     }
   }

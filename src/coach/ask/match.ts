@@ -106,6 +106,37 @@ const METRIC_WORDS: ReadonlyArray<[AskableMetric, RegExp]> = [
   ["feel", /\b(feel|groove|sound good|sounds good)\b/],
 ];
 
+// Leg c2b1b: the four cards about the Take's history and the pass mark.
+
+/** "What changed since the last Take?": this Take beside the one before. */
+const CHANGED =
+  /\bwhat (has |have )?changed\b|\bwhat (is|was) different\b|\b(better|worse|different) than (my |the |that )?(last|previous|earlier) (take|one|time|go)\b|\bcompared? (to|with) (my |the )?(last|previous|earlier) (take|one|time|go)\b|\bdid (i|it) (get|do) (better|worse)\b/;
+/** The words that name the Take a "what changed" question compares with: allowed past `OTHER_TAKE`. */
+const BEFORE_THIS =
+  /\b(since|than|to|with|from) (my |the |that )?(last|previous|earlier) (take|one|time|go)\b|\b(the )?(take|one) before( (it|this|that))?\b/g;
+/** "What changed" about the app, not about playing. */
+const CHANGED_OTHER = /\b(app|version|update|release|settings|setting|screen|menu|coach|build|beta|new|features?)\b/;
+/** A part of the Take named ("what was different about bar 5"): the comparison is of whole Takes, so not its question. */
+const A_BAR = /\bbars? \d+\b/;
+
+/** "Am I improving?": the measured Takes of this Exercise. */
+const IMPROVING =
+  /\b(am|are) (i|we) (improving|getting better|progressing|making progress)\b|\b(have|has) (i|it|my \w+) (improved|got better|gotten better|progressed)\b|\b(is|are) (it|my \w+) (improving|getting better)\b|\bhow (am i|is it) (doing|going|progressing)\b|\bhow is my progress\b/;
+/** Beyond this Exercise: not this card's question. */
+const IMPROVING_OTHER = /\b(overall|in general|generally|at guitar|on guitar|as a (guitarist|player|musician)|at all)\b/;
+/** How progress is worked out, not what it is ("how is my progress calculated"): never the history. */
+const IMPROVING_HOW = /\b(calculated|computed|worked out|measured|counted|based on|made of|made up of)\b/;
+/** "Feel" as the asker's verb ("do you feel I am improving"), not the thing asked about. */
+const FEEL_VERB = /\b(i|you|we) feel\b/;
+
+/** "What is the score made of?": the Exercise's pass mark, check by check. */
+const MADE_OF =
+  /\b(score|grade|grading|pass mark|result)\b.*\b(made of|made up of|based on|consists? of|worked out|calculated|computed)\b|\bhow (is|are|do you|does the app|does it) (it |this |my takes? |takes? |the take )?(graded|scored|marked|grade|score)\b|\bwhat (is|gets|do you|does the app|does it|does the pass mark) (graded|measured|checked|grade|measure|check)\b|\bwhat (does|do) (the |this )?(grade|score|pass mark) (check|measure|look at)\b/;
+
+/** "How far is the pass mark?": the last Take's checks against it. */
+const DISTANCE =
+  /\bhow (far|close|much) (am i|was i|is it|was it|was that|is that)? ?(from|to|off|away from|short of|below|under) (the )?pass(ing| mark)?\b|\bhow (far|close) (is|was) (the )?pass mark\b|\bhow (far|close) (off|away) (am i|was i|was it|is it) (from|to) (the )?pass(ing| mark)?\b|\bhow (much|far) (more|better|faster) (do i need|did i need)\b|\bwhat (do|did) i (need|miss) to pass\b|\b(did i|was i|was it) (nearly|almost|close to) pass(ing)?\b|\bby how much did i (miss|fail)\b/;
+
 function metricIn(s: string): AskableMetric | null {
   const found = METRIC_WORDS.filter(([, re]) => re.test(s)).map(([id]) => id);
   return found.length === 1 ? found[0] : null;
@@ -121,11 +152,30 @@ export function matchCard(text: string): CardCall | null {
   const asks = s.endsWith("?") || QUESTION_START.test(s);
   if (!asks || GENERAL_START.test(s)) return null;
   const q = s.replace(/\?/g, "").trim();
+  // "What changed since my last Take?" names the Take it compares with; any
+  // other Take named past that ("since take 3", "since yesterday") is not
+  // this card's question (c2b1b).
+  const changed = CHANGED.test(q) && !CHANGED_OTHER.test(q) && !NAMED_OTHER.test(q) && !A_BAR.test(q);
+  const rest = changed ? q.replace(BEFORE_THIS, " ") : q;
   // A card reads the last Take, as it is: not another Take, not a definition,
   // not the count-in (review c2b1a F6).
-  if (OTHER_TAKE.test(q) || MEANING.test(q) || COUNT_IN.test(q)) return null;
+  if (OTHER_TAKE.test(rest) || MEANING.test(q) || COUNT_IN.test(q)) return null;
 
   const found: CardCall[] = [];
+  if (changed) found.push({ tool: "what_changed", args: {} });
+  // "Am I improving on this Exercise?": the Exercise is the card's own subject.
+  const onThis = q.replace(/\b(on|at|with|in) (this|the) exercise\b/g, " ");
+  // "How close am I to passing this exercise?": the Exercise is the pass mark's own subject too.
+  const passThis = onThis.replace(/\b(pass|passing) (this|the) exercise\b/g, "$1");
+  // "Is my tone improving?" names something: a thing the app does not grade
+  // gets "I didn't measure that" (the why card), never the tempo history
+  // (review c2b1b, item 3).
+  const named = metricIn(q);
+  const improvingMetric = named === "feel" && FEEL_VERB.test(q) ? null : named;
+  if (IMPROVING.test(q) && !IMPROVING_OTHER.test(q) && !IMPROVING_HOW.test(q) && !NAMED_OTHER.test(onThis)) {
+    found.push(improvingMetric ? { tool: "why_not_counted", args: { what: improvingMetric } } : { tool: "improving", args: {} });
+  }
+  if (DISTANCE.test(q) && !NAMED_OTHER.test(passThis)) found.push({ tool: "pass_mark_distance", args: {} });
   // The cards that read the last Take whole; a metric question reads the Exercise.
   const wholeTake = !NAMED_OTHER.test(q);
 
@@ -149,6 +199,8 @@ export function matchCard(text: string): CardCall | null {
   } else if (metric && CHECKS.test(q)) {
     found.push({ tool: "why_not_counted", args: { what: metric } });
   }
+  // What the pass mark checks, in general: a metric named is the why card's question.
+  if (!metric && !WHY_NOT.test(q) && MADE_OF.test(q) && !NAMED_OTHER.test(onThis)) found.push({ tool: "score_made_of", args: {} });
 
   return found.length === 1 ? found[0] : null;
 }

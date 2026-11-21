@@ -1,48 +1,100 @@
 {
   "notebook": {
     "noticed": {
-      "tempoEvenness": "At {{fast}} BPM your Takes were {{fastScore}}% even; at {{slow}} BPM, {{slowScore}}%.",
+      "tempoEvenness": "À {{fast}} BPM, tes prises étaient régulières à {{fastScore}} % ; à {{slow}} BPM, à {{slowScore}} %.",
       "lean": {
         "first": {
-          "late": "The first bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The first bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "La première mesure du motif tombait en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes où cela pouvait être mesuré.",
+          "early": "La première mesure du motif tombait en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes où cela pouvait être mesuré."
         },
         "last": {
-          "late": "The last bar of the pattern sat late against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured.",
-          "early": "The last bar of the pattern sat early against the rest: {{hits}} of the {{count}} most recent Takes where it could be measured."
+          "late": "La dernière mesure du motif tombait en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes où cela pouvait être mesuré.",
+          "early": "La dernière mesure du motif tombait en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes où cela pouvait être mesuré."
         }
       },
       "place": {
         "afterHeld": {
-          "late": "Bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars where a note follows a held one sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars where a note follows a held one sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Les mesures où une note suit une note tenue tombaient en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes avec de telles mesures où cela pouvait être mesuré.",
+          "early": "Les mesures où une note suit une note tenue tombaient en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes avec de telles mesures où cela pouvait être mesuré.",
+          "lateOne": "Dans {{exercise}}, les mesures où une note suit une note tenue tombaient en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes de cet exercice où cela pouvait être mesuré.",
+          "earlyOne": "Dans {{exercise}}, les mesures où une note suit une note tenue tombaient en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes de cet exercice où cela pouvait être mesuré."
         },
         "openString": {
-          "late": "Bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with an open string in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with an open string in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Les mesures avec une corde à vide tombaient en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes avec de telles mesures où cela pouvait être mesuré.",
+          "early": "Les mesures avec une corde à vide tombaient en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes avec de telles mesures où cela pouvait être mesuré.",
+          "lateOne": "Dans {{exercise}}, les mesures avec une corde à vide tombaient en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes de cet exercice où cela pouvait être mesuré.",
+          "earlyOne": "Dans {{exercise}}, les mesures avec une corde à vide tombaient en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes de cet exercice où cela pouvait être mesuré."
         },
         "shift": {
-          "late": "Bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "early": "Bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes with such bars where it could be measured.",
-          "lateOne": "In {{exercise}}, bars with a position shift in them sat late against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured.",
-          "earlyOne": "In {{exercise}}, bars with a position shift in them sat early against the rest: {{hits}} of the {{count}} most recent Takes of it where it could be measured."
+          "late": "Les mesures avec un changement de position tombaient en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes avec de telles mesures où cela pouvait être mesuré.",
+          "early": "Les mesures avec un changement de position tombaient en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes avec de telles mesures où cela pouvait être mesuré.",
+          "lateOne": "Dans {{exercise}}, les mesures avec un changement de position tombaient en retard par rapport au reste : {{hits}} des {{count}} prises les plus récentes de cet exercice où cela pouvait être mesuré.",
+          "earlyOne": "Dans {{exercise}}, les mesures avec un changement de position tombaient en avance par rapport au reste : {{hits}} des {{count}} prises les plus récentes de cet exercice où cela pouvait être mesuré."
         }
       },
       "tempoPlayed": {
-        "named": "You played {{exercise}} at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently.",
-        "unnamed": "You played one Exercise at {{fromBpm}} BPM at first and at {{toBpm}} BPM most recently."
+        "named": "Tu as joué {{exercise}} à {{fromBpm}} BPM au début et à {{toBpm}} BPM le plus récemment.",
+        "unnamed": "Tu as joué un exercice à {{fromBpm}} BPM au début et à {{toBpm}} BPM le plus récemment."
       },
       "minutes": {
-        "perSession": "Your last {{sessions}} Sessions had {{now}} minutes played in Takes each, on average; the {{sessions}} before, {{then}}."
+        "perSession": "Tes {{sessions}} dernières séances comptaient en moyenne {{now}} minutes jouées en prises chacune ; les {{sessions}} d'avant, {{then}}."
       }
     },
     "evidence": {
-      "oneExercise": "From {{count}} Takes · {{from}} to {{to}}",
-      "exercises": "From {{count}} Takes on {{exercises}} Exercises · {{from}} to {{to}}"
+      "oneExercise": "Prises : {{count}} · du {{from}} au {{to}}",
+      "exercises": "Prises : {{count}} sur {{exercises}} exercices · du {{from}} au {{to}}"
+    },
+    "ui": {
+      "tabsLabel": "Coach",
+      "tabAsk": "Demander",
+      "tabNotebook": "Carnet",
+      "noticedTitle": "Ce que j'ai remarqué",
+      "goalTitle": "Ce vers quoi tu travailles",
+      "loading": "Un instant : je lis les notes du coach.",
+      "noticedUnreadable": "La liste des lignes que tu as écartées n'a pas pu être lue, donc aucune ligne n'est affichée cette fois. Chaque prise reste enregistrée.",
+      "tooFewTakes": "Il me faut cinq prises avant de dire quoi que ce soit ici. Prises jusqu'ici : {{count}}. Écarte une ligne et je ne l'utilise plus pendant 30 jours.",
+      "nothingYet": "Rien ne ressort pour l'instant. Prises lues : {{count}}. Une ligne apparaît ici dès que la même chose revient dans cinq prises ou plus.",
+      "leaveOutHint": "Écarte une ligne et je ne l'utilise plus pendant 30 jours.",
+      "leaveOut": "Écarter",
+      "leftOut": "Écartée pendant 30 jours. Chaque prise est conservée.",
+      "undo": "Annuler",
+      "leftOutNotRead": "Non écartée : la liste des lignes écartées n'a pas pu être lue cette fois.",
+      "notSaved": "Cela tient jusqu'à la fermeture de Yames : l'enregistrement n'a pas pu se faire.",
+      "sessionNote": "Dans une séance, ceci n'affiche que ce qui était enregistré avant le début de la séance.",
+      "goalSaid": "Tu as dit · {{date}}",
+      "goalSaidUndated": "Tu as dit",
+      "goalEdit": "Modifier",
+      "goalAdd": "Ajouter un objectif",
+      "goalNone": "Pas encore d'objectif.",
+      "goalUnreadable": "Ton objectif n'a pas pu être lu cette fois, donc il n'est pas affiché et ne peut pas être modifié ici.",
+      "goalQuestion": "Vers quoi travailles-tu ?",
+      "goalHint": "Un morceau, un tempo, un style, juste jouer, ou tes propres mots.",
+      "goalInputLabel": "Ton objectif",
+      "goalSave": "Enregistrer",
+      "goalCancel": "Annuler",
+      "goalChoice": {
+        "song": "Un morceau",
+        "tempo": "Un tempo",
+        "style": "Un style",
+        "justPlaying": "Juste jouer"
+      },
+      "goalStarter": {
+        "song": "Jouer le morceau",
+        "tempo": "Jouer proprement à",
+        "style": "Jouer dans le style de",
+        "justPlaying": "Juste jouer"
+      },
+      "notNow": "Pas maintenant",
+      "notNowDone": "Pas maintenant. Je ne redemanderai pas avant au moins 7 jours. Paramètres → Coach → Suggestions désactive les questions de ce genre.",
+      "notNowNotRead": "Non enregistré : les notes du coach n'ont pas pu être lues cette fois.",
+      "footer": "Tout ce qui est ici vient de tes prises enregistrées, ou de ce que tu as saisi."
+    },
+    "suggestions": {
+      "label": "Suggestions",
+      "hint": "Si le coach propose quelque chose de lui-même, comme la question sur ton objectif. Demander et le Carnet sont toujours là.",
+      "on": "Activées",
+      "asked": "Seulement quand je demande",
+      "unreadable": "Ton choix n'a pas pu être lu cette fois ; en appuyer sur un l'enregistre."
     }
   }
 }

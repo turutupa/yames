@@ -30,6 +30,8 @@ import {
   COACH_REPORT_SENTENCE,
   coachFeedOption,
   coachReportOption,
+  freePlayFinding,
+  toolFindingOption,
   inputFailOption,
   lowConfidenceFeedback,
   reportableRun,
@@ -807,8 +809,9 @@ function seededTake(
   };
 }
 
-function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped"): PathStoreSeed {
+function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "ungraded" | "slipped" | "notebook"): PathStoreSeed {
   if (seed === "first") return { states: [], takes: [], ceilings: [] };
+  if (seed === "notebook") return notebookSeed();
   // The same Takes, every one played without grading (owner, 2026-11-18).
   if (seed === "ungraded") {
     const base = sessionSeed("returning");
@@ -869,6 +872,29 @@ function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none" | "
       },
     ],
   };
+}
+
+/**
+ * The Notebook's scenes (leg c4a2): two Exercises, each twice at 100 and twice
+ * at 90, less even at 100 on both (the tempo line), the five newest with their
+ * last bar late (the bar-position line). The oldest is nine days old.
+ */
+function notebookSeed(): PathStoreSeed {
+  const base = sessionSeed("returning");
+  const open = "even-eighths.open-string";
+  const four = "even-eighths.four-fingers";
+  const late = [0, 2, -3, 25];
+  const takes = [
+    seededTake(four, 100, 0.74, false, 1),
+    seededTake(open, 100, 0.76, false, 1.1),
+    seededTake(four, 100, 0.72, false, 2),
+    seededTake(open, 100, 0.74, false, 2.1),
+    seededTake(four, 90, 0.86, true, 3),
+    seededTake(four, 90, 0.84, false, 4),
+    seededTake(open, 90, 0.85, true, 5),
+    seededTake(open, 90, 0.87, true, 9),
+  ].map((t, i) => (i < 5 ? { ...t, facts: { ...(t.facts as object), lean: late } } : t));
+  return { ...base, takes };
 }
 
 /**
@@ -1133,10 +1159,13 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (shot.jam?.heard) store.set("jamHear", true);
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
   if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
+  // The Notebook's goal (leg c4a2), said twelve days ago.
+  if (shot.session?.seed === "notebook") store.set("coach.goal", { text: "A clean pentatonic solo at 120", at: Date.now() - 12 * DAY_MS });
   if (shot.session?.unsubscribed) store.set("session.unsubscribed", shot.session.unsubscribed);
   // A focus is kept with the day it was chosen on: the scene's is today's.
   if (shot.session?.focus) store.set("session.todayFocus", storedFocus(shot.session.focus, Date.now()));
   if (shot.session?.offMix) store.set("session.offMix", shot.session.offMix);
+  if (shot.session?.myExercises) store.set("myExercises", shot.session.myExercises);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 
@@ -1189,6 +1218,7 @@ export function installShotMock(shot: Shot, theme: string): void {
   /** The tools' coach options on the query string (`toolCoachFixtures.ts`). */
   const coachFeed = coachFeedOption();
   const coachReport = coachReportOption();
+  const toolFinding = toolFindingOption();
   const toolRuns = toolRunsOption();
   const inputFail = inputFailOption();
   /** The input is on: between `start_evaluation` and `stop_evaluation`. */
@@ -2278,6 +2308,30 @@ export function installShotMock(shot: Shot, theme: string): void {
           playMode: "structured",
           onsetResults: script.pass.results,
           extraOnsets: script.pass.extras,
+        });
+      } else if (coachReport && toolFinding) {
+        // `?toolFinding=K` (leg c5c2): the free-play close of the run that just
+        // stopped, carrying what `analyze_free_play` ranked first.
+        // Wall-clock ms, as the engine sends them: the note ties a finding to
+        // the run by the segment's own end (c5c2b L3).
+        const endMs = Date.now();
+        emit("practice-segment-ended", {
+          startMs: endMs - 30_000,
+          endMs,
+          score: 82,
+          componentScores: { intervalConsistency: 0.84, gridAlignment: 0.81, hitCompleteness: 0.88, onsetEfficiency: 0.92 },
+          bpm: 120,
+          instrument: "electric-guitar",
+          endReason: "user-stopped",
+          onsetCount: 28,
+          beatCount: 32,
+          totalOnsets: 30,
+          spuriousOnsets: 2,
+          onsetEfficiency: 0.92,
+          inferredDivisor: 2,
+          inferredDivisorConfidence: 0.9,
+          playMode: "structured",
+          findings: [freePlayFinding(toolFinding)],
         });
       }
       return null;

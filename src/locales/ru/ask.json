@@ -47,102 +47,254 @@
       "phone": "Ничто из набранного здесь не покидает этот телефон."
     },
     "card": {
-      "chips": "About your last Take:",
+      "chips": "О вашем последнем дубле:",
       "chip": {
-        "where": "Where did it slip?",
-        "lean": "Was I early or late?",
-        "count": "Why didn't that count?"
+        "where": "Где сбилось?",
+        "lean": "Я играл раньше или позже?",
+        "count": "Почему это не засчиталось?",
+        "changed": "Что изменилось с прошлого дубля?",
+        "improving": "Я становлюсь лучше?",
+        "madeOf": "Из чего состоит оценка?",
+        "distance": "Как далеко до планки?"
       },
       "canAnswer": {
-        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+        "ungraded": "Вы играете без оценки, поэтому нет измерений, по которым я мог бы отвечать на вопросы о ваших дублях."
       },
-      "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
-      "tooShort_few": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
-      "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
-      "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort": "Дубль {{take}} остановился после {{bars}} такта, слишком мало для оценки.",
+      "tooShort_few": "Дубль {{take}} остановился после {{bars}} тактов, слишком мало для оценки.",
+      "tooShort_many": "Дубль {{take}} остановился после {{bars}} тактов, слишком мало для оценки.",
+      "tooShort_other": "Дубль {{take}} остановился после {{bars}} такта, слишком мало для оценки.",
       "slip": {
-        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
-        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+        "none": "В дубле {{take}} не сбился ни один такт: каждый такт, который можно было оценить, удержался.",
+        "noBars": "Я не измерял дубль {{take}} такт за тактом, поэтому не скажу, где сбилось."
       },
       "lean": {
         "premise": {
-          "early": "In Take {{take}} the bars that leaned sat earlier than the rest of it, not later. A lean the whole Take shares is something I don't measure.",
-          "late": "In Take {{take}} the bars that leaned sat later than the rest of it, not earlier. A lean the whole Take shares is something I don't measure."
+          "early": "В дубле {{take}} такты с уклоном оказались раньше остальной части дубля, а не позже. Уклон, общий для всего дубля, я не измеряю.",
+          "late": "В дубле {{take}} такты с уклоном оказались позже остальной части дубля, а не раньше. Уклон, общий для всего дубля, я не измеряю."
         },
         "premiseNone": {
-          "early": "No bar of Take {{take}} sat more than {{ms}} ms earlier than the rest of it. A lean the whole Take shares is something I don't measure.",
-          "late": "No bar of Take {{take}} sat more than {{ms}} ms later than the rest of it. A lean the whole Take shares is something I don't measure."
+          "early": "В дубле {{take}} ни один из тактов, которые я смог измерить ({{measured}} из {{bars}}), не оказался раньше остальной части дубля больше чем на {{ms}} ms. Уклон, общий для всего дубля, я не измеряю.",
+          "late": "В дубле {{take}} ни один из тактов, которые я смог измерить ({{measured}} из {{bars}}), не оказался позже остальной части дубля больше чем на {{ms}} ms. Уклон, общий для всего дубля, я не измеряю."
         },
         "bar": {
-          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
-          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+          "early": "Такт {{bar}} мелодии: на {{ms}} ms раньше остальной части дубля.",
+          "late": "Такт {{bar}} мелодии: на {{ms}} ms позже остальной части дубля."
         },
-        "none": "In Take {{take}}, none of the bars I could measure ({{measured}} of {{bars}}) sat more than {{ms}} ms earlier or later than the rest of it.",
-        "notMeasured": "I didn't measure which way Take {{take}} leaned: no bar of it had enough note-by-note timing to tell."
+        "none": "В дубле {{take}} ни один из тактов, которые я смог измерить ({{measured}} из {{bars}}), не оказался раньше или позже остальной части дубля больше чем на {{ms}} ms.",
+        "notMeasured": "Я не измерял, в какую сторону уклонился дубль {{take}}: ни в одном его такте не хватило тайминга по нотам, чтобы это сказать."
       },
       "direction": {
-        "early": "The notes there sat earlier than the rest of the Take.",
-        "late": "The notes there sat later than the rest of the Take.",
-        "earlyOpen": "The open {{note}}s there sat earlier than the rest of the Take.",
-        "lateOpen": "The open {{note}}s there sat later than the rest of the Take.",
-        "earlyNote": "The {{note}}s at fret {{fret}} there sat earlier than the rest of the Take.",
-        "lateNote": "The {{note}}s at fret {{fret}} there sat later than the rest of the Take."
+        "early": "Ноты там оказались раньше остальной части дубля.",
+        "late": "Ноты там оказались позже остальной части дубля.",
+        "earlyOpen": "Открытые ноты {{note}} там оказались раньше остальной части дубля.",
+        "lateOpen": "Открытые ноты {{note}} там оказались позже остальной части дубля.",
+        "earlyNote": "Ноты {{note}} на ладу {{fret}} там оказались раньше остальной части дубля.",
+        "lateNote": "Ноты {{note}} на ладу {{fret}} там оказались позже остальной части дубля."
       },
       "below": {
-        "plain": "Take {{take}} was below the pass mark at {{bpm}} BPM.",
-        "even": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%.",
-        "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
-        "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
-        "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
-        "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
+        "plain": "Дубль {{take}} был ниже планки, на {{bpm}} BPM.",
+        "even": "Ровность дубля {{take}} — {{value}}% при планке {{bar}}%.",
+        "evenSome": "Ровность дубля {{take}} — {{value}}% при планке {{bar}}%, и я услышал {{heard}} из {{expected}} нот.",
+        "heard": "Я услышал {{heard}} из {{expected}} нот в дубле {{take}} при планке {{bar}}%.",
+        "extras": "В дубле {{take}} было больше лишних нот, чем допускает планка: {{bar}} или меньше на четыре такта.",
+        "accents": "В дубле {{take}} {{value}}% отмеченных акцентов прозвучали громче окружающих нот при планке {{bar}}%.",
+        "notes": "В дубле {{take}} {{value}}% нот, высоту которых я смог определить, были записанными, при планке {{bar}}%."
       },
       "count": {
-        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
-        "below": "Take {{take}} is kept, below the pass mark at {{bpm}} BPM.",
+        "passed": "Дубль {{take}} засчитан: он взял планку на {{bpm}} BPM.",
+        "below": "Дубль {{take}} сохранён, ниже планки на {{bpm}} BPM.",
         "notCaught": {
-          "nothingHeard": "I couldn't grade Take {{take}}: I heard none of its notes, so it doesn't count against you.",
-          "tooFewHeard": "I couldn't grade Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
-          "tooManyExtras": "I couldn't grade Take {{take}}: I heard more notes that weren't written than ones that were, so it doesn't count against you.",
-          "lowConfidence": "I couldn't grade Take {{take}}: I wasn't sure enough of the notes I heard, so it doesn't count against you.",
-          "unknown": "I couldn't grade Take {{take}}."
+          "nothingHeard": "Я не смог оценить дубль {{take}}: я не услышал ни одной его ноты, поэтому он не идёт вам в минус.",
+          "tooFewHeard": "Я не смог оценить дубль {{take}}: я услышал {{heard}} из {{expected}} нот, слишком мало для оценки, поэтому он не идёт вам в минус.",
+          "tooManyExtras": "Я не смог оценить дубль {{take}}: я услышал больше нот, которых нет в записи, чем тех, что есть, поэтому он не идёт вам в минус.",
+          "lowConfidence": "Я не смог оценить дубль {{take}}: я недостаточно уверенно распознал услышанные ноты, поэтому он не идёт вам в минус.",
+          "unknown": "Я не смог оценить дубль {{take}}."
         },
-        "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
-        "tooShort_few": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
-        "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
-        "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
-        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
-        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
-        "pitchNotGraded": "The pitch of your notes isn't part of this Exercise's grade.",
-        "rightNotes": "In Take {{take}}, {{value}}% of the {{base}} notes I could pitch were the written ones.",
-        "notesUnchecked": "I couldn't check the pitches in Take {{take}}.",
+        "tooShort": "Дубль {{take}} остановился после {{bars}} такта, слишком мало для оценки, поэтому он не засчитан ни в ту, ни в другую сторону.",
+        "tooShort_few": "Дубль {{take}} остановился после {{bars}} тактов, слишком мало для оценки, поэтому он не засчитан ни в ту, ни в другую сторону.",
+        "tooShort_many": "Дубль {{take}} остановился после {{bars}} тактов, слишком мало для оценки, поэтому он не засчитан ни в ту, ни в другую сторону.",
+        "tooShort_other": "Дубль {{take}} остановился после {{bars}} такта, слишком мало для оценки, поэтому он не засчитан ни в ту, ни в другую сторону.",
+        "notClean": "Он не сдвинул ваш чистый темп: для этого нужно {{need}} чистых тактов подряд, а самая длинная серия в дубле {{take}} была {{held}}.",
+        "notCleanPlain": "Он не сдвинул ваш чистый темп: для этого нужно {{need}} чистых тактов подряд, а в дубле {{take}} их не было.",
+        "unfair": "Вы отметили эту оценку как несправедливую. Она сохранена как измерена, ваш ответ рядом с ней.",
+        "pitchGraded": "Высота ваших нот входит в оценку этого упражнения.",
+        "pitchNotGraded": "Высота ваших нот не входит в оценку этого упражнения.",
+        "rightNotes": "В дубле {{take}} {{value}}% из {{base}} нот, высоту которых я смог определить, были записанными.",
+        "notesUnchecked": "Я не смог проверить высоту нот в дубле {{take}}.",
         "ungraded": {
-          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
-          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
-          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
-          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded.",
-          "selfChecked": "I didn't measure Take {{take}}: this Exercise is one you check yourself, so nothing was graded.",
-          "selfCheckedTempo": "I didn't measure Take {{take}}: at {{bpm}} BPM this Exercise is one you check yourself, so nothing was graded.",
-          "practiceOnly": "I didn't measure Take {{take}}: this Exercise is practice only, not graded.",
-          "landings": "I didn't measure Take {{take}}: this Exercise isn't graded yet."
+          "eyes": "Я не измерял дубль {{take}}: он был для ваших глаз, поэтому ничего не оценивалось.",
+          "chosen": "Я не измерял дубль {{take}}: вы выбрали просто сыграть его, поэтому ничего не оценивалось.",
+          "inputOff": "Я не измерял дубль {{take}}: вход не был включён, поэтому ничего не оценивалось.",
+          "gradingOff": "Я не измерял дубль {{take}}: оценка выключена, поэтому ничего не оценивалось.",
+          "selfChecked": "Я не измерял дубль {{take}}: это упражнение вы проверяете сами, поэтому ничего не оценивалось.",
+          "selfCheckedTempo": "Я не измерял дубль {{take}}: на {{bpm}} BPM это упражнение вы проверяете сами, поэтому ничего не оценивалось.",
+          "practiceOnly": "Я не измерял дубль {{take}}: это упражнение только для практики, без оценки.",
+          "landings": "Я не измерял дубль {{take}}: это упражнение пока не оценивается."
         }
       },
       "notMeasured": {
-        "pitch": "I didn't measure that. The pitch of your notes isn't part of this Exercise's grade.",
-        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
-        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
-        "posture": "I didn't measure that. The app has no picture of you.",
-        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
-        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
-        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
-        "tone": "I didn't measure that. Tone and touch aren't measured.",
-        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+        "pitch": "Этого я не измерял. Высота ваших нот не входит в оценку этого упражнения.",
+        "pickDirection": "Этого я не измерял. У приложения есть только звук, а удар вниз и удар вверх могут звучать одинаково.",
+        "muting": "Этого я не измерял. Приложение не отличит заглушённую струну от громкой рядом с ней.",
+        "posture": "Этого я не измерял. У приложения нет вашего изображения.",
+        "tension": "Этого я не измерял. Напряжение чувствуете только вы, и оно возникает раньше, чем его можно услышать.",
+        "handAttribution": "Этого я не измерял. Запоздавшая нота звучит одинаково от любой руки.",
+        "fingering": "Этого я не измерял. Одна и та же высота звучит одинаково от любого пальца.",
+        "tone": "Этого я не измерял. Тембр и касание не измеряются.",
+        "feel": "Этого я не измерял. Хорошо ли это звучит, приложение не измеряет."
       },
       "notNow": {
-        "noTake": "There's no Take of this Exercise to answer from yet.",
-        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+        "noTake": "Пока нет дубля этого упражнения, по которому я мог бы ответить.",
+        "notSaved": "Дубль {{take}} ещё не сохранён, поэтому я не могу прочитать дубли до него.",
+        "ungraded": "Вы играете без оценки, поэтому я ничего не измерял, чтобы ответить на это."
+      },
+      "history": {
+        "leftOut": "Я исключил {{count}} дубль, который вы отметили как несправедливый.",
+        "leftOut_few": "Я исключил {{count}} дубля, которые вы отметили как несправедливые.",
+        "leftOut_many": "Я исключил {{count}} дублей, которые вы отметили как несправедливые.",
+        "leftOut_other": "Я исключил {{count}} дубля, которые вы отметили как несправедливые.",
+        "otherNotes": "Я исключил {{count}} дубль, сыгранный на другом варианте этого упражнения.",
+        "otherNotes_few": "Я исключил {{count}} дубля, сыгранных на других вариантах этого упражнения.",
+        "otherNotes_many": "Я исключил {{count}} дублей, сыгранных на других вариантах этого упражнения.",
+        "otherNotes_other": "Я исключил {{count}} дубля, сыгранных на других вариантах этого упражнения."
+      },
+      "changed": {
+        "first": "У меня нет измеренного дубля этого упражнения до дубля {{take}}, поэтому сравнивать не с чем.",
+        "onlyUnfair": "Единственные измеренные дубли этого упражнения до дубля {{take}} — те, что вы отметили как несправедливые, поэтому я не сравниваю его с ними.",
+        "thisUnfair": "Вы отметили оценку дубля {{take}} как несправедливую, поэтому я не сравниваю его с другими дублями.",
+        "noneAlike": "У меня нет измеренного дубля этого варианта упражнения до дубля {{take}}, с которым я мог бы его сравнить.",
+        "sameTempo": "Дубль {{take}} и последний измеренный дубль перед ним были оба на {{bpm}} BPM.",
+        "tempo": "Последний измеренный дубль перед дублем {{take}} был на {{before}} BPM; дубль {{take}} был на {{bpm}} BPM.",
+        "metric": {
+          "even": "Ровность: {{before}}% в том дубле, {{now}}% в дубле {{take}}.",
+          "heard": "Услышанные ноты: {{before}}% в том дубле, {{now}}% в дубле {{take}}.",
+          "extras": "Лишние ноты: {{before}} в том дубле, {{now}} в дубле {{take}}.",
+          "accents": "Акценты попали: {{before}}% в том дубле, {{now}}% в дубле {{take}}.",
+          "notes": "Верные ноты: {{before}}% в том дубле, {{now}}% в дубле {{take}}.",
+          "hold": "Ровность, удержанная до конца: {{before}}% в том дубле, {{now}}% в дубле {{take}}."
+        },
+        "noPair": "У того дубля и дубля {{take}} нет общего измеренного числа, которое я мог бы поставить рядом.",
+        "verdict": {
+          "bothPassed": "Оба взяли планку.",
+          "bothBelow": "Оба были ниже планки.",
+          "nowPassed": "Тот дубль был ниже планки; дубль {{take}} её взял.",
+          "nowBelow": "Тот дубль взял планку; дубль {{take}} был ниже неё."
+        }
+      },
+      "improving": {
+        "tooFew": "Я могу сравнить {{count}} измеренный дубль этого упражнения, а нужно {{need}}.",
+        "tooFew_few": "Я могу сравнить {{count}} измеренных дубля этого упражнения, а нужно {{need}}.",
+        "tooFew_many": "Я могу сравнить {{count}} измеренных дублей этого упражнения, а нужно {{need}}.",
+        "tooFew_other": "Я могу сравнить {{count}} измеренного дубля этого упражнения, а нужно {{need}}.",
+        "window": "В вашем последнем измеренном дубле ({{count}}) этого упражнения темп был {{to}} BPM.",
+        "window_few": "В ваших последних {{count}} измеренных дублях этого упражнения темп изменился с {{from}} BPM в самом раннем до {{to}} BPM в самом новом.",
+        "window_many": "В ваших последних {{count}} измеренных дублях этого упражнения темп изменился с {{from}} BPM в самом раннем до {{to}} BPM в самом новом.",
+        "window_other": "В ваших последних {{count}} измеренных дублях этого упражнения темп изменился с {{from}} BPM в самом раннем до {{to}} BPM в самом новом.",
+        "windowSame": "В вашем последнем измеренном дубле ({{count}}) этого упражнения темп был {{to}} BPM.",
+        "windowSame_few": "В ваших последних {{count}} измеренных дублях этого упражнения самый ранний и самый новый были оба на {{to}} BPM.",
+        "windowSame_many": "В ваших последних {{count}} измеренных дублях этого упражнения самый ранний и самый новый были оба на {{to}} BPM.",
+        "windowSame_other": "В ваших последних {{count}} измеренных дублях этого упражнения самый ранний и самый новый были оба на {{to}} BPM.",
+        "clean": "{{count}} из них дал чистый темп, на {{bpm}} BPM.",
+        "clean_few": "{{count}} из них дали чистый темп; самый быстрый — {{bpm}} BPM.",
+        "clean_many": "{{count}} из них дали чистый темп; самый быстрый — {{bpm}} BPM.",
+        "clean_other": "{{count}} из них дали чистый темп; самый быстрый — {{bpm}} BPM.",
+        "cleanNone": "Ни один из них не дал чистый темп.",
+        "cleanUnknown": "Я не могу посчитать, сколько из них дали чистый темп: в некоторых не сохранилось, дали ли они его.",
+        "even": "Ровность в {{count}} из них, где она сохранилась: {{first}}% в самом раннем из этих, на {{firstBpm}} BPM; {{last}}% в самом новом из этих, на {{lastBpm}} BPM; {{best}}% в лучшем, на {{bestBpm}} BPM.",
+        "even_few": "Ровность в {{count}} из них, где она сохранилась: {{first}}% в самом раннем из этих, на {{firstBpm}} BPM; {{last}}% в самом новом из этих, на {{lastBpm}} BPM; {{best}}% в лучшем, на {{bestBpm}} BPM.",
+        "even_many": "Ровность в {{count}} из них, где она сохранилась: {{first}}% в самом раннем из этих, на {{firstBpm}} BPM; {{last}}% в самом новом из этих, на {{lastBpm}} BPM; {{best}}% в лучшем, на {{bestBpm}} BPM.",
+        "even_other": "Ровность в {{count}} из них, где она сохранилась: {{first}}% в самом раннем из этих, на {{firstBpm}} BPM; {{last}}% в самом новом из этих, на {{lastBpm}} BPM; {{best}}% в лучшем, на {{bestBpm}} BPM.",
+        "evenNone": "Менее чем в двух из них сохранилась ровность, поэтому я её не сравниваю."
+      },
+      "made": {
+        "intro": "У планки этого упражнения {{count}} проверка.",
+        "intro_few": "У планки этого упражнения {{count}} проверки.",
+        "intro_many": "У планки этого упражнения {{count}} проверок.",
+        "intro_other": "У планки этого упражнения {{count}} проверки.",
+        "check": {
+          "even": "Ровность: не менее {{bar}}% на протяжении {{over}} тактов подряд.",
+          "heard": "Услышанные ноты: не менее {{bar}}% записанных нот.",
+          "extras": "Лишние ноты: {{bar}} или меньше на {{over}} тактов.",
+          "accents": "Акценты: не менее {{bar}}% отмеченных акцентов громче окружающих нот.",
+          "notes": "Верные ноты: не менее {{bar}}% нот, высоту которых я могу определить, — записанные.",
+          "hold": "Ровность, удержанная до конца: не менее {{bar}}% на последних тактах оцениваемого отрезка."
+        },
+        "unnamed": "{{count}} из них — проверка, которую я пока не могу описать.",
+        "unnamed_few": "{{count}} из них — проверки, которые я пока не могу описать.",
+        "unnamed_many": "{{count}} из них — проверки, которые я пока не могу описать.",
+        "unnamed_other": "{{count}} из них — проверки, которые я пока не могу описать.",
+        "clean": "Дубль, который проходит, при {{need}} чистых тактах подряд даёт чистый темп на собственном темпе и поднимает ваш чистый темп, если он быстрее.",
+        "tempo": "Чистый дубль на {{passAt}} BPM или быстрее засчитывает упражнение.",
+        "ungraded": {
+          "selfChecked": "Это упражнение вы проверяете сами: приложение его не оценивает, поэтому нет оценки, которую можно разложить.",
+          "practiceOnly": "Это упражнение только для практики, без оценки, поэтому нет оценки, которую можно разложить.",
+          "landings": "Это упражнение пока не оценивается, поэтому нет оценки, которую можно разложить."
+        },
+        "not": {
+          "pickDirection": "Направление медиатора не входит в оценку.",
+          "muting": "Глушение не входит в оценку.",
+          "posture": "Посадка не входит в оценку.",
+          "tension": "Напряжение не входит в оценку.",
+          "handAttribution": "То, от какой руки случился промах, не входит в оценку.",
+          "fingering": "То, каким пальцем сыграна нота, не входит в оценку.",
+          "tone": "Тембр и касание не входят в оценку.",
+          "feel": "Ощущение и то, хорошо ли это звучит, не входят в оценку.",
+          "bendPitch": "То, насколько далеко идёт бенд, не входит в оценку.",
+          "vibrato": "Вибрато не входит в оценку.",
+          "noteChoice": "То, какие ноты вы выбираете между опорными, не входит в оценку.",
+          "notesWritten": "Высота ваших нот не входит в оценку."
+        }
+      },
+      "distance": {
+        "short": {
+          "even": "Ровность: {{value}}% в дубле {{take}}, на {{count}} пункт ниже планки {{bar}}%.",
+          "even_few": "Ровность: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "even_many": "Ровность: {{value}}% в дубле {{take}}, на {{count}} пунктов ниже планки {{bar}}%.",
+          "even_other": "Ровность: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "heard": "Услышанные ноты: {{value}}% в дубле {{take}}, на {{count}} пункт ниже планки {{bar}}%.",
+          "heard_few": "Услышанные ноты: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "heard_many": "Услышанные ноты: {{value}}% в дубле {{take}}, на {{count}} пунктов ниже планки {{bar}}%.",
+          "heard_other": "Услышанные ноты: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "extras": "Лишние ноты: {{value}} в дубле {{take}}, на {{gap}} больше, чем допускает планка ({{bar}} или меньше на {{over}} тактов).",
+          "accents": "Акценты попали: {{value}}% в дубле {{take}}, на {{count}} пункт ниже планки {{bar}}%.",
+          "accents_few": "Акценты попали: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "accents_many": "Акценты попали: {{value}}% в дубле {{take}}, на {{count}} пунктов ниже планки {{bar}}%.",
+          "accents_other": "Акценты попали: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "notes": "Верные ноты: {{value}}% в дубле {{take}}, на {{count}} пункт ниже планки {{bar}}%.",
+          "notes_few": "Верные ноты: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "notes_many": "Верные ноты: {{value}}% в дубле {{take}}, на {{count}} пунктов ниже планки {{bar}}%.",
+          "notes_other": "Верные ноты: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "hold": "Ровность, удержанная до конца: {{value}}% в дубле {{take}}, на {{count}} пункт ниже планки {{bar}}%.",
+          "hold_few": "Ровность, удержанная до конца: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%.",
+          "hold_many": "Ровность, удержанная до конца: {{value}}% в дубле {{take}}, на {{count}} пунктов ниже планки {{bar}}%.",
+          "hold_other": "Ровность, удержанная до конца: {{value}}% в дубле {{take}}, на {{count}} пункта ниже планки {{bar}}%."
+        },
+        "under": {
+          "even": "Ровность в дубле {{take}}: меньше одного пункта до планки {{bar}}%.",
+          "heard": "Услышанные ноты в дубле {{take}}: меньше одного пункта до планки {{bar}}%.",
+          "accents": "Акценты попали в дубле {{take}}: меньше одного пункта до планки {{bar}}%.",
+          "notes": "Верные ноты в дубле {{take}}: меньше одного пункта до планки {{bar}}%.",
+          "hold": "Ровность, удержанная до конца, в дубле {{take}}: меньше одного пункта до планки {{bar}}%."
+        },
+        "unnamed": "У планки есть ещё {{count}} проверка, которую я пока не могу описать, поэтому не могу сказать, как с ней справился дубль {{take}}.",
+        "unnamed_few": "У планки есть ещё {{count}} проверки, которые я пока не могу описать, поэтому не могу сказать, как с ними справился дубль {{take}}.",
+        "unnamed_many": "У планки есть ещё {{count}} проверок, которые я пока не могу описать, поэтому не могу сказать, как с ними справился дубль {{take}}.",
+        "unnamed_other": "У планки есть ещё {{count}} проверки, которые я пока не могу описать, поэтому не могу сказать, как с ними справился дубль {{take}}.",
+        "met": {
+          "even": "Ровность: {{value}}% в дубле {{take}}, что берёт планку {{bar}}%.",
+          "heard": "Услышанные ноты: {{value}}% в дубле {{take}}, что берёт планку {{bar}}%.",
+          "extras": "Лишние ноты: {{value}} в дубле {{take}}, в пределах планки: {{bar}} или меньше на {{over}} тактов.",
+          "accents": "Акценты попали: {{value}}% в дубле {{take}}, что берёт планку {{bar}}%.",
+          "notes": "Верные ноты: {{value}}% в дубле {{take}}, что берёт планку {{bar}}%.",
+          "hold": "Ровность, удержанная до конца: {{value}}% в дубле {{take}}, что берёт планку {{bar}}%."
+        },
+        "unmeasured": "{{count}} проверка планки не измерена в дубле {{take}}.",
+        "unmeasured_few": "{{count}} проверки планки не измерены в дубле {{take}}.",
+        "unmeasured_many": "{{count}} проверок планки не измерено в дубле {{take}}.",
+        "unmeasured_other": "{{count}} проверки планки не измерены в дубле {{take}}.",
+        "tempo": "Дубль {{take}} был на {{bpm}} BPM; чистый дубль на {{passAt}} BPM или быстрее засчитывает упражнение.",
+        "none": "Я не измерял ни одной проверки планки в дубле {{take}}."
       }
     }
   }

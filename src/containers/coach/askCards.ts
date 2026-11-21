@@ -70,9 +70,30 @@ export function answerCardFor(text: string): string | null {
   return writeCard(card, text);
 }
 
+/**
+ * The cards as the text box's next answerer (t1b2b's slot, `setAskNextAnswerer`;
+ * plugged by `AskPanel` while it is mounted, leg c2b1b): after the router,
+ * before the model or the plain statement. Synchronous, as the slot requires:
+ * `answerCardFor` decides and writes both turns before it returns.
+ *
+ * English only: the matcher reads English, so in any other language typed
+ * text never reaches a card (a German "where did it slip?" goes on to the
+ * model); every language reaches the cards by chip. `language` is read at
+ * each send, so a change of language in Settings counts at once.
+ */
+export function typedCardAnswerer(language: () => string): (text: string) => boolean {
+  return (text) => isEnglish(language()) && answerCardFor(text) !== null;
+}
+
+function isEnglish(language: string): boolean {
+  return language === "en" || language.startsWith("en-");
+}
+
 /** A card has something to read here: the last Take of the Exercise on screen, or for a metric question, the Exercise. */
 function readsSomethingHere(call: CardCall, ctx: CoachContext): boolean {
   if (lastTakeHere(ctx)) return true;
+  // What the score is made of reads the Exercise, not a Take (c2b1b).
+  if (call.tool === "score_made_of") return ctx.exercise !== undefined;
   const what = call.args.what;
   return call.tool === "why_not_counted" && typeof what === "string" && what !== "take" && ctx.exercise !== undefined;
 }

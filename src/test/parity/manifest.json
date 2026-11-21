@@ -467,6 +467,7 @@
     "onPracticeSegmentEnded",
     "onRampStep",
     "onScoreOnset",
+    "onSettingsChangeNotified",
     "onSongDropped",
     "onStateChange",
     "onTakeCapped",
@@ -1712,6 +1713,11 @@
       "written": true
     },
     "coach.suppressed": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "myExercises": {
       "store": "settings.json",
       "read": true,
       "written": true

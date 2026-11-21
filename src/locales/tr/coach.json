@@ -24,7 +24,40 @@
     "runScore": "Puan {{score}}, {{bpm}} BPM’de",
     "runScoreNoBpm": "Puan {{score}}",
     "sessionScore": "Seans puanı {{score}} · {{word}}",
-    "openRuns": "İlerleme’de Araç çalışmalarını aç"
+    "openRuns": "İlerleme’de Araç çalışmalarını aç",
+    "finding": {
+      "beatEarly": "Ölçünün {{beat}}. vuruşunda notaların, diğer vuruşlardaki notalarına göre ortalama {{ms}} ms daha erken geldi: o vuruştaki {{notes}} notanın {{agreeing}} tanesi diğer vuruşların ortalamasından daha erkendi.",
+      "beatLate": "Ölçünün {{beat}}. vuruşunda notaların, diğer vuruşlardaki notalarına göre ortalama {{ms}} ms daha geç geldi: o vuruştaki {{notes}} notanın {{agreeing}} tanesi diğer vuruşların ortalamasından daha geçti.",
+      "subdivision": "Konumun sayıldığı {{total}} vuruşun {{missed}} tanesinde “{{position}}” konumuna hiç nota düşmedi.",
+      "ceiling": "{{low}} BPM'de tık sesine denk gelen {{lowNotes}} notanın en az yarısı, notalarının tık sesine göre genelde düştüğü yerin {{lowMs}} ms içine düştü; {{high}} BPM'de tık sesine denk gelen {{highNotes}} notanın en az yarısı o yerden {{highMs}} ms veya daha fazla uzaktaydı.",
+      "driftEarly": "Tık sesine denk gelen {{notes}} notalık bir bölümde, son {{third}} nota tık sesine göre ilk {{third}} notadan ortalama {{ms}} ms daha erken düştü.",
+      "driftLate": "Tık sesine denk gelen {{notes}} notalık bir bölümde, son {{third}} nota tık sesine göre ilk {{third}} notadan ortalama {{ms}} ms daha geç düştü.",
+      "position": {
+        "2": {
+          "0": "vuruş üstü sekizlik",
+          "1": "vuruş dışı sekizlik"
+        },
+        "3": {
+          "0": "birinci üçleme",
+          "1": "ikinci üçleme",
+          "2": "üçüncü üçleme"
+        },
+        "4": {
+          "0": "birinci onaltılık",
+          "1": "ikinci onaltılık",
+          "2": "üçüncü onaltılık",
+          "3": "dördüncü onaltılık"
+        },
+        "6": {
+          "0": "birinci altılama",
+          "1": "ikinci altılama",
+          "2": "üçüncü altılama",
+          "3": "dördüncü altılama",
+          "4": "beşinci altılama",
+          "5": "altıncı altılama"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Koç modeli",

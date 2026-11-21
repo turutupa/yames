@@ -440,6 +440,34 @@
       "heard": "In vrij spel zat je in {{key}}, vooral op {{chords}}.",
       "heardKey": "In vrij spel zat je in {{key}}."
     },
+    "myExercises": {
+      "title": "Mijn oefeningen",
+      "intro": "Oefeningen die je zelf hebt gemaakt. Ze horen bij geen enkel leerpad en tellen nergens voor mee.",
+      "shape": {
+        "box": "{{root}} {{scale}}, de box vanaf fret {{position}}",
+        "threePerString": "{{root}} {{scale}}, drie noten per snaar vanaf fret {{position}}",
+        "arpeggio": "{{chord}}-arpeggio vanaf fret {{position}}",
+        "oneString": "{{root}} {{scale}} langs snaar {{string}} vanaf fret {{position}}",
+        "chromatic": "Chromatisch, één vinger per fret vanaf fret {{position}}"
+      },
+      "direction": {
+        "up": "omhoog",
+        "down": "omlaag",
+        "upAndBack": "omhoog en weer omlaag"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars": "{{count}} maat",
+      "bars_other": "{{count}} maten",
+      "remove": "Verwijderen",
+      "removeLabel": "{{what}} verwijderen uit Mijn oefeningen",
+      "removed": "Verwijderd uit Mijn oefeningen.",
+      "undo": "Ongedaan maken",
+      "notSaved": "Mijn oefeningen kon net niet worden gelezen of opgeslagen, dus er is niets veranderd.",
+      "undoFull": "Mijn oefeningen is vol (50), dus Ongedaan maken kan deze niet terugzetten.",
+      "undoAlready": "Deze staat al weer in Mijn oefeningen.",
+      "cantBuild": "Deze oefening kan niet meer worden gemaakt: deze versie van Yames maakt hem niet meer. Hij blijft hier staan tot je hem verwijdert.",
+      "howTo": "Speel het zoals geschreven, met de klik."
+    },
     "paths": {
       "title": "Leerpaden",
       "intro": "Kies een doel. Niets zit op slot: je kunt met elke stap beginnen en van gedachten veranderen.",
