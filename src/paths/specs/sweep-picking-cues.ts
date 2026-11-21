@@ -60,6 +60,17 @@ const LAST_AS_FIRST = "Keep the last chord as even as the first.";
 const WELL_UNDER = "Start well under your clean tempo.";
 const ONE_BY_ONE = "Sound every note of the sweep, one by one.";
 const END_AS_START = "Keep the end as even as the start.";
+// cues13b: the link (the first note of a new shape, hammered, pulled or slid on the same string).
+const LINK_HEARD = "Press the link note hard enough to hear it.";
+const LINK_LATE = "Land the link note right on beat one.";
+const LINK_EARLY = "Wait for beat one before the link note.";
+const CROSS_AFTER_LINK = "Let the link note sound before you pick again.";
+const HELD_THEN_LINK = "Count the held note's two beats, then link.";
+const LAST_TWO_BEATS = "Count the last note's two beats, then go round.";
+// cues13b: loops whose top note is a hammer in some bars and a slide in others.
+const TOP_NOTE_LATE = "Put the top note on beats two and four.";
+const TOP_NOTE_EARLY = "Wait for beats two and four to reach the top.";
+const REST_MOVE = "Use the two-note rests to move.";
 
 export const SWEEP_PICKING_CUES: CueBook = {
   // ── Beginner ──────────────────────────────────────────────────────────
@@ -414,4 +425,178 @@ export const SWEEP_PICKING_CUES: CueBook = {
   ],
 
   // ── cues13b: Intermediate Steps 10 to 14, then Advanced, from here ─────
+
+  // Step 10: the-link
+  "the-link.link-alone": [
+    g("Make the link note with the fretting hand.", 0),
+    c("heard", LINK_HEARD, 0),
+    c("extras", IN_USE),
+    c("late", LINK_LATE),
+    c("early", LINK_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", CROSS_AFTER_LINK, 0),
+    c("lastBars", LAST_TWO_BEATS),
+  ],
+  "the-link.two-shapes": [
+    g("Play it as one gesture, link in the middle.", 1),
+    c("heard", LINK_HEARD, 1),
+    c("extras", IN_USE),
+    c("late", LINK_LATE),
+    c("early", LINK_EARLY),
+    c("afterHeld", HELD_THEN_LINK, 0),
+    c("shift", MOVE_AT_START),
+    c("stringChange", CROSS_AFTER_LINK, 1),
+    c("lastBars", LAST_TWO_BEATS),
+  ],
+  "the-link.round-the-loop": [
+    g("Go straight into each new loop, no stop.", 1),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", "Start each new loop right on beat one."),
+    c("early", "Wait for beat one before each new loop."),
+    c("shift", MOVE_AT_START),
+    c("stringChange", "Keep three even notes to every two clicks.", 0),
+    c("lastBars", "Run the last loop straight into the first."),
+  ],
+
+  // Step 11: link-chains
+  "link-chains.one-pass-each": [
+    g("Keep each link to the smallest move you can.", 1),
+    c("heard", LINK_HEARD),
+    c("extras", IN_USE),
+    c("late", LINK_LATE),
+    c("early", LINK_EARLY),
+    c("afterHeld", HELD_THEN_LINK, 0),
+    c("shift", MOVE_AT_START, 1),
+    c("stringChange", CROSS_AFTER_LINK),
+    c("lastBars", LAST_TWO_BEATS),
+  ],
+  "link-chains.looped-chain": [
+    g("Play it as one gesture, not four pieces.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Go round from the last loop with no gap."),
+  ],
+  "link-chains.start-anywhere": [
+    g("Find the first note before the count-in.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", END_AS_START),
+  ],
+
+  // Step 12: minor-progressions
+  "minor-progressions.the-pull": [
+    g("Move only the fingers whose notes change.", 1),
+    c("heard", EACH_ARRIVES),
+    c("extras", TOP_THREE),
+    c("late", TOP_HAMMER),
+    c("early", TURN_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", LAST_AS_FIRST),
+  ],
+  "minor-progressions.with-the-v-three": [
+    g("Play two loops, then change right on beat one.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", TOP_HAMMER),
+    c("early", TURN_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", END_AS_START),
+  ],
+  "minor-progressions.linked-with-the-v": [
+    g("One note per click, and link at each end.", 0),
+    c("heard", LINK_HEARD),
+    c("extras", IN_USE),
+    c("late", LINK_LATE),
+    c("early", LINK_EARLY),
+    c("shift", "Let the link carry the hand to its new place."),
+    c("stringChange", CROSS_AFTER_LINK),
+    c("lastBars", "Keep the last pass as even as the first."),
+  ],
+  "minor-progressions.minor-two-five-one": [
+    g("Play two loops of each, then move on the click.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", END_AS_START),
+  ],
+
+  // Step 13: long-chains
+  "long-chains.chain-four": [
+    g("Start each new loop as near the last as you can.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_AT_START, 1),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", END_AS_START),
+  ],
+  "long-chains.chain-five": [
+    g("Keep every note separate in the big loops.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", SWEEP_LATE),
+    c("early", TOP_THREE_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", SEPARATE_TO_END),
+  ],
+  "long-chains.mixed-lengths": [
+    g("Keep the triplets even as the loops change size.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", END_AS_START),
+  ],
+
+  // Step 14: over-the-progression
+  "over-the-progression.band-four": [
+    g("Play two loops a bar, locked to the band.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", FOUR_ONLY),
+    c("late", TOP_NOTE_LATE),
+    c("early", TOP_NOTE_EARLY),
+    c("shift", MOVE_ON_LAST),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", LAST_AS_FIRST),
+  ],
+  "over-the-progression.band-five": [
+    g("Keep it slow enough that every note is separate."),
+    c("heard", EACH_ARRIVES),
+    c("extras", FIVE_ONLY),
+    c("late", LOOP_A_LATE),
+    c("early", REST_EARLY),
+    c("shift", REST_MOVE, 0),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Use the last rest to get back to fret 12."),
+  ],
+  "over-the-progression.etude": [
+    g("Learn it two bars at a time, then join them.", 1),
+    c("heard", EACH_ARRIVES),
+    c("extras", FIVE_ONLY),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("afterHeld", "Count the held A's two beats, then go round."),
+    c("shift", MOVE_ON_LAST),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Hammer the high A right on beat three.", 0),
+  ],
+  "over-the-progression.your-chorus": [g("Swap one bar for your own, then record it.", 0)],
 };
