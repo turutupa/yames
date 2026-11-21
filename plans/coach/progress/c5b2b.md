@@ -24,3 +24,14 @@ Branch `coach-c5b2`, on top of c5b2. Frontend only.
   guard removed "its own Start does not stop it" fails (`expected 'off' to be 'demo'`, job 767).
 - Layout specs (`coach-hear-back`, `smooth`) read either form of the chip at rest.
 - L4 fixed on `coach` by c5b1c; L5 and L6 left (theoretical / unreachable, per the review).
+
+## Gates (after the merge; logs `~/scratch/jobq/<n>-coach-c5b2b-*.log`; load average 67 to 87 throughout)
+
+- tsc pass (783); build pass (785).
+- vitest (784): 50,052 pass, 11 skipped; only the known `TabStage.render.test.tsx` fails to load,
+  plus 2 vitest RPC `onTaskUpdate` timeouts under load.
+- Playwright, the six named specs (786): 333 pass, 7 fail, all timing under load (two `coach-session`
+  ungraded shots timed out waiting for the harness; four `smooth` long-task cases; the hear-back
+  "second press" whose click landed after the 1.2 s harness bar had ended). Re-run alone, one worker
+  (837): 6 of 7 pass; the last (`smooth` session-runway-playing, one 69 ms long task) passes alone (855).
+- Owed: the full layout suite and the e2e probe (as c5b2 said), on a quiet machine.
