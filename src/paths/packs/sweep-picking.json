@@ -5582,7 +5582,7 @@
           "coachLine": "Very slow on purpose. Say each chord's name as you land on it: that's the check that matters here.",
           "cues": [
             {"when":"even","say":"Make the link note with the fretting hand.","more":0,"general":true},
-            {"when":"heard","say":"Press the link note hard enough to hear it.","more":0},
+            {"when":"heard","say":"Sound the link note firmly, fretting hand only.","more":0},
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land the link note right on beat one."},
             {"when":"early","say":"Wait for beat one before the link note."},
@@ -6929,7 +6929,7 @@
           "coachLine": "I report whether each note came in time. Whether a link was picked is up to your ear.",
           "cues": [
             {"when":"even","say":"Play it as one gesture, link in the middle.","more":1,"general":true},
-            {"when":"heard","say":"Press the link note hard enough to hear it.","more":1},
+            {"when":"heard","say":"Sound the link note firmly, fretting hand only.","more":1},
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land the link note right on beat one."},
             {"when":"early","say":"Wait for beat one before the link note."},
@@ -7918,7 +7918,7 @@
             {"when":"early","say":"Wait for beat one before each new loop."},
             {"when":"shift","say":"Be in place before each bar starts."},
             {"when":"stringChange","say":"Keep three even notes to every two clicks.","more":0},
-            {"when":"lastBars","say":"Run the last loop straight into the first."}
+            {"when":"lastBars","say":"Keep the end as even as the start."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -8980,7 +8980,7 @@
           "coachLine": "Four links per round. I report evenness and notes heard at these tempos.",
           "cues": [
             {"when":"even","say":"Keep each link to the smallest move you can.","more":1,"general":true},
-            {"when":"heard","say":"Press the link note hard enough to hear it."},
+            {"when":"heard","say":"Sound the link note firmly, fretting hand only."},
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land the link note right on beat one."},
             {"when":"early","say":"Wait for beat one before the link note."},
@@ -13471,7 +13471,7 @@
           "coachLine": "Slow notes and a big move at each link. Every note has to arrive on time, and that's what I report.",
           "cues": [
             {"when":"even","say":"One note per click, and link at each end.","more":0,"general":true},
-            {"when":"heard","say":"Press the link note hard enough to hear it."},
+            {"when":"heard","say":"Sound the link note firmly, fretting hand only."},
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land the link note right on beat one."},
             {"when":"early","say":"Wait for beat one before the link note."},
@@ -15981,7 +15981,7 @@
             {"when":"early","say":"Wait for beat three before the top hammer."},
             {"when":"shift","say":"Be in place before each bar starts."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
-            {"when":"lastBars","say":"Keep every note separate right to the end."}
+            {"when":"lastBars","say":"Keep the end as even as the start."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -18339,7 +18339,7 @@
           ],
           "coachLine": "No score on this one. It's your chorus, so you decide when it's done.",
           "cues": [
-            {"when":"even","say":"Swap one bar for your own, then record it.","more":0,"general":true}
+            {"when":"even","say":"Swap one bar for a line of your own.","more":0,"general":true}
           ],
           "grading": "selfChecked",
           "feedback": "none",
@@ -19195,7 +19195,7 @@
           "coachLine": "Slower note rate than it looks, so this is gradable for longer. It's a good place to check your muting by ear.",
           "cues": [
             {"when":"even","say":"Keep the link moving: no stop between passes.","more":1,"general":true},
-            {"when":"heard","say":"Press the link note hard enough to hear it."},
+            {"when":"heard","say":"Sound the link note firmly, fretting hand only."},
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land the link note right on beat one."},
             {"when":"early","say":"Wait for beat one before the link note."},
@@ -21011,9 +21011,9 @@
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land the first note after the jump on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
-            {"when":"shift","say":"Look at where you land before you jump.","more":0},
+            {"when":"shift","say":"Leave each loop's last note early to jump.","more":0},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
-            {"when":"lastBars","say":"Jump back down on the last note."}
+            {"when":"lastBars","say":"Drop back down right after the last note."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -23414,7 +23414,7 @@
           ],
           "coachLine": "Eight bars is long. If you get lost, the chord names on the tab are the way back in.",
           "cues": [
-            {"when":"even","say":"Keep your place by the chord names on the tab.","general":true},
+            {"when":"even","say":"Start each new shape right on beat one.","general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land each new shape's first note on the click."},
@@ -24021,7 +24021,7 @@
           "coachLine": "The held note is the point, and I can't judge how it sings. I'll report the timing before it.",
           "cues": [
             {"when":"even","say":"Link into E major with the pull-off, no pick.","more":0,"general":true},
-            {"when":"heard","say":"Press the link note hard enough to hear it."},
+            {"when":"heard","say":"Sound the link note firmly, fretting hand only."},
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Start each loop on the A string on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
@@ -26115,12 +26115,12 @@
           "coachLine": "On a loud band this is one to record and listen back to, however the numbers look.",
           "cues": [
             {"when":"even","say":"Keep three even notes across every two beats.","more":1,"general":true},
-            {"when":"heard","say":"Press the link note hard enough to hear it."},
+            {"when":"heard","say":"Sound the link note firmly, fretting hand only."},
             {"when":"extras","say":"Keep the pick on the strings in use."},
             {"when":"late","say":"Land the link note right on beat one."},
             {"when":"early","say":"Wait for beat one before the link note."},
             {"when":"shift","say":"Be in place before each bar starts."},
-            {"when":"stringChange","say":"Let the link note sound before you pick again."},
+            {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
             {"when":"lastBars","say":"Keep the end as even as the start."}
           ],
           "grading": "graded",
@@ -26623,7 +26623,7 @@
           "howTo": ["Record it, listen and keep what sounds like music. Change the rest."],
           "coachLine": "No marks on this one. It's yours.",
           "cues": [
-            {"when":"even","say":"Swap one bar for your own, then record it.","more":0,"general":true}
+            {"when":"even","say":"Swap one bar for a line of your own.","more":0,"general":true}
           ],
           "grading": "selfChecked",
           "feedback": "none",

@@ -61,7 +61,7 @@ const WELL_UNDER = "Start well under your clean tempo.";
 const ONE_BY_ONE = "Sound every note of the sweep, one by one.";
 const END_AS_START = "Keep the end as even as the start.";
 // cues13b: the link (the first note of a new shape, hammered, pulled or slid on the same string).
-const LINK_HEARD = "Press the link note hard enough to hear it.";
+const LINK_HEARD = "Sound the link note firmly, fretting hand only.";
 const LINK_LATE = "Land the link note right on beat one.";
 const LINK_EARLY = "Wait for beat one before the link note.";
 const CROSS_AFTER_LINK = "Let the link note sound before you pick again.";
@@ -77,7 +77,7 @@ const THREE_TO_TWO = "Keep three even notes to every two clicks.";
 const TWO_LOOPS_EACH = "Play two loops of each, then move on the click.";
 const HELD_E_COUNT = "Count the held E's two beats, then go round.";
 const HELD_E_LAND = "Land the held E right on beat three.";
-const SWAP_ONE = "Swap one bar for your own, then record it.";
+const SWAP_ONE = "Swap one bar for a line of your own.";
 
 export const SWEEP_PICKING_CUES: CueBook = {
   // ── Beginner ──────────────────────────────────────────────────────────
@@ -463,7 +463,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("early", "Wait for beat one before each new loop."),
     c("shift", MOVE_AT_START),
     c("stringChange", THREE_TO_TWO, 0),
-    c("lastBars", "Run the last loop straight into the first."),
+    c("lastBars", END_AS_START),
   ],
 
   // Step 11: link-chains
@@ -560,7 +560,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("early", TOP_THREE_EARLY),
     c("shift", MOVE_AT_START),
     c("stringChange", OWN_MOMENT),
-    c("lastBars", SEPARATE_TO_END),
+    c("lastBars", END_AS_START),
   ],
   "long-chains.mixed-lengths": [
     g("Keep the triplets even as the loops change size.", 0),
@@ -677,9 +677,9 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("extras", IN_USE),
     c("late", "Land the first note after the jump on the click."),
     c("early", SWEEP_EARLY),
-    c("shift", "Look at where you land before you jump.", 0),
+    c("shift", "Leave each loop's last note early to jump.", 0),
     c("stringChange", OWN_MOMENT),
-    c("lastBars", "Jump back down on the last note."),
+    c("lastBars", "Drop back down right after the last note."),
   ],
   "fast-shifts.inversion-runs": [g("Learn each beat alone, then join them up.", 0)],
   "fast-shifts.big-shape-jumps": [
@@ -725,7 +725,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("lastBars", "Keep the highest shape as even as the first."),
   ],
   "neoclassical.walking-triads": [
-    g("Keep your place by the chord names on the tab."),
+    g("Start each new shape right on beat one."),
     c("heard", EACH_ARRIVES),
     c("extras", IN_USE),
     c("late", NEW_SHAPE_LATE),
@@ -808,7 +808,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("late", LINK_LATE),
     c("early", LINK_EARLY),
     c("shift", MOVE_AT_START),
-    c("stringChange", CROSS_AFTER_LINK),
+    c("stringChange", OWN_MOMENT),
     c("lastBars", END_AS_START),
   ],
   "over-a-heavy-band.your-solo": [g(SWAP_ONE, 0)],
