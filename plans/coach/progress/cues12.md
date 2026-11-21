@@ -17,7 +17,11 @@ Cues: `src/paths/specs/tapping-cues.ts`, attached with `withCues` in `tapping.ts
   errors, 0 refused, 0 cues rewritten (`gc7.log`; the 55 `variant.rewritten` lines are purposes and
   how-tos, none mine).
 - [x] Proof-read (below); `check` after the fixes: 0 errors, 0 refused, 0 cues rewritten (`gc10.log`).
-- [ ] Translations
+- [x] Translations: four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 120
+  sentences each, every file checked again by me with `check_i18n.py` (problems 0 in all fourteen), merged:
+  every overlay 947 of 947 (`/tmp/coach-cues12/merge.log`; the "different numbers" warnings on cue keys are
+  ja/ko/pt-BR/vi writing spelled numbers or finger names as digits, which the brief allows). `check
+  tapping` after the merge: 0 errors (`gc11.log`).
 - [ ] Gates
 
 ## The proof-read (three separate sonnet readers, one per Level: cues, tabs, purposes, how-tos, the guide's rules)
