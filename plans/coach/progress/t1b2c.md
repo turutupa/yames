@@ -50,6 +50,14 @@ Status: fixes done, `coach` merged in (no conflicts), gates below.
 
 Every new test failed on the code before the fix (55 failures, `/tmp/coach-t1b2b/c-before.log`) and passes after.
 
+## Merge and gates (after `git merge coach`, no conflicts)
+
+- tsc pass; `npm run build` pass; vitest 47127 passed, only `TabStage.render.test.tsx` fails (known, symlink)
+  (`c-vitest.log`).
+- Layout `ask`, `ask-tools`, `ask-typed`, `short-window`, `smooth`: 140 passed, 2 failed in `smooth.spec.ts`
+  (long tasks 63 and 78 ms under tonight's load: the tab's Take, "Ask commits nothing during a running Take");
+  both pass re-run alone (`c-layout.log`, job `coach-t1b2c-smooth2`). Full layout suite owed (the orchestrator's).
+
 ## Open points
 
 - An async next answerer is "not answered", so if it also writes turns later the model answers too. c2b1b:
