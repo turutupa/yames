@@ -66,6 +66,8 @@ const CARD_CHIP: Readonly<Record<CardShape, string>> = {
   improving: "ask.card.chip.improving",
   score_made_of: "ask.card.chip.madeOf",
   pass_mark_distance: "ask.card.chip.distance",
+  // Not in `CARD_ORDER`: offered after no Take; asked, or on Paths (c4b3).
+  suggest_path: "companion.pathSuggest.chip",
 };
 
 /**

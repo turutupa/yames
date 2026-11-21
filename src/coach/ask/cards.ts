@@ -49,7 +49,9 @@ export type CardShape =
   | "what_changed"
   | "improving"
   | "score_made_of"
-  | "pass_mark_distance";
+  | "pass_mark_distance"
+  // Leg c4b3: `coach/pathSuggest.ts`.
+  | "suggest_path";
 
 /** The way a player's question assumed the Take leaned ("am I rushing": early). */
 export type Lean = "early" | "late";

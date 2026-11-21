@@ -20,6 +20,8 @@
  * Take only when there is one, of the Exercise on screen.
  */
 import type { CoachContext } from "../context";
+import { suggestPathCard } from "../pathSuggest";
+import { coachStored } from "../store";
 import { TOOL_CATALOGUE_VERSION } from "../tools/registry";
 import { checkCall } from "../tools/run";
 import { argString, takeRunning, type ActTool, type Line, type ToolArgs, type ToolCatalogue, type ToolSpec } from "../tools/types";
@@ -160,6 +162,15 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     measuredTake,
     (_args, ctx) => passMarkDistance(ctx),
   ),
+  // Leg c4b3 (DESIGN 6.4): "suggest a Path". Reads the curriculum and which
+  // Paths were started, never a grade, so an ungraded player is answered too
+  // (`runFactCard`). It names a Path; it never subscribes.
+  entry(
+    "suggest_path",
+    { args: [], note: "One Path to try next, not started yet, its prerequisites met, with the curriculum's reason (what it builds on); a goal the player set orders it." },
+    (ctx) => !takeRunning(ctx),
+    (_args, ctx) => suggestPathCard(ctx.progress, coachStored().goal),
+  ),
 ];
 
 /** Graded, not in a Take, and an Exercise on screen (a card that reads the Exercise, not a Take). */
@@ -200,7 +211,7 @@ export function runFactCard(call: unknown, ctx: CoachContext): FactCard | NoCard
   if (!checked.ok) return { line: checked.line };
   const tool = checked.call.tool as FactCardTool;
   if (takeRunning(ctx)) return { line: { key: "coachTools.why.notNow.take", values: {} } };
-  if (ungradedPlayer(ctx)) return { line: UNGRADED_LINE };
+  if (ungradedPlayer(ctx) && tool.name !== "suggest_path") return { line: UNGRADED_LINE };
   // `when` decides what is offered. Asked anyway about a Take that was not
   // caught, too short or not graded, the card answers "I didn't measure that"
   // itself (uncertainty by rule); with no Take of this Exercise, one line says so.

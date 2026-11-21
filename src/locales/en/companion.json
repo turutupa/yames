@@ -58,6 +58,18 @@
       "pathDone": "{{path}} is finished: every Step in it is done.",
       "benchmark": "Benchmark: {{exercise}}, the same Take at {{bpm}} BPM: {{from}}% even on day {{fromDay}}, {{to}}% on day {{toDay}}.",
       "payoff": "The Path says: “{{payoff}}”"
+    },
+    "pathSuggest": {
+      "label": "A Path to try next, from the coach",
+      "kick": "A Path to try next",
+      "chip": "Suggest a Path",
+      "next": "{{path}} is the next Path in the curriculum's order that you have not started, and nothing it builds on is missing.",
+      "buildsOn": "{{path}} builds on {{on}}, which you have started.",
+      "buildsOnLevel": "{{path}} builds on {{on}}, and you are through {{level}} there.",
+      "goal": "You said you are working toward: “{{goal}}”",
+      "open": "Open {{path}}",
+      "none": "Of the Paths you have not started, none has what it builds on in place yet, so there is none to suggest.",
+      "notLoaded": "The Paths are not loaded yet, so there is none to suggest just now."
     }
   }
 }

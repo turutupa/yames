@@ -22,6 +22,7 @@ import { plateausNow, type Plateau } from "./nudges";
 import { coachKeyStates, coachStored, loadCoachStored, subscribeCoachStored } from "./store";
 import { lookBack, type LookBack } from "./weekly";
 import { milestonesNow, type Milestone } from "./milestones";
+import { rememberPaths } from "./pathSuggest";
 import type { Weekday } from "../session/totals";
 
 export type CompanionState = {
@@ -132,6 +133,10 @@ export function useCompanionWatch(
   useEffect(() => {
     void loadCoachStored().catch(() => {});
   }, []);
+  // The asked Path suggestion reads the loaded Paths from here (memory only).
+  useEffect(() => {
+    rememberPaths(paths);
+  }, [paths]);
   useEffect(() => {
     if (blocked) return;
     const now = Date.now();
