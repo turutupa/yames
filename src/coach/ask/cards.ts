@@ -30,12 +30,13 @@ import { MAX_SENTENCE } from "../blocks/spec";
 import type { CoachBlock } from "../blocks/types";
 import type { CoachContext } from "../context";
 import { takeLean } from "../rounds";
-import { biasThresholdMs, heldStretchUncrossed, takeNote, type TakeNote, type TakeReview } from "../takeNote";
-import type { Line } from "../tools/types";
+import { biasThresholdMs, heldStretchUncrossed, noteForTake, type TakeNote, type TakeReview } from "../takeNote";
+import type { Line, ToolCall } from "../tools/types";
 import type { Exercise } from "../../paths/format";
 import { NOT_GRADED } from "../../paths/metrics";
 import { displayBar, displayValue, metricKey } from "../../session/coachWords";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
+import type { PlanStep } from "../../session/planner";
 import { factsOf, isMarkedNotFair, leanOf, takesOf } from "../../session/progress";
 import type { TakeOutcome, UngradedWhy } from "../../session/runner";
 import { variantIndexOf, withVariant } from "../../session/take";
@@ -50,8 +51,25 @@ export type CardShape =
   | "improving"
   | "score_made_of"
   | "pass_mark_distance"
+  | PathCardShape
   // Leg c4b3: `coach/pathSuggest.ts`.
   | "suggest_path";
+
+/** The Path, plan, theory and term cards (leg c2b2a, `pathCards.ts`). */
+export type PathCardShape =
+  | "exercise_purpose"
+  | "exercise_how"
+  | "exercise_try"
+  | "plan_why"
+  | "plan_tempo"
+  | "plan_next"
+  | "plan_skip"
+  | "plan_minutes"
+  | "plan_return"
+  | "scale_fits"
+  | "chord_notes"
+  | "pass_mark_ms"
+  | "clean_tempo";
 
 /** The way a player's question assumed the Take leaned ("am I rushing": early). */
 export type Lean = "early" | "late";
@@ -85,6 +103,13 @@ export type FactCard = {
   uncertain?: true;
   /** Its first line answers a premise the measurement contradicts (mock 15). */
   premise?: true;
+  /**
+   * A tool call the card ends in (leg c2b2a): a drawing (`show_scale`,
+   * `show_chord`) or an action's proposal (`test_out`, `set_minutes`). Ask
+   * issues it through the runner after the card; building the card changes
+   * nothing.
+   */
+  then?: ToolCall;
 };
 
 /** Why there is no card here: said as one line, never as silence. */
@@ -126,6 +151,38 @@ function variantKnown(ctx: CoachContext, outcome: TakeOutcome, exercise: Exercis
   return ctx.run?.phase === "result";
 }
 
+/**
+ * The plan the Session is running (`run.plan`, as `currentStep` reads it), not
+ * Today's (review c2b2a H1: a Session begun from a Step's page, Test out, a
+ * step inserted, Today rebuilt after a saved Take). A context that does not
+ * carry the run's plan falls back to `ctx.plan`, which the host sets to the
+ * run's plan in a Session.
+ */
+export function runningPlan(ctx: CoachContext) {
+  if (!ctx.run) return null;
+  const plan = ctx.run.plan !== undefined ? ctx.run.plan : ctx.plan;
+  return plan ?? null;
+}
+
+/** The plan step a running Session is on. */
+export function planStepHere(ctx: CoachContext): PlanStep | null {
+  const plan = runningPlan(ctx);
+  if (!plan || !ctx.run) return null;
+  return plan.steps[ctx.run.stepIndex] ?? null;
+}
+
+/**
+ * The Path the Exercise on screen is from: the context's, else the running
+ * plan step's (the player's own exercises are not in the host's list of
+ * Paths, review c2b2a L7).
+ */
+export function pathIdHere(ctx: CoachContext): string | null {
+  if (ctx.path?.id) return ctx.path.id;
+  const step = planStepHere(ctx);
+  if (step?.kind === "exercise" && ctx.exercise && step.exerciseId === ctx.exercise.id) return step.pathId;
+  return null;
+}
+
 function storedRow(ctx: CoachContext, outcome: TakeOutcome): PathTakeRow | null {
   if (!outcome.takeId) return null;
   return ctx.progress.takes.find((row) => row.id === outcome.takeId) ?? null;
@@ -142,21 +199,31 @@ function seedOfTake(ctx: CoachContext, outcome: TakeOutcome): number | null {
   return ctx.variantSeed ?? null;
 }
 
+/** The variant the last Take of the Exercise on screen played, or undefined when there is none. */
+export function takeSeedHere(ctx: CoachContext): number | null | undefined {
+  const here = lastTakeHere(ctx);
+  return here ? seedOfTake(ctx, here.outcome) : undefined;
+}
+
 /**
- * The note the result screen drew for this Take, computed again from the same
- * inputs (`takeNote`): this Exercise's earlier Takes, newest first, without it.
+ * The note the result screen drew for this Take, computed again by the same
+ * function (`noteForTake`) from the same inputs: this Exercise's earlier
+ * Takes, and the Session's start, so the repeat count is this Session's as on
+ * the screen (review c2b2a M3).
  */
 export function noteOf(ctx: CoachContext): TakeNote | null {
   const here = lastTakeHere(ctx);
   if (!here) return null;
   const { outcome, exercise } = here;
   const row = storedRow(ctx, outcome);
-  const pathId = ctx.path?.id ?? row?.pathId ?? null;
-  const earlier = pathId
-    ? takesOf(ctx.progress, pathId, outcome.exerciseId).filter((t) => t.id !== outcome.takeId)
-    : [];
+  // The running step's Path when there is no stored row yet (review c2b2ab L5).
+  const pathId = ctx.path?.id ?? row?.pathId ?? pathIdHere(ctx);
   const review = (ctx.review ?? null) as TakeReview | null;
-  return takeNote(outcome, review, earlier, exercise, { variantSeed: seedOfTake(ctx, outcome) });
+  const session = ctx.run?.startedAt;
+  return noteForTake(outcome, review, ctx.progress, pathId, exercise, {
+    variantSeed: seedOfTake(ctx, outcome),
+    ...(session ? { session } : {}),
+  });
 }
 
 /** The lean of each pattern bar, ms (positive late), from the stored Take or else its review. */
@@ -1015,11 +1082,27 @@ export function cardAnswer(card: FactCard, word: (l: Line) => string): ResolvedB
   for (const s of sentences) {
     const last = texts.length - 1;
     if (last >= 0 && texts[last].length + 1 + s.length <= MAX_SENTENCE) texts[last] = `${texts[last]} ${s}`;
-    else texts.push(s.length <= MAX_SENTENCE ? s : `${s.slice(0, MAX_SENTENCE - 1)}…`);
+    // A sentence longer than a block (a Path's own words, quoted whole, leg
+    // c2b2a) goes on in the next block, cut between words: never shortened.
+    else texts.push(...pieces(s));
   }
   if (texts.length === 0) return [];
   const blocks: CoachBlock[] = texts.map((text) => ({ type: "text", text }));
   return resolveCoachAnswer({ blocks }, {}, { source: card.source }).blocks;
+}
+
+/** A sentence in pieces of at most `MAX_SENTENCE` characters, cut at spaces (a word longer than that, at the limit). */
+function pieces(s: string): string[] {
+  const out: string[] = [];
+  let rest = s;
+  while (rest.length > MAX_SENTENCE) {
+    const space = rest.lastIndexOf(" ", MAX_SENTENCE);
+    const cut = space > 0 ? space : MAX_SENTENCE;
+    out.push(rest.slice(0, cut));
+    rest = rest.slice(cut).trimStart();
+  }
+  if (rest) out.push(rest);
+  return out;
 }
 
 /**

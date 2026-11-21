@@ -157,5 +157,38 @@
     "for me", "with me", "to me", "along", "back", "or", "over"
   ],
   "polite": ["please", "ok", "okay", "hey coach", "hey", "now", "thanks", "thank you", "just"],
-  "fillers": ["me", "the", "a bit", "a little", "a", "an", "my", "some", "one step"]
+  "fillers": ["me", "the", "a bit", "a little", "a", "an", "my", "some", "one step"],
+  "recipe": {
+    "shapes": {
+      "box": ["box shape", "box pattern", "box"],
+      "threePerString": ["three notes per string", "three notes a string", "3 notes per string", "3 notes a string", "three per string", "3 per string", "3nps"],
+      "arpeggio": ["arpeggios", "arpeggio", "arp"],
+      "oneString": ["on one string", "along one string", "one string", "single string"],
+      "chromatic": ["chromatic", "spider"]
+    },
+    "chords": {
+      "maj": ["major"],
+      "min": ["minor"],
+      "dim": ["diminished", "dim"],
+      "aug": ["augmented", "aug"],
+      "7": ["dominant 7", "dominant seventh", "dominant", "7", "seventh"],
+      "maj7": ["major 7", "major seventh", "maj7"],
+      "m7": ["minor 7", "minor seventh", "m7"],
+      "m7b5": ["half diminished", "minor 7 flat 5", "m7b5"],
+      "dim7": ["diminished 7", "diminished seventh", "dim7"]
+    },
+    "subdivisions": {
+      "quarters": ["quarter notes", "quarters", "crotchets"],
+      "eighths": ["eighth notes", "eighths", "8th notes", "8ths", "quavers"],
+      "eighthTriplets": ["eighth note triplets", "eighth triplets", "triplets"],
+      "sixteenths": ["sixteenth notes", "sixteenths", "16th notes", "16ths", "semiquavers"]
+    },
+    "fret": ["fret #", "# fret"],
+    "numberSuffixes": ["st", "nd", "rd", "th"],
+    "article": {
+      "words": ["a"],
+      "rootAfter": ["an", "the", "in"],
+      "rootBefore": ["minor pentatonic", "major pentatonic", "minor 7", "minor seventh", "major 7", "major seventh", "minor blues"]
+    }
+  }
 }

@@ -41,6 +41,7 @@ import type { CoachContext } from "../context";
 import type { ResolvedBlock } from "../blocks/resolve";
 import type { CoachToolHost } from "./host";
 import type { SessionPlan } from "../../session/planner";
+import type { CustomSummary } from "../../paths/custom";
 
 // ---------------------------------------------------------------------------
 // Arguments
@@ -136,8 +137,26 @@ export type ToolDone = {
    * The receipt as it turned out, when the app only learns that a moment
    * later (a preset is re-read from the store before it is applied). Until it
    * settles, `receipt` says the app is at it, never that it is done (leg t1b1).
+   * When it also decides whether there is anything to undo (an add the store
+   * may refuse), name the Undo's tool in `askTools.ts`'s `UNDO_AFTER_LATER`:
+   * that Undo is then hidden until `later` settles and withdrawn when it
+   * settles as a refusal. Any other Undo is left as it is (review t2c, 7).
    */
   later?: Promise<Line>;
+  /** Where to go next, offered under the receipt as chips ("Open Paths", leg t2c). Each a full call. */
+  next?: readonly ToolChoice[];
+};
+
+/**
+ * What `make_exercise` would make (leg t2c), drawn above its proposal: the
+ * generator's facts (never words), one pass of the notes in the order they
+ * are played (the first is the first note), and the variant chips, each a
+ * full `make_exercise` call that proposes again.
+ */
+export type ExercisePreview = {
+  readonly summary: CustomSummary;
+  readonly notes: readonly { readonly string: number; readonly fret: number }[];
+  readonly variants: readonly ToolChoice[];
 };
 
 export type ToolResult = ToolDone | Refusal;
@@ -164,6 +183,8 @@ export type Proposal = {
    * a Path is the player's, never a tool). The UI says so before the press.
    */
   readonly noUndo?: true;
+  /** `make_exercise`: the Exercise it would add, drawn before the press (leg t2c). */
+  readonly preview?: ExercisePreview;
 };
 
 export type Proposed = { ok: true; proposal: Proposal };
@@ -176,7 +197,7 @@ export type RunOutcome = ToolResult | Proposed;
 
 /** What a `confirm` tool's `propose` returns. */
 export type ProposeResult<R = unknown> =
-  | { ok: true; line: Line; resolved: R; plan?: SessionPlan; noUndo?: true }
+  | { ok: true; line: Line; resolved: R; plan?: SessionPlan; noUndo?: true; preview?: ExercisePreview }
   | Refusal;
 
 // ---------------------------------------------------------------------------

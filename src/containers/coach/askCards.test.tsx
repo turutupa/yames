@@ -10,6 +10,7 @@ import { fixture } from "../../coach/ask/cardFixtures";
 import { fakeHost, toolCtx } from "../../coach/tools/fakeHost";
 import { __resetCoachLoaderForTests } from "../../hooks/coachLoader";
 import i18n from "../../i18n";
+import type { SessionPlan } from "../../session/planner";
 import { AskPanel } from "./AskPanel";
 import { AskCardTurn } from "./AskCardTurn";
 import { answerCardFor, askCard, lastCardShape, MAX_ASK_CHIPS, typedCardAnswerer, withinChipCap } from "./askCards";
@@ -252,5 +253,46 @@ describe("the thread", () => {
     __setAskToolsForTests(fakeHost(), below().ctx);
     askCard({ tool: "early_or_late", args: {} }, "Was I early or late?");
     expect(lastCardShape(getAskState().turns)).toBe("early_or_late");
+  });
+});
+
+describe("cards that end in a proposal or a drawing (leg c2b2a)", () => {
+  const today = () => toolCtx({ screen: "today" });
+  const hostWithMinutes = () => {
+    const plan = { minutes: 5, mood: "first", daysAway: null, steps: [] } as unknown as SessionPlan;
+    return fakeHost({ view: "today" }, { minutes: () => 10, previewPlan: () => plan, setMinutes: () => "done" as never });
+  };
+
+  it("typed 'I have 5 minutes': the card, then set_minutes' proposal through the runner; nothing changes", () => {
+    const host = hostWithMinutes();
+    __setAskToolsForTests(host, today());
+    expect(answerCardFor("I have 5 minutes")).not.toBeNull();
+    const turns = getAskState().turns;
+    expect(turns.map((t) => t.kind)).toEqual(["user", "card", "tool"]);
+    const tool = turns[2];
+    expect(tool.kind === "tool" && tool.body.kind).toBe("proposal");
+    expect(host.changes()).toEqual([]);
+  });
+
+  it("in a Session the minutes card is not answered by typing: nothing written, the next answerer has it", () => {
+    __setAskToolsForTests(hostWithMinutes(), below().ctx);
+    expect(answerCardFor("I have 5 minutes")).toBeNull();
+    expect(getAskState().turns).toEqual([]);
+  });
+
+  it("'what notes are in F7?': the spelled card, then show_chord's drawing as a receipt", () => {
+    __setAskToolsForTests(fakeHost({ view: "today" }, { instrument: () => "guitar" }), today());
+    expect(answerCardFor("What notes are in F7?")).not.toBeNull();
+    const turns = getAskState().turns;
+    expect(turns.map((t) => t.kind)).toEqual(["user", "card", "tool"]);
+    const tool = turns[2];
+    expect(tool.kind === "tool" && tool.body.kind).toBe("receipt");
+  });
+
+  it("an unknown chord: 'I don't know', and nothing drawn", () => {
+    __setAskToolsForTests(fakeHost({ view: "today" }), today());
+    expect(answerCardFor("What notes are in Fxyz?")).toBeNull();
+    askCard({ tool: "chord_notes", args: { root: "F", suffix: "unknown" } }, "notes of F7zz");
+    expect(getAskState().turns.map((t) => t.kind)).toEqual(["user", "card"]);
   });
 });

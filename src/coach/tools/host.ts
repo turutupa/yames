@@ -44,6 +44,7 @@ import type { PlanMinutes, PlanStep, SessionPlan } from "../../session/planner";
 import type { PlayerProgress } from "../../session/progress";
 import type { LoopRefusal } from "../../session/runner";
 import type { SwapChoice, SwapOptions } from "../../session/swap";
+import type { Recipe } from "../../paths/custom";
 import type { Subdivision } from "../../types";
 
 /** A member that is declared and not wired yet says so. */
@@ -232,7 +233,28 @@ export type CoachToolHost = {
   loopAsk: (fromBar: number, toBar: number) => LoopAsk | NotWired;
   /** `sessionRun.actions.startLoop({ fromBar, toBar })`, bars as printed: "done", or why it did not start. */
   loopBars: (fromBar: number, toBar: number) => HostOutcome | LoopRefusal;
+
+  // -- Leg t2c: My exercises ---------------------------------------------------
+
+  /**
+   * Add a recipe at the top of My exercises, through the store's one writer
+   * (`updateMyExercises` and t2b's `addMyExercise`), dated `addedAt` so its Undo
+   * finds exactly this entry. Answers when the store has answered.
+   */
+  addMyExercise: (recipe: Recipe, addedAt: number) => Promise<MyExerciseAdd> | NotWired;
+  /**
+   * The Undo of that add, and only of it: takes out the one entry `addMyExercise`
+   * added (matched by its recipe key AND its date), never another. Not a way to
+   * delete: reached only through the receipt's issued Undo (`undo_make_exercise`,
+   * an app-only tool), so the player's list is never emptied by the coach.
+   */
+  undoAddedExercise: (key: string, addedAt: number) => Promise<MyExerciseUndo> | NotWired;
 };
+
+/** What adding one came to: added, refused by the list (`full`, `already`, `badRecipe`), or not kept. */
+export type MyExerciseAdd = "added" | "full" | "already" | "badRecipe" | "unreadable" | "failed";
+/** What the Undo came to: undone, the entry not there any more (`gone`), or not kept. */
+export type MyExerciseUndo = "undone" | "gone" | "unreadable" | "failed";
 
 /**
  * What `loopAsk` answers: the loop a press would start, in pattern bars, or
@@ -291,6 +313,8 @@ export const HOST_MEMBERS = [
   "setGoal",
   "loopAsk",
   "loopBars",
+  "addMyExercise",
+  "undoAddedExercise",
 ] as const satisfies readonly (keyof CoachToolHost)[];
 
 type Unlisted = Exclude<keyof CoachToolHost, (typeof HOST_MEMBERS)[number]>;
@@ -374,6 +398,8 @@ export function notWiredHost(): CoachToolHost {
     setGoal: nothing,
     loopAsk: nothing,
     loopBars: nothing,
+    addMyExercise: nothing,
+    undoAddedExercise: nothing,
   };
 }
 

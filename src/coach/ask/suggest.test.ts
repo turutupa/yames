@@ -9,6 +9,8 @@ import { cardChipsFor, MAX_CHIPS, suggestChips, type ChipChoice, type ChipFacts,
 const ALL = ["where_slipped", "early_or_late", "why_not_counted", "what_changed", "improving", "score_made_of", "pass_mark_distance"] as const;
 /** The first three after a Take below the pass mark (c2b1b; before it: where, lean, count). */
 const BELOW = ["where_slipped", "pass_mark_distance", "early_or_late"];
+/** The Path's and the plan's cards that can have a chip (leg c2b2a). */
+const PATH_PLAN = ["exercise_try", "exercise_purpose", "exercise_how", "plan_why", "plan_tempo", "plan_next", "plan_return", "clean_tempo", "pass_mark_ms"] as const;
 
 function names(chips: ChipChoice[]): string[] {
   return chips.map((c) => (c.kind === "card" ? c.shape : c.kind === "feed" ? `feed${c.index}` : c.kind));
@@ -35,6 +37,12 @@ const TABLE: ReadonlyArray<[string, ChipPlace, ChipFacts, string[]]> = [
   ["Ask, an Exercise the player checks: what the score is made of", "askEmpty", { cards: ["why_not_counted", "score_made_of"], verdict: "ungraded" }, ["why_not_counted", "score_made_of"]],
   ["Ask, an ungraded player: no card", "askEmpty", { cards: [], verdict: "belowBar" }, []],
   ["Ask, no Take", "askEmpty", { cards: ALL, verdict: null }, []],
+  // Leg c2b2a: the Path's words and the plan.
+  ["Ask, a Session's ready screen before a Take", "askEmpty", { cards: [...ALL, ...PATH_PLAN], verdict: null }, ["exercise_try", "plan_why", "exercise_purpose"]],
+  ["Ask, before a Take, no cue in the pack", "askEmpty", { cards: ["plan_why", "exercise_purpose", "exercise_how"], verdict: null }, ["plan_why", "exercise_purpose", "exercise_how"]],
+  ["Ask, below the pass mark: the Take's cards first, the Path's never crowd them", "askAbove", { cards: [...ALL, ...PATH_PLAN], verdict: "belowBar" }, BELOW],
+  ["Ask, a Take not caught: the Path's cue fills the third place", "askAbove", { cards: ["why_not_counted", "score_made_of", ...PATH_PLAN], verdict: "notCaught" }, ["why_not_counted", "score_made_of", "exercise_try"]],
+  ["Ask, theory and minutes never as chips", "askEmpty", { cards: ["scale_fits", "chord_notes", "plan_minutes", "plan_skip"], verdict: null }, []],
 ];
 
 describe("suggestChips", () => {
@@ -64,8 +72,10 @@ describe("cardChipsFor: the facts read off a real context", () => {
   it("grading off: none", () => {
     expect(cardChipsFor(fixture({ slipped: [0, 4], failOn: "timingEvenness" }, { grading: "off" }).ctx, "askEmpty")).toEqual([]);
   });
-  it("a Take not caught: why, and what the score is made of", () => {
-    expect(names(cardChipsFor(fixture({ verdict: "notCaught" }).ctx, "askAbove"))).toEqual(["why_not_counted", "score_made_of"]);
+  it("a Take not caught: why, and what the score is made of (then the Path's cue, when the pack has cues)", () => {
+    const f = fixture({ verdict: "notCaught" });
+    const third = (f.exercise.cues?.length ?? 0) > 0 ? ["exercise_try"] : f.exercise.howTo.length > 0 ? ["exercise_how"] : [];
+    expect(names(cardChipsFor(f.ctx, "askAbove"))).toEqual(["why_not_counted", "score_made_of", ...third]);
   });
   it("a new card's chip carries its own words", () => {
     const chips = suggestChips("askEmpty", { cards: ALL, verdict: "passed" });

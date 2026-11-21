@@ -248,7 +248,7 @@ const COMMANDS: ReadonlyArray<[string, keyof typeof facts, string, ToolArgs]> = 
   ["change the language to spanish", "settings", "set_setting", { key: "language", value: "spanish" }],
   ["set my goal to play the solo at 120", "today", "set_goal", { text: "play the solo at 120" }],
   ["explain this screen", "today", "explain_screen", {}],
-  ["make a minor pentatonic exercise", "today", "make_exercise", { shape: "minor pentatonic exercise" }],
+  ["make a minor pentatonic exercise", "today", "make_exercise", { root: "A", scale: "minorPentatonic" }],
 ];
 
 describe("commands", () => {

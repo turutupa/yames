@@ -31,7 +31,11 @@
       "loadAsked": "Yames 先問了你未儲存的變更。你回答之前不會載入任何內容。",
       "clickSubdivision": "每拍點擊數：{{to}}",
       "setSetting": "{{key}}：{{to}}",
-      "setGoal": "已記下目標：「{{to}}」"
+      "setGoal": "已記下目標：「{{to}}」",
+      "makeExercise": "Added {{what}} to My exercises.",
+      "makeExerciseAdding": "Adding {{what}} to My exercises…",
+      "undoMakeExercise": "Taken back out of My exercises.",
+      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
     },
     "propose": {
       "goTo": "開啟{{screen}}？",
@@ -62,7 +66,9 @@
       "clickSubdivision": "每拍點擊數：{{from}} → {{to}}",
       "setSetting": "{{key}}：{{from}} → {{to}}",
       "setGoal": "把這個記為你的目標：「{{to}}」",
-      "setGoalFrom": "把你的目標從「{{from}}」改為「{{to}}」"
+      "setGoalFrom": "把你的目標從「{{from}}」改為「{{to}}」",
+      "makeExercise": "Add it to My exercises",
+      "undoMakeExercise": "Take it back out of My exercises"
     },
     "stops": {
       "click": "節拍點擊會停止。",
@@ -120,7 +126,8 @@
       "keep": "保留",
       "go": "前往",
       "open": "開啟",
-      "loop": "循環"
+      "loop": "循環",
+      "add": "Add it"
     },
     "why": {
       "which": "是哪一個？",
@@ -181,7 +188,38 @@
         "cap": "你已跟隨 {{cap}} 條路線，這是上限。請先到它的頁面退出一條。",
         "loopBackwards": "第{{to}}小節在第{{from}}小節之前。請先說起始的小節。"
       },
-      "failed": "沒有成功，也沒有變更任何內容。"
+      "failed": "沒有成功，也沒有變更任何內容。",
+      "make": {
+        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
+        "root": "Say its root too: for example “A minor pentatonic”.",
+        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
+        "needScale": "Say which scale: for example “A minor pentatonic”.",
+        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
+        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
+        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
+        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
+        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
+        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
+        "tooManyNotes": "One time through needs {{count}} bar.",
+        "tooManyNotes_other": "One time through needs {{count}} bars.",
+        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
+        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
+        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
+        "unreachable": "No hand the app knows can play that fast enough to grade it.",
+        "notMade": "The app can't make that one.",
+        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
+        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
+        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
+        "already": "That one is already on My exercises.",
+        "badRecipe": "The app can't make that one.",
+        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
+        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "undo": {
+          "gone": "It's no longer on My exercises.",
+          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
+          "failed": "My exercises couldn't be saved just now, so it's still there."
+        }
+      }
     },
     "yours": {
       "input": "這個由你來決定。教練從不開關輸入。工具裡的「聆聽」和練習列可以開關，輸入在設定裡。",
@@ -255,6 +293,25 @@
         "neck": "琴頸",
         "runway": "跑道",
         "tab": "六線譜"
+      }
+    },
+    "make": {
+      "source": "Worked out by the app",
+      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
+      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
+      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
+      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
+      "openPaths": "Open Paths",
+      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "chip": {
+        "fret": "Fret {{fret}}",
+        "bars": "{{count}} bar",
+        "bars_other": "{{count}} bars",
+        "quarters": "Quarter notes instead",
+        "eighths": "Eighths instead",
+        "eighthTriplets": "Triplets instead",
+        "sixteenths": "Sixteenths instead",
+        "nextPosition": "Next position"
       }
     }
   }

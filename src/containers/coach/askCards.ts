@@ -14,13 +14,13 @@
  */
 import type { FactCard, CardShape } from "../../coach/ask/cards";
 import { isCard, lastTakeHere, ungradedPlayer } from "../../coach/ask/cards";
-import { runFactCard } from "../../coach/ask/intents";
+import { findCard, runFactCard } from "../../coach/ask/intents";
 import { matchCard, type CardCall } from "../../coach/ask/match";
 import type { CoachContext } from "../../coach/context";
 import { cardChipsFor, type ChipChoice } from "../../coach/ask/suggest";
 import type { ToolCall } from "../../coach/tools/types";
 import { appendAskTurn, askTurnId, type AskTurn } from "./askStore";
-import { askToolContext } from "./askTools";
+import { askToolContext, runAskCall } from "./askTools";
 
 /** A card turn's body: the card, or the one line that says why there is none. */
 export type CardBody = FactCard | { shape: null; line: FactCard["lines"][number] };
@@ -38,6 +38,10 @@ function writeCard(card: CardBody, said: string): string {
   if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
   const id = askTurnId();
   appendAskTurn({ id, kind: "card", card });
+  // A card that ends in a drawing or an action (leg c2b2a): the call goes
+  // through the runner like a chip's, as its own turn. An action comes back as
+  // a proposal the player presses or not; nothing changes here.
+  if (card.shape !== null && card.then) runAskCall(card.then, "");
   return id;
 }
 
@@ -64,7 +68,14 @@ export function answerCardFor(text: string): string | null {
   // that line on Songs, Jam or Today would keep the question from the model
   // (review c2b1c M4).
   const ctx = askToolContext();
-  if (!ctx || !readsSomethingHere(call, ctx)) return null;
+  if (!ctx) return null;
+  // The Path, plan, theory and term cards read no Take: typed, they answer only
+  // with a card; "not here" goes on to the next answerer (leg c2b2a).
+  if (findCard(call.tool)?.readsNoTake) {
+    const card = cardBodyFor(call);
+    return card.shape === null ? null : writeCard(card, text);
+  }
+  if (!readsSomethingHere(call, ctx)) return null;
   const card = cardBodyFor(call);
   if (card.shape === null && card.line.key === NO_TAKE_KEY) return null;
   return writeCard(card, text);

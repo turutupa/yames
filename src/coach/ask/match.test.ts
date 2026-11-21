@@ -107,12 +107,10 @@ const NEAR_MISSES: readonly string[] = [
   "should I play behind the beat?",
   "can I rush a fill?",
   "how do I hold the pick?",
-  "what is a clean tempo?",
-  "what does 85% even mean?",
-  "why this tempo?",
+  // c2b2a: "what is a clean tempo?", "what does 85% even mean?", "why this tempo?" and
+  // "what should I try?" now have cards (`pathMatch.test.ts`, with their near-misses).
   "why not 100 yet?",
   // c2b1b: these three now have cards (see MATCHES); their near-misses are below.
-  "what should I try?",
   "why is it so slow",
   "do you check my tone and my muting?",
   "did you hear that?",

@@ -20,6 +20,7 @@
 import { NECK_POSITIONS, SCALE_NAMES } from "../blocks/spec";
 import { SAFE_SETTING_KEYS, SETTINGS_SECTIONS } from "../tools/host";
 import { GO_TO_SCREENS } from "../tools/go";
+import { MAKE_CHORDS, MAKE_SHAPES, MAKE_SUBDIVISIONS } from "../tools/make";
 import { NEVER_ITEMS, type NeverItem } from "../../containers/coach/neverList";
 
 /**
@@ -116,7 +117,84 @@ export type CommandTable = {
   polite: Words;
   /** Words a command may carry that mean nothing to it ("me", "the", "a bit"). */
   fillers: Words;
+  /**
+   * Optional (leg t2c). The words of a recipe for `make_exercise`: "a minor
+   * pentatonic eighths 5th fret". Roots are `roots`, scales `scales`, a length
+   * is a number and `units.bar`. Without this group a language types no recipe.
+   */
+  recipe?: RecipeWords;
 };
+
+/** `make_exercise`'s recipe words (leg t2c). Ids are `make.ts`'s closed sets. */
+export type RecipeWords = {
+  /** The shapes: "box", "three notes per string", "arpeggio", "on one string", "chromatic". */
+  shapes?: Partial<WordsOf<(typeof MAKE_SHAPES)[number]>>;
+  /** An arpeggio's chord after its root: "minor 7", "major". Read only with an arpeggio word. */
+  chords?: Partial<WordsOf<(typeof MAKE_CHORDS)[number]>>;
+  subdivisions?: Partial<WordsOf<(typeof MAKE_SUBDIVISIONS)[number]>>;
+  /** The fret it starts at, `#` standing for the number: "fret #", "# fret", "position #". */
+  fret?: Words;
+  /** What may follow a number to make it an ordinal, read as the number: "st", "nd", "rd", "th" ("5th"). */
+  numberSuffixes?: Words;
+  /**
+   * A root's letter that is also an article (English "a"; leg t2cb, review t2c
+   * finding 1). It is the root only right after a word in `rootAfter` ("an a
+   * minor", "in a"), or right before a name in `rootBefore` ("a minor
+   * pentatonic" is A's); followed later by another root it is the article; else
+   * the key was never said ("make a blues exercise": the tool asks which).
+   */
+  article?: { words: Words; rootAfter?: Words; rootBefore?: Words };
+};
+
+const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article">, readonly string[]>> = {
+  shapes: MAKE_SHAPES,
+  chords: MAKE_CHORDS,
+  subdivisions: MAKE_SUBDIVISIONS,
+};
+
+/** What is wrong with a table's recipe words (leg t2c). */
+function recipeProblems(recipe: RecipeWords | undefined): string[] {
+  if (recipe === undefined) return [];
+  const problems: string[] = [];
+  const check = (where: string, words: unknown) => {
+    if (!Array.isArray(words) || words.length === 0) return problems.push(`${where} is an empty list`);
+    for (const word of words) {
+      if (typeof word !== "string" || phraseKey(word) === "") problems.push(`${where} has an empty word`);
+      else if (word !== phraseKey(word)) problems.push(`${where}: "${word}" is not written in lower case with single spaces`);
+    }
+  };
+  for (const [group, ids] of Object.entries(RECIPE_IDS)) {
+    const have = (recipe as Record<string, Record<string, unknown> | undefined>)[group];
+    if (have === undefined) continue;
+    const seen = new Map<string, string>();
+    for (const [id, words] of Object.entries(have)) {
+      if (!ids.includes(id)) problems.push(`recipe.${group}.${id} is not an id the app knows`);
+      check(`recipe.${group}.${id}`, words);
+      for (const word of Array.isArray(words) ? words : []) {
+        const other = seen.get(phraseKey(String(word)));
+        if (other && other !== id) problems.push(`recipe.${group}: "${word}" names both ${other} and ${id}`);
+        seen.set(phraseKey(String(word)), id);
+      }
+    }
+  }
+  if (recipe.fret !== undefined) {
+    check("recipe.fret", recipe.fret);
+    for (const word of recipe.fret) {
+      if (word.split("#").length !== 2) problems.push(`recipe.fret: "${word}" does not have exactly one #`);
+      else if (word.replace("#", "").trim() === "") problems.push(`recipe.fret: "${word}" is only the number`);
+    }
+  }
+  if (recipe.numberSuffixes !== undefined) check("recipe.numberSuffixes", recipe.numberSuffixes);
+  if (recipe.article !== undefined) {
+    check("recipe.article.words", recipe.article.words);
+    for (const word of Array.isArray(recipe.article.words) ? recipe.article.words : []) {
+      if (typeof word === "string" && !/^[a-g]$/.test(word)) problems.push(`recipe.article.words: "${word}" is not a root's letter`);
+    }
+    if (recipe.article.rootAfter !== undefined) check("recipe.article.rootAfter", recipe.article.rootAfter);
+    if (recipe.article.rootBefore !== undefined) check("recipe.article.rootBefore", recipe.article.rootBefore);
+  }
+  return problems;
+}
 
 function lists(table: CommandTable): Array<[string, Words]> {
   const out: Array<[string, Words]> = [];
@@ -220,6 +298,13 @@ export function validateCommandTable(table: CommandTable): string[] {
   }
   for (const [word, n] of Object.entries(table.ordinals ?? {})) {
     if (!Number.isInteger(n) || n < 1) problems.push(`ordinals.${word} is not a whole number from 1`);
+  }
+  problems.push(...recipeProblems(table.recipe));
+  // An article read as one is passed over only as a filler: without it the whole line fails (review t2cb, LOW 5).
+  const fillers = new Set((Array.isArray(table.fillers) ? table.fillers : []).map((w) => phraseKey(String(w))));
+  const articleWords: unknown = table.recipe?.article?.words;
+  for (const word of Array.isArray(articleWords) ? articleWords : []) {
+    if (typeof word === "string" && !fillers.has(phraseKey(word))) problems.push(`recipe.article.words: "${word}" is not also in fillers`);
   }
   return problems;
 }

@@ -62,7 +62,16 @@
         "changed": "Что изменилось с прошлого дубля?",
         "improving": "Я становлюсь лучше?",
         "madeOf": "Из чего состоит оценка?",
-        "distance": "Как далеко до планки?"
+        "distance": "Как далеко до планки?",
+        "purpose": "What is this for?",
+        "how": "How do I play it?",
+        "try": "What should I try?",
+        "planWhy": "Why this?",
+        "planTempo": "Why this tempo?",
+        "planNext": "What's next?",
+        "planReturn": "When does this come back?",
+        "passMarkMs": "What does the evenness pass mark mean?",
+        "cleanTempo": "What is a clean tempo?"
       },
       "canAnswer": {
         "ungraded": "Вы играете без оценки, поэтому нет измерений, по которым я мог бы отвечать на вопросы о ваших дублях."
@@ -302,6 +311,74 @@
         "unmeasured_other": "{{count}} проверки планки не измерены в дубле {{take}}.",
         "tempo": "Дубль {{take}} был на {{bpm}} BPM; чистый дубль на {{passAt}} BPM или быстрее засчитывает упражнение.",
         "none": "Я не измерял ни одной проверки планки в дубле {{take}}."
+      },
+      "path": {
+        "quote": "“{{text}}”",
+        "noExercise": "There's no Exercise on screen for me to read that from.",
+        "purposeIntro": "What this Exercise is for, in the Path's words:",
+        "purposeNone": "The Path gives no purpose for this Exercise.",
+        "howIntro": "How to play it, in the Path's words:",
+        "howNone": "The Path gives no how-to for this Exercise.",
+        "tryMeasured": "The Path's cue for what Take {{take}} measured:",
+        "tryGeneral": "The Path's cue for this Exercise:",
+        "tryNone": "The Path has no cue for this Exercise."
+      },
+      "plan": {
+        "notInPlan": "There's no Session running a plan for me to read that from.",
+        "why": "Why this part is in this Session's plan:",
+        "tempoPlanned": "This part was planned at {{bpm}} BPM.",
+        "tempoNow": "It is at {{bpm}} BPM now.",
+        "tempoNone": "This part has no tempo of its own.",
+        "next": "Next in this Session's plan: {{title}}, {{minutes}} min.",
+        "nextBpm": "Next in this Session's plan: {{title}}, at {{bpm}} BPM, {{minutes}} min.",
+        "nextLast": "This is the last part of this Session's plan.",
+        "skip": "Test out plays one Take at the pass tempo of each graded Exercise of the Step you haven't passed yet (all of them again, when you've passed every one).",
+        "skipInSession": "Test out starts from a Step's page, not while a Session runs.",
+        "minutes": "Today's plan comes in {{list}} minutes.",
+        "minutesSnapped": "The nearest to {{asked}} minutes is {{to}}.",
+        "minutesNone": "Tell me how many minutes you have, as a number.",
+        "minutesInSession": "The minutes of a Session that runs can't change.",
+        "returnDays": "The review schedule brings this Exercise back within {{count}} day, at {{bpm}} BPM.",
+        "returnDays_few": "The review schedule brings this Exercise back within {{count}} days, at {{bpm}} BPM.",
+        "returnDays_many": "The review schedule brings this Exercise back within {{count}} days, at {{bpm}} BPM.",
+        "returnDays_other": "The review schedule brings this Exercise back within {{count}} days, at {{bpm}} BPM.",
+        "returnDue": "This Exercise is due for review now, at {{bpm}} BPM.",
+        "returnNotPassed": "This Exercise isn't passed yet; reviews start once it is.",
+        "returnUngraded": "This Exercise isn't graded, so it has no review schedule.",
+        "returnNoPassTempo": "This Exercise has no pass tempo, so the review schedule doesn't bring it back.",
+        "returnMine": "Your own exercises aren't on a Path, so they have no review schedule.",
+        "returnNotFair": "A Take of this Exercise is marked not fair, and the review schedule doesn't leave it out, so I won't quote it."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} is {{notes}}.",
+        "chordUnknown": "I don't know that chord. Chords I can spell on {{root}}: {{known}}.",
+        "scalesIntroMajor": "Over {{chord}}, taken as the home chord of {{root}} major, the app picks these scales, each with every note of the chord in it.",
+        "scalesIntroMinor": "Over {{chord}}, taken as the home chord of {{root}} minor, the app picks these scales, each with every note of the chord in it.",
+        "scalesPlacedMajor": "{{chord}} is the {{degree}} chord of {{root}} major, one key it belongs in. In that key the app picks these scales, each with every note of the chord in it.",
+        "scalesPlacedMinor": "{{chord}} is the {{degree}} chord of {{root}} minor, one key it belongs in. In that key the app picks these scales, each with every note of the chord in it.",
+        "scalesNoneMajor": "In {{root}} major, none of the scales the app picks for {{chord}} has every note of the chord in it.",
+        "scalesNoneMinor": "In {{root}} minor, none of the scales the app picks for {{chord}} has every note of the chord in it.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "This Exercise isn't graded, so it has no pass mark.",
+        "noPassMarkSet": "No pass mark is set: you're playing without grading, so nothing you play is measured against one. To set one, choose \"Grade me\" for \"Grade my playing\" in Settings, under Practice; you can also switch in any Session.",
+        "noSuchMark": "No pass mark of this Exercise is {{value}}%.",
+        "evenNone": "This Exercise's pass mark has no evenness check.",
+        "evenNoMs": "I can't put this Exercise's evenness pass mark in milliseconds: its beat isn't a quarter note.",
+        "evenMs": "The evenness pass mark here is {{bar}}%: at {{bpm}} BPM, with this Exercise's closest notes {{gap}} ms apart, it allows a spread of about {{ms}} ms around your own average timing.",
+        "holdMs": "The pass mark for evenness held to the end is {{bar}}%, measured over the closing bars of the stretch judged: at {{bpm}} BPM, with this Exercise's closest notes {{gap}} ms apart, it allows a spread of about {{ms}} ms around your own average timing.",
+        "heardMark": "{{bar}}% is the notes-heard pass mark: in the bars judged, at least {{bar}} of every 100 written notes must be heard.",
+        "accentsMark": "{{bar}}% is the accents pass mark: at least {{bar}} of every 100 marked accents must come out louder than the notes around them.",
+        "notesMark": "{{bar}}% is the right-notes pass mark: at least {{bar}} of every 100 notes I could pitch must be the written ones.",
+        "markOther": "{{value}}% is the pass mark of another of this Exercise's checks, not its evenness.",
+        "markAlso": "{{value}}% is also the pass mark of another of this Exercise's checks.",
+        "evenHow": "Evenness is measured around your own average timing, not the click, so a steady lean doesn't lower it.",
+        "clean": "Your clean tempo is the highest tempo at which a Take passed with at least {{need}} bars in a row that held every check.",
+        "cleanYours": "Your clean tempo on this Exercise is {{bpm}} BPM.",
+        "cleanNone": "You have no clean tempo on this Exercise yet.",
+        "cleanNotFair": "Takes you marked not fair don't count toward it.",
+        "cleanMine": "Your own exercises aren't on a Path, so I don't quote a clean tempo for them."
       }
     }
   }
