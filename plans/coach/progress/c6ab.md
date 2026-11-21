@@ -30,6 +30,18 @@ Branch `coach-c6a` (the existing worktree `/home/dgx-delgado/yames-coach-c6a`), 
   "Remove models", no "Hear what I play".
 - **L4** left as is (unreachable: Ask is not shown with Settings). **L2** left (recorded in c6a).
 
-## Gates
+## Strings
 
-See the report / the commits below for each run.
+Three strings in 15 locales (`onboarding.coach.modelBuys`, `settings.coach.notebook.unreadableEntries`,
+`settings.coach.removeModels`): sonnet translator, then a separate sonnet proof-reader (no fixes needed).
+
+## Gates (all after the merge of `coach`)
+
+- tsc: pass (job coach-c6ab-tsc).
+- vitest, the five touched files: 86/86 (coach-c6ab-vitest).
+- `npm run test`: 484 files pass, 51804 tests; 1 file fails, the known `TabStage.render.test.tsx` (symlink)
+  (coach-c6ab-test, `/tmp/coach-c6a/test-full.log`).
+- `npm run build`: pass (coach-c6ab-build).
+- Layout, the six specs: 86 passed, 5 failed (firstrun's theme cards, all 30 s timeouts on a busy queue)
+  (coach-c6ab-layout-2, `/tmp/coach-c6a/layout.log`); `firstrun.spec.ts` re-run alone with `--workers=2`:
+  28/28 (coach-c6ab-layout-3).
