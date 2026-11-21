@@ -4500,6 +4500,14 @@
             "The first figure and the last start on a beat. Everything between slides."
           ],
           "coachLine": "I time each note against where it is written, and check the two pitches after the take.",
+          "cues": [
+            {"when":"even","say":"Count '1 e and a' out loud as the figure slides.","more":0,"general":true},
+            {"when":"heard","say":"Pick both notes of every figure."},
+            {"when":"extras","say":"Leave the third sixteenth of each figure silent."},
+            {"when":"notes","say":"Play A then G, fret seven then five."},
+            {"when":"late","say":"Start the last figure right on '4'.","more":1},
+            {"when":"early","say":"Wait for the 'a' of '1' for the second figure.","more":0}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4617,6 +4625,15 @@
             "Upstroke notes are usually quieter. Make them match the downstroke that starts the bar."
           ],
           "coachLine": "Four of these notes are on the 'e' and the 'a'. I'll say how even they were.",
+          "cues": [
+            {"when":"even","say":"Count '1 e (and) a, 2 (e) and (a)' aloud.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note on the 'e' and the 'a'."},
+            {"when":"extras","say":"Leave '3' itself silent."},
+            {"when":"notes","say":"Play G at fret five on '2' and on '4'."},
+            {"when":"late","say":"Put '1', '2' and '4' right on the click."},
+            {"when":"early","say":"Wait out '3' before its 'e'."},
+            {"when":"stringChange","say":"Cross from the low A to the D string on 'e'."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4734,6 +4751,17 @@
             "The held A at the end is the only long note. Everything before it is short."
           ],
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Sing the rhythm once before you play it.","more":0,"general":true},
+            {"when":"heard","say":"Pick every short note up to the held A."},
+            {"when":"extras","say":"Play only the written sixteenths, no more."},
+            {"when":"notes","say":"Play C on the low E string at fret eight."},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the low A's beat, then start again."},
+            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"lastBars","say":"Land the held low A on '4'.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4881,6 +4909,14 @@
             "The two stabs of a figure are down-up one time and up-down the next. Keep the two the same size."
           ],
           "coachLine": "Eleven stabs in the bar, each one timed against where it is written. A stab is one attack, never pitch-checked.",
+          "cues": [
+            {"when":"even","say":"Keep the foot on the beat as the stabs slide.","more":0,"general":true},
+            {"when":"heard","say":"Catch both strings with every stab."},
+            {"when":"extras","say":"Leave the third sixteenth of each figure silent."},
+            {"when":"late","say":"Start the last figure right on '4'."},
+            {"when":"early","say":"Wait for the 'a' of '1' for the second figure."},
+            {"when":"stringChange","say":"Keep the stroke small: just the two strings.","more":2}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5000,6 +5036,14 @@
             "The octaves on the 'e' and the 'a' are upstrokes through three strings. Keep the stroke as small as the shape allows."
           ],
           "coachLine": "Nine attacks a bar, four of them on the 'e' and the 'a'. An octave is one attack: timed and counted.",
+          "cues": [
+            {"when":"even","say":"Count '1 e (and) a, 2 (e) and (a)' aloud.","more":0,"general":true},
+            {"when":"heard","say":"Strike both strings of every octave."},
+            {"when":"extras","say":"Leave '3' itself silent."},
+            {"when":"late","say":"Put '1', '2' and '4' right on the click."},
+            {"when":"early","say":"Wait out '3' before its 'e'."},
+            {"when":"stringChange","say":"Keep the stroke small across the three strings.","more":2}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5121,6 +5165,16 @@
             "After the upstroke stab on the 'a' of beat 3 in bar 2, let the hand carry on up past the low E string, so that the downstroke on beat 4 starts above it. This is the widest the swing gets."
           ],
           "coachLine": "Band on. This is the Step's test piece: every attack is timed against the band. Pitch is not checked when stabs are in the line.",
+          "cues": [
+            {"when":"even","say":"Keep the first finger flat across fret five.","more":2,"general":true},
+            {"when":"heard","say":"Pick every note as firmly as the stabs."},
+            {"when":"extras","say":"Leave the third sixteenth of each figure silent."},
+            {"when":"late","say":"Put the two stabs right on '4' and its 'e'.","more":0},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the low A's beat, then start again."},
+            {"when":"stringChange","say":"Let the swing carry past the low E string.","more":3},
+            {"when":"lastBars","say":"Land the held low A on '4'.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5267,6 +5321,17 @@
             "The hand shifts back one fret for bar 2, or the first finger stretches. Either works at these tempos."
           ],
           "coachLine": "I time the notes and check them after the take. F# is the one I'm listening for.",
+          "cues": [
+            {"when":"even","say":"Play F sharp at the D string's fret four.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note of the answer."},
+            {"when":"extras","say":"Leave the 'and' and 'a' of '2' silent."},
+            {"when":"notes","say":"Play D on the A string at fret five.","more":0},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"shift","say":"Move back one fret as the answer starts.","more":1},
+            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"lastBars","say":"Keep the answer as even as the first line."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5399,6 +5464,15 @@
             "After some of the hammer-ons the upper note is picked again. That one is a separate stroke."
           ],
           "coachLine": "A hammer-on I can't hear costs nothing, so the picked notes carry the timing. Its volume is for your ear.",
+          "cues": [
+            {"when":"even","say":"Pick fret five, hammer seven: two even notes.","more":0,"general":true},
+            {"when":"heard","say":"Hammer hard enough to hear the note."},
+            {"when":"extras","say":"Leave the sixteenth after each hammer silent."},
+            {"when":"notes","say":"Hammer with the third finger at fret seven.","more":0},
+            {"when":"late","say":"Put each picked note right where you count it."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"stringChange","say":"Cross to the A string on '3'."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5516,6 +5590,18 @@
             "Bar 3 starts like bar 1. On beat 3 it stays on the D string: G hammered to A, then A picked again on the 'a'."
           ],
           "coachLine": "Band on. I time your notes against it and check them after the take.",
+          "cues": [
+            {"when":"even","say":"Play F sharp over D9, the box over Am7.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note through to the held D."},
+            {"when":"extras","say":"Leave the rests between notes silent."},
+            {"when":"notes","say":"Play D at the A string's fret five for D9."},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"afterHeld","say":"Count the held D's beat, then start again."},
+            {"when":"shift","say":"Shift one fret as each new chord starts."},
+            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"lastBars","say":"Land the held D on '4' and let it ring."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5701,6 +5787,16 @@
             "The changes of register are the hard part. Look at the string you are going to."
           ],
           "coachLine": "Band on. I time every attack against it. Pitch is not checked when stabs and octaves are in the line.",
+          "cues": [
+            {"when":"even","say":"Change part on '1' without a gap in the count.","general":true},
+            {"when":"heard","say":"Strike every attack: notes, stabs, octaves."},
+            {"when":"extras","say":"Keep the pick off the strings in the rests."},
+            {"when":"late","say":"Put each '1' right on the click."},
+            {"when":"early","say":"Wait out each rest before the next note."},
+            {"when":"shift","say":"Reach back to fret four for the F sharp.","more":0},
+            {"when":"stringChange","say":"Look at the next string during each rest.","more":1},
+            {"when":"lastBars","say":"Walk up D, E, F sharp, G in even eighths."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5875,6 +5971,14 @@
             "If your mind wanders, listen to the hi-hat and lock the hand's swing to it again."
           ],
           "coachLine": "I check that the time holds to the end of the minute. Whether every bar felt the same is for your ear.",
+          "cues": [
+            {"when":"even","say":"Play every round the same, holes and all.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note of every round."},
+            {"when":"late","say":"Lock back onto the hi-hat, round after round.","more":1},
+            {"when":"early","say":"Wait out each rest in full, every round."},
+            {"when":"stringChange","say":"Cross to the A string on '3' every round."},
+            {"when":"lastBars","say":"Start at a tempo you can hold a whole minute."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5995,6 +6099,14 @@
             "Breathe, and let the shoulder drop."
           ],
           "coachLine": "I check that the time holds to the end of the minute.",
+          "cues": [
+            {"when":"even","say":"Keep every stab the same length.","more":0,"general":true},
+            {"when":"heard","say":"Catch both strings with every stab."},
+            {"when":"late","say":"Play each 'and' halfway between the clicks."},
+            {"when":"early","say":"Wait for the click, then stab on the 'and'."},
+            {"when":"stringChange","say":"Move from the root to the stab on the 'and'."},
+            {"when":"lastBars","say":"Start at a tempo you can hold a whole minute."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6121,6 +6233,15 @@
             "After the C# there is one sixteenth of rest before the B octave of bar 1: the third finger hops from the low E string to the D string, same fret."
           ],
           "coachLine": "Band on. An octave is one attack: every one is timed against the band and counted, and so are the four single notes. Pitch is not checked when octaves are in the line.",
+          "cues": [
+            {"when":"even","say":"Change octave in the two rests after each 'e'.","more":1,"general":true},
+            {"when":"heard","say":"Strike both strings of every octave."},
+            {"when":"extras","say":"Keep the pick off the strings in the rests."},
+            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"early","say":"Wait out '2' before its 'e'."},
+            {"when":"stringChange","say":"Keep the shape as it moves a string over.","more":0},
+            {"when":"lastBars","say":"Walk down F sharp, E, D, C sharp in eighths.","more":2}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6310,6 +6431,15 @@
             "When the loop comes round, the octave bar leads back into the E9 bar. That join is not in the form; the one to listen to is bar 1 into bar 2."
           ],
           "coachLine": "Every attack is timed. The first octave of bar 2 is the one to watch: late means the change took too long.",
+          "cues": [
+            {"when":"even","say":"Look at the low E string during the last stab.","more":2,"general":true},
+            {"when":"heard","say":"Strike every attack: notes, stabs, octaves."},
+            {"when":"extras","say":"Keep the pick off the strings in the rests."},
+            {"when":"late","say":"Put the first octave right on '1'."},
+            {"when":"early","say":"Wait for '1' before the first octave."},
+            {"when":"stringChange","say":"Hop the third finger to the D string, same fret.","more":1},
+            {"when":"lastBars","say":"Keep the second half as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6444,6 +6574,15 @@
             "Count the bars. The band will not tell you which half you are in: it plays the same two chords, one to a bar, all eight bars through."
           ],
           "coachLine": "Band on. Every attack is timed against it. Pitch is not checked when stabs and octaves are in the line.",
+          "cues": [
+            {"when":"even","say":"Count four of stabs, then four of octaves.","more":3,"general":true},
+            {"when":"heard","say":"Strike every attack: notes, stabs, octaves."},
+            {"when":"extras","say":"Keep the pick off the strings in the rests."},
+            {"when":"late","say":"Put each '1' right on the click."},
+            {"when":"early","say":"Wait for '1' before the first octave.","more":2},
+            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"lastBars","say":"Walk down to the start in even eighths."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7094,7 +7233,16 @@
                   "maxPlayableBpm": 170,
                   "difficulty": 3.14
                 },
-                "chords": ["Gm7", "C9", "Gm7", "C9", "Gm7", "C9", "Gm7", "C9"]
+                "chords": ["Gm7", "C9", "Gm7", "C9", "Gm7", "C9", "Gm7", "C9"],
+                "cues": [
+                  {"when":"even","say":"Count four of stabs, then four of octaves.","more":2,"general":true},
+                  {"when":"heard","say":"Strike every attack: notes, stabs, octaves."},
+                  {"when":"extras","say":"Keep the pick off the strings in the rests."},
+                  {"when":"late","say":"Put each '1' right on the click."},
+                  {"when":"early","say":"Wait for '1' before the first octave.","more":1},
+                  {"when":"stringChange","say":"Look at the next string during each rest."},
+                  {"when":"lastBars","say":"Walk down to the start in even eighths."}
+                ]
               },
               {
                 "id": "key=D-minor",
@@ -7296,7 +7444,16 @@
                   "maxPlayableBpm": 400,
                   "difficulty": 3.12
                 },
-                "chords": ["Dm7", "G9", "Dm7", "G9", "Dm7", "G9", "Dm7", "G9"]
+                "chords": ["Dm7", "G9", "Dm7", "G9", "Dm7", "G9", "Dm7", "G9"],
+                "cues": [
+                  {"when":"even","say":"Count four of stabs, then four of octaves.","more":2,"general":true},
+                  {"when":"heard","say":"Strike every attack: notes, stabs, octaves."},
+                  {"when":"extras","say":"Keep the pick off the strings in the rests."},
+                  {"when":"late","say":"Put each '1' right on the click."},
+                  {"when":"early","say":"Wait for '1' before the first octave.","more":1},
+                  {"when":"stringChange","say":"Look at the next string during each rest."},
+                  {"when":"lastBars","say":"Walk down to the start in even eighths."}
+                ]
               },
               {
                 "id": "key=C-minor",
@@ -7498,7 +7655,16 @@
                   "maxPlayableBpm": 400,
                   "difficulty": 3.12
                 },
-                "chords": ["Cm7", "F9", "Cm7", "F9", "Cm7", "F9", "Cm7", "F9"]
+                "chords": ["Cm7", "F9", "Cm7", "F9", "Cm7", "F9", "Cm7", "F9"],
+                "cues": [
+                  {"when":"even","say":"Count four of stabs, then four of octaves.","more":2,"general":true},
+                  {"when":"heard","say":"Strike every attack: notes, stabs, octaves."},
+                  {"when":"extras","say":"Keep the pick off the strings in the rests."},
+                  {"when":"late","say":"Put each '1' right on the click."},
+                  {"when":"early","say":"Wait for '1' before the first octave.","more":1},
+                  {"when":"stringChange","say":"Look at the next string during each rest."},
+                  {"when":"lastBars","say":"Walk down to the start in even eighths."}
+                ]
               }
             ]
           }
@@ -7513,6 +7679,14 @@
             "Breathe, and let the shoulder drop."
           ],
           "coachLine": "The time has to hold to the end of the minute. Whether every bar felt the same is for your ear.",
+          "cues": [
+            {"when":"even","say":"Play every round the same, holes and all.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note of every round."},
+            {"when":"late","say":"Lock back onto the hi-hat, round after round."},
+            {"when":"early","say":"Let the snare sound before each stab.","more":1},
+            {"when":"stringChange","say":"Cross to the A string on '3' every round."},
+            {"when":"lastBars","say":"Start at a tempo you can hold a whole minute."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -9109,6 +9283,14 @@
             "Start well under your clean tempo. Foot on the beat while the figure slides across it; first finger only, and move it up a note at each bar line."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
+            {"when":"heard","say":"Pick both notes of every figure."},
+            {"when":"late","say":"Start the last figure right on '4'."},
+            {"when":"early","say":"Wait for the 'a' of '1' for the second figure."},
+            {"when":"shift","say":"Arrive on the new note as each bar starts."},
+            {"when":"lastBars","say":"Keep the foot on the beat to the top note."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {

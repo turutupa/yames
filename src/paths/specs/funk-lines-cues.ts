@@ -70,6 +70,24 @@ const CROSS3 = "Keep the stroke small across the three strings.";
 const E_24_ONLY = "Play only the 'e' of '2' and of '4'.";
 const TWO_WAIT = "Wait out '2' before its 'e'.";
 const SHAPE_OVER = "Keep the shape as it moves a string over.";
+const PAIR_HEARD = "Pick both notes of every figure.";
+const THIRD_SILENT = "Leave the third sixteenth of each figure silent.";
+const LAST_FIGURE = "Start the last figure right on '4'.";
+const SECOND_FIGURE = "Wait for the 'a' of '1' for the second figure.";
+const COUNT_OFF_E = "Count '1 e (and) a, 2 (e) and (a)' aloud.";
+const THREE_SILENT = "Leave '3' itself silent.";
+const ON_124 = "Put '1', '2' and '4' right on the click.";
+const LOW_A_LAND = "Land the held low A on '4'.";
+const F_SHARP = "Play F sharp at the D string's fret four.";
+const STRIKE_ALL = "Strike every attack: notes, stabs, octaves.";
+const REST_QUIET = "Keep the pick off the strings in the rests.";
+const EACH_ONE = "Put each '1' right on the click.";
+const SAME_ROUND = "Play every round the same, holes and all.";
+const ROUND_HEARD = "Pick every note of every round.";
+const HIHAT = "Lock back onto the hi-hat, round after round.";
+const CROSS_A3 = "Cross to the A string on '3' every round.";
+const WHOLE_MINUTE = "Start at a tempo you can hold a whole minute.";
+const FIRST_OCTAVE_WAIT = "Wait for '1' before the first octave.";
 
 export const FUNK_LINES_CUES: CueBook = {
   // Level 1 (Beginner), Step 1: the engine
@@ -375,5 +393,170 @@ export const FUNK_LINES_CUES: CueBook = {
     c("early", A_LATE),
     c("shift", ARRIVE),
     c("lastBars", "Keep counting '1 e (and) a' to the top note."),
+  ],
+
+  // Level 3 (Advanced), Step 10: displaced
+  "displaced.threes": [
+    g("Count '1 e and a' out loud as the figure slides.", 0),
+    c("heard", PAIR_HEARD),
+    c("extras", THIRD_SILENT),
+    c("notes", "Play A then G, fret seven then five."),
+    c("late", LAST_FIGURE, 1),
+    c("early", SECOND_FIGURE, 0),
+  ],
+  "displaced.off-the-e": [
+    g(COUNT_OFF_E, 0),
+    c("heard", "Pick every note on the 'e' and the 'a'."),
+    c("extras", THREE_SILENT),
+    c("notes", "Play G at fret five on '2' and on '4'."),
+    c("late", ON_124),
+    c("early", THREE_WAIT),
+    c("stringChange", "Cross from the low A to the D string on 'e'."),
+  ],
+  "displaced.long-phrase": [
+    g("Sing the rhythm once before you play it.", 0),
+    c("heard", "Pick every short note up to the held A."),
+    c("extras", "Play only the written sixteenths, no more."),
+    c("notes", C_LOW_E),
+    c("late", ONE_THREE),
+    c("early", WAIT_REST),
+    c("afterHeld", LOW_A_AGAIN),
+    c("stringChange", LOOK_NEXT),
+    c("lastBars", LOW_A_LAND, 1),
+  ],
+
+  // Step 11: displaced shapes
+  "displaced-shapes.stab-threes": [
+    g("Keep the foot on the beat as the stabs slide.", 0),
+    c("heard", STAB_BOTH),
+    c("extras", THIRD_SILENT),
+    c("late", LAST_FIGURE),
+    c("early", SECOND_FIGURE),
+    c("stringChange", "Keep the stroke small: just the two strings.", 2),
+  ],
+  "displaced-shapes.octave-off-the-e": [
+    g(COUNT_OFF_E, 0),
+    c("heard", OCT_BOTH),
+    c("extras", THREE_SILENT),
+    c("late", ON_124),
+    c("early", THREE_WAIT),
+    c("stringChange", CROSS3, 2),
+  ],
+  "displaced-shapes.slide-and-stab": [
+    g("Keep the first finger flat across fret five.", 2),
+    c("heard", "Pick every note as firmly as the stabs."),
+    c("extras", THIRD_SILENT),
+    c("late", "Put the two stabs right on '4' and its 'e'.", 0),
+    c("early", WAIT_REST),
+    c("afterHeld", LOW_A_AGAIN),
+    c("stringChange", "Let the swing carry past the low E string.", 3),
+    c("lastBars", LOW_A_LAND, 1),
+  ],
+
+  // Step 12: the sixth
+  "the-sixth.sixth": [
+    g(F_SHARP, 0),
+    c("heard", "Pick every note of the answer."),
+    c("extras", SILENT_2),
+    c("notes", "Play D on the A string at fret five.", 0),
+    c("late", ONE_THREE),
+    c("early", WAIT_REST),
+    c("shift", "Move back one fret as the answer starts.", 1),
+    c("stringChange", LOOK_NEXT),
+    c("lastBars", "Keep the answer as even as the first line."),
+  ],
+  "the-sixth.hammered": [
+    g("Pick fret five, hammer seven: two even notes.", 0),
+    c("heard", "Hammer hard enough to hear the note."),
+    c("extras", "Leave the sixteenth after each hammer silent."),
+    c("notes", "Hammer with the third finger at fret seven.", 0),
+    c("late", "Put each picked note right where you count it."),
+    c("early", WAIT_REST),
+    c("stringChange", "Cross to the A string on '3'."),
+  ],
+  "the-sixth.two-chord-line": [
+    g("Play F sharp over D9, the box over Am7.", 0),
+    c("heard", "Pick every note through to the held D."),
+    c("extras", "Leave the rests between notes silent."),
+    c("notes", "Play D at the A string's fret five for D9."),
+    c("late", ONE_THREE),
+    c("early", WAIT_REST),
+    c("afterHeld", "Count the held D's beat, then start again."),
+    c("shift", "Shift one fret as each new chord starts."),
+    c("stringChange", LOOK_NEXT),
+    c("lastBars", "Land the held D on '4' and let it ring."),
+  ],
+
+  // Step 13: the pocket
+  "the-pocket.groove": [
+    g("Change part on '1' without a gap in the count."),
+    c("heard", STRIKE_ALL),
+    c("extras", REST_QUIET),
+    c("late", EACH_ONE),
+    c("early", WAIT_REST),
+    c("shift", F4_REACH, 0),
+    c("stringChange", LOOK_NEXT, 1),
+    c("lastBars", "Walk up D, E, F sharp, G in even eighths."),
+  ],
+  "the-pocket.pocket-minute": [
+    g(SAME_ROUND, 0),
+    c("heard", ROUND_HEARD),
+    c("late", HIHAT, 1),
+    c("early", "Wait out each rest in full, every round."),
+    c("stringChange", CROSS_A3),
+    c("lastBars", WHOLE_MINUTE),
+  ],
+  "the-pocket.stab-minute": [
+    g("Keep every stab the same length.", 0),
+    c("heard", STAB_BOTH),
+    c("late", AND_HALFWAY),
+    c("early", AND_WAIT),
+    c("stringChange", ROOT_TO_STAB),
+    c("lastBars", WHOLE_MINUTE),
+  ],
+
+  // Step 14: the long form
+  "long-form.bm-octaves": [
+    g("Change octave in the two rests after each 'e'.", 1),
+    c("heard", OCT_BOTH),
+    c("extras", REST_QUIET),
+    c("late", ONE_THREE),
+    c("early", TWO_WAIT),
+    c("stringChange", SHAPE_OVER, 0),
+    c("lastBars", "Walk down F sharp, E, D, C sharp in eighths.", 2),
+  ],
+  "long-form.the-change": [
+    g("Look at the low E string during the last stab.", 2),
+    c("heard", STRIKE_ALL),
+    c("extras", REST_QUIET),
+    c("late", "Put the first octave right on '1'."),
+    c("early", FIRST_OCTAVE_WAIT),
+    c("stringChange", "Hop the third finger to the D string, same fret.", 1),
+    c("lastBars", SECOND_HALF),
+  ],
+  "long-form.eight-bars": [
+    g("Count four of stabs, then four of octaves.", 3),
+    c("heard", STRIKE_ALL),
+    c("extras", REST_QUIET),
+    c("late", EACH_ONE),
+    c("early", FIRST_OCTAVE_WAIT, 2),
+    c("stringChange", LOOK_NEXT),
+    c("lastBars", "Walk down to the start in even eighths."),
+  ],
+  "long-form.bm-pocket-minute": [
+    g(SAME_ROUND, 0),
+    c("heard", ROUND_HEARD),
+    c("late", HIHAT),
+    c("early", SNARE_EARLY, 1),
+    c("stringChange", CROSS_A3),
+    c("lastBars", WHOLE_MINUTE),
+  ],
+  "warmup-advanced.threes-up": [
+    g(WELL_UNDER, 0),
+    c("heard", PAIR_HEARD),
+    c("late", LAST_FIGURE),
+    c("early", SECOND_FIGURE),
+    c("shift", ARRIVE),
+    c("lastBars", "Keep the foot on the beat to the top note."),
   ],
 };
