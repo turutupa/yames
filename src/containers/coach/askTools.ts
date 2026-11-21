@@ -209,6 +209,20 @@ export function runAskCall(call: ToolCall, said: string): string {
   return id;
 }
 
+/**
+ * A press, for a tool button's `onClick`: the second click of a double-click
+ * (`detail` 2 and up) is not a new press. Without this a double-click on a chip
+ * ran its call twice, and the second click could land on a button drawn by the
+ * first (the receipt's Undo where the proposal's button was). A key press has
+ * `detail` 0 and always counts.
+ */
+export function onePress(fn: () => void): (event: { detail: number }) => void {
+  return (event) => {
+    if (event.detail > 1) return;
+    fn();
+  };
+}
+
 /** The proposal's button: the runner checks it is still good, then does it. */
 export function pressProposal(id: string): void {
   const turn = turnOf(id);

@@ -308,6 +308,17 @@ describe("a proposal", () => {
     expect(host.changes()).toEqual([]);
   });
 
+  it("the second click of a double-click is not a press: one change, and the Undo drawn in its place is not pressed", () => {
+    const host = use(subdivisionHost(), toolCtx({ screen: "beat" }));
+    render(<Thread />);
+    act(() => void runAskCall({ tool: "click_subdivision", args: { subdivision: 2 } }, ""));
+    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go"), { detail: 1 }));
+    act(() => fireEvent.click(screen.getByTestId("ask-undo"), { detail: 2 }));
+    expect(host.now()).toBe(2);
+    expect(screen.getByTestId("ask-undo")).toBeInTheDocument();
+    expect(host.changes().map((c) => c.member)).toEqual(["setClickSubdivision"]);
+  });
+
   it("not now drops it for good", () => {
     const host = use(subdivisionHost(), toolCtx({ screen: "beat" }));
     act(() => void runAskCall({ tool: "click_subdivision", args: { subdivision: 2 } }, ""));

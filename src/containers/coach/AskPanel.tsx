@@ -9,7 +9,7 @@ import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
 import { consumeAskFocus, noteAskScreen, sendAsk, useAskState, type AskTurn } from "./askStore";
 import { AskToolTurn } from "./AskToolTurn";
-import { askToolChips, runAskCall } from "./askTools";
+import { askToolChips, onePress, runAskCall } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
 
@@ -180,7 +180,7 @@ function AskConversation({
         {chips.map((chip) => {
           const words = lineText(t, chip.label);
           return (
-            <button key={chip.id} type="button" className="ask-chip" data-chip={chip.id} onClick={() => runAskCall(chip.call, words)}>
+            <button key={chip.id} type="button" className="ask-chip" data-chip={chip.id} onClick={onePress(() => runAskCall(chip.call, words))}>
               {words}
             </button>
           );

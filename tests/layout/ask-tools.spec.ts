@@ -111,6 +111,30 @@ for (const theme of THEMES) {
   });
 }
 
+test("a fast double-click has one effect: on a chip, one call; on a proposal's button, one change, and the Undo drawn under the pointer is not pressed", async ({ page }) => {
+  await openShot(page, "metronome", { width: 1440, height: 900 }, "ember");
+  await openFromRail(page);
+  await page.locator(".ask-panel .ask-chip", { hasText: "Slower" }).dblclick();
+  await page.waitForTimeout(150);
+  await expect(page.locator(".ask-panel [data-testid=ask-proposal]")).toHaveCount(1);
+  await expect(page.locator(".ask-panel .ask-thread [data-testid=ask-refusal], .ask-panel .ask-thread [data-testid=ask-receipt]")).toHaveCount(0);
+
+  await page.locator(".ask-panel [data-testid=ask-proposal-go]").dblclick();
+  await page.waitForTimeout(150);
+  const receipt = page.locator(".ask-panel [data-testid=ask-receipt]");
+  await expect(receipt).toHaveCount(1);
+  await expect(receipt).toContainText("Tempo");
+  await expect(page.locator(".ask-panel [data-testid=ask-undone]")).toHaveCount(0);
+  await expect(page.locator(".ask-panel [data-testid=ask-refusal]")).toHaveCount(0);
+  await expect(receipt.locator("[data-testid=ask-undo]")).toBeVisible();
+
+  // The chip row above the text box stays where it is after a press: a double-click there is one call too.
+  const turnsBefore = await page.locator(".ask-panel .ask-thread .ask-tool").count();
+  await page.locator(".ask-panel .ask-chip-row .ask-chip", { hasText: "Faster" }).dblclick();
+  await page.waitForTimeout(150);
+  await expect(page.locator(".ask-panel .ask-thread .ask-tool")).toHaveCount(turnsBefore + 1);
+});
+
 test("in German at 1024: long words wrap inside the panel", async ({ page }) => {
   await openShot(page, "metronome", { width: 1024, height: 760 }, "ember", { lng: "de" });
   await openFromRail(page);
