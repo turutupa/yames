@@ -467,6 +467,7 @@
     "onPracticeSegmentEnded",
     "onRampStep",
     "onScoreOnset",
+    "onSettingsChangeNotified",
     "onSongDropped",
     "onStateChange",
     "onTakeCapped",

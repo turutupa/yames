@@ -24,7 +24,40 @@
     "runScore": "Score {{score}} bij {{bpm}} BPM",
     "runScoreNoBpm": "Score {{score}}",
     "sessionScore": "Sessiescore {{score}} · {{word}}",
-    "openRuns": "Open Toolruns bij Voortgang"
+    "openRuns": "Open Toolruns bij Voortgang",
+    "finding": {
+      "beatEarly": "Op beat {{beat}} van de maat kwamen je noten gemiddeld {{ms}} ms vroeger dan op de andere beats: {{agreeing}} van de {{notes}} noten op die beat kwamen vroeger dan het gemiddelde van de andere beats.",
+      "beatLate": "Op beat {{beat}} van de maat kwamen je noten gemiddeld {{ms}} ms later dan op de andere beats: {{agreeing}} van de {{notes}} noten op die beat kwamen later dan het gemiddelde van de andere beats.",
+      "subdivision": "Bij {{missed}} van de {{total}} beats waarin die positie meetelde, viel er geen noot op de positie ‘{{position}}’.",
+      "ceiling": "Bij {{low}} BPM viel minstens de helft van je {{lowNotes}} noten op de klik binnen {{lowMs}} ms van hun gebruikelijke plek ten opzichte van de klik; bij {{high}} BPM lag minstens de helft van je {{highNotes}} noten op de klik {{highMs}} ms of meer ervan af.",
+      "driftEarly": "Over een stuk van {{notes}} noten op de klik vielen de laatste {{third}} noten gemiddeld {{ms}} ms eerder ten opzichte van de klik dan de eerste {{third}} noten.",
+      "driftLate": "Over een stuk van {{notes}} noten op de klik vielen de laatste {{third}} noten gemiddeld {{ms}} ms later ten opzichte van de klik dan de eerste {{third}} noten.",
+      "position": {
+        "2": {
+          "0": "achtste op de beat",
+          "1": "achtste tussen de beats"
+        },
+        "3": {
+          "0": "eerste triool",
+          "1": "tweede triool",
+          "2": "derde triool"
+        },
+        "4": {
+          "0": "eerste zestiende",
+          "1": "tweede zestiende",
+          "2": "derde zestiende",
+          "3": "vierde zestiende"
+        },
+        "6": {
+          "0": "eerste sextool",
+          "1": "tweede sextool",
+          "2": "derde sextool",
+          "3": "vierde sextool",
+          "4": "vijfde sextool",
+          "5": "zesde sextool"
+        }
+      }
+    }
   },
   "coachModel": {
     "label": "Coachmodel",

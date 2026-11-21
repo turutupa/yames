@@ -293,6 +293,31 @@ pub struct PracticeSegment {
     pub burst_start_indices: Vec<usize>,
 }
 
+impl PracticeSegment {
+    /// What the session log keeps of a closed segment (`commands.rs`'s
+    /// `on_segment_end`). Field by field, so the free-play findings that
+    /// ride on the event are never stored (c5c2b L4).
+    pub fn from_segment_end(segment_end: &crate::timing::PracticeSegmentEnded) -> Self {
+        Self {
+            start_ms: segment_end.start_ms,
+            end_ms: segment_end.end_ms,
+            start_bpm: segment_end.bpm,
+            end_bpm: segment_end.bpm,
+            score: segment_end.score,
+            component_scores: segment_end.component_scores.clone(),
+            end_reason: segment_end.end_reason,
+            // Path B — the grid the matcher scored against, for "why did
+            // this score this way?" from session_*.json.
+            inferred_divisor: segment_end.inferred_divisor,
+            inferred_divisor_confidence: segment_end.inferred_divisor_confidence,
+            // D4c — raw IC errors and where each burst starts in them,
+            // without which they cannot reproduce the score they sit beside.
+            interval_errors: segment_end.interval_errors.clone(),
+            burst_start_indices: segment_end.burst_start_indices.clone(),
+        }
+    }
+}
+
 /// D3c — four-component scoring breakdown. Each component is in `[0, 1]`
 /// (multiply by 100 to get the "0–100" form the plan documents).
 ///

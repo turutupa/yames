@@ -364,6 +364,7 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
                 subdivision_index: s,
                 subdivision_total: click_total,
                 beats_per_bar: 4,
+                bar_beat: q % 4,
             });
         }
     }
