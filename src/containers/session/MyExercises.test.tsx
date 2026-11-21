@@ -11,8 +11,10 @@ import { ALT, NOW } from "../../session/testKit";
 import type { PlayerProgress } from "../../session/progress";
 import { CUSTOM_PATH_ID, CUSTOM_STEP_ID, customExerciseId } from "../../paths/custom";
 import type { Recipe } from "../../paths/custom";
-import { MY_EXERCISES_KEY, resetMyExercisesForTest } from "../../session/myExercises";
+import { MY_EXERCISES_KEY, resetMyExercisesForTest, updateMyExercises } from "../../session/myExercises";
 import { installSettings } from "../../test/parity/store";
+import { load } from "@tauri-apps/plugin-store";
+import { loadMyExercisesList } from "./MyExercisesSection";
 
 afterEach(() => {
   cleanup();
@@ -108,18 +110,72 @@ describe("My exercises on the Paths screen", () => {
     render(<PathsView session={session} />);
     const rows = await screen.findAllByTestId("my-exercise");
     fireEvent.click(within(rows[0]).getByTestId("my-exercise-remove"));
-    expect(screen.getAllByTestId("my-exercise")).toHaveLength(1);
+    await waitFor(() => expect(screen.getAllByTestId("my-exercise")).toHaveLength(1));
     await waitFor(() => expect(store.values.get(MY_EXERCISES_KEY)).toEqual([{ recipe: CHROMATIC, addedAt: NOW - 1 }]));
     fireEvent.click(screen.getByTestId("my-exercise-undo"));
-    expect(screen.getAllByTestId("my-exercise")).toHaveLength(2);
+    await waitFor(() => expect(screen.getAllByTestId("my-exercise")).toHaveLength(2));
     expect(screen.getAllByTestId("my-exercise")[0]).toHaveTextContent("A minor pentatonic");
     await waitFor(() => expect(store.values.get(MY_EXERCISES_KEY)).toHaveLength(2));
     expect(screen.queryByTestId("my-exercise-undo")).toBeNull();
 
     for (const row of screen.getAllByTestId("my-exercise")) fireEvent.click(within(row).getByTestId("my-exercise-remove"));
     // Two presses, one Undo: the last one removed.
-    expect(screen.queryAllByTestId("my-exercise")).toHaveLength(0);
+    await waitFor(() => expect(screen.queryAllByTestId("my-exercise")).toHaveLength(0));
     expect(screen.getByTestId("my-exercise-undo")).toBeInTheDocument();
+    expect(store.values.get(MY_EXERCISES_KEY)).toEqual([]);
+  });
+
+  it("an Undo the store refuses stays, and says why; the same notes back already: no second row", async () => {
+    const store = await withStored([
+      { recipe: MOCK_17, addedAt: NOW },
+      { recipe: CHROMATIC, addedAt: NOW - 1 },
+    ]);
+    const { session } = fake();
+    render(<PathsView session={session} />);
+    const rows = await screen.findAllByTestId("my-exercise");
+    fireEvent.click(within(rows[0]).getByTestId("my-exercise-remove"));
+    await waitFor(() => expect(screen.getAllByTestId("my-exercise")).toHaveLength(1));
+    // Meanwhile the same notes come back (as t2c's Add would: another object, another date).
+    await act(async () => {
+      await updateMyExercises((list) => [{ recipe: { ...MOCK_17, position: "root" }, addedAt: NOW + 5 }, ...list]);
+    });
+    fireEvent.click(screen.getByTestId("my-exercise-undo"));
+    await waitFor(() => expect(screen.getByTestId("my-exercise-notice")).toHaveTextContent("already back"));
+    expect(screen.getAllByTestId("my-exercise")).toHaveLength(2);
+    expect(store.values.get(MY_EXERCISES_KEY)).toHaveLength(2);
+    expect(screen.queryByTestId("my-exercise-undo")).toBeNull();
+  });
+
+  it("a write that fails says nothing changed and keeps the Undo", async () => {
+    const store = await withStored([
+      { recipe: MOCK_17, addedAt: NOW },
+      { recipe: CHROMATIC, addedAt: NOW - 1 },
+    ]);
+    const { session } = fake();
+    render(<PathsView session={session} />);
+    const rows = await screen.findAllByTestId("my-exercise");
+    fireEvent.click(within(rows[0]).getByTestId("my-exercise-remove"));
+    await waitFor(() => expect(screen.getAllByTestId("my-exercise")).toHaveLength(1));
+    const settings = (await load("settings.json")) as unknown as { set: (k: string, v: unknown) => Promise<void> };
+    settings.set = async () => {
+      throw new Error("disk full");
+    };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fireEvent.click(screen.getByTestId("my-exercise-undo"));
+    await waitFor(() => expect(screen.getByTestId("my-exercise-notice")).toHaveTextContent("nothing changed"));
+    expect(screen.getByTestId("my-exercise-undo")).toBeInTheDocument();
+    expect(screen.getAllByTestId("my-exercise")).toHaveLength(1);
+    expect(store.values.get(MY_EXERCISES_KEY)).toHaveLength(1);
+    warn.mockRestore();
+  });
+
+  it("the list's chunk failing to load shows nothing, never an error to the app's root", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const Loaded = (await loadMyExercisesList<object>(() => Promise.reject(new Error("chunk")))).default;
+    const { container } = render(<Loaded />);
+    expect(container.innerHTML).toBe("");
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it("keeps a recipe that can't be built any more, says so, and lets the player remove it", async () => {

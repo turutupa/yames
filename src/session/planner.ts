@@ -84,6 +84,16 @@ import {
   sessionCount,
   yourTurnPicks,
 } from "./rotation";
+import { isCustomTake } from "./myExercises";
+
+/**
+ * Sessions with a Path Take in them (t2bb): which warm-up turns up and the
+ * "your turn" cadence follow the Path Sessions only. A Session of nothing but
+ * My exercises moves neither (it still counts as time away not taken).
+ */
+function pathSessionCount(progress: PlayerProgress): number {
+  return sessionCount({ ...progress, takes: progress.takes.filter((t) => !isCustomTake(t)) });
+}
 
 export const PLAN_MINUTES = [5, 10, 15, 20] as const;
 export type PlanMinutes = (typeof PLAN_MINUTES)[number];
@@ -612,7 +622,7 @@ export function warmupStepOn(
   bpm: number,
   clean: number | null,
 ): Extract<PlanStep, { kind: "metronome" }> {
-  const variantSeed = pickVariantSeed(warmup, sessionCount(progress), undefined);
+  const variantSeed = pickVariantSeed(warmup, pathSessionCount(progress), undefined);
   // Its own backing: a warm-up's grid need not be the focus Exercise's.
   const backing = warmup.backing.kind === "click" ? warmup.backing.subdivision : 1;
   return {
@@ -640,8 +650,8 @@ function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number, focu
   // notes change from day to day, with a variant of their own each Session.
   const focusClean = cleanTempoOf(progress, path.id, exercise.id);
   const own = warmupsOf(path, focus.step.id);
-  const sessions = sessionCount(progress);
-  let warmup = focusClean === null && own.length > 0 ? own[sessions % own.length] : exercise;
+  const sessions = pathSessionCount(progress);
+  let warmup =focusClean === null && own.length > 0 ? own[sessions % own.length] : exercise;
   // A pack's warm-up says whose clean tempo it reads and what share of it to
   // start at; with no history it has a tempo of its own.
   let plan = warmup.warmup;
@@ -748,7 +758,8 @@ function eased(pick: Pick, tempo: Tempo, drop: number, daysAway: number, progres
 
 /** What a player just coming back last played, the point to pick up from. */
 function recapPick(paths: readonly PathDoc[], progress: PlayerProgress): Pick | null {
-  const last = progress.takes[0];
+  // The last Path Take: a custom one since is not a point to pick up from (t2bb).
+  const last = progress.takes.find((t) => !isCustomTake(t));
   if (!last) return null;
   const path = paths.find((p) => p.id === last.pathId);
   if (!path) return null;
@@ -1021,7 +1032,7 @@ export function planSession(input: PlannerInput): SessionPlan {
     ? { code: "focusChosen", values: { path: focusPath.title } }
     : undefined;
   const turn = chosen ?? (mood === "returning" && paths.length > 1 ? headContext(focusPath, true) : undefined);
-  const sessions = sessionCount(progress);
+  const sessions = pathSessionCount(progress);
   const yourTurn =
     minutes >= 15 && sessions % YOUR_TURN_EVERY === YOUR_TURN_EVERY - 1
       ? ([focusPath, ...paths.filter((p) => p.id !== focusPath.id)]
