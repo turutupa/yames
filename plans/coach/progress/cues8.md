@@ -21,7 +21,12 @@ Cues: `src/paths/specs/triads-cues.ts`, attached with `withCues` in `triads.ts`.
 - [x] Proof-read (below): three sonnet readers, one per Level, 31 objections, 31 taken (some by a
   wider fix than the one suggested). `check` after the fixes: 0 errors, 0 refused, 0 rewritten
   (`gc9.log`).
-- [ ] Translations
+- [x] Translations: 171 distinct sentences. Three sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi
+  ja); the fourth (ko zh-CN zh-TW) could not be started (the session's concurrent-agent limit), so I
+  wrote those three myself from the overlays' terms. Every file checked with `check_i18n.py` (problems
+  0 in all fourteen), merged: every overlay 1284 of 1284 (`/tmp/coach-cues8/merge.log`; the warnings
+  are all "different numbers", fret numbers as digits where the English spells them). `check triads`
+  after the merge: 0 errors (`gc10.log`).
 - [ ] Gates
 
 ## The proof-read (three separate sonnet readers: cues, tabs, purposes, how-tos, per-bar triggers, the guide's rules)
