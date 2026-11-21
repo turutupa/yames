@@ -43,7 +43,7 @@ Tests: `pathCards.test.ts` (PC), `pathMatch.test.ts` (PM), `askCards.test.tsx` (
 | `plan.returnNotPassed` / `returnUngraded` / `returnMine` | … isn't passed yet / isn't graded / own exercises aren't on a Path | `reviewStateOf` null / grading / path id `my-exercises` | – | PC "not passed", "my own exercises" |
 | `plan.returnNotFair` | A Take of this Exercise is marked not fair, and the review schedule doesn't leave it out, so I won't quote it. | `isMarkedNotFair` on `takesOf` | no number said | PC "a Take marked not fair" |
 | `theory.chordNotes` | {{chord}} is {{notes}}. | `spellChord`, else `chordNotes` + `noteName` | then `show_chord {chord}` | PC "the notes of F7", "lower case", "no spelling table" |
-| `theory.chordUnknown` / `chordUnknownNoRoot` | I don't know the chord “{{asked}}”. Chords I can spell on {{root}}: … / … written like C, Am, G7… | `parseChordName` null | uncertain; nothing drawn | PC "a chord the app cannot read", AC "an unknown chord" |
+| `theory.chordUnknown` | I don't know that chord. Chords I can spell on {{root}}: {{known}}. | suffix `unknown` / `parseChordName` null | uncertain; nothing drawn | PC "a chord the app cannot read", AC "an unknown chord" |
 | `theory.scalesIntroMajor` / `Minor` | Over {{chord}}, taken as the home chord of {{root}} major/minor, the app's jam offers these scales. | `homeKeyOf` (minor third and no major third → minor) | the key assumed is said | PC "what fits over F", "a minor chord…" |
 | `theory.scale` | {{root}} {{name}}: {{notes}}. | `scalesForChord`, `spellScale` (else `scaleNotes`) | then `show_scale` for the first | PC "what fits over F" |
 | `term.evenMs` | The evenness pass mark here is {{bar}}%: at {{bpm}} BPM, with this Exercise's closest notes {{gap}} ms apart, it allows a spread of about {{ms}} ms around your own average timing. | `passBars` `timingEvenness`; tempo = `run.bpm`, else the Take's, else `passAtBpm`; gap = `buildTake` schedule's smallest onset gap × 60000/bpm; σ = k√(−2 ln p), k = half `tempo_aware_window_ms` (`score.rs` `evenness`) | 4/4-family meters only | PC "the evenness formula agrees with the metric's own note" (0.85 → 14 ms at 125 ms gaps), "what does 85% mean" |
@@ -55,6 +55,32 @@ Tests: `pathCards.test.ts` (PC), `pathMatch.test.ts` (PM), `askCards.test.tsx` (
 | `term.cleanNotFair` | Takes you marked not fair don't count toward it. | any Take marked not fair | – | same |
 | `term.cleanMine` | Your own exercises aren't on a Path… | path id `my-exercises` | no number | PC "my own exercises" |
 | `chip.*` (9) | the chip labels | `cardsHere` | – | `suggest.test.ts` |
+
+## Gates (logs in /tmp/coach-c2b2a/)
+
+- tsc: pass (`coach-c2b2a-tsc-2`). Build: pass (`coach-c2b2a-build`).
+- vitest full (`test.log`): 50332 passed, 5 failed + the known `TabStage.render.test.tsx` load failure. The five
+  (`take.test` 20 s timeout, `SupportSection`, three `useSessionRun.*` waitFor) are in files this leg does not touch;
+  re-run alone they pass (`coach-c2b2a-rerun`). `src/coach/ask` + `askCards`/`useAskHost`/`askContext`: pass (`coach-c2b2a-vt2`).
+- Layout `ask`, `ask-tools`, `ask-cards` (`layout.log`): 34 passed, 7 failed on 30 s timeouts (the page's first
+  load under a full queue). Re-run: `ask-tools` + `ask-cards` with 2 workers, 21 passed and the two first
+  `ask-cards` scenes timed out at `openShot` again (`layout-2.log`); `ask-cards` alone with 1 worker: 4 of 4
+  passed, first try (`coach-c2b2a-layout-3`).
+
+## Decisions
+
+- Chords are two closed arguments (`root` from `ROOT_NAMES`, `suffix` from `CHORD_SUFFIXES` or `unknown`), not a
+  query: the matcher reads the chord off the raw text, `parseChordName` decides the suffix; unknown is "I don't
+  know that chord" with the chords spelled on that root.
+- "What fits over F" takes the chord as the home chord of its own key (minor for a minor third), and says so.
+  The jam's key is not read (Jam cards are c5a's).
+- The plan answers from the plan (`plan.steps[stepIndex + 1]`), not `bigAction` (the context has no full
+  `RunState`); `test_out` and `set_minutes` only outside a Session, as their tools.
+- Clean tempo is `shownCleanTempoOf`, pooled across variants as Progress shows it (the app's own definition);
+  the review schedule is not quoted when any Take of the Exercise is marked not fair (`reviewStateOf` counts them).
+- No chips for an ungraded player (as before); typed questions still answered. No chip for theory, minutes, Test out.
+- Not built: "show me the next position" (needs the last drawn position across turns; nothing in the context
+  holds it). Left for c2b2b or a later leg.
 
 ## To translate (c2b2b)
 
