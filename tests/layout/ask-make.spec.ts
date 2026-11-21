@@ -87,7 +87,9 @@ async function previewReceiptEnded(page: Page, root: string, where: string, engl
 
   await settleAnimations(page);
   await go.scrollIntoViewIfNeeded();
-  await go.click();
+  // A phone is pressed with a finger.
+  if (minTarget > 0) await go.tap();
+  else await go.click();
   // The make receipt by its place: "Open Paths" below adds a receipt of its own (with its own Undo).
   const receipts = page.locator(`${root} [data-testid=ask-receipt]`);
   await expect(receipts.first()).toBeVisible({ timeout: 10_000 });
