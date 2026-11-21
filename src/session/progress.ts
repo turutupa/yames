@@ -206,6 +206,24 @@ export function shownCleanTempoOf(
   return shownCleanTempo(progress, pathId, exerciseId).bpm;
 }
 
+/**
+ * The clean tempo a plan reason may quote (nf1c): the stored ceiling the
+ * planner computes from, and only when it is also the clean tempo the app shows
+ * (`shownCleanTempoOf`), so the sentence agrees with Progress and with the
+ * tempo printed beside it. Null when a Take marked not fair holds the ceiling
+ * (the two differ) or there is no clean tempo: the reason then takes its
+ * variant that names no clean tempo.
+ */
+export function quotableCleanTempoOf(
+  progress: PlayerProgress,
+  pathId: string,
+  exerciseId: string,
+): number | null {
+  const ceiling = cleanTempoOf(progress, pathId, exerciseId);
+  if (ceiling === null) return null;
+  return shownCleanTempo(progress, pathId, exerciseId).bpm === ceiling ? ceiling : null;
+}
+
 /** `shownCleanTempoOf`, and whether it is the ceiling as stored (no Take marked not fair holds it). */
 function shownCleanTempo(
   progress: PlayerProgress,

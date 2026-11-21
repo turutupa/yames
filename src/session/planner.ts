@@ -61,10 +61,11 @@ import {
   factsOf,
   isExercisePassed,
   isGradable,
+  isMarkedNotFair,
   isStepSkipped,
   isUngradedTake,
   lastCaughtTake,
-  shownCleanTempoOf,
+  quotableCleanTempoOf,
   takesOf,
 } from "./progress";
 import type { PlayerProgress } from "./progress";
@@ -341,7 +342,7 @@ function siblingStart(
   path: PathDoc,
   exercise: Exercise,
   progress: PlayerProgress,
-): { bpm: number; clean: number; title: string } | null {
+): { bpm: number; clean: number | null; title: string } | null {
   const step = path.steps.find((s) => s.exercises.some((e) => e.id === exercise.id));
   const own = beatsPerNote(exercise);
   if (!step || own === null) return null;
@@ -356,11 +357,9 @@ function siblingStart(
   const sibling = siblings[0];
   if (!sibling) return null;
   // The tempo is worked out from the stored ceiling (the planner's input); the
-  // sentence quotes the clean tempo the app shows (`shownCleanTempoOf`, nf1b
-  // M2). When only Takes marked not fair hold one there is no shown tempo and
-  // no sentence that says this honestly without a new string: the ceiling stays
-  // in the words (an open question for the owner, `progress/nf1b.md`).
-  const quoted = shownCleanTempoOf(progress, path.id, sibling.e.id) ?? sibling.clean;
+  // sentence quotes it only when it is also the clean tempo the app shows
+  // (`quotableCleanTempoOf`, nf1c). Otherwise null: "newFromSiblingNoClean".
+  const quoted = quotableCleanTempoOf(progress, path.id, sibling.e.id);
   // The same notes per second on this Exercise's grid, then 80% of that.
   const target = SIBLING_START_SHARE * sibling.clean * (own / sibling.grid);
   const rungs = gradedRungs(exercise);
@@ -401,7 +400,12 @@ export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProg
         bpm: sibling.bpm,
         why: {
           code: "newFromSibling",
-          values: { ...values, bpm: sibling.bpm, clean: sibling.clean, sibling: sibling.title },
+          values: {
+            ...values,
+            bpm: sibling.bpm,
+            ...(sibling.clean === null ? {} : { clean: sibling.clean }),
+            sibling: sibling.title,
+          },
         },
       };
     }
@@ -418,13 +422,21 @@ export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProg
 
   const facts = factsOf(last);
   if (last.passed) {
-    const clean = cleanTempoOf(progress, path.id, exercise.id) ?? last.bpm;
+    const stored = cleanTempoOf(progress, path.id, exercise.id);
+    const clean = stored ?? last.bpm;
     if (clean >= passAt) {
-      // The words quote the shown clean tempo (nf1b M2); the tempo stays on the ceiling.
-      const quoted = shownCleanTempoOf(progress, path.id, exercise.id) ?? last.bpm;
+      // The tempo stays on the ceiling; the words quote it only when the app
+      // shows the same clean tempo (nf1c), and never the tempo of a Take marked
+      // not fair. Otherwise "passedKeepGoingNoClean", with no number.
+      const quoted =
+        stored === null
+          ? isMarkedNotFair(last)
+            ? null
+            : last.bpm
+          : quotableCleanTempoOf(progress, path.id, exercise.id);
       return {
         bpm: Math.min(rungAbove(exercise, clean), rungAbove(exercise, passAt)),
-        why: { code: "passedKeepGoing", values: { ...values, bpm: quoted } },
+        why: { code: "passedKeepGoing", values: quoted === null ? values : { ...values, bpm: quoted } },
       };
     }
     const value = facts.headlineValue;
@@ -569,9 +581,9 @@ export function warmupTempo(
       ? plan.fallbackBpm
       : Math.max(MIN_WARMUP_BPM, Math.round((clean * plan.startAtCleanRatio) / 5) * 5)
     : warmupBpm(warmup, clean);
-  // `clean` here is for the words only (`warmupStepOn`): the shown clean tempo
-  // (nf1b M2). The tempo above is worked out from the stored ceiling.
-  return { bpm, clean: clean === null ? null : shownCleanTempoOf(progress, path.id, reference) };
+  // `clean` here is for the words only (`warmupStepOn`): the ceiling the tempo
+  // above came from, when the app shows the same clean tempo (nf1c).
+  return { bpm, clean: quotableCleanTempoOf(progress, path.id, reference) };
 }
 
 /**
@@ -589,8 +601,8 @@ export function warmupCeiling(warmup: Exercise, focus: Exercise, focusBpm: numbe
 
 /**
  * One warm-up step on a chosen Exercise, with the reason its tempo has.
- * `clean` is the clean tempo the reason quotes: the shown one
- * (`shownCleanTempoOf`), null for no clean tempo to quote.
+ * `clean` is the clean tempo the reason quotes (`quotableCleanTempoOf`), null
+ * for none to quote.
  */
 export function warmupStepOn(
   path: PathDoc,
@@ -655,9 +667,9 @@ function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number, focu
       bpm = warmupBpm(exercise, clean);
     }
   }
-  // The tempo comes from the stored ceiling; the reason quotes the shown clean
-  // tempo of the same Exercise (nf1b M2).
-  const quoted = clean === null ? null : shownCleanTempoOf(progress, path.id, reference);
+  // The tempo comes from the stored ceiling; the reason quotes it only when the
+  // app shows the same clean tempo for that Exercise (nf1c).
+  const quoted = clean === null ? null : quotableCleanTempoOf(progress, path.id, reference);
   return warmupStepOn(path, warmup, progress, minutes, bpm, quoted);
 }
 
@@ -677,9 +689,10 @@ export function edgeStep(
 ): PlanStep {
   const clean = cleanTempoOf(progress, pick.path.id, pick.exercise.id);
   const bpm = options.bpm ?? clean ?? tempoFor(pick.path, pick.exercise, progress).bpm;
-  // The start is the stored ceiling; "Last time it was N" quotes the shown
-  // clean tempo (nf1b M2), and with none shown it is a first look.
-  const quoted = clean === null ? null : shownCleanTempoOf(progress, pick.path.id, pick.exercise.id);
+  // The start is the stored ceiling; "Last time it was N" quotes it only when
+  // the app shows the same clean tempo (nf1c), otherwise the first-look words.
+  // The stored reason code then reads `edgeFirst` (only the export reads it).
+  const quoted = clean === null ? null : quotableCleanTempoOf(progress, pick.path.id, pick.exercise.id);
   const why: Reason =
     options.why ??
     (quoted === null
@@ -720,8 +733,9 @@ export function exerciseStep(
 
 /** Come down `drop` rungs from where it would be, and say so. */
 function eased(pick: Pick, tempo: Tempo, drop: number, daysAway: number, progress: PlayerProgress): Tempo {
-  // Words only: the shown clean tempo (nf1b M2); `tempo` came from the ceiling.
-  const clean = shownCleanTempoOf(progress, pick.path.id, pick.exercise.id);
+  // Words only: the ceiling `tempo` came from, when the app shows the same
+  // clean tempo (nf1c); otherwise "backEasedNoClean".
+  const clean = quotableCleanTempoOf(progress, pick.path.id, pick.exercise.id);
   const bpm = rungBelow(pick.exercise, tempo.bpm, drop);
   return {
     bpm,
@@ -1055,6 +1069,10 @@ export function planSession(input: PlannerInput): SessionPlan {
     if (!item) return null;
     used.add(key(item));
     if (item.kind === "review") {
+      // "Two Takes at your clean tempo, N BPM" only when N is the clean tempo
+      // the app shows (nf1c); the slipped variant names a rung, not a clean tempo.
+      const quote =
+        item.slips > 0 || quotableCleanTempoOf(progress, item.path.id, item.exercise.id) === item.bpm;
       return exerciseStep(
         item,
         id,
@@ -1066,7 +1084,7 @@ export function planSession(input: PlannerInput): SessionPlan {
             values: {
               exercise: item.exercise.title,
               path: item.path.title,
-              bpm: item.bpm,
+              ...(quote ? { bpm: item.bpm } : {}),
               days: daysSince(item.since, now) ?? 0,
               ...(item.slips > 0 ? { slipped: 1 } : {}),
             },
