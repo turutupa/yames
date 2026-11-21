@@ -60,7 +60,7 @@
             {"when":"notes","say":"Hammer exactly two frets above the first finger."},
             {"when":"late","say":"Put each picked note right on the click."},
             {"when":"early","say":"Place each hammer-on on its count, not before.","more":1},
-            {"when":"lastBars","say":"Hammer on the same 'and' you picked on."}
+            {"when":"lastBars","say":"Count '1 and 2 and' to the last hammer-on."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -466,7 +466,7 @@
             {"when":"extras","say":"Keep the first finger on fret 5 throughout.","more":0},
             {"when":"late","say":"Put each fret 5 right on the click."},
             {"when":"early","say":"Place each hammer-on on its count, not before."},
-            {"when":"lastBars","say":"Hammer on the same 'and' you picked on."}
+            {"when":"lastBars","say":"Count '1 and 2 and' to the last hammer-on."}
           ],
           "grading": "graded",
           "feedback": "livePerNote",
@@ -946,7 +946,7 @@
             {"when":"notes","say":"Keep the lower finger down before you pull.","more":0},
             {"when":"late","say":"Put each picked note right on the click."},
             {"when":"early","say":"Let the pulled note wait for its 'and'."},
-            {"when":"lastBars","say":"Pull off on the same 'and' you picked on."}
+            {"when":"lastBars","say":"Count '1 and 2 and' to the last pull-off."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -1352,7 +1352,7 @@
             {"when":"extras","say":"Keep the first finger on fret 5 throughout.","more":0},
             {"when":"late","say":"Put each picked note right on the click."},
             {"when":"early","say":"Let the pulled note wait for its 'and'."},
-            {"when":"lastBars","say":"Pull off on the same 'and' you picked on."}
+            {"when":"lastBars","say":"Count '1 and 2 and' to the last pull-off."}
           ],
           "grading": "graded",
           "feedback": "livePerNote",
@@ -1469,7 +1469,7 @@
             {"when":"early","say":"Let each open note wait for its 'and'."},
             {"when":"afterHeld","say":"Count the last open E's beat, then go again."},
             {"when":"openString","say":"Have the next fret ready as the open rings."},
-            {"when":"stringChange","say":"Know the next string before each pair starts."},
+            {"when":"stringChange","say":"Look at the next string during the open note."},
             {"when":"lastBars","say":"Finish on the open top E and let it ring.","more":0}
           ],
           "grading": "graded",
@@ -3185,7 +3185,7 @@
             {"when":"even","say":"Hammer up, pull down, one pick each beat.","more":0,"general":true},
             {"when":"heard","say":"Keep the little finger down across the turn.","more":1},
             {"when":"extras","say":"Lift each string's fingers as you leave it."},
-            {"when":"notes","say":"Pick the top note again to start down.","more":1},
+            {"when":"notes","say":"Pick the highest note again to start down.","more":1},
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Spread the three notes evenly to the next pick."},
             {"when":"afterHeld","say":"Count the long note's two beats, then go."},
@@ -4507,7 +4507,7 @@
             {"when":"extras","say":"Pull off without catching the next string."},
             {"when":"notes","say":"Say the group's three notes before you start."},
             {"when":"late","say":"Put each picked note right on the click."},
-            {"when":"early","say":"Count '1 e and a' through all eight notes."},
+            {"when":"early","say":"Count '1 e and a 2 e and a' between picks."},
             {"when":"lastBars","say":"Keep feeding the string to the next pick."}
           ],
           "grading": "graded",
@@ -5919,7 +5919,7 @@
             {"when":"late","say":"Put each group's first note on the click."},
             {"when":"early","say":"Wait for the click before each group."},
             {"when":"stringChange","say":"Let the pick fall onto the next string.","more":1},
-            {"when":"lastBars","say":"Play the same lick a string lower.","more":0}
+            {"when":"lastBars","say":"Keep the same pick strokes a string lower.","more":1}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -6056,7 +6056,7 @@
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           "cues": [
             {"when":"even","say":"Count the beats through the turn at the top.","more":1,"general":true},
-            {"when":"heard","say":"Pick the top note again to start down.","more":0},
+            {"when":"heard","say":"Pick the highest note again to start down.","more":0},
             {"when":"extras","say":"Lift each string's fingers as you leave it."},
             {"when":"notes","say":"Say each string's two notes before you start."},
             {"when":"late","say":"Put each beat's first note on the click."},
@@ -7259,7 +7259,7 @@
             {"when":"even","say":"One pick a string: hammers up, pulls down.","more":0,"general":true},
             {"when":"heard","say":"Keep the little finger down across the turn.","more":1},
             {"when":"extras","say":"Lift each string's fingers as you leave it."},
-            {"when":"notes","say":"Pick the top note again to start down.","more":1},
+            {"when":"notes","say":"Pick the highest note again to start down.","more":1},
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Spread the three notes evenly to the next pick."},
             {"when":"stringChange","say":"Have the first finger on the next string early."},
@@ -8785,14 +8785,14 @@
           "coachLine": "This is the Step's test piece. Evenness and right notes after the take.",
           "cues": [
             {"when":"even","say":"Change shape near the top, on a picked note.","general":true},
-            {"when":"heard","say":"Pick the top note again to start down."},
+            {"when":"heard","say":"Pick the highest note again to start down."},
             {"when":"extras","say":"Lift each string's fingers as you leave it."},
             {"when":"notes","say":"Shift up two frets for the G string.","more":0},
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Spread the three notes evenly to the next pick."},
             {"when":"shift","say":"Move the hand on the picked note, not after.","more":1},
             {"when":"stringChange","say":"Have the first finger on the next string early."},
-            {"when":"lastBars","say":"Keep the descent as even as the climb."}
+            {"when":"lastBars","say":"Count '1-trip-let' all the way down."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -9134,7 +9134,7 @@
             {"when":"notes","say":"Say the six notes once before you start."},
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Spread the six notes evenly to the next pick."},
-            {"when":"stringChange","say":"Cross strings with a hammer, not a pick.","more":1},
+            {"when":"stringChange","say":"Hammer up to the new string; pick on return.","more":1},
             {"when":"lastBars","say":"Keep the six as even as the picked ones."}
           ],
           "grading": "graded",
@@ -9733,7 +9733,7 @@
             {"when":"heard","say":"Drop the first finger hard on the new string."},
             {"when":"extras","say":"Let each string stop as the next one starts."},
             {"when":"notes","say":"Count three notes on each string."},
-            {"when":"late","say":"Put the one picked note right on the click."},
+            {"when":"late","say":"Put each picked note right on the click."},
             {"when":"early","say":"Count six notes to every click."},
             {"when":"afterHeld","say":"Count the held note out, then start again."},
             {"when":"stringChange","say":"Have the first finger on the next string early."},
@@ -9995,7 +9995,7 @@
                   {"when":"heard","say":"Drop the first finger hard on the new string."},
                   {"when":"extras","say":"Let each string stop as the next one starts."},
                   {"when":"notes","say":"Count three notes on each string."},
-                  {"when":"late","say":"Put the one picked note right on the click."},
+                  {"when":"late","say":"Put each picked note right on the click."},
                   {"when":"early","say":"Count six notes to every click."},
                   {"when":"afterHeld","say":"Count the held note out, then start again."},
                   {"when":"stringChange","say":"Have the first finger on the next string early."},
@@ -10072,7 +10072,7 @@
                   {"when":"heard","say":"Drop the first finger hard on the new string."},
                   {"when":"extras","say":"Let each string stop as the next one starts."},
                   {"when":"notes","say":"Count three notes on each string."},
-                  {"when":"late","say":"Put the one picked note right on the click."},
+                  {"when":"late","say":"Put each picked note right on the click."},
                   {"when":"early","say":"Count six notes to every click."},
                   {"when":"afterHeld","say":"Count the held note out, then start again."},
                   {"when":"stringChange","say":"Have the first finger on the next string early."},
@@ -10149,7 +10149,7 @@
                   {"when":"heard","say":"Drop the first finger hard on the new string."},
                   {"when":"extras","say":"Let each string stop as the next one starts."},
                   {"when":"notes","say":"Count three notes on each string."},
-                  {"when":"late","say":"Put the one picked note right on the click."},
+                  {"when":"late","say":"Put each picked note right on the click."},
                   {"when":"early","say":"Count six notes to every click."},
                   {"when":"afterHeld","say":"Count the held note out, then start again."},
                   {"when":"stringChange","say":"Have the first finger on the next string early."},
@@ -10226,7 +10226,7 @@
                   {"when":"heard","say":"Drop the first finger hard on the new string."},
                   {"when":"extras","say":"Let each string stop as the next one starts."},
                   {"when":"notes","say":"Count three notes on each string."},
-                  {"when":"late","say":"Put the one picked note right on the click."},
+                  {"when":"late","say":"Put each picked note right on the click."},
                   {"when":"early","say":"Count six notes to every click."},
                   {"when":"afterHeld","say":"Count the held note out, then start again."},
                   {"when":"stringChange","say":"Have the first finger on the next string early."},
@@ -10248,12 +10248,12 @@
           "coachLine": "There is one picked note a bar here, so my timing has little to hold. Record a take and listen: that is the real check.",
           "cues": [
             {"when":"even","say":"Pick once; everything else is hammer or pull.","more":0,"general":true},
-            {"when":"heard","say":"Have the lower fingers down before each hammer.","more":1},
+            {"when":"heard","say":"Set the other fingers before the hammer lands.","more":1},
             {"when":"extras","say":"Let each string stop as the next one starts."},
             {"when":"notes","say":"Pull, hammer, pull at the top, then come down.","more":0},
             {"when":"late","say":"Put the one picked note right on the click."},
             {"when":"early","say":"Count six notes to every click."},
-            {"when":"stringChange","say":"Lead each lower string with the little finger.","more":1}
+            {"when":"stringChange","say":"Have the next string's finger ready early.","more":1}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -10723,7 +10723,7 @@
           "coachLine": "The picked note on each beat is the anchor. A hammer-on from nowhere too quiet to hear costs nothing, so your ear decides whether it spoke.",
           "cues": [
             {"when":"even","say":"One pick a beat; start each string from the air.","more":0,"general":true},
-            {"when":"heard","say":"Land the first finger with the third, together.","more":1},
+            {"when":"heard","say":"Have the first finger down before the hammer."},
             {"when":"extras","say":"Let each string stop as the next one starts."},
             {"when":"notes","say":"Say each string's two notes before you start."},
             {"when":"late","say":"Put each beat's picked note on the click."},
@@ -11553,7 +11553,7 @@
           "coachLine": "One picked note is all the timing can hold firmly in bar 2. A pull-off too quiet to hear costs nothing, so its volume is yours to judge.",
           "cues": [
             {"when":"even","say":"Land both fingers at once; the upper one sounds.","more":1,"general":true},
-            {"when":"heard","say":"Flick the finger toward the floor as you pull."},
+            {"when":"heard","say":"Drop the upper finger hard on each new string."},
             {"when":"extras","say":"Let each string stop as the next one starts."},
             {"when":"notes","say":"Say each string's two notes before you start."},
             {"when":"late","say":"Put each beat's first note on the click."},
@@ -11963,7 +11963,7 @@
           "coachLine": "Three picked notes in two bars are all the timing can hold firmly. The rest is yours to hear: every string starting as loud as the one before.",
           "cues": [
             {"when":"even","say":"Two picks: one at the bottom, one at the top.","more":0,"general":true},
-            {"when":"heard","say":"Pick the top note again to start down.","more":0},
+            {"when":"heard","say":"Pick the highest note again to start down.","more":0},
             {"when":"extras","say":"Let each string stop as the next one starts."},
             {"when":"notes","say":"Say each string's two notes before you start."},
             {"when":"late","say":"Put each picked note right on the click."},
@@ -12740,7 +12740,7 @@
             {"when":"late","say":"Pick each string on its beat or half beat.","more":1},
             {"when":"early","say":"Spread the three notes evenly to the next pick."},
             {"when":"afterHeld","say":"Count the held note out, then start again."},
-            {"when":"shift","say":"Move the hand on the picked note, not after."},
+            {"when":"shift","say":"Shift during the last note on each string."},
             {"when":"stringChange","say":"Have the first finger on the next string early."},
             {"when":"lastBars","say":"Hold the top note right to the end."}
           ],
@@ -13211,8 +13211,8 @@
             {"when":"late","say":"Pick each string on its beat or half beat."},
             {"when":"early","say":"Spread the three notes evenly to the next pick."},
             {"when":"afterHeld","say":"Count the held note out, then start again."},
-            {"when":"shift","say":"Move the hand on the picked note, not after.","more":1},
-            {"when":"stringChange","say":"Have the new string fretted before the pick.","more":1},
+            {"when":"shift","say":"Shift during the last note on each string.","more":1},
+            {"when":"stringChange","say":"Set the next string while the last note rings."},
             {"when":"lastBars","say":"Hold the last low note right to the end."}
           ],
           "grading": "graded",
@@ -13673,13 +13673,13 @@
           "coachLine": "The shifts are where notes go missing. I'll say how even it was and check the notes after the take.",
           "cues": [
             {"when":"even","say":"Look at the fret you are going to.","more":1,"general":true},
-            {"when":"heard","say":"Leave each finger down as the next one lands."},
+            {"when":"heard","say":"Hammer and pull hard enough to hear each note."},
             {"when":"extras","say":"Lift each string's fingers as you leave it."},
             {"when":"notes","say":"Start the positions at frets 5, 8 and 10.","more":0},
             {"when":"late","say":"Pick each string on its beat or half beat."},
             {"when":"early","say":"Spread the three notes evenly to the next pick."},
             {"when":"afterHeld","say":"Count the held note out, then start again."},
-            {"when":"shift","say":"Shift between beats, on the picked note.","more":1},
+            {"when":"shift","say":"Move the hand on the picked note, not after.","more":1},
             {"when":"stringChange","say":"Have the first finger on the next string early."},
             {"when":"lastBars","say":"Land the last note on its beat and hold it."}
           ],
@@ -13848,7 +13848,7 @@
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Spread the five notes evenly to the next pick."},
             {"when":"stringChange","say":"Pick again for the new string on the last beat.","more":1},
-            {"when":"lastBars","say":"Fall onto the G string with a fresh pick.","more":0}
+            {"when":"lastBars","say":"Count five to the click right to the end."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -14827,13 +14827,13 @@
           ],
           "coachLine": "With the band on I time your picked notes against it and check the notes after the take. Direct input or headphones make that fair.",
           "cues": [
-            {"when":"even","say":"Land each picked note with the bass and drums.","more":0,"general":true},
-            {"when":"heard","say":"Pull the group's last note off with a flick."},
+            {"when":"even","say":"Pick on each beat, then three legato notes.","more":0,"general":true},
+            {"when":"heard","say":"Hammer and pull hard enough to hear each note."},
             {"when":"extras","say":"Pull off without catching the next string."},
             {"when":"notes","say":"Keep the hand in fifth position throughout.","more":4},
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Give each legato note its own sixteenth."},
-            {"when":"stringChange","say":"Change only the string under the pick.","more":4},
+            {"when":"stringChange","say":"Move to the new string only on the pick.","more":4},
             {"when":"lastBars","say":"Count '1 e and a' right to the last note."}
           ],
           "grading": "graded",
@@ -15010,14 +15010,14 @@
           "coachLine": "This is the Step's test piece. I'll say how even it was and check the notes after the take.",
           "cues": [
             {"when":"even","say":"Count the climb's three beats; turn on four.","more":0,"general":true},
-            {"when":"heard","say":"Pick the top note again to start down.","more":1},
+            {"when":"heard","say":"Pick the highest note again to start down.","more":1},
             {"when":"extras","say":"Lift each string's fingers as you leave it."},
             {"when":"notes","say":"Count three notes on each string."},
             {"when":"late","say":"Pick each string on its beat or half beat."},
             {"when":"early","say":"Spread the three notes evenly to the next pick."},
             {"when":"afterHeld","say":"Count the long note's two beats, then go."},
-            {"when":"shift","say":"Move the hand on the picked note, not after.","more":1},
-            {"when":"stringChange","say":"Have the first finger on the next string early."},
+            {"when":"shift","say":"Shift during the last note on each string.","more":1},
+            {"when":"stringChange","say":"Have the new string fretted before the pick."},
             {"when":"lastBars","say":"Hold the last note its full two beats."}
           ],
           "grading": "graded",
@@ -15476,7 +15476,7 @@
             {"when":"heard","say":"Keep every hammer-on firm to the last second."},
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Give each legato note its own sixteenth."},
-            {"when":"lastBars","say":"Keep the roll as even in the last seconds."}
+            {"when":"lastBars","say":"Keep the roll as even as in the first seconds."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -15840,7 +15840,7 @@
             {"when":"even","say":"Hold each long note for its full length.","general":true},
             {"when":"heard","say":"Pull the group's last note off with a flick."},
             {"when":"extras","say":"Lift off cleanly into each rest."},
-            {"when":"notes","say":"Use fingers one, two, four on both top strings.","more":0},
+            {"when":"notes","say":"Name each long note before you play it."},
             {"when":"late","say":"Put each picked note right on the click."},
             {"when":"early","say":"Count the rest before the next note."},
             {"when":"afterHeld","say":"Count each long note out, then move on."},
@@ -16156,11 +16156,11 @@
             {"when":"even","say":"Lay the first finger flat across two strings.","more":0,"general":true},
             {"when":"heard","say":"Pull the group's last note off with a flick."},
             {"when":"extras","say":"Lift off cleanly into each rest."},
-            {"when":"notes","say":"Come down the B string in two steps.","more":1},
+            {"when":"notes","say":"Name each long note before you play it."},
             {"when":"late","say":"Put each picked note right on the click."},
             {"when":"early","say":"Count the rest before the next note."},
             {"when":"afterHeld","say":"Count each long note out, then move on."},
-            {"when":"shift","say":"Shift on the longer note, little finger first.","more":1},
+            {"when":"shift","say":"Move the hand on the picked note, not after."},
             {"when":"stringChange","say":"Have the next string's finger ready early."},
             {"when":"lastBars","say":"Hold the last note its full length."}
           ],
@@ -16472,7 +16472,7 @@
             {"when":"notes","say":"Start the second phrase with the first finger.","more":1},
             {"when":"late","say":"Put each picked note right on the click."},
             {"when":"early","say":"Count the rest before the next note."},
-            {"when":"afterHeld","say":"Count each long note out, then move on."},
+            {"when":"afterHeld","say":"Count each long note, then play the next."},
             {"when":"shift","say":"Move the hand on the picked note, not after."},
             {"when":"stringChange","say":"Have the next string's finger ready early."},
             {"when":"lastBars","say":"Hold the last note its full length."}
@@ -22633,8 +22633,8 @@
             {"when":"late","say":"Put each beat's picked note on the click."},
             {"when":"early","say":"Count six notes to every click."},
             {"when":"afterHeld","say":"Count each long note out, then move on."},
-            {"when":"shift","say":"Look ahead during each long note.","more":0},
-            {"when":"stringChange","say":"Change strings with a hammer, not a pick."},
+            {"when":"shift","say":"Be in place for the beat after the long note.","more":0},
+            {"when":"stringChange","say":"Hammer onto the new string; pick each beat."},
             {"when":"lastBars","say":"Hold the last long note its full beat."}
           ],
           "grading": "graded",

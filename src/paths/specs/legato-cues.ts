@@ -36,17 +36,20 @@ const PULL_CLEAR = "Pull off without catching the next string.";
 const FIRST_ON_FIVE = "Keep the first finger on fret 5 throughout.";
 const LIFT_LEAVE = "Lift each string's fingers as you leave it.";
 const FIRST_NEXT = "Have the first finger on the next string early.";
-const NEXT_STRING_KNOW = "Know the next string before each pair starts.";
+const NEXT_STRING_KNOW = "Look at the next string during the open note.";
 const HELD_BEAT = "Count the long note's beat, then start again.";
 const HELD_TWO = "Count the long note's two beats, then go.";
 const LAND_HOLD = "Land the last note on its beat and hold it.";
-const SAME_AND_HAMMER = "Hammer on the same 'and' you picked on.";
-const SAME_AND_PULL = "Pull off on the same 'and' you picked on.";
+const SAME_AND_HAMMER = "Count '1 and 2 and' to the last hammer-on.";
+const SAME_AND_PULL = "Count '1 and 2 and' to the last pull-off.";
+const SHIFT_RING = "Shift during the last note on each string.";
+const HP_HEAR = "Hammer and pull hard enough to hear each note.";
+const LONG_NAME = "Name each long note before you play it.";
 const GROUP_NOTES = "Say the group's three notes before you start.";
 const SHIFT_ON_PICK = "Move the hand on the picked note, not after.";
 const PAIRS_TOP = "Keep the pairs even right to the top.";
 const HAMMER_UPPER = "Hammer each string's upper note firmly.";
-const PICK_TOP_AGAIN = "Pick the top note again to start down.";
+const PICK_TOP_AGAIN = "Pick the highest note again to start down.";
 const LITTLE_TURN = "Keep the little finger down across the turn.";
 const LEAVE_DOWN = "Leave each finger down as the next one lands.";
 const PULL_SECOND = "Pull the second pull-off as firmly as the first.";
@@ -236,7 +239,7 @@ export const LEGATO_CUES: CueBook = {
     c("extras", PULL_CLEAR),
     c("notes", GROUP_NOTES),
     c("late", PICK_LATE),
-    c("early", "Count '1 e and a' through all eight notes."),
+    c("early", "Count '1 e and a 2 e and a' between picks."),
     c("lastBars", "Keep feeding the string to the next pick."),
   ],
   "rolls.roll-melody": [
@@ -281,7 +284,7 @@ export const LEGATO_CUES: CueBook = {
     c("late", "Put each group's first note on the click."),
     c("early", "Wait for the click before each group."),
     c("stringChange", "Let the pick fall onto the next string.", 1),
-    c("lastBars", "Play the same lick a string lower.", 0),
+    c("lastBars", "Keep the same pick strokes a string lower.", 1),
   ],
   "pentatonic-legato.box-round": [
     g("Count the beats through the turn at the top.", 1),
@@ -368,7 +371,7 @@ export const LEGATO_CUES: CueBook = {
     c("early", SPREAD_THREE),
     c("shift", SHIFT_ON_PICK, 1),
     c("stringChange", FIRST_NEXT),
-    c("lastBars", "Keep the descent as even as the climb."),
+    c("lastBars", "Count '1-trip-let' all the way down."),
   ],
 
   // Level 2 · warm-ups
@@ -397,7 +400,7 @@ export const LEGATO_CUES: CueBook = {
     c("notes", "Say the six notes once before you start."),
     c("late", BEAT_PICK_LATE),
     c("early", SPREAD_SIX),
-    c("stringChange", "Cross strings with a hammer, not a pick.", 1),
+    c("stringChange", "Hammer up to the new string; pick on return.", 1),
     c("lastBars", "Keep the six as even as the picked ones."),
   ],
   "from-nowhere.nowhere-ascent": [
@@ -405,7 +408,7 @@ export const LEGATO_CUES: CueBook = {
     c("heard", DROP_FIRST),
     c("extras", STRING_STOP),
     c("notes", THREE_EACH),
-    c("late", ONE_PICK_LATE),
+    c("late", PICK_LATE),
     c("early", SIX_TO_CLICK),
     c("afterHeld", HELD_OUT),
     c("stringChange", FIRST_NEXT),
@@ -413,18 +416,18 @@ export const LEGATO_CUES: CueBook = {
   ],
   "from-nowhere.one-pick-round": [
     g("Pick once; everything else is hammer or pull.", 0),
-    c("heard", "Have the lower fingers down before each hammer.", 1),
+    c("heard", "Set the other fingers before the hammer lands.", 1),
     c("extras", STRING_STOP),
     c("notes", "Pull, hammer, pull at the top, then come down.", 0),
     c("late", ONE_PICK_LATE),
     c("early", SIX_TO_CLICK),
-    c("stringChange", "Lead each lower string with the little finger.", 1),
+    c("stringChange", NEXT_FINGER_READY, 1),
   ],
 
   // Level 3 · Step 9: from nowhere in the box
   "nowhere-box.nowhere-box-two": [
     g("One pick a beat; start each string from the air.", 0),
-    c("heard", "Land the first finger with the third, together.", 1),
+    c("heard", "Have the first finger down before the hammer."),
     c("extras", STRING_STOP),
     c("notes", STRING_PAIR_SAY),
     c("late", BEAT_PICK_LATE),
@@ -446,7 +449,7 @@ export const LEGATO_CUES: CueBook = {
   ],
   "nowhere-box.nowhere-box-down": [
     g("Land both fingers at once; the upper one sounds.", 1),
-    c("heard", PULL_FLICK),
+    c("heard", "Drop the upper finger hard on each new string."),
     c("extras", STRING_STOP),
     c("notes", STRING_PAIR_SAY),
     c("late", BEAT_FIRST_LATE),
@@ -485,7 +488,7 @@ export const LEGATO_CUES: CueBook = {
     c("late", PICK_HALF, 1),
     c("early", SPREAD_THREE),
     c("afterHeld", HELD_OUT),
-    c("shift", SHIFT_ON_PICK),
+    c("shift", SHIFT_RING),
     c("stringChange", FIRST_NEXT),
     c("lastBars", TOP_HOLD),
   ],
@@ -497,19 +500,19 @@ export const LEGATO_CUES: CueBook = {
     c("late", PICK_HALF),
     c("early", SPREAD_THREE),
     c("afterHeld", HELD_OUT),
-    c("shift", SHIFT_ON_PICK, 1),
-    c("stringChange", NEW_FRETTED, 1),
+    c("shift", SHIFT_RING, 1),
+    c("stringChange", "Set the next string while the last note rings."),
     c("lastBars", LOW_HOLD),
   ],
   "six-string-runs.position-run": [
     g("Look at the fret you are going to.", 1),
-    c("heard", LEAVE_DOWN),
+    c("heard", HP_HEAR),
     c("extras", LIFT_LEAVE),
     c("notes", "Start the positions at frets 5, 8 and 10.", 0),
     c("late", PICK_HALF),
     c("early", SPREAD_THREE),
     c("afterHeld", HELD_OUT),
-    c("shift", "Shift between beats, on the picked note.", 1),
+    c("shift", SHIFT_ON_PICK, 1),
     c("stringChange", FIRST_NEXT),
     c("lastBars", LAND_HOLD),
   ],
@@ -523,7 +526,7 @@ export const LEGATO_CUES: CueBook = {
     c("late", BEAT_PICK_LATE),
     c("early", SPREAD_FIVE),
     c("stringChange", "Pick again for the new string on the last beat.", 1),
-    c("lastBars", "Fall onto the G string with a fresh pick.", 0),
+    c("lastBars", "Count five to the click right to the end."),
   ],
   "odd-groups.six-roll": [
     g("Lean on the fourth note of each six.", 1),
@@ -545,13 +548,13 @@ export const LEGATO_CUES: CueBook = {
 
   // Level 3 · Step 12: long lines
   "long-lines.etude": [
-    g("Land each picked note with the bass and drums.", 0),
-    c("heard", PULL_LAST),
+    g("Pick on each beat, then three legato notes.", 0),
+    c("heard", HP_HEAR),
     c("extras", PULL_CLEAR),
     c("notes", "Keep the hand in fifth position throughout.", 4),
     c("late", BEAT_PICK_LATE),
     c("early", LEGATO_SIXTEENTH),
-    c("stringChange", "Change only the string under the pick.", 4),
+    c("stringChange", "Move to the new string only on the pick.", 4),
     c("lastBars", "Count '1 e and a' right to the last note."),
   ],
   "long-lines.six-round": [
@@ -562,8 +565,8 @@ export const LEGATO_CUES: CueBook = {
     c("late", PICK_HALF),
     c("early", SPREAD_THREE),
     c("afterHeld", HELD_TWO),
-    c("shift", SHIFT_ON_PICK, 1),
-    c("stringChange", FIRST_NEXT),
+    c("shift", SHIFT_RING, 1),
+    c("stringChange", NEW_FRETTED),
     c("lastBars", HOLD_LAST_TWO),
   ],
   "long-lines.roll-minute": [
@@ -571,7 +574,7 @@ export const LEGATO_CUES: CueBook = {
     c("heard", "Keep every hammer-on firm to the last second."),
     c("late", BEAT_PICK_LATE),
     c("early", LEGATO_SIXTEENTH),
-    c("lastBars", "Keep the roll as even in the last seconds."),
+    c("lastBars", "Keep the roll as even as in the first seconds."),
   ],
 
   // Level 3 · Step 13: a second key, over the band
@@ -579,7 +582,7 @@ export const LEGATO_CUES: CueBook = {
     g("Hold each long note for its full length."),
     c("heard", PULL_LAST),
     c("extras", REST_LIFT),
-    c("notes", "Use fingers one, two, four on both top strings.", 0),
+    c("notes", LONG_NAME),
     c("late", PICK_LATE),
     c("early", REST_COUNT),
     c("afterHeld", LONG_OUT),
@@ -591,11 +594,11 @@ export const LEGATO_CUES: CueBook = {
     g("Lay the first finger flat across two strings.", 0),
     c("heard", PULL_LAST),
     c("extras", REST_LIFT),
-    c("notes", "Come down the B string in two steps.", 1),
+    c("notes", LONG_NAME),
     c("late", PICK_LATE),
     c("early", REST_COUNT),
     c("afterHeld", LONG_OUT),
-    c("shift", "Shift on the longer note, little finger first.", 1),
+    c("shift", SHIFT_ON_PICK),
     c("stringChange", NEXT_FINGER_READY),
     c("lastBars", LAST_FULL),
   ],
@@ -606,7 +609,7 @@ export const LEGATO_CUES: CueBook = {
     c("notes", "Start the second phrase with the first finger.", 1),
     c("late", PICK_LATE),
     c("early", REST_COUNT),
-    c("afterHeld", LONG_OUT),
+    c("afterHeld", "Count each long note, then play the next."),
     c("shift", SHIFT_ON_PICK),
     c("stringChange", NEXT_FINGER_READY),
     c("lastBars", LAST_FULL),
@@ -619,8 +622,8 @@ export const LEGATO_CUES: CueBook = {
     c("late", BEAT_PICK_LATE),
     c("early", SIX_TO_CLICK),
     c("afterHeld", LONG_OUT),
-    c("shift", "Look ahead during each long note.", 0),
-    c("stringChange", "Change strings with a hammer, not a pick."),
+    c("shift", "Be in place for the beat after the long note.", 0),
+    c("stringChange", "Hammer onto the new string; pick each beat."),
     c("lastBars", "Hold the last long note its full beat."),
   ],
   "warmup-advanced.six-roll-climb": [
