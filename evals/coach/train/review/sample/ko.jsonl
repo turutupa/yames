@@ -1,0 +1,50 @@
+{"id":"ko-00452","wording":"find_edge#7","text":"차례로 엣지 찾아줄래요?","where":"today","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"차례"}},"tags":["ambiguous"]}
+{"id":"ko-00195","wording":"find_edge#2","text":"과제 a줄 한계 찾기","where":"paths","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"a줄"}},"tags":["ambiguous"]}
+{"id":"ko-00399","wording":"open_step_name#0","text":"단계 마이너를 열어줘","where":"today","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"마이너를"}},"tags":["ambiguous"]}
+{"id":"ko-00578","wording":"open_step_of_path#7","text":"9단계 열어줘 피킹에서","where":"paths","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"path":"피킹","step":9}},"tags":["ambiguous"]}
+{"id":"ko-00503","wording":"play_exercise#6","text":"g줄 연습 스타트","where":"setlist","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"g줄"}},"tags":["ambiguous"]}
+{"id":"ko-00393","wording":"open_step_of_path#3","text":"코드 코스 7단계로 가고 싶어요","where":"beat","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"path":"코드","step":7}},"tags":["ambiguous"]}
+{"id":"ko-00641","wording":"play_exercise#3","text":"내추럴 틀어줘","where":"paths","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"내추럴"}},"tags":["ambiguous"]}
+{"id":"ko-00670","wording":"open_step_name#3","text":"단계: a줄에서","where":"beat","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"a줄에서"}},"tags":["ambiguous"]}
+{"id":"ko-00044","wording":"play_exercise_bpm#5","text":"이븐 183bpm","where":"drill","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"이븐","bpm":183}},"tags":["ambiguous"]}
+{"id":"ko-00586","wording":"open_step_of_path#5","text":"리듬에서 3단계 부탁","where":"paths","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"path":"리듬","step":3}},"tags":["ambiguous"]}
+{"id":"ko-00122","wording":"open_step_name#2","text":"전체를 단계로 가줘","where":"progress","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"전체를"}},"tags":["ambiguous"]}
+{"id":"ko-00117","wording":"play_exercise#7","text":"움직이는라는 거 시작해줄래요?","where":"paths","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"움직이는"}},"tags":["ambiguous"]}
+{"id":"ko-00489","wording":"open_step_of_path#7","text":"10단계 열어줘 리듬에서","where":"today","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"path":"리듬","step":10}},"tags":["ambiguous"]}
+{"id":"ko-00032","wording":"find_edge#4","text":"열두 마디에 걸친 A, A, B 한계를 찾아주세요","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"find_edge","args":{"exercise":"열두 마디에 걸친 A, A, B"}},"tags":["wrong-screen"]}
+{"id":"ko-00261","wording":"none_wish#5","text":"프로처럼 칠 수 있으면 좋을 텐데","where":"today","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ko-00019","wording":"click_subdivision#6","text":"메트로놈 클릭을 4연으로 해줄 수 있나요?","where":"session (ready)","expect":{"kind":"none"},"call":{"tool":"click_subdivision","args":{"subdivision":4}},"tags":["wrong-screen"]}
+{"id":"ko-00054","wording":"voice_on#7","text":"코치가 목소리로 말해주게 해줄래요?","where":"session (listening)","expect":{"kind":"none"},"call":{"tool":"set_setting","args":{"key":"coachVoice","value":"on"}},"tags":["wrong-screen"]}
+{"id":"ko-00492","wording":"explain_screen#4","text":"여기서 뭘 할 수 있어?","where":"session (listening)","expect":{"kind":"none"},"call":{"tool":"explain_screen","args":{}},"tags":["wrong-screen"]}
+{"id":"ko-00686","wording":"none_tuning#0","text":"기타 튜닝해줘","where":"drill","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ko-00611","wording":"none_chat#9","text":"알겠어요","where":"songs","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ko-00549","wording":"tempo_bpm#3","text":"85 bpm으로 맞춰줘","where":"beat","expect":{"kind":"none"},"call":{"tool":"set_tempo","args":{"bpm":85}},"tags":["withheld"]}
+{"id":"ko-00046","wording":"none_tuning#3","text":"드롭 D로 하려면 어떻게 해?","where":"songs","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ko-00432","wording":"play_exercise_bpm#4","text":"170bpm으로 한 박에 태핑 둘 스타트","where":"session (result)","expect":{"kind":"none"},"call":{"tool":"play_exercise","args":{"exercise":"한 박에 태핑 둘","bpm":170}},"tags":["wrong-screen"]}
+{"id":"ko-00346","wording":"show_scale#6","text":"E 디미니시드 온 반 띄워","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"show_scale","args":{"root":"E","scale":"diminishedWholeHalf"}},"tags":["wrong-screen"]}
+{"id":"ko-00130","wording":"find_edge#5","text":"두 번째 모양, 올라갔다 돌아오기에서 내 클린 최고 템포가 궁금해","where":"tools","expect":{"kind":"none"},"call":{"tool":"find_edge","args":{"exercise":"두 번째 모양, 올라갔다 돌아오기"}},"tags":["withheld"]}
+{"id":"ko-00659","wording":"none_unsupported#11","text":"공연 일정 캘린더에 넣어줘","where":"songs","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"ko-00078","wording":"find_edge#6","text":"인사이드, 움직이는 음 한계 템포 재줘","where":"setlist","expect":{"kind":"call","tool":"find_edge","args":{"exercise":"인사이드, 움직이는 음"}},"call":{"tool":"find_edge","args":{"exercise":"인사이드, 움직이는 음"}},"tags":[]}
+{"id":"ko-00594","wording":"swap_harder#2","text":"2파트 교체해, 더 어려운 걸로","where":"settings","expect":{"kind":"call","tool":"swap_part","args":{"at":2,"choice":"harder"}},"call":{"tool":"swap_part","args":{"at":2,"choice":"harder"}},"tags":[]}
+{"id":"ko-00152","wording":"count_in_off#7","text":"카운트인 좀 꺼줄 수 있나요?","where":"beat","expect":{"kind":"call","tool":"set_setting","args":{"key":"countIn","value":"off"}},"call":{"tool":"set_setting","args":{"key":"countIn","value":"off"}},"tags":["already"]}
+{"id":"ko-00031","wording":"loop_bar#3","text":"3번째 마디를 반복해주세요","where":"settings","expect":{"kind":"call","tool":"loop_bars","args":{"from":3}},"call":{"tool":"loop_bars","args":{"from":3}},"tags":[]}
+{"id":"ko-00542","wording":"test_out_here#3","text":"2단계를 시험으로 넘기고 싶어요","where":"paths","expect":{"kind":"call","tool":"test_out","args":{"step":2}},"call":{"tool":"test_out","args":{"step":2}},"tags":[]}
+{"id":"ko-00557","wording":"test_out_here#0","text":"12단계 건너뛰기 테스트 해줘","where":"paths","expect":{"kind":"call","tool":"test_out","args":{"step":12}},"call":{"tool":"test_out","args":{"step":12}},"tags":[]}
+{"id":"ko-00635","wording":"open_path#4","text":"코스: 트라이어드","where":"today","expect":{"kind":"call","tool":"open_path","args":{"path":"트라이어드"}},"call":{"tool":"open_path","args":{"path":"트라이어드"}},"tags":[]}
+{"id":"ko-00602","wording":"loop_bars#5","text":"7마디부터 13마디까지를 느리게 루프해줄래요?","where":"session (result)","expect":{"kind":"call","tool":"loop_bars","args":{"from":7,"to":13}},"call":{"tool":"loop_bars","args":{"from":7,"to":13}},"tags":[]}
+{"id":"ko-00617","wording":"suggestions_on#0","text":"코치 제안 켜줘","where":"beat","expect":{"kind":"call","tool":"set_setting","args":{"key":"coachSuggestions","value":"on"}},"call":{"tool":"set_setting","args":{"key":"coachSuggestions","value":"on"}},"tags":["already"]}
+{"id":"ko-00552","wording":"show_scale_at#6","text":"D 믹솔리디안을 루트 3번줄 모양으로 표시해줄래요?","where":"session (ready)","expect":{"kind":"call","tool":"show_scale","args":{"root":"D","scale":"mixolydian","position":"rootOn3"}},"call":{"tool":"show_scale","args":{"root":"D","scale":"mixolydian","position":"rootOn3"}},"tags":[]}
+{"id":"ko-00048","wording":"play_exercise_bpm#3","text":"느린 트릴 64 템포로 하고 싶어","where":"paths","expect":{"kind":"call","tool":"play_exercise","args":{"exercise":"느린 트릴","bpm":64}},"call":{"tool":"play_exercise","args":{"exercise":"느린 트릴","bpm":64}},"tags":[]}
+{"id":"ko-00278","wording":"swap_different#2","text":"1파트 바꿔주세요","where":"tools","expect":{"kind":"call","tool":"swap_part","args":{"at":1,"choice":"different"}},"call":{"tool":"swap_part","args":{"at":1,"choice":"different"}},"tags":[]}
+{"id":"ko-00155","wording":"start_today_at#1","text":"2파트부터 시작하자","where":"today","expect":{"kind":"call","tool":"start_today","args":{"at":2}},"call":{"tool":"start_today","args":{"at":2}},"tags":[]}
+{"id":"ko-00451","wording":"yours_input#4","text":"내 기타 소리 좀 들어봐","where":"progress","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"ko-00255","wording":"yours_devices#6","text":"USB 인터페이스 골라줘","where":"setlist","expect":{"kind":"yours","item":"devices"},"tags":["never"]}
+{"id":"ko-00203","wording":"yours_devices#3","text":"출력을 인터페이스로 해줘","where":"session (ready)","expect":{"kind":"yours","item":"devices"},"tags":["never"]}
+{"id":"ko-00562","wording":"yours_grading#2","text":"이번엔 채점해줘","where":"paths","expect":{"kind":"yours","item":"grading"},"tags":["never"]}
+{"id":"ko-00212","wording":"yours_model#2","text":"다른 LLM으로 전환하고 싶어","where":"setlist","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"ko-00633","wording":"yours_deleting#6","text":"지금 테이크 필요 없으니까 지워줄래요?","where":"paths","expect":{"kind":"yours","item":"deleting"},"tags":["never"]}
+{"id":"ko-00375","wording":"yours_deleting#9","text":"이 녹음 지우기","where":"songs","expect":{"kind":"yours","item":"deleting"},"tags":["never"]}
+{"id":"ko-00135","wording":"yours_grading#2","text":"이번엔 채점해줘","where":"today","expect":{"kind":"yours","item":"grading"},"tags":["never"]}
+{"id":"ko-00327","wording":"yours_model#1","text":"코치 모델 바꿔줘","where":"today","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"ko-00382","wording":"yours_model#4","text":"코치 두뇌를 더 똑똑한 걸로 바꿔줘","where":"today","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"ko-00276","wording":"yours_unfollowing#9","text":"블루스와는 졸업했어요, 팔로우 해제 부탁해요","where":"today","expect":{"kind":"yours","item":"unfollowing"},"tags":["never"]}

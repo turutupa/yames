@@ -171,6 +171,46 @@ describe("the take the review is handed", () => {
     expect(view.result.current.lastTake).toBeUndefined();
   });
 
+  // Review c5a2 finding 2: a pass played with the switch off must not be
+  // reviewed against the last recorded pass's audio ("% right notes").
+  it("stops being this pass's take when the next pass starts unrecorded", async () => {
+    ipc.stopTake.mockImplementation(() => Promise.resolve(take()));
+    const view = mount();
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: true, countingIn: false, enabled: true });
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: false, countingIn: false, enabled: true });
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: false, countingIn: false, enabled: false });
+    await settle();
+    expect(view.result.current.lastTake).toBeDefined();
+
+    view.rerender({ songId: SONG, isPlaying: true, countingIn: false, enabled: false });
+    await settle();
+    expect(view.result.current.lastTake).toBeUndefined();
+    expect(ipc.startTake).toHaveBeenCalledTimes(1);
+  });
+
+  it("a stop's take that lands after the next pass began is not that pass's", async () => {
+    let land: (t: JamTake) => void = () => {};
+    ipc.stopTake.mockImplementation(() => new Promise<JamTake>((resolve) => (land = resolve)));
+    const view = mount();
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: true, countingIn: false, enabled: true });
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: false, countingIn: false, enabled: false });
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: true, countingIn: false, enabled: false });
+    await settle();
+    await act(async () => {
+      land(take());
+    });
+    await settle();
+    expect(view.result.current.lastTake).toBeUndefined();
+    // The take itself is still filed on the shelf: recording is unchanged.
+    expect(view.result.current.takes.map((t) => t.id)).toEqual(["t1"]);
+  });
+
   it("is dropped when the file it names is deleted", async () => {
     ipc.stopTake.mockImplementation(() => Promise.resolve(take()));
     const view = mount();

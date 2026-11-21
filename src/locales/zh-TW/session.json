@@ -87,7 +87,11 @@
           "lastSession": "上次練習中彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。",
           "lastSession_other": "上次練習中彈了 {{count}} 分鐘，最後一遍是 {{exercise}}，{{bpm}} BPM。"
         },
-        "samePlace": "今天還是從同一個地方開始。"
+        "samePlace": "今天還是從同一個地方開始。",
+        "songDue": {
+          "one": "{{song}} 第 {{bar}} 小節該回來練習了。",
+          "range": "{{song}} 第 {{from}}–{{to}} 小節該回來練習了。"
+        }
       },
       "whatsIn": "練什麼，為什麼",
       "min": "分鐘",
@@ -852,6 +856,11 @@
       },
       "chip": {
         "hear": "先聽一下",
+        "hearBack": "聽第 {{bar}} 小節：先聽你的，再聽示範",
+        "hearYours": "你的：第 {{bar}} 小節 · 停止",
+        "hearDemo": "示範：第 {{bar}} 小節 · 停止",
+        "hearBackTune": "聽你的第 {{played}} 小節，再聽曲子第 {{tune}} 小節的示範",
+        "hearDemoTune": "示範：曲子第 {{tune}} 小節 · 停止",
         "try": "我該試什麼？"
       },
       "ungraded": {

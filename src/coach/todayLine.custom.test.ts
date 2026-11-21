@@ -114,6 +114,18 @@ describe("Today's line with custom Takes", () => {
     expect(say(input([customTake(30, "passed")]))).toBeNull();
   });
 
+  // c5a2b, the orchestrator's decision: the due Songs passage is gated on the
+  // RAW history, so a player whose only Takes are My-exercises Takes (not on
+  // their first day) still hears it; the Path's part stays silent.
+  it("a player with only custom Takes still gets the due Songs passage, alone", () => {
+    const songDue = { song: "Blackbird", from: 9, to: 12 };
+    expect(say({ ...input([customTake(30, "passed")]), songDue })).toBe("Bars 9 to 12 of Blackbird are due.");
+    // With a Path Take too, after the Path's line, which ignores the custom Take.
+    expect(say({ ...input([customTake(30, "passed"), pathTake(1)]), songDue })).toBe(`${pathOnly} Bars 9 to 12 of Blackbird are due.`);
+    // Nothing played at all: still the first day, still not said.
+    expect(say({ ...input([]), songDue })).toBeNull();
+  });
+
   it("the Step page's line reads the last Path Session too", () => {
     const base = { paths: PATHS, pathId: PATH, exerciseIds: [TUNE], now: NOW, grading: "on" as const };
     const plain = stepLine({ ...base, progress: { states: [], takes: [pathTake(1)], ceilings: [] } });

@@ -27,8 +27,8 @@ export type CardBody = FactCard | { shape: null; line: FactCard["lines"][number]
 
 const NO_TAKE_KEY = "ask.card.notNow.noTake";
 
-/** The card for a call where the player is now, or the one line that says why there is none. */
-function cardBodyFor(call: ToolCall): CardBody {
+/** The card for a call where the player is now, or the one line that says why there is none (a card the model chose too, leg c3b2a). */
+export function cardBodyFor(call: ToolCall): CardBody {
   const ctx = askToolContext();
   const out = ctx ? runFactCard(call, ctx) : { line: { key: NO_TAKE_KEY, values: {} } };
   return isCard(out) ? out : { shape: null, line: out.line };

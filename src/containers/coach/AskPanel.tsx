@@ -10,6 +10,7 @@ import { CoachGlyph } from "./CoachGlyph";
 import { askDraft, consumeAskFocus, keepAskDraft, noteAskScreen, setAskTab, useAskState, type AskTab, type AskTurn } from "./askStore";
 import { Notebook } from "./Notebook";
 import { answerTyped, setAskNextAnswerer } from "./askTyped";
+import { modelTurnWanted, stopModelTurn } from "./askModelTurn";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
 import { askCardChips, askUngradedHere, typedCardAnswerer, withinChipCap } from "./askCards";
@@ -186,6 +187,8 @@ function AskConversation({
   // Typed English reaches the fact cards after the router (leg c2b1b): plugged into
   // the send path's slot while the panel is mounted, unplugged when it closes.
   useEffect(() => setAskNextAnswerer(typedCardAnswerer(() => i18n.language)), [i18n]);
+  // The panel going stops the model's turn in flight (leg c3b2a); its answer is dropped.
+  useEffect(() => () => stopModelTurn(), []);
 
   // The tools' chips for where the player is (leg t1b1): chosen when the screen or
   // the thread is written (a turn updated in place too: a proposal's press changes
@@ -316,6 +319,16 @@ function Turn({ turn }: { turn: AskTurn }) {
           <span>{turn.text}</span>
         </div>
       );
+    case "model":
+      // The model is choosing (mock 11): one line and its Stop.
+      return (
+        <div className="ask-turn ask-turn-pending ask-model-working" aria-busy="true" data-testid="ask-model-working">
+          <span>{t("ask.model.working")}</span>{" "}
+          <button type="button" className="ask-tool-quiet" onClick={() => stopModelTurn()} data-testid="ask-model-stop">
+            {t("ask.model.stop")}
+          </button>
+        </div>
+      );
     case "coach":
       return turn.pending ? (
         <div className="ask-turn ask-turn-pending" aria-busy="true">
@@ -330,7 +343,7 @@ function Turn({ turn }: { turn: AskTurn }) {
 
 /** One line: what this device does with what you type (DESIGN 5.5); on the Notebook, where its lines come from (5.4, guardrail 7). */
 function AskFooter({ tab }: { tab: AskTab }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const model = useCoachModel().state;
   const key =
     tab === "notebook"
@@ -338,7 +351,9 @@ function AskFooter({ tab }: { tab: AskTab }) {
       : IS_MOBILE
         ? "ask.footer.phone"
         : model === "ready"
-          ? "ask.footer.model"
+          ? modelTurnWanted(i18n.language)
+            ? "ask.footer.choice"
+            : "ask.footer.model"
           : "ask.footer.local";
   return <p className="ask-footer">{t(key)}</p>;
 }
