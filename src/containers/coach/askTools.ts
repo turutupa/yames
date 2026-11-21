@@ -842,7 +842,15 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
       continue;
     }
     if (turn.body.kind !== "receipt") continue;
-    const undo = turn.body.undo;
+    // A next chip to the screen now on screen has nothing left to do ("Open Paths" on Paths; leg t2g,
+    // t2d's open point 5): it goes, and does not come back.
+    let body = turn.body;
+    const next = body.next?.filter((c) => !(c.call.tool === "go_to" && c.call.args.screen === view));
+    if (body.next && next && next.length < body.next.length) {
+      body = { ...body, next: next.length > 0 ? next : undefined };
+      setBody(turn.id, body);
+    }
+    const undo = body.undo;
     if (!undo || undo.state !== "live") continue;
     if (undo.chip) {
       // A chip's Undo: only on its screen and, in a Session, its step (leg chip1). The Settings
@@ -850,7 +858,7 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
       // place (leg chip1b, review L2 d); back from it, the view and the step are checked again.
       if (view === "settings") continue;
       const stepMoved = step !== undefined && (undo.step ?? null) !== step;
-      if (undo.view === null || undo.view !== view || stepMoved) retire(turn.id, turn.body, undo);
+      if (undo.view === null || undo.view !== view || stepMoved) retire(turn.id, body, undo);
       continue;
     }
     if (undo.view === null || undo.view === view) continue;
@@ -858,7 +866,7 @@ export function noteAskToolView(view: MainView, step?: number | null): void {
     // it ended (it does not come back) and what does the same job, rather than losing it silently
     // (review t2c, finding 3; review t2cb, MEDIUM 1).
     const said = laterDecidesUndo(undo) && undoLive(undo, Date.now()) ? { note: line("coachTools.make.undoLeft") } : {};
-    setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone", ...said } });
+    setBody(turn.id, { ...body, undo: { ...undo, state: "gone", ...said } });
   }
 }
 
