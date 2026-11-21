@@ -35,6 +35,30 @@ Note `long-chains.chain-four` can produce `openString`.
 - [ ] Step 4: translations.
 - [ ] Step 5: gates.
 
+## The numbers
+
+255 cues on 37 Exercises (36 graded and 1 self-checked with the general cue only, of which 3 warm-ups),
+115 distinct sentences. By trigger: general 37, heard 36, late 36, early 36, stringChange 36,
+extras 33, shift 19, lastBars 19, afterHeld 3 (no `notes`, no `openString`: none possible here).
+Refusals: first `check` 4 `cue.specific` errors and 109 `cue.refused` lines; reworded (below) to 0
+and 0. None of my cues is said in other words for a variant (the Path's 34 `variant.rewritten`
+lines are purposes and how-tos). Longest English cue 47 characters.
+
+## Refusals and rewordings
+
+`cue.specific`: "each G-string note" (read as the note G) -> "before each fret 14"; "the hammer to
+17" (a number it cannot place) -> dropped the number; "Am up on the beat, G down on the next" (chord
+symbols not declared) -> "One shape up, the other down, one per beat."; "on the D string, then the
+G" -> "Press fret 14 one string at a time.". `cue.refused` on the varied Exercises: "Press each note
+down as the pick reaches it." ("down" a direction, "reaches" a layout word) -> "Press each note
+fully as the pick gets there." (and "Sound every note of the sweep, one by one." on the warm-ups);
+"Move the hand as each bar starts." -> "Be in place before each bar starts."; "Follow the chords by
+ear" -> "Keep your place by ear, not by counting."; "Keep the last chord as even as the first." on
+big-round -> "Keep the end as even as the start."; triad-rolls' C to C minor pair refused "top three
+strings" and "Name the new chord" -> "Keep the pick on the strings in use." and the stock lastBars;
+four-chords-rock refused "Have the new shape ready" / "the next fingers" ("next" = which string) and
+"Reach for the nearest shape" -> the stock heard cue and "Make each move as small as it can be.".
+
 ## The proof-read (two separate sonnet readers: Beginner; Intermediate Steps 6 to 9 and warm-ups)
 
 32 objections (`/tmp/coach-cues13a/proof-sweep-picking/objections-{a,b}.md`), 31 taken, 1 answered.
