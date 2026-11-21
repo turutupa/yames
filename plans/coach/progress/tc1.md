@@ -77,8 +77,15 @@ removed); it also names a listed key a locale left unchanged. `--table` prints t
 
 ## Status
 - [x] English reworded (42), lint allow-list empty, lint widened, key-diff script.
-- [ ] Fourteen locales (sonnet helpers).
-- [ ] Gates: tsc, `npm run test`, build. Full layout suite owed (tip text changed; not run here).
+- [x] Fourteen locales (five sonnet helpers, `/tmp/coach-tc1/HELPER.md`). Key diff against `coach`: every
+  locale `42 keys changed, 0 outside the list, 0 listed but unchanged`; `git diff --stat` 84 lines (42 -/+)
+  per file, the 15 `toolTips.json` only. Where a locale's old text already met the rule (a neutral
+  "attack" in proMode: nl, pl, ru, ja, pt-BR, it, tr, zh-TW) the helper reworded it lightly so the key
+  changed with the English.
+- [x] Gates (2026-11-21): tsc pass (job coach-tc1-tsc); build pass (coach-tc1-build); `npm run test`
+  453/455 files (coach-tc1-test): the known TabStage.render symlink file, and `src/session/take.test.ts`
+  timing out at 20 s under load; re-run alone with the catalogue tests, 4/4 files, 62/62 pass
+  (coach-tc1-test-named; take.test 6.6 s). Full layout suite owed (tip text changed; not run here).
 
 ## Open (not in this leg's scope)
 About 55 more lines in the fatigue / check_in / stamina slots name the body without the lint's words
