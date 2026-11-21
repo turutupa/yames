@@ -91,7 +91,9 @@ test("at 1440, Ember: a Path passage quoted, its source pressed in a Session ope
   const opened = lastCard(page, ".ask-panel");
   await expect(opened).toHaveAttribute("data-card", "none");
   await expect(opened).toContainText("in the Path's words");
-  await expect(opened.locator("[data-source=path]")).toBeVisible();
+  // A long quote is cut into blocks, each with its own source line (c2b1b): every one says the Path.
+  await expect(opened.locator("[data-source=path]").first()).toBeVisible();
+  expect(await opened.locator(".coach-block-source:not([data-source=path])").count(), "only the Path as the source").toBe(0);
   await expect(sessionAsk).toBeAttached();
   await expect(page.locator(".ask-panel [data-testid=ask-receipt]")).toHaveCount(0);
   await page.locator(".ask-panel .ask-thread").evaluate((el) => (el.scrollTop = el.scrollHeight));

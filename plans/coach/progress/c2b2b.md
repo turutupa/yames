@@ -42,9 +42,29 @@ the drawn line is a button only with `onSource`; a card's Measured line pressed 
   `theory.scalesPlacedMajorAlso` / `MinorAlso`, "(Bbb sounds the same as A)". Every letter stays as the theory code spells it.
 - No card, tool, `intents.ts` entry, `note` or `short` was added or changed (decision 4).
 
-## Status
+## Locales
 
-- [x] code + unit tests (WIP commit)
-- [ ] locales (three sonnet translators, then three proof-readers)
-- [ ] scenes `tests/layout/ask-path-cards.spec.ts`
-- [ ] merge `coach`, gates
+Three sonnet translators (de nl pl ru / es fr it pt-BR tr / ja ko vi zh-CN zh-TW), then three separate sonnet proof-readers.
+Proof-read fixes: ru degree "аккорд V ступени"; es/fr/it/pt-BR "home chord" as the tonic chord; it Take feminine in the keys of this
+leg; tr apostrophes; ko no particle glued to a placeholder; zh-CN quote marks; zh "保持到最后". Settings labels in `noPassMarkSet` checked
+against each locale's `settings.json` / `shell.json`.
+Want a native read: it (the rest of `ask.json` still says "il take", masculine, against the glossary: a sweep for a later leg); the
+tonic wording in es/fr/it/pt-BR; ko "{{chord}} 코드는"; ja Test out 飛び級テスト (coachTools) vs テストアウト (session.json); zh Test out
+跳级测试 vs 测试 likewise; ru `plan.minutes`; pl `term.notesMark`.
+
+## Scenes (`tests/layout/ask-path-cards.spec.ts`)
+
+1440 Ember (Session: Path passage quoted, its source pressed, the Step quoted in Ask, no receipt, the Session stays); 1440 Manuscript
+(Today: `plan_minutes` with its proposal, then `scale_fits` with the neck, "Worked out by the app" pressed); phone de Manuscript
+(the source line 44 px tall, pressed in the Session); phone Ember (the neck fits the sheet).
+Seen in the pictures: a quote longer than a block is cut between words into two blocks, each with its own source line (c2b1a's
+`cardAnswer` rule, already named in c2b1b). Not changed here.
+
+## Gates (after `git merge coach`, rem2)
+
+- tsc pass (`coach-c2b2b-tsc-2`); build pass (`coach-c2b2b-build`).
+- vitest (`coach-c2b2b-test`, `/tmp/coach-c2b2b/test.log`): 51211 passed, 10 skipped; only the known `TabStage.render.test.tsx` load failure.
+- `npm run paths -- check`: not owed (nothing under the packs changed).
+- Layout `ask`, `ask-tools`, `ask-cards`, `ask-path-cards` (`coach-c2b2b-layout-2`): 42 passed, 3 failed: two `ask-cards` 30 s timeouts
+  at `openInSession` (load), one mine (a strict locator, fixed). Re-run of `ask-cards` + `ask-path-cards` with 2 workers
+  (`coach-c2b2b-layout-3`): 8 of 8 passed. Pictures in `/tmp/coach-c2b2b/shots/`.
