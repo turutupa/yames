@@ -76,6 +76,10 @@ function sameEntry(a: MyExercise, b: MyExercise): boolean {
  * rows left out here stay in the store (`updateMyExercises` writes them back).
  */
 export function readMyExercises(saved: unknown): MyExercise[] {
+  return readEntries(saved, MY_EXERCISES_MAX);
+}
+
+function readEntries(saved: unknown, max: number): MyExercise[] {
   if (!Array.isArray(saved)) return [];
   const out: MyExercise[] = [];
   for (const row of saved) {
@@ -85,21 +89,30 @@ export function readMyExercises(saved: unknown): MyExercise[] {
     if (typeof row.name === "string" && row.name.trim() !== "") entry.name = row.name;
     storedRowOf.set(entry, row);
     out.push(entry);
-    if (out.length === MY_EXERCISES_MAX) break;
+    if (out.length === max) break;
   }
   return out;
 }
 
-export type RemovedMyExercise = { entry: MyExercise; index: number };
+/**
+ * `entry` as it was taken out, and where. `entriesBefore`: how many entries the
+ * store held (shown or not) before it was taken out, when the caller knew.
+ */
+export type RemovedMyExercise = { entry: MyExercise; index: number; entriesBefore?: number };
 
-/** Take one out (found as the stored entry it is, not by a position that may be stale); `undo` puts it back where it was. */
+/**
+ * Take one out (found as the stored entry it is, not by a position that may be
+ * stale); `undo` puts it back where it was. `entries`: the store's entry count
+ * now (`myExercisesStoredEntries()`, shown or not), kept for the Undo.
+ */
 export function removeMyExercise(
   list: readonly MyExercise[],
   entry: MyExercise,
+  entries: number = list.length,
 ): { list: MyExercise[]; removed: RemovedMyExercise | null } {
   const index = list.findIndex((e) => sameEntry(e, entry));
   if (index < 0) return { list: [...list], removed: null };
-  return { list: list.filter((_, i) => i !== index), removed: { entry: list[index], index } };
+  return { list: list.filter((_, i) => i !== index), removed: { entry: list[index], index, entriesBefore: entries } };
 }
 
 /**
@@ -107,17 +120,21 @@ export function removeMyExercise(
  * shorter). Refused, and the list as it was, when it is already there (the
  * same stored entry, or the same notes added again since: `keyOf`, the
  * recipe's key, which the caller brings so this file needs no generator), or
- * when the list is full.
+ * when the list is full. Full counts the store's entries (`entries`, shown or
+ * not): an Undo may always give back the place its Remove freed, so a store
+ * already holding more than fifty (a hand edit, a later build) can still undo,
+ * and only an Add since the Remove fills it (t2bb review, item 1).
  */
 export function restoreMyExercise(
   list: readonly MyExercise[],
   removed: RemovedMyExercise,
   keyOf: (entry: MyExercise) => string | null = () => null,
+  entries: number = list.length,
 ): { list: MyExercise[]; refused: null | "already" | "full" } {
   const key = keyOf(removed.entry);
   const already = list.some((e) => sameEntry(e, removed.entry) || (key !== null && keyOf(e) === key));
   if (already) return { list: [...list], refused: "already" };
-  if (list.length >= MY_EXERCISES_MAX) return { list: [...list], refused: "full" };
+  if (entries >= Math.max(MY_EXERCISES_MAX, removed.entriesBefore ?? 0)) return { list: [...list], refused: "full" };
   const at = Math.min(removed.index, list.length);
   return { list: [...list.slice(0, at), removed.entry, ...list.slice(at)], refused: null };
 }
@@ -177,23 +194,46 @@ export function loadMyExercises(): Promise<void> {
 }
 
 /**
+ * A row taken out → the rows the reader left out that sat right after it then.
+ * When it is put back (an Undo), they go back behind it, so Remove then Undo
+ * gives back the stored array as it was (t2bb review, item 2).
+ */
+const followersOf = new WeakMap<object, unknown[]>();
+
+/**
  * The stored rows for a new list: each entry's own stored row, and every row
  * the reader left out (an entry it could not read, one past the fifty shown)
  * kept, unchanged, right after the stored row it followed (or first, when no
- * row before it is kept).
+ * row before it is kept), or behind the row it followed before that row was
+ * taken out, when it is put back.
  */
 function rowsFor(next: readonly MyExercise[]): unknown[] {
   const nextRows = next.map(rowOf);
   const shownBefore = new Set(held.map(rowOf));
   const keep = new Set(nextRows);
+  const inStore = new Set(stored);
+  const claimed = new Map<unknown, unknown>();
+  for (const row of nextRows) {
+    if (inStore.has(row) || !isObject(row)) continue;
+    for (const f of followersOf.get(row) ?? []) if (inStore.has(f) && !shownBefore.has(f)) claimed.set(f, row);
+  }
   const after = new Map<unknown, unknown[]>();
   let anchor: unknown = null;
+  let dropped: unknown[] | null = null;
   for (const row of stored) {
-    if (keep.has(row)) anchor = row;
-    else if (!shownBefore.has(row)) {
-      const group = after.get(anchor) ?? [];
+    if (keep.has(row)) {
+      anchor = row;
+      dropped = null;
+    } else if (!shownBefore.has(row)) {
+      const at = claimed.has(row) ? claimed.get(row) : anchor;
+      const group = after.get(at) ?? [];
       group.push(row);
-      after.set(anchor, group);
+      after.set(at, group);
+      dropped?.push(row);
+    } else {
+      // A shown row taken out: remember what follows it, for an Undo.
+      dropped = [];
+      if (isObject(row)) followersOf.set(row, dropped);
     }
   }
   const out: unknown[] = [...(after.get(null) ?? [])];
@@ -240,6 +280,15 @@ export function updateMyExercises(fn: (list: readonly MyExercise[]) => MyExercis
 /** The list on screen now. Display only: empty while loading or unreadable, so never a writer's starting point. */
 export function myExercisesNow(): readonly MyExercise[] {
   return held;
+}
+
+/**
+ * How many entries the store holds, shown or not (past the fifty shown, a hand
+ * edit or a later build). Read inside an `updateMyExercises` function, it is
+ * the count that function starts from. What Remove and Undo pass on.
+ */
+export function myExercisesStoredEntries(): number {
+  return readEntries(stored, Number.POSITIVE_INFINITY).length;
 }
 
 /** Where the key stands (`MyExercisesState`). */

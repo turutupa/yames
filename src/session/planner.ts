@@ -651,7 +651,7 @@ function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number, focu
   const focusClean = cleanTempoOf(progress, path.id, exercise.id);
   const own = warmupsOf(path, focus.step.id);
   const sessions = pathSessionCount(progress);
-  let warmup =focusClean === null && own.length > 0 ? own[sessions % own.length] : exercise;
+  let warmup = focusClean === null && own.length > 0 ? own[sessions % own.length] : exercise;
   // A pack's warm-up says whose clean tempo it reads and what share of it to
   // start at; with no history it has a tempo of its own.
   let plan = warmup.warmup;

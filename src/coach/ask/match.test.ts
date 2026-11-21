@@ -78,6 +78,15 @@ const MATCHES: ReadonlyArray<[string, string, ToolArgs]> = [
   ["what do I need to pass?", "pass_mark_distance", {}],
   // A metric named: the why card's question, never what the score is made of.
   ["do you grade my muting?", "why_not_counted", { what: "muting" }],
+  // int1b (review c2b1b, item 3): "improving" about something the app does not grade is "I didn't measure that".
+  ["Is my tone getting better?", "why_not_counted", { what: "tone" }],
+  ["is my muting improving?", "why_not_counted", { what: "muting" }],
+  ["Am I getting better at alternate picking?", "why_not_counted", { what: "pickDirection" }],
+  ["is my timing improving?", "improving", {}],
+  ["I feel stuck, am I improving?", "improving", {}],
+  // int1b (review c2b1b, item 4): passing this Exercise is the pass mark's own subject.
+  ["How close am I to passing this exercise?", "pass_mark_distance", {}],
+  ["how far off am I from passing?", "pass_mark_distance", {}],
 ];
 
 /** Lines that must not become a card: commands, questions about something else, statements, two shapes at once. */
@@ -158,6 +167,16 @@ const NEAR_MISSES: readonly string[] = [
   "did I pass?",
   "how far is it to the next exercise?",
   "what changed since the previous take, and was I late?",
+  // int1b (review c2b1b, item 4): each of these matched a card it does not ask for.
+  "How is my progress calculated?",
+  "how is my progress worked out?",
+  "How far off was I on the downbeat?",
+  "how far off am I?",
+  "What was different about bar 5?",
+  "what changed in bar 3?",
+  "What changed in the coach?",
+  "What changed in this build?",
+  "what changed in the beta?",
 ];
 
 describe("matchCard: typed English to a card", () => {

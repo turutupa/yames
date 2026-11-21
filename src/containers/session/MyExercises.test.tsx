@@ -146,6 +146,28 @@ describe("My exercises on the Paths screen", () => {
     expect(screen.queryByTestId("my-exercise-undo")).toBeNull();
   });
 
+  it("an Undo refused as full says only that, and goes: no press could bring that one back", async () => {
+    const fifty = Array.from({ length: 50 }, (_, i) => ({
+      recipe: { ...CHROMATIC, position: 1 + (i % 12), bars: 1 + Math.floor(i / 12) },
+      addedAt: NOW - i,
+    }));
+    const store = await withStored(fifty);
+    const { session } = fake();
+    render(<PathsView session={session} />);
+    const rows = await screen.findAllByTestId("my-exercise");
+    fireEvent.click(within(rows[0]).getByTestId("my-exercise-remove"));
+    await waitFor(() => expect(store.values.get(MY_EXERCISES_KEY)).toHaveLength(49));
+    // Meanwhile one is added (t2c's Add, after a yes): the list is full again.
+    await act(async () => {
+      await updateMyExercises((list) => [{ recipe: MOCK_17, addedAt: NOW + 5 }, ...list]);
+    });
+    fireEvent.click(screen.getByTestId("my-exercise-undo"));
+    await waitFor(() => expect(screen.getByTestId("my-exercise-notice")).toHaveTextContent("full (50), so Undo can't put this one back"));
+    expect(screen.getByTestId("my-exercise-notice")).not.toHaveTextContent(/Remove one/);
+    expect(screen.queryByTestId("my-exercise-undo")).toBeNull();
+    expect(store.values.get(MY_EXERCISES_KEY)).toHaveLength(50);
+  });
+
   it("a write that fails says nothing changed and keeps the Undo", async () => {
     const store = await withStored([
       { recipe: MOCK_17, addedAt: NOW },

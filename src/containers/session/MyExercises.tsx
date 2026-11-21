@@ -15,7 +15,13 @@ import { CUSTOM_PATH_ID, customPathDoc } from "../../paths/custom";
 import type { CustomSummary } from "../../paths/custom";
 import { tempoRange } from "../../session/coachWords";
 import { shownCleanTempoOf, takesOf } from "../../session/progress";
-import { removeMyExercise, restoreMyExercise, updateMyExercises, useMyExercises } from "../../session/myExercises";
+import {
+  myExercisesStoredEntries,
+  removeMyExercise,
+  restoreMyExercise,
+  updateMyExercises,
+  useMyExercises,
+} from "../../session/myExercises";
 import type { MyExercise, RemovedMyExercise } from "../../session/myExercises";
 import { buildMyExercises, keyOf, myExerciseLine } from "../../session/myExerciseBuild";
 import type { SessionRun } from "./hooks/useSessionRun";
@@ -47,7 +53,7 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
   const remove = async (entry: MyExercise) => {
     const got: { removed: RemovedMyExercise | null } = { removed: null };
     const result = await updateMyExercises((now) => {
-      const r = removeMyExercise(now, entry);
+      const r = removeMyExercise(now, entry, myExercisesStoredEntries());
       got.removed = r.removed;
       return r.removed ? r.list : null;
     });
@@ -60,7 +66,7 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
     if (!removed) return;
     const got: { refused: null | "already" | "full" } = { refused: null };
     const result = await updateMyExercises((now) => {
-      const r = restoreMyExercise(now, removed, keyOf);
+      const r = restoreMyExercise(now, removed, keyOf, myExercisesStoredEntries());
       got.refused = r.refused;
       return r.refused ? null : r.list;
     });
@@ -72,8 +78,13 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
       // The same notes are on the list again: nothing to undo, and no second row.
       setRemoved(null);
       setNotice("undoAlready");
-    } else if (refused === "full") setNotice("undoFull"); // the Undo stays: remove another, then press it
-    else setNotice("notSaved"); // the Undo stays
+    } else if (refused === "full") {
+      // Only an Add since the Remove fills the list (`restoreMyExercise`), and a
+      // later Remove would replace this Undo: no press can bring it back, so the
+      // Undo goes and the notice says only that (t2bb review, item 1).
+      setRemoved(null);
+      setNotice("undoFull");
+    } else setNotice("notSaved"); // the Undo stays
   };
 
   return (

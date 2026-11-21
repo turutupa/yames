@@ -41,19 +41,32 @@ import { askCommandFacts, askYours, runAskCall, runTypedCall, typedGo } from "./
 export type AskNextAnswerer = (text: string) => boolean;
 
 const NO_ANSWER: AskNextAnswerer = () => false;
-let nextAnswerer: AskNextAnswerer = NO_ANSWER;
+/**
+ * The answerers plugged in, in the order they were; the last one answers. A
+ * stack, not one slot: with two Ask views mounted (the panel and a sheet), the
+ * first one unmounting must not unplug the second's, and the second unmounting
+ * must hand the slot back to the first (review c2b1b, item 7).
+ */
+const plugged: Array<{ fn: AskNextAnswerer }> = [];
+const nextAnswerer: AskNextAnswerer = (text) => (plugged.length > 0 ? plugged[plugged.length - 1].fn(text) : NO_ANSWER(text));
 
 /**
- * Plug in the answerer that comes after the router (one at a time, the last
- * wins); the returned function unplugs it. Today nothing is plugged in.
- * `fn` must be synchronous and return a boolean (see `AskNextAnswerer`): an
- * async answerer is never waited for, and its answer would follow the model's.
+ * Plug in the answerer that comes after the router (the last one plugged in
+ * answers); the returned function unplugs that one alone, wherever it is in
+ * the stack. `fn` must be synchronous and return a boolean (see
+ * `AskNextAnswerer`): an async answerer is never waited for, and its answer
+ * would follow the model's. `null` unplugs every answerer (a test's reset).
  */
 export function setAskNextAnswerer(fn: AskNextAnswerer | null): () => void {
-  const mine = fn ?? NO_ANSWER;
-  nextAnswerer = mine;
+  if (fn === null) {
+    plugged.length = 0;
+    return () => {};
+  }
+  const mine = { fn };
+  plugged.push(mine);
   return () => {
-    if (nextAnswerer === mine) nextAnswerer = NO_ANSWER;
+    const at = plugged.indexOf(mine);
+    if (at >= 0) plugged.splice(at, 1);
   };
 }
 

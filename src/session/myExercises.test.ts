@@ -20,6 +20,7 @@ import {
   resetMyExercisesForTest,
   restoreMyExercise,
   myExercisesState,
+  myExercisesStoredEntries,
   updateMyExercises,
 } from "./myExercises";
 import type { MyExercise, RemovedMyExercise } from "./myExercises";
@@ -105,7 +106,7 @@ describe("adding, removing, undo", () => {
     const list = [entry(MOCK_17, 3), entry(CHROMATIC, 2), entry(NO_LONGER, 1)];
     const out = removeMyExercise(list, list[1]);
     expect(out.list).toEqual([list[0], list[2]]);
-    expect(out.removed).toEqual({ entry: list[1], index: 1 });
+    expect(out.removed).toEqual({ entry: list[1], index: 1, entriesBefore: 3 });
     const back = restoreMyExercise(out.list, out.removed!);
     expect(back).toEqual({ list, refused: null });
     expect(restoreMyExercise(back.list, out.removed!)).toEqual({ list, refused: "already" });
@@ -200,19 +201,20 @@ describe("the store", () => {
     expect(fake.writes).toEqual([[MY_EXERCISES_KEY, [entry(CHROMATIC)]]]);
   });
 
-  const removeSecond = async () => {
-    const second = myExercisesNow()[1];
+  const removeAt = async (at: number) => {
+    const which = myExercisesNow()[at];
     const removed = { r: null as RemovedMyExercise | null };
     const result = await updateMyExercises((list) => {
-      const out = removeMyExercise(list, second);
+      const out = removeMyExercise(list, which, myExercisesStoredEntries());
       removed.r = out.removed;
       return out.list;
     });
     return { result, removed: removed.r! };
   };
+  const removeSecond = () => removeAt(1);
   const undo = (removed: RemovedMyExercise) =>
     updateMyExercises((list) => {
-      const out = restoreMyExercise(list, removed, keyOf);
+      const out = restoreMyExercise(list, removed, keyOf, myExercisesStoredEntries());
       return out.refused ? null : out.list;
     });
 
@@ -232,18 +234,43 @@ describe("the store", () => {
     expect(fake.writes[1][1]).toEqual(rows);
   });
 
-  it("entries past the fifty shown stay in the store; an Undo the full list refuses changes nothing", async () => {
+  it("Undo puts an unread row that followed the removed one back behind it: the stored array exactly as it was", async () => {
+    const bad = { recipe: CHROMATIC, addedAt: "2026-11-20" };
+    const rows: unknown[] = [entry({ ...CHROMATIC, bars: 1 }, 3), bad, entry({ ...CHROMATIC, bars: 2 }, 2)];
+    const fake = await installSettings({ [MY_EXERCISES_KEY]: rows });
+    await loadMyExercises();
+    const { result, removed } = await removeAt(0);
+    expect(result).toBe("saved");
+    expect(fake.writes[0][1]).toEqual([bad, rows[2]]);
+    expect(await undo(removed)).toBe("saved");
+    expect(fake.writes[1][1]).toEqual(rows);
+    expect((fake.writes[1][1] as unknown[])[1]).toBe(bad);
+  });
+
+  it("entries past the fifty shown stay in the store, and an Undo gives back the place its Remove freed", async () => {
     const rows = Array.from({ length: 53 }, (_, i) => entry({ ...CHROMATIC, position: i % 12, bars: 1 + Math.floor(i / 12) } as Recipe, 100 - i));
     const fake = await installSettings({ [MY_EXERCISES_KEY]: rows });
     await loadMyExercises();
     expect(myExercisesNow()).toHaveLength(MY_EXERCISES_MAX);
+    expect(myExercisesStoredEntries()).toBe(53);
     const { result, removed } = await removeSecond();
     expect(result).toBe("saved");
     expect(fake.writes[0][1]).toEqual(rows.filter((_, i) => i !== 1));
-    // 52 stored, 50 shown again: the Undo is refused as full and nothing is written.
-    expect(restoreMyExercise(myExercisesNow(), removed, keyOf).refused).toBe("full");
+    // 52 stored, 50 shown again: the Undo still puts it back, every row where it was.
+    expect(await undo(removed)).toBe("saved");
+    expect(fake.writes[1][1]).toEqual(rows);
+    expect(myExercisesNow()).toHaveLength(MY_EXERCISES_MAX);
+  });
+
+  it("an Add since the Remove filled the list: the Undo is refused as full and nothing is written", async () => {
+    const rows = Array.from({ length: MY_EXERCISES_MAX }, (_, i) => entry({ ...CHROMATIC, position: i % 12, bars: 1 + Math.floor(i / 12) } as Recipe, 100 - i));
+    const fake = await installSettings({ [MY_EXERCISES_KEY]: rows });
+    await loadMyExercises();
+    const { removed } = await removeSecond();
+    expect(await updateMyExercises((list) => [entry(MOCK_17, 500), ...list])).toBe("saved");
+    expect(restoreMyExercise(myExercisesNow(), removed, keyOf, myExercisesStoredEntries()).refused).toBe("full");
     expect(await undo(removed)).toBe("unchanged");
-    expect(fake.writes).toHaveLength(1);
+    expect(fake.writes).toHaveLength(2);
   });
 });
 
