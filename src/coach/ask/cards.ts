@@ -36,6 +36,7 @@ import type { Exercise } from "../../paths/format";
 import { NOT_GRADED } from "../../paths/metrics";
 import { displayBar, displayValue, metricKey } from "../../session/coachWords";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
+import type { PlanStep } from "../../session/planner";
 import { factsOf, isMarkedNotFair, leanOf, takesOf } from "../../session/progress";
 import type { TakeOutcome, UngradedWhy } from "../../session/runner";
 import { withVariant } from "../../session/take";
@@ -148,6 +149,38 @@ function variantKnown(ctx: CoachContext, outcome: TakeOutcome, exercise: Exercis
   return ctx.run?.phase === "result";
 }
 
+/**
+ * The plan the Session is running (`run.plan`, as `currentStep` reads it), not
+ * Today's (review c2b2a H1: a Session begun from a Step's page, Test out, a
+ * step inserted, Today rebuilt after a saved Take). A context that does not
+ * carry the run's plan falls back to `ctx.plan`, which the host sets to the
+ * run's plan in a Session.
+ */
+function runningPlan(ctx: CoachContext) {
+  if (!ctx.run) return null;
+  const plan = ctx.run.plan !== undefined ? ctx.run.plan : ctx.plan;
+  return plan ?? null;
+}
+
+/** The plan step a running Session is on. */
+export function planStepHere(ctx: CoachContext): PlanStep | null {
+  const plan = runningPlan(ctx);
+  if (!plan || !ctx.run) return null;
+  return plan.steps[ctx.run.stepIndex] ?? null;
+}
+
+/**
+ * The Path the Exercise on screen is from: the context's, else the running
+ * plan step's (the player's own exercises are not in the host's list of
+ * Paths, review c2b2a L7).
+ */
+export function pathIdHere(ctx: CoachContext): string | null {
+  if (ctx.path?.id) return ctx.path.id;
+  const step = planStepHere(ctx);
+  if (step?.kind === "exercise" && ctx.exercise && step.exerciseId === ctx.exercise.id) return step.pathId;
+  return null;
+}
+
 function storedRow(ctx: CoachContext, outcome: TakeOutcome): PathTakeRow | null {
   if (!outcome.takeId) return null;
   return ctx.progress.takes.find((row) => row.id === outcome.takeId) ?? null;
@@ -181,7 +214,8 @@ export function noteOf(ctx: CoachContext): TakeNote | null {
   if (!here) return null;
   const { outcome, exercise } = here;
   const row = storedRow(ctx, outcome);
-  const pathId = ctx.path?.id ?? row?.pathId ?? null;
+  // The running step's Path when there is no stored row yet (review c2b2ab L5).
+  const pathId = ctx.path?.id ?? row?.pathId ?? pathIdHere(ctx);
   const review = (ctx.review ?? null) as TakeReview | null;
   const session = ctx.run?.startedAt;
   return noteForTake(outcome, review, ctx.progress, pathId, exercise, {

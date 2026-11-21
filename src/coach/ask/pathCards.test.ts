@@ -184,6 +184,18 @@ describe("the Exercise, quoted from the Path", () => {
     // In this Session: the second time, the second cue.
     expect(noteOf(at(START))?.repeat).toBe(2);
     expect(card(exerciseTry(at(START))).lines[1].values.text).toBe("Even the second evenness cue.");
+    // No Path in the context and no stored row for the Take: the running step's Path is read (review c2b2ab L5).
+    const fromStep = here(
+      {
+        exercise: CUED,
+        path: undefined,
+        run: { ...runIn("result"), startedAt: START, stepIndex: 0, plan: planOf([PART(80)]) },
+        progress: { states: [], ceilings: [], takes: [before(START)] },
+      },
+      shape,
+    );
+    expect(fromStep.lastTake?.takeId === undefined || !fromStep.progress.takes.some((t) => t.id === fromStep.lastTake?.takeId)).toBe(true);
+    expect(noteOf(fromStep)?.repeat).toBe(2);
   });
 
   it("an Exercise with no cues: 'no cue', never a made-up one", () => {
@@ -399,10 +411,47 @@ describe("theory, worked out by the app", () => {
     expect(c.then).toEqual({ tool: "show_scale", args: { root: first[0], scale: expect.any(String) } });
   });
 
-  it("G7#9: the app has no scale with every one of its notes, says so, and draws nothing", () => {
+  it("G7#9: none of the scales the app picks for it in C minor holds every note; said as that, and nothing drawn (review c2b2ab M1)", () => {
     const c = scaleFits("G", "7#9");
-    expect(c.lines).toEqual([{ key: "ask.card.theory.scalesNone", values: { chord: "G7#9" } }]);
+    expect(c.lines).toEqual([{ key: "ask.card.theory.scalesNoneMinor", values: { chord: "G7#9", root: "C" } }]);
+    expect(english(c.lines[0])).toBe("In C minor, none of the scales the app picks for G7#9 has every note of the chord in it.");
     expect(c.then).toBeUndefined();
+    // The major sentence says the same of a major key.
+    expect(english({ key: "ask.card.theory.scalesNoneMajor", values: { chord: "G7", root: "C" } })).toBe(
+      "In C major, none of the scales the app picks for G7 has every note of the chord in it.",
+    );
+  });
+
+  // Review c2b2ab L1: a key whose letter name is Cb, Fb or a double flat is said by its letter;
+  // only show_scale's argument takes the app's own name for that pitch. Written out by hand.
+  const BY_LETTER: Array<[string, string, Line, string[], string]> = [
+    ["Gb", "7", { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "Gb7", degree: "V", root: "Cb" } }, ["Gb Mixolydian: Gb Ab Bb Cb Db Eb Fb"], "Gb"],
+    [
+      "Bb",
+      "dim",
+      { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "Bbdim", degree: "vii", root: "Cb" } },
+      ["Cb Major: Cb Db Eb Fb Gb Ab Bb", "Cb Harmonic minor: Cb Db Ebb Fb Gb Abb Bb"],
+      "B",
+    ],
+    [
+      "Gb",
+      "m7b5",
+      { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Gbm7b5", degree: "ii", root: "Fb" } },
+      ["Fb Natural minor: Fb Gb Abb Bbb Cb Dbb Ebb", "Fb Harmonic minor: Fb Gb Abb Bbb Cb Dbb Eb"],
+      "E",
+    ],
+    ["Ab", "dim7", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Abdim7", degree: "vii", root: "Bbb" } }, ["Bbb Harmonic minor: Bbb Cb Dbb Ebb Fb Gbb Ab"], "A"],
+  ];
+
+  it.each(BY_LETTER)("what fits over %s%s: the key by its letter, show_scale by the app's name", (root, suffix, intro, rows, drawn) => {
+    const c = scaleFits(root, suffix);
+    expect(c.lines[0]).toEqual(intro);
+    expect(scaleRows(c)).toEqual(rows);
+    expect(c.then?.args.root).toBe(drawn);
+  });
+
+  it("Gb7, in words: the V chord of Cb major, never of B major", () => {
+    expect(english(scaleFits("Gb", "7").lines[0])).toMatch(/^Gb7 is the V chord of Cb major, /);
   });
 
   it("every quality, all twelve roots: every scale offered holds every note of the chord", () => {
@@ -411,7 +460,7 @@ describe("theory, worked out by the app", () => {
         const c = scaleFits(root, suffix);
         const tones = String(chordNotesCard(root, suffix).lines[0].values.notes).split(" ").map((n) => nameToPitchClass(n));
         const scales = c.lines.filter((l) => l.key === "ask.card.theory.scale");
-        if (scales.length === 0) expect(keys(c), `${root}${suffix}`).toEqual(["ask.card.theory.scalesNone"]);
+        if (scales.length === 0) expect(["ask.card.theory.scalesNoneMinor", "ask.card.theory.scalesNoneMajor"], `${root}${suffix}`).toContain(keys(c).join());
         for (const l of scales) {
           const pcs = String(l.values.notes).split(" ").map((n) => nameToPitchClass(n));
           for (const t of tones) expect(pcs, `${root}${suffix} over ${l.values.root} ${l.values.name}`).toContain(t);
@@ -432,6 +481,8 @@ describe("theory, worked out by the app", () => {
 describe("the app's computed terms", () => {
   it("the evenness formula agrees with the metric's own note: 0.85 is about 14 ms at sixteenths, 120 BPM", () => {
     expect(Math.round(evennessSpreadMs(0.85, 125))).toBe(14);
+    // By hand (review c2b2ab L6): the window is 0.4 × 125 = 50 ms, k = 25, σ = 25 × √(−2 ln 0.75) = 25 × 0.7585 ≈ 19.
+    expect(Math.round(evennessSpreadMs(0.75, 125))).toBe(19);
   });
 
   it("what does 85% mean: each evenness pass mark in ms at this tempo, with the tempo said", () => {
@@ -481,7 +532,40 @@ describe("the app's computed terms", () => {
 
   it("my own exercises and a player without grading: no number", () => {
     expect(keys(cleanTempo(here({ path: { ...PATH, id: MY_EXERCISES_PATH } })))).toEqual(["ask.card.term.clean", "ask.card.term.cleanMine"]);
-    expect(keys(cleanTempo(here({ grading: "off" })))).toEqual(["ask.card.term.clean"]);
+    // The same player as pass_mark_ms's below: no pass mark set, said the same way.
+    expect(keys(cleanTempo(here({ grading: "off" })))).toEqual(["ask.card.term.clean", "ask.card.term.noPassMarkSet"]);
+  });
+});
+
+describe("a player who chose no grading asks about a pass mark (the owner's relay decision, 2026-11-21)", () => {
+  const NO_MARK =
+    'No pass mark is set: you\'re playing without grading, so nothing you play is measured against one. To set one, choose "Grade me" for "Grade my playing" in Settings, under Practice; you can also switch in any Session.';
+
+  it("asked what 85% means with grading off: one line, no pass mark set and where to turn grading on", () => {
+    const c = card(passMarkMs(here({ grading: "off" }), 85));
+    expect(c.lines).toEqual([{ key: "ask.card.term.noPassMarkSet", values: {} }]);
+    expect(english(c.lines[0])).toBe(NO_MARK);
+    // Through the runner, as a typed question or a model's pick reaches it.
+    const run = runFactCard({ tool: "pass_mark_ms", args: { value: 85 } }, here({ grading: "off" }));
+    expect(isCard(run) && run.lines).toEqual([{ key: "ask.card.term.noPassMarkSet", values: {} }]);
+  });
+
+  it("'Just play' chosen in this Session: the same line", () => {
+    const base = here();
+    expect(keys(card(passMarkMs({ ...base, run: { ...base.run!, ungraded: "chosen" } }, 85)))).toEqual(["ask.card.term.noPassMarkSet"]);
+  });
+
+  it("not for a player whose input is off: the pass mark is set, and said", () => {
+    const base = here();
+    const c = card(passMarkMs({ ...base, run: { ...base.run!, ungraded: "inputOff" } }, 85));
+    expect(keys(c)).not.toContain("ask.card.term.noPassMarkSet");
+  });
+
+  it("the place named is real: Settings, Practice, 'Grade my playing', 'Grade me'", () => {
+    const t = i18n.getFixedT("en");
+    expect(t("settings.practice.title")).toBe("Practice");
+    expect(t("settings.practice.grade")).toBe("Grade my playing");
+    expect(t("settings.practice.grading.on")).toBe("Grade me");
   });
 });
 
@@ -580,6 +664,39 @@ describe("pass marks, each in its own words (review c2b2a M1)", () => {
   it("60%: a check the app has no sentence for: no card", () => {
     expect(noCard(passMarkMs(ctx(), 60))).toEqual({ key: "ask.card.term.markOther", values: { value: 60 } });
   });
+
+  it("two checks at the same 90%: both named, notes heard and accents (review c2b2ab L4)", () => {
+    const twin = {
+      ...TUNE,
+      passBars: [
+        { metric: "notesHeard", min: 0.9, overBars: 16 },
+        { metric: "accentPlacement", min: 0.9, overBars: 4 },
+      ],
+    } as Exercise;
+    const c = card(passMarkMs(here({ exercise: twin }, { exercise: twin }), 90));
+    expect(c.lines).toEqual([
+      { key: "ask.card.term.heardMark", values: { bar: 90 } },
+      { key: "ask.card.term.accentsMark", values: { bar: 90 } },
+    ]);
+    expect(english(c.lines[1])).toBe("90% is the accents pass mark: at least 90 of every 100 marked accents must come out louder than the notes around them.");
+  });
+
+  it("right notes and a check with no sentence at the same 80%: the one named, the other said to be there", () => {
+    const twin = {
+      ...TUNE,
+      passBars: [
+        { metric: "noteIdentity", min: 0.8, overBars: 4 },
+        { metric: "someOtherCheck", min: 0.8, overBars: 4 },
+      ],
+    } as unknown as Exercise;
+    const c = card(passMarkMs(here({ exercise: twin }, { exercise: twin }), 80));
+    expect(c.lines).toEqual([
+      { key: "ask.card.term.notesMark", values: { bar: 80 } },
+      { key: "ask.card.term.markAlso", values: { value: 80 } },
+    ]);
+    expect(english(c.lines[0])).toBe("80% is the right-notes pass mark: at least 80 of every 100 notes I could pitch must be the written ones.");
+    expect(english(c.lines[1])).toBe("80% is also the pass mark of another of this Exercise's checks.");
+  });
 });
 
 describe("the review schedule's edges (review c2b2a L6)", () => {
@@ -603,6 +720,18 @@ describe("the review schedule's edges (review c2b2a L6)", () => {
   it("due in a few hours: 'within 1 day', never 'now'", () => {
     const l: Line = { key: "ask.card.plan.returnDays", values: { count: 1, bpm: 80 } };
     expect(english(l)).toBe("The review schedule brings this Exercise back within 1 day, at 80 BPM.");
+  });
+
+  it("planReturn with the review due three hours from now: 1 day (review c2b2ab L6)", () => {
+    const passAt = TUNE.tempo.passAtBpm ?? 80;
+    const ceiling = { exerciseKey: `${ALT.id}/${TUNE.id}`, cleanBpm: passAt, lastPracticed: NOW - 2 * DAY };
+    const passed = row(TUNE.id, { pathId: ALT.id, bpm: passAt, passed: true, startedAt: NOW - 2 * DAY, facts: { verdict: "passed" } });
+    const progress = { states: [], takes: [passed], ceilings: [ceiling] } as unknown as CoachContext["progress"];
+    const state = reviewStateOf(progress, { path: ALT, step: STEP_OF_TUNE as Step, exercise: TUNE });
+    expect(state).not.toBeNull();
+    const c = card(planReturn(here({ progress, now: state!.dueAt - 3 * 60 * 60 * 1000 })));
+    expect(keys(c)).toEqual(["ask.card.plan.returnDays"]);
+    expect(c.lines[0].values.count).toBe(1);
   });
 });
 
