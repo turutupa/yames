@@ -3,6 +3,14 @@
 Branch `coach-nf1` (the same worktree as nf1), merged with `coach` (hd1, c2ca, the typed
 commands). Work list: `/tmp/coach-orch/nf1-review.md` (M1, M2, L1 to L4). Logs in `/tmp/coach-nf1b/`.
 
+## Gates (after the merge of `coach`)
+
+- `npx tsc --noEmit`: pass (`coach-nf1b-tsc`). `npm run build`: pass (`coach-nf1b-build`).
+- `npm run test`: 48247 passed, 10 skipped; only the known `TabStage.render.test.tsx` cannot load
+  (`vitest.log`).
+- `npm run test:rust`: 1231 passed, 0 failed, `every_shared_clean_tempo_row_agrees` ok (`rust.log`).
+- Layout `today-line`, `session`, `planner`, `short-window`: 231 passed (`layout.log`). Full suite owed.
+
 ## What landed
 
 | Finding | Fix | Test that fails without it |
