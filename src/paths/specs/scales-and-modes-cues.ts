@@ -40,7 +40,7 @@ const LONG_EACH = "Hold each long note its two beats, then move.";
 const SHIFT_TWO = "Move two frets as each long note ends.";
 const SEE_NEXT = "See where the next note is before the click.";
 const MOVE_EARLY = "Wait for the click before each move.";
-const STEPS_END = "Keep saying 'whole' or 'half' to the end.";
+const DOWN_UP_EVEN = "Keep the way down as even as the way up.";
 const OPEN_CLICK = "Put each open string right on the click.";
 const DOWN_EVEN = "Come down as evenly as you went up.";
 const ON_CHORD = "Start each bar on a note of its chord.";
@@ -58,10 +58,9 @@ const STILL_HAND = "Keep the hand still: one finger per fret.";
 const CHORD_NAMES = "Say each chord's name on its long note.";
 const CHORD_LATE = "Put each chord's first note on the click.";
 const CHORD_EARLY = "Wait for the click before each new chord.";
-const HOP_ROOT = "Hop the same finger to the next root in time.";
+const HOP_ROOT = "Count the long note out, then the next root.";
 const LONG_TWO = "Count each long note's two beats, then go.";
 const LONG_OUT = "Count each long note out, then move on.";
-const RAISED_LISTEN = "Listen for the raised seventh each time.";
 const RAISE_SEVENTH = "Raise the seventh: one fret under the root.";
 const FINGER_TWO_SEVENTH = "Put finger two on the raised seventh.";
 const EXTRAS3 = "Play three notes to each click, no more.";
@@ -73,9 +72,9 @@ const COUNT_TWO = "Count up two scale notes, not two frets.";
 const PAIR_LATE = "Put each pair's first note on the click.";
 const PAIR_EARLY = "Wait for the click before each new pair.";
 const LAST_TWO = "Give each of the last two notes a full click.";
-const SHAPE_STRING = "Let the shape tell you which string is next.";
+const SHAPE_STRING = "Know the next string before each pair starts.";
 const PAIRS_TOP = "Keep the pairs even right to the top note.";
-const MOVE_ON = "Move on as soon as each note sounds.";
+const MOVE_ON = "Move on as each note ends, not before.";
 const F_SHARP_D4 = "Find F sharp at the D string's fret four.";
 const REACH_F_SHARP = "Reach finger one back a fret for F sharp.";
 const LAND_F_SHARP = "Land on F sharp as each D chord comes.";
@@ -116,14 +115,14 @@ export const SCALES_AND_MODES_CUES: CueBook = {
   ],
   "major-scale.formula": [
     g("Say 'whole, whole, half' as the finger moves.", 1),
-    c("notes", "Say 'half' as you play notes four and eight."),
+    c("notes", "Sing each note before you play it."),
     c("heard", HEARD_ANY),
     c("extras", EXTRAS4, 0),
     c("late", SEE_NEXT),
     c("early", MOVE_EARLY),
     c("afterHeld", "Count the long note's two beats, then go."),
     c("shift", MOVE_ON),
-    c("lastBars", STEPS_END),
+    c("lastBars", DOWN_UP_EVEN),
   ],
   "major-scale.ode": [
     g("Sing the tune as you play it."),
@@ -226,7 +225,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("late", BAND_LATE),
     c("early", BAND_EARLY),
     c("afterHeld", LONG_TWO),
-    c("shift", SHIFT_TWO, 2),
+    c("shift", "Move two frets as each half's last note ends.", 2),
     c("stringChange", CROSS),
     c("lastBars", "Hold the long D, then go back down for C.", 2),
   ],
@@ -245,7 +244,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
   ],
   "keys-by-hand.c-then-f": [
     g("Keep the hand at fret seven for both keys.", 3),
-    c("notes", "Play B flat at fret eight in the F bars.", 2),
+    c("notes", B_FLAT_D8, 2),
     c("heard", HEARD),
     c("extras", EXTRAS8, 0),
     c("late", BEAT_LATE),
@@ -323,7 +322,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("early", EARLY),
     c("afterHeld", "Hold the long E two beats, then climb."),
     c("stringChange", CROSS),
-    c("lastBars", "Keep coming down: A, then G, F sharp, E.", 3),
+    c("lastBars", "Say D, C, B, A as you come down.", 3),
   ],
   "minor-second-key.g-and-e-minor": [
     g("Listen for home: G first, then E."),
@@ -409,18 +408,18 @@ export const SCALES_AND_MODES_CUES: CueBook = {
 
   // Step 8: the harmonic minor
   "harmonic-minor.harmonic-shape": [
-    g(RAISED_LISTEN),
+    g(FINGER_TWO_SEVENTH, 1),
     c("notes", RAISE_SEVENTH),
     c("heard", HEARD),
     c("extras", EXTRAS8, 0),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("afterHeld", HELD_LOOP),
-    c("stringChange", FINGER_TWO_SEVENTH, 1),
+    c("stringChange", CROSS),
     c("lastBars", DOWN_EVEN),
   ],
   "harmonic-minor.harmonic-lick": [
-    g("Lean on G sharp over E7, rest on A over Am."),
+    g("Play G sharp over E7 only."),
     c("notes", "Play G sharp at the D string's fret six.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS_TAB),
@@ -432,7 +431,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
   ],
   "harmonic-minor.natural-then-harmonic": [
     g("Play G the first time up, G sharp the second."),
-    c("notes", "Play G at fret five, then G sharp at six.", 1),
+    c("notes", "Move the D string's fret five up to six.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS8, 0),
     c("late", BEAT_LATE),
@@ -444,14 +443,14 @@ export const SCALES_AND_MODES_CUES: CueBook = {
 
   // Step 9: the harmonic minor again
   "harmonic-minor-again.e-harmonic-shape": [
-    g(RAISED_LISTEN),
+    g(FINGER_TWO_SEVENTH, 1),
     c("notes", RAISE_SEVENTH, 2),
     c("heard", HEARD),
     c("extras", EXTRAS8, 0),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("afterHeld", HELD_LOOP),
-    c("stringChange", FINGER_TWO_SEVENTH, 1),
+    c("stringChange", CROSS),
     c("lastBars", DOWN_EVEN),
   ],
   "harmonic-minor-again.e-natural-then-harmonic": [
@@ -527,14 +526,14 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("extras", EXTRAS3),
     c("late", GROUP_LATE),
     c("early", GROUP_EARLY),
-    c("shift", "Reach finger one back a fret for each B.", 1),
+    c("shift", "Reach finger one back a fret on the G string.", 1),
     c("stringChange", CROSS),
     c("lastBars", "Hold the low A until the count ends."),
   ],
 
   // Step 11: more of the neck
   "more-neck.two-positions": [
-    g("Shift on the repeated note, finger four to one.", 1),
+    g("Play the shape at two, then the shape at five.", 1),
     c("notes", "Play the B string at five, six and eight."),
     c("heard", HEARD),
     c("extras", EXTRAS8, 0),
@@ -553,11 +552,11 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("early", "Wait for the click before each new string."),
     c("shift", "Move finger one up a fret on the D string.", 1),
     c("stringChange", CROSS),
-    c("lastBars", "Keep the way down as even as the way up."),
+    c("lastBars", DOWN_UP_EVEN),
   ],
   "more-neck.walk-and-shape": [
     g("Play the same eight notes along, then across.", 1),
-    c("notes", "Say 'whole, whole, half' along the string.", 1),
+    c("notes", "Count frets: two, two, one, two, two, two, one.", 1),
     c("heard", HEARD),
     c("extras", EXTRAS_TAB, 0),
     c("late", SEE_NEXT),
@@ -613,7 +612,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("late", BAND_LATE),
     c("early", BAND_EARLY),
     c("afterHeld", LONG_TWO),
-    c("shift", "Move the hand as each long D ends.", 2),
+    c("shift", "Move the hand as each half's last D ends.", 2),
     c("stringChange", CROSS),
     c("lastBars", "Hold the high D, then go back down to fret four.", 2),
   ],
@@ -641,7 +640,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("afterHeld", LONG_EACH),
     c("shift", REACH_F_SHARP),
     c("stringChange", CROSS),
-    c("lastBars", "Hold the last D two beats, then start again."),
+    c("lastBars", "Hold the last G two beats, then start again."),
   ],
   "dorian.dorian-lick": [
     g(LAND_F_SHARP, 1),
@@ -665,7 +664,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
     c("afterHeld", HELD_LOOP),
-    c("stringChange", "Put finger two on the lowered seventh.", 1),
+    c("stringChange", CROSS),
     c("lastBars", DOWN_EVEN),
   ],
   "mixolydian.major-vs-mixolydian": [
@@ -701,7 +700,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("early", BEAT_EARLY),
     c("afterHeld", "Hold the long A, then start the next phrase.", 0),
     c("stringChange", CROSS),
-    c("lastBars", "Play F sharp at fret seven, then the long A.", 3),
+    c("lastBars", "Hold the last A for its two beats."),
   ],
   "box-plus-two.box-phrase": [
     g("Add F sharp and B to the box you know."),
@@ -795,7 +794,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("afterHeld", LONG_BEAT),
     c("shift", SHIFT_CROSS, 3),
     c("stringChange", CROSS),
-    c("lastBars", "Land on G and hear it as home.", 4),
+    c("lastBars", "Land the last G on the click and let it ring."),
   ],
   "same-notes-new-home.three-home-chords": [
     g("Play root, third, fifth from each new home."),
@@ -858,7 +857,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("early", BAND_EARLY),
     c("afterHeld", LONG_OUT),
     c("stringChange", CROSS),
-    c("lastBars", "Move the hand back a fret for the last F sharp.", 3),
+    c("lastBars", "Move back a fret as the last phrase starts.", 3),
   ],
   "choosing-again.seventh-follows-the-chord": [
     g("Take G sharp over E, G over the G chord.", 4),
@@ -893,7 +892,7 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("afterHeld", HELD_LOOP),
     c("shift", FIRST_READY, 0),
     c("stringChange", CLOSE),
-    c("lastBars", TWICE_LAST),
+    c("lastBars", "Keep the eighths even right to the last note."),
   ],
   "warmup-beginner.scale-walk": [
     g("Say 'whole' or 'half' as you move.", 0),
@@ -901,6 +900,6 @@ export const SCALES_AND_MODES_CUES: CueBook = {
     c("late", SEE_NEXT),
     c("early", MOVE_EARLY),
     c("shift", "Start one note higher as each bar starts.", 0),
-    c("lastBars", STEPS_END),
+    c("lastBars", "Keep the quarters even right to the end."),
   ],
 };
