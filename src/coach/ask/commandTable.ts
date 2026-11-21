@@ -136,9 +136,17 @@ export type RecipeWords = {
   fret?: Words;
   /** What may follow a number to make it an ordinal, read as the number: "st", "nd", "rd", "th" ("5th"). */
   numberSuffixes?: Words;
+  /**
+   * A root's letter that is also an article (English "a"; leg t2cb, review t2c
+   * finding 1). It is the root only right after a word in `rootAfter` ("an a
+   * minor", "in a"), or right before a name in `rootBefore` ("a minor
+   * pentatonic" is A's); followed later by another root it is the article; else
+   * the key was never said ("make a blues exercise": the tool asks which).
+   */
+  article?: { words: Words; rootAfter?: Words; rootBefore?: Words };
 };
 
-const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes">, readonly string[]>> = {
+const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article">, readonly string[]>> = {
   shapes: MAKE_SHAPES,
   chords: MAKE_CHORDS,
   subdivisions: MAKE_SUBDIVISIONS,
@@ -177,6 +185,14 @@ function recipeProblems(recipe: RecipeWords | undefined): string[] {
     }
   }
   if (recipe.numberSuffixes !== undefined) check("recipe.numberSuffixes", recipe.numberSuffixes);
+  if (recipe.article !== undefined) {
+    check("recipe.article.words", recipe.article.words);
+    for (const word of Array.isArray(recipe.article.words) ? recipe.article.words : []) {
+      if (typeof word === "string" && !/^[a-g]$/.test(word)) problems.push(`recipe.article.words: "${word}" is not a root's letter`);
+    }
+    if (recipe.article.rootAfter !== undefined) check("recipe.article.rootAfter", recipe.article.rootAfter);
+    if (recipe.article.rootBefore !== undefined) check("recipe.article.rootBefore", recipe.article.rootBefore);
+  }
   return problems;
 }
 

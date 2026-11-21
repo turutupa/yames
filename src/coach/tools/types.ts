@@ -137,9 +137,13 @@ export type ToolDone = {
    * The receipt as it turned out, when the app only learns that a moment
    * later (a preset is re-read from the store before it is applied). Until it
    * settles, `receipt` says the app is at it, never that it is done (leg t1b1).
+   * When it also decides whether there is anything to undo (an add the store
+   * may refuse), name the Undo's tool in `askTools.ts`'s `UNDO_AFTER_LATER`:
+   * that Undo is then hidden until `later` settles and withdrawn when it
+   * settles as a refusal. Any other Undo is left as it is (review t2c, 7).
    */
   later?: Promise<Line>;
-  /** Where to go next, offered under the receipt as chips ("Open My exercises", leg t2c). Each a full call. */
+  /** Where to go next, offered under the receipt as chips ("Open Paths", leg t2c). Each a full call. */
   next?: readonly ToolChoice[];
 };
 

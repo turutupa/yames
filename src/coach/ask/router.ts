@@ -169,6 +169,8 @@ type CompiledRecipe = {
   subdivisions: Array<{ id: string; words: Toks }>;
   fret: readonly Place[];
   numberSuffixes: readonly string[];
+  /** A root's letter that is also an article (`RecipeWords.article`). */
+  article: { words: readonly string[]; rootAfter: Phrases; rootBefore: Phrases };
 };
 
 const compiledTables = new WeakMap<CommandTable, Compiled>();
@@ -231,6 +233,11 @@ function compile(table: CommandTable): Compiled {
           subdivisions: entries(table.recipe.subdivisions ?? {}),
           fret: places(table.recipe.fret),
           numberSuffixes: (table.recipe.numberSuffixes ?? []).map(phraseKey),
+          article: {
+            words: (table.recipe.article?.words ?? []).map(phraseKey),
+            rootAfter: phrases(table.recipe.article?.rootAfter),
+            rootBefore: phrases(table.recipe.article?.rootBefore),
+          },
         }
       : null,
   };
@@ -781,31 +788,45 @@ function fretAt(t: Toks, r: CompiledRecipe): { n: number; rest: Toks } | null {
  */
 function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "chord", made: boolean): ToolCall | null {
   const args: Record<string, string | number> = {};
-  // Without a verb, a recipe needs a word only an exercise has: "a minor pentatonic" alone is a scale, not a request.
+  // Without a verb, a recipe needs a word only an exercise has: "a minor pentatonic" alone is a scale, not a
+  // request. A shape or a fret is not one (review t2c, finding 1): "a minor pentatonic box", "… at the 5th
+  // fret" are what a player types to SEE a scale. A subdivision, a number of bars or "exercise" is.
   let exerciseWord = made;
+  // The scale or chord was named with no key ("make a blues exercise"): the tool asks which (`why.make.root`).
+  let keyless = false;
   const once = (name: string, value: string | number): boolean => {
     if (name in args) return false;
     args[name] = value;
     return true;
   };
   const glue = [...c.fillers, ...c.connectors.at, ...c.connectors.of, ...c.connectors.for];
+  const musicOf = reading === "scale" ? c.scales : r.chords;
   let q = t;
   while (q.length > 0) {
-    if (args.root === undefined) {
+    if (args.root === undefined && !keyless) {
       const root = rootAt(q, c);
-      const music = root ? leadId(root.rest, reading === "scale" ? c.scales : r.chords) : null;
+      const music = root ? leadId(root.rest, musicOf) : null;
       // "a chromatic exercise": the shape with no key, not A's chromatic scale.
       if (root && music && music.id !== "chromatic") {
-        args.root = root.name;
-        args[reading] = music.id;
-        q = skip(music.rest, c.nouns.scale);
-        continue;
+        const read = articleOrRoot(t, q, root.rest, c, r, musicOf);
+        if (read === "root") {
+          args.root = root.name;
+          args[reading] = music.id;
+          q = skip(music.rest, c.nouns.scale);
+          continue;
+        }
+        if (read === "keyless") {
+          keyless = true;
+          args[reading] = music.id;
+          q = skip(music.rest, c.nouns.scale);
+          continue;
+        }
+        // The article before a root that follows ("make a c major exercise"): a filler, below.
       }
     }
     const shape = leadId(q, r.shapes);
     if (shape) {
       if (!once("shape", shape.id)) return null;
-      exerciseWord = true;
       q = shape.rest;
       continue;
     }
@@ -820,7 +841,6 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
     const fret = fretAt(q, r);
     if (fret) {
       if (fret.n > MAX_RECIPE_FRET || !once("position", fret.n)) return null;
-      exerciseWord = true;
       q = fret.rest;
       continue;
     }
@@ -848,9 +868,30 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
   if (!exerciseWord) return null;
   // The chord reading is only an arpeggio's; the scale reading never is.
   if (reading === "chord" ? args.shape !== "arpeggio" || args.chord === undefined : args.shape === "arpeggio") return null;
-  // Something to make: a root and its scale or chord, or the one shape with no key. A bare shape is the tool's to ask about.
-  if (args.root === undefined && args.shape !== "chromatic" && !(made && args.shape !== undefined)) return null;
+  // Something to make: a root and its scale or chord, or the one shape with no key. A bare shape, or a
+  // scale or chord with no key, is the tool's to ask about.
+  if (args.root === undefined && args.shape !== "chromatic" && !keyless && !(made && args.shape !== undefined)) return null;
   return call("make_exercise", args);
+}
+
+/**
+ * The token at the head of `q` is a root's letter followed by a scale or chord
+ * name: is it that root, the article before a root still to come, or the
+ * article with no key said at all? Only a letter in `article.words` ("a") is
+ * ever anything but the root.
+ */
+function articleOrRoot(t: Toks, q: Toks, afterRoot: Toks, c: Compiled, r: CompiledRecipe, musicOf: Compiled["scales"]): "root" | "article" | "keyless" {
+  const a = r.article;
+  // "a#", "ab", "a sharp", "a flat": a root, never an article.
+  if (!a.words.includes(q[0]) || afterRoot.length !== q.length - 1) return "root";
+  const before = t.slice(0, t.length - q.length);
+  if (a.rootAfter.some((p) => endsWith(before, p))) return "root";
+  if (a.rootBefore.some((p) => startsWith(afterRoot, p))) return "root";
+  for (let i = 1; i < q.length; i++) {
+    const later = rootAt(q.slice(i), c);
+    if (later && leadId(later.rest, musicOf)) return "article";
+  }
+  return "keyless";
 }
 
 /** The recipe the words are, or null (not a recipe, or not in this language's table). */

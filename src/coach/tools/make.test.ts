@@ -17,11 +17,13 @@ import {
   MAKE_SEVEN_SCALES,
   MAKE_SHAPES,
   MAKE_SUBDIVISIONS,
+  __setGeneratorImportForTests,
   exerciseGenerator,
   loadExerciseGenerator,
   recipeRoot,
 } from "./make";
 import { confirmCoachTool, runCoachTool, runCoachUndo } from "./run";
+import { runIn } from "./testPaths";
 import type { MyExerciseAdd, MyExerciseUndo } from "./host";
 import type { Proposal, RunOutcome, ToolCall, ToolResult } from "./types";
 
@@ -156,11 +158,45 @@ describe("the press", () => {
     expect((await back.later)?.key).toBe("coachTools.why.make.undo.gone");
   });
 
-  it("no Open My exercises chip when the list is on screen", () => {
-    const { host } = storeHost();
-    host.setView("paths");
-    const result = confirmCoachTool(proposalOf(runCoachTool(call(MOCK_17), host, toolCtx())), host, toolCtx()) as ToolResult & { ok: true };
-    expect(result.next).toBeUndefined();
+  it("the chip is 'Open Paths' (it is go_to paths), offered only where Paths opens on its list and go_to can run", () => {
+    const press = (host: ReturnType<typeof storeHost>["host"], ctx = toolCtx()) =>
+      confirmCoachTool(proposalOf(runCoachTool(call(MOCK_17), host, ctx)), host, ctx) as ToolResult & { ok: true };
+    // From Today, with Paths keeping its list: offered, and honest about where it goes.
+    const today = storeHost().host;
+    expect(press(today).next).toEqual([{ label: { key: "coachTools.make.openPaths", values: {} }, call: { tool: "go_to", args: { screen: "paths" } } }]);
+    // The list already on screen.
+    const list = storeHost().host;
+    list.setView("paths");
+    expect(press(list).next).toBeUndefined();
+    // Paths keeps a Path's page (`usePathsPlace`): go_to would land there, not on My exercises.
+    const page = storeHost().host;
+    page.movePaths({ pathId: "some-path", stepId: null });
+    expect(press(page).next).toBeUndefined();
+    // A Session's ready screen: go_to refuses there, so it is not offered.
+    const session = fakeHost({ view: "session", session: true }, { addMyExercise: () => Promise.resolve("added"), jamTakeRunning: () => false });
+    const ready = toolCtx({ screen: "session", run: runIn("ready") });
+    const inSession = press(session, ready);
+    expect(inSession.ok).toBe(true);
+    expect(inSession.next).toBeUndefined();
+  });
+
+  it("a generator that will not load says so after the failure, not 'ask again' forever", async () => {
+    __setGeneratorImportForTests(() => Promise.reject(new Error("chunk")));
+    try {
+      const { host } = storeHost();
+      // Before any load was tried: getting it ready.
+      expect(runCoachTool(call(MOCK_17), host, toolCtx())).toMatchObject({ ok: false, line: { key: "coachTools.why.make.loading" } });
+      expect(await loadExerciseGenerator()).toBeNull();
+      // The load failed: the fact, as often as it is asked.
+      for (let i = 0; i < 2; i++) {
+        expect(runCoachTool(call(MOCK_17), host, toolCtx())).toMatchObject({ ok: false, line: { key: "coachTools.why.make.loadFailed" } });
+        expect(await loadExerciseGenerator()).toBeNull();
+      }
+    } finally {
+      __setGeneratorImportForTests(null);
+      await loadExerciseGenerator();
+    }
+    expect(proposalOf(runCoachTool(call(MOCK_17), storeHost().host, toolCtx())).preview).toBeDefined();
   });
 });
 

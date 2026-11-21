@@ -160,7 +160,7 @@
   "fillers": ["me", "the", "a bit", "a little", "a", "an", "my", "some", "one step"],
   "recipe": {
     "shapes": {
-      "box": ["box shape", "box pattern", "box", "pattern", "shape"],
+      "box": ["box shape", "box pattern", "box"],
       "threePerString": ["three notes per string", "three notes a string", "3 notes per string", "3 notes a string", "three per string", "3 per string", "3nps"],
       "arpeggio": ["arpeggios", "arpeggio", "arp"],
       "oneString": ["on one string", "along one string", "one string", "single string"],
@@ -183,7 +183,12 @@
       "eighthTriplets": ["eighth note triplets", "eighth triplets", "triplets"],
       "sixteenths": ["sixteenth notes", "sixteenths", "16th notes", "16ths", "semiquavers"]
     },
-    "fret": ["fret #", "# fret", "position #"],
-    "numberSuffixes": ["st", "nd", "rd", "th"]
+    "fret": ["fret #", "# fret"],
+    "numberSuffixes": ["st", "nd", "rd", "th"],
+    "article": {
+      "words": ["a"],
+      "rootAfter": ["an", "the", "in"],
+      "rootBefore": ["minor pentatonic", "major pentatonic", "minor 7", "minor seventh", "major 7", "major seventh"]
+    }
   }
 }

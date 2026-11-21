@@ -208,6 +208,7 @@
         "unreachable": "No hand the app knows can play that fast enough to grade it.",
         "notMade": "The app can't make that one.",
         "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
+        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
         "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
         "already": "That one is already on My exercises.",
         "badRecipe": "The app can't make that one.",
@@ -304,7 +305,8 @@
       "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
       "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
       "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
-      "openList": "Open My exercises",
+      "openPaths": "Open Paths",
+      "undoLeft": "The Undo stayed on the screen this was added on. To take it out, use Remove on My exercises in Paths.",
       "chip": {
         "fret": "Fret {{fret}}",
         "bars": "{{count}} bar",

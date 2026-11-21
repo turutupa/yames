@@ -18,7 +18,7 @@ import type { ToolChoice } from "../../coach/tools/types";
 import { MakeExercisePreview } from "./MakeExercisePreview";
 import { lineText, stopsKey } from "./toolWords";
 import { NEVER_LIST } from "./neverList";
-import { noKeyRepeat, notNowProposal, onePress, pressProposal, pressUndo, runAskCall, showMeYours, undoLive, type ToolBody, type UndoState } from "./askTools";
+import { laterDecidesUndo, noKeyRepeat, notNowProposal, onePress, pressProposal, pressUndo, runAskCall, showMeYours, undoLive, type ToolBody, type UndoState } from "./askTools";
 
 /** The proposal's verb: what its one button says. */
 const VERBS: Readonly<Record<string, string>> = {
@@ -84,7 +84,8 @@ function Receipt({ id, body }: { id: string; body: ToolBody & { kind: "receipt" 
   const { t } = useTranslation();
   const { undo } = body;
   const now = useUndoClock(undo);
-  const live = undoLive(undo, Math.max(now, Date.now()));
+  // An add's Undo waits for the store to say it kept the add (review t2c, finding 4).
+  const live = undoLive(undo, Math.max(now, Date.now())) && !(body.settling && laterDecidesUndo(undo));
   return (
     <div className="ask-tool ask-receipt" data-testid="ask-receipt" data-undo={undo?.state ?? "none"}>
       <div className="ask-receipt-row">

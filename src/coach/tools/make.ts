@@ -26,6 +26,8 @@ import type * as Custom from "../../paths/custom";
 import type { Recipe, RecipeSubdivision, Why } from "../../paths/custom";
 import { ROOT_NAMES, SCALE_NAMES } from "../blocks/spec";
 import { chordSymbolOf } from "../../session/myExerciseWords";
+import type { CoachContext } from "../context";
+import { outsideSession } from "./go";
 import {
   argNumber,
   argString,
@@ -53,23 +55,40 @@ type Generator = typeof Custom;
 
 let generator: Generator | null = null;
 let loading: Promise<Generator | null> | null = null;
+/** The last load was refused (a chunk that would not load): the tool says that, not "ask again". */
+let lastLoadFailed = false;
 
 /** The generator if it is loaded, else null (the tool then says so and the next call has it). */
 export function exerciseGenerator(): Generator | null {
   return generator;
 }
 
+/** The module's import; tests replace it to make the load fail. */
+let importGenerator = (): Promise<Generator> => import("../../paths/custom");
+
 /** Load the generator once. A failed load is tried again by the next call. */
 export function loadExerciseGenerator(): Promise<Generator | null> {
-  loading ??= import("../../paths/custom").then(
-    (module) => (generator = module),
+  loading ??= importGenerator().then(
+    (module) => {
+      lastLoadFailed = false;
+      return (generator = module);
+    },
     (error) => {
       console.warn("[yames] could not load the exercise maker", error);
+      lastLoadFailed = true;
       loading = null;
       return null;
     },
   );
   return loading;
+}
+
+/** Tests: forget the loaded generator and load it with `load` from now on (null: the real import). */
+export function __setGeneratorImportForTests(load: (() => Promise<Generator>) | null): void {
+  generator = null;
+  loading = null;
+  lastLoadFailed = false;
+  importGenerator = load ?? (() => import("../../paths/custom"));
 }
 
 // ---------------------------------------------------------------------------
@@ -294,10 +313,31 @@ function jamTake(host: CoachToolHost): boolean {
   }
 }
 
+/**
+ * The generator is not there. Still loading: say so, and load it. Its last load
+ * failed (review t2c, finding 5): say THAT, rather than "ask again" forever;
+ * the next call still tries the load again first (`askTools.withGenerator`).
+ */
 const loadingNow = (): Refusal => {
+  const failed = lastLoadFailed;
   void loadExerciseGenerator();
-  return refuse("notNow", "coachTools.why.make.loading");
+  return refuse(failed ? "refused" : "notNow", failed ? "coachTools.why.make.loadFailed" : "coachTools.why.make.loading");
 };
+
+/**
+ * The receipt's "Open Paths" chip (review t2c, finding 3): it is `go_to paths`,
+ * so it is offered only where `go_to` runs (outside a Session) and only where
+ * Paths would open on its list, which ends with My exercises: not when a Path's
+ * page is what Paths keeps, nor when the list is already on screen.
+ */
+function pathsChipHere(host: CoachToolHost, ctx: CoachContext): boolean {
+  try {
+    if (!outsideSession(ctx) || host.sessionActive()) return false;
+    return host.view() !== "paths" && host.pathsAt().pathId === null;
+  } catch {
+    return false;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // The tools
@@ -362,7 +402,7 @@ const makeExercise = defineConfirmTool<MakeResolved>({
       preview,
     };
   },
-  commit({ recipe, key, words }, host): ToolResult {
+  commit({ recipe, key, words }, host, ctx): ToolResult {
     if (jamTake(host)) return refuse("notNow", "coachTools.why.notNow.take");
     const gen = exerciseGenerator();
     if (!gen) return loadingNow();
@@ -376,13 +416,12 @@ const makeExercise = defineConfirmTool<MakeResolved>({
       (outcome): Line => (outcome === "added" ? line("coachTools.receipt.makeExercise", words) : line(`coachTools.why.make.${outcome}`)),
       (): Line => line("coachTools.why.make.failed"),
     );
-    const listShown = host.view() === "paths" && host.pathsAt().pathId === null;
     return {
       ok: true,
       receipt: line("coachTools.receipt.makeExerciseAdding", words),
       later,
       undo: { tool: "undo_make_exercise", args: { key, at: String(addedAt) } },
-      ...(listShown ? {} : { next: [{ label: line("coachTools.make.openList"), call: { tool: "go_to", args: { screen: "paths" } } }] }),
+      ...(pathsChipHere(host, ctx) ? { next: [{ label: line("coachTools.make.openPaths"), call: { tool: "go_to", args: { screen: "paths" } } }] } : {}),
     };
   },
 });
