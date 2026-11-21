@@ -33,7 +33,15 @@ import {
   type SafeSettingOption,
   type SafeSettingValue,
 } from "../../coach/tools/host";
-import { coachStored, coachStoredLoaded, loadCoachStored, saveGoal, saveSuggestions } from "../../coach/store";
+import {
+  coachGoalKnown,
+  coachStored,
+  coachStoredLoaded,
+  coachStoredUnread,
+  loadCoachStored,
+  saveGoal,
+  saveSuggestions,
+} from "../../coach/store";
 import i18n, { getLanguages } from "../../i18n";
 import { listPresets as listPresetsIpc, storeSave } from "../../ipc";
 import { findExercise } from "../../session/packs";
@@ -122,6 +130,9 @@ const SUGGESTIONS_OPTIONS: readonly SafeSettingOption[] = [
   { value: true, names: ["on"] },
 ];
 
+/** `coach.suggestions` read, and read without a failure: only then is "from" in a proposal true. */
+const suggestionsKnown = () => coachStoredLoaded() && !coachStoredUnread("suggestions");
+
 export function buildCoachToolHost(latest: { readonly current: CoachToolHostInput }): CoachToolHost {
   const session = () => latest.current.session;
   const pathOf = (pathId: string) => {
@@ -166,8 +177,9 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
       case "coachVoice":
         return settings.coachVoice === "voice";
       case "coachSuggestions":
-        // `coach.suggestions` (c4a1): on, or "Only when I ask" (off). Not read yet: no proposal over it.
-        return coachStoredLoaded() ? coachStored().suggestions === "on" : "notWiredYet";
+        // `coach.suggestions` (c4a1): on, or "Only when I ask" (off). Not read yet, or its read failed
+        // (c4a1b): unknown, so no proposal "from" a value nobody read.
+        return suggestionsKnown() ? coachStored().suggestions === "on" : "notWiredYet";
     }
   };
 
@@ -277,7 +289,7 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
         case "coachVoice":
           return latest.current.settings.voiceAvailable ? ON_OFF : ON_OFF.slice(0, 1);
         case "coachSuggestions":
-          return coachStoredLoaded() ? SUGGESTIONS_OPTIONS : "notWiredYet";
+          return suggestionsKnown() ? SUGGESTIONS_OPTIONS : "notWiredYet";
       }
     },
     setSafeSetting: (key, value) => {
@@ -307,15 +319,16 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
           return "done";
         }
         case "coachSuggestions":
-          if (!coachStoredLoaded()) return "notWiredYet";
+          if (!suggestionsKnown()) return "notWiredYet";
           saveSuggestions(value ? "on" : "asked");
           return "done";
       }
     },
-    // `coach.goal` (c4a1). Until it has been read, no proposal: one could replace a goal it never saw.
-    goal: () => (coachStoredLoaded() ? (coachStored().goal?.text ?? null) : "notWiredYet"),
+    // `coach.goal` (c4a1). Until it has been read, and when its read failed (c4a1b, L5), it is
+    // unknown, not "no goal": no proposal, since one could replace a goal it never saw.
+    goal: () => (coachGoalKnown() ? (coachStored().goal?.text ?? null) : "notWiredYet"),
     setGoal: (text) => {
-      if (!coachStoredLoaded()) return "notWiredYet";
+      if (!coachGoalKnown()) return "notWiredYet";
       if (!saveGoal(text, Date.now())) throw new Error("not a goal the store keeps");
       return "done";
     },

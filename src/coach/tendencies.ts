@@ -10,14 +10,16 @@
  *
  * The rules, each held by a test over a fixture history:
  * - at least `MIN_TAKES` (five) Takes of evidence behind every line;
- * - a Take the player marked not fair is left out of every line;
+ * - a Take the player marked not fair is left out of every measured line (the
+ *   minutes line counts it: a not-fair Take's minutes were still played, and
+ *   Progress counts them);
  * - an ungraded Take, or one where too little was heard, carries no measure:
  *   it counts only toward the tempo and minutes lines, so an ungraded player
  *   gets those and nothing else;
  * - a line whose id is in `coach.suppressed` is left out for thirty days;
  * - only the newest `TAKES_WINDOW` (500) rows are read, whatever is passed;
  * - Takes on the reserved Path `mine` (the player's own exercises, t2b) are
- *   never read.
+ *   never read for a measured line or a tempo (their minutes count, as in Progress).
  *
  * Pure: no store, no React, no clock but `now`. Build it on demand (when the
  * Notebook opens), never in a render or per beat.
@@ -44,8 +46,8 @@ export const SHOWN_SHARE = 0.6;
 export const MIN_EVENNESS_DROP = 5;
 /** Two tempos are compared only with at least this many Takes at each. */
 export const MIN_TAKES_PER_TEMPO = 2;
-/** Minutes per Session: at least this many Sessions, compared newer half against older half. */
-export const MIN_SESSIONS = 4;
+/** Minutes per Session: at least this many Sessions, compared newer half against older half (three against three). */
+export const MIN_SESSIONS = 6;
 /** The newest this many Sessions are read for the minutes line. */
 export const RECENT_SESSIONS = 8;
 /** And the two halves must differ by at least this many whole minutes. */
@@ -94,12 +96,18 @@ export type TendencyOptions = {
 // Which rows count for what
 // ---------------------------------------------------------------------------
 
-/** The window: newest first, at most 500, not marked unfair, not the player's own exercises. */
+/**
+ * Every Take in the window, newest first, at most 500: what Progress counts
+ * (`totalsFrom`). The minutes line reads these, because minutes played are
+ * minutes played whether the Take was fair or on the player's own exercise.
+ */
+export function playedOf(rows: readonly PathTakeRow[]): PathTakeRow[] {
+  return [...rows].sort((a, b) => b.startedAt - a.startedAt).slice(0, TAKES_WINDOW);
+}
+
+/** The window the measured lines read: `playedOf`, less Takes marked not fair and the player's own exercises. */
 export function windowOf(rows: readonly PathTakeRow[]): PathTakeRow[] {
-  return [...rows]
-    .sort((a, b) => b.startedAt - a.startedAt)
-    .slice(0, TAKES_WINDOW)
-    .filter((t) => t.pathId !== OWN_EXERCISES_PATH && factsOf(t).fair !== "no");
+  return playedOf(rows).filter((t) => t.pathId !== OWN_EXERCISES_PATH && factsOf(t).fair !== "no");
 }
 
 /** A Take whose measures can be compared: graded and heard. */
@@ -230,6 +238,14 @@ function leaning(window: readonly PathTakeRow[]): Array<{ take: PathTakeRow; lea
 /**
  * Of the newest `RECENT_TAKES` Takes that can show it, how many leaned which
  * way: a line when one direction holds at least `SHOWN_SHARE` of them.
+ *
+ * "Can show it" is exactly what the sentence calls "where it could be
+ * measured" (c4a1b, L2): in the window (not marked not fair, not the player's
+ * own exercise), graded, heard, with a per-bar lean of at least two bars, and
+ * for a place line at least one bar with that place and one without. Takes in
+ * between that are none of these are not counted, and the sentence does not
+ * say "your last N Takes": `count` is the number of these readings, newest
+ * first, and the evidence line carries their dates.
  */
 function verdictOf(
   readings: ReadonlyArray<{ take: PathTakeRow; value: number }>,
@@ -337,10 +353,17 @@ function secondsOf(take: PathTakeRow, paths: readonly PathDoc[] | undefined): nu
   return (take.bars * (barLengthTicks(meter) / 960) * 60) / take.bpm;
 }
 
-/** Minutes played per Session, the newer half of the newest Sessions against the older half. */
-function minutesLine(window: readonly PathTakeRow[], paths: readonly PathDoc[] | undefined): NoticedLine | null {
+/**
+ * Minutes played per Session, the newer half of the newest Sessions against
+ * the older half. The minutes are the Takes' own length, counted as Progress
+ * counts them (`totalsFrom`): every Take in `playedOf`, a Take marked not fair
+ * and one on the player's own exercise included (c4a1b, L3), so the two never
+ * disagree for the same Sessions. At least `MIN_SESSIONS` (six: three against
+ * three) Sessions.
+ */
+function minutesLine(played: readonly PathTakeRow[], paths: readonly PathDoc[] | undefined): NoticedLine | null {
   const sessions: Array<{ key: string; takes: PathTakeRow[] }> = [];
-  for (const t of window) {
+  for (const t of played) {
     const key = sessionKeyOf(t);
     const s = sessions.find((x) => x.key === key);
     if (s) s.takes.push(t);
@@ -372,7 +395,7 @@ export function tendencies(rows: readonly PathTakeRow[], now: number, options: T
     ...leanLines(window),
     ...placeLines(window, options.paths),
     ...tempoPlayedLines(window, options.paths),
-    minutesLine(window, options.paths),
+    minutesLine(playedOf(rows), options.paths),
   ].filter((l): l is NoticedLine => l !== null);
   const suppressed = options.suppressed ?? {};
   return lines.filter((l) => !isSuppressed(suppressed, l.id, now));

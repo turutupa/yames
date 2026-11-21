@@ -5,7 +5,7 @@
  * | Key | Holds | Default (missing, null or malformed) |
  * |---|---|---|
  * | `coach.suggestions` | `"on"` \| `"asked"` | `"on"` |
- * | `coach.cards` | per card kind: last shown, times dismissed, last dismissed | `{}` |
+ * | `coach.cards` | per card kind: times dismissed, last dismissed | `{}` |
  * | `coach.goal` | `{ text, at }`: one sentence (at most 200 characters) and its date | `null` (no goal) |
  * | `coach.suppressed` | noticed-line id → the date it was left out | `{}` |
  *
@@ -17,15 +17,26 @@
  *
  * Nothing here writes on its own: no migration, no default written at load,
  * no clean-up at start. Every writer is called from a player's press (a tool's
- * confirm, Leave out, Hide / Not now, Settings' row) or a rule DESIGN 6.6
- * names (a card shown is counted when it is shown). A stored `null`, a value
- * from a future build or a hand-edited file reads as the default and never
- * throws, so a player who never opens the coach sees no change at all.
+ * confirm, Leave out, Hide / Not now, Settings' row) and nothing else: the
+ * coach stores nothing the player did not press (c4a1b: "a card was shown" is
+ * not stored; it lives in memory, c4b2's, unless the owner says otherwise).
+ * A stored `null`, a value from a future build or a hand-edited file reads as
+ * the default and never throws, so a player who never opens the coach sees no
+ * change at all. A dismissal or left-out date in the future (a clock moved
+ * back, a hand edit) reads as the moment it was read; the file is not
+ * rewritten for it, only by the next press on that key.
  *
  * The readers the tool host calls are synchronous (a confirm is), so the
  * values are kept in memory after one load (`loadCoachStored`); until that
  * load has finished `coachStoredLoaded()` is false and the host answers
- * "not yet" rather than propose over a goal it has not read.
+ * "not yet" rather than propose over a goal it has not read. A key whose read
+ * failed is "unknown", not its default, for anything that would replace it
+ * (`coachStoredUnread`).
+ *
+ * The two map keys (`coach.cards`, `coach.suppressed`) are written whole, so
+ * a press on them before the load has finished is queued, shown in memory at
+ * once, and replayed onto what the load reads; only then is the map saved.
+ * A write never starts from the empty default and overwrites the disk.
  */
 import { storeLoad, storeSave } from "../ipc";
 
@@ -33,8 +44,6 @@ export type Suggestions = "on" | "asked";
 
 /** One proactive card kind's record (DESIGN 6.6). Times are ms since the epoch. */
 export type CardRecord = {
-  /** When it was last shown; null: never. */
-  lastShown: number | null;
   /** "Hide" / "Not now" presses since it was last asked for. */
   dismissed: number;
   /** When it was last dismissed; null: never. */
@@ -97,23 +106,23 @@ export function readSuggestions(raw: unknown): Suggestions {
   return raw === "asked" ? "asked" : "on";
 }
 
-/** One card record, or null when it is not one (dropped, not repaired). */
-function readCard(raw: unknown): CardRecord | null {
+/** One card record, or null when it is not one (dropped, not repaired). A date after `now` reads as `now`. */
+function readCard(raw: unknown, now: number): CardRecord | null {
   if (!isRecord(raw)) return null;
-  const lastShown = raw.lastShown === null || raw.lastShown === undefined ? null : raw.lastShown;
   const lastDismissed = raw.lastDismissed === null || raw.lastDismissed === undefined ? null : raw.lastDismissed;
   const dismissed = raw.dismissed === undefined ? 0 : raw.dismissed;
-  if (lastShown !== null && !isTime(lastShown)) return null;
   if (lastDismissed !== null && !isTime(lastDismissed)) return null;
   if (typeof dismissed !== "number" || !Number.isInteger(dismissed) || dismissed < 0) return null;
-  return { lastShown, dismissed, lastDismissed };
+  // An older record's `lastShown` (c4a1, never released) is not read: nothing stores it now.
+  return { dismissed, lastDismissed: lastDismissed === null ? null : Math.min(lastDismissed, now) };
 }
 
-export function readCards(raw: unknown): CoachCards {
+/** `now`: when it is read. A dismissal dated after it reads as `now` (not rewritten). */
+export function readCards(raw: unknown, now: number): CoachCards {
   if (!isRecord(raw)) return COACH_STORED_DEFAULTS.cards;
   const out: Record<string, CardRecord> = {};
   for (const [kind, value] of Object.entries(raw)) {
-    const card = readCard(value);
+    const card = readCard(value, now);
     if (card) out[kind] = card;
   }
   return out;
@@ -126,10 +135,11 @@ export function readGoal(raw: unknown): CoachGoal | null {
   return { text, at: isTime(raw.at) ? raw.at : null };
 }
 
-export function readSuppressed(raw: unknown): Suppressed {
+/** `now`: when it is read. A line left out after it reads as left out `now` (not rewritten). */
+export function readSuppressed(raw: unknown, now: number): Suppressed {
   if (!isRecord(raw)) return COACH_STORED_DEFAULTS.suppressed;
   const out: Record<string, number> = {};
-  for (const [id, at] of Object.entries(raw)) if (id.length > 0 && isTime(at)) out[id] = at;
+  for (const [id, at] of Object.entries(raw)) if (id.length > 0 && isTime(at)) out[id] = Math.min(at, now);
   return out;
 }
 
@@ -138,7 +148,7 @@ export function readSuppressed(raw: unknown): Suppressed {
 // ---------------------------------------------------------------------------
 
 export function cardOf(cards: CoachCards, kind: string): CardRecord {
-  return cards[kind] ?? { lastShown: null, dismissed: 0, lastDismissed: null };
+  return cards[kind] ?? { dismissed: 0, lastDismissed: null };
 }
 
 /**
@@ -155,18 +165,15 @@ export function cardMayShow(stored: Pick<CoachStored, "suggestions" | "cards">, 
   return true;
 }
 
-export function withCardShown(cards: CoachCards, kind: string, now: number): CoachCards {
-  return { ...cards, [kind]: { ...cardOf(cards, kind), lastShown: now } };
-}
-
 export function withCardDismissed(cards: CoachCards, kind: string, now: number): CoachCards {
   const card = cardOf(cards, kind);
   return { ...cards, [kind]: { ...card, dismissed: card.dismissed + 1, lastDismissed: now } };
 }
 
-/** The player asked for this kind: the dismissals stop counting against it. */
+/** The player asked for this kind: the dismissals stop counting against it. The same object when there were none. */
 export function withCardAsked(cards: CoachCards, kind: string): CoachCards {
   const card = cardOf(cards, kind);
+  if (card.dismissed === 0 && card.lastDismissed === null) return cards;
   return { ...cards, [kind]: { ...card, dismissed: 0, lastDismissed: null } };
 }
 
@@ -187,8 +194,9 @@ export function withSuppressed(suppressed: Suppressed, id: string, now: number):
   return { ...stillSuppressed(suppressed, now), [id]: now };
 }
 
-/** Leave-out's Undo: the line is back at once. */
+/** Leave-out's Undo: the line is back at once. The same object when it was not left out. */
 export function withoutSuppressed(suppressed: Suppressed, id: string): Suppressed {
+  if (!Object.prototype.hasOwnProperty.call(suppressed, id)) return suppressed;
   const out = { ...suppressed };
   delete out[id];
   return out;
@@ -198,11 +206,35 @@ export function withoutSuppressed(suppressed: Suppressed, id: string): Suppresse
 // The values in memory, the load, the writers
 // ---------------------------------------------------------------------------
 
+/** The two keys written as a whole map: a write before the load is queued and replayed. */
+type MapKey = "cards" | "suppressed";
+type Queued =
+  | { key: "cards"; op: (cards: CoachCards) => CoachCards }
+  | { key: "suppressed"; op: (suppressed: Suppressed) => Suppressed };
+
+/**
+ * What a writer did with the press, for the caller to say so:
+ * - `"saved"`: in memory, and sent to the store;
+ * - `"queued"`: made before the keys were read: in memory now, replayed onto
+ *   what the load reads and saved then;
+ * - `"unchanged"`: there was nothing to change (nothing written);
+ * - `"notRead"`: the key could not be read this run, so a write would replace
+ *   what is on disk unseen: nothing changed, nothing written.
+ */
+export type Written = "saved" | "queued" | "unchanged" | "notRead";
+
 let stored: CoachStored = COACH_STORED_DEFAULTS;
 let loaded = false;
 let loading: Promise<CoachStored> | null = null;
 const listeners = new Set<() => void>();
+/** Scalar keys (`suggestions`) written before the load finished: the press wins over what is read. */
 const writtenEarly = new Set<keyof CoachStored>();
+/** Map writes made before the load finished, in order. */
+const queued: Queued[] = [];
+/** Keys whose read failed this run: "unknown", not their default, for anything that would replace them. */
+const unread = new Set<keyof CoachStored>();
+/** The goal the last `saveGoal` replaced, so its undo brings back its own date (c4a1b, L4). */
+let replacedGoal: CoachGoal | null = null;
 let resets = 0;
 
 function set(next: CoachStored, written?: keyof CoachStored): void {
@@ -226,6 +258,16 @@ export function coachStoredLoaded(): boolean {
   return loaded;
 }
 
+/** Did this key's read fail this run? Then its value in memory is the default, not what is on disk. */
+export function coachStoredUnread(key: keyof CoachStored): boolean {
+  return unread.has(key);
+}
+
+/** Is the stored goal known (read, and read without a failure)? Only then may anything replace it. */
+export function coachGoalKnown(): boolean {
+  return loaded && !unread.has("goal");
+}
+
 /** Hear every change (for `useSyncExternalStore`); returns the unsubscribe. */
 export function subscribeCoachStored(listener: () => void): () => void {
   listeners.add(listener);
@@ -234,25 +276,53 @@ export function subscribeCoachStored(listener: () => void): () => void {
 
 /**
  * Read the four keys once (later calls share the first). A key that cannot be
- * read is its default. Writes nothing. Every key is named as a literal at its
+ * read is its default in memory and is marked unread (`coachStoredUnread`).
+ * Writes nothing of its own: only a map press queued before it finished is
+ * saved, replayed onto what was read. Every key is named as a literal at its
  * `storeLoad` / `storeSave`, so the parity manifest's scan finds it.
  */
 export function loadCoachStored(): Promise<CoachStored> {
   const generation = resets;
+  const failed: Array<keyof CoachStored> = [];
+  const failedAs = <T>(key: keyof CoachStored, fallback: T) => () => {
+    failed.push(key);
+    return fallback;
+  };
   loading ??= Promise.all([
-    storeLoad<unknown>("coach.suggestions").then(readSuggestions, () => readSuggestions(undefined)),
-    storeLoad<unknown>("coach.cards").then(readCards, () => readCards(undefined)),
-    storeLoad<unknown>("coach.goal").then(readGoal, () => readGoal(undefined)),
-    storeLoad<unknown>("coach.suppressed").then(readSuppressed, () => readSuppressed(undefined)),
+    storeLoad<unknown>("coach.suggestions").then(readSuggestions, failedAs("suggestions", readSuggestions(undefined))),
+    storeLoad<unknown>("coach.cards").then((raw) => readCards(raw, Date.now()), failedAs("cards", COACH_STORED_DEFAULTS.cards)),
+    storeLoad<unknown>("coach.goal").then(readGoal, failedAs("goal", readGoal(undefined))),
+    storeLoad<unknown>("coach.suppressed").then(
+      (raw) => readSuppressed(raw, Date.now()),
+      failedAs("suppressed", COACH_STORED_DEFAULTS.suppressed),
+    ),
   ]).then(([suggestions, cards, goal, suppressed]) => {
     if (generation !== resets) return stored; // a test reset since: this read is stale
-    // A key written before the load finished holds the newer value: keep it.
-    const read: CoachStored = { suggestions, cards, goal, suppressed };
-    const next = { ...read };
+    const next: CoachStored = { suggestions, cards, goal, suppressed };
+    // A scalar written before the load finished holds the player's newer value: keep it.
     for (const key of writtenEarly) (next as Record<keyof CoachStored, unknown>)[key] = stored[key];
+    for (const key of failed) if (!writtenEarly.has(key)) unread.add(key);
     writtenEarly.clear();
+    // A map press made before the load: replayed, in order, onto what was read.
+    const replayed = new Set<MapKey>();
+    for (const q of queued.splice(0)) {
+      if (q.key === "cards") {
+        const v = q.op(next.cards);
+        if (v !== next.cards) replayed.add("cards");
+        next.cards = v;
+      } else {
+        const v = q.op(next.suppressed);
+        if (v !== next.suppressed) replayed.add("suppressed");
+        next.suppressed = v;
+      }
+    }
     loaded = true;
     set(next);
+    for (const key of replayed) {
+      // Unread: the press holds for this run, and the disk keeps what it had.
+      if (unread.has(key)) console.error(`[coach.store] coach.${key} could not be read: an early press is not saved`);
+      else persistMap(key);
+    }
     return stored;
   });
   return loading;
@@ -261,57 +331,78 @@ export function loadCoachStored(): Promise<CoachStored> {
 /** A failed write is logged; the value in memory stays what the player chose for this run. */
 const notSaved = (key: string) => (err: unknown) => console.error(`[coach.store] ${key} not saved`, err);
 
-/** Settings → Coach's row and `set_setting`'s confirm. */
+/** Settings → Coach's row and `set_setting`'s confirm. The whole value: once chosen, it is known. */
 export function saveSuggestions(value: Suggestions): void {
   set({ ...stored, suggestions: value }, "suggestions");
+  unread.delete("suggestions");
   void storeSave("coach.suggestions", value).catch(notSaved("coach.suggestions"));
 }
 
-/** `set_goal`'s confirm (and its undo). `text` is trimmed and held to 200 characters. */
+/**
+ * `set_goal`'s confirm (and its undo). `text` is trimmed and held to 200
+ * characters. Null, and nothing written, when it is not a goal or when the
+ * stored goal is not known (`coachGoalKnown`: not read yet, or its read
+ * failed): a goal nobody has seen is never replaced. The text of the goal the
+ * last call replaced comes back with its own date (the undo; L4).
+ */
 export function saveGoal(text: string, now: number): CoachGoal | null {
-  const goal = readGoal({ text, at: now });
+  if (!coachGoalKnown()) return null;
+  const back = replacedGoal !== null && replacedGoal.text === text.trim() ? replacedGoal : null;
+  const goal = readGoal({ text, at: back ? back.at : now });
   if (!goal) return null;
+  replacedGoal = stored.goal;
   set({ ...stored, goal }, "goal");
   void storeSave("coach.goal", goal).catch(notSaved("coach.goal"));
   return goal;
 }
 
-function saveCards(cards: CoachCards): void {
-  set({ ...stored, cards }, "cards");
-  void storeSave("coach.cards", cards).catch(notSaved("coach.cards"));
+function persistMap(key: MapKey): void {
+  if (key === "cards") void storeSave("coach.cards", stored.cards).catch(notSaved("coach.cards"));
+  else void storeSave("coach.suppressed", stored.suppressed).catch(notSaved("coach.suppressed"));
 }
 
-/** A card was shown (DESIGN 6.6 counts it). */
-export function saveCardShown(kind: string, now: number): void {
-  saveCards(withCardShown(stored.cards, kind, now));
+/** One press on a map key: never from the empty default over the disk (M1). */
+function writeMap(q: Queued): Written {
+  if (!loaded) {
+    // Shown at once; replayed onto what the load reads, and saved then.
+    queued.push(q);
+    if (q.key === "cards") set({ ...stored, cards: q.op(stored.cards) });
+    else set({ ...stored, suppressed: q.op(stored.suppressed) });
+    void loadCoachStored().catch(() => {});
+    return "queued";
+  }
+  if (unread.has(q.key)) return "notRead";
+  if (q.key === "cards") {
+    const cards = q.op(stored.cards);
+    if (cards === stored.cards) return "unchanged";
+    set({ ...stored, cards });
+  } else {
+    const suppressed = q.op(stored.suppressed);
+    if (suppressed === stored.suppressed) return "unchanged";
+    set({ ...stored, suppressed });
+  }
+  persistMap(q.key);
+  return "saved";
 }
 
 /** "Hide" on a report, "Not now" on an offer. */
-export function saveCardDismissed(kind: string, now: number): void {
-  saveCards(withCardDismissed(stored.cards, kind, now));
+export function saveCardDismissed(kind: string, now: number): Written {
+  return writeMap({ key: "cards", op: (cards) => withCardDismissed(cards, kind, now) });
 }
 
 /** The player asked for a card of this kind. Writes only when there were dismissals to clear. */
-export function saveCardAsked(kind: string): void {
-  const card = cardOf(stored.cards, kind);
-  if (card.dismissed === 0 && card.lastDismissed === null) return;
-  saveCards(withCardAsked(stored.cards, kind));
-}
-
-function saveSuppressedList(suppressed: Suppressed): void {
-  set({ ...stored, suppressed }, "suppressed");
-  void storeSave("coach.suppressed", suppressed).catch(notSaved("coach.suppressed"));
+export function saveCardAsked(kind: string): Written {
+  return writeMap({ key: "cards", op: (cards) => withCardAsked(cards, kind) });
 }
 
 /** "Leave out" on a noticed line. Not a delete: every Take stays. */
-export function saveSuppressed(id: string, now: number): void {
-  saveSuppressedList(withSuppressed(stored.suppressed, id, now));
+export function saveSuppressed(id: string, now: number): Written {
+  return writeMap({ key: "suppressed", op: (suppressed) => withSuppressed(suppressed, id, now) });
 }
 
-/** Leave-out's Undo. */
-export function saveUnsuppressed(id: string): void {
-  if (!(id in stored.suppressed)) return;
-  saveSuppressedList(withoutSuppressed(stored.suppressed, id));
+/** Leave-out's Undo. Writes only when the line was left out. */
+export function saveUnsuppressed(id: string): Written {
+  return writeMap({ key: "suppressed", op: (suppressed) => withoutSuppressed(suppressed, id) });
 }
 
 /** Tests only: forget what was loaded. */
@@ -322,4 +413,7 @@ export function resetCoachStored(): void {
   loading = null;
   listeners.clear();
   writtenEarly.clear();
+  queued.length = 0;
+  unread.clear();
+  replacedGoal = null;
 }

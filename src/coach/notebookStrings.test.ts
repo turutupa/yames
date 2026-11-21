@@ -38,4 +38,15 @@ describe("the Notebook, in English", () => {
     // A count of Takes or Sessions, or (tempo lines) the two tempos it compares.
     expect(text, key).toMatch(/\{\{count\}\}|\{\{sessions\}\}|\{\{slow\}\}|\{\{fromBpm\}\}/);
   });
+
+  // c4a1b, L2: `count` is the Takes where the lean could be measured, not every Take played since.
+  it.each(NOTICED.filter(([, text]) => text.includes("{{hits}}")))("%s says which Takes it counted", (key, text) => {
+    expect(text, key).not.toMatch(/your last \{\{count\}\}/i);
+    expect(text, key).toMatch(/of the \{\{count\}\} most recent Takes .*where it could be measured/);
+  });
+
+  // c4a1b, L3: the minutes are the Takes' own length, as Progress counts them.
+  it("the minutes line says it counts minutes played in Takes", () => {
+    expect(en.notebook.noticed.minutes.perSession).toMatch(/minutes played in Takes/);
+  });
 });

@@ -24,8 +24,10 @@ import {
   CARD_QUIET_DAYS,
   cardMayShow,
   COACH_STORED_DEFAULTS,
+  coachGoalKnown,
   coachStored,
   coachStoredLoaded,
+  coachStoredUnread,
   isSuppressed,
   loadCoachStored,
   readCards,
@@ -35,7 +37,6 @@ import {
   resetCoachStored,
   saveCardAsked,
   saveCardDismissed,
-  saveCardShown,
   saveGoal,
   saveSuggestions,
   saveSuppressed,
@@ -44,7 +45,6 @@ import {
   SUPPRESS_DAYS,
   withCardAsked,
   withCardDismissed,
-  withCardShown,
   withSuppressed,
 } from "./store";
 
@@ -70,24 +70,36 @@ describe("coach.suggestions", () => {
 
 describe("coach.cards", () => {
   it("reads a malformed value, or null, as no cards", () => {
-    for (const raw of MALFORMED) expect(readCards(raw)).toEqual({});
+    for (const raw of MALFORMED) expect(readCards(raw, NOW)).toEqual({});
   });
 
   it("keeps good records, drops bad ones, and keeps a kind it does not know", () => {
     const raw = {
-      weekly: { lastShown: NOW, dismissed: 1, lastDismissed: NOW },
-      milestone: { lastShown: null, dismissed: 0, lastDismissed: null },
-      future: { lastShown: NOW },
-      plateau: { lastShown: "yesterday", dismissed: 0 },
+      weekly: { dismissed: 1, lastDismissed: NOW },
+      milestone: { dismissed: 0, lastDismissed: null },
+      future: {},
+      plateau: { lastDismissed: "yesterday", dismissed: 0 },
       goal: { dismissed: -1 },
       other: { dismissed: 1.5 },
       bare: 3,
     };
-    expect(readCards(raw)).toEqual({
-      weekly: { lastShown: NOW, dismissed: 1, lastDismissed: NOW },
-      milestone: { lastShown: null, dismissed: 0, lastDismissed: null },
-      future: { lastShown: NOW, dismissed: 0, lastDismissed: null },
+    expect(readCards(raw, NOW)).toEqual({
+      weekly: { dismissed: 1, lastDismissed: NOW },
+      milestone: { dismissed: 0, lastDismissed: null },
+      future: { dismissed: 0, lastDismissed: null },
     });
+  });
+
+  it("stores no \"last shown\": an older record's is not read back (c4a1b, M2)", () => {
+    expect(readCards({ weekly: { lastShown: NOW, dismissed: 1, lastDismissed: NOW } }, NOW)).toEqual({
+      weekly: { dismissed: 1, lastDismissed: NOW },
+    });
+  });
+
+  it("a dismissal dated in the future reads as the moment it was read (c4a1b, L7)", () => {
+    const cards = readCards({ weekly: { dismissed: 1, lastDismissed: NOW + 365 * DAY } }, NOW);
+    expect(cards.weekly.lastDismissed).toBe(NOW);
+    expect(cardMayShow({ suggestions: "on", cards }, "weekly", NOW + CARD_QUIET_DAYS * DAY)).toBe(true);
   });
 });
 
@@ -110,13 +122,19 @@ describe("coach.suppressed", () => {
   it("reads a malformed value, or null, as nothing left out", () => {
     // `{ a: 1 }` is a well-formed entry (id "a", left out at 1 ms), so it is not in this list.
     for (const raw of MALFORMED.filter((r) => !(typeof r === "object" && r !== null && "a" in r))) {
-      expect(readSuppressed(raw)).toEqual({});
+      expect(readSuppressed(raw, NOW)).toEqual({});
     }
-    expect(readSuppressed({ a: "x", b: null })).toEqual({});
+    expect(readSuppressed({ a: "x", b: null }, NOW)).toEqual({});
   });
 
   it("keeps ids with a date and drops the rest", () => {
-    expect(readSuppressed({ "lean:first:late": NOW, bad: "x", neg: -5, "": NOW })).toEqual({ "lean:first:late": NOW });
+    expect(readSuppressed({ "lean:first:late": NOW, bad: "x", neg: -5, "": NOW }, NOW)).toEqual({ "lean:first:late": NOW });
+  });
+
+  it("a line left out at a date in the future reads as left out when it was read (c4a1b, L7)", () => {
+    const s = readSuppressed({ "lean:first:late": NOW + 365 * DAY }, NOW);
+    expect(s).toEqual({ "lean:first:late": NOW });
+    expect(isSuppressed(s, "lean:first:late", NOW + SUPPRESS_DAYS * DAY)).toBe(false);
   });
 });
 
@@ -133,7 +151,7 @@ describe("the rules of DESIGN 6.6", () => {
   });
 
   it("a dismissed kind does not return for seven days, then may", () => {
-    const cards = withCardDismissed(withCardShown({}, "weekly", NOW), "weekly", NOW);
+    const cards = withCardDismissed({}, "weekly", NOW);
     expect(cardMayShow({ suggestions: "on", cards }, "weekly", NOW + (CARD_QUIET_DAYS * DAY - 1))).toBe(false);
     expect(cardMayShow({ suggestions: "on", cards }, "weekly", NOW + CARD_QUIET_DAYS * DAY)).toBe(true);
     // Another kind is not held by it.
@@ -147,12 +165,6 @@ describe("the rules of DESIGN 6.6", () => {
     expect(cardMayShow({ suggestions: "on", cards }, "plateau", NOW + 400 * DAY)).toBe(false);
     cards = withCardAsked(cards, "plateau");
     expect(cardMayShow({ suggestions: "on", cards }, "plateau", NOW + 400 * DAY)).toBe(true);
-  });
-
-  it("being shown does not by itself hold a kind back", () => {
-    const cards = withCardShown({}, "weekly", NOW);
-    expect(cards.weekly).toEqual({ lastShown: NOW, dismissed: 0, lastDismissed: null });
-    expect(cardMayShow({ suggestions: "on", cards }, "weekly", NOW + 1)).toBe(true);
   });
 });
 
@@ -202,13 +214,12 @@ describe("the values in memory and the store", () => {
     await loadCoachStored();
     saveSuggestions("asked");
     saveGoal("  Play in a band  ", NOW);
-    saveCardShown("weekly", NOW);
-    saveCardDismissed("weekly", NOW + 1);
-    saveSuppressed("lean:last:late", NOW);
+    expect(saveCardDismissed("weekly", NOW + 1)).toBe("saved");
+    expect(saveSuppressed("lean:last:late", NOW)).toBe("saved");
     await Promise.resolve();
-    expect(saves.map(([key]) => key)).toEqual(["coach.suggestions", "coach.goal", "coach.cards", "coach.cards", "coach.suppressed"]);
+    expect(saves.map(([key]) => key)).toEqual(["coach.suggestions", "coach.goal", "coach.cards", "coach.suppressed"]);
     expect(disk.get("coach.goal")).toEqual({ text: "Play in a band", at: NOW });
-    expect(disk.get("coach.cards")).toEqual({ weekly: { lastShown: NOW, dismissed: 1, lastDismissed: NOW + 1 } });
+    expect(disk.get("coach.cards")).toEqual({ weekly: { dismissed: 1, lastDismissed: NOW + 1 } });
     expect(coachStored().suggestions).toBe("asked");
   });
 
@@ -221,11 +232,11 @@ describe("the values in memory and the store", () => {
 
   it("asking for a card with nothing to clear writes nothing; with dismissals it clears them", async () => {
     await loadCoachStored();
-    saveCardAsked("weekly");
+    expect(saveCardAsked("weekly")).toBe("unchanged");
     expect(saves).toEqual([]);
     saveCardDismissed("weekly", NOW);
-    saveCardAsked("weekly");
-    expect(coachStored().cards.weekly).toEqual({ lastShown: null, dismissed: 0, lastDismissed: null });
+    expect(saveCardAsked("weekly")).toBe("saved");
+    expect(coachStored().cards.weekly).toEqual({ dismissed: 0, lastDismissed: null });
   });
 
   it("leave out and its undo", async () => {
@@ -235,8 +246,95 @@ describe("the values in memory and the store", () => {
     saveUnsuppressed("place:afterHeld:late");
     expect(coachStored().suppressed).toEqual({});
     const before = saves.length;
-    saveUnsuppressed("never-left-out");
+    expect(saveUnsuppressed("never-left-out")).toBe("unchanged");
     expect(saves.length).toBe(before);
+  });
+
+  // c4a1b, M1: a map is written whole, so a press before the load must not start from `{}`.
+  it("a dismissal and a leave-out before the load are replayed onto what is on disk, not over it", async () => {
+    disk.set("coach.cards", { weekly: { dismissed: 2, lastDismissed: NOW - DAY } });
+    disk.set("coach.suppressed", { "lean:first:late": NOW - DAY });
+    expect(saveCardDismissed("plateau", NOW)).toBe("queued");
+    expect(saveSuppressed("place:shift:early", NOW)).toBe("queued");
+    // Shown at once, and nothing on disk replaced before the read.
+    expect(coachStored().cards.plateau).toEqual({ dismissed: 1, lastDismissed: NOW });
+    expect(saves).toEqual([]);
+    await loadCoachStored();
+    const cards = { weekly: { dismissed: 2, lastDismissed: NOW - DAY }, plateau: { dismissed: 1, lastDismissed: NOW } };
+    const suppressed = { "lean:first:late": NOW - DAY, "place:shift:early": NOW };
+    expect(coachStored().cards).toEqual(cards);
+    expect(coachStored().suppressed).toEqual(suppressed);
+    expect(disk.get("coach.cards")).toEqual(cards);
+    expect(disk.get("coach.suppressed")).toEqual(suppressed);
+  });
+
+  it("an undo of a leave-out and an asked card before the load act on what is on disk", async () => {
+    disk.set("coach.cards", { weekly: { dismissed: 2, lastDismissed: NOW - DAY } });
+    disk.set("coach.suppressed", { "lean:first:late": NOW - DAY, "lean:last:early": NOW - DAY });
+    expect(saveUnsuppressed("lean:first:late")).toBe("queued");
+    expect(saveCardAsked("weekly")).toBe("queued");
+    await loadCoachStored();
+    expect(coachStored().suppressed).toEqual({ "lean:last:early": NOW - DAY });
+    expect(disk.get("coach.suppressed")).toEqual({ "lean:last:early": NOW - DAY });
+    expect(coachStored().cards.weekly).toEqual({ dismissed: 0, lastDismissed: null });
+    expect(disk.get("coach.cards")).toEqual({ weekly: { dismissed: 0, lastDismissed: null } });
+  });
+
+  it("a press before the load that changes nothing on what is read writes nothing", async () => {
+    expect(saveUnsuppressed("never-left-out")).toBe("queued");
+    await loadCoachStored();
+    expect(saves).toEqual([]);
+  });
+
+  it("a map key that could not be read is never written over: refused after the load, kept in memory only before", async () => {
+    disk.set("coach.suppressed", { "lean:first:late": NOW - DAY });
+    failLoad = "coach.suppressed";
+    expect(saveSuppressed("early", NOW)).toBe("queued");
+    await loadCoachStored();
+    expect(coachStoredUnread("suppressed")).toBe(true);
+    expect(saveSuppressed("late", NOW)).toBe("notRead");
+    expect(saves).toEqual([]);
+    expect(disk.get("coach.suppressed")).toEqual({ "lean:first:late": NOW - DAY });
+  });
+
+  // c4a1b, L5.
+  it("a goal that could not be read is unknown, not \"no goal\": nothing replaces it", async () => {
+    disk.set("coach.goal", { text: "Learn the blues", at: NOW - DAY });
+    failLoad = "coach.goal";
+    await loadCoachStored();
+    expect(coachStoredUnread("goal")).toBe(true);
+    expect(coachGoalKnown()).toBe(false);
+    expect(saveGoal("Play in a band", NOW)).toBeNull();
+    expect(saves).toEqual([]);
+  });
+
+  it("before the load, the goal is not known and is not written", () => {
+    expect(coachGoalKnown()).toBe(false);
+    expect(saveGoal("Play in a band", NOW)).toBeNull();
+    expect(saves).toEqual([]);
+  });
+
+  // c4a1b, L4.
+  it("putting back the goal a new one replaced brings back its own date", async () => {
+    disk.set("coach.goal", { text: "Learn the blues", at: NOW - 10 * DAY });
+    await loadCoachStored();
+    saveGoal("Play in a band", NOW);
+    expect(saveGoal("Learn the blues", NOW + 1)).toEqual({ text: "Learn the blues", at: NOW - 10 * DAY });
+    expect(disk.get("coach.goal")).toEqual({ text: "Learn the blues", at: NOW - 10 * DAY });
+    // Any other text is dated now.
+    expect(saveGoal("Join a band", NOW + 2)?.at).toBe(NOW + 2);
+  });
+
+  // c4a1b, L7.
+  it("a date in the future on disk reads as now and the file is not rewritten", async () => {
+    const later = Date.now() + 365 * DAY;
+    disk.set("coach.suppressed", { "lean:first:late": later });
+    disk.set("coach.cards", { weekly: { dismissed: 1, lastDismissed: later } });
+    await loadCoachStored();
+    expect(coachStored().suppressed["lean:first:late"]).toBeLessThanOrEqual(Date.now());
+    expect(coachStored().cards.weekly.lastDismissed).toBeLessThanOrEqual(Date.now());
+    expect(saves).toEqual([]);
+    expect(disk.get("coach.suppressed")).toEqual({ "lean:first:late": later });
   });
 
   it("a press made before the load finished is not undone by the load", async () => {

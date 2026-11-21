@@ -6,7 +6,7 @@
 import type { PathTakeRow } from "../ipc";
 import type { PathDoc } from "../paths/format";
 import { cardMayShow, type CoachGoal, type CoachStored } from "./store";
-import { MIN_TAKES, tendencies, windowOf, type NoticedLine } from "./tendencies";
+import { MIN_TAKES, playedOf, tendencies, windowOf, type NoticedLine } from "./tendencies";
 
 /** DESIGN 6.7 / judgement call 10: the goal is asked once the first Session is seven days old. */
 export const GOAL_ASK_AFTER_DAYS = 7;
@@ -26,7 +26,12 @@ export type Notebook = {
   /** The Takes read (after the window's rules), and the oldest one's date. */
   takesRead: number;
   firstTakeAt: number | null;
-  /** True when no Exercise has `MIN_TAKES` Takes yet: the empty state's sentence is the honest one. */
+  /**
+   * True when fewer than `MIN_TAKES` Takes were played in the window (every
+   * Take Progress counts): no line can rest on so few, so "not enough Takes
+   * yet" is the honest empty state. Never true beside a noticed line (c4a1b,
+   * L1): every line rests on at least `MIN_TAKES` of those Takes.
+   */
   tooFewTakes: boolean;
 };
 
@@ -38,16 +43,15 @@ export function notebookFrom(
 ): Notebook {
   const window = windowOf(rows);
   const firstTakeAt = window.length ? window[window.length - 1].startedAt : null;
-  const perExercise = new Map<string, number>();
-  for (const t of window) perExercise.set(`${t.pathId}/${t.exerciseId}`, (perExercise.get(`${t.pathId}/${t.exerciseId}`) ?? 0) + 1);
-  const tooFewTakes = ![...perExercise.values()].some((n) => n >= MIN_TAKES);
+  const noticed = tendencies(rows, now, { paths, suppressed: stored.suppressed });
+  const tooFewTakes = noticed.length === 0 && playedOf(rows).length < MIN_TAKES;
   const askGoal =
     stored.goal === null &&
     firstTakeAt !== null &&
     now - firstTakeAt >= GOAL_ASK_AFTER_DAYS * DAY_MS &&
     cardMayShow(stored, "goal", now);
   return {
-    noticed: tendencies(rows, now, { paths, suppressed: stored.suppressed }),
+    noticed,
     goal: stored.goal,
     askGoal,
     takesRead: window.length,

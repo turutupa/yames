@@ -20,6 +20,35 @@ import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import type { SessionRun } from "../session/hooks/useSessionRun";
 import { useCoachToolHost, type CoachToolHostInput } from "./useCoachToolHost";
 
+/**
+ * The settings store, in memory, with a hand on the read: while `hold` is set a
+ * `storeLoad` waits for `release()`, so the pre-load case is always seen (c4a1b, L6).
+ */
+const store = vi.hoisted(() => ({
+  disk: new Map<string, unknown>(),
+  hold: false,
+  waiting: [] as Array<() => void>,
+  failRead: null as string | null,
+}));
+vi.mock("../../ipc", async (importOriginal) => {
+  const real = await importOriginal<typeof import("../../ipc")>();
+  return {
+    ...real,
+    storeLoad: vi.fn((key: string) => {
+      const read = () => (key === store.failRead ? Promise.reject(new Error("unreadable")) : Promise.resolve(store.disk.get(key)));
+      if (!store.hold) return read();
+      return new Promise((resolve, reject) => store.waiting.push(() => read().then(resolve, reject)));
+    }),
+    storeSave: vi.fn(async (key: string, value: unknown) => {
+      store.disk.set(key, value);
+    }),
+  };
+});
+const releaseReads = () => {
+  store.hold = false;
+  for (const go of store.waiting.splice(0)) go();
+};
+
 /** What the Session's doors were called with, in order. */
 const sessionCalls: Array<[string, unknown[]]> = [];
 const recordAs = (name: string) => (...args: unknown[]) => {
@@ -91,6 +120,9 @@ function input(over: Partial<CoachToolHostInput> = {}): CoachToolHostInput & { m
 afterEach(() => {
   vi.useRealTimers();
   resetCoachStored();
+  releaseReads();
+  store.disk.clear();
+  store.failRead = null;
 });
 
 describe("useCoachToolHost", () => {
@@ -160,14 +192,16 @@ describe("useCoachToolHost", () => {
   });
 
   it("the goal and Suggestions wait for the coach's keys to be read, then read and write them (c4a1)", async () => {
+    store.hold = true;
     const { result } = renderHook(() => useCoachToolHost(input()));
     const host = result.current;
     // Read on mount; a proposal before that would be over a goal nobody has seen.
-    if (!coachStoredLoaded()) {
-      expect(host.goal()).toBe("notWiredYet");
-      expect(host.safeSetting("coachSuggestions")).toBe("notWiredYet");
-    }
+    expect(coachStoredLoaded()).toBe(false);
+    expect(host.goal()).toBe("notWiredYet");
+    expect(host.safeSetting("coachSuggestions")).toBe("notWiredYet");
+    expect(runCoachTool({ tool: "set_goal", args: { text: "Play the solo at 120" } }, host, toolCtx())).toMatchObject({ why: "notWiredYet" });
     await act(async () => {
+      releaseReads();
       await loadCoachStored();
     });
     // A player who never chose: no goal, Suggestions on.
@@ -201,8 +235,44 @@ describe("useCoachToolHost", () => {
     const second = confirmCoachTool(proposalOf(runCoachTool({ tool: "set_goal", args: { text: "Join a band" } }, host, toolCtx())), host, toolCtx());
     if (!second.ok || !second.undo) throw new Error("no undo");
     expect(coachStored().goal?.text).toBe("Join a band");
+    const firstAt = coachStored().goal?.at;
     expect(runCoachUndo(second.undo, host, toolCtx()).ok).toBe(true);
     expect(coachStored().goal?.text).toBe("Play the solo at 120");
+    // With its own date, not the undo's (c4a1b, L4).
+    expect(store.disk.get("coach.goal")).toEqual({ text: "Play the solo at 120", at: firstAt });
+  });
+
+  it("the undo of a second goal puts the first back with the date it was set (c4a1b, L4)", async () => {
+    const setAt = Date.UTC(2026, 9, 1);
+    store.disk.set("coach.goal", { text: "Play the solo at 120", at: setAt });
+    const { result } = renderHook(() => useCoachToolHost(input()));
+    const host = result.current;
+    await act(async () => {
+      await loadCoachStored();
+    });
+    const run = runCoachTool({ tool: "set_goal", args: { text: "Join a band" } }, host, toolCtx());
+    if (!run.ok || !("proposal" in run)) throw new Error("no proposal");
+    const kept = confirmCoachTool(run.proposal, host, toolCtx());
+    if (!kept.ok || !kept.undo) throw new Error("no undo");
+    expect(runCoachUndo(kept.undo, host, toolCtx()).ok).toBe(true);
+    expect(coachStored().goal).toEqual({ text: "Play the solo at 120", at: setAt });
+    expect(store.disk.get("coach.goal")).toEqual({ text: "Play the solo at 120", at: setAt });
+  });
+
+  it("a goal whose read failed is unknown: set_goal says not yet and nothing is written (c4a1b, L5)", async () => {
+    store.disk.set("coach.goal", { text: "Play the solo at 120", at: 1 });
+    store.failRead = "coach.goal";
+    const { result } = renderHook(() => useCoachToolHost(input()));
+    const host = result.current;
+    await act(async () => {
+      await loadCoachStored();
+    });
+    expect(coachStoredLoaded()).toBe(true);
+    expect(host.goal()).toBe("notWiredYet");
+    expect(runCoachTool({ tool: "set_goal", args: { text: "Join a band" } }, host, toolCtx())).toMatchObject({ why: "notWiredYet" });
+    expect(store.disk.get("coach.goal")).toEqual({ text: "Play the solo at 120", at: 1 });
+    // The other keys still read: Suggestions answers.
+    expect(host.safeSetting("coachSuggestions")).toBe(true);
   });
 
   it("says what sounds: nothing in a Session, the band on the jam, a song on Songs, else the click", () => {

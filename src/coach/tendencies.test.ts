@@ -11,7 +11,8 @@ import type { PathDoc, PathNote } from "../paths/format";
 import type { TakeFacts } from "../session/progress";
 import { notebookFrom } from "./notebook";
 import { COACH_STORED_DEFAULTS } from "./store";
-import { MIN_TAKES, TAKES_WINDOW, tendencies, type NoticedLine } from "./tendencies";
+import { MIN_SESSIONS, MIN_TAKES, TAKES_WINDOW, tendencies, type NoticedLine } from "./tendencies";
+import { totalsFrom } from "../containers/session/ProgressView";
 
 const DAY = 86_400_000;
 const HOUR = 3_600_000;
@@ -136,6 +137,23 @@ describe("where in time: by bar position", () => {
     expect(lines[0]).toMatchObject({ key: "notebook.noticed.lean.last.late", values: { hits: 5, count: 7 } });
   });
 
+  // c4a1b, L2: "of the N most recent Takes where it could be measured" is exactly the set counted.
+  it("counts only the Takes where the lean could be measured, and names exactly those", () => {
+    const measuredRows = [0, 1, 2, 3, 4, 5].map((i) => leaning("a", [0, 2, -3, 25], i * DAY + 2 * HOUR));
+    const between = [
+      leaning("a", [0, 2, -3, 25], HOUR, { ungraded: "gradingOff" }),
+      row("a", 1 * DAY + HOUR, { caught: false, facts: { lean: [0, 2, -3, 25] } }),
+      leaning("a", [0, 2, -3, 25], 2 * DAY + HOUR, { fair: "no" }),
+      // One pattern bar: nothing to lean against.
+      leaning("a", [25], 3 * DAY + HOUR),
+    ];
+    const [line] = tendencies([...between, ...measuredRows], NOW);
+    expect(line).toMatchObject({ id: "lean:last:late", values: { hits: 6, count: 6 } });
+    expect([...line.takeIds].sort()).toEqual(measuredRows.map((t) => t.id).sort());
+    expect(line.from).toBe(measuredRows[5].startedAt);
+    expect(line.to).toBe(measuredRows[0].startedAt);
+  });
+
   it("needs five Takes that can show it, and most of them to", () => {
     const four = [0, 1, 2, 3].map((i) => leaning("a", [0, 2, -3, 25], i * DAY));
     expect(tendencies(four, NOW)).toEqual([]);
@@ -169,8 +187,10 @@ describe("an ungraded player", () => {
     const rows = [
       ...[0, 1].map((i) => row("u", i * HOUR, { bpm: 95, bars: 150, facts: facts(1) })),
       ...[2, 3].map((i) => row("u", DAY + i * HOUR, { bpm: 95, bars: 150, facts: facts(2) })),
-      ...[4, 5].map((i) => row("u", 2 * DAY + i * HOUR, { bpm: 80, bars: 40, facts: facts(3) })),
+      ...[4, 5].map((i) => row("u", 2 * DAY + i * HOUR, { bpm: 95, bars: 150, facts: facts(3) })),
       ...[6, 7].map((i) => row("u", 3 * DAY + i * HOUR, { bpm: 80, bars: 40, facts: facts(4) })),
+      ...[8, 9].map((i) => row("u", 4 * DAY + i * HOUR, { bpm: 80, bars: 40, facts: facts(5) })),
+      ...[10, 11].map((i) => row("u", 5 * DAY + i * HOUR, { bpm: 80, bars: 40, facts: facts(6) })),
     ];
     const lines = tendencies(rows, NOW, { paths: [FX_PATH] });
     expect(new Set(lines.map((l) => l.kind))).toEqual(new Set(["tempoPlayed", "minutes"]));
@@ -182,7 +202,40 @@ describe("an ungraded player", () => {
     // 150 bars of 4/4 at 95 is 6.3 minutes; two a Session is 13. 40 at 80: 2 minutes, 4 a Session.
     expect(lines.find((l) => l.kind === "minutes")).toMatchObject({
       key: "notebook.noticed.minutes.perSession",
-      values: { sessions: 2, now: 13, then: 4 },
+      values: { sessions: 3, now: 13, then: 4 },
+    });
+  });
+
+  // c4a1b, L3.
+  describe("minutes per Session", () => {
+    /** `n` Sessions, newest first: two Takes each, one of them marked not fair; the newer half longer. */
+    const sessions = (n: number) =>
+      Array.from({ length: n }, (_v, s) => {
+        const newer = s < Math.floor(n / 2);
+        const at = s * DAY;
+        const take = { bpm: newer ? 95 : 80, bars: newer ? 150 : 40 };
+        return [
+          row("u", at, { ...take, facts: { session: 100 - s } }),
+          row("u", at + HOUR, { ...take, facts: { session: 100 - s, fair: "no" } }),
+        ];
+      });
+
+    it(`needs ${MIN_SESSIONS} Sessions, three against three`, () => {
+      expect(MIN_SESSIONS).toBe(6);
+      const minutes = (rows: PathTakeRow[]) => tendencies(rows, NOW).filter((l) => l.kind === "minutes");
+      expect(minutes(sessions(5).flat())).toEqual([]);
+      expect(minutes(sessions(6).flat())).toHaveLength(1);
+    });
+
+    it("counts the minutes Progress counts, a Take marked not fair included", () => {
+      const groups = sessions(6);
+      const line = tendencies(groups.flat(), NOW).find((l) => l.kind === "minutes");
+      const perSession = (gs: PathTakeRow[][]) =>
+        Math.round(gs.reduce((s, g) => s + totalsFrom(g, []).seconds, 0) / gs.length / 60);
+      expect(line?.values).toEqual({ sessions: 3, now: perSession(groups.slice(0, 3)), then: perSession(groups.slice(3)) });
+      // Two Takes of 6.3 minutes a Session: 13, not the 6 the fair Take alone would say.
+      expect(line?.values.now).toBe(13);
+      expect(line?.takeIds).toHaveLength(12);
     });
   });
 
@@ -255,7 +308,8 @@ describe("notebookFrom", () => {
   it("one plain object: the lines, the goal, and whether the goal may be asked", () => {
     const rows = tempoHistory();
     const fresh = notebookFrom(rows, COACH_STORED_DEFAULTS, NOW);
-    expect(fresh).toMatchObject({ goal: null, takesRead: 8, firstTakeAt: NOW - 6 * DAY, tooFewTakes: true, askGoal: false });
+    // A line on 8 Takes over two Exercises: not "too few Takes" (c4a1b, L1).
+    expect(fresh).toMatchObject({ goal: null, takesRead: 8, firstTakeAt: NOW - 6 * DAY, tooFewTakes: false, askGoal: false });
     expect(ids(fresh.noticed)).toEqual(["tempoEvenness:100:90"]);
 
     const weekOld = [...rows, even("a", 90, 0.85, 8 * DAY)];
@@ -266,6 +320,24 @@ describe("notebookFrom", () => {
     expect(notebookFrom(weekOld, quiet, NOW).askGoal).toBe(false);
     const leftOut = { ...COACH_STORED_DEFAULTS, suppressed: { "tempoEvenness:100:90": NOW - DAY } };
     expect(notebookFrom(weekOld, leftOut, NOW).noticed).toEqual([]);
+  });
+
+  it("\"too few Takes\" only under five Takes played, and never beside a noticed line (c4a1b, L1)", () => {
+    const four = tempoHistory().slice(0, 4);
+    expect(notebookFrom(four, COACH_STORED_DEFAULTS, NOW)).toMatchObject({ noticed: [], tooFewTakes: true });
+    // Five Takes with nothing to say: the empty state is "nothing noticed", not "too few".
+    const five = [0, 1, 2, 3, 4].map((i) => row(`e${i}`, i * DAY));
+    expect(notebookFrom(five, COACH_STORED_DEFAULTS, NOW)).toMatchObject({ noticed: [], tooFewTakes: false });
+    const histories = [
+      tempoHistory(),
+      [0, 1, 2, 3, 4, 5].map((i) => row("held", i * DAY, { facts: { lean: [0, -1, 30, -5] } })),
+      [0, 1, 2, 3, 4].map((i) => row("y", i * HOUR, { bpm: 90 - i * 5, facts: { ungraded: "chosen" } })),
+    ];
+    for (const rows of histories) {
+      const nb = notebookFrom(rows, COACH_STORED_DEFAULTS, NOW, [FX_PATH]);
+      expect(nb.noticed.length).toBeGreaterThan(0);
+      expect(nb.tooFewTakes).toBe(false);
+    }
   });
 
   it("an empty history: nothing noticed, the empty state's sentence, no goal question", () => {
