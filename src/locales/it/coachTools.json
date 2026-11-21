@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Cerco il tuo limite su {{title}}",
       "testOut": "Prova della tappa {{step}}: {{title}}",
+      "loopBar": "Battuta {{bar}} in loop a {{bpm}} BPM",
+      "loopBars": "Battute da {{from}} a {{to}} in loop a {{bpm}} BPM",
       "swapPart": "La parte {{part}} ora è {{to}}",
       "restorePart": "La parte {{part}} è di nuovo {{from}}",
       "setMinutes": "Oggi ora sono {{to}} minuti",
@@ -47,6 +49,8 @@
       "findEdge": "Trovare il tuo limite su {{title}} ({{path}} · Tappa {{step}}), da {{bpm}} BPM",
       "findEdgeNoBpm": "Trovare il tuo limite su {{title}} ({{path}} · Tappa {{step}})",
       "testOut": "Provare la tappa {{step}}: {{title}}, in {{takes}} take",
+      "loopBar": "Ripetere la battuta {{bar}} a {{bpm}} BPM, finché non fermi",
+      "loopBars": "Ripetere le battute da {{from}} a {{to}} a {{bpm}} BPM, finché non fermi",
       "swapPart": "Parte {{part}}: {{from}} → {{to}}",
       "restorePart": "Rimettere la parte {{part}} su {{title}}",
       "setMinutes": "Oggi: {{from}} → {{to}} minuti, {{parts}} parti",
@@ -106,7 +110,8 @@
       "load": "Carica",
       "keep": "Tieni",
       "go": "Vai",
-      "open": "Apri"
+      "open": "Apri",
+      "loop": "Ripetila"
     },
     "why": {
       "which": "Quale?",
@@ -123,7 +128,9 @@
         "level": "{{path}} non ha nessun livello chiamato «{{query}}».",
         "swap": "Niente di chiamato «{{query}}» può andare nella parte {{part}}.",
         "rung": "Non c'è nessun tempo da impostare lì.",
-        "settingValue": "{{key}} non può essere «{{query}}». Può essere:"
+        "settingValue": "{{key}} non può essere «{{query}}». Può essere:",
+        "loopBar": "Questa melodia non ha la battuta {{bar}}.",
+        "loopAcross": "Le battute da {{from}} a {{to}} escono dalla fine della melodia e rientrano nel suo inizio. Chiedi battute all'interno di un solo giro."
       },
       "notNow": {
         "take": "Dopo questa take.",
@@ -154,13 +161,15 @@
         "following": "Segui già {{path}}.",
         "alreadySubdivision": "Sono già {{subdivision}} click per battito.",
         "alreadySetting": "{{key}} è già {{value}}.",
-        "alreadyGoal": "È già il tuo obiettivo."
+        "alreadyGoal": "È già il tuo obiettivo.",
+        "loopHere": "Un loop parte da un Esercizio in una sessione, tra una take e l'altra."
       },
       "notWiredYet": "L'app non può ancora farlo da qui.",
       "refused": {
         "shape": "Questo l'app non può farlo.",
         "proposal": "Nel frattempo è cambiato, quindi non è stato fatto nulla. Chiedi di nuovo.",
-        "cap": "Segui {{cap}} percorsi, il massimo possibile. Lasciane prima uno dalla sua pagina."
+        "cap": "Segui {{cap}} percorsi, il massimo possibile. Lasciane prima uno dalla sua pagina.",
+        "loopBackwards": "La battuta {{to}} viene prima della battuta {{from}}. Nomina prima la prima battuta."
       },
       "failed": "Non ha funzionato, e non è stato cambiato nulla."
     },

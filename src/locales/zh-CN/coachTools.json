@@ -15,6 +15,8 @@
       "setTempo": "速度 {{from}} → {{to}} BPM",
       "findEdge": "正在{{title}}上找你的极限",
       "testOut": "正在跳级测试第{{step}}步：{{title}}",
+      "loopBar": "正在以 {{bpm}} BPM 循环第{{bar}}小节",
+      "loopBars": "正在以 {{bpm}} BPM 循环第{{from}}到{{to}}小节",
       "swapPart": "第{{part}}部分现在是{{to}}",
       "restorePart": "第{{part}}部分又变回{{from}}",
       "setMinutes": "今天现在是 {{to}} 分钟",
@@ -47,6 +49,8 @@
       "findEdge": "在{{title}}（{{path}} · 第{{step}}步）上找你的极限，从 {{bpm}} BPM 开始",
       "findEdgeNoBpm": "在{{title}}（{{path}} · 第{{step}}步）上找你的极限",
       "testOut": "跳级测试第{{step}}步：{{title}}，共 {{takes}} 遍",
+      "loopBar": "以 {{bpm}} BPM 循环第{{bar}}小节，直到你停下",
+      "loopBars": "以 {{bpm}} BPM 循环第{{from}}到{{to}}小节，直到你停下",
       "swapPart": "第{{part}}部分：{{from}} → {{to}}",
       "restorePart": "把第{{part}}部分换回{{title}}",
       "setMinutes": "今天：{{from}} → {{to}} 分钟，共 {{parts}} 部分",
@@ -106,7 +110,8 @@
       "load": "载入",
       "keep": "保留",
       "go": "前往",
-      "open": "打开"
+      "open": "打开",
+      "loop": "循环"
     },
     "why": {
       "which": "是哪一个？",
@@ -123,7 +128,9 @@
         "level": "{{path}}没有叫“{{query}}”的级别。",
         "swap": "没有叫“{{query}}”的内容可以放进第{{part}}部分。",
         "rung": "那里没有可设置的速度。",
-        "settingValue": "{{key}}不能是“{{query}}”。它可以是这些："
+        "settingValue": "{{key}}不能是“{{query}}”。它可以是这些：",
+        "loopBar": "这首曲子没有第{{bar}}小节。",
+        "loopAcross": "第{{from}}到{{to}}小节会越过曲子的结尾，又回到开头。请只要曲子一遍之内的小节。"
       },
       "notNow": {
         "take": "等这一遍结束后。",
@@ -154,13 +161,15 @@
         "following": "你已经在跟随{{path}}了。",
         "alreadySubdivision": "已经是每拍 {{subdivision}} 下了。",
         "alreadySetting": "{{key}}已经是{{value}}了。",
-        "alreadyGoal": "那已经是你的目标了。"
+        "alreadyGoal": "那已经是你的目标了。",
+        "loopHere": "循环要在一次练习中、两遍之间，从某个练习开始。"
       },
       "notWiredYet": "应用暂时还不能在这里做到。",
       "refused": {
         "shape": "应用做不了这件事。",
         "proposal": "此后情况有变，所以什么都没有做。请再问一次。",
-        "cap": "你已跟随 {{cap}} 条路线，这是上限。请先去它的页面退出一条。"
+        "cap": "你已跟随 {{cap}} 条路线，这是上限。请先去它的页面退出一条。",
+        "loopBackwards": "第{{to}}小节在第{{from}}小节之前。请先说起始的小节。"
       },
       "failed": "没有成功，也没有改动任何内容。"
     },

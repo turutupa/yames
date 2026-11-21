@@ -15,6 +15,8 @@
       "setTempo": "Tempo {{from}} → {{to}} BPM",
       "findEdge": "Deine Grenze bei {{title}} wird gesucht",
       "testOut": "Test für Schritt {{step}}: {{title}}",
+      "loopBar": "Takt {{bar}} in Wiederholung, mit {{bpm}} BPM",
+      "loopBars": "Takt {{from}} bis {{to}} in Wiederholung, mit {{bpm}} BPM",
       "swapPart": "Teil {{part}} ist jetzt {{to}}",
       "restorePart": "Teil {{part}} ist wieder {{from}}",
       "setMinutes": "Heute sind es jetzt {{to}} Minuten",
@@ -47,6 +49,8 @@
       "findEdge": "Deine Grenze bei {{title}} finden ({{path}} · Schritt {{step}}), ab {{bpm}} BPM",
       "findEdgeNoBpm": "Deine Grenze bei {{title}} finden ({{path}} · Schritt {{step}})",
       "testOut": "Schritt {{step}} testen: {{title}}, in {{takes}} Takes",
+      "loopBar": "Takt {{bar}} mit {{bpm}} BPM wiederholen, bis du stoppst",
+      "loopBars": "Takt {{from}} bis {{to}} mit {{bpm}} BPM wiederholen, bis du stoppst",
       "swapPart": "Teil {{part}}: {{from}} → {{to}}",
       "restorePart": "Teil {{part}} zurück auf {{title}} setzen",
       "setMinutes": "Heute: {{from}} → {{to}} Minuten, {{parts}} Teile",
@@ -106,7 +110,8 @@
       "load": "Laden",
       "keep": "Merken",
       "go": "Los",
-      "open": "Öffnen"
+      "open": "Öffnen",
+      "loop": "Wiederholen"
     },
     "why": {
       "which": "Welcher?",
@@ -123,7 +128,9 @@
         "level": "{{path}} hat keine Stufe namens „{{query}}“.",
         "swap": "Nichts namens „{{query}}“ passt in Teil {{part}}.",
         "rung": "Dort gibt es kein Tempo zum Setzen.",
-        "settingValue": "{{key}} kann nicht „{{query}}“ sein. Möglich sind:"
+        "settingValue": "{{key}} kann nicht „{{query}}“ sein. Möglich sind:",
+        "loopBar": "Diese Melodie hat keinen Takt {{bar}}.",
+        "loopAcross": "Takt {{from}} bis {{to}} laufen über das Ende der Melodie hinaus und wieder an ihren Anfang. Frag nach Takten innerhalb eines Durchgangs."
       },
       "notNow": {
         "take": "Nach diesem Take.",
@@ -154,13 +161,15 @@
         "following": "Du folgst {{path}} schon.",
         "alreadySubdivision": "Es sind schon {{subdivision}} Klicks pro Schlag.",
         "alreadySetting": "{{key}} ist schon {{value}}.",
-        "alreadyGoal": "Das ist schon dein Ziel."
+        "alreadyGoal": "Das ist schon dein Ziel.",
+        "loopHere": "Eine Wiederholung startet bei einer Übung in einer Session, zwischen Takes."
       },
       "notWiredYet": "Das kann die App von hier aus noch nicht.",
       "refused": {
         "shape": "Das kann die App nicht.",
         "proposal": "Das hat sich inzwischen geändert, deshalb wurde nichts gemacht. Frag noch einmal.",
-        "cap": "Du folgst {{cap}} Pfaden, mehr geht nicht. Verlasse zuerst einen auf seiner Seite."
+        "cap": "Du folgst {{cap}} Pfaden, mehr geht nicht. Verlasse zuerst einen auf seiner Seite.",
+        "loopBackwards": "Takt {{to}} kommt vor Takt {{from}}. Nenne zuerst den ersten Takt."
       },
       "failed": "Das hat nicht geklappt, und es wurde nichts geändert."
     },

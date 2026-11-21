@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { CoachScreen } from "../context";
 import { fakeHost, toolCtx } from "./fakeHost";
-import { HOST_MEMBERS, SAFE_SETTING_KEYS, SETTINGS_SECTIONS, WIRED_IN_T1A1, notWiredHost } from "./host";
+import { HOST_MEMBERS, SAFE_SETTING_KEYS, SETTINGS_SECTIONS, STILL_NOT_WIRED, WIRED_IN_T1A1, notWiredHost } from "./host";
 import { COACH_TOOLS, toolCatalogue } from "./registry";
 import { checkCall, runCoachTool, runCoachUndo } from "./run";
 import { TEST_PATHS, runIn } from "./testPaths";
@@ -180,6 +180,17 @@ describe("the never-list", () => {
     const stub = notWiredHost() as unknown as Record<string, unknown>;
     expect(Object.keys(stub).sort()).toEqual([...HOST_MEMBERS].sort());
     expect(WIRED_IN_T1A1.every((m) => (HOST_MEMBERS as readonly string[]).includes(m))).toBe(true);
+  });
+
+  it("loop_bars has its door (leg lb1): a read that starts nothing, and the press", () => {
+    expect(STILL_NOT_WIRED).not.toContain("loopBars");
+    expect(STILL_NOT_WIRED).not.toContain("loopAsk");
+    expect(STILL_NOT_WIRED).toEqual(["goal", "setGoal"]);
+    // The proposal asks the read only; the press alone changes something.
+    const host = fakeHost({ view: "session", session: true }, { loopAsk: () => ({ fromBar: 1, toBar: 2, bpm: 60 }), loopBars: () => "done" });
+    const out = runCoachTool({ tool: "loop_bars", args: SAMPLE_ARGS.loop_bars }, host, toolCtx({ screen: "session", run: runIn("ready") }));
+    expect(out).toMatchObject({ ok: true, proposal: { tool: "loop_bars" } });
+    expect(host.changes()).toEqual([]);
   });
 
   it("the tools reach the app only through the host: no IPC, no Tauri, no hook, no store", () => {

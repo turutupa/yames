@@ -1853,7 +1853,8 @@ export function useSessionRun(input: SessionRunInput) {
    * Null when a loop started. A click handler's event is not bars.
    */
   const startLoop = useCallback(
-    (bars?: { fromBar: number; toBar: number }): LoopRefusal | null => {
+    // `{ nativeEvent }`: the Session's loop button passes `startLoop` itself as its onClick.
+    (bars?: { fromBar: number; toBar: number } | { nativeEvent: unknown }): LoopRefusal | null => {
       const asked = isLoopBars(bars) ? loopAsked(run, exercise, bars.fromBar, bars.toBar) : loop;
       if (!asked) return "notHere";
       if ("refused" in asked) return asked.refused;

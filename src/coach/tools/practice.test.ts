@@ -409,9 +409,76 @@ describe("find_edge and test_out, on a real Path", () => {
   });
 });
 
+describe("loop_bars (leg lb1)", () => {
+  const session = (phase: Parameters<typeof runIn>[0] = "ready") => toolCtx({ screen: "session", run: runIn(phase) });
+  /** A host whose Session answers like `runner.loopAsked` on a four-bar tune at 72 two rungs down. */
+  const host = (over: Partial<CoachToolHost> = {}) =>
+    fakeHost(
+      { paths: TEST_PATHS, session: true },
+      {
+        loopAsk: (from, to) => (to > 12 ? { refused: "outsideTune" } : { fromBar: ((from - 1) % 4) + 1, toBar: ((to - 1) % 4) + 1, bpm: 72 }),
+        loopBars: () => "done",
+        ...over,
+      },
+    );
+
+  it("proposes the bars and the tempo, and loops them only on the press", () => {
+    const h = host();
+    const proposal = proposalOf(runCoachTool(call("loop_bars", { from: 3, to: 4 }), h, session()));
+    expect(proposal.line).toEqual({ key: "coachTools.propose.loopBars", values: { from: 3, to: 4, bpm: 72 } });
+    expect(h.changes()).toEqual([]);
+    const out = done(confirmCoachTool(proposal, h, session()));
+    expect(out.receipt).toEqual({ key: "coachTools.receipt.loopBars", values: { from: 3, to: 4, bpm: 72 } });
+    expect(out.undo).toBeUndefined();
+    expect(h.changes()).toEqual([{ member: "loopBars", args: [3, 4] }]);
+  });
+
+  it("one bar, and a Take's bar named as printed: the pattern bar it is, the asked bars passed to the press", () => {
+    const h = host();
+    const one = proposalOf(runCoachTool(call("loop_bars", { from: 7 }), h, session("result")));
+    expect(one.line).toEqual({ key: "coachTools.propose.loopBar", values: { bar: 3, bpm: 72 } });
+    done(confirmCoachTool(one, h, session("result")));
+    expect(h.changes()).toEqual([{ member: "loopBars", args: [7, 7] }]);
+  });
+
+  it.each([
+    ["notHere", "notNow", "coachTools.why.notNow.loopHere", {}],
+    ["outsideTune", "notFound", "coachTools.why.notFound.loopBar", { bar: 4 }],
+    ["backwards", "refused", "coachTools.why.refused.loopBackwards", { from: 3, to: 4 }],
+    ["acrossRounds", "notFound", "coachTools.why.notFound.loopAcross", { from: 3, to: 4 }],
+  ] as const)("the runner's %s, in words, and nothing done", (refused, why, key, values) => {
+    const h = host({ loopAsk: () => ({ refused }) });
+    expect(runCoachTool(call("loop_bars", { from: 3, to: 4 }), h, session())).toMatchObject({ ok: false, why, line: { key, values } });
+    expect(h.changes()).toEqual([]);
+  });
+
+  it("never during a Take: the tool's own when refuses before the host is asked", () => {
+    const h = host();
+    expect(runCoachTool(call("loop_bars", { from: 1 }), h, session("playing"))).toMatchObject({ ok: false, why: "notNow", line: { key: "coachTools.why.notNow.take" } });
+    expect(h.calls.filter((c) => c.member === "loopAsk" || c.member === "loopBars")).toEqual([]);
+  });
+
+  it("the press re-checks: a tempo moved or a Take started since the proposal does nothing", () => {
+    const h = host();
+    const proposal = proposalOf(runCoachTool(call("loop_bars", { from: 1, to: 2 }), h, session()));
+    const moved = host({ loopAsk: (from, to) => ({ fromBar: from, toBar: to, bpm: 66 }) });
+    expect(confirmCoachTool(proposal, moved, session())).toMatchObject({ ok: false, why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    const taking = host({ loopAsk: () => ({ refused: "notHere" }) });
+    expect(confirmCoachTool(proposal, taking, session())).toMatchObject({ ok: false, why: "refused", line: { key: "coachTools.why.refused.proposal" } });
+    expect(confirmCoachTool(proposal, host({ loopBars: () => "notHere" }), session())).toMatchObject({ ok: false, line: { key: "coachTools.why.refused.proposal" } });
+    expect(moved.changes()).toEqual([]);
+    expect(taking.changes()).toEqual([]);
+  });
+
+  it("says not yet on a host without the door", () => {
+    const h = fakeHost({ paths: TEST_PATHS });
+    expect(runCoachTool(call("loop_bars", { from: 3 }), h, session())).toMatchObject({ why: "notWiredYet", line: { values: { tool: "loop_bars" } } });
+    expect(h.changes()).toEqual([]);
+  });
+});
+
 describe("typed and waiting", () => {
   it.each([
-    ["loop_bars", { from: 3 }],
     ["make_exercise", { shape: "scale run", root: "A", scale: "minorPentatonic" }],
   ])("%s says not yet, and touches nothing", (tool, args) => {
     const h = fakeHost({ paths: TEST_PATHS });

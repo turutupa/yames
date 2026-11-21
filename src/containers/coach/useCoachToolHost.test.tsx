@@ -13,6 +13,10 @@ import { toolCtx } from "../../coach/tools/fakeHost";
 import { TEST_PATHS } from "../../coach/tools/testPaths";
 import type { Jam } from "../../jam/types";
 import { bandVolumeFor } from "../../session/takeBand";
+import { rungBelow } from "../../session/ladder";
+import { planSession } from "../../session/planner";
+import { IDLE, runReducer } from "../../session/runner";
+import { ALT, NOW, missed, progress } from "../../session/testKit";
 import type { MainView } from "../main-window/MainHeader";
 import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import type { SessionRun } from "../session/hooks/useSessionRun";
@@ -147,7 +151,31 @@ describe("useCoachToolHost", () => {
     expect(props.views).toEqual([]);
   });
 
-  it("only the Notebook's goal and a loop of named bars are still stubs", () => {
+  it("the loop of named bars reads the Session's run through the runner, and the press is startLoop(bars) (leg lb1)", () => {
+    const EX = ALT.steps[0].exercises[0];
+    const plan = planSession({ minutes: 15, now: NOW, paths: [ALT], progress: progress({ takes: [missed(EX.id, 60, 0.8)] }) });
+    const ready = [{ type: "start", plan, now: NOW }, { type: "next", now: NOW }].reduce(
+      (s, e) => runReducer(s, e as Parameters<typeof runReducer>[1]),
+      IDLE,
+    );
+    const base = input().session;
+    const props = input({
+      view: "session",
+      session: { ...base, run: ready, exercise: EX, actions: { ...base.actions, startLoop: (bars: unknown) => (sessionCalls.push(["startLoop", [bars]]), null) } } as unknown as SessionRun,
+    });
+    const { result } = renderHook(() => useCoachToolHost(props));
+    sessionCalls.length = 0;
+    expect(result.current.loopAsk(1, 1)).toEqual({ fromBar: 1, toBar: 1, bpm: rungBelow(EX, rungBelow(EX, ready.bpm)) });
+    expect(result.current.loopAsk(2, 1)).toEqual({ refused: "backwards" });
+    expect(sessionCalls).toEqual([]);
+    expect(result.current.loopBars(1, 1)).toBe("done");
+    expect(sessionCalls).toEqual([["startLoop", [{ fromBar: 1, toBar: 1 }]]]);
+    const idle = input();
+    const { result: away } = renderHook(() => useCoachToolHost(idle));
+    expect(away.current.loopAsk(1, 1)).toEqual({ refused: "notHere" });
+  });
+
+  it("only the Notebook's goal is still a stub", () => {
     const { result } = renderHook(() => useCoachToolHost(input()));
     const host = result.current as unknown as Record<string, (...args: unknown[]) => unknown>;
     for (const member of STILL_NOT_WIRED) expect(host[member](), member).toBe("notWiredYet");
