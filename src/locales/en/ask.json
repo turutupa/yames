@@ -105,7 +105,7 @@
         "evenSome": "Take {{take}} was {{value}}% even, against a pass mark of {{bar}}%, and I heard {{heard}} of {{expected}} notes.",
         "heard": "I heard {{heard}} of {{expected}} notes in Take {{take}}, against a pass mark of {{bar}}%.",
         "extras": "Take {{take}} had more extra notes than the pass mark allows: {{bar}} or fewer in four bars.",
-        "accents": "In Take {{take}}, {{value}}% of the marked accents came out louder than the notes around them, against a pass mark of {{bar}}%.",
+        "accents": "In Take {{take}}, the marked accents came out {{value}}% louder than the other notes on average, against a pass mark of {{bar}}%.",
         "notes": "In Take {{take}}, {{value}}% of the notes I could pitch were the written ones, against a pass mark of {{bar}}%."
       },
       "count": {
@@ -205,7 +205,7 @@
           "even": "Even: at least {{bar}}% over {{over}} bars in a row.",
           "heard": "Notes heard: at least {{bar}}% of the written notes.",
           "extras": "Extra notes: {{bar}} or fewer in {{over}} bars.",
-          "accents": "Accents: at least {{bar}}% of the marked accents louder than the notes around them.",
+          "accents": "Accents: on average at least {{bar}}% louder than the other notes.",
           "notes": "Right notes: at least {{bar}}% of the notes I can pitch are the written ones.",
           "hold": "Evenness held to the end: at least {{bar}}% over the last bars of the stretch judged."
         },
@@ -311,6 +311,8 @@
         "scalesIntroMinor": "Over {{chord}}, taken as the home chord of {{root}} minor, the app picks these scales, each with every note of the chord in it.",
         "scalesPlacedMajor": "{{chord}} is the {{degree}} chord of {{root}} major, one key it belongs in. In that key the app picks these scales, each with every note of the chord in it.",
         "scalesPlacedMinor": "{{chord}} is the {{degree}} chord of {{root}} minor, one key it belongs in. In that key the app picks these scales, each with every note of the chord in it.",
+        "scalesPlacedMajorAlso": "{{chord}} is the {{degree}} chord of {{root}} major, one key it belongs in ({{root}} sounds the same as {{plain}}). In that key the app picks these scales, each with every note of the chord in it.",
+        "scalesPlacedMinorAlso": "{{chord}} is the {{degree}} chord of {{root}} minor, one key it belongs in ({{root}} sounds the same as {{plain}}). In that key the app picks these scales, each with every note of the chord in it.",
         "scalesNoneMajor": "In {{root}} major, none of the scales the app picks for {{chord}} has every note of the chord in it.",
         "scalesNoneMinor": "In {{root}} minor, none of the scales the app picks for {{chord}} has every note of the chord in it.",
         "scale": "{{root}} {{name}}: {{notes}}."
@@ -324,7 +326,7 @@
         "evenMs": "The evenness pass mark here is {{bar}}%: at {{bpm}} BPM, with this Exercise's closest notes {{gap}} ms apart, it allows a spread of about {{ms}} ms around your own average timing.",
         "holdMs": "The pass mark for evenness held to the end is {{bar}}%, measured over the closing bars of the stretch judged: at {{bpm}} BPM, with this Exercise's closest notes {{gap}} ms apart, it allows a spread of about {{ms}} ms around your own average timing.",
         "heardMark": "{{bar}}% is the notes-heard pass mark: in the bars judged, at least {{bar}} of every 100 written notes must be heard.",
-        "accentsMark": "{{bar}}% is the accents pass mark: at least {{bar}} of every 100 marked accents must come out louder than the notes around them.",
+        "accentsMark": "{{bar}}% is the accents pass mark: on average, the marked accents must come out at least {{bar}}% louder than the other notes.",
         "notesMark": "{{bar}}% is the right-notes pass mark: at least {{bar}} of every 100 notes I could pitch must be the written ones.",
         "markOther": "{{value}}% is the pass mark of another of this Exercise's checks, not its evenness.",
         "markAlso": "{{value}}% is also the pass mark of another of this Exercise's checks.",
@@ -335,6 +337,16 @@
         "cleanNotFair": "Takes you marked not fair don't count toward it.",
         "cleanMine": "Your own exercises aren't on a Path, so I don't quote a clean tempo for them."
       }
+    },
+    "source": {
+      "measured": "Measured: the app read this off your own Takes.",
+      "path": "From the Path: the Path's own written words, quoted as they are.",
+      "app": "Worked out by the app: computed by its own rules, not written by a model.",
+      "general": "General advice: written by the model on this computer about playing in general, not from your playing.",
+      "take": "Take {{take}}, as its result said it: {{text}}",
+      "takeGone": "Take {{take}}'s result isn't the one on screen any more, so I can't open it here.",
+      "step": "Step {{step}}, {{title}}, in the Path's words:",
+      "stepGone": "I can't find Step {{step}} to quote it here."
     }
   }
 }

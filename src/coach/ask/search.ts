@@ -505,7 +505,8 @@ export function answerSearchFor(text: string, ctx: SearchContext): SearchAnswer 
   if (!hit) return null;
   return {
     answer: { blocks: [{ type: "text", text: hit.text }] },
-    source: { kind: "path", step: hit.stepOrder },
+    // Which Path: a press on the source line opens this Step, not Step N of another Path (leg c2b2b).
+    source: { kind: "path", step: hit.stepOrder, pathId: hit.pathId },
     hit,
     candidates,
   };

@@ -32,10 +32,10 @@
       "clickSubdivision": "Щелчков на долю: {{to}}",
       "setSetting": "{{key}}: {{to}}",
       "setGoal": "Цель сохранена: «{{to}}»",
-      "makeExercise": "Added {{what}} to My exercises.",
-      "makeExerciseAdding": "Adding {{what}} to My exercises…",
-      "undoMakeExercise": "Taken back out of My exercises.",
-      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
+      "makeExercise": "{{what}} добавлено в «Мои упражнения».",
+      "makeExerciseAdding": "{{what}} добавляется в «Мои упражнения»…",
+      "undoMakeExercise": "Убрано обратно из «Мои упражнения».",
+      "undoMakeExerciseDoing": "Убирается обратно из «Мои упражнения»…"
     },
     "propose": {
       "goTo": "Открыть раздел «{{screen}}»?",
@@ -67,8 +67,8 @@
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Сохранить как вашу цель: «{{to}}»",
       "setGoalFrom": "Изменить вашу цель с «{{from}}» на «{{to}}»",
-      "makeExercise": "Add it to My exercises",
-      "undoMakeExercise": "Take it back out of My exercises"
+      "makeExercise": "Добавить в «Мои упражнения»",
+      "undoMakeExercise": "Убрать обратно из «Мои упражнения»"
     },
     "stops": {
       "click": "Щелчок остановится.",
@@ -127,7 +127,7 @@
       "go": "Перейти",
       "open": "Открыть",
       "loop": "Зациклить",
-      "add": "Add it"
+      "add": "Добавить"
     },
     "why": {
       "which": "Какой именно?",
@@ -190,39 +190,39 @@
       },
       "failed": "Не получилось, и ничего не изменилось.",
       "make": {
-        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
-        "root": "Say its root too: for example “A minor pentatonic”.",
-        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
-        "needScale": "Say which scale: for example “A minor pentatonic”.",
-        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
-        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
-        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
-        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
-        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
-        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
-        "tooManyNotes": "One time through needs {{count}} bar.",
-        "tooManyNotes_other": "One time through needs {{count}} bars.",
-        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
-        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
-        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
-        "unreachable": "No hand the app knows can play that fast enough to grade it.",
-        "notMade": "The app can't make that one.",
-        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
-        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
-        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
-        "already": "That one is already on My exercises.",
-        "badRecipe": "The app can't make that one.",
-        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
-        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "what": "Скажите, что сделать: гамму или аккорд и её основной звук. Например, «A минорная пентатоника, 5-й лад».",
+        "root": "Назовите и основной звук: например, «A минорная пентатоника».",
+        "chord": "Скажите, какой это аккорд арпеджио: например, «арпеджио A минор 7».",
+        "needScale": "Скажите, какая гамма: например, «A минорная пентатоника».",
+        "scale": "Приложение пока не умеет делать упражнение в гамме: {{scale}}. Оно делает минорную и мажорную пентатонику, блюзовую гамму, мажор, натуральный и гармонический минор, дорийский лад и миксолидийский лад.",
+        "boxScale": "«Коробочка» бывает для минорной пентатоники, мажорной пентатоники и блюзовой гаммы, но не для гаммы: {{scale}}.",
+        "threeScale": "Три ноты на струне бывают для мажора, натурального минора, гармонического минора, дорийского и миксолидийского, но не для гаммы: {{scale}}.",
+        "mixed": "Здесь названы и гамма, и аккорд сразу, либо то, что эта форма не принимает. Назовите что-то одно.",
+        "noShapeHere": "Эта форма не начинается на ладу {{fret}}.",
+        "outOfRange": "От лада {{fret}} она выходит за конец грифа.",
+        "tooManyNotes": "Один проход занимает {{count}} такт.",
+        "tooManyNotes_other": "Один проход занимает {{count}} такта.",
+        "tooLong": "Один проход занимает больше {{count}} тактов, а больше в упражнении быть не может.",
+        "tooFewNotes": "Это слишком мало нот для стольких тактов: они занимают {{count}} такт.",
+        "tooFewNotes_other": "Это слишком мало нот для стольких тактов: они занимают {{count}} такта.",
+        "unreachable": "Ни одна рука, которую знает приложение, не сыграет это достаточно быстро, чтобы оценить.",
+        "notMade": "Приложение не умеет делать такое.",
+        "loading": "Приложение готовит конструктор упражнений. Спросите ещё раз через минуту.",
+        "loadFailed": "Приложение не смогло загрузить конструктор упражнений, поэтому ничего не сделано.",
+        "full": "«Мои упражнения» заполнены (50), поэтому это не добавлено. Сначала удалите там одно.",
+        "already": "Это уже есть в «Моих упражнениях».",
+        "badRecipe": "Приложение не умеет делать такое.",
+        "unreadable": "«Мои упражнения» только что не удалось прочитать, поэтому ничего не добавлено.",
+        "failed": "«Мои упражнения» только что не удалось сохранить, поэтому ничего не добавлено.",
         "undo": {
-          "gone": "It's no longer on My exercises.",
-          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
-          "failed": "My exercises couldn't be saved just now, so it's still there."
+          "gone": "Этого уже нет в «Моих упражнениях».",
+          "unreadable": "«Мои упражнения» только что не удалось прочитать, поэтому ничего не убрано.",
+          "failed": "«Мои упражнения» только что не удалось сохранить, поэтому это всё ещё там."
         },
-        "tooManyNotes_few": "One time through needs {{count}} bars.",
-        "tooManyNotes_many": "One time through needs {{count}} bars.",
-        "tooFewNotes_few": "That's too few notes for so many bars: they fill {{count}} bars.",
-        "tooFewNotes_many": "That's too few notes for so many bars: they fill {{count}} bars."
+        "tooManyNotes_few": "Один проход занимает {{count}} такта.",
+        "tooManyNotes_many": "Один проход занимает {{count}} тактов.",
+        "tooFewNotes_few": "Это слишком мало нот для стольких тактов: они занимают {{count}} такта.",
+        "tooFewNotes_many": "Это слишком мало нот для стольких тактов: они занимают {{count}} тактов."
       }
     },
     "yours": {
@@ -300,24 +300,24 @@
       }
     },
     "make": {
-      "source": "Worked out by the app",
-      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
-      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
-      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
-      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
-      "openPaths": "Open Paths",
-      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "source": "Составлено приложением",
+      "graded": "Начинается с {{bpm}} BPM. Оценить можно ритм и услышанные ноты; остальное оцениваете вы сами.",
+      "startsOn": "Начинается с ноты {{note}}: струна {{string}}, лад {{fret}}.",
+      "startsOnString": "Начинается на струне {{string}}, лад {{fret}}.",
+      "notesLabel": "Нот: {{n}}, лады с {{from}} по {{to}}",
+      "openPaths": "Открыть Курсы",
+      "undoLeft": "Отмена закончилась, когда вы покинули экран, на котором это добавили. Чтобы убрать, нажмите «Удалить» в «Моих упражнениях» в разделе «Курсы».",
       "chip": {
-        "fret": "Fret {{fret}}",
-        "bars": "{{count}} bar",
-        "bars_other": "{{count}} bars",
-        "quarters": "Quarter notes instead",
-        "eighths": "Eighths instead",
-        "eighthTriplets": "Triplets instead",
-        "sixteenths": "Sixteenths instead",
-        "nextPosition": "Next position",
-        "bars_few": "{{count}} bars",
-        "bars_many": "{{count}} bars"
+        "fret": "Лад {{fret}}",
+        "bars": "{{count}} такт",
+        "bars_other": "{{count}} такта",
+        "quarters": "Вместо этого четверти",
+        "eighths": "Вместо этого восьмые",
+        "eighthTriplets": "Вместо этого триоли",
+        "sixteenths": "Вместо этого шестнадцатые",
+        "nextPosition": "Следующая позиция",
+        "bars_few": "{{count}} такта",
+        "bars_many": "{{count}} тактов"
       }
     }
   }

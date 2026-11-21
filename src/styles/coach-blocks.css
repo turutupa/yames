@@ -97,6 +97,42 @@
   font-style: italic;
 }
 
+/* In Ask the line opens what it cites (leg c2b2b): the same quiet line, as a
+   button. No fill and no colour of its own; an underline says it can be
+   pressed. On a phone Ask's sheet makes it a 44 px target (ask.css). */
+.coach-block-source-press {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.coach-block-source-press > span {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.coach-block-source-press:hover > span,
+.coach-block-source-press:focus-visible > span {
+  text-decoration-color: currentColor;
+}
+
+.coach-block-source-press:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* --- the neck and the grip, both borrowed whole ------------------------- */
 
 .coach-block-neck {

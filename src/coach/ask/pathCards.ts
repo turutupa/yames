@@ -87,8 +87,11 @@ export { planStepHere };
  * own exercises are on no Path: their words are the app's, from the recipe.
  */
 function fromPath(ctx: CoachContext): BlockSource {
-  if (pathIdHere(ctx) === MY_EXERCISES_PATH) return APP;
-  return ctx.step ? { kind: "path", step: ctx.step.order } : { kind: "path" };
+  const pathId = pathIdHere(ctx);
+  if (pathId === MY_EXERCISES_PATH) return APP;
+  // Which Path the Step is on, so a press on the line opens that one (leg c2b2b).
+  if (!ctx.step) return { kind: "path" };
+  return pathId ? { kind: "path", step: ctx.step.order, pathId } : { kind: "path", step: ctx.step.order };
 }
 
 /** A string of the pack's, quoted whole (the test holds it byte-equal to the pack's). */
@@ -405,12 +408,22 @@ export function scaleFits(root: string, suffix: string): FactCard {
       source: APP,
     };
   }
+  // A key whose root by letter is not a name on the app's controls (Cb, Fb, Bbb):
+  // the sentence also names the root it sounds as, the one `show_scale` draws (leg c2b2b).
+  const also = keyRoot.letter !== keyRoot.app;
   const intro = placed
-    ? line(placed.mode === "minor" ? "ask.card.theory.scalesPlacedMinor" : "ask.card.theory.scalesPlacedMajor", {
-        chord: symbol,
-        degree: placed.degree,
-        root: keyRoot.letter,
-      })
+    ? line(
+        placed.mode === "minor"
+          ? also
+            ? "ask.card.theory.scalesPlacedMinorAlso"
+            : "ask.card.theory.scalesPlacedMinor"
+          : also
+            ? "ask.card.theory.scalesPlacedMajorAlso"
+            : "ask.card.theory.scalesPlacedMajor",
+        also
+          ? { chord: symbol, degree: placed.degree, root: keyRoot.letter, plain: keyRoot.app }
+          : { chord: symbol, degree: placed.degree, root: keyRoot.letter },
+      )
     : line(key.mode === "minor" ? "ask.card.theory.scalesIntroMinor" : "ask.card.theory.scalesIntroMajor", { chord: symbol, root: keyRoot.letter });
   const lines: Line[] = [intro];
   const named = suggestions.map((s) => {
@@ -422,7 +435,8 @@ export function scaleFits(root: string, suffix: string): FactCard {
     return { s, name, notes };
   });
   for (const { s, name, notes } of named) {
-    lines.push(line("ask.card.theory.scale", { root: name.letter, name: SCALE_NAMES_EN[s.scale], notes: notes.join(" ") }));
+    // `scale` is the id: Ask says the name the Jam screen uses (`SCALES[id].labelKey`, leg c2b2b); `name` is its English fallback.
+    lines.push(line("ask.card.theory.scale", { root: name.letter, name: SCALE_NAMES_EN[s.scale], scale: s.scale, notes: notes.join(" ") }));
   }
   const first = named[0];
   return { shape, lines, source: APP, then: { tool: "show_scale", args: { root: first.name.app, scale: first.s.scale } } };

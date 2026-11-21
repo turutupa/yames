@@ -119,7 +119,7 @@ describe.each([...BY_LNG.keys()].sort())("search fixtures: %s", (lng) => {
       const field = owner[hit.field] as string | string[];
       const said = Array.isArray(field) ? field[hit.line!] : field;
       expect(result.answer).toEqual({ blocks: [{ type: "text", text: said }] });
-      expect(result.source).toEqual({ kind: "path", step: step.order });
+      expect(result.source).toEqual({ kind: "path", step: step.order, pathId: path.id });
       expect(result.candidates[0]).toBe(hit);
     }
     expect(quoted).toBeGreaterThan(5);

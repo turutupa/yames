@@ -20,6 +20,8 @@
  * Take only when there is one, of the Exercise on screen.
  */
 import type { CoachContext } from "../context";
+import { suggestPathCard } from "../pathSuggest";
+import { coachStored } from "../store";
 import { TOOL_CATALOGUE_VERSION } from "../tools/registry";
 import { checkCall } from "../tools/run";
 import { argNumber, argString, takeRunning, type ActTool, type Line, type ToolArgs, type ToolCatalogue, type ToolSpec } from "../tools/types";
@@ -293,6 +295,20 @@ export const FACT_CARDS: readonly FactCardTool[] = [
     "what a clean tempo is",
     gradedExerciseHere,
     (_a, ctx) => cleanTempo(ctx),
+  ),
+  // Leg c4b3 (DESIGN 6.4): "suggest a Path". Reads the curriculum and which
+  // Paths were started, never a grade or a Take, so an ungraded player is
+  // answered too and it is answered anywhere but a Take. It names a Path; it
+  // never subscribes.
+  pathEntry(
+    "suggest_path",
+    [],
+    "One Path to try next: not started, nothing it builds on missing; a goal the player set orders it.",
+    // Six characters at most: the cards' share of the choice prompt stood at
+    // 292 of its 300 tokens before this card (c2b2ac).
+    "a Path",
+    () => true,
+    (_a, ctx) => suggestPathCard(ctx.progress, coachStored().goal),
   ),
 ];
 

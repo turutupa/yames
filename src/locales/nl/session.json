@@ -364,7 +364,7 @@
         "even": "{{value}}% gelijkmatig bij een lat van {{bar}}%. Alle noten waren er; het zit in de ruimte ertussen. Zelfde noten, zelfde tempo.",
         "heard": "Ik hoorde {{heard}} van de {{expected}} noten, en zonder die noten kan de timing niet slagen.",
         "extras": "{{extras}} noten die ik niet verwachtte. Demp de vrije snaren als ze meeklinken.",
-        "accents": "{{value}}% van de gemarkeerde accenten klonk harder dan de noten eromheen.",
+        "accents": "Gemiddeld kwamen de gemarkeerde accenten {{value}}% luider uit dan de andere noten.",
         "notes": "{{value}}% van de noten waarvan ik de toonhoogte kon horen waren de geschreven. Zelfde noten, zelfde tempo, en let op de frets.",
         "evenSome": "{{value}}% gelijkmatig bij een lat van {{bar}}%, en {{missed}} noten klonken niet. Zelfde noten, zelfde tempo, allemaal."
       },
