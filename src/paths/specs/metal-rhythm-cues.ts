@@ -51,6 +51,23 @@ const CHUG_ON_E = "Move the fretting hand while the open E chugs.";
 const THREES = "Count '1 2 3, 1 2 3, 1 2': chord on each 1.";
 const WELL_UNDER = "Start well under your clean tempo.";
 const EVEN_TO_END = "Keep the eighths even right to the last note.";
+const ONE_STRING = "Keep the pick on the one string only.";
+const FRETTED_READY = "Have the fretted notes ready before they come.";
+const LIFT_FOR_FRETTED = "Lift the palm for the fretted notes only.";
+const TWO_NOT_ONE = "Pick both short notes as two, not one.";
+const SHORTS_AFTER_CHORD = "Pick both short notes right after each chord.";
+const SHORTS_GALLOP = "Pick both short notes of every gallop.";
+const LONG_LATE = "Put every long note right on the click.";
+const LONG_EARLY = "Wait for the click before each long note.";
+const FIRST_SHORT_LATE = "Put the first short note right on the click.";
+const FIRST_SHORT_EARLY = "Wait for the click before each short pair.";
+const ACCENT_LATE = "Land each accent right on its count.";
+const ACCENT_EARLY = "Wait for the count before each accent.";
+const QUIET_HEARD = "Play every quiet note, just lighter.";
+const HOLD_G = "Hold the last G its full beat, then gallop.";
+const BB_A_G = "Put B flat on '3', A on its 'and', G on '4'.";
+const GALLOP_SAY = "Say '1, and a, 2 e and' before you start.";
+const FIVE_FRETS = "Move the hand five frets as each bar starts.";
 
 export const METAL_RHYTHM_CUES: CueBook = {
   // ---------------------------------------------------------------- Level 1
@@ -58,14 +75,14 @@ export const METAL_RHYTHM_CUES: CueBook = {
   "the-chug.open-chug": [
     g("Down on every eighth, two to the click.", 0),
     c("heard", SAME_STROKE),
-    c("extras", "Keep the pick on the one string only."),
+    c("extras", ONE_STRING),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
-    c("openString", "Have the fretted notes ready before they come."),
+    c("openString", FRETTED_READY),
     c("lastBars", "Count '4 and' on the two fretted notes.", 0),
   ],
   "the-chug.chug-and-note": [
-    g("Lift the palm for the fretted notes only.", 0),
+    g(LIFT_FOR_FRETTED, 0),
     c("heard", FRETTED_FIRM),
     c("extras", LOW_E_ONLY),
     c("notes", FINGERS_356, 1),
@@ -76,10 +93,10 @@ export const METAL_RHYTHM_CUES: CueBook = {
   ],
   "the-chug.accent-open": [
     g("Count '1 2 3, 1 2 3, 1 2', accent on each 1.", 1),
-    c("heard", "Play every quiet note, just lighter."),
+    c("heard", QUIET_HEARD),
     c("extras", LOW_E_ONLY),
-    c("late", "Land each accent right on its count."),
-    c("early", "Wait for the count before each accent."),
+    c("late", ACCENT_LATE),
+    c("early", ACCENT_EARLY),
     c("openString", "Keep the quiet open Es as even as the accents."),
     c("lastBars", "Accent both fretted notes at the end.", 1),
   ],
@@ -207,7 +224,166 @@ export const METAL_RHYTHM_CUES: CueBook = {
     c("heard", SAME_STROKE),
     c("late", BEAT_LATE),
     c("early", BEAT_EARLY),
-    c("shift", "Move the hand five frets as each bar starts."),
+    c("shift", FIVE_FRETS),
     c("lastBars", EVEN_TO_END),
+  ],
+
+  // ---------------------------------------------------------------- Level 2
+  // Step 5: the gallop (gallop-one changes string between Takes)
+  "gallop.gallop-one": [
+    g("Count '1, and a': the long note on the click.", 0),
+    c("heard", TWO_NOT_ONE, 1),
+    c("extras", ONE_STRING),
+    c("late", LONG_LATE, 0),
+    c("early", LONG_EARLY),
+    c("openString", "Say 'and a' on the short notes out loud."),
+    c("lastBars", "Move to frets 3 and 5 for the last two gallops."),
+  ],
+  "gallop.gallop-chords": [
+    g("Strike the chord as the gallop's long note.", 0),
+    c("heard", SHORTS_AFTER_CHORD, 0),
+    c("extras", JUST_TWO),
+    c("late", CHORD_COUNT_LATE),
+    c("early", CHORD_COUNT_EARLY),
+    c("openString", "Keep the gallop going while the hand moves."),
+    c("stringChange", TWO_ONE),
+    c("lastBars", "Land A on beat three, then gallop on."),
+  ],
+  "gallop.gallop-riff": [
+    g("Keep the sixteenths going through the eighths.", 1),
+    c("heard", "Pick frets 3 and 5 as firmly as the gallops."),
+    c("extras", LOW_E_ONLY),
+    c("notes", FINGERS_356, 0),
+    c("late", "Put the gallop after the eighths on beat four.", 1),
+    c("early", "Wait for beat four before the next gallop."),
+    c("afterHeld", HOLD_G),
+    c("openString", FRETTED_READY),
+    c("lastBars", BB_A_G),
+  ],
+
+  // Step 6: the reverse gallop (reverse-one changes string between Takes)
+  "reverse-gallop.reverse-one": [
+    g("Count '1 e and': two short, then the long.", 0),
+    c("heard", TWO_NOT_ONE),
+    c("extras", ONE_STRING),
+    c("late", FIRST_SHORT_LATE),
+    c("early", FIRST_SHORT_EARLY),
+    c("openString", "Give each beat's first note a little weight.", 1),
+    c("lastBars", "Move to frets 3 and 5 for the last two beats."),
+  ],
+  "reverse-gallop.four-two": [
+    g("Count '1 e and a, 2 and' out loud as you play."),
+    c("heard", "Pick all four sixteenths, every one clear."),
+    c("extras", LOW_E_ONLY),
+    c("notes", FINGERS_356),
+    c("late", BEAT_LATE),
+    c("early", "Hold the eighths back to half the speed.", 1),
+    c("openString", "Keep the four open sixteenths even."),
+    c("lastBars", "Put B flat on '4' and A on its 'and'."),
+  ],
+  "reverse-gallop.both-gallops": [
+    g(GALLOP_SAY, 0),
+    c("heard", TWO_NOT_ONE),
+    c("extras", LOW_E_ONLY),
+    c("notes", "Say G, A, then B flat, A, G as you fret them."),
+    c("late", BEAT_LATE),
+    c("early", BEAT_EARLY),
+    c("afterHeld", HOLD_G),
+    c("openString", "Keep the hand swinging in sixteenths throughout.", 1),
+    c("lastBars", BB_A_G),
+  ],
+
+  // Step 7: the sixteenth chug (straight-sixteenths changes string between Takes)
+  "sixteenth-chug.straight-sixteenths": [
+    g("Down-up-down-up, four notes to every click.", 0),
+    c("heard", "Pick all four notes of every beat."),
+    c("extras", ONE_STRING),
+    c("late", "Put each accent right on the click."),
+    c("early", "Wait for the click before each accent."),
+    c("openString", "Accent just the first of each four.", 0),
+    c("lastBars", "Count '1 e and a' right to the last note."),
+  ],
+  "sixteenth-chug.accent-threes": [
+    g("Count the sixteenths in threes as you play.", 0),
+    c("heard", QUIET_HEARD),
+    c("extras", LOW_E_ONLY),
+    c("late", ACCENT_LATE),
+    c("early", ACCENT_EARLY),
+    c("openString", "Tap your foot on the beat under the accents.", 1),
+  ],
+  "sixteenth-chug.sixteenth-riff": [
+    g(LIFT_FOR_FRETTED, 0),
+    c("heard", FRETTED_FIRM),
+    c("extras", LOW_E_ONLY),
+    c("notes", FINGERS_356, 0),
+    c("late", FRETTED_LATE),
+    c("early", FRETTED_EARLY),
+    c("openString", "Keep the picking going between fretted notes.", 1),
+    c("lastBars", "Count '4 e and a' for the last four notes."),
+  ],
+
+  // Step 8: gallop changes (the first three change string between Takes)
+  "gallop-changes.gallop-bar-changes": [
+    g("Move on the last eighth; chord on the click.", 2),
+    c("heard", SHORTS_AFTER_CHORD),
+    c("extras", JUST_TWO),
+    c("late", "Land each new chord right on beat one."),
+    c("early", "Wait for beat one before each new chord."),
+    c("openString", "Gallop on the open string right to beat four."),
+    c("shift", "Move as the last eighth sounds, not after.", 2),
+    c("stringChange", TWO_ONE),
+    c("lastBars", "Come back to the open chord right on the click."),
+  ],
+  "gallop-changes.reverse-bar-changes": [
+    g("Count '1 e and, 2 e and': chord on two and four.", 0),
+    c("heard", "Pick both short notes at the start of each beat."),
+    c("extras", JUST_TWO),
+    c("late", "Put each new root's first note on the click."),
+    c("early", "Wait for the click to start each new root."),
+    c("openString", "Count '1 e and' on every open-string beat."),
+    c("shift", "Move on the chord, so the new root is on time.", 2),
+    c("stringChange", TWO_ONE),
+    c("lastBars", "Cut the last chord a little short to go round.", 2),
+  ],
+  "gallop-changes.two-beat-changes": [
+    g(GALLOP_SAY, 0),
+    c("heard", SHORTS_GALLOP),
+    c("extras", JUST_TWO),
+    c("late", CHORD_COUNT_LATE),
+    c("early", CHORD_COUNT_EARLY),
+    c("openString", "Let go of the high chord early to go round.", 2),
+    c("shift", "Move on the eighth before each chord.", 1),
+    c("stringChange", TWO_ONE),
+    c("lastBars", "Count '3, and a, 4 e and' to the end."),
+  ],
+  "gallop-changes.band-changes": [
+    g("Land each chord with the kick on one and three.", 3),
+    c("heard", SHORTS_AFTER_CHORD),
+    c("extras", JUST_TWO),
+    c("late", "Land each new chord with the band's beat one."),
+    c("early", "Wait for the kick before each chord."),
+    c("afterHeld", "Cut the held C a little short to go round.", 4),
+    c("openString", "Drop to E with the first finger only.", 4),
+    c("shift", "Move to the next root as beat four ends."),
+    c("stringChange", TWO_ONE),
+    c("lastBars", "If you get lost, come back in on beat one.", 5),
+  ],
+
+  // Warm-ups, Level 2 (a new key and string each Take: name nothing)
+  "warmup-intermediate.root-gallop": [
+    g(WELL_UNDER, 0),
+    c("heard", SHORTS_GALLOP),
+    c("late", LONG_LATE),
+    c("early", LONG_EARLY),
+    c("shift", FIVE_FRETS),
+    c("lastBars", "Keep '1, and a' even right to the last note."),
+  ],
+  "warmup-intermediate.root-reverse": [
+    g(WELL_UNDER, 0),
+    c("heard", TWO_NOT_ONE),
+    c("late", FIRST_SHORT_LATE, 0),
+    c("early", FIRST_SHORT_EARLY),
+    c("shift", FIVE_FRETS),
+    c("lastBars", "Keep '1 e and' even right to the last note."),
   ],
 };
