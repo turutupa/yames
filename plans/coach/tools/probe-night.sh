@@ -15,6 +15,8 @@ OUT=/tmp/coach-orch
 M=/home/dgx-delgado/scratch/yames-c3a-models/Qwen3-0.6B-Q8_0.gguf
 V="--volume 0.01"
 WAIT_MIN="${PROBE_WAIT_MIN:-20}"
+# The relay's rule for session 3: a load average under 4 (AGENTS.md says under 6).
+LOAD_MAX="${PROBE_LOAD_MAX:-4}"
 export XDG_RUNTIME_DIR=/run/user/1000
 export PATH="$HOME/.cargo/bin:$PATH"
 export CFLAGS='-std=gnu11 -Wno-implicit-function-declaration'
@@ -33,10 +35,10 @@ cp "$CARGO_TARGET_DIR/release/click-jitter-probe" "$OUT/click-jitter-probe" || e
 P="$OUT/click-jitter-probe"
 
 quiet() {
-  # Wait up to WAIT_MIN minutes for a 1-minute load under 6.
+  # Wait up to WAIT_MIN minutes for a 1-minute load under LOAD_MAX.
   local i=0
   while [ "$i" -lt "$WAIT_MIN" ]; do
-    if awk -v l="$(cut -d' ' -f1 /proc/loadavg)" 'BEGIN{exit !(l < 6)}'; then return 0; fi
+    if awk -v l="$(cut -d' ' -f1 /proc/loadavg)" -v m="$LOAD_MAX" 'BEGIN{exit !(l < m)}'; then return 0; fi
     if [ -e /tmp/yames-dgx-yield ]; then return 1; fi
     timeout 60 tail -f /dev/null
     i=$((i + 1))
@@ -55,7 +57,7 @@ run() {
       echo "[probe-night] exit $? end load $(cut -d' ' -f1 /proc/loadavg)"
     } > "$log" 2>&1
   else
-    echo "[probe-night] $label SKIPPED: load $(cut -d' ' -f1 /proc/loadavg) after ${WAIT_MIN} min (needs < 6)" > "$log"
+    echo "[probe-night] $label SKIPPED: load $(cut -d' ' -f1 /proc/loadavg) after ${WAIT_MIN} min (needs < ${LOAD_MAX})" > "$log"
   fi
   echo "$label: $(grep -E 'p99|missed|alloc|dropped|PASS|FAIL' "$log" | tr '\n' ' ' | cut -c1-400) | $(tail -n 1 "$log")"
 }
