@@ -11,7 +11,9 @@ Cues: `src/paths/specs/scales-and-modes-cues.ts`, attached with `withCues` in `s
   minor-second-key, warm-up scale-walk), 23 Exercises.
 - [x] Level 2 (Intermediate: chords-from-the-scale, harmonic-minor, harmonic-minor-again, sequences,
   more-neck, second-shape, warm-up shape-of-the-day), 24 Exercises.
-- [ ] Level 3 (Advanced).
+- [x] Level 3 (Advanced: dorian, mixolydian, box-plus-two, modes-second-key, same-notes-new-home,
+  choosing, choosing-again, warm-up mode-of-the-day), 25 Exercises (3 self-checked: general cue only).
+  `check`: 0 errors, 0 `cue.refused`, 0 cues rewritten for a variant (`/tmp/coach-cues5/gc5.log`).
 - [ ] Proof-read.
 - [ ] Translations.
 - [ ] Gates.
@@ -29,3 +31,7 @@ Level 2: the intermediate warm-up's minor-shape variants refused "the same two f
 hand", "cross strings" -> "Play it twice: the second time just as even.", "Have the first note ready
 as the held one ends.", "Keep the pick close to the strings.". The key-moved Exercises (one shape
 moved along the same strings) say degrees, fingers and string names and were refused nothing.
+
+Level 3: one cue over 48 characters ("Find the third three frets above A, four above D." -> "Find each
+chord's third from its root."); the Dorian shape in D refused "Reach finger one back" (in D the reach
+is not the same) -> "Put finger one on the raised sixth.".
