@@ -9,6 +9,7 @@ import { PLAN_MINUTES } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import { reasonLine } from "../../session/coachWords";
 import { FIRST_PATH_ID } from "../../session/packs";
+import { NO_PROGRESS } from "../../session/progress";
 import type { PathDoc } from "../../paths/format";
 import { TAKES_TO_READ } from "./hooks/useSessionRun";
 import type { SessionRun } from "./hooks/useSessionRun";
@@ -282,6 +283,15 @@ export function TodayView({
   // TODAY-9). The input's state is the header's chip (TODAY-10).
   const neck3d = useNeck3d();
   const [endRef, endInView] = useEndInView();
+  // rem2b: the reminder reuses the Session's Takes (null until they are read),
+  // and says nothing while a Session is in progress.
+  const runPhase = session.run?.phase ?? "idle";
+  const reminder = (
+    <TodayReminder
+      takes={!progress || progress === NO_PROGRESS ? null : progress.takes}
+      sessionBusy={runPhase !== "idle" && runPhase !== "recap"}
+    />
+  );
 
   // The coach's one sentence above the plan (DESIGN 6.1): from stored rows
   // only, and absent when it would only repeat the rows.
@@ -387,7 +397,7 @@ export function TodayView({
             )}
           </div>
           {/* Mock 12: on a phone the line sits under the title, above the minutes. */}
-          {IS_MOBILE && <TodayReminder />}
+          {IS_MOBILE && reminder}
           {IS_MOBILE && coachLine}
           {noPaths ? (
             <button
@@ -437,7 +447,7 @@ export function TodayView({
         </div>
 
         <div className="session-today-plan">
-          {!IS_MOBILE && <TodayReminder />}
+          {!IS_MOBILE && reminder}
           {!IS_MOBILE && coachLine}
           {steps.length > 0 && (
             <div className="session-plan-head session-rise" style={rise(4)}>

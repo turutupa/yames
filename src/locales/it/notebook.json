@@ -98,13 +98,14 @@
     },
     "reminder": {
       "label": "Promemoria di pratica",
-      "hint": "Oggi lo menziona dopo quest'ora, in questi giorni, se non ti sei ancora esercitato. Non c'è nessuna notifica.",
+      "hint": "«Oggi» lo menziona dopo quest'ora, in questi giorni, se non ti sei ancora esercitato. Non c'è nessuna notifica.",
       "off": "Disattivato",
       "on": "Attivo",
       "time": "Ora",
       "days": "Giorni",
-      "quiet": "Oggi ha smesso di menzionarlo: sono passati tre giorni di promemoria senza una sessione. Ricomincia dopo la tua prossima sessione.",
-      "unreadable": "Stavolta il tuo promemoria non si è potuto leggere, quindi Oggi non lo menziona; premere Disattivato o Attivo lo salva.",
+      "quiet": "«Oggi» ha smesso di menzionarlo: sono passati tre giorni di promemoria senza pratica. Ricomincia dopo la tua prossima pratica.",
+      "noDays": "Non è stato scelto nessun giorno, quindi «Oggi» non lo menziona.",
+      "unreadable": "Stavolta il tuo promemoria non si è potuto leggere, quindi «Oggi» non lo menziona; premere Disattivato o Attivo lo salva.",
       "line": "Il tuo promemoria: chitarra alle {{time}}."
     }
   }

@@ -1,8 +1,9 @@
 /**
  * Settings → Coach: "Practice reminder" (leg rem2; OWNER-UPDATES 2026-11-20:
  * in the app only). Off / On, and when On a time and the seven weekdays in the
- * locale's order. Today mentions it after that time on those days if there is
- * no Session yet; there is no notification, nothing runs in the background.
+ * locale's order. Today mentions it after that time on those days if the
+ * player has not practised yet (a Path Take, a tool run or a Songs attempt);
+ * there is no notification, nothing runs in the background.
  *
  * Off by default, and only a press here changes it: nothing in the app asks
  * the player to turn it on, and nothing turns it off. The first On fills
@@ -10,11 +11,12 @@
  * The controls wait while the key is being read (turning it on keeps what is
  * stored); when it could not be read the row says so, and a press saves it.
  * While Today has stopped mentioning it (three reminder days passed with no
- * Session, judgement call 23) the row says so: the setting stays On.
+ * practice, judgement call 23) the row says so, except on a day already
+ * practised: the setting stays On.
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { reminderQuiet } from "../../coach/reminder";
+import { dayKey, reminderQuiet } from "../../coach/reminder";
 import { coachPressSettled, REMINDER_OFF, saveReminder, type ReminderChoice } from "../../coach/store";
 import { useReminderPractised, useStoredReminder } from "../../coach/useReminder";
 import { weekStartOf } from "../../session/totals";
@@ -23,7 +25,15 @@ export function CoachReminderRow() {
   const { t, i18n } = useTranslation();
   const { reminder, state } = useStoredReminder();
   const { practised, now } = useReminderPractised(reminder);
-  const quiet = reminder !== null && practised !== null && reminderQuiet(reminder, now, practised);
+  // Not on a day the player has already practised: "starts again after you
+  // next practise" would be untrue then (rem2b, L1).
+  const quiet =
+    reminder !== null &&
+    practised !== null &&
+    !practised.days.has(dayKey(now)) &&
+    reminderQuiet(reminder, now, practised);
+  // On with every day turned off: Today will never say it (rem2b, L3).
+  const noDays = reminder !== null && reminder.on && reminder.days.length === 0;
 
   // A press whose save did not land says so; the next press that lands clears it.
   const [notSaved, setNotSaved] = useState(false);
@@ -64,6 +74,11 @@ export function CoachReminderRow() {
             {t("notebook.reminder.quiet")}
           </span>
         )}
+        {noDays && (
+          <span className="setting-hint" style={{ marginTop: 4 }} data-testid="coach-reminder-no-days">
+            {t("notebook.reminder.noDays")}
+          </span>
+        )}
         {state === "unreadable" && (
           <span className="setting-hint" style={{ marginTop: 4 }} data-testid="coach-reminder-unreadable">
             {t("notebook.reminder.unreadable")}
@@ -76,7 +91,7 @@ export function CoachReminderRow() {
         )}
       </div>
       <div className="coach-reminder-controls">
-        <div className="toggle-group">
+        <div className="toggle-group" role="group" aria-label={t("notebook.reminder.label")}>
           {([false, true] as const).map((on) => (
             <button
               key={String(on)}

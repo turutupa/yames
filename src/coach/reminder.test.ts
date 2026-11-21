@@ -3,7 +3,15 @@
  * built in local time, so the table holds in any time zone.
  */
 import { describe, expect, it } from "vitest";
-import { dayKey, practisedFrom, reminderDueLaterToday, reminderLine, reminderQuiet, reminderTimeText } from "./reminder";
+import {
+  dayKey,
+  practisedFrom,
+  reminderDueLaterToday,
+  reminderLine,
+  reminderNextCheck,
+  reminderQuiet,
+  reminderTimeText,
+} from "./reminder";
 import type { Practised } from "./reminder";
 import type { CoachReminder } from "./store";
 
@@ -100,6 +108,16 @@ describe("helpers", () => {
     expect(reminderDueLaterToday(ON, NOW)).toBeNull();
     expect(reminderDueLaterToday({ ...ON, on: false }, at(20, 9))).toBeNull();
     expect(reminderDueLaterToday({ ...ON, days: [(FRI + 1) % 7] }, at(20, 9))).toBeNull();
+  });
+
+  it("reminderNextCheck: the time today if still to come, else the next local midnight (rem2b M1)", () => {
+    expect(reminderNextCheck(ON, at(20, 9))).toBe(at(20, 18));
+    expect(reminderNextCheck(ON, NOW)).toBe(at(21));
+    expect(reminderNextCheck(ON, at(20, 23, 59))).toBe(at(21));
+    expect(reminderNextCheck({ ...ON, days: [(FRI + 1) % 7] }, at(20, 9))).toBe(at(21));
+    expect(reminderNextCheck({ ...ON, on: false }, at(20, 9))).toBeNull();
+    // The last day of a month rolls into the next.
+    expect(reminderNextCheck(ON, at(30, 20))).toBe(new Date(2026, 11, 1).getTime());
   });
 
   it("reminderTimeText: the locale's own format", () => {

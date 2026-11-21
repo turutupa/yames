@@ -98,13 +98,14 @@
     },
     "reminder": {
       "label": "Przypomnienie o graniu",
-      "hint": "Dzisiaj wspomina o nim po tej godzinie w wybrane dni, jeśli tego dnia nie było jeszcze sesji. Powiadomienia nie ma.",
+      "hint": "„Dzisiaj” wspomina o nim po tej godzinie w wybrane dni, jeśli tego dnia nie było jeszcze ćwiczenia. Powiadomienia nie ma.",
       "off": "Wyłączone",
       "on": "Włączone",
       "time": "Godzina",
       "days": "Dni",
-      "quiet": "Dzisiaj przestało o nim wspominać: minęły trzy dni przypomnienia bez sesji. Wróci po Twojej następnej sesji.",
-      "unreadable": "Twojego przypomnienia nie udało się teraz odczytać, więc Dzisiaj o nim nie wspomina; naciśnięcie Wyłączone lub Włączone zapisze je.",
+      "quiet": "„Dzisiaj” przestało o nim wspominać: minęły trzy dni przypomnienia bez ćwiczenia. Wróci, gdy znów poćwiczysz.",
+      "noDays": "Nie wybrano żadnych dni, więc „Dzisiaj” o nim nie wspomina.",
+      "unreadable": "Twojego przypomnienia nie udało się teraz odczytać, więc „Dzisiaj” o nim nie wspomina; naciśnięcie Wyłączone lub Włączone zapisze je.",
       "line": "Twoje przypomnienie: gitara o {{time}}."
     }
   }

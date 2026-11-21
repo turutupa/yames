@@ -7,8 +7,10 @@
  * - the reminder is on (only the player's press in Settings → Coach does that);
  * - today, in local time, is one of its days;
  * - `now` is at or past its time today;
- * - there is no Session today (a stored Path Take, or a saved tool run, dated
- *   today: judgement call 21);
+ * - the player has not practised today. What counts as practice (judgement
+ *   call 21, widened in rem2b): a stored Path Take (My exercises included, a
+ *   Take marked "not fair" included), a saved tool run, or a stored Songs
+ *   attempt, dated today;
  * - the quiet rule does not hold (`reminderQuiet`).
  *
  * The quiet rule (judgement call 23) stands in for "off after three ignored":
@@ -28,7 +30,7 @@ import type { CoachReminder } from "./store";
 
 /** The local days with a Session, and from when the lists that gave them are complete. */
 export type Practised = {
-  /** `dayKey`s of every stored Path Take and saved tool run read. */
+  /** `dayKey`s of every stored Path Take, saved tool run and stored Songs attempt read. */
   days: ReadonlySet<string>;
   /** ms: nothing is known before this (a list was cut at its limit). 0: everything is known. */
   knownFrom: number;
@@ -112,6 +114,19 @@ export function reminderDueLaterToday(reminder: CoachReminder, now: number): num
   if (!reminder.days.includes(today.getDay())) return null;
   const at = momentOn(today, reminder.time);
   return at > now ? at : null;
+}
+
+/**
+ * When a screen left open must look again (rem2b): the reminder's time today
+ * if it is still to come, else the next local midnight (the line belongs to a
+ * day, and a screen open across midnight must not keep yesterday's). Null
+ * while the reminder is off.
+ */
+export function reminderNextCheck(reminder: CoachReminder, now: number): number | null {
+  if (!reminder.on) return null;
+  const midnight = dayStart(now, -1).getTime();
+  const due = reminderDueLaterToday(reminder, now);
+  return due !== null && due < midnight ? due : midnight;
 }
 
 /** "18:00" in the locale's own time format. */

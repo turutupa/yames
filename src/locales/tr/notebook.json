@@ -98,13 +98,14 @@
     },
     "reminder": {
       "label": "Çalışma hatırlatıcısı",
-      "hint": "Bugün, henüz çalışmadıysan seçili günlerde bu saatten sonra bunu gösterir. Bildirim yok.",
+      "hint": "“Bugün”, henüz çalışmadıysan seçili günlerde bu saatten sonra bunu gösterir. Bildirim yok.",
       "off": "Kapalı",
       "on": "Açık",
       "time": "Saat",
       "days": "Günler",
-      "quiet": "Bugün artık bunu göstermiyor: üç hatırlatıcı günü oturum olmadan geçti. Bir sonraki oturumundan sonra yeniden başlar.",
-      "unreadable": "Hatırlatıcın bu sefer okunamadı, bu yüzden Bugün onu göstermiyor; Kapalı ya da Açık'a basmak onu kaydeder.",
+      "quiet": "“Bugün” artık bunu göstermiyor: üç hatırlatıcı günü çalışmadan geçti. Bir daha çalıştıktan sonra yeniden başlar.",
+      "noDays": "Hiç gün seçilmedi, bu yüzden “Bugün” bunu göstermiyor.",
+      "unreadable": "Hatırlatıcın bu sefer okunamadı, bu yüzden “Bugün” onu göstermiyor; Kapalı ya da Açık'a basmak onu kaydeder.",
       "line": "Hatırlatıcın: gitar, saat {{time}}."
     }
   }

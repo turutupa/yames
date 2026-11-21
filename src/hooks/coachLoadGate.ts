@@ -30,3 +30,22 @@ export function subscribeCoachSessionBusy(listener: () => void): () => void {
     listeners.delete(listener);
   };
 }
+
+/**
+ * The click is sounding (a Take, its count-in, or the metronome on its own),
+ * as `MainWindow` reports it through `useCoachModelDriver`. The practice
+ * reminder (rem2b) reads nothing and arms no timer while it is, nor while a
+ * Session is in progress: Settings can be opened in the middle of a Take.
+ */
+let clickPlaying = false;
+
+export function setCoachClickPlaying(next: boolean): void {
+  if (next === clickPlaying) return;
+  clickPlaying = next;
+  for (const listener of [...listeners]) listener();
+}
+
+/** The click sounds, or a Session is in progress: background work waits. */
+export function coachHeld(): boolean {
+  return busy || clickPlaying;
+}

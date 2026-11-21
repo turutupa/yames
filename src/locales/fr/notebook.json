@@ -98,13 +98,14 @@
     },
     "reminder": {
       "label": "Rappel de pratique",
-      "hint": "Aujourd'hui le mentionne après cette heure, ces jours-là, si tu n'as pas encore pratiqué. Il n'y a aucune notification.",
+      "hint": "« Aujourd'hui » le mentionne après cette heure, ces jours-là, si tu n'as pas encore pratiqué. Il n'y a aucune notification.",
       "off": "Désactivé",
       "on": "Activé",
       "time": "Heure",
       "days": "Jours",
-      "quiet": "Aujourd'hui a cessé de le mentionner : trois jours de rappel sont passés sans séance. Il reprend après ta prochaine séance.",
-      "unreadable": "Ton rappel n'a pas pu être lu cette fois, donc Aujourd'hui ne le mentionne pas ; appuyer sur Désactivé ou Activé l'enregistre.",
+      "quiet": "« Aujourd'hui » a cessé de le mentionner : trois jours de rappel sont passés sans pratique. Il reprend dès que tu auras pratiqué de nouveau.",
+      "noDays": "Aucun jour n'est choisi, donc « Aujourd'hui » ne le mentionne pas.",
+      "unreadable": "Ton rappel n'a pas pu être lu cette fois, donc « Aujourd'hui » ne le mentionne pas ; appuyer sur Désactivé ou Activé l'enregistre.",
       "line": "Ton rappel : guitare à {{time}}."
     }
   }

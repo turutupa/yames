@@ -98,13 +98,14 @@
     },
     "reminder": {
       "label": "Lembrete de prática",
-      "hint": "Hoje o menciona depois deste horário, nestes dias, se você ainda não praticou. Não há notificação.",
+      "hint": "“Hoje” o menciona depois deste horário, nestes dias, se você ainda não praticou. Não há notificação.",
       "off": "Desativado",
       "on": "Ativado",
       "time": "Horário",
       "days": "Dias",
-      "quiet": "Hoje deixou de mencioná-lo: passaram-se três dias de lembrete sem uma sessão. Ele recomeça depois da sua próxima sessão.",
-      "unreadable": "Seu lembrete não pôde ser lido desta vez, então Hoje não o menciona; ao pressionar Desativado ou Ativado, ele é salvo.",
+      "quiet": "“Hoje” deixou de mencioná-lo: passaram-se três dias de lembrete sem prática. Ele recomeça depois da sua próxima prática.",
+      "noDays": "Nenhum dia foi escolhido, então “Hoje” não o menciona.",
+      "unreadable": "Seu lembrete não pôde ser lido desta vez, então “Hoje” não o menciona; ao pressionar Desativado ou Ativado, ele é salvo.",
       "line": "Seu lembrete: guitarra às {{time}}."
     }
   }
