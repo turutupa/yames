@@ -23,7 +23,7 @@ locales carry the English text; list below).
 | Question | Reads | Answer for one fixture Take (Take 2, 90 BPM, below the pass mark, bars 1 and 5 slipped, the tune's bar 1 notes 40 ms late) | Source |
 |---|---|---|---|
 | Where did it slip? | `takeNote()` place, last Take's count there, direction | "Bar 1 of the tune slipped on 2 of 3 rounds. The notes there landed late." | Measured · Take 2 |
-| Was I early or late? (premise from "rushing" / "dragging") | the note's direction; the lean per pattern bar (stored `facts.lean`, else `takeLean(review)`), over `biasThresholdMs(bpm)` | asked "how do I stop rushing": "In Take 2 your notes landed late, not early. Bar 1 of the tune slipped on 2 of 3 rounds. The notes there landed late. Bar 1 of the tune: N ms later than the rest of the Take." | Measured · Take 2 |
+| Was I early or late? (premise from "rushing" / "dragging") | the note's direction; the lean per pattern bar (stored `facts.lean`, else `takeLean(review)`), over `biasThresholdMs(bpm)` | asked "how do I stop rushing": "In Take 2 your notes landed late, not early. Bar 1 of the tune slipped on 2 of 3 rounds. The notes there landed late. Bar 1 of the tune: 40 ms later than the rest of the Take." | Measured · Take 2 |
 | Why didn't that count? (`what`: the Take or a metric) | verdict, `ungraded` why, stored `fair`, the note's lead; `Exercise.passBars` / `notGraded` | not caught: "I didn't measure Take 2: I heard 9 of 60 notes, too few to grade, so it doesn't count against you." + the no-catch hint | Worked out by the app |
 
 ## Decisions and why

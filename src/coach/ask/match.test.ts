@@ -23,6 +23,8 @@ const MATCHES: ReadonlyArray<[string, string, ToolArgs]> = [
   ["Which bars slipped in that take?", "where_slipped", {}],
   ["where was I late?", "where_slipped", {}],
   ["where did I lose it", "where_slipped", {}],
+  // A place and a way at once: the where card says which way the notes there leaned.
+  ["where did it slip and was I late?", "where_slipped", {}],
   ["Am I rushing?", "early_or_late", { premise: "early" }],
   ["was I rushing", "early_or_late", { premise: "early" }],
   ["am i dragging?", "early_or_late", { premise: "late" }],
@@ -73,7 +75,6 @@ const NEAR_MISSES: readonly string[] = [
   "how far is the pass mark?",
   "what should I try?",
   "why is it so slow",
-  "where did it slip and was I late?",
   "do you check my tone and my muting?",
   "did you hear that?",
   "tell me a joke",

@@ -92,7 +92,7 @@ describe("early or late, with the premise answered first (mock 15)", () => {
   it("names the bars that leaned, by bar of the tune, in milliseconds", () => {
     const c = card(earlyOrLate(fixture({ failOn: "timingEvenness", slipped: [0, 4], deviation: (bar) => (bar % 4 === 0 ? 40 : 0) }).ctx, "early"));
     expect(text(c)).toBe(
-      "In Take 2 your notes landed late, not early. Bar 1 of the tune slipped on 2 of 3 rounds. The notes there landed late. Bar 1 of the tune: 30 ms later than the rest of the Take.",
+      "In Take 2 your notes landed late, not early. Bar 1 of the tune slipped on 2 of 3 rounds. The notes there landed late. Bar 1 of the tune: 40 ms later than the rest of the Take.",
     );
   });
 
