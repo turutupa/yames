@@ -696,7 +696,7 @@
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Use each bar's last note to see the next root.","more":1,"general":true},
-            {"when":"notes","say":"Roots at frets ten, seven, three, five.","more":1},
+            {"when":"notes","say":"Start at frets ten, seven, three, five.","more":1},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's root right on '1'."},
@@ -1252,7 +1252,7 @@
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Use each bar's last note to see the next root.","more":1,"general":true},
-            {"when":"notes","say":"Roots at frets five, fourteen, ten, twelve.","more":1},
+            {"when":"notes","say":"Start at frets five, fourteen, ten, twelve.","more":1},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's root right on '1'."},
@@ -1420,7 +1420,7 @@
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Put the repeated top note right on '1'."},
             {"when":"early","say":"Wait for '1' before playing the top note again."},
-            {"when":"shift","say":"Reach down to fret five right after '1'."},
+            {"when":"shift","say":"Move the hand before the note that needs it."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"Jump back up to fret ten for C on '1'."}
           ],
@@ -1541,7 +1541,7 @@
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's first note on '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
-            {"when":"shift","say":"Reach down to fret five right after '1'."},
+            {"when":"shift","say":"Move the hand before the note that needs it."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"Jump back up to fret ten for C on '1'."}
           ],
@@ -1790,7 +1790,7 @@
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's first note on '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
-            {"when":"shift","say":"Move as each chord's last note ends."},
+            {"when":"shift","say":"Look ahead to the next chord's first note."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"Step back down to fret five for C on '1'."}
           ],
@@ -2052,7 +2052,7 @@
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's first note on '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
-            {"when":"shift","say":"Move as each chord's last note ends."},
+            {"when":"shift","say":"Look ahead to the next chord's first note."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"Step back down to fret twelve for G on '1'."}
           ],
@@ -2437,7 +2437,7 @@
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Say one, six, two, five as each chord starts.","general":true},
-            {"when":"notes","say":"Roots at frets ten, seven, twelve, five.","more":1},
+            {"when":"notes","say":"Start at frets ten, seven, twelve, five.","more":1},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's root right on '1'."},
@@ -2576,7 +2576,7 @@
             {"when":"afterHeld","say":"Count the long root's four beats, then go."},
             {"when":"shift","say":"Have the next chord's note ready before '1'.","more":4},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for all four beats."}
+            {"when":"lastBars","say":"Land the long last note right on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -2731,7 +2731,7 @@
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's root right on '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's root."},
-            {"when":"shift","say":"Cut each chord's last note short and move.","more":2},
+            {"when":"shift","say":"Move right after each chord's last eighth.","more":2},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
             {"when":"lastBars","say":"From E minor seven, go back to G on '1'."}
           ],
@@ -2871,7 +2871,7 @@
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Say one, six, two, five as each chord starts.","general":true},
-            {"when":"notes","say":"Roots at frets five, fourteen, seven, twelve.","more":1},
+            {"when":"notes","say":"Start at frets five, fourteen, seven, twelve.","more":1},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's root right on '1'."},
@@ -3010,7 +3010,7 @@
             {"when":"afterHeld","say":"Count the long root's four beats, then go."},
             {"when":"shift","say":"Have the next chord's note ready before '1'.","more":4},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for all four beats."}
+            {"when":"lastBars","say":"Land the long last note right on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -3140,7 +3140,7 @@
           "coachLine": "A key that changes from day to day. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Let five's seventh fall to one's third.","general":true},
-            {"when":"notes","say":"Say two, five, one as each chord starts."},
+            {"when":"notes","say":"Know each chord's four notes before you start."},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's first note on '1'."},
@@ -3148,7 +3148,7 @@
             {"when":"afterHeld","say":"Count the long root's four beats, then go."},
             {"when":"shift","say":"Have the next chord's note ready before '1'."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for all four beats."}
+            {"when":"lastBars","say":"Land the long last note right on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -4139,7 +4139,7 @@
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Use each held root's length to move.","more":2,"general":true},
-            {"when":"notes","say":"Low roots at frets three, eight, ten, three.","more":1},
+            {"when":"notes","say":"Start low at frets three, eight, ten, three.","more":1},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's root right on '1'."},
@@ -4147,7 +4147,7 @@
             {"when":"afterHeld","say":"Count the held root's two beats, then go."},
             {"when":"shift","say":"Move in the held root's second beat."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for its full two beats."}
+            {"when":"lastBars","say":"Keep the last way down as even as the way up."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -4304,7 +4304,7 @@
           "coachLine": "Eight bars with the band. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Use each held root's length to move.","general":true},
-            {"when":"notes","say":"Low roots at frets five, ten, twelve, five.","more":1},
+            {"when":"notes","say":"Start low at frets five, ten, twelve, five.","more":1},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's root right on '1'."},
@@ -4312,7 +4312,7 @@
             {"when":"afterHeld","say":"Count the held root's two beats, then go."},
             {"when":"shift","say":"Move in the held root's second beat."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for its full two beats."}
+            {"when":"lastBars","say":"Keep the last way down as even as the way up."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -4486,7 +4486,7 @@
           "coachLine": "Right notes and even eighths after the take.",
           "cues": [
             {"when":"even","say":"Say root, third, fifth, seventh as you climb.","general":true},
-            {"when":"notes","say":"Put the seventh at the B string's fret eight.","more":1},
+            {"when":"notes","say":"Play the seventh on the D and B strings.","more":1},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Put the first note of each beat on the click."},
@@ -4730,7 +4730,7 @@
           "coachLine": "Right notes and even eighths after the take.",
           "cues": [
             {"when":"even","say":"Say root, third, fifth, seventh as you climb.","general":true},
-            {"when":"notes","say":"Finger one back to fret one for the seventh.","more":2},
+            {"when":"notes","say":"Finger one to fret one for the high seventh.","more":2},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Put the first note of each beat on the click."},
@@ -4859,9 +4859,9 @@
             {"when":"late","say":"Land each new chord's first note on '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
             {"when":"afterHeld","say":"Count the long root's four beats, then go."},
-            {"when":"shift","say":"Move the hand up as C major seven starts.","more":3},
+            {"when":"shift","say":"Move the hand as each chord's first note comes."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for all four beats."}
+            {"when":"lastBars","say":"Land the long last note right on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -6568,15 +6568,15 @@
           "coachLine": "Band on. Right notes and time after the take.",
           "cues": [
             {"when":"even","say":"Let the seventh fall to E seven's third.","more":4,"general":true},
-            {"when":"notes","say":"Keep the shared note as A minor seven starts.","more":4},
+            {"when":"notes","say":"Pick the shared note again on '1'.","more":4},
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"extras","say":"Pick one string for each note, no more."},
             {"when":"late","say":"Land each new chord's first note on '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
             {"when":"afterHeld","say":"Count the long root's four beats, then go."},
-            {"when":"shift","say":"Drop the hand to fret three for E seven.","more":4},
+            {"when":"shift","say":"Move the hand before the note that needs it.","more":4},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for all four beats."}
+            {"when":"lastBars","say":"Land the long last note right on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -6714,7 +6714,7 @@
             {"when":"afterHeld","say":"Count the long root's four beats, then go."},
             {"when":"shift","say":"Have the next chord's note ready before '1'."},
             {"when":"stringChange","say":"Keep the pick close as it crosses strings."},
-            {"when":"lastBars","say":"Hold the last root for all four beats."}
+            {"when":"lastBars","say":"Land the long last note right on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -7869,7 +7869,7 @@
             {"when":"afterHeld","say":"Count the held beat, then sweep C on '1'."},
             {"when":"shift","say":"Move the shape as the last pull ends."},
             {"when":"stringChange","say":"Keep the push one slow, even motion."},
-            {"when":"lastBars","say":"Stop on F's top note and hold it a beat.","more":2}
+            {"when":"lastBars","say":"Sweep F's three beats evenly, then stop.","more":2}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -8246,7 +8246,7 @@
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
             {"when":"shift","say":"Move the shape as the last pull ends."},
             {"when":"stringChange","say":"Keep the push one slow, even motion."},
-            {"when":"lastBars","say":"From four, go straight back to one on '1'."}
+            {"when":"lastBars","say":"From the last chord, go back to one on '1'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -9555,7 +9555,7 @@
             {"when":"heard","say":"Press each note fully before you pick it."},
             {"when":"late","say":"Land each new chord's first note on '1'."},
             {"when":"early","say":"Wait for '1' before the new chord's first note."},
-            {"when":"shift","say":"Move as each chord's last note ends."},
+            {"when":"shift","say":"Have the new chord in mind before '1'."},
             {"when":"stringChange","say":"Keep the pick close to the strings."},
             {"when":"lastBars","say":"Keep the quarters even right to the last note."}
           ],
@@ -9998,7 +9998,7 @@
             {"when":"afterHeld","say":"Count the held beat, then start again on '1'."},
             {"when":"shift","say":"Move on as the last pull ends."},
             {"when":"stringChange","say":"Keep the push one slow, even motion."},
-            {"when":"lastBars","say":"Hold the last note for its full beat."}
+            {"when":"lastBars","say":"Sweep the last chord evenly, then stop."}
           ],
           "grading": "graded",
           "feedback": "afterTake",

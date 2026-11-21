@@ -26,6 +26,9 @@ Cues: `src/paths/specs/arpeggios-over-changes-cues.ts`, attached with `withCues`
   the shape as the last pull ends." (a shape, not a uniform transposition) and "Stop on the top note and hold
   it a beat." (a direction) -> "Move on as the last pull ends." / "Hold the last note for its full beat."
   (`gc6.log`: 0 errors, 0 refused, 0 rewritten).
-- [ ] Proof-read
+- [x] Proof-read (below): three sonnet readers, one per Level, 24 objections, all taken (`gc8.log`: 0 errors,
+  0 refused, 0 rewritten). One more refusal while rewording: "Look ahead to the next chord's first note." on
+  the intermediate warm-up's coming-down variants ("next" reads as the next string) -> "Have the new chord in
+  mind before '1'."
 - [ ] Translations
 - [ ] Gates
