@@ -39,7 +39,7 @@ import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { PlanStep } from "../../session/planner";
 import { factsOf, isMarkedNotFair, leanOf, takesOf } from "../../session/progress";
 import type { TakeOutcome, UngradedWhy } from "../../session/runner";
-import { withVariant } from "../../session/take";
+import { variantIndexOf, withVariant } from "../../session/take";
 import type { PathTakeRow } from "../../ipc";
 
 /** The question shapes the cards answer: a name here, a function below, an entry in `intents.ts`. */
@@ -620,20 +620,10 @@ function pathIdOf(ctx: CoachContext, outcome: TakeOutcome): string | null {
 }
 
 /**
- * Which of the Exercise's variants a seed plays, as `withVariant` picks it (the
- * seed modulo the variant count); null: the Exercise as written, or one with no
- * variants. `takesOf` keeps one id for every variant, so the history cards
- * compare a Take only with Takes on the same notes (review c2b1b, item 1).
- */
-function variantIndex(exercise: Exercise, seed: number | null | undefined): number | null {
-  const n = exercise.variation?.variants?.length ?? 0;
-  if (n === 0 || seed === null || seed === undefined) return null;
-  return ((seed % n) + n) % n;
-}
-
-/**
  * The stored Takes of the last Take's Exercise that the history cards may read,
- * newest first: on the same variant as it (`variantIndex`), with how many of the
+ * newest first: on the same variant as it (`variantIndexOf`, `withVariant`'s own
+ * rule: `takesOf` keeps one id for every variant, so a Take is compared only
+ * with Takes on the same notes, review c2b1b, item 1), with how many of the
  * measured ones were on another variant (each card says it left those out).
  * Null: no Path to read a history from.
  */
@@ -641,11 +631,11 @@ function historyOf(ctx: CoachContext, outcome: TakeOutcome): { rows: PathTakeRow
   const pathId = pathIdOf(ctx, outcome);
   const base = ctx.exercise;
   if (!pathId || !base) return null;
-  const mine = variantIndex(base, seedOfTake(ctx, outcome));
+  const mine = variantIndexOf(base, seedOfTake(ctx, outcome));
   const rows: PathTakeRow[] = [];
   const otherNotes: PathTakeRow[] = [];
   for (const row of takesOf(ctx.progress, pathId, outcome.exerciseId)) {
-    if (variantIndex(base, row.variantSeed) === mine) rows.push(row);
+    if (variantIndexOf(base, row.variantSeed) === mine) rows.push(row);
     else otherNotes.push(row);
   }
   return { rows, otherNotes };

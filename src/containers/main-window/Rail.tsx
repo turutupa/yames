@@ -13,6 +13,21 @@ import type { LibrarySong } from "../../songs/songFiles";
 import type { MainView } from "./MainHeader";
 import { isLearnTab } from "./hooks/useTabRouting";
 import type { AppTab, PlayTab } from "./hooks/useTabRouting";
+import { useProgressDot } from "../../coach/companion";
+
+/**
+ * The dot on Progress (DESIGN 6.6, mock 10): the coach's look-back (or its
+ * plateau question) is waiting there. No count, no notification; gone once
+ * Progress has shown it this run, and never drawn in a Session or Settings,
+ * where nothing proactive appears. Its own component, so the rail renders
+ * nothing more when it changes. Shared with the phone's tab bar.
+ */
+export function ProgressDot({ view }: { view: MainView }) {
+  const { t } = useTranslation();
+  const dot = useProgressDot();
+  if (!dot || view === "session" || view === "settings" || view === "progress") return null;
+  return <span className="rail-dot" role="img" aria-label={t("companion.dot")} data-testid="progress-dot" />;
+}
 
 interface RailProps {
   state: AppState;
@@ -403,6 +418,7 @@ export const Rail = memo(forwardRef<PresetSidebarHandle, RailProps>(function Rai
                 {place.icon}
               </svg>
               <span className="rail-mode-label">{t(place.labelKey)}</span>
+              {place.id === "progress" && <ProgressDot view={view} />}
               <RailKey id={place.id} keyBindings={keyBindings} />
             </button>
           </div>
