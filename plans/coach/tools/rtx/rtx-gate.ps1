@@ -39,7 +39,7 @@ function Run($cmdline) {
   return $LASTEXITCODE
 }
 function Grep($pattern, $n) {
-  Select-String -Path $log -Pattern $pattern | Select-Object -Last $n | ForEach-Object { $_.Line }
+  Select-String -CaseSensitive -Path $log -Pattern $pattern | Select-Object -Last $n | ForEach-Object { $_.Line }
 }
 Set-Content -Path $log -Value ("[{0:HH:mm:ss}] {1} at {2} in {3}" -f (Get-Date), $Step, $head, $Wt)
 if ($Sha -and -not $head.StartsWith($Sha)) { Done $false "HEAD is not ${Sha}; run sync first" }

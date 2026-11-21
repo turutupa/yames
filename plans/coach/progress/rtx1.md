@@ -31,4 +31,28 @@ Session 6, leg rtx1. Branch `coach-rtx1`. Scripts: `plans/coach/tools/rtx/` (REA
 
 | job | what | result | time |
 |---|---|---|---|
-| coach-rtx1-sync | sync 9757b3f6 | PASS | 1 s copy + 2 s fetch/checkout |
+| coach-rtx1-sync | sync 9757b3f6 (coach HEAD) | PASS | 1 s copy + 2 s fetch/checkout |
+| coach-rtx1-rust-lib | `node scripts\rust-test.mjs --lib --no-default-features` at 9757b3f6 | PASS: 1275 passed, 0 failed, 4 ignored (tests 230.7 s) | 4.8 min incl. the incremental build (target warm from pv1) |
+| coach-rtx1-rtx-tsc | tsc at 9757b3f6 | FAIL at once: no `node_modules` (by design: this leg may not install) | 0 min |
+
+vitest and build not run: same refusal as tsc. Logs on the RTX: `C:\yt-coach\logs\s6\{sync,rust-lib,tsc}-9757b3f6.log`.
+
+## Lessons
+
+- `rtx-job.sh` cannot refresh itself (Windows scp: "open local ... Broken pipe" on the file bash is
+  running). The refresh is the README's line 0 (`bash -c` scp, then `check`).
+- `Select-String` is case-insensitive by default: "FAILED" matched test names like `a_failed_...`; now `-CaseSensitive`.
+
+## What the next leg needs
+
+- **node_modules for tsc / vitest / build / Playwright** (owner's call): either an install in
+  `C:\yt-coach\wt` on the Windows side (the repo has `bun.lock`, no `package-lock.json`; Windows
+  ARM64 native packages: esbuild, rollup), or run the node gates in the RTX's WSL with a copy of a
+  Linux arm64 `node_modules` (WSL has node; its version and arch still to check).
+- **Playwright layout shards**: the above, plus browsers (`%LOCALAPPDATA%\ms-playwright` is missing),
+  plus lock `coach-layout` and nothing visible (headless only).
+- **Vulkan evals**: `coach-eval` is not built there (only `bin\click-jitter-probe-vk.exe`). Build it
+  like pv1 built the probe (`C:\Users\delgado\src\pv1-rtx-probe.ps1`, build phase: vcvarsarm64,
+  clang-cl, `VULKAN_SDK` = pv1's `yames-tools\VulkanSDK-1.4.313.0`, not set machine-wide),
+  `cargo build --release --features coach-llm-vulkan --bin coach-eval` with `CARGO_TARGET_DIR=C:\yt-coach\target`.
+  Model there: `C:\yt-coach\models\Qwen3-4B-Q4_K_M.gguf` only; any other GGUF must be pulled with scp from the DGX the same way.

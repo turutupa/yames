@@ -11,7 +11,7 @@ Low priority (nice 19, BelowNormal). One RTX job at a time; `--ram` honest (abou
 | File | Where it runs | What |
 |---|---|---|
 | `rtx-bundle.sh` | DGX | thin bundle of a branch (since 406d084155, which the RTX has) -> prints sha + path |
-| `rtx-job.sh` | RTX WSL (`C:\yt-coach\tools\`) | `check`, `tools <dgx-dir>`, `sync <sha> <bundle>`, `gate <step> [sha]` |
+| `rtx-job.sh` | RTX WSL (`C:\yt-coach\tools\`) | `check`, `sync <sha> <bundle>`, `gate <step> [sha]` |
 | `rtx-sync.ps1` | RTX Windows | fetch the bundle into `refs/remotes/dgx/*`, refuse on a dirty tree, checkout detached |
 | `rtx-gate.ps1` | RTX Windows | `check`, `tsc`, `vitest`, `build`, `rust-lib`; log `C:\yt-coach\logs\s6\<step>-<sha8>.log`; last line PASS/FAIL + minutes |
 | `look.sh` | RTX WSL | the first read-only look (argument of `bash -c`) |
@@ -20,9 +20,9 @@ Low priority (nice 19, BelowNormal). One RTX job at a time; `--ram` honest (abou
 
 ```sh
 J=/home/dgx-delgado/.local/bin/job
-# 0. after changing these scripts: copy them to C:\yt-coach\tools (the DGX folder holding them)
-$J submit --name coach-<leg>-rtx-tools --machine rtx --env any --ram 1G --est 1m -- \
-  bash /mnt/c/yt-coach/tools/rtx-job.sh tools /home/dgx-delgado/<worktree>/plans/coach/tools/rtx
+# 0. after changing these scripts: copy them to C:\yt-coach\tools, then `check` (the DGX folder holding them is $1;
+#    not a mode of rtx-job.sh, because Windows cannot overwrite the script bash is running)
+$J submit --name coach-<leg>-rtx-tools --machine rtx --env any --ram 1G --est 2m -- bash -c 'renice -n 19 $$ >/dev/null; mkdir -p /mnt/c/yt-coach/tools && cd /mnt/c/yt-coach && /mnt/c/Windows/System32/OpenSSH/scp.exe -B -q dgx:$1/rtx-job.sh dgx:$1/rtx-sync.ps1 dgx:$1/rtx-gate.ps1 tools/ && bash tools/rtx-job.sh check' _ /home/dgx-delgado/<worktree>/plans/coach/tools/rtx
 # 1. bundle on the DGX (prints SHA and BUNDLE), then sync
 bash plans/coach/tools/rtx/rtx-bundle.sh <branch>
 $J submit --name coach-<leg>-rtx-sync --machine rtx --env any --ram 1G --est 3m -- \

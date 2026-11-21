@@ -5,7 +5,8 @@
 # nice 19 here, BelowNormal for the Windows processes (the .ps1 scripts set it themselves).
 #
 #   rtx-job.sh check                         interop, scp, Windows tools (read-only)
-#   rtx-job.sh tools <dgx-dir>               copy this folder's scripts from the DGX into C:\yt-coach\tools
+#   (copying these scripts to C:\yt-coach\tools is NOT a mode of this script: Windows cannot
+#    overwrite the file bash is running. See README.md, line 0.)
 #   rtx-job.sh sync <sha> <dgx-bundle-path>  copy the bundle from the DGX, fetch it, check <sha> out (detached) in C:\yt-coach\wt
 #   rtx-job.sh gate <tsc|vitest|build|rust-lib> [sha]   one gate in C:\yt-coach\wt (refuses if HEAD is not sha)
 #
@@ -30,11 +31,6 @@ case "${1:-}" in
     "$SYS/cmd.exe" /c "ver"
     ps 'C:\yt-coach\tools\rtx-gate.ps1' -Step check
     ;;
-  tools)
-    [ -n "${2:-}" ] || { echo "FAIL tools: no DGX folder given"; exit 2; }
-    "$SCP" -B -q "dgx:$2/rtx-job.sh" "dgx:$2/rtx-sync.ps1" "dgx:$2/rtx-gate.ps1" tools/ \
-      && { echo "PASS tools"; ls -la tools; } || { echo "FAIL tools: scp exit $?"; exit 3; }
-    ;;
   sync)
     sha=${2:-}; src=${3:-}
     [ -n "$sha" ] && [ -n "$src" ] || { echo "FAIL sync: usage sync <sha> <dgx-bundle-path>"; exit 2; }
@@ -48,6 +44,6 @@ case "${1:-}" in
     ps 'C:\yt-coach\tools\rtx-gate.ps1' -Step "$2" -Sha "${3:-}"
     ;;
   *)
-    echo "usage: rtx-job.sh check | tools <dgx-dir> | sync <sha> <dgx-bundle> | gate <step> [sha]"; exit 2
+    echo "usage: rtx-job.sh check | sync <sha> <dgx-bundle> | gate <step> [sha]"; exit 2
     ;;
 esac
