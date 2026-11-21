@@ -322,7 +322,13 @@ async function cmdPrompt(ev, opt) {
 
 const opt = args(process.argv.slice(2));
 const command = opt._[0];
-const commands = { rules: cmdRules, requests: cmdRequests, score: cmdScore, model: cmdModel, titles: cmdTitles, prompt: cmdPrompt, check: cmdCheck };
+/** The full choice grammar (every player tool, the cards): `src/coach/ask/choice-grammar.gbnf` is this. */
+async function cmdGrammar(ev, opt) {
+  if (typeof opt.out !== "string") fail("--out FILE is required");
+  writeFileSync(opt.out, ev.choiceGrammar(ev.toolCatalogue(ev.COACH_TOOLS), ev.EVAL_CARDS));
+}
+
+const commands = { grammar: cmdGrammar, rules: cmdRules, requests: cmdRequests, score: cmdScore, model: cmdModel, titles: cmdTitles, prompt: cmdPrompt, check: cmdCheck };
 if (!commands[command]) fail(`usage: coach-eval.mjs <${Object.keys(commands).join("|")}> --out ...`);
 const ev = await loadEval();
 await commands[command](ev, opt);
