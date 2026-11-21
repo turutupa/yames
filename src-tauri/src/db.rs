@@ -1826,9 +1826,11 @@ fn history_sql(filter: &HistoryFilter) -> (String, Vec<Box<dyn rusqlite::ToSql>>
 /// too.
 ///
 /// Rows saved before `newClean` existed (2026-11-08 to 11-16) carry no such
-/// flag; for those alone, a caught, passed Take over at least
-/// `CLEAN_TEMPO_MIN_BARS` bars counts, which is what `gradeTake` asked of a
-/// clean tempo then, short of the per-bar evenness it cannot see from here.
+/// flag; for those alone, a caught, passed Take counts when the scorer said
+/// it counts for a clean tempo (`measures.pass.countsForCleanTempo`) or, with
+/// no such answer, when it ran at least `CLEAN_TEMPO_MIN_BARS` bars: the same
+/// reading as `countsClean` in `ProgressView.tsx`. Such a row may be a pass
+/// slower than the clean tempo already was; first-and-best is untouched by it.
 /// Facts that are not JSON are read as having no flag, as `list_path_takes`
 /// keeps such a row.
 ///
@@ -1844,7 +1846,15 @@ fn clean_tempo_spans_sql() -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
                            THEN json_type(facts_json, '$.newClean') END,
                       'null')
                  WHEN 'true' THEN 1
-                 WHEN 'null' THEN bars >= ?1
+                 WHEN 'null' THEN
+                   CASE COALESCE(
+                          CASE WHEN json_valid(facts_json)
+                               THEN json_type(facts_json, '$.measures.pass.countsForCleanTempo') END,
+                          'null')
+                     WHEN 'true' THEN 1
+                     WHEN 'false' THEN 0
+                     ELSE bars >= ?1
+                   END
                  ELSE 0
                END
          ORDER BY exercise_id ASC, started_at DESC",
@@ -3153,7 +3163,8 @@ mod tests {
     }
 
     /// Rows from before `newClean`: a caught, passed Take over eight bars
-    /// counts, a shorter one does not, and unreadable facts are no flag.
+    /// counts, a shorter one does not, the scorer's `countsForCleanTempo`
+    /// overrides the bar count, and unreadable facts are no flag.
     #[test]
     fn a_take_from_before_the_flag_counts_by_its_columns() {
         let mut db = Db::open_in_memory().unwrap();
@@ -3162,6 +3173,14 @@ mod tests {
         short.bars = 7;
         save_clean(&mut db, &short);
         save_clean(&mut db, &clean_take("old", p, e, 20, 64, None));
+        // The scorer's own answer wins over the bar count, either way.
+        let mut scorer_no = clean_take("scorer-no", p, e, 5, 58, None);
+        scorer_no.facts["measures"]["pass"] = serde_json::json!({ "countsForCleanTempo": false });
+        save_clean(&mut db, &scorer_no);
+        let mut scorer_yes = clean_take("scorer-yes", p, e, 40, 72, None);
+        scorer_yes.bars = 6;
+        scorer_yes.facts["measures"]["pass"] = serde_json::json!({ "countsForCleanTempo": true });
+        save_clean(&mut db, &scorer_yes);
         db.conn
             .execute(
                 "INSERT INTO path_takes (id, path_id, step_id, exercise_id, started_at, bpm,
@@ -3170,7 +3189,7 @@ mod tests {
                 [],
             )
             .unwrap();
-        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (64, 20), (70, 30))]);
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (64, 20), (72, 40))]);
     }
 
     /// The same Exercise id on two Paths is two clean tempos, as the ceiling
