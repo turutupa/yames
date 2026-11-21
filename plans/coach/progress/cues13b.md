@@ -19,11 +19,56 @@ Intermediate Steps 10 to 14 (`the-link` 3, `link-chains` 3, `minor-progressions`
   0 `cue.refused`, none of the new cues said in other words for a variant (`gc5.log`).
 - [x] Step 3: proof-read (two sonnet readers: Intermediate, Advanced; below); `check` after: 0 errors,
   0 refused (`gc6.log`).
-- [ ] Step 4: translations: of 286 new cue keys per language, 181 have an English already translated
+- [x] Step 4: translations: of 286 new cue keys per language, 181 have an English already translated
   in the overlay (cues13a's constants and reused sentences): filled from it
   (`/tmp/coach-cues13b/prefill.mjs`, `i18n-sweep-picking/prefill.<lng>.json`); 73 new sentences to
-  four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW).
-- [ ] Step 5: gates.
+  four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW). Every file checked
+  again by me (`check_i18n.py`, problems 0 in all fourteen), merged: every overlay 1395 of 1395
+  (`merge-prefill.log`, `merge.log`, `merge2.log`). My fixes before the merge: the etude's "Move one
+  fret as the pick skips the D string" (the index drops 12 to 11) had "up" in de, fr, es, it and nl:
+  set to down; ja's six-string-links general was two sentences: made one.
+- [x] Step 5: gates (below).
+
+## Gates (logs in `/tmp/coach-cues13b/`)
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors; sweep-picking 0 refused (`check-all.log`).
+- `npx tsc --noEmit`: clean (`tsc.log`).
+- `npm run test`: 415 of 416 files, 45,354 of 45,354 tests passed (`vitest.log`); the one file is the
+  known worktree-only `TabStage.render.test.tsx`; one "Timeout calling onTaskUpdate" from the busy box,
+  every test passing.
+- `npm run build`: ok (`build.log`).
+- No Rust file changed; no layout run (the orchestrator's).
+
+## The numbers (this leg)
+
+286 cues on 38 Exercises (35 graded, 3 self-checked with the general cue only), 73 new distinct
+sentences (the rest reuse the first half's constants). By trigger: general 38, heard 35, late 35,
+early 35, stringChange 35, extras 35, shift 33, lastBars 33, afterHeld 7. The whole Path now: 541
+cues on 75 Exercises, 188 distinct. None of my cues is said in other words for a variant.
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · fr 48 · es 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 48 · vi 46 · ko 27 ·
+ja 23 · zh-CN 18 · zh-TW 18. Read first: the new word for "the link" (de Bindeton, fr liaison, es
+enlace, it collegamento, nl linknoot, pl nuta łącząca, pt-BR nota de ligação, ru нота-связка, tr bağ
+notası, vi nốt nối, ja つなぎの音, ko 연결음, zh 连接音 / 連接音); "fretting hand" written as the left
+hand in it, pl and ko (wrong for a left-handed player); pl's two clipped cues on link-alone and
+two-shapes; de band-big-chain general is not an imperative; es octave-jump shift drops "to jump".
+
+## Twelve cues to read
+
+- **"Up one chord, down the next"** (Intermediate, the-link). Up three strings, a link at the top, the
+  next chord back down. general "Play it as one gesture, link in the middle." · afterHeld "Count the
+  held note's two beats, then link." · late "Land the link note right on beat one."
+- **"Five strings, in a chain"** (Intermediate, long-chains). One five-string loop per chord through
+  four chords. general "Keep every note separate in the big loops." · early "Wait for beat three
+  before the top hammer." · stringChange "Slow the hand so each string gets its moment."
+- **"The octave jump"** (Advanced, fast-shifts). One triad twelve frets apart. general "Make the jump
+  in the time of one note." · heard "Press the first note after each jump fully." · shift "Leave each
+  loop's last note early to jump."
+- **"The etude, part two"** (Advanced, advanced-etude). E minor high, A minor, B major home, a sweep up
+  to a held E. general "Count the beat of rest before the last sweep." · shift "Move the index down
+  three frets for A minor." · lastBars "Land the held E right on beat three."
 
 ## Constants added (reuse them)
 
