@@ -137,7 +137,25 @@
       "stanceLearningDesc": "Dá metade a mais de folga antes de dizer qualquer coisa, mantém as correções longe dos seus ouvidos enquanto você toca e começa pelo que deu certo. Sua nota é calculada exatamente do mesmo jeito nos dois casos.",
       "cuesNoVoice": "Precisa de uma voz do coach: escolha Padrão ou Studio acima. Até lá, os avisos ficam na tela.",
       "toolsOnly": "Só ferramentas",
-      "toolsOnlyHint": "Vale no Metrônomo, no Treino e no Jam. As sessões sempre avaliam do mesmo jeito."
+      "toolsOnlyHint": "Vale no Metrônomo, no Treino e no Jam. As sessões sempre avaliam do mesmo jeito.",
+      "groups": {
+        "answers": "Respostas",
+        "voice": "Voz",
+        "suggestions": "Sugestões",
+        "notebook": "Caderno",
+        "tools": "Nas ferramentas"
+      },
+      "answersRuleMade": "O coach responde a partir das suas tomadas e trilhas.",
+      "answersLangs": "Com as próprias palavras em: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Linhas que você deixou de fora",
+        "empty": "Nada deixado de fora.",
+        "leftOutOn": "Deixada de fora em {{date}}",
+        "bringBack": "Trazer de volta",
+        "broughtBack": "De volta ao seu Caderno.",
+        "lineGone": "Uma linha que suas tomadas recentes não mostram mais",
+        "comesBack": "Uma linha deixada de fora volta sozinha depois de trinta dias. Nada é apagado."
+      }
     },
     "general": {
       "title": "Geral",

@@ -137,7 +137,25 @@
       "stanceLearningDesc": "Cho bạn thêm một nửa khoảng dung sai trước khi nói bất cứ điều gì, giữ lời nhắc ra khỏi tai bạn trong lúc chơi, và bắt đầu từ chỗ đã ổn. Điểm của bạn vẫn được tính y hệt nhau ở cả hai cách.",
       "cuesNoVoice": "Cần giọng huấn luyện viên: chọn Tiêu chuẩn hoặc Studio ở trên. Trước đó, lời nhắc hiện trên màn hình.",
       "toolsOnly": "Chỉ công cụ",
-      "toolsOnlyHint": "Áp dụng trong Máy đếm nhịp, Luyện tempo và Jam. Buổi tập luôn chấm điểm như nhau."
+      "toolsOnlyHint": "Áp dụng trong Máy đếm nhịp, Luyện tempo và Jam. Buổi tập luôn chấm điểm như nhau.",
+      "groups": {
+        "answers": "Câu trả lời",
+        "voice": "Giọng nói",
+        "suggestions": "Gợi ý",
+        "notebook": "Sổ tay",
+        "tools": "Trong các công cụ"
+      },
+      "answersRuleMade": "Huấn luyện viên trả lời dựa trên các lượt và Lộ trình của bạn.",
+      "answersLangs": "Bằng lời của riêng nó trong: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Những dòng bạn đã bỏ ra",
+        "empty": "Chưa bỏ dòng nào.",
+        "leftOutOn": "Đã bỏ ra ngày {{date}}",
+        "bringBack": "Đưa lại",
+        "broughtBack": "Đã trở lại Sổ tay của bạn.",
+        "lineGone": "Một dòng mà các lượt gần đây của bạn không còn cho thấy",
+        "comesBack": "Dòng bạn bỏ ra sẽ tự quay lại sau ba mươi ngày. Không có gì bị xóa."
+      }
     },
     "general": {
       "title": "Chung",

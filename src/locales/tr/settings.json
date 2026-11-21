@@ -137,7 +137,25 @@
       "stanceLearningDesc": "Bir şey söylemeden önce sana yarı yarıya daha fazla pay bırakır, sen çalarken düzeltmeleri kulağından uzak tutar ve iyi gidenden başlar. Puanın her iki durumda da tamamen aynı hesaplanır.",
       "cuesNoVoice": "Bir koç sesi gerekir: yukarıdan Standart veya Studio'yu seç. O zamana kadar uyarılar ekranda kalır.",
       "toolsOnly": "Yalnızca araçlar",
-      "toolsOnlyHint": "Metronom, Tempo Antrenmanı ve Jam'de geçerlidir. Seanslar hep aynı şekilde puanlar."
+      "toolsOnlyHint": "Metronom, Tempo Antrenmanı ve Jam'de geçerlidir. Seanslar hep aynı şekilde puanlar.",
+      "groups": {
+        "answers": "Yanıtlar",
+        "voice": "Ses",
+        "suggestions": "Öneriler",
+        "notebook": "Defter",
+        "tools": "Araçlarda"
+      },
+      "answersRuleMade": "Koç, denemelerinden ve yollarından yanıt verir.",
+      "answersLangs": "Kendi sözleriyle şu dillerde: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Çıkardığın satırlar",
+        "empty": "Çıkarılan bir şey yok.",
+        "leftOutOn": "{{date}} tarihinde çıkarıldı",
+        "bringBack": "Geri getir",
+        "broughtBack": "Defterine geri döndü.",
+        "lineGone": "Son denemelerinde artık görünmeyen bir satır",
+        "comesBack": "Çıkardığın bir satır otuz gün sonra kendiliğinden geri gelir. Hiçbir şey silinmez."
+      }
     },
     "general": {
       "title": "Genel",

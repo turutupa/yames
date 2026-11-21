@@ -137,7 +137,25 @@
       "stanceLearningDesc": "Ti lascia metà margine in più prima di dire qualcosa, tiene le correzioni fuori dalle orecchie mentre suoni e parte da quello che è andato bene. Il tuo punteggio viene calcolato esattamente allo stesso modo in entrambi i casi.",
       "cuesNoVoice": "Serve una voce del coach: scegli Standard o Studio qui sopra. Fino ad allora gli avvisi restano sullo schermo.",
       "toolsOnly": "Solo strumenti",
-      "toolsOnlyHint": "Vale in Metronomo, Rampa e Jam. Le sessioni valutano sempre allo stesso modo."
+      "toolsOnlyHint": "Vale in Metronomo, Rampa e Jam. Le sessioni valutano sempre allo stesso modo.",
+      "groups": {
+        "answers": "Risposte",
+        "voice": "Voce",
+        "suggestions": "Suggerimenti",
+        "notebook": "Taccuino",
+        "tools": "Negli strumenti"
+      },
+      "answersRuleMade": "Il coach risponde dalle tue take e dai tuoi percorsi.",
+      "answersLangs": "Con parole proprie in: {{langs}}.",
+      "notebook": {
+        "leftOutTitle": "Righe che hai escluso",
+        "empty": "Nessuna riga esclusa.",
+        "leftOutOn": "Esclusa il {{date}}",
+        "bringBack": "Ripristina",
+        "broughtBack": "Di nuovo nel tuo Taccuino.",
+        "lineGone": "Una riga che le tue take recenti non mostrano più",
+        "comesBack": "Una riga che escludi torna da sola dopo trenta giorni. Non viene cancellato nulla."
+      }
     },
     "general": {
       "title": "Generale",

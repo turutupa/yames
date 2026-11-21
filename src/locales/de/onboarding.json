@@ -67,13 +67,14 @@
     },
     "coach": {
       "title": "Übungscoach",
-      "what1": "Der Coach hört über deinen Audio-Eingang mit und bewertet, wie dein Timing zum Klick sitzt.",
-      "what2": "Nach jedem Durchgang schreibt er einen kurzen Bericht – mit geladenem Modell erklärt er auch, woran du als Nächstes arbeiten solltest.",
+      "what1": "Der Coach liest deine Takes und deine Pfade: Er gibt dir die Zeile für Heute, eine Notiz nach einem Take und antwortet, wenn du fragst.",
+      "question": "Soll der Coach auch mit eigenen Worten antworten?",
+      "withoutModel": "Aus gibt dir trotzdem die Zeile, die Notiz, die Werkzeuge und Antworten aus deinen Takes und Pfaden.",
       "privacy": "Alles läuft auf diesem Rechner. Dein Audio verlässt ihn nie, und Release-Builds nehmen nichts auf.",
       "recommended": "Empfohlen",
-      "timing": {
-        "title": "Nur Timing-Feedback",
-        "desc": "Kein Download. Live-Punkte, Timing-Wertung und Sitzungsverlauf bekommst du trotzdem."
+      "off": {
+        "title": "Aus",
+        "desc": "Kein Download. Der Coach antwortet aus deinen Takes und Pfaden."
       },
       "standard": {
         "title": "Standard-Modell",
@@ -91,10 +92,6 @@
       "reasonInstalled": "Bereits auf diesem Rechner geladen – nichts zu holen.",
       "downloadNote": "Der Download startet beim Weitergehen und läuft im Hintergrund weiter.",
       "downloading": "Coach-Modell wird geladen",
-      "tryListening": {
-        "label": "Zuhör-Funktion trotzdem ausprobieren",
-        "hint": "Zwei kurze Schritte: Eingang wählen, acht Schläge spielen, Timing sehen."
-      },
       "voiceReady": "Die Coach-Stimmen sind bereit.",
       "voicePick": "Stimme wählen",
       "voiceDismiss": "Schließen"
@@ -189,7 +186,7 @@
       },
       "controlKeyboard": "Tastatur",
       "controlFootswitch": "Fußschalter",
-      "coachTiming": "Nur Timing-Feedback",
+      "coachTiming": "Aus: Antworten aus deinen Takes und Pfaden",
       "inputNone": "Nicht eingerichtet",
       "alwaysOnTop": "Immer im Vordergrund",
       "start": "Weiter zu Heute",

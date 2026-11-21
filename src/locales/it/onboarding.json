@@ -67,13 +67,14 @@
     },
     "coach": {
       "title": "Coach di studio",
-      "what1": "Il coach ascolta dal tuo ingresso audio e valuta come il tuo timing si appoggia al click.",
-      "what2": "Dopo ogni passaggio scrive un breve report e, con un modello scaricato, spiega su cosa lavorare.",
+      "what1": "Il coach legge le tue take e i tuoi percorsi: ti dà la riga di Oggi, una nota dopo una take e risposte quando chiedi.",
+      "question": "Il coach deve rispondere anche con parole sue?",
+      "withoutModel": "Disattivato ti dà comunque la riga, la nota, gli strumenti e risposte dalle tue take e dai tuoi percorsi.",
       "privacy": "Tutto gira su questa macchina. Il tuo audio non esce mai e le build di rilascio non lo registrano.",
       "recommended": "Consigliato",
-      "timing": {
-        "title": "Solo feedback sul timing",
-        "desc": "Nessun download. Restano i punti in tempo reale, il punteggio di timing e lo storico."
+      "off": {
+        "title": "Disattivato",
+        "desc": "Nessun download. Il coach risponde dalle tue take e dai tuoi percorsi."
       },
       "standard": {
         "title": "Modello standard",
@@ -91,10 +92,6 @@
       "reasonInstalled": "Già scaricato su questa macchina: non serve altro.",
       "downloadNote": "Il download parte quando continui e prosegue in background.",
       "downloading": "Download del modello del coach",
-      "tryListening": {
-        "label": "Prova comunque la funzione di ascolto",
-        "hint": "Due passaggi brevi: scegli l'ingresso, suona otto movimenti, guarda il tuo timing."
-      },
       "voiceReady": "Le voci del coach sono pronte.",
       "voicePick": "Scegli una voce",
       "voiceDismiss": "Chiudi"
@@ -189,7 +186,7 @@
       },
       "controlKeyboard": "Tastiera",
       "controlFootswitch": "Pedale",
-      "coachTiming": "Solo feedback sul tempo",
+      "coachTiming": "Disattivato: risposte dalle tue take e dai tuoi percorsi",
       "inputNone": "Non configurato",
       "alwaysOnTop": "Sempre in primo piano",
       "start": "Vai a Oggi",
