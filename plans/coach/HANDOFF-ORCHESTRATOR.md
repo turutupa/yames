@@ -58,37 +58,57 @@ Session 2 (2026-11-20, from 13:45 PT), in order: **c2a2** (+ c2a2b; no Start but
 line and note, Tool runs; reviewed twice) → delivery 1d; **t1a1** (the tool runner, go and read tools);
 **cues1** (+ cues1b; Rhythm Foundations, First Chords) → delivery 1e; **c1b2a** (Today's line);
 **cues2** (Blues Pentatonics); **t1a2** (+ t1a2b, t1a2c; the fourteen confirm tools; reviewed twice)
-→ delivery 1f. Deliveries so far: 1a to 1f (`STATUS.md`).
+→ delivery 1f; **c1b2b** (+ c1b2c, c1b2d, c1b2e; the voice at boundaries, three coach keys; reviewed three
+times; Rust in `tts.rs` / `commands.rs`), **cues3** (Chords in a Key) → delivery 1g; **t1b1** (+ t1b1b;
+the tools in the Ask panel; reviewed), **cues4** (Know the Neck) → delivery 1h. Deliveries so far: 1a
+to 1h (`STATUS.md`). Six Paths of sixteen have cues.
 
 In flight when this was last written (check `git worktree list`, `git branch --no-merged coach`, and
 `PROGRESS.md`'s rows marked "running"):
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
-| **c1b2b** (+ c1b2c) the voice at boundaries, three coach keys | `~/yames-coach-c1b2b`, `coach-c1b2b` | Built; reviewed (MERGE AFTER FIXES, six findings); c1b2c fixed them, with a five-line Rust change (`tts_speak` takes `dim: Option<bool>`); **the fixes are with a second reviewer** (`/tmp/coach-orch/c1b2c-review.md`) | On MERGE: merge, `gates.sh tests/layout/coach-voice.spec.ts tests/layout/coach-session.spec.ts tests/layout/smooth.spec.ts tests/layout/settings.spec.ts`, plus `npm run test:rust` through `run.sh` on the main checkout (Rust changed). On findings: a small fix agent, as before. |
-| **t1b1** the tools in the Ask panel | `~/yames-coach-t1b1`, `coach-t1b1` | Running | Read its screenshots against mock 16; a reviewer on the host change (`useCoachToolHost.ts`, the `MainWindow` closure: the preset re-list) and on anything that calls `confirmCoachTool` / `runCoachUndo` from the UI (a press must be the only way in); merge; then **t1b2** (typed commands). |
-| **cues3** Chords in a Key | `~/yames-coach-cues3`, `coach-cues3` | Running | Read its twelve sample cues; merge; `gates-cues.sh`. |
+| – | – | **Nothing is in flight and nothing is unmerged** (session 2 stopped at 17:45 PT on 2026-11-20, at its context limit, after delivery 1i). The only worktrees are the main checkout and `~/yames-coach-base`. | Start with the night gates under "Owed" if it is after 8 PM Pacific or a weekend; otherwise launch the next legs and run them at 8 PM. |
 
-Briefed and not started (`plans/tasks/coach/`): `t1b2-typed-commands.md` (after t1b1),
-`c2b1-fact-cards-playing.md` (after t1b1), `c2b2-fact-cards-path-plan-theory.md` (after c2b1). The cue
-legs share `cues-content.md`; **the queue of Paths left, in order**: know-the-neck (54),
+**vr1** (the variant rewriter, a defect found by cues4) is merged: no false sentence had shipped; `npm
+run paths -- check` now lists rewritten and refused variant sentences, so cue legs no longer need
+`refusals-entry.ts` (drop that line from the cue prompt; `cues-content.md` still mentions the script:
+`CUES_GUIDE.md` is the newer word).
+
+For a merge that changed Rust: `bash plans/coach/tools/gates-rust.sh [layout specs]` (the gates, then
+`npm run test:rust`).
+
+Briefed and not started (`plans/tasks/coach/`), all three can start now: `t1b2-typed-commands.md`,
+`c2b1-fact-cards-playing.md`, then `c2b2-fact-cards-path-plan-theory.md` (after c2b1). **Split t1b2 and
+c2b1 before launching them** (every leg with UI, fifteen locales and layout scenes ran past 300k this
+session): t1b2 into the router with its English table and tests, then the fourteen verb tables and
+the wiring with its scene; c2b1 into the machinery with the first three cards in English, then the
+rest of the cards, the locales and the scenes. Tell t1b2: a chip's words are stored as the player's
+turn and must not reach a model's conversation without the tool's answer (`progress/t1b1.md`).
+The cue legs share `cues-content.md`; **the queue of Paths left, in order** (after vr1 is merged):
 scales-and-modes (69), classic-rock (69), legato (46), triads (68), funk-lines (46), metal-rhythm (49),
-arpeggios-over-changes (54), sweep-picking (72: two legs), tapping (49), shred (53). Each cue leg gets
-the scripts in `plans/coach/tools/cues/` copied into its log folder.
+arpeggios-over-changes (54), sweep-picking (72: two legs), tapping (49), shred (53). One Path a leg:
+every cue leg of 54 to 73 Exercises used 240k to 275k tokens, so the "second Path if under 110k" rule
+never fires; drop it from the prompt. Each cue leg copies the scripts in `plans/coach/tools/cues/`
+into its log folder (session 2's prompts for cues3 and cues4 are the shape to copy).
 
 Not yet briefed: c2c (search, the help set, `explain_screen`), a **polish leg** (every item marked "for
 a polish leg" in `PROGRESS.md`: about twenty now; brief it as two legs, one for the Session and Today,
 one for the tools and Ask), c4a, c4b, t2a to t2c, rem, c3b, c3c, c5a, c5b, c5c, c6. `PLAN.md` has each
 one's scope, design sections and flags; split each as above before briefing it.
 
-Suggested order from here: finish the three in flight → t1b2 ‖ c2b1 ‖ a cue leg → c2b2 ‖ c2c ‖ a cue
-leg (**delivery 2**: Ask answers and acts on every device with the selector on Off) → the two polish
+Suggested order from here: the night gates below if it is after 8 PM → t1b2a ‖ c2b1a ‖ a
+cue leg → t1b2b ‖ c2b1b ‖ a cue leg → c2b2 ‖ c2c ‖ a cue leg (**delivery 2**: Ask answers and acts on
+every device with the selector on Off) → the two polish
 legs → milestone 3 (c4a, c4b, t2, rem) with the remaining cue legs beside it → milestone 4 (c3b, c3c)
 → milestone 5.
 
 ## Owed, and easy to forget
 
-- **The full layout suite on `coach`, after 8 PM Pacific** (not run since c4c; six merges since changed
+- **An open question for the owner** (in `STATUS.md`, delivery 1h): a chip for a one-press tool
+  ("Slower") shows its proposal first, so the change takes two presses; the chip's own press could
+  count. Built the careful way; change it only on the owner's word.
+- **The full layout suite on `coach`, after 8 PM Pacific** (not run since c4c; ten merges since changed
   text or styles): `bash plans/coach/tools/run.sh npx playwright test --trace off > /tmp/coach-orch/layout-full.log 2>&1`
   from the main checkout, in the background. Songs tests time out under load: re-run a failure alone.
   A real failure gets a small fix leg. Put the result in `STATUS.md`.

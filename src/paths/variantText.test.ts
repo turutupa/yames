@@ -79,6 +79,8 @@ describe("variants read by hand", () => {
     });
   });
 
+  // The notes on the B string are not the Exercise's moved one interval (vr1), and the names are still said:
+  // the six in the order played, and "the E at fret 5", are the notes the variant plays at those places.
   it("Tapping: the scale under the tap on the B string, frets and note names", () => {
     expect(said("tapping", "scale-under-the-tap.scale-tap", "stringSet=B:-12-over-5-6-8")).toEqual({
       purpose: "Tap 12, pull off to 8, 6 and 5, hammer 6 and 8. B, G, F, E, F, G: six to the beat.",
@@ -101,6 +103,8 @@ describe("variants read by hand", () => {
   });
 
   // The same triplet on the top string is 5-7-8: fingers 1, 3, 4, so nothing about the second finger is said.
+  // E, F, G became A, B, C (not one interval), and "A, B, C on the top string" is said because the list is
+  // put on a string: the names are the notes the variant plays there (vr1).
   it("Legato (stringSet): the triplet on the top string loses the finger sentences", () => {
     expect(said("legato", "hammer-and-pull.triplet-up", "stringSet=top-E-5-7-8")).toEqual({
       purpose: "A, B, C on the top string as a triplet: pick, hammer, hammer.",
@@ -369,6 +373,102 @@ describe("round 3: three holes closed, on made-up lines", () => {
         }
       }
     }
+  });
+});
+
+// Leg vr1. A note name was rewritten by where the note sat, as if every variant were a transposition: on
+// a variant that moves the same key to another string, or to another box, the name came out false
+// ("Play F sharp, the one sharp in G major." read "Play A, the one sharp in G major." on the B string).
+describe("a note or key name is rewritten only where the variant is that transposition", () => {
+  /** What `cueTexts` says of `says` for one variant of a real Exercise. */
+  const cuesFor = (pathId: string, exerciseId: string, variantId: string, says: string[]) => {
+    const ex = exercisesOf(doc(pathId)).find((e) => e.id === exerciseId);
+    if (!ex) throw new Error(`no Exercise ${pathId}/${exerciseId}`);
+    const v = ex.variation?.variants.find((x) => x.id === variantId);
+    if (!v) throw new Error(`no variant ${exerciseId}#${variantId}: ${ex.variation?.variants.map((x) => x.id).join(" | ")}`);
+    const { exercise, variant } = sides(ex, v);
+    return cueTexts(exercise, variant, says);
+  };
+
+  it("Know the Neck: G major and F major on another string, same key, are refused, not renamed", () => {
+    const gMajor = ["Play F sharp, the one sharp in G major.", "Find each G before you start."];
+    for (const v of ["stringSet=B-string", "stringSet=top-E-string"]) {
+      for (const s of cuesFor("know-the-neck", "top-strings-keys.g-major-strings", v, gMajor)) expect(s.ok, `${v}: ${JSON.stringify(s)}`).toBe(false);
+      const [flat] = cuesFor("know-the-neck", "top-strings-keys.f-major-strings", v, ["Play B flat, the one flat in F major."]);
+      expect(flat.ok, `${v}: ${JSON.stringify(flat)}`).toBe(false);
+      // The key's name is the key's: it did not move, and it is said as it was ("Say B major's names" before).
+      expect(cuesFor("know-the-neck", "top-strings-keys.g-major-strings", v, ["Say G major's names."])).toEqual([{ ok: true, text: "Say G major's names." }]);
+      expect(cuesFor("know-the-neck", "top-strings-keys.f-major-strings", v, ["Say F major's names."])).toEqual([{ ok: true, text: "Say F major's names." }]);
+    }
+  });
+
+  it("Know the Neck: another box of the same key is refused, not renamed", () => {
+    for (const box of ["box-2", "box-3", "box-4", "box-5"]) {
+      const [a] = cuesFor("know-the-neck", "five-boxes.each-box", `position=${box}`, ["Find each A before you start."]);
+      expect(a.ok, `${box}: ${JSON.stringify(a)}`).toBe(false);
+      const [e] = cuesFor("know-the-neck", "boxes-second-key.e-minor-each-box", `position=${box}`, ["Find each E before you start."]);
+      expect(e.ok, `${box}: ${JSON.stringify(e)}`).toBe(false);
+    }
+  });
+
+  it("Know the Neck: a cue naming nothing is still said on every string and box", () => {
+    const [g] = cuesFor("know-the-neck", "top-strings-keys.g-major-strings", "stringSet=B-string", ["Name the key's one sharp every time it comes."]);
+    expect(g).toEqual({ ok: true, text: "Name the key's one sharp every time it comes." });
+  });
+
+  const note = (string: number, fret: number, tick: number) => ({ string, fret, midi: [64, 59, 55, 50, 45, 40][string - 1] + fret, tick, dur: 480, tech: [] });
+  const side = (places: Array<[number, number]>, fret = 2): TextSide => ({ notes: places.map(([s, f], i) => note(s, f, i * 480)), position: { fret, shifts: "none" } });
+  const major = (root: string, spelled: string[]) => ({ kind: "scale" as const, root, scale: "major", spelled, cover: false });
+  const G = major("G", ["G", "A", "B", "C", "D", "E", "F#"]);
+  const A = major("A", ["A", "B", "C#", "D", "E", "F#", "G#"]);
+  // G, A, B, C on the G string (open, 2, 4, 5).
+  const walk = side([[3, 0], [3, 2], [3, 4], [3, 5]], 1);
+  const ex: ExerciseText = { ...walk, purpose: "G, A, B, C up the G string.", howTo: ["Say each name as you play it."], harmony: G, params: { key: "G" } };
+  const says = ["Play B, the third of G major.", "Say G major's names.", "Land on C at fret 5."];
+
+  it("same key, another string: B, C, D, E on the B string is not a transposition of G, A, B, C", () => {
+    const onB: TextSide = { ...side([[2, 0], [2, 1], [2, 3], [2, 5]], 1), harmony: G, params: { key: "G" } };
+    expect(cueTexts(ex, onB, says)).toEqual([
+      { ok: false, reason: "a note name, and the notes did not all move the same interval" },
+      // The key's name stays: the key did not move.
+      { ok: true, text: "Say G major's names." },
+      // A note put at a fret is the note the variant plays at that place: E at fret 5 on the B string.
+      { ok: true, text: "Land on E at fret 5." },
+    ]);
+    // Put at a fret in one sentence, named again in the next: the same note.
+    expect(cueTexts(ex, onB, ["Land on C at fret 5. Hold the C.", "Hold the C."])).toEqual([
+      { ok: true, text: "Land on E at fret 5. Hold the E." },
+      { ok: false, reason: "a note name, and the notes did not all move the same interval" },
+    ]);
+    // Three or more names in the order played are the notes played: B, C, D, E on the B string.
+    expect(cueTexts(ex, onB, ["G, A, B, C, then back."])).toEqual([{ ok: true, text: "B, C, D, E, then back." }]);
+    expect(cueTexts(ex, onB, ["G, B, A, then back."])[0].ok).toBe(false);
+    // A name given a part in the key is its identity, wherever the sentence before put it.
+    expect(cueTexts(ex, onB, ["Land on C at fret 5. Hold the C, the home note."])).toEqual([
+      { ok: false, reason: "a note's part in the key, and the notes did not all move the same interval" },
+    ]);
+  });
+
+  it("a true transposition still rewrites the note, the key and the fret", () => {
+    // Two frets up on the same string, in A: A, B, C#, D.
+    const inA: TextSide = { ...side([[3, 2], [3, 4], [3, 6], [3, 7]], 2), harmony: A, params: { key: "A" } };
+    expect(cueTexts(ex, inA, says)).toEqual([
+      { ok: true, text: "Play C#, the third of A major." },
+      { ok: true, text: "Say A major's names." },
+      { ok: true, text: "Land on D at fret 7." },
+    ]);
+  });
+
+  it("same key, the same figure a string over: a uniform move keeps its note names, the key note's name stays the key's", () => {
+    // C, D, E on the G string (5, 7, 9); the same frets on the D string are G, A, B: every note a fourth down, still in G major.
+    const three: ExerciseText = { ...side([[3, 5], [3, 7], [3, 9]], 5), purpose: "C, D, E on the G string.", howTo: ["Say each name as you play it."], harmony: G, params: { key: "G" } };
+    const down: TextSide = { ...side([[4, 5], [4, 7], [4, 9]], 5), harmony: G, params: { key: "G" } };
+    expect(cueTexts(three, down, ["Play C, D and E evenly.", "Say G major's names.", "Play C, the fourth of G major."])).toEqual([
+      { ok: true, text: "Play G, A and B evenly." },
+      { ok: true, text: "Say G major's names." },
+      // G is not G major's fourth: a note renamed beside a key that stayed is not written.
+      { ok: false, reason: "a note renamed beside a key name that did not move" },
+    ]);
   });
 });
 
