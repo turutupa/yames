@@ -49,5 +49,6 @@ is for the grammar's owner (c3b).
   alone (`coach-chip1c-vt-2`, job 540: 19/19 with the grammar test).
 - `npm run build`: pass (`coach-chip1c-build`, job 519).
 - Rust: `npm run test:rust -- choice_grammar` pass (`coach-chip1c-rust`, job 526).
-- Layout (`coach-chip1c-pw`, job 522): see the report.
+- Layout (`coach-chip1c-pw`, job 522, `/tmp/coach-chip1c/pw.log`): ask, ask-tools, ask-typed,
+  coach-loop, short-window, coach-session: 162 passed, 71 skipped, 0 failed.
 - Nothing a running Take renders changed; the full layout suite is owed.
