@@ -631,11 +631,9 @@ impl AudioInput {
                     let start = session_start_instant;
                     let sr_frames = sample_rate;
                     let ch = selected_ch;
-                    let stream_id = my_stream_id;
                     let stream_gen_f32 = stream_gen_cb.clone();
                     let my_gen_f32 = my_gen;
                     let mut level_acc = LevelAcc::new();
-                    let mut cap_logged_f32 = false;
                     let take_ring_f32 = take_ring_cb.clone();
                     let take_on_f32 = take_recording_cb.clone();
                     let frames_f32 = input_frames_cb.clone();
@@ -673,14 +671,11 @@ impl AudioInput {
                         {
                             if let Ok(mut buf) = rec_buf.try_lock() {
                                 let max_rec = recording_max_f32.load(Ordering::Relaxed);
+                                // Past the cap the buffer just stops growing;
+                                // `stop_recording` reports the cap, off this
+                                // thread (no stderr lock in the callback).
                                 if buf.len() < max_rec {
                                     buf.extend_from_slice(&mono);
-                                } else if !cap_logged_f32 {
-                                    cap_logged_f32 = true;
-                                    eprintln!(
-                                        "[{}] [recording] cap hit (f32): stream_id={} thread_sr={}Hz rec_cap_sr={}Hz",
-                                        now_ts(), stream_id, sr_frames, max_rec / 10
-                                    );
                                 }
                             }
                         }
@@ -721,11 +716,9 @@ impl AudioInput {
                     let start = session_start_instant;
                     let sr_frames = sample_rate;
                     let ch = selected_ch;
-                    let stream_id = my_stream_id;
                     let stream_gen_i16 = stream_gen_cb.clone();
                     let my_gen_i16 = my_gen;
                     let mut level_acc = LevelAcc::new();
-                    let mut cap_logged_i16 = false;
                     let take_ring_i16 = take_ring_cb.clone();
                     let take_on_i16 = take_recording_cb.clone();
                     let frames_i16 = input_frames_cb.clone();
@@ -755,14 +748,11 @@ impl AudioInput {
                         {
                             if let Ok(mut buf) = rec_buf.try_lock() {
                                 let max_rec = recording_max_i16.load(Ordering::Relaxed);
+                                // Past the cap the buffer just stops growing;
+                                // `stop_recording` reports the cap, off this
+                                // thread (no stderr lock in the callback).
                                 if buf.len() < max_rec {
                                     buf.extend_from_slice(&mono);
-                                } else if !cap_logged_i16 {
-                                    cap_logged_i16 = true;
-                                    eprintln!(
-                                        "[{}] [recording] cap hit (i16): stream_id={} thread_sr={}Hz rec_cap_sr={}Hz",
-                                        now_ts(), stream_id, sr_frames, max_rec / 10
-                                    );
                                 }
                             }
                         }
@@ -973,6 +963,19 @@ impl AudioInput {
             std::mem::take(&mut *buf)
         };
         let duration = samples.len() as f32 / sr as f32;
+        // The callbacks stop growing the buffer at the cap and say nothing
+        // (no stderr lock on the audio thread); this is where it is told.
+        let max_rec = self.recording_max.load(Ordering::SeqCst);
+        if samples.len() >= max_rec {
+            eprintln!(
+                "[{}] [recording] cap hit: {} samples >= cap {} ({}s @ {}Hz)",
+                now_ts(),
+                samples.len(),
+                max_rec,
+                max_rec / sr.max(1) as usize,
+                sr
+            );
+        }
         let rms = if !samples.is_empty() {
             (samples.iter().map(|s| s * s).sum::<f32>() / samples.len() as f32).sqrt()
         } else {
@@ -1134,6 +1137,8 @@ impl AudioInput {
             let alive_for_cb = alive.clone();
             let logged = Arc::new(AtomicBool::new(false));
             let logged_cb = logged.clone();
+            let first_len = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+            let first_len_cb = first_len.clone();
 
             // Real-time scheduling for cpal's stream thread on Windows, taken
             // on the first callback (see `callback_priority`); a no-op elsewhere.
@@ -1146,9 +1151,11 @@ impl AudioInput {
                         for s in data.iter_mut() { *s = 0.0; }
                         return;
                     }
-                    if !logged_cb.swap(true, Ordering::Relaxed) {
-                        eprintln!("[{}] [playback] first callback: data.len()={}, out_channels={}, frames={}",
-                            now_ts(), data.len(), out_channels, data.len() / out_channels);
+                    // Noted for the wait loop below, which prints it: no
+                    // stderr lock on the callback thread.
+                    if !logged_cb.load(Ordering::Relaxed) {
+                        first_len_cb.store(data.len(), Ordering::Relaxed);
+                        logged_cb.store(true, Ordering::Release);
                     }
                     let pos = cursor_for_cb.load(Ordering::Relaxed);
                     let frames = data.len() / out_channels;
@@ -1247,7 +1254,19 @@ impl AudioInput {
             }
 
             // Wait for playback to finish or be stopped
+            let mut first_reported = false;
             while alive.load(Ordering::SeqCst) {
+                if !first_reported && logged.load(Ordering::Acquire) {
+                    first_reported = true;
+                    let len = first_len.load(Ordering::Relaxed);
+                    eprintln!(
+                        "[{}] [playback] first callback: data.len()={}, out_channels={}, frames={}",
+                        now_ts(),
+                        len,
+                        out_channels,
+                        len / out_channels
+                    );
+                }
                 let pos = cursor.load(Ordering::Relaxed);
                 if pos >= total_len {
                     break;

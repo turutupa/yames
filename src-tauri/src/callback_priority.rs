@@ -30,16 +30,24 @@
 //! closure whose stream never built, so never ran — has nothing to revert,
 //! and the thread id is checked so it cannot revert someone else.
 //!
-//! **Nothing on the callback allocates.** The first-callback path is three
-//! Win32 calls with a stack `u32` and a `'static` UTF-16 name, plus relaxed
-//! atomic stores; every later callback is one `bool` test. `avrt.dll` is a
-//! load-time import (windows-sys links it), so there is no `LoadLibrary` on
-//! the audio thread, and [`CallbackPriority::new`] — called on the thread
-//! that BUILDS the stream — makes the process's first MMCSS registration
-//! there and reverts it, so the service's one-off first-call setup is never
-//! paid inside a buffer. Nothing here logs from the callback: outcomes are
-//! counted in atomics, and [`report_once`] prints them from a thread that may
-//! print (the engine's event loop).
+//! **Nothing on the callback allocates on the Rust side.** The
+//! first-callback path is three Win32 calls with a stack `u32` and a
+//! `'static` UTF-16 name, plus atomic stores; every later callback is one
+//! `bool` test. The engine calls it inside the click-jitter probe's
+//! allocation span, so the probe's counting allocator checks that claim
+//! instead of taking it on trust. `avrt.dll` is a load-time import
+//! (windows-sys links it), so there is no `LoadLibrary` on the audio thread.
+//! [`CallbackPriority::new`] — called on the thread that BUILDS the stream —
+//! makes the process's first MMCSS registration there and reverts it, which
+//! keeps the process-first MMCSS call off the audio thread. Each stream's own
+//! registration still costs one syscall in its first buffer: MMCSS reads the
+//! task's registry key and may touch the process heap, as cpal 0.17,
+//! PortAudio and JUCE all accept. The onset analyzer's thread is already
+//! MMCSS `"Audio"` (`audio_thread_priority`, `onset.rs`); the mic callback at
+//! `"Pro Audio"` now outranks its consumer, which is the right order.
+//! Nothing here logs from the callback: outcomes are counted in atomics, and
+//! [`report_once`] prints them from a thread that may print (the engine's
+//! event loop).
 //!
 //! **Other platforms: no change.** Everywhere but Windows the type is empty
 //! and both calls compile to nothing. CoreAudio already runs its IO thread at
@@ -63,27 +71,34 @@ static REPORTED: AtomicU32 = AtomicU32::new(0);
 
 /// How the callback threads opened so far were scheduled:
 /// `(mmcss, fallback, failed)`. Read by the jitter probe so a run says which
-/// path it measured, and by the Windows test.
+/// path it measured, and by the Windows test. `Acquire`, pairing with the
+/// `Release` increments, so a reader that sees a fallback or a failure also
+/// sees the `LAST_ERROR` stored before it.
 pub fn counts() -> (u32, u32, u32) {
     (
-        MMCSS.load(Ordering::Relaxed),
-        FALLBACK.load(Ordering::Relaxed),
-        FAILED.load(Ordering::Relaxed),
+        MMCSS.load(Ordering::Acquire),
+        FALLBACK.load(Ordering::Acquire),
+        FAILED.load(Ordering::Acquire),
     )
 }
 
 /// Print each outcome the first time it is seen, once per process.
 ///
-/// Call it from a thread that may print — never the callback. Three relaxed
-/// loads when there is nothing new, so it can sit in a loop.
+/// Call it from a thread that may print — never the callback. Three loads
+/// and one `fetch_or` when there is nothing new, so it can sit in a loop.
+/// The `fetch_or` claims the new bits in one RMW, so two event loops alive
+/// at once (a timed-out reopen) cannot both print the same outcome.
 pub fn report_once() {
     let (mmcss, fallback, failed) = counts();
     let seen = (mmcss > 0) as u32 | ((fallback > 0) as u32) << 1 | ((failed > 0) as u32) << 2;
-    let new = seen & !REPORTED.load(Ordering::Relaxed);
+    if seen == 0 {
+        return;
+    }
+    let new = seen & !REPORTED.fetch_or(seen, Ordering::Relaxed);
     if new == 0 {
         return;
     }
-    REPORTED.fetch_or(new, Ordering::Relaxed);
+    // Last writer wins across streams; it is only for the log line.
     let err = LAST_ERROR.load(Ordering::Relaxed);
     if new & 1 != 0 {
         eprintln!("[yames] audio callback thread registered with MMCSS \"Pro Audio\"");
@@ -153,7 +168,7 @@ impl CallbackPriority {
     pub fn on_callback(&mut self) {
         #[cfg(windows)]
         if !self.inner.tried {
-            self.inner.promote();
+            self.inner.promote(&win::PRO_AUDIO);
         }
     }
 }
@@ -188,7 +203,7 @@ mod win {
 
     /// `"Pro Audio"`, NUL-terminated UTF-16, built at compile time so the
     /// callback never encodes a string.
-    static PRO_AUDIO: [u16; 10] = utf16z(b"Pro Audio");
+    pub(super) static PRO_AUDIO: [u16; 10] = utf16z(b"Pro Audio");
 
     const fn utf16z<const N: usize>(ascii: &[u8]) -> [u16; N] {
         let mut out = [0u16; N];
@@ -237,23 +252,27 @@ mod win {
     }
 
     impl Inner {
-        /// On the audio thread, once. No allocation, no lock, no I/O.
+        /// On the audio thread, once. No allocation, no lock, no I/O on the
+        /// Rust side. `task` is a NUL-terminated UTF-16 MMCSS task name:
+        /// always [`PRO_AUDIO`] in the app; the tests pass one the registry
+        /// lacks to drive the `TIME_CRITICAL` fallback.
         #[cold]
         #[inline(never)]
-        pub(super) fn promote(&mut self) {
+        pub(super) fn promote(&mut self, task: &'static [u16]) {
+            debug_assert_eq!(task.last(), Some(&0), "task name is NUL-terminated");
             self.tried = true;
             // SAFETY: plain Win32 scheduling calls on the calling thread;
             // `GetCurrentThread` is a pseudo-handle that needs no close.
             unsafe {
                 self.thread = GetCurrentThreadId();
                 let mut index = 0u32;
-                let h: HANDLE = AvSetMmThreadCharacteristicsW(PRO_AUDIO.as_ptr(), &mut index);
+                let h: HANDLE = AvSetMmThreadCharacteristicsW(task.as_ptr(), &mut index);
                 if !h.is_null() {
                     // Within the task; a refusal still leaves the thread in
                     // the Pro Audio class, so it is not worth a fallback.
                     AvSetMmThreadPriority(h, AVRT_PRIORITY_HIGH);
                     self.held = Held::Mmcss(h as usize);
-                    MMCSS.fetch_add(1, Ordering::Relaxed);
+                    MMCSS.fetch_add(1, Ordering::Release);
                     return;
                 }
                 LAST_ERROR.store(GetLastError(), Ordering::Relaxed);
@@ -266,9 +285,9 @@ mod win {
                         before
                     };
                     self.held = Held::TimeCritical(restore);
-                    FALLBACK.fetch_add(1, Ordering::Relaxed);
+                    FALLBACK.fetch_add(1, Ordering::Release);
                 } else {
-                    FAILED.fetch_add(1, Ordering::Relaxed);
+                    FAILED.fetch_add(1, Ordering::Release);
                 }
             }
         }
@@ -300,6 +319,11 @@ mod win {
         }
     }
 
+    /// A task name no registry has, NUL-terminated: MMCSS refuses it, which
+    /// is how the tests reach the fallback on a machine where MMCSS works.
+    #[cfg(test)]
+    pub(super) static NO_SUCH_TASK: [u16; 19] = utf16z(b"Yames No Such Task");
+
     #[cfg(test)]
     pub(super) fn current_priority() -> i32 {
         // SAFETY: a read of the calling thread's priority.
@@ -314,10 +338,24 @@ mod tests {
     use std::sync::Arc;
     use std::time::{Duration, Instant};
 
+    /// `YAMES_NO_CALLBACK_PRIORITY` (the A/B switch) turns promotion off for
+    /// the whole process, so in a shell that exported it these tests would
+    /// read as regressions. Skip instead, and say so.
+    fn skip_if_disabled() -> bool {
+        let off = disabled();
+        if off {
+            eprintln!("YAMES_NO_CALLBACK_PRIORITY set; callback-priority test skipped");
+        }
+        off
+    }
+
     /// The promotion on a plain thread: it takes, it raises the thread, and
     /// dropping it puts the thread back where it was.
     #[test]
     fn promotes_on_first_call_and_reverts_on_drop() {
+        if skip_if_disabled() {
+            return;
+        }
         std::thread::spawn(|| {
             let before = win::current_priority();
             let mut p = CallbackPriority::new();
@@ -339,11 +377,47 @@ mod tests {
         .unwrap();
     }
 
+    /// The fallback, which no machine with working MMCSS would otherwise
+    /// run: a task name the registry lacks makes MMCSS refuse, the thread
+    /// goes to TIME_CRITICAL through the pseudo-handle, and dropping puts it
+    /// back exactly where it was.
+    #[test]
+    fn unknown_task_takes_time_critical_fallback_and_reverts() {
+        if skip_if_disabled() {
+            return;
+        }
+        std::thread::spawn(|| {
+            let before = win::current_priority();
+            assert_ne!(before, 15, "a fresh thread is not already TIME_CRITICAL");
+            let fallback_before = counts().1;
+            let mut p = CallbackPriority::new();
+            p.inner.promote(&win::NO_SUCH_TASK);
+            assert!(p.inner.tried);
+            assert_eq!(
+                p.inner.held,
+                win::Held::TimeCritical(before),
+                "MMCSS refused the unknown task and the fallback took"
+            );
+            assert_eq!(win::current_priority(), 15, "fallback is TIME_CRITICAL");
+            assert_ne!(LAST_ERROR.load(Ordering::Acquire), 0, "MMCSS's error was kept");
+            assert!(counts().1 > fallback_before, "the fallback was counted");
+            p.on_callback(); // already tried: no second promotion
+            assert_eq!(p.inner.held, win::Held::TimeCritical(before));
+            drop(p);
+            assert_eq!(win::current_priority(), before, "reverted on drop");
+        })
+        .join()
+        .unwrap();
+    }
+
     /// The real thing: a cpal output stream on the default device, and the
     /// priority its callback thread reports after its first callback. Skips
     /// (passes) on a machine with no output device, e.g. a headless runner.
     #[test]
     fn cpal_output_callback_thread_is_raised() {
+        if skip_if_disabled() {
+            return;
+        }
         use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
         let host = cpal::default_host();
         let Some(device) = host.default_output_device() else {
