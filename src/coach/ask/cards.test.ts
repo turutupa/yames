@@ -368,6 +368,25 @@ describe("the app attaches the source; a text block without one is not drawn", (
       }
     }
   });
+
+  it("a quoted passage longer than a block is cut at a sentence end, not between words (pol2 extras A1)", () => {
+    const first = `Spiel es langsam, bis jede Note sitzt, und achte auf die Hand, die nicht anschlägt: sie dämpft, sie hält die Saiten ruhig, und sie ist es, an die du denken musst, wenn es schneller wird und die Töne ineinander laufen.`;
+    const second = "Das Timing kommt danach von selbst.“ Und dann noch einmal, mit dem Klick auf zwei und vier.";
+    const c: FactCard = { shape: "early_or_late", lines: [{ key: "x", values: {} }], source: { kind: "measured", take: 4 } };
+    const blocks = cardAnswer(c, () => `${first} ${second}`);
+    const texts = blocks.map((b) => (b.type === "text" ? b.text : ""));
+    expect(texts[0]).toBe(first);
+    expect(texts[1]).toBe(second);
+    for (const t of texts) expect(t.length).toBeLessThanOrEqual(240);
+  });
+
+  it("with no sentence end that fits, it is still cut between words, never shortened", () => {
+    const words = Array.from({ length: 60 }, (_u, i) => `word${i}`).join(" ");
+    const c: FactCard = { shape: "early_or_late", lines: [{ key: "x", values: {} }], source: { kind: "measured", take: 4 } };
+    const texts = cardAnswer(c, () => words).map((b) => (b.type === "text" ? b.text : ""));
+    expect(texts.length).toBeGreaterThan(1);
+    expect(texts.join(" ")).toBe(words);
+  });
 });
 
 describe("the cards' English", () => {

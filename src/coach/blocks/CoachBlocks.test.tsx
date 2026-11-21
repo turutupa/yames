@@ -250,6 +250,16 @@ describe("the source line (DESIGN 3.6)", () => {
     render(<CoachBlocks blocks={blocks} />);
     expect(document.querySelector(".coach-block-source")).toBeNull();
   });
+
+  it("one passage cut into two text blocks has one source line, under the last (pol2 extras A1)", () => {
+    const two = { blocks: [{ type: "text", text: "First half of the passage." }, { type: "text", text: "Second half." }] };
+    const { blocks } = resolveCoachAnswer(two, GALLERY_CONTEXT, { source: { kind: "path", step: 2 } });
+    render(<CoachBlocks blocks={blocks} />);
+    const texts = screen.getByTestId("coach-blocks").querySelectorAll('[data-block="text"]');
+    expect(texts).toHaveLength(2);
+    expect(texts[0].querySelector(".coach-block-source")).toBeNull();
+    expect(texts[1].querySelector(".coach-block-source")?.textContent).toBe("From the Path · Step 2");
+  });
 });
 
 describe("an answer that resolved to nothing", () => {
