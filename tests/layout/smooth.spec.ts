@@ -194,6 +194,7 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
   let best: PerfSample | null = null;
   let askRenders = 0;
   let windows = 0;
+  const seen: string[] = [];
   for (let opening = 0; opening < 3; opening++) {
     await openShot(page, "session-playing", WIDE);
     await takeRunning(page);
@@ -206,6 +207,7 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
     expect(await page.locator('[data-testid="session-coach-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
     const kept = await windowsInTake(page, 3 - windows);
     windows += kept.windows.length;
+    seen.push(`opening ${opening + 1}: ${kept.windows.map((w) => w.longTasks).join(",") || "-"}${kept.ended ? " (Take ended)" : ""}`);
     for (const s of kept.windows) {
       askRenders += s.renders.AskPanel ?? 0;
       if (!best || s.longTasks < best.longTasks) best = s;
@@ -218,7 +220,7 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
   const s = best!;
   expect(s.commits, "the Take is running").toBeGreaterThan(0);
   expect(askRenders, `the Ask panel rendered during the Take (${windows} windows)`).toBe(0);
-  expect(s.longTasks, `long tasks in the best of ${windows} windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
+  expect(s.longTasks, `long tasks in the best of ${windows} windows (longest ${s.longTaskMaxMs} ms; ${seen.join("; ")})`).toBe(0);
 });
 
 /** What the Take's big button says it is doing. */
@@ -232,15 +234,15 @@ function takePhase(page: Page): Promise<string | null> {
  * none is taken after one the Take ended in); it stops early at a window free
  * of long tasks, as `bestWindow` does.
  */
-async function windowsInTake(page: Page, most: number): Promise<{ windows: PerfSample[] }> {
+async function windowsInTake(page: Page, most: number): Promise<{ windows: PerfSample[]; ended: boolean }> {
   const windows: PerfSample[] = [];
   for (let i = 0; i < most; i++) {
     const s = await samplePerf(page, WINDOW_MS);
-    if ((await takePhase(page)) !== "playing") break;
+    if ((await takePhase(page)) !== "playing") return { windows, ended: true };
     windows.push(s);
     if (s.longTasks === 0) break;
   }
-  return { windows };
+  return { windows, ended: false };
 }
 
 test("the open Ask panel on a tool screen does not re-render with the beat", async ({ page }) => {

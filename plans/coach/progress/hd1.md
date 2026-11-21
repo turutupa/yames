@@ -59,6 +59,23 @@ and 1024 and on a phone (`phone-today-back`, a new phone copy of the scene in
   the DOM counts are read while the Take plays; AskPanel's renders are summed
   over every kept window (before: the best window's only). Same thresholds.
 
-## Gates
+  If the long-task assertion fails, its message names each opening's
+  windows' long-task counts and whether the Take ended.
 
-See the leg's report.
+## Gates (load average 40 to 60 all evening)
+
+- tsc: pass (`coach-hd1-tsc`, `-tsc-2`). Build: pass (`coach-hd1-build`).
+- vitest: 47911 passed, the one known file (`TabStage.render.test.tsx`)
+  unloadable (`/tmp/coach-hd1/vitest.log`); then scenarios, locale parity,
+  i18n locales and generate: 117 passed (`coach-hd1-vitest-shots`).
+- Layout by name (today-line, today-anchor, today-focus, planner,
+  short-window, smooth, phone-learning, phone-header): 409 passed, 40 skipped,
+  1 failed: the Ask test, a long task (`/tmp/coach-hd1/layout.log`).
+- The Ask test alone, repeated: this branch 2/3, 2/3, 4/4, 6/6 (logs
+  `smooth-2`, `smooth-3`, jobs `-4`, `-5`); `coach` untouched 3/3 then 4/6, both
+  failures the same long-task assertion (`/tmp/coach-hd1/smooth-control-2.log`).
+  The long task under this load is the test's flake on `coach` too (the relay
+  did not record which assertion failed at 19:35). The change here makes the
+  windows lie inside the Take; it cannot remove a long task a loaded machine
+  puts in all three of them.
+- The full layout suite is the orchestrator's (text changed on Today).
