@@ -17,7 +17,7 @@
  * file: no empty list, no phrase under two verbs, no never-list phrase that
  * is also a verb, and every id one the app knows.
  */
-import { NECK_POSITIONS, SCALE_NAMES } from "../blocks/spec";
+import { NECK_POSITIONS, ROOT_NAMES, SCALE_NAMES } from "../blocks/spec";
 import { SAFE_SETTING_KEYS, SETTINGS_SECTIONS } from "../tools/host";
 import { GO_TO_SCREENS } from "../tools/go";
 import { MAKE_CHORDS, MAKE_SHAPES, MAKE_SUBDIVISIONS } from "../tools/make";
@@ -144,16 +144,39 @@ export type RecipeWords = {
    * the key was never said ("make a blues exercise": the tool asks which).
    */
   article?: { words: Words; rootAfter?: Words; rootBefore?: Words };
+  /**
+   * Leg t2d. A note's name this language writes otherwise than English, read
+   * in a recipe only: a word to the app's root (`ROOT_NAMES`; German "h" is
+   * B, "fis" F#), or null for a letter that names another note here than in
+   * English (German "b" is B flat): a line holding it is not read as a recipe
+   * at all, since the key it means cannot be told.
+   */
+  rootNames?: Readonly<Record<string, string | null>>;
+  /**
+   * Leg t2dc (review t2d, L1). The words that say "from" before a bar's
+   * number ("ab dem 4. Takt", "od 4 taktu", "с 4 такта"): a number after one
+   * is the bar to start at, not how many, so the line is not read. Only words
+   * that cannot mean "for" or "of": "von 4 Takten" is a length.
+   */
+  barFrom?: Words;
+  /**
+   * Leg t2dc. A number and a unit form that can only name one bar, `#` for
+   * the number ("# takcie": "w 4 takcie" is in the 4th bar; "# такте"): read
+   * in a recipe only, where it leaves the line unread. Not `ordinalPlaces`,
+   * which would also change what loop_bars reads.
+   */
+  barPlace?: Words;
 };
 
-const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article">, readonly string[]>> = {
+const RECIPE_IDS: Readonly<Record<Exclude<keyof RecipeWords, "fret" | "numberSuffixes" | "article" | "rootNames" | "barFrom" | "barPlace">, readonly string[]>> = {
   shapes: MAKE_SHAPES,
   chords: MAKE_CHORDS,
   subdivisions: MAKE_SUBDIVISIONS,
 };
 
 /** What is wrong with a table's recipe words (leg t2c). */
-function recipeProblems(recipe: RecipeWords | undefined): string[] {
+function recipeProblems(table: CommandTable): string[] {
+  const recipe = table.recipe;
   if (recipe === undefined) return [];
   const problems: string[] = [];
   const check = (where: string, words: unknown) => {
@@ -192,6 +215,30 @@ function recipeProblems(recipe: RecipeWords | undefined): string[] {
     }
     if (recipe.article.rootAfter !== undefined) check("recipe.article.rootAfter", recipe.article.rootAfter);
     if (recipe.article.rootBefore !== undefined) check("recipe.article.rootBefore", recipe.article.rootBefore);
+  }
+  if (recipe.rootNames !== undefined) {
+    const names = Object.entries(recipe.rootNames);
+    if (names.length === 0) problems.push("recipe.rootNames is empty");
+    // A note's name that is also a word the table reads otherwise would be read twice (review t2d, L4).
+    const others: Array<[string, Words | undefined]> = [
+      ["fillers", table.fillers],
+      ["notCommand", table.notCommand],
+      ...Object.entries(table.connectors).map(([id, words]): [string, Words] => [`connectors.${id}`, words]),
+      ...Object.entries(table.verbs).map(([id, words]): [string, Words | undefined] => [`verbs.${id}`, words]),
+      ...Object.entries(recipe.shapes ?? {}).map(([id, words]): [string, Words | undefined] => [`recipe.shapes.${id}`, words]),
+    ];
+    for (const [word, root] of names) {
+      if (word !== phraseKey(word) || word.includes(" ")) problems.push(`recipe.rootNames: "${word}" is not one lower-case word`);
+      if (root !== null && !ROOT_NAMES.includes(root)) problems.push(`recipe.rootNames.${word}: "${String(root)}" is not a root the app knows`);
+      for (const [where, words] of others) {
+        if ((words ?? []).some((w) => phraseKey(w).split(" ").includes(word))) problems.push(`recipe.rootNames: "${word}" is also a word of ${where}`);
+      }
+    }
+  }
+  if (recipe.barFrom !== undefined) check("recipe.barFrom", recipe.barFrom);
+  if (recipe.barPlace !== undefined) {
+    check("recipe.barPlace", recipe.barPlace);
+    for (const word of recipe.barPlace) if (word.split("#").length !== 2) problems.push(`recipe.barPlace: "${word}" does not have exactly one #`);
   }
   return problems;
 }
@@ -299,7 +346,7 @@ export function validateCommandTable(table: CommandTable): string[] {
   for (const [word, n] of Object.entries(table.ordinals ?? {})) {
     if (!Number.isInteger(n) || n < 1) problems.push(`ordinals.${word} is not a whole number from 1`);
   }
-  problems.push(...recipeProblems(table.recipe));
+  problems.push(...recipeProblems(table));
   // An article read as one is passed over only as a filler: without it the whole line fails (review t2cb, LOW 5).
   const fillers = new Set((Array.isArray(table.fillers) ? table.fillers : []).map((w) => phraseKey(String(w))));
   const articleWords: unknown = table.recipe?.article?.words;

@@ -49,6 +49,7 @@ import { MyExercisesSection } from "./MyExercisesSection";
 import { buildsOnPaths, prerequisitesToOffer } from "../../session/prerequisites";
 import { START_HERE_PATH_ID, pathTracks, trackOf } from "../../session/tracks";
 import type { TrackId } from "../../session/tracks";
+import { PathSuggestion } from "../coach/PathSuggestion";
 import "../../styles/session.css";
 
 /*
@@ -386,6 +387,8 @@ function PathList({
         );
       })}
       <MyExercisesSection session={session} style={rise(Math.min(tracks.length + 1, 12))} />
+      {/* The coach's Path suggestion, last on the page (c4b3, DESIGN 6.4). */}
+      <PathSuggestion session={session} onOpen={onOpen} />
     </div>
   );
 }

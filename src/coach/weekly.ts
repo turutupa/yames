@@ -244,9 +244,10 @@ function playedMoved(inWeek: readonly PathTakeRow[], paths: readonly PathDoc[]):
  * The newest benchmark Take in the week, beside the benchmark before it on the
  * same Exercise, the same version of it (`variantIndexOf`, `withVariant`'s
  * rule: the planner rotates a benchmark's variant like any step's) and the
- * same tempo; else nothing (c4b2's review, M3).
+ * same tempo; else nothing (c4b2's review, M3). Also the benchmark milestone's
+ * reading (`milestones.ts`), over the last Session's span.
  */
-function benchmarkOf(takes: readonly PathTakeRow[], paths: readonly PathDoc[], start: number, end: number): Benchmark | null {
+export function benchmarkOf(takes: readonly PathTakeRow[], paths: readonly PathDoc[], start: number, end: number): Benchmark | null {
   const marked = takes
     .filter((t) => t.caught && !isMarkedNotFair(t) && factsOf(t).benchmark && evenOf(t) !== null)
     .sort((a, b) => b.startedAt - a.startedAt);

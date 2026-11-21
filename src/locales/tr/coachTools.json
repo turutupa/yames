@@ -32,10 +32,10 @@
       "clickSubdivision": "Vuruş başına tık: {{to}}",
       "setSetting": "{{key}}: {{to}}",
       "setGoal": "Hedef kaydedildi: “{{to}}”",
-      "makeExercise": "Added {{what}} to My exercises.",
-      "makeExerciseAdding": "Adding {{what}} to My exercises…",
-      "undoMakeExercise": "Taken back out of My exercises.",
-      "undoMakeExerciseDoing": "Taking it back out of My exercises…"
+      "makeExercise": "{{what}} Alıştırmalarım'a eklendi.",
+      "makeExerciseAdding": "{{what}} Alıştırmalarım'a ekleniyor…",
+      "undoMakeExercise": "Alıştırmalarım'dan geri çıkarıldı.",
+      "undoMakeExerciseDoing": "Alıştırmalarım'dan geri çıkarılıyor…"
     },
     "propose": {
       "goTo": "{{screen}} açılsın mı?",
@@ -67,8 +67,8 @@
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Hedefin olarak kalsın: “{{to}}”",
       "setGoalFrom": "Hedefini “{{from}}” yerine “{{to}}” yap",
-      "makeExercise": "Add it to My exercises",
-      "undoMakeExercise": "Take it back out of My exercises"
+      "makeExercise": "Alıştırmalarım'a ekle",
+      "undoMakeExercise": "Alıştırmalarım'dan geri çıkar"
     },
     "stops": {
       "click": "Tık durur.",
@@ -127,7 +127,7 @@
       "go": "Git",
       "open": "Aç",
       "loop": "Döngüye al",
-      "add": "Add it"
+      "add": "Ekle"
     },
     "why": {
       "which": "Hangisi?",
@@ -190,34 +190,34 @@
       },
       "failed": "Olmadı ve hiçbir şey değişmedi.",
       "make": {
-        "what": "Say what to make: a scale or a chord, and its root. For example “A minor pentatonic, 5th fret”.",
-        "root": "Say its root too: for example “A minor pentatonic”.",
-        "chord": "Say which chord the arpeggio is: for example “A minor 7 arpeggio”.",
-        "needScale": "Say which scale: for example “A minor pentatonic”.",
-        "scale": "The app can't make an exercise in {{scale}} yet. It makes the minor and major pentatonic, blues, major, natural and harmonic minor, dorian and mixolydian.",
-        "boxScale": "A box is for the minor pentatonic, the major pentatonic and blues, not {{scale}}.",
-        "threeScale": "Three notes a string is for major, natural minor, harmonic minor, dorian and mixolydian, not {{scale}}.",
-        "mixed": "That names a scale and a chord at once, or one that shape doesn't take. Say one.",
-        "noShapeHere": "That shape doesn't start at fret {{fret}}.",
-        "outOfRange": "From fret {{fret}} it runs off the end of the neck.",
-        "tooManyNotes": "One time through needs {{count}} bar.",
-        "tooManyNotes_other": "One time through needs {{count}} bars.",
-        "tooLong": "One time through needs more than {{count}} bars, the most an exercise can have.",
-        "tooFewNotes": "That's too few notes for so many bars: they fill {{count}} bar.",
-        "tooFewNotes_other": "That's too few notes for so many bars: they fill {{count}} bars.",
-        "unreachable": "No hand the app knows can play that fast enough to grade it.",
-        "notMade": "The app can't make that one.",
-        "loading": "The app is getting the exercise maker ready. Ask again in a moment.",
-        "loadFailed": "The app couldn't load the exercise maker, so nothing was made.",
-        "full": "My exercises is full (50), so this one wasn't added. Remove one there first.",
-        "already": "That one is already on My exercises.",
-        "badRecipe": "The app can't make that one.",
-        "unreadable": "My exercises couldn't be read just now, so nothing was added.",
-        "failed": "My exercises couldn't be saved just now, so nothing was added.",
+        "what": "Ne yapılacağını söyle: bir gam ya da bir akor ve kökü. Örneğin “A minör pentatonik, 5. perde”.",
+        "root": "Kökünü de söyle: örneğin “A minör pentatonik”.",
+        "chord": "Arpejin hangi akor olduğunu söyle: örneğin “A minör 7 arpej”.",
+        "needScale": "Hangi gam olduğunu söyle: örneğin “A minör pentatonik”.",
+        "scale": "Uygulama henüz {{scale}} ile alıştırma yapamıyor. Minör ve majör pentatonik, blues, majör, doğal ve armonik minör, dorian ve miksolidyen yapabiliyor.",
+        "boxScale": "Kutu kalıbı minör pentatonik, majör pentatonik ve blues içindir, {{scale}} için değil.",
+        "threeScale": "Telde üç nota; majör, doğal minör, armonik minör, dorian ve miksolidyen içindir, {{scale}} için değil.",
+        "mixed": "Bu aynı anda hem bir gamı hem bir akoru adlandırıyor ya da bu kalıbın almadığı birini. Yalnızca birini söyle.",
+        "noShapeHere": "Bu kalıp {{fret}}. perdede başlamıyor.",
+        "outOfRange": "{{fret}}. perdeden itibaren sapın sonundan taşıyor.",
+        "tooManyNotes": "Bir kez baştan sona çalmak {{count}} ölçü ister.",
+        "tooManyNotes_other": "Bir kez baştan sona çalmak {{count}} ölçü ister.",
+        "tooLong": "Bir kez baştan sona çalmak {{count}} ölçüden fazla ister; bir alıştırmada en fazla bu kadar olabilir.",
+        "tooFewNotes": "Bu kadar ölçü için nota çok az: {{count}} ölçüyü dolduruyor.",
+        "tooFewNotes_other": "Bu kadar ölçü için nota çok az: {{count}} ölçüyü dolduruyor.",
+        "unreachable": "Uygulamanın tanıdığı hiçbir el bunu değerlendirilecek kadar hızlı çalamaz.",
+        "notMade": "Uygulama bunu yapamıyor.",
+        "loading": "Uygulama alıştırma oluşturucuyu hazırlıyor. Biraz sonra tekrar sor.",
+        "loadFailed": "Uygulama alıştırma oluşturucuyu yükleyemedi, bu yüzden hiçbir şey yapılmadı.",
+        "full": "Alıştırmalarım dolu (50), bu yüzden bu eklenmedi. Önce oradan birini kaldır.",
+        "already": "Bu zaten Alıştırmalarım'da.",
+        "badRecipe": "Uygulama bunu yapamıyor.",
+        "unreadable": "Alıştırmalarım az önce okunamadı, bu yüzden hiçbir şey eklenmedi.",
+        "failed": "Alıştırmalarım az önce kaydedilemedi, bu yüzden hiçbir şey eklenmedi.",
         "undo": {
-          "gone": "It's no longer on My exercises.",
-          "unreadable": "My exercises couldn't be read just now, so nothing was taken out.",
-          "failed": "My exercises couldn't be saved just now, so it's still there."
+          "gone": "Artık Alıştırmalarım'da değil.",
+          "unreadable": "Alıştırmalarım az önce okunamadı, bu yüzden hiçbir şey çıkarılmadı.",
+          "failed": "Alıştırmalarım az önce kaydedilemedi, bu yüzden hâlâ orada."
         }
       }
     },
@@ -296,22 +296,22 @@
       }
     },
     "make": {
-      "source": "Worked out by the app",
-      "graded": "Starts at {{bpm}} BPM. Timing and notes heard can be graded; the rest is yours.",
-      "startsOn": "Starts on {{note}}: string {{string}}, fret {{fret}}.",
-      "startsOnString": "Starts on string {{string}}, fret {{fret}}.",
-      "notesLabel": "{{n}} notes, frets {{from}} to {{to}}",
-      "openPaths": "Open Paths",
-      "undoLeft": "The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.",
+      "source": "Uygulama tarafından hazırlandı",
+      "graded": "{{bpm}} BPM ile başlar. Tempo ve duyulan notalar değerlendirilebilir; gerisi sana ait.",
+      "startsOn": "{{note}} notasında başlar: {{string}}. tel, {{fret}}. perde.",
+      "startsOnString": "{{string}}. telde, {{fret}}. perdede başlar.",
+      "notesLabel": "{{n}} nota, {{from}}. ile {{to}}. perde arası",
+      "openPaths": "Yolları aç",
+      "undoLeft": "Geri al, bunun eklendiği ekrandan ayrıldığında sona erdi. Çıkarmak için Yollar'daki Alıştırmalarım'da Kaldır'ı kullan.",
       "chip": {
-        "fret": "Fret {{fret}}",
-        "bars": "{{count}} bar",
-        "bars_other": "{{count}} bars",
-        "quarters": "Quarter notes instead",
-        "eighths": "Eighths instead",
-        "eighthTriplets": "Triplets instead",
-        "sixteenths": "Sixteenths instead",
-        "nextPosition": "Next position"
+        "fret": "{{fret}}. perde",
+        "bars": "{{count}} ölçü",
+        "bars_other": "{{count}} ölçü",
+        "quarters": "Bunun yerine dörtlükler",
+        "eighths": "Bunun yerine sekizlikler",
+        "eighthTriplets": "Bunun yerine üçlemeler",
+        "sixteenths": "Bunun yerine onaltılıklar",
+        "nextPosition": "Sonraki pozisyon"
       }
     }
   }

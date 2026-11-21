@@ -107,7 +107,8 @@ describe("the Exercise, quoted from the Path", () => {
     expect(keys(c)).toEqual(["ask.card.path.purposeIntro", "ask.card.path.quote"]);
     expect(c.lines[1].values.text).toBe(exerciseWords(TUNE, TUNE).purpose);
     expect(c.lines[1].values.text).toBe(TUNE.purpose);
-    expect(c.source).toEqual({ kind: "path", step: STEP.order });
+    // Which Path the Step is on rides along, so a press on the line opens that Step (leg c2b2b).
+    expect(c.source).toEqual({ kind: "path", step: STEP.order, pathId: PATH.id });
   });
 
   it("how do I play it: every how-to line, byte-equal and in order", () => {
@@ -425,23 +426,35 @@ describe("theory, worked out by the app", () => {
   // Review c2b2ab L1: a key whose letter name is Cb, Fb or a double flat is said by its letter;
   // only show_scale's argument takes the app's own name for that pitch. Written out by hand.
   const BY_LETTER: Array<[string, string, Line, string[], string]> = [
-    ["Gb", "7", { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "Gb7", degree: "V", root: "Cb" } }, ["Gb Mixolydian: Gb Ab Bb Cb Db Eb Fb"], "Gb"],
+    // The sentence also names the root it sounds as (`plain`, the app's name), leg c2b2b.
+    ["Gb", "7", { key: "ask.card.theory.scalesPlacedMajorAlso", values: { chord: "Gb7", degree: "V", root: "Cb", plain: "B" } }, ["Gb Mixolydian: Gb Ab Bb Cb Db Eb Fb"], "Gb"],
     [
       "Bb",
       "dim",
-      { key: "ask.card.theory.scalesPlacedMajor", values: { chord: "Bbdim", degree: "vii", root: "Cb" } },
+      { key: "ask.card.theory.scalesPlacedMajorAlso", values: { chord: "Bbdim", degree: "vii", root: "Cb", plain: "B" } },
       ["Cb Major: Cb Db Eb Fb Gb Ab Bb", "Cb Harmonic minor: Cb Db Ebb Fb Gb Abb Bb"],
       "B",
     ],
     [
       "Gb",
       "m7b5",
-      { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Gbm7b5", degree: "ii", root: "Fb" } },
+      { key: "ask.card.theory.scalesPlacedMinorAlso", values: { chord: "Gbm7b5", degree: "ii", root: "Fb", plain: "E" } },
       ["Fb Natural minor: Fb Gb Abb Bbb Cb Dbb Ebb", "Fb Harmonic minor: Fb Gb Abb Bbb Cb Dbb Eb"],
       "E",
     ],
-    ["Ab", "dim7", { key: "ask.card.theory.scalesPlacedMinor", values: { chord: "Abdim7", degree: "vii", root: "Bbb" } }, ["Bbb Harmonic minor: Bbb Cb Dbb Ebb Fb Gbb Ab"], "A"],
+    ["Ab", "dim7", { key: "ask.card.theory.scalesPlacedMinorAlso", values: { chord: "Abdim7", degree: "vii", root: "Bbb", plain: "A" } }, ["Bbb Harmonic minor: Bbb Cb Dbb Ebb Fb Gbb Ab"], "A"],
   ];
+
+  it("Abdim7, in words: the vii chord of Bbb minor, which sounds as A", () => {
+    expect(english(scaleFits("Ab", "dim7").lines[0])).toBe(
+      "Abdim7 is the vii chord of Bbb minor, one key it belongs in (Bbb sounds the same as A). In that key the app picks these scales, each with every note of the chord in it.",
+    );
+  });
+
+  it("a key whose letter is on the app's controls names no second root", () => {
+    expect(scaleFits("B", "dim7").lines[0].key).toBe("ask.card.theory.scalesPlacedMinor");
+    expect(scaleFits("G", "7").lines[0].key).toBe("ask.card.theory.scalesPlacedMajor");
+  });
 
   it.each(BY_LETTER)("what fits over %s%s: the key by its letter, show_scale by the app's name", (root, suffix, intro, rows, drawn) => {
     const c = scaleFits(root, suffix);
@@ -680,7 +693,8 @@ describe("pass marks, each in its own words (review c2b2a M1)", () => {
       { key: "ask.card.term.heardMark", values: { bar: 90 } },
       { key: "ask.card.term.accentsMark", values: { bar: 90 } },
     ]);
-    expect(english(c.lines[1])).toBe("90% is the accents pass mark: at least 90 of every 100 marked accents must come out louder than the notes around them.");
+    // What `accent_agreement` computes (score/pass.rs:481): mean accented level over mean plain level, less one (leg c2b2b).
+    expect(english(c.lines[1])).toBe("90% is the accents pass mark: on average, the marked accents must come out at least 90% louder than the other notes.");
   });
 
   it("right notes and a check with no sentence at the same 80%: the one named, the other said to be there", () => {

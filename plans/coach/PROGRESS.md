@@ -141,6 +141,15 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 | c3d2 the training pipeline (session 5) | merged (scripts) | `coach-c3d2` | 2026-11-21 | `progress/c3d2.md`. Three candidates run as queue jobs with no agent; results in `~/scratch/yames-c3d/runs/<candidate>/RESULT.md`. |
 | rem2 (+ rem2b), t2c (+ t2cb), c2b2a (+ c2b2ab) (session 5) | **on branches, not merged** | `coach-rem2`, `coach-t2c`, `coach-c2b2a` | 2026-11-21 | Each reviewed, fixed and gated on its branch; what each waits for is in `HANDOFF-S5.md` (reviews: `rem2-review.md`, `rem2b-review.md`, `t2c-review.md`, `c2b2a-review.md` under `/tmp/coach-orch/`; if `/tmp` was cleared the progress files `rem2b.md`, `t2cb.md`, `c2b2ab.md` on each branch list every finding and its fix). |
 
+| t2c make_exercise (+ t2cb, t2cc) (session 6 merged it) | merged | `coach-t2c` | 2026-11-21 | `progress/t2c.md`, `t2cb.md`, `t2cc.md`. Second read `/tmp/coach-orch/t2cb-review.md` (the Undo notice was false); t2cc also reads a trailing key ("… in e"). |
+| c2b2a thirteen Path / plan / theory cards (+ c2b2ab, c2b2ac) | merged | `coach-c2b2a` | 2026-11-21 | Second read `c2b2ab-review.md` (`scalesNone` false; the short form). **Every card has a hand-written `short`** for the choice prompt; no pass-mark answer for a player with no grading. |
+| rem2 the in-app reminder (+ rem2b, rem2c) | merged | `coach-rem2` | 2026-11-21 | `Db::attempt_times_since`, one bounded read; store review `rem2c-review.md`: MERGE (six LOW for pol2; L1 is the owner's question on the wizard's fallback instrument). |
+| tc2 tip lines (+ tc2b) | merged | `coach-tc2` | 2026-11-21 | `progress/tc2.md`, `tc2b.md`. Review `tc2-review.md`: the stamina lines claimed "around minute N". The fatigue slot has no detector. Owed: about 60 lines that credit a hand (`tc2.md`), two lines in `tc2b.md`. |
+| c4b3 milestones, Path suggestion, On / Hide (+ c4b3b) | merged | `coach-c4b3` | 2026-11-21 | Review `c4b3-review.md` (H1 "the next Path"; M1 `pathDone`). `suggest_path` is the 21st card (short "a Path": the cards' 300-token share is full). c4b4: the scenes and `pathSuggest.next`'s wording. |
+| c2b2b sources, locales, scenes | merged | `coach-c2b2b` | 2026-11-21 | `progress/c2b2b.md`. Source lines pressable; the accents sentences corrected in four places. For pol2: a long quote is cut between words into two blocks; "accents landed N%" strings; it Take gender. |
+| rtx1 the RTX through the queue | merged (scripts) | `coach-rtx1` | 2026-11-21 | `plans/coach/tools/rtx/README.md`. Rust suite runs there (4.5 min); no `node_modules`, no browsers; sync writes objects and `refs/remotes/dgx/*` into the owner's repository there. |
+| t2d (+ t2dc), t2f, c2cb, c5a1, c6a, c4b4 (session 6) | **on branches** | `coach-<leg>` | 2026-11-21 | See `HANDOFF-S6.md`. |
+
 **`smooth.spec.ts` on a quiet machine (session 4, 20:10 PT, load 7 falling, nothing else running, in
 `~/yames-coach-night` at `coach` + t2a): 17 passed in 45 s.** The gate owed since delivery 1j is paid.
 

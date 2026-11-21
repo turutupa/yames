@@ -13,6 +13,7 @@ import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { modelTurnWanted, stopModelTurn } from "./askModelTurn";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
+import { pressSource } from "./askSources";
 import { askCardChips, askUngradedHere, typedCardAnswerer, withinChipCap } from "./askCards";
 import { askToolChips, noKeyRepeat, onePress, pressChip } from "./askTools";
 import { lineText } from "./toolWords";
@@ -122,6 +123,16 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
           data-coach-model-bounds=""
           data-typing={typing ? "" : undefined}
           data-testid="ask-panel"
+          // The keyboard is up and a button in the thread is pressed (leg t2f): the box keeps the
+          // focus until the click has landed. A blur on the press brought the context line back
+          // above the thread, which moved the button from under the finger before the click, and the
+          // press did nothing. The keyboard goes away once the press is made.
+          onMouseDown={(e) => {
+            if (typing && pressedInThread(e.target)) e.preventDefault();
+          }}
+          onClick={(e) => {
+            if (typing && pressedInThread(e.target)) inputRef.current?.blur();
+          }}
         >
           {head}
           {body}
@@ -158,6 +169,11 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
     </aside>
   );
 });
+
+/** A press on a button of the thread or of the chip row under it (not the send button). */
+export function pressedInThread(target: EventTarget | null): boolean {
+  return target instanceof Element && !!target.closest(".ask-thread button, .ask-chip-row button");
+}
 
 /** The thread, its empty state, and the text box. */
 function AskConversation({
@@ -335,8 +351,13 @@ function Turn({ turn }: { turn: AskTurn }) {
           {t("ask.writing")}
         </div>
       ) : (
-        // The model's words are general advice and say so (owner decision 3).
-        <CoachBlocks className="ask-turn ask-turn-coach" blocks={[{ type: "text", text: turn.text, source: { kind: "general" } }]} />
+        // The model's words are general advice and say so (owner decision 3); the
+        // line, pressed, says what that label means (leg c2b2b, `askSources.ts`).
+        <CoachBlocks
+          className="ask-turn ask-turn-coach"
+          blocks={[{ type: "text", text: turn.text, source: { kind: "general" } }]}
+          onSource={(source, words) => pressSource(source, words)}
+        />
       );
   }
 }
