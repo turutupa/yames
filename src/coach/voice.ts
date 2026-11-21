@@ -28,7 +28,8 @@
  * A cut is `ttsStop()`, and only for speech this module started: the voice
  * preview in Settings is not the coach's to stop. It is sent again on every
  * later cut until the speak settles, since one that reached Rust before the
- * line had begun cancels nothing. The speech never dims the click
+ * line had begun cancels nothing, and again when a line starts to sound while
+ * it must not (`tts-speech-started`). The speech never dims the click
  * (`ttsSpeak(text, { dim: false })` in `useCoachVoice`).
  *
  * It subscribes to the coach's bus (Session events, never the beat) and holds
@@ -43,6 +44,12 @@ export type VoiceBoundary = "ready" | "result";
 export type VoiceOut = {
   speak: (text: string) => Promise<void>;
   stop: () => Promise<void>;
+  /**
+   * Calls back when a line starts to sound (`tts-speech-started`, any
+   * speaker's); returns the unsubscribe. Optional: without it the voice
+   * relies on the cuts alone.
+   */
+  onStarted?: (callback: () => void) => () => void;
 };
 
 type State = {
@@ -107,6 +114,17 @@ export function soundIsStarting(): boolean {
 function startingHeard(): void {
   state.startingAt = Date.now();
   hushCoachVoice();
+}
+
+/**
+ * A line just started to sound. If ours may be the one and it is starting
+ * over sound, a Take or a pending Start, every stop sent so far was lost (it
+ * reached Rust while the output device was still opening, say): send it
+ * again. Speech is never wanted there, so a stop is right whoever's line it is.
+ */
+function speechStarted(): void {
+  if (state.speaking === 0) return;
+  if (state.sounding || state.inTake || soundIsStarting()) stopOut(state.out);
 }
 
 function canSpeak(): boolean {
@@ -247,9 +265,11 @@ export function installCoachVoice(out: VoiceOut): () => void {
   state.out = out;
   const offBus = subscribe(heard);
   const offSound = onSoundStarting(startingHeard);
+  const offStarted = out.onStarted?.(speechStarted) ?? (() => {});
   return () => {
     offBus();
     offSound();
+    offStarted();
     hushCoachVoice();
     if (state.out === out) state.out = null;
   };

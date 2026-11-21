@@ -87,12 +87,19 @@ function screen(run: RunState): void {
   if (run.phase === "result") sayAtBoundary("result", FINDING);
 }
 
-type Out = { said: string[]; stops: number; pending: Array<() => void> };
+type Out = { said: string[]; stops: number; pending: Array<() => void>; started: () => void };
 
 function mount(options: { voice?: boolean; lostStops?: number } = {}) {
-  const out: Out = { said: [], stops: 0, pending: [] };
+  const out: Out = { said: [], stops: 0, pending: [], started: () => {} };
   let lost = options.lostStops ?? 0;
   const uninstall = installCoachVoice({
+    // Rust's `tts-speech-started`: the test fires it with `out.started()`.
+    onStarted: (callback) => {
+      out.started = callback;
+      return () => {
+        out.started = () => {};
+      };
+    },
     // Speech lasts until the test ends it, or a stop that arrives in time does
     // (Rust settles the speak once the cancel is seen). A lost stop is one
     // Rust received before the line had begun: it cancels nothing.
@@ -254,6 +261,29 @@ describe("the coach's voice", () => {
     expect(s.out.stops).toBe(2);
     s.send({ type: "takeStarted", now: 5 });
     expect(s.out.stops).toBe(3);
+  });
+
+  it("a line that starts to sound after every stop was lost is stopped again (a cold output device)", async () => {
+    // Rust was still opening the device: the gate's stop, the engine's report
+    // and takeStarted all landed before the line began, and cancelled nothing.
+    const s = mount({ lostStops: 3 });
+    cleanup = s.uninstall;
+    s.send({ type: "start", plan: PLAN, now: 0 });
+    s.send({ type: "next", now: 1 });
+    // Its own line starting on a quiet ready screen is what was asked for.
+    s.out.started();
+    expect(s.out.stops).toBe(0);
+    s.play();
+    await flush();
+    s.send({ type: "takeStarted", now: 5 });
+    expect(s.out.stops).toBe(3);
+    // The device is open, the order starts to sound over the count-in: stopped.
+    s.out.started();
+    expect(s.out.stops).toBe(4);
+    await flush();
+    // Settled: a later "started" (someone else's line) is not ours to stop.
+    s.out.started();
+    expect(s.out.stops).toBe(4);
   });
 
   it("a coach key pressed while the order is being said speaks the key's line, with no stop before it", async () => {

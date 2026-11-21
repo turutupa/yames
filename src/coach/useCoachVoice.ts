@@ -6,7 +6,7 @@
  * per beat.
  */
 import { useEffect } from "react";
-import { ttsSpeak, ttsStop } from "../ipc";
+import { onTtsSpeechStarted, ttsSpeak, ttsStop } from "../ipc";
 import { IS_MOBILE } from "../platform";
 import type { VoiceMode } from "../types";
 import { installCoachSlot } from "./coachSlot";
@@ -20,6 +20,22 @@ export function useCoachVoice(voiceMode: VoiceMode, sounding: boolean, inSession
     const offVoice = installCoachVoice({
       speak: (text) => ttsSpeak(text, { dim: false }),
       stop: () => ttsStop(),
+      // A listener of its own: the tools' coach (`useSession`) pops its
+      // reveal queue on the same event, and is left alone.
+      onStarted: (callback) => {
+        let off: (() => void) | null = null;
+        let gone = false;
+        void onTtsSpeechStarted(callback)
+          .then((unlisten) => {
+            if (gone) unlisten();
+            else off = unlisten;
+          })
+          .catch(() => {});
+        return () => {
+          gone = true;
+          off?.();
+        };
+      },
     });
     const offSlot = installCoachSlot();
     return () => {
