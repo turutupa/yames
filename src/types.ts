@@ -685,6 +685,10 @@ export type FeedMessage = {
    *  read the greeting/tip seconds before they hear it (see
    *  `speakAndReveal` in useSession.ts). */
   pending?: boolean;
+  /** A mini-report: when the run it is about stopped (ms). The report can
+   *  arrive after the next run has started; this, not `timestamp`, says which
+   *  run it belongs to (leg pol2, item 5). */
+  stoppedAt?: number;
 };
 
 // ---------------------------------------------------------------------------

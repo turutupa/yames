@@ -67,6 +67,7 @@ export function toolCoachView(
   let tip: FeedMessage | null = null;
   let note: FeedMessage | null = null;
   let chips: FeedChip[] = [];
+  let lateChips = false;
   for (const m of messages) {
     if (m.timestamp < runStartedAt) continue;
     if ((m.type === "coach-tip" || m.type === "system") && !m.pending) tip = m;
@@ -76,9 +77,22 @@ export function toolCoachView(
     // A session that recorded too little ends with the switch going off and
     // nothing more, as the old card gave such a session no end card.
     const unsaved = m.type === "session-end" && !(m.report && isSegmentReportable(m.report));
+    // A mini-report that arrived late, after the next run had started, is
+    // the last run's: it is never this run's note (pol2 item 5).
+    const earlier = m.type === "mini-report" && m.stoppedAt !== undefined && m.stoppedAt < runStartedAt;
+    if (earlier) {
+      // Its chips ride on the message after it: they are not this run's either.
+      lateChips = true;
+      continue;
+    }
     if ((m.type === "mini-report" || m.type === "session-end") && !unsaved) {
       note = m;
       chips = [];
+      lateChips = false;
+    }
+    if (m.type === "chip-prompt" && lateChips) {
+      lateChips = false;
+      continue;
     }
     if (m.type === "chip-prompt" && note && m.chips) chips = m.chips;
   }
