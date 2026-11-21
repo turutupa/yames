@@ -74,8 +74,12 @@
           "notes": "Son oturum, {{exercise}}: {{bpm}} BPM'de %{{value}} doğru nota.",
           "plain": "Son oturum şunda bitti: {{exercise}}, {{bpm}} BPM'de."
         },
-        "backRungs": "Bugün olacağından {{count}} basamak aşağıdan başlıyor.",
-        "backRungs_other": "Bugün olacağından {{count}} basamak aşağıdan başlıyor.",
+        "backAgo": "Bu {{count}} gün önceydi.",
+        "backAgo_other": "Bu {{count}} gün önceydi.",
+        "backAway": "Son oturumun {{count}} gün önceydi.",
+        "backAway_other": "Son oturumun {{count}} gün önceydi.",
+        "backStartsAt": "Bugün {{bpm}} BPM'le başlıyor.",
+        "backStartsAtOther": "Bugün {{exercise}} {{bpm}} BPM'le başlıyor.",
         "ungraded": {
           "today": "Bugün daha önce {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
           "today_other": "Bugün daha önce {{count}} dakikalık deneme, sonuncusu: {{exercise}}, {{bpm}} BPM'de.",
@@ -270,7 +274,7 @@
       "endTake": "Denemeyi bitir",
       "goAgain": "Tekrar, {{bpm}} BPM",
       "next": "Sırada: {{title}}",
-      "finish": "Nasıl geçtiğine bak",
+      "finish": "Seansı bitir",
       "done": "Bitti",
       "slower": "Daha yavaş",
       "faster": "Daha hızlı",

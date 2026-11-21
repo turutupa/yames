@@ -74,8 +74,12 @@
           "notes": "Buổi tập trước, {{exercise}}: {{value}}% nốt đúng ở {{bpm}} BPM.",
           "plain": "Buổi tập trước kết thúc ở {{exercise}}, {{bpm}} BPM."
         },
-        "backRungs": "Hôm nay bắt đầu thấp hơn {{count}} nấc so với lẽ ra.",
-        "backRungs_other": "Hôm nay bắt đầu thấp hơn {{count}} nấc so với lẽ ra.",
+        "backAgo": "Đó là {{count}} ngày trước.",
+        "backAgo_other": "Đó là {{count}} ngày trước.",
+        "backAway": "Buổi tập gần nhất của bạn cách đây {{count}} ngày.",
+        "backAway_other": "Buổi tập gần nhất của bạn cách đây {{count}} ngày.",
+        "backStartsAt": "Hôm nay bắt đầu ở {{bpm}} BPM.",
+        "backStartsAtOther": "Hôm nay {{exercise}} bắt đầu ở {{bpm}} BPM.",
         "ungraded": {
           "today": "{{count}} phút các lượt chơi trước đó hôm nay, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
           "today_other": "{{count}} phút các lượt chơi trước đó hôm nay, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
@@ -270,7 +274,7 @@
       "endTake": "Kết thúc lượt",
       "goAgain": "Chơi lại, {{bpm}} BPM",
       "next": "Tiếp theo: {{title}}",
-      "finish": "Xem kết quả",
+      "finish": "Kết thúc buổi tập",
       "done": "Xong",
       "slower": "Chậm hơn",
       "faster": "Nhanh hơn",

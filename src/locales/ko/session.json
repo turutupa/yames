@@ -74,8 +74,12 @@
           "notes": "지난 세션, {{exercise}}: {{bpm}} BPM에서 맞는 음 {{value}}%.",
           "plain": "지난 세션은 {{exercise}}, {{bpm}} BPM에서 끝났어요."
         },
-        "backRungs": "오늘은 원래보다 한 단계 낮게 시작해요.",
-        "backRungs_other": "오늘은 원래보다 {{count}}단계 낮게 시작해요.",
+        "backAgo": "{{count}}일 전이에요.",
+        "backAgo_other": "{{count}}일 전이에요.",
+        "backAway": "지난 세션은 {{count}}일 전이에요.",
+        "backAway_other": "지난 세션은 {{count}}일 전이에요.",
+        "backStartsAt": "오늘은 {{bpm}} BPM에서 시작해요.",
+        "backStartsAtOther": "오늘 {{exercise}}: {{bpm}} BPM에서 시작해요.",
         "ungraded": {
           "today": "오늘 아까 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
           "today_other": "오늘 아까 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
@@ -270,7 +274,7 @@
       "endTake": "테이크 끝내기",
       "goAgain": "다시, {{bpm}} BPM",
       "next": "다음: {{title}}",
-      "finish": "결과 보기",
+      "finish": "세션 끝내기",
       "done": "완료",
       "slower": "느리게",
       "faster": "빠르게",

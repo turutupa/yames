@@ -83,14 +83,27 @@ export function LoopButton({ session }: { session: SessionRun }) {
   );
 }
 
+/**
+ * Whether the result's tonal row carries Faster. Not under P1 ("once more
+ * here", DESIGN 4.2): the rule holds the tempo once, and the way up it keeps
+ * one tap away is its own "Up to N"; a second way up beside it argued with
+ * the hold. Slower stays.
+ */
+export function fasterOnRow(big: BigAction): boolean {
+  return !(big.kind === "again" && big.onceMore);
+}
+
 export function TempoNudges({
   run,
   exercise,
   session,
+  faster = true,
 }: {
   run: RunState;
   exercise: Exercise | null;
   session: SessionRun;
+  /** False leaves Faster off the row (see `fasterOnRow`). */
+  faster?: boolean;
 }) {
   const { t } = useTranslation();
   const can = tempoNudges(run, exercise);
@@ -117,23 +130,25 @@ export function TempoNudges({
           {t("session.run.slower")}
         </button>
       </span>
-      <span className="session-nudge-wrap" title={why(can.fasterWhy)} data-why={can.fasterWhy ?? undefined}>
-        <button
-          className="session-secondary"
-          disabled={!can.faster}
-          aria-describedby={can.fasterWhy ? "session-faster-why" : undefined}
-          onClick={session.actions.faster}
-          data-testid="session-faster"
-        >
-          {t("session.run.faster")}
-        </button>
-      </span>
+      {faster && (
+        <span className="session-nudge-wrap" title={why(can.fasterWhy)} data-why={can.fasterWhy ?? undefined}>
+          <button
+            className="session-secondary"
+            disabled={!can.faster}
+            aria-describedby={can.fasterWhy ? "session-faster-why" : undefined}
+            onClick={session.actions.faster}
+            data-testid="session-faster"
+          >
+            {t("session.run.faster")}
+          </button>
+        </span>
+      )}
       {can.slowerWhy && (
         <span id="session-slower-why" className="sr-only">
           {why(can.slowerWhy)}
         </span>
       )}
-      {can.fasterWhy && (
+      {faster && can.fasterWhy && (
         <span id="session-faster-why" className="sr-only">
           {why(can.fasterWhy)}
         </span>
