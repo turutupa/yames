@@ -16,9 +16,6 @@ import type { CustomSummary } from "../../paths/custom";
 import { tempoRange } from "../../session/coachWords";
 import { cleanTempoOf, takesOf } from "../../session/progress";
 import {
-  buildMyExercises,
-  keyOf,
-  myExerciseLine,
   myExercisesNow,
   removeMyExercise,
   restoreMyExercise,
@@ -26,6 +23,7 @@ import {
   useMyExercises,
 } from "../../session/myExercises";
 import type { MyExercise } from "../../session/myExercises";
+import { buildMyExercises, keyOf, myExerciseLine } from "../../session/myExerciseBuild";
 import type { SessionRun } from "./hooks/useSessionRun";
 
 /**
@@ -40,7 +38,8 @@ export function playableDoc(t: TFunction, exercise: Exercise, summary: CustomSum
   return { ...doc, title, steps: doc.steps.map((s) => ({ ...s, title })) };
 }
 
-export function MyExercisesSection({ session, style }: { session: SessionRun; style?: React.CSSProperties }) {
+/** The section itself. Loaded lazily by `MyExercisesSection`, with the generator behind it. */
+export default function MyExercisesList({ session, style }: { session: SessionRun; style?: React.CSSProperties }) {
   const { t } = useTranslation();
   const list = useMyExercises();
   const rows = useMemo(() => buildMyExercises(list), [list]);

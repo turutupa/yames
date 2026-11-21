@@ -15,13 +15,22 @@
  * kept. Every reader of Path standing, per-Path totals, Today's plan and the
  * tendencies resolves a Take through the pack documents, where that id is not:
  * `isCustomTake` is the one test for a reader that does not.
+ *
+ * Light on purpose: no generator in here. The app's shell and the Session runner
+ * import this file, and the generator and validator behind `buildCustomExercise`
+ * are only loaded when there is a list to show (`myExerciseBuild.ts`).
  */
 import { useSyncExternalStore } from "react";
-import type { TFunction } from "i18next";
 import { storeLoad, storeSave } from "../ipc";
 import type { PathTakeRow } from "../ipc";
-import { CUSTOM_PATH_ID, buildCustomExercise, recipeKey, recipeProblem } from "../paths/custom";
-import type { BuildResult, CustomSummary, Recipe } from "../paths/custom";
+import type { Recipe } from "../paths/custom";
+
+/**
+ * The Path id custom Takes are kept under: `CUSTOM_PATH_ID` in `paths/custom.ts`,
+ * written out here so the runner need not load the generator to know it (a test
+ * holds the two equal).
+ */
+export const MY_EXERCISES_PATH_ID = "my-exercises";
 
 export const MY_EXERCISES_KEY = "myExercises";
 /** The most recipes the list keeps. Adding past it is refused, never an old one dropped. */
@@ -57,30 +66,6 @@ export function readMyExercises(saved: unknown): MyExercise[] {
   return out;
 }
 
-/** The recipe's key, or null for one that is not a recipe this build knows. */
-export function keyOf(entry: MyExercise): string | null {
-  if (recipeProblem(entry.recipe) !== null) return null;
-  try {
-    return recipeKey(entry.recipe);
-  } catch {
-    return null;
-  }
-}
-
-export type AddResult =
-  | { ok: true; list: MyExercise[] }
-  | { ok: false; why: "full" | "already" | "badRecipe"; list: MyExercise[] };
-
-/** Add a recipe at the top. The same notes twice, a bad recipe or a full list: refused, the list as it was. */
-export function addMyExercise(list: readonly MyExercise[], recipe: Recipe, now: number): AddResult {
-  const entry: MyExercise = { recipe, addedAt: now };
-  const key = keyOf(entry);
-  if (key === null) return { ok: false, why: "badRecipe", list: [...list] };
-  if (list.some((e) => keyOf(e) === key)) return { ok: false, why: "already", list: [...list] };
-  if (list.length >= MY_EXERCISES_MAX) return { ok: false, why: "full", list: [...list] };
-  return { ok: true, list: [entry, ...list] };
-}
-
 /** Take one out; `undo` puts it back where it was. */
 export function removeMyExercise(
   list: readonly MyExercise[],
@@ -100,45 +85,7 @@ export function restoreMyExercise(list: readonly MyExercise[], removed: { entry:
 
 /** A Take of a custom Exercise. */
 export function isCustomTake(take: Pick<PathTakeRow, "pathId">): boolean {
-  return take.pathId === CUSTOM_PATH_ID;
-}
-
-/** Each entry built again, in list order. */
-export function buildMyExercises(list: readonly MyExercise[]): Array<{ entry: MyExercise; built: BuildResult }> {
-  return list.map((entry) => ({ entry, built: buildCustomExercise(entry.recipe) }));
-}
-
-// ---------------------------------------------------------------------------
-// Words: the line a row shows, from the summary, in the language on screen.
-// ---------------------------------------------------------------------------
-
-/** A chord as its symbol: written the same in every language the app speaks. */
-const CHORD_SUFFIX: Readonly<Record<string, string>> = {
-  maj: "",
-  min: "m",
-  dim: "dim",
-  aug: "+",
-  "7": "7",
-  maj7: "maj7",
-  m7: "m7",
-  m7b5: "m7♭5",
-  dim7: "dim7",
-};
-
-/** One line: what it is, where it starts and which way it goes, then its length. Never stored. */
-export function myExerciseLine(t: TFunction, s: CustomSummary): string {
-  const shape = t(`session.myExercises.shape.${s.shape}`, {
-    root: s.root ?? "",
-    scale: s.scale ? t(`scale.${s.scale}`) : "",
-    chord: s.chord !== null && s.root ? `${s.root}${CHORD_SUFFIX[s.chord] ?? s.chord}` : "",
-    position: s.position,
-    string: s.firstNote.string,
-  });
-  return t("session.myExercises.line", {
-    shape,
-    direction: t(`session.myExercises.direction.${s.direction}`),
-    bars: t("session.myExercises.bars", { count: s.bars }),
-  });
+  return take.pathId === MY_EXERCISES_PATH_ID;
 }
 
 // ---------------------------------------------------------------------------

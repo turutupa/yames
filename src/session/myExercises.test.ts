@@ -7,14 +7,13 @@ import { afterEach, describe, expect, it } from "vitest";
 import i18n from "../i18n";
 import { CUSTOM_PATH_ID, CUSTOM_STEP_ID, buildCustomExercise, customExerciseId } from "../paths/custom";
 import type { Recipe } from "../paths/custom";
+import { addMyExercise, buildMyExercises, myExerciseLine } from "./myExerciseBuild";
 import {
   MY_EXERCISES_KEY,
   MY_EXERCISES_MAX,
-  addMyExercise,
-  buildMyExercises,
+  MY_EXERCISES_PATH_ID,
   isCustomTake,
   loadMyExercises,
-  myExerciseLine,
   myExercisesNow,
   readMyExercises,
   removeMyExercise,
@@ -177,9 +176,13 @@ describe("custom Takes stay out of the Paths", () => {
   };
 
   it("are told apart by their Path id, which no pack uses", () => {
+    // The store's copy of the id is the generator's.
+    expect(MY_EXERCISES_PATH_ID).toBe(CUSTOM_PATH_ID);
     expect(mine.every(isCustomTake)).toBe(true);
     expect(isCustomTake(packOnly.takes[0])).toBe(false);
-    expect([ALT.id, SWEEP.id]).not.toContain(CUSTOM_PATH_ID);
+    const packs = Object.values(import.meta.glob("../paths/packs/*.json", { eager: true, import: "default" })) as Array<{ id: string }>;
+    expect(packs.length).toBeGreaterThan(10);
+    expect(packs.map((p) => p.id)).not.toContain(CUSTOM_PATH_ID);
   });
 
   it("Path standing: the Step a player is on and the Steps passed do not move", () => {

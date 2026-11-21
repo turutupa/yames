@@ -45,7 +45,7 @@ import { IS_MOBILE } from "../../platform";
 import { PATHS_LIST, pathsUp } from "../main-window/hooks/usePathsPlace";
 import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import { BuildsOnLine, StartFirstLine, SubscribeOffer } from "./PathPrerequisites";
-import { MyExercisesSection } from "./MyExercises";
+import { MyExercisesSection } from "./MyExercisesSection";
 import { buildsOnPaths, prerequisitesToOffer } from "../../session/prerequisites";
 import { START_HERE_PATH_ID, pathTracks, trackOf } from "../../session/tracks";
 import type { TrackId } from "../../session/tracks";

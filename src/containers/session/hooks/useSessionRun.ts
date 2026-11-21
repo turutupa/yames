@@ -63,7 +63,8 @@ import type { BeatPosition } from "../../../songs/position";
 import type { AppState, Subdivision } from "../../../types";
 import type { Exercise, PathDoc, Step } from "../../../paths/format";
 import { FIRST_PATH_ID, findExercise, isRunnable, loadAllPacks } from "../../../session/packs";
-import { CUSTOM_PATH_ID } from "../../../paths/custom";
+// The id alone: `paths/custom.ts` would bring the generator into the runner.
+import { MY_EXERCISES_PATH_ID as CUSTOM_PATH_ID } from "../../../session/myExercises";
 import { gradeTake } from "../../../session/grade";
 import type { BarCheck, TakeGrade } from "../../../session/grade";
 import { measureTake } from "../../../session/takeMeasures";
