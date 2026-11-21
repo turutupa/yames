@@ -4,6 +4,15 @@ Branch `coach-nf1` (same worktree), merged with `coach` first (L5: c4a1, c5c1, t
 `useSession` split; clean merge). Work list `/tmp/coach-orch/nf1b-review.md`. Logs in
 `/tmp/coach-nf1c/`.
 
+## Gates (after the merge of `coach`)
+
+- `npx tsc --noEmit`: pass (`coach-nf1c-tsc-2`); `npm run build`: pass (`build.log`).
+- `npm run test`: 48571 passed, 10 skipped; only the known `TabStage.render.test.tsx`
+  cannot load (`vitest.log`).
+- Layout `today-line`, `session`, `planner`, `short-window`: 231 passed (`layout.log`).
+  Full suite owed.
+- `npm run test:rust`: not run (no Rust, the shared fixture unchanged).
+
 ## The rule (the orchestrator's decision for M1 and M2)
 
 A plan reason quotes a clean tempo ONLY when the clean tempo the app shows for the
