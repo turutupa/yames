@@ -36,7 +36,43 @@ Cues: `src/paths/specs/arpeggios-over-changes-cues.ts`, attached with `withCues`
   file checked again by me with `check_i18n.py` (problems 0 in all fourteen; ru had three over 48 on my first
   look, its helper fixed them before handing back). Merged (`merge{1,2,3}.log`): every overlay 1028 of 1028;
   `check` 0 errors (`gc9.log`).
-- [ ] Gates
+- [x] Gates (below)
+
+## Gates (job queue; logs in `/tmp/coach-cues11/`)
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`check-all.log`).
+- `npx tsc --noEmit`: clean (`tsc.log`; run on the final English cues, before the overlays, which are JSON).
+- `npm run test`: 414 of 415 files, 31,503 of 31,503 tests passed (`vitest.log`); the one file is the known
+  worktree-only `TabStage.render.test.tsx`.
+- `npm run build`: ok (`build.log`).
+- No Rust file changed; no layout run (the orchestrator's).
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 48 · vi 46 · ko 27 · zh-CN 28 ·
+zh-TW 28 · ja 25. Read first: the spoken triplet count ('1-trip-let'), which no overlay had: de '1-Tri-o-le',
+fr '1-tri-o-let', es '1-tre-si-llo', it '1-ter-zi-na', pl '1-tri-o-la', pt-BR '1-tri-no-la', ru '1-три-оль';
+nl, ko and zh keep the English. it shortens "sulla corda Re / La" to "sulla Re / La" twice, and uses "radice"
+once beside the overlay's "fondamentale"; fr and it name the A string by solfège as their overlays do ("corde
+de la", "corda La"). The chord degrees ("five's seventh", "one, six, two, five") are the translators' own
+words in tr, pl, pt-BR and ru. ja writes plain imperatives where its overlay is です/ます. ru uses "свип" for a
+sweep. de, pl write the seventh chords short (G7, Am7) as their overlays do.
+
+## Twelve cues to read
+
+- **"C into A minor on a shared note"** (Level 1). C up to its top C, then A minor coming down from that same
+  C. general "Start A minor on the same top note." · heard "Pick the top note again as A minor starts." ·
+  lastBars "Jump back up to fret ten for C on '1'."
+- **"A two, five, one line"** (Level 2). D minor seven, G seven, C major seven as one line; C starts on E, a
+  fret under G seven's F. general "Let G seven's seventh fall to C's third." · notes "Keep G seven between
+  frets six and ten." · afterHeld "Count the long root's four beats, then go."
+- **"Two, five, one in other keys"** (Level 2, a new key each Take). The line from C moved along the neck.
+  general "Let five's seventh fall to one's third." · notes "Know each chord's four notes before you start." ·
+  late "Land each new chord's first note on '1'."
+- **"A minor two, five, one line"** (Level 3). B half-diminished, E seven, A minor seven; A falls to G sharp,
+  then E stays. general "Let the seventh fall to E seven's third." · notes "Pick the shared note again on
+  '1'." · shift "Move the hand before the note that needs it."
+
 
 ## How the cues are built
 
