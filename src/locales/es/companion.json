@@ -64,7 +64,7 @@
       "label": "Una ruta para probar a continuación, del coach",
       "kick": "Una ruta para probar a continuación",
       "chip": "Sugerir una ruta",
-      "next": "{{path}} es la siguiente ruta, en el orden del currículo, que no has empezado, y no falta nada de lo que le sirve de base.",
+      "next": "De las rutas que no has empezado, {{path}} es la primera en el orden del currículo a la que no le falta nada de lo que le sirve de base.",
       "readyGoal": "{{path}} encaja con lo que dijiste que quieres lograr, y no falta nada de lo que le sirve de base.",
       "buildsOn":"{{path}} se apoya en {{on}}, que ya empezaste.",
       "buildsOnLevel": "{{path}} se apoya en {{on}}, y ahí ya pasaste {{level}}.",

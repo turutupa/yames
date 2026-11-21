@@ -64,7 +64,7 @@
       "label": "Koçtan, sıradaki denenecek yol",
       "kick": "Sıradaki denenecek yol",
       "chip": "Bir yol öner",
-      "next": "{{path}}, müfredat sırasında henüz başlamadığın bir sonraki yol ve dayandığı hiçbir şey eksik değil.",
+      "next": "Henüz başlamadığın yollar arasında {{path}}, müfredat sırasında dayandığı hiçbir şeyin eksik olmadığı ilk yol.",
       "readyGoal": "{{path}}, ulaşmak istediğini söylediğin hedefe uyuyor ve dayandığı hiçbir şey eksik değil.",
       "buildsOn":"{{path}}, başladığın {{on}} yoluna dayanıyor.",
       "buildsOnLevel": "{{path}}, {{on}} yoluna dayanıyor ve orada {{level}} seviyesini bitirdin.",
