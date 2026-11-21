@@ -31,6 +31,14 @@ export const CASES: RecipeCases = {
     "maak c majeur achtsten op fret 20",
     "maak a mineur pentatoniek 12 maten",
     "maak een pentatoniek achtsten",
+    // "es" and "as" as ordinary words (ash, axis), and a tempo (review t2d, Q6).
+    "maak een oefening op de as",
+    "maak een achtsten oefening voor es",
+    "maak een a mineur pentatoniek oefening op 90",
+    "maak een a mineur pentatoniek oefening op 90 bpm",
+    // "a mol" may be a German-style "a-moll" (A minor) as easily as A flat: "mol" is not read (review t2d, L3).
+    "maak een a mol pentatoniek oefening",
+    "maak een e mol majeur oefening",
   ],
   yours: ["maak een a mineur pentatoniek achtsten opname"],
 };

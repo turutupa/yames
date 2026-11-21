@@ -35,6 +35,19 @@ export const CASES: RecipeCases = {
     "mach a moll pentatonik 12 takte",
     "mach es dur achtel",
     "mach des dur achtel",
+    // Hyphenated keys are one word and not read (review t2d, L6): a miss, never a wrong key.
+    "mach eine a-moll pentatonik übung",
+    "mach h-moll achtel",
+    "mach es-dur achtel",
+    "mach b-dur achtel",
+    // A tempo has no place in a recipe (review t2d, Q6).
+    "mach a moll pentatonik achtel auf 90",
+    "mach a moll pentatonik achtel mit 90 bpm",
+    // A bar's place is not a count of bars (review t2d, L1).
+    "mach a moll pentatonik achtel ab dem 4. takt",
+    "mach a moll pentatonik achtel ab 4 takte",
+    "mach a moll pentatonik achtel 4. takt",
+    "mach a moll pentatonik achtel 4 takt",
   ],
   yours: ["erstelle a moll pentatonik achtel aufnahme"],
 };

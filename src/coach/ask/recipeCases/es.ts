@@ -40,6 +40,18 @@ export const CASES: RecipeCases = {
     "haz un ejercicio a mayor velocidad",
     "haz un ejercicio a menor velocidad corcheas",
     "haz una escala pentatónica menor de a corcheas",
+    // "a menor / mayor escala" is "on a smaller / larger scale", never A minor (review t2d, H1).
+    "hazme un ejercicio a menor escala",
+    "haz un ejercicio a mayor escala",
+    "hazme un ejercicio a gran escala",
+    "haz corcheas a mayor escala",
+    "hazme un ejercicio de corcheas a menor escala",
+    // "a" as the preposition before a recipe word (leg t2dc): each falls through.
+    "hazme un ejercicio a menor tempo",
+    "haz un ejercicio de corcheas a mayor ritmo",
+    "hazme un arpegio a 7 compases",
+    "haz un ejercicio en corcheas a 4 compases",
+    "haz un ejercicio a 90 corcheas",
   ],
   yours: ["graba a menor pentatónica corcheas traste 5", "borra mi ejercicio a menor pentatónica corcheas"],
 };

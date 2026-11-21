@@ -38,6 +38,14 @@ export const CASES: RecipeCases = {
     "fais un exercice de pentatonique mineure",
     "fais un exercice à a mineur vitesse croches",
     "fais une gamme pentatonique mineure de a croches",
+    // A tempo has no place in a recipe, typed with or without the accent (review t2d, Q6).
+    "fais a mineur pentatonique croches a 90",
+    "fais a mineur pentatonique croches à 90",
+    // "a" / "à" as the preposition before a recipe word (leg t2dc): each falls through.
+    "fais-moi un arpège a 7 mesures",
+    "fais un exercice en croches a 4 mesures",
+    "fais un exercice à plus grande échelle",
+    "fais un exercice a mineur échelle",
   ],
   yours: ["enregistre a mineur pentatonique croches case 5", "supprime mon exercice a mineur pentatonique croches"],
 };

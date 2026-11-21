@@ -95,7 +95,7 @@
   },
   "roots": {
     "sharp": ["kruis", "sharp"],
-    "flat": ["mol", "flat"]
+    "flat": ["flat"]
   },
   "scales": {
     "major": ["majeur", "ionisch"],

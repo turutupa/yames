@@ -299,7 +299,7 @@
     },
     "make": {
       "source": "Calculado por la app",
-      "graded": "Empieza a {{bpm}} BPM. Se pueden evaluar el tempo y las notas oídas; lo demás es cosa tuya.",
+      "graded": "Empieza a {{bpm}} BPM. Se pueden evaluar el tiempo y las notas oídas; lo demás es cosa tuya.",
       "startsOn": "Empieza en {{note}}: cuerda {{string}}, traste {{fret}}.",
       "startsOnString": "Empieza en la cuerda {{string}}, traste {{fret}}.",
       "notesLabel": "{{n}} notas, trastes {{from}} a {{to}}",

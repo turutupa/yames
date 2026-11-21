@@ -299,7 +299,7 @@
     },
     "make": {
       "source": "Calculé par l'app",
-      "graded": "Démarre à {{bpm}} BPM. Le tempo et les notes entendues peuvent être évalués ; le reste est à toi.",
+      "graded": "Démarre à {{bpm}} BPM. Le placement et les notes entendues peuvent être évalués ; le reste est à toi.",
       "startsOn": "Commence sur {{note}} : corde {{string}}, case {{fret}}.",
       "startsOnString": "Commence sur la corde {{string}}, case {{fret}}.",
       "notesLabel": "{{n}} notes, cases {{from}} à {{to}}",

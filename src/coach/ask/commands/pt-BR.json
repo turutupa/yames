@@ -157,7 +157,8 @@
     "depois", "mais tarde", "tarde", "amanhã", "amanha", "ontem", "hoje à noite", "hoje a noite", "esta noite", "essa noite", "antes", "de novo", "outra vez", "novamente", "próximo", "proximo", "próxima", "proxima", "já",
     "que", "porque", "pois", "mas", "se", "embora", "quando", "enquanto", "então", "entao", "ou", "também", "tambem",
     "demais", "muito", "bastante", "tão", "tao", "realmente",
-    "pra mim", "para mim", "comigo", "atrás", "atras", "voltar", "volta", "por cima", "de volta"
+    "pra mim", "para mim", "comigo", "atrás", "atras", "voltar", "volta", "por cima", "de volta",
+    "a maior escala", "a menor escala"
   ],
   "polite": ["por favor", "pfv", "obrigado", "obrigada", "valeu", "ok", "okay", "oi coach", "ei coach", "oi", "ei", "agora", "só"],
   "fillers": ["me", "o", "a", "os", "as", "um pouco", "um", "uma", "uns", "umas", "meu", "minha", "meus", "minhas", "ao", "aos", "e"],

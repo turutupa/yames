@@ -33,12 +33,61 @@ describe("the rootNames override (leg t2d)", () => {
     expect(problems).toContain('recipe.rootNames.h: "H" is not a root the app knows');
     expect(problems).toContain('recipe.rootNames: "c d" is not one lower-case word');
   });
+  it("a name that is also a filler, connector, verb, shape or not-a-command word is a problem (review t2d, L4)", () => {
+    const bad = { ...en, recipe: { ...en.recipe, rootNames: { the: "C", at: "D", box: "E", i: "F" } } } as CommandTable;
+    const problems = validateCommandTable(bad).join("\n");
+    expect(problems).toContain('recipe.rootNames: "the" is also a word of fillers');
+    expect(problems).toContain('recipe.rootNames: "at" is also a word of connectors.at');
+    expect(problems).toContain('recipe.rootNames: "box" is also a word of recipe.shapes.box');
+    expect(problems).toContain('recipe.rootNames: "i" is also a word of notCommand');
+  });
   it("a name is read as its root; a null letter leaves the whole line unread", () => {
     const t = { ...en, recipe: { ...en.recipe, rootNames: { h: "B", b: null } } } as CommandTable;
     expect(routeCommand("make h major exercise", t, today)).toEqual({ kind: "call", call: { tool: "make_exercise", args: { root: "B", scale: "major" } } });
     expect(routeCommand("make b major exercise", t, today).kind).not.toBe("call");
     expect(routeCommand("make c major exercise in b", t, today).kind).not.toBe("call");
     expect(routeCommand("make c major exercise", t, today)).toEqual({ kind: "call", call: { tool: "make_exercise", args: { root: "C", scale: "major" } } });
+  });
+});
+
+describe("show_scale and show_chord read a language's own note names (review t2d, M2)", () => {
+  const scale = (root: string, s: string) => ({ kind: "call", call: { tool: "show_scale", args: { root, scale: s } } });
+  const chord = (name: string) => ({ kind: "call", call: { tool: "show_chord", args: { chord: name } } });
+  const shows = (lng: string, text: string) => {
+    const r = routeCommand(text, COMMAND_TABLES[lng] as CommandTable, today);
+    return r.kind === "call" && (r.call.tool === "show_scale" || r.call.tool === "show_chord") ? r.call : null;
+  };
+  it("German, Polish, Russian: h is B; b is never drawn as B", () => {
+    expect(routeCommand("zeig mir h moll", COMMAND_TABLES.de as CommandTable, today)).toEqual(scale("B", "naturalMinor"));
+    expect(routeCommand("zeig mir fis moll", COMMAND_TABLES.de as CommandTable, today)).toEqual(scale("F#", "naturalMinor"));
+    expect(routeCommand("zeig mir akkord h7", COMMAND_TABLES.de as CommandTable, today)).toEqual(chord("B7"));
+    expect(routeCommand("zeig mir akkord fism", COMMAND_TABLES.de as CommandTable, today)).toEqual(chord("F#m"));
+    expect(routeCommand("zeig mir akkord bb7", COMMAND_TABLES.de as CommandTable, today)).toEqual(chord("Bb7"));
+    expect(routeCommand("zeig mir akkord asus4", COMMAND_TABLES.de as CommandTable, today)).toEqual(chord("Asus4"));
+    expect(shows("de", "zeig mir b dur")).toBeNull();
+    expect(shows("de", "zeig mir b moll")).toBeNull();
+    expect(shows("de", "zeig mir akkord b7")).toBeNull();
+    expect(shows("de", "zeig mir akkord bm")).toBeNull();
+    expect(routeCommand("pokaż h moll", COMMAND_TABLES.pl as CommandTable, today)).toEqual(scale("B", "naturalMinor"));
+    expect(shows("pl", "pokaż b dur")).toBeNull();
+    expect(shows("pl", "pokaż akord b7")).toBeNull();
+    expect(routeCommand("покажи h минор", COMMAND_TABLES.ru as CommandTable, today)).toEqual(scale("B", "naturalMinor"));
+    expect(shows("ru", "покажи b мажор")).toBeNull();
+  });
+  it("Dutch reads its -is / -es names; b stays B there", () => {
+    expect(routeCommand("toon bes majeur", COMMAND_TABLES.nl as CommandTable, today)).toEqual(scale("Bb", "major"));
+    expect(routeCommand("toon b mineur", COMMAND_TABLES.nl as CommandTable, today)).toEqual(scale("B", "naturalMinor"));
+  });
+  it("a bare 五声 / 五聲 / ngũ cung draws nothing: it does not say minor (review t2d, M1)", () => {
+    expect(shows("zh-CN", "显示C五声音阶")).toBeNull();
+    expect(shows("zh-TW", "顯示C五聲音階")).toBeNull();
+    expect(shows("vi", "hiện c ngũ cung")).toBeNull();
+    expect(routeCommand("显示C小调五声音阶", COMMAND_TABLES["zh-CN"] as CommandTable, today)).toEqual(scale("C", "minorPentatonic"));
+    expect(routeCommand("hiện c ngũ cung thứ", COMMAND_TABLES.vi as CommandTable, today)).toEqual(scale("C", "minorPentatonic"));
+  });
+  it("English is unchanged: b is B", () => {
+    expect(shows("en", "show b major")).toEqual(scale("B", "major").call);
+    expect(shows("en", "show chord b7")).toEqual(chord("B7").call);
   });
 });
 

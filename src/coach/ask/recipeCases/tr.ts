@@ -31,6 +31,8 @@ export const CASES: RecipeCases = {
     "a minör pentatonik gamını göster",
     "a minör pentatonik sekizlik 20. perde oluştur",
     "a minör arpej nasıl çalınır",
+    // "4." is the fourth bar, not four bars (review t2d, L1).
+    "a minör pentatonik sekizlik 4. ölçü oluştur",
   ],
   yours: ["a minör pentatonik sekizlik 5. perde kaydet"],
 };

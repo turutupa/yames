@@ -46,6 +46,12 @@ export const CASES: RecipeCases = {
     "faça um exercício de pentatônica menor",
     "faça uma escala pentatônica menor de a colcheias",
     "faça um exercício a menor velocidade colcheias",
+    // "a" / "e" as ordinary words before a recipe word (leg t2dc): "a maior escala" is "the largest scale".
+    "faça a maior escala",
+    "faça a menor escala em colcheias",
+    "faça um exercício em menor escala",
+    "faça um arpejo de colcheias e 7 compassos",
+    "faça um exercício a 90 colcheias",
   ],
   yours: ["grave a pentatônica colcheias casa 5", "apague meu exercício de a menor pentatônica colcheias"],
 };

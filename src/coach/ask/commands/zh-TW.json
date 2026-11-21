@@ -100,7 +100,7 @@
     "naturalMinor": ["自然小調", "小調音階", "小調", "愛奧利亞"],
     "dorian": ["多利安"],
     "mixolydian": ["米索利地安"],
-    "minorPentatonic": ["小調五聲音階", "小調五聲", "五聲音階", "五聲"],
+    "minorPentatonic": ["小調五聲音階", "小調五聲"],
     "majorPentatonic": ["大調五聲音階", "大調五聲"],
     "blues": ["藍調", "小調藍調"],
     "harmonicMinor": ["和聲小調"],

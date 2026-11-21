@@ -35,6 +35,10 @@ export const CASES: RecipeCases = {
     "zrób a moll 12 taktów",
     "zrób as dur ósemkami",
     "zrób a moll pentatonika ósemkami",
+    // A tempo, and a bar's place that is not a count of bars (review t2d, Q6 and L1).
+    "zrób a moll ósemkami w tempie 90",
+    "zrób ćwiczenie a moll ósemkami od 4 taktu",
+    "zrób ćwiczenie a moll ósemkami od 4 takty",
   ],
   yours: ["zrób a moll ósemkami nagranie"],
 };

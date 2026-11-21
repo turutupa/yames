@@ -162,7 +162,8 @@
     "luego", "después", "despues", "mañana", "ayer", "anoche", "esta noche", "antes", "otra vez", "de nuevo", "nuevamente", "próximo", "proximo", "próxima", "proxima", "siguiente", "hace",
     "que", "qué", "porque", "por qué", "pero", "si", "aunque", "cuando", "cuándo", "mientras", "como", "cómo", "cuál", "cual", "o",
     "demasiado", "muy", "mucho", "tan", "también", "tambien", "ya", "todavía", "todavia", "aún", "aun", "además", "ademas",
-    "para mí", "para mi", "conmigo", "atrás", "atras", "encima", "volver", "vuelve", "otra"
+    "para mí", "para mi", "conmigo", "atrás", "atras", "encima", "volver", "vuelve", "otra",
+    "a mayor escala", "a menor escala", "a gran escala"
   ],
   "polite": ["por favor", "porfa", "porfavor", "ok", "okay", "vale", "oye coach", "oye", "ahora", "ahora mismo", "gracias", "solo", "sólo", "hola"],
   "fillers": ["me", "el", "la", "los", "las", "un poco", "un", "una", "unos", "unas", "mi", "mis", "al"],

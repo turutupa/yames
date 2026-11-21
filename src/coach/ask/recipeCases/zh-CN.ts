@@ -29,6 +29,9 @@ export const CASES: RecipeCases = {
     "做个A小调五声音阶 16品",
     "做个A小调五声音阶 9小节",
     "做个五声音阶练习",
+    // Bare 五声 does not say minor (宫调 is as common a reading; review t2d, M1): never read as either.
+    "做个C五声音阶 八分音符",
+    "做个A五声 4小节",
     "开始 A小调五声音阶 八分音符",
     "播放 A小调五声音阶 八分音符",
     "显示 A小调五声音阶 八分音符",

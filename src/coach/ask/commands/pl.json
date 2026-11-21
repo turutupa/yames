@@ -191,6 +191,7 @@
       "des": "Db",
       "es": "Eb",
       "ges": "Gb"
-    }
+    },
+    "barFrom": ["od"]
   }
 }

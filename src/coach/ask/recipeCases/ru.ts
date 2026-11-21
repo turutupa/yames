@@ -33,6 +33,11 @@ export const CASES: RecipeCases = {
     "сделай a минор 12 тактов",
     "сделай а минор восьмыми",
     "сделай до мажор восьмыми",
+    // A bar's place is not a count of bars (review t2d, L1 and Q6).
+    "сделай a минор восьмыми с 4 такта",
+    "сделай a минор восьмыми от 4 такта",
+    // "полуувеличенный" (half-augmented) names no chord (review t2d, L2).
+    "сделай a полуувеличенный арпеджио",
   ],
   yours: ["сделай a минор восьмыми запись"],
 };

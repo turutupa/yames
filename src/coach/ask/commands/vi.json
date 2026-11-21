@@ -100,7 +100,7 @@
     "naturalMinor": ["thứ", "thứ tự nhiên", "thang thứ", "âm giai thứ", "aeolian"],
     "dorian": ["dorian"],
     "mixolydian": ["mixolydian"],
-    "minorPentatonic": ["ngũ cung thứ", "pentatonic thứ", "ngũ cung", "pentatonic"],
+    "minorPentatonic": ["ngũ cung thứ", "pentatonic thứ", "pentatonic"],
     "majorPentatonic": ["ngũ cung trưởng", "pentatonic trưởng"],
     "blues": ["blues", "blues thứ"],
     "harmonicMinor": ["thứ hòa thanh", "thứ harmonic", "harmonic minor"],

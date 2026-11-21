@@ -207,6 +207,7 @@
       "ais": "A#",
       "as": "Ab",
       "ges": "Gb"
-    }
+    },
+    "barFrom": ["ab", "vom"]
   }
 }

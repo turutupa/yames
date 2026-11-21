@@ -42,6 +42,13 @@ export const CASES: RecipeCases = {
     "voglio un esercizio di a minore pentatonica",
     "fai un esercizio di pentatonica minore",
     "fai una scala pentatonica minore di a crome",
+    // "e" is "and", "a" the preposition, before a recipe word (review t2d, Q6; leg t2dc).
+    "fammi un esercizio in crome e semicrome",
+    "fammi un esercizio di crome e terzine",
+    "fammi un arpeggio di crome e 7 battute",
+    "fai un esercizio a 90 crome",
+    "fai un esercizio a maggiore velocità",
+    "fammi un esercizio di scala maggiore e minore",
   ],
   yours: ["registra a minore pentatonica crome tasto 5", "cancella il mio esercizio a minore pentatonica crome"],
 };

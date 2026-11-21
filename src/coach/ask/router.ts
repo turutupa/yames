@@ -173,6 +173,8 @@ type CompiledRecipe = {
   article: { words: readonly string[]; rootAfter: Phrases; rootBefore: Phrases };
   /** A note's name this language writes otherwise (`RecipeWords.rootNames`): its root, or null (the line is not read). */
   rootNames: ReadonlyMap<string, string | null>;
+  /** The words after which a number is a bar's place, not a count (`RecipeWords.barFrom`). */
+  barFrom: Phrases;
 };
 
 const compiledTables = new WeakMap<CommandTable, Compiled>();
@@ -241,6 +243,7 @@ function compile(table: CommandTable): Compiled {
             rootBefore: phrases(table.recipe.article?.rootBefore),
           },
           rootNames: new Map(Object.entries(table.recipe.rootNames ?? {}).map(([w, root]) => [phraseKey(w), root])),
+          barFrom: phrases(table.recipe.barFrom),
         }
       : null,
   };
@@ -321,11 +324,13 @@ function num(token: string | undefined): number | null {
 // The text
 // ---------------------------------------------------------------------------
 
-type Text = { toks: Toks; question: boolean };
+/** `ordinals`: the numbers typed as ordinals with a period ("4." in "ab dem 4. Takt"), which the period's removal hides. */
+type Text = { toks: Toks; question: boolean; ordinals: ReadonlySet<string> };
 
 function normalize(text: string, c: Compiled): Text {
   let s = text.normalize("NFKC").toLowerCase().replace(/[’‘`´]/g, "'");
   const question = /[?¿？]/.test(s);
+  const ordinals = new Set([...s.matchAll(/(?<![\d.,])(\d+)\.(?=\s+\p{L})/gu)].map((m) => m[1]));
   // A range typed "3-4" or "3–4" is "3 - 4"; a hyphen inside a word ("count-in") stays.
   s = s.replace(/(\d)\s*[-–—]\s*(?=\d)/g, "$1 - ");
   s = s.replace(/[^\p{L}\p{N}\p{M}#'\- ]+/gu, " ").replace(/\s+/g, " ").trim();
@@ -337,7 +342,7 @@ function normalize(text: string, c: Compiled): Text {
     if (glued && c.unitWords.has(glued[2])) toks.push(glued[1], glued[2]);
     else if (tok !== "'" ) toks.push(tok);
   }
-  return { toks, question };
+  return { toks, question, ordinals };
 }
 
 function stripPolite(t: Toks, c: Compiled): Toks {
@@ -564,7 +569,9 @@ function screenCall(t: Toks, c: Compiled): ToolCall | null {
 
 /** "a minor pentatonic", "c sharp dorian root on 5", "the a blues scale". */
 function scaleCall(t: Toks, c: Compiled): ToolCall | null {
-  const root = rootAt(t, c);
+  // A language's own note names hold here as in a recipe (review t2d, M2): German "h moll" is B minor, and
+  // "b dur" is left unread, since a German, Polish or Russian "b" may be B flat.
+  const root = c.recipe ? recipeRootAt(t, c, c.recipe) : rootAt(t, c);
   if (!root) return null;
   const scale = leadId(root.rest, c.scales);
   if (!scale) return null;
@@ -608,11 +615,30 @@ function chordCall(t: Toks, c: Compiled): ToolCall | null {
   const body = named ?? t;
   if (body.length !== 1) return null;
   const tok = body[0];
-  const name = tok.charAt(0).toUpperCase() + tok.slice(1);
   chordPattern ??= new RegExp(chordNamePattern());
+  const native = c.recipe ? nativeChordName(tok, c.recipe.rootNames, chordPattern) : undefined;
+  if (native === null) return null;
+  const name = native ?? tok.charAt(0).toUpperCase() + tok.slice(1);
   if (!chordPattern.test(name)) return null;
   if (named === null && ROOT_NAMES.includes(name)) return null;
   return call("show_chord", { chord: name });
+}
+
+/**
+ * A chord typed with the language's own root name (`rootNames`; review t2d, M2): German "h7" is B7,
+ * "fism" F#m. Null: its root is a letter that names another note here ("b7"), so it is not read.
+ * Undefined: no such name, read as English. A name that leaves an accidental behind ("bb7") is not it.
+ */
+function nativeChordName(tok: string, names: ReadonlyMap<string, string | null>, pattern: RegExp): string | null | undefined {
+  const keys = [...names.keys()].filter((k) => tok.startsWith(k)).sort((a, b) => b.length - a.length);
+  for (const k of keys) {
+    const quality = tok.slice(k.length);
+    if (/^[#b]/.test(quality)) continue;
+    const root = names.get(k);
+    if (root === null) return null;
+    if (root !== undefined && pattern.test(root + quality)) return root + quality;
+  }
+  return undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -641,7 +667,7 @@ function verbAt(t: Toks, c: Compiled): { id: VerbId; rest: Toks } | null {
 
 type Parsed = readonly ToolCall[] | RouteResult | null;
 
-function parseVerb(id: VerbId, rest: Toks, c: Compiled, f: CommandFacts): Parsed {
+function parseVerb(id: VerbId, rest: Toks, c: Compiled, f: CommandFacts, ordinals: ReadonlySet<string>): Parsed {
   switch (id) {
     case "open": {
       if (rest.length === 0) return null;
@@ -748,7 +774,7 @@ function parseVerb(id: VerbId, rest: Toks, c: Compiled, f: CommandFacts): Parsed
       return q.length === 0 || c.nouns.screen.some((p) => equals(q, p)) ? [call("explain_screen")] : null;
     }
     case "make": {
-      const made = recipeCall(rest, c, true);
+      const made = recipeCall(rest, c, true, ordinals);
       return made ? [made] : null;
     }
   }
@@ -789,7 +815,14 @@ function fretAt(t: Toks, r: CompiledRecipe): { n: number; rest: Toks } | null {
  * and connectors between them. `reading` says whether the words after the root
  * are a scale or a chord ("a minor" is both).
  */
-function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "chord", made: boolean): ToolCall | null {
+function recipeAs(
+  t: Toks,
+  c: Compiled,
+  r: CompiledRecipe,
+  reading: "scale" | "chord",
+  made: boolean,
+  ordinals: ReadonlySet<string>,
+): ToolCall | null {
   const args: Record<string, string | number> = {};
   // Without a verb, a recipe needs a word only an exercise has: "a minor pentatonic" alone is a scale, not a
   // request. A shape or a fret is not one (review t2c, finding 1): "a minor pentatonic box", "… at the 5th
@@ -862,6 +895,13 @@ function recipeAs(t: Toks, c: Compiled, r: CompiledRecipe, reading: "scale" | "c
     const barsRest = bars === null ? null : after(q.slice(1), c.units.bar);
     if (bars !== null && barsRest) {
       if (bars < 1 || bars > MAX_RECIPE_BARS || !once("bars", bars)) return null;
+      // A bar's place is not a count of bars (review t2d, L1): "ab dem 4. Takt", "od 4 taktu", "с 4 такта",
+      // "4. ölçü". Not after a word that says "from" (`recipe.barFrom`), not typed as an ordinal ("4."), not
+      // the table's ordinal place ("4 takt").
+      let lead: Toks = t.slice(0, t.length - q.length);
+      for (let back = before(lead, c.fillers); back; back = before(lead, c.fillers)) lead = back;
+      if (r.barFrom.some((p) => endsWith(lead, p)) || ordinals.has(q[0])) return null;
+      if (placeAt(q, c.places.bar)?.start === 0) return null;
       exerciseWord = true;
       q = barsRest;
       continue;
@@ -933,12 +973,12 @@ function recipeRootAt(t: Toks, c: Compiled, r: CompiledRecipe): { name: string; 
 }
 
 /** The recipe the words are, or null (not a recipe, or not in this language's table). */
-function recipeCall(t: Toks, c: Compiled, made: boolean): ToolCall | null {
+function recipeCall(t: Toks, c: Compiled, made: boolean, ordinals: ReadonlySet<string>): ToolCall | null {
   if (!c.recipe || t.length === 0) return null;
   // A letter that names another note here than in English (German "b"): the key cannot be told, so the line is not read.
   const unread = c.recipe.rootNames;
   if (t.some((tok) => unread.has(tok) && unread.get(tok) === null)) return null;
-  return recipeAs(t, c, c.recipe, "scale", made) ?? recipeAs(t, c, c.recipe, "chord", made);
+  return recipeAs(t, c, c.recipe, "scale", made, ordinals) ?? recipeAs(t, c, c.recipe, "chord", made, ordinals);
 }
 
 const SWAP_ORDER = ["harder", "different", "style"] as const;
@@ -988,7 +1028,7 @@ function parseSet(t: Toks, c: Compiled, f: CommandFacts): Parsed {
 }
 
 /** The forms with no verb: "80", "80 bpm", "15 minutes", "step 7", "paths", "theme velvet". */
-function parseBare(t: Toks, c: Compiled, f: CommandFacts): Parsed {
+function parseBare(t: Toks, c: Compiled, f: CommandFacts, ordinals: ReadonlySet<string>): Parsed {
   const counted = numberWithUnit(t, c);
   if (counted) {
     if (counted.unit === null) return bareNumber(counted.n, f);
@@ -1013,7 +1053,7 @@ function parseBare(t: Toks, c: Compiled, f: CommandFacts): Parsed {
   const setting = settingCall(t, c);
   if (setting) return [setting];
   // "a minor pentatonic eighths 5th fret" (leg t2c): a recipe with no verb, every word a recipe's.
-  const recipe = recipeCall(t, c, false);
+  const recipe = recipeCall(t, c, false, ordinals);
   return recipe ? [recipe] : null;
 }
 
@@ -1102,6 +1142,6 @@ export function routeCommand(text: string, table: CommandTable, facts: CommandFa
   if (never) return { kind: "yours", item: never };
   // "a bit faster": a filler may come before the verb.
   const verb = verbAt(t, c) ?? verbAt(skip(t, c.fillers), c);
-  if (verb) return pressNamedGo(settle(parseVerb(verb.id, verb.rest, c, facts), facts), c);
-  return pressNamedGo(settle(parseBare(t, c, facts), facts), c);
+  if (verb) return pressNamedGo(settle(parseVerb(verb.id, verb.rest, c, facts, typed.ordinals), facts), c);
+  return pressNamedGo(settle(parseBare(t, c, facts, typed.ordinals), facts), c);
 }
