@@ -217,9 +217,14 @@ describe("make_exercise in Ask", () => {
     expect(receipt).toHaveTextContent("The Undo ended when you left the screen this was added on. To take it out, use Remove on My exercises in Paths.");
     expect(receipt).not.toHaveTextContent("stayed");
     expect(undone).toEqual([]);
-    // Back on Today: the Undo does not come back.
+    // Paths is on screen: its "Open Paths" has nothing left to do (leg t2g; t2d's open point 5).
+    expect(receipt.querySelector("[data-testid='ask-receipt-next']")).toBeNull();
+    // Only a chip to the screen on screen goes: "Opened Paths" keeps its way back.
+    expect(screen.getAllByTestId("ask-receipt")[1]).toHaveTextContent("Back to Today");
+    // Back on Today: the Undo does not come back, nor the chip.
     act(() => noteAskToolView("today", null));
     expect(screen.queryByTestId("ask-undo")).toBeNull();
+    expect(screen.getAllByTestId("ask-receipt")[0].querySelector("[data-testid='ask-receipt-next']")).toBeNull();
   });
 
   it("a full list: the receipt says so, and offers no Undo", async () => {
