@@ -52,6 +52,15 @@
             "Sixteenth notes on the open A string, strictly down-up, right through the take. Rest the picking hand lightly on the bridge so the low E stays quiet."
           ],
           "coachLine": "This one is only about time. I'll say how even your best eight bars in a row were and whether any note went missing.",
+          "cues": [
+            {"when":"even","say":"Land every stroke on its '1 e and a'.","more":0,"general":true},
+            {"when":"heard","say":"Pick every open A right through."},
+            {"when":"extras","say":"Keep the pick on the A string only."},
+            {"when":"late","say":"Put each '1' right on the click."},
+            {"when":"early","say":"Wait for the click on each '1'."},
+            {"when":"openString","say":"Keep every stroke the same size."},
+            {"when":"lastBars","say":"Keep counting '1 e and a' to the last note."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -174,6 +183,16 @@
             "Keep each finger down until the next one lands. If the notes come out as flams, the fingers are running ahead of the pick: make them lazier."
           ],
           "coachLine": "If the notes bunch up, drop one rung. I'll check the notes and the timing after the take.",
+          "cues": [
+            {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+            {"when":"heard","say":"Press each finger right behind the fret."},
+            {"when":"extras","say":"Keep each finger down until the next lands.","more":2},
+            {"when":"notes","say":"One finger per fret: never skip one."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+            {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -423,7 +442,17 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 148,
                   "difficulty": 6.79
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-5,stringSet=2",
@@ -488,7 +517,17 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 148,
                   "difficulty": 6.79
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-5,stringSet=5",
@@ -553,7 +592,17 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 148,
                   "difficulty": 6.79
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-7,stringSet=3",
@@ -618,7 +667,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 152,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-7,stringSet=4",
@@ -683,7 +742,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 152,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-7,stringSet=2",
@@ -748,7 +817,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 152,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-7,stringSet=5",
@@ -813,7 +892,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 152,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-9,stringSet=3",
@@ -878,7 +967,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-9,stringSet=4",
@@ -943,7 +1042,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-9,stringSet=2",
@@ -1008,7 +1117,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-9,stringSet=5",
@@ -1073,7 +1192,17 @@
                   "handShifts": 0,
                   "maxPlayableBpm": 400,
                   "difficulty": 6.67
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-3,stringSet=3",
@@ -1138,7 +1267,17 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 143,
                   "difficulty": 6.79
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-3,stringSet=4",
@@ -1203,7 +1342,17 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 143,
                   "difficulty": 6.79
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-3,stringSet=2",
@@ -1268,7 +1417,17 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 143,
                   "difficulty": 6.79
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               },
               {
                 "id": "position=fret-3,stringSet=5",
@@ -1333,7 +1492,17 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 143,
                   "difficulty": 6.79
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land each finger exactly as the pick strikes.","general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep each finger down until the next lands.","more":1},
+                  {"when":"notes","say":"One finger per fret: never skip one."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand one fret as each bar starts.","more":0},
+                  {"when":"lastBars","say":"Keep the walk down as even as the walk up."}
+                ]
               }
             ]
           }
@@ -1347,6 +1516,16 @@
             "This is tremolo picking in slow motion, and a good first thing to play on any day."
           ],
           "coachLine": "Four notes per pitch makes the time easy to judge, and I'll check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Move the fretting hand exactly on the beat.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the pick on the top string only."},
+            {"when":"notes","say":"Say A, C, B, A, then G, A, B, C.","more":0},
+            {"when":"late","say":"Put each new note right on the click."},
+            {"when":"early","say":"Wait for the click before each new note."},
+            {"when":"shift","say":"Have the next finger ready over its fret."},
+            {"when":"lastBars","say":"Give the last C all four of its strokes."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1479,6 +1658,14 @@
             "Leave the first finger down while the others play, so it is already there for the next loop."
           ],
           "coachLine": "Evenness first, then the notes. I'll check both after the take.",
+          "cues": [
+            {"when":"even","say":"Leave the first finger down through the loop.","more":1,"general":true},
+            {"when":"heard","say":"Press the little finger fully down."},
+            {"when":"extras","say":"Keep the pick on one string only."},
+            {"when":"notes","say":"Reach two frets up with the little finger.","more":0},
+            {"when":"late","say":"Put each loop's first note on the click."},
+            {"when":"early","say":"Wait for the click before each loop."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1826,6 +2013,14 @@
             "Sixteenths on fret 7 of the G string. Bar 1 accents the first of each four, bar 2 the second, bar 3 the third, bar 4 the fourth. Keep the time dead still at each change."
           ],
           "coachLine": "Bars 2 and 4 are the test. The accent reading is rough, so trust your ear too.",
+          "cues": [
+            {"when":"even","say":"Keep the time still as the accent moves.","more":0,"general":true},
+            {"when":"heard","say":"Play every quiet note, just lighter."},
+            {"when":"extras","say":"Keep the pick on the G string only."},
+            {"when":"late","say":"Put each '1' on the click, accent or not."},
+            {"when":"early","say":"Wait for the click; do not rush the accent."},
+            {"when":"lastBars","say":"Accent the last of each four, right on time."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -1985,6 +2180,14 @@
             "If only the downstroke accents come out, dig the upstroke a little deeper rather than hitting the downstroke softer."
           ],
           "coachLine": "Accent checks are rough. If the upstroke accents disappear on the recording, that is the thing to work on.",
+          "cues": [
+            {"when":"even","say":"Accent the first and fourth of each six.","more":0,"general":true},
+            {"when":"heard","say":"Play every quiet note, just lighter."},
+            {"when":"extras","say":"Keep the pick on the A string only."},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"openString","say":"Keep the six even between the accents."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -2104,6 +2307,13 @@
             "Six is even, so every group starts on a downstroke and the accent is always a downstroke here."
           ],
           "coachLine": "Accent checks are rough: I can only tell louder from not louder. Evenness and missed notes are firmer.",
+          "cues": [
+            {"when":"even","say":"Accent the first of each six; count the beat.","more":0,"general":true},
+            {"when":"heard","say":"Play every quiet note, just lighter."},
+            {"when":"extras","say":"Keep the pick on one string only."},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -2485,6 +2695,14 @@
             "Tap your foot on the click, not on the accents, and let the two disagree."
           ],
           "coachLine": "Your accents should fall against the click here, which makes it a good one to listen back to.",
+          "cues": [
+            {"when":"even","say":"Tap your foot on the click, not the accents.","more":1,"general":true},
+            {"when":"heard","say":"Play every quiet note, just lighter."},
+            {"when":"extras","say":"Keep the pick on the top string only."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"lastBars","say":"Count the beats until the accent meets the '1'."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -2652,6 +2870,15 @@
             "Sixteenths. Two of each pair, then change: in A minor, C and E, D and G, C and F, D and E. The strokes never change: down on the G string, up on the B string."
           ],
           "coachLine": "I can time these and check the notes. Which way the pick went is yours to keep honest, so the checklist asks.",
+          "cues": [
+            {"when":"even","say":"Change the notes; keep the strokes the same.","more":0,"general":true},
+            {"when":"heard","say":"Pick the higher string as firmly as the lower."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Know the next pair before it comes."},
+            {"when":"late","say":"Put each new pair right on the beat."},
+            {"when":"early","say":"Wait for the click before each new pair."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3044,6 +3271,15 @@
             "Sixteenths. Down on the B string, up on the G string. If you hear a tiny gap at each change, that is the hop out of the strings: make it smaller."
           ],
           "coachLine": "Compare this take with the outside one. The gap between the two is what you are working on.",
+          "cues": [
+            {"when":"even","say":"Keep it as even as the outside pairs.","general":true},
+            {"when":"heard","say":"Pick the lower string as firmly as the higher."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Know the next pair before it comes."},
+            {"when":"late","say":"Put each new pair right on the beat."},
+            {"when":"early","say":"Wait for the click before each new pair."},
+            {"when":"stringChange","say":"Make the hop smaller, not faster.","more":0}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3427,6 +3663,15 @@
             "If you get lost, stop, find beat 1 of the next bar and come back in there."
           ],
           "coachLine": "This is music now. Get it even, then take it up one rung at a time.",
+          "cues": [
+            {"when":"even","say":"Alternate strictly; never add a stroke.","more":1,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Say the lick's first note before you start."},
+            {"when":"late","say":"Start each lick right on the click."},
+            {"when":"early","say":"Wait for the click before each lick."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -19467,6 +19712,14 @@
             "Sixteenths. Start well under your clean tempo. Follow the tune and let the hand travel with it."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Start one note higher as each bar starts."},
+            {"when":"lastBars","say":"Keep the highest notes as even as the low."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
