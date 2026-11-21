@@ -21,8 +21,8 @@ row); TOOLS.md 2.2 (`loop_bars`), 3 (confirm tools: one press). Code: `src/sessi
 
 ## What must not change
 
-A loop is slow (two rungs under the Take's tempo), ungraded unless the Session listens and grades,
-never a plan step, never counted against the minutes, nothing stored, back to the same step. The
+A loop is slow (two rungs under the Take's tempo), never graded (no pass mark; the early / late strip
+only when the Session grades and listens), never a plan step, never counted against the minutes, nothing stored, back to the same step. The
 offer the Session makes by itself (`loopOffer`, its `front`, P1 / P2) is unchanged. Nothing during a
 Take: the tool's `when` already refuses, and the runner's `loop` event is valid only from `ready` and
 `result`.
