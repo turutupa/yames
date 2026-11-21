@@ -5518,6 +5518,13 @@
             "If you tense up, drop a rung. Speed comes from the motion getting smaller."
           ],
           "coachLine": "Two taps a beat give me a firm grid. Above the middle rungs, evenness is the number to trust.",
+          "cues": [
+            {"when":"even","say":"Lean on the first tap of each beat.","more":0,"general":true},
+            {"when":"heard","say":"Land each hammer-on firmly enough to sound."},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Put each beat's first tap on the click."},
+            {"when":"early","say":"Wait for the click on each beat's first tap."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5832,6 +5839,13 @@
             "Move the tap during the last hammer-on of the beat. There is less time than there was in triplets."
           ],
           "coachLine": "The taps carry the timing. The first tap after each move is the one that goes late.",
+          "cues": [
+            {"when":"even","say":"Move the tap during the beat's last hammer-on.","more":1,"general":true},
+            {"when":"heard","say":"Tap each new fret as firmly as the first."},
+            {"when":"extras","say":"Keep the tap on the top string only."},
+            {"when":"late","say":"Be over the next fret before its beat."},
+            {"when":"early","say":"Wait for the click on each beat's first tap."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -5953,6 +5967,14 @@
             "Both hands leave for the G chord together, on the last note of the F bar."
           ],
           "coachLine": "The taps carry the timing. Record it: at this speed your ear in the moment is not a fair judge.",
+          "cues": [
+            {"when":"even","say":"Move both hands on the F chord's last note.","more":1,"general":true},
+            {"when":"heard","say":"Fret the new note before the tap pulls off."},
+            {"when":"extras","say":"Keep the tap on the top string only."},
+            {"when":"late","say":"Put the first tap of each chord on the click."},
+            {"when":"early","say":"Wait for the click on each chord's first tap."},
+            {"when":"lastBars","say":"Bring the shape back to frets 5 and 8 for Am."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6161,6 +6183,13 @@
             "Lean a little on the fourth note, the A at fret 5. It is the middle of the beat and keeps the six even."
           ],
           "coachLine": "One tap a beat is my anchor. On a recording, count the notes between the taps: there should be five.",
+          "cues": [
+            {"when":"even","say":"Lean a little on the fourth note of six.","more":1,"general":true},
+            {"when":"heard","say":"Have the fretting hand ready before you tap."},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Put each tap right on the click."},
+            {"when":"early","say":"Wait for the click before each tap."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6413,6 +6442,13 @@
             "The tap has five notes to get to its next fret. Move early and wait above the string."
           ],
           "coachLine": "The taps carry the timing. Where each one landed is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move the tap early and wait above the string.","more":1,"general":true},
+            {"when":"heard","say":"Fret all three notes before you tap."},
+            {"when":"extras","say":"Keep the tap on the top string only."},
+            {"when":"late","say":"Be over the next fret before its beat."},
+            {"when":"early","say":"Wait above the string for the click."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6534,6 +6570,14 @@
             "Mute the string you leave with the first finger as it crosses."
           ],
           "coachLine": "One tap a beat, on alternating strings, is what I time.",
+          "cues": [
+            {"when":"even","say":"Use the middle finger at the B string's fret 6.","more":0,"general":true},
+            {"when":"heard","say":"Fret all three notes before you tap."},
+            {"when":"extras","say":"Land each tap on one string, not two."},
+            {"when":"late","say":"Put each tap right on the click."},
+            {"when":"early","say":"Wait for the click before each tap."},
+            {"when":"stringChange","say":"Cross during the last hammer-on of each beat."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6677,6 +6721,13 @@
             "Lean a little on the fourth note, the E at fret 5. It is the middle of the beat and keeps the six even."
           ],
           "coachLine": "One tap a beat carries the timing. On a recording, count the notes between the taps: there should be five.",
+          "cues": [
+            {"when":"even","say":"Use the third finger, not the middle, at fret 7.","more":1,"general":true},
+            {"when":"heard","say":"Fret all three notes before you tap."},
+            {"when":"extras","say":"Keep the tap on the B string only."},
+            {"when":"late","say":"Put each tap right on the click."},
+            {"when":"early","say":"Wait for the click before each tap."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6800,6 +6851,13 @@
             "The first tap, at fret 17, is E, an octave above the first finger's E at fret 5."
           ],
           "coachLine": "The taps carry the timing. Where each one landed is for your ear.",
+          "cues": [
+            {"when":"even","say":"Walk the tap down two frets, two, then one.","more":1,"general":true},
+            {"when":"heard","say":"Fret all three notes before you tap."},
+            {"when":"extras","say":"Keep the tap on the B string only."},
+            {"when":"late","say":"Move the tap early and wait above the string.","more":1},
+            {"when":"early","say":"Wait above the string for the click."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -6922,6 +6980,15 @@
             "The tapping hand and the first and third fingers cross during the last hammer-on of the bar, while the little finger still holds its note. The little finger follows while the tap sounds: it must be down at fret 8 before the tap pulls off."
           ],
           "coachLine": "One tap a beat carries the timing. The first beat of each bar shows whether the crossing was on time.",
+          "cues": [
+            {"when":"even","say":"Keep the little finger down as the others cross.","more":2,"general":true},
+            {"when":"heard","say":"Put the little finger down before the pull-off.","more":2},
+            {"when":"extras","say":"Land each tap on one string, not two."},
+            {"when":"late","say":"Put the first tap of each chord on the click."},
+            {"when":"early","say":"Wait for the click on each chord's first tap."},
+            {"when":"stringChange","say":"Cross as the last hammer-on sounds."},
+            {"when":"lastBars","say":"Cross back to the B string for Em."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7087,6 +7154,13 @@
             "After the tap at 15, both fretting fingers are still down: pull to the little finger, then to the first."
           ],
           "coachLine": "Two taps a beat, at two frets, are what I time.",
+          "cues": [
+            {"when":"even","say":"Tap on the click, then halfway through the beat.","more":0,"general":true},
+            {"when":"heard","say":"Keep both fretting fingers down for the taps.","more":1},
+            {"when":"extras","say":"Keep the tap on the top string only."},
+            {"when":"late","say":"Put both taps of each beat on the count."},
+            {"when":"early","say":"Wait for '1' and 'and' before each tap."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7208,6 +7282,14 @@
             "Rest a spare fretting finger on the B string so it can't ring when both hands jump over it."
           ],
           "coachLine": "The taps carry the timing. A ringing B string will show up as extra notes.",
+          "cues": [
+            {"when":"even","say":"Jump both hands over the middle string at once.","more":1,"general":true},
+            {"when":"heard","say":"Tap each string as firmly as the top one."},
+            {"when":"extras","say":"Land each tap on one string, not two."},
+            {"when":"late","say":"Put both taps of each beat on the count."},
+            {"when":"early","say":"Wait for '1' and 'and' before each tap."},
+            {"when":"stringChange","say":"Cross every half beat, both hands at once.","more":0}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7330,6 +7412,13 @@
             "Both fretting fingers are down when you tap. The first pull-off lands on the little finger."
           ],
           "coachLine": "One tap a beat is what I time. The three notes after it are for your ear.",
+          "cues": [
+            {"when":"even","say":"Have both fingers down when you tap.","more":1,"general":true},
+            {"when":"heard","say":"Flick both pull-offs toward the floor."},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Put each tap right on the click."},
+            {"when":"early","say":"Wait for the click before each tap."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -7630,6 +7719,14 @@
             "The fretting hand moves two frets while the first tap of the new bar is sounding. Keep both fingers in their shape as it moves, and have the first finger down before that tap pulls off."
           ],
           "coachLine": "Two taps a beat, at two frets, carry the timing. The first beat after each move is where it slips.",
+          "cues": [
+            {"when":"even","say":"Keep the taps still; move the fretting hand.","more":1,"general":true},
+            {"when":"heard","say":"Fret the new note before the tap pulls off."},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Put both taps of each beat on the count."},
+            {"when":"early","say":"Wait for '1' and 'and' before each tap."},
+            {"when":"lastBars","say":"Move the fretting hand as the first tap sounds.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -8033,6 +8130,14 @@
             "Move the tapping hand as a whole, with the thumb sliding along the edge of the neck, while the pull-offs at the end of the bar sound."
           ],
           "coachLine": "The taps carry the timing. Where each one landed is for your ear.",
+          "cues": [
+            {"when":"even","say":"Keep the fretting hand still; move the taps.","more":0,"general":true},
+            {"when":"heard","say":"Keep both fretting fingers down for the taps."},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Move the tapping hand as the pull-offs sound.","more":1},
+            {"when":"early","say":"Wait for '1' and 'and' before each tap."},
+            {"when":"lastBars","say":"Slide the whole tapping hand, thumb and all.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -8335,7 +8440,15 @@
                 "harmony": {
                   "kind": "chordTones",
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Keep the fretting hand still; move the taps.","more":0,"general":true},
+                  {"when":"heard","say":"Keep both fretting fingers down for the taps."},
+                  {"when":"extras","say":"Keep the tap on the one string."},
+                  {"when":"late","say":"Move the tapping hand as the pull-offs sound."},
+                  {"when":"early","say":"Wait for '1' and 'and' before each tap."},
+                  {"when":"lastBars","say":"Slide the whole tapping hand, thumb and all."}
+                ]
               },
               {
                 "id": "key=G-minor",
@@ -8420,7 +8533,15 @@
                 "harmony": {
                   "kind": "chordTones",
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Keep the fretting hand still; move the taps.","more":0,"general":true},
+                  {"when":"heard","say":"Keep both fretting fingers down for the taps."},
+                  {"when":"extras","say":"Keep the tap on the one string."},
+                  {"when":"late","say":"Move the tapping hand as the pull-offs sound."},
+                  {"when":"early","say":"Wait for '1' and 'and' before each tap."},
+                  {"when":"lastBars","say":"Slide the whole tapping hand, thumb and all."}
+                ]
               }
             ]
           }
@@ -8434,6 +8555,15 @@
             "On the G string the third finger hammers. Rest the middle finger on the string in between so it can't ring when both hands jump over it."
           ],
           "coachLine": "The taps carry the timing. A B string that gets struck can count as an extra note; one that only rings is for your ear.",
+          "cues": [
+            {"when":"even","say":"Jump both hands over the middle string at once.","more":1,"general":true},
+            {"when":"heard","say":"Tap each string as firmly as the top one."},
+            {"when":"extras","say":"Land each tap on one string, not two."},
+            {"when":"late","say":"Put both taps of each beat on the count."},
+            {"when":"early","say":"Wait for '1' and 'and' before each tap."},
+            {"when":"stringChange","say":"Cross every half beat, both hands at once.","more":0},
+            {"when":"lastBars","say":"Move only the fretting hand, two frets down."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -8854,6 +8984,15 @@
             "Take the bar lines one at a time before joining them. Bar 3 into bar 4 is the hard one: both hands move and the figure changes."
           ],
           "coachLine": "Band on. The taps carry the timing. Record it: at this speed your ear in the moment is not a fair judge.",
+          "cues": [
+            {"when":"even","say":"Practise each change alone, then all four.","more":1,"general":true},
+            {"when":"heard","say":"Fret the new note before the tap pulls off."},
+            {"when":"extras","say":"Land each tap on one string, not two."},
+            {"when":"late","say":"Put both taps of each beat on the count."},
+            {"when":"early","say":"Wait for '1' and 'and' before each tap."},
+            {"when":"stringChange","say":"Cross every half beat, both hands at once."},
+            {"when":"lastBars","say":"Have the two-tap figure ready before it starts.","more":1}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -9496,6 +9635,14 @@
             "This is the A minor progression from the Beginner Level. Play it until the moves need no thought."
           ],
           "coachLine": "Band on. The taps carry the timing.",
+          "cues": [
+            {"when":"even","say":"Count four cells to every chord.","more":0,"general":true},
+            {"when":"heard","say":"Land each hammer-on firmly enough to sound."},
+            {"when":"extras","say":"Keep the tap on the top string only."},
+            {"when":"late","say":"Land each chord's first tap with the band."},
+            {"when":"early","say":"Wait for the band on each chord's first tap."},
+            {"when":"lastBars","say":"Drop both hands one fret for the last chord."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -9642,6 +9789,14 @@
             "The first tap of every bar is a note of its chord. The others are the scale around it."
           ],
           "coachLine": "Band on. Sixteen taps in four bars; I time each one.",
+          "cues": [
+            {"when":"even","say":"Know each chord's four taps before it comes.","more":0,"general":true},
+            {"when":"heard","say":"Tap each new fret as firmly as the first."},
+            {"when":"extras","say":"Keep the tap on the top string only."},
+            {"when":"late","say":"Be over the next fret before its beat."},
+            {"when":"early","say":"Wait for the band on each chord's first tap."},
+            {"when":"lastBars","say":"Reach the tap up to fret 19 and back down."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -9792,6 +9947,13 @@
             "If the tapping finger or the forearm starts to burn, that is the set done."
           ],
           "coachLine": "I check that the time holds to the end of the minute. Whether the volume held is for your ear.",
+          "cues": [
+            {"when":"even","say":"Breathe, and let both shoulders drop.","more":0,"general":true},
+            {"when":"heard","say":"Flick every pull-off right to the end."},
+            {"when":"late","say":"Put each tap right on the click."},
+            {"when":"early","say":"Wait for the click before each tap."},
+            {"when":"lastBars","say":"Start at a tempo you can hold a whole minute."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -10078,6 +10240,14 @@
             "In the D bar and the B bar the first pull-off lands on the little finger, so the whole hand has to be in its new place, both fingers down, before the tap leaves. The tap holds the string for one sixteenth: move as it lands, not after."
           ],
           "coachLine": "Band on. One tap a beat carries the timing; the three notes after it are for your ear.",
+          "cues": [
+            {"when":"even","say":"Move as the tap lands, not after.","more":1,"general":true},
+            {"when":"heard","say":"Have both fingers down before the tap leaves.","more":1},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Land each chord's first tap with the band."},
+            {"when":"early","say":"Wait for the band on each chord's first tap."},
+            {"when":"lastBars","say":"Drop both hands three frets for the last chord."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10438,7 +10608,15 @@
                 "harmony": {
                   "kind": "chordTones",
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Move as the tap lands, not after.","general":true},
+                  {"when":"heard","say":"Have both fingers down before the tap leaves."},
+                  {"when":"extras","say":"Keep the tap on the one string."},
+                  {"when":"late","say":"Land each chord's first tap with the band."},
+                  {"when":"early","say":"Wait for the band on each chord's first tap."},
+                  {"when":"lastBars","say":"Drop both hands three frets for the last chord."}
+                ]
               },
               {
                 "id": "stringSet=G:-C-minor",
@@ -10558,6 +10736,14 @@
             "Move the tap while the fretting hand plays its three notes. Look at the fret you are going to."
           ],
           "coachLine": "Band on. Sixteen taps in four bars carry the timing; where each one landed is for your ear.",
+          "cues": [
+            {"when":"even","say":"Move the tap during the three fretted notes.","more":2,"general":true},
+            {"when":"heard","say":"Tap each new fret as firmly as the first."},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Be over the next fret before its beat."},
+            {"when":"early","say":"Wait for the band on each chord's first tap."},
+            {"when":"lastBars","say":"Look at the fret you are going to, every beat.","more":2}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -11056,6 +11242,14 @@
             "The join is bar 4 into bar 5: the tap goes from fret 12 up to fret 17 while the fretting hand comes up one fret, from frets 4 and 7 to frets 5 and 8."
           ],
           "coachLine": "Band on. The taps carry the timing. Record it and listen for the bar where the melody begins.",
+          "cues": [
+            {"when":"even","say":"Join the line to the melody without a gap.","more":1,"general":true},
+            {"when":"heard","say":"Have both fingers down before the tap leaves."},
+            {"when":"extras","say":"Keep the tap on the one string."},
+            {"when":"late","say":"Land each chord's first tap with the band."},
+            {"when":"early","say":"Wait for the band on each chord's first tap."},
+            {"when":"lastBars","say":"Keep the eighth bar as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -12890,6 +13084,13 @@
             "Start well under your clean tempo. Two taps a beat. The tap moves up five frets at the bar line; the fretting hand stays."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":1,"general":true},
+            {"when":"heard","say":"Land each hammer-on firmly enough to sound."},
+            {"when":"late","say":"Put each beat's first tap on the click."},
+            {"when":"early","say":"Wait for the click on each beat's first tap."},
+            {"when":"lastBars","say":"Keep the high tap as even as the low one."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {

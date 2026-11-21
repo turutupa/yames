@@ -12,7 +12,10 @@ Cues: `src/paths/specs/tapping-cues.ts`, attached with `withCues` in `tapping.ts
   cell-around), 14 Exercises. `check`: 0 errors, 0 refused, 0 cues rewritten (`gc2.log`).
 - [x] Level 2 (Intermediate: sixteenths, sixteenths-in-e-minor, two-strings, strings-through-chords,
   warm-up loop-around), 15 Exercises. `check`: 0 errors, 0 refused, 0 cues rewritten (`gc4.log`).
-- [ ] Level 3
+- [x] Level 3 (Advanced: sextuplet-taps, scale-under-the-tap, scale-tap-again, two-taps-and-skips,
+  two-taps-through-chords, over-the-band, second-solo, warm-up fast-around), 23 Exercises. `check`: 0
+  errors, 0 refused, 0 cues rewritten (`gc7.log`; the 55 `variant.rewritten` lines are purposes and
+  how-tos, none mine).
 - [ ] Proof-read
 - [ ] Translations
 - [ ] Gates
@@ -27,3 +30,10 @@ hammer-on lands.", "Flick the last pull-off toward the floor.". `cue.specific` r
 Level 2: the double tap's G-string variant refused "Put the little finger back down as you tap." -> "Put
 the higher finger back down as you tap." (the base tab carries no finger marks; the variant hammers
 with the third).
+
+Level 3: `cue.specific` refused "over the B string" on skip-taps (a string the Exercise does not play)
+-> "Jump both hands over the middle string at once." (shared with skip-em-am). The B-string variant of
+"Six notes from one tap" refused "Have all three fingers down" (the fingers differ) and then "Fret all
+three notes" (the frets moved differently) -> "Have the fretting hand ready before you tap."; the
+G-string variant of "The cell from the top down" refused "Pull off from the higher fret to the lower."
+-> "Flick both pull-offs toward the floor.".
