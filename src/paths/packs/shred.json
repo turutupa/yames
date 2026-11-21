@@ -4118,6 +4118,17 @@
             "Shift during the last note of a pass, not after it. Six bars, then it starts again."
           ],
           "coachLine": "Long lines are where the time drifts. I'll report evenness over the whole take and the notes after it.",
+          "cues": [
+            {"when":"even","say":"Count '1 e and a': one string to each beat.","general":true},
+            {"when":"heard","say":"Press each finger right behind the fret."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Say '1-2-3-4' going up, '4-3-2-1' coming down.","more":0},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Shift during the last note of a pass.","more":1},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the last pass down as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -4831,6 +4842,17 @@
             "Lift each finger only when its partner on the other string has landed."
           ],
           "coachLine": "This is a diagnostic, so play it slowly enough to hear the weakest change. I'll check the timing and the notes.",
+          "cues": [
+            {"when":"even","say":"Lift each finger only when its partner lands.","more":2,"general":true},
+            {"when":"heard","say":"Press each finger right behind the fret."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Say '1-3, 2-4' with the fingers each beat.","more":0},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Move the hand as each bar starts, not after.","more":1},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the crawl back down as even as the climb."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5174,7 +5196,18 @@
                   "handShifts": 3,
                   "maxPlayableBpm": 127,
                   "difficulty": 8.28
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lift each finger only when its partner lands.","more":1,"general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep the stroke small: just the two strings."},
+                  {"when":"notes","say":"Say '1-3, 2-4' with the fingers each beat.","more":0},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand as each bar starts, not after."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross."},
+                  {"when":"lastBars","say":"Keep the crawl back down as even as the climb."}
+                ]
               },
               {
                 "id": "position=fret-9",
@@ -5270,7 +5303,18 @@
                   "handShifts": 2,
                   "maxPlayableBpm": 137,
                   "difficulty": 8.25
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lift each finger only when its partner lands.","more":1,"general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep the stroke small: just the two strings."},
+                  {"when":"notes","say":"Say '1-3, 2-4' with the fingers each beat.","more":0},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand as each bar starts, not after."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross."},
+                  {"when":"lastBars","say":"Keep the crawl back down as even as the climb."}
+                ]
               },
               {
                 "id": "position=fret-3",
@@ -5366,7 +5410,18 @@
                   "handShifts": 4,
                   "maxPlayableBpm": 109,
                   "difficulty": 8.31
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Lift each finger only when its partner lands.","more":1,"general":true},
+                  {"when":"heard","say":"Press each finger right behind the fret."},
+                  {"when":"extras","say":"Keep the stroke small: just the two strings."},
+                  {"when":"notes","say":"Say '1-3, 2-4' with the fingers each beat.","more":0},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Move the hand as each bar starts, not after."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross."},
+                  {"when":"lastBars","say":"Keep the crawl back down as even as the climb."}
+                ]
               }
             ]
           }
@@ -5380,6 +5435,17 @@
             "Say the finger numbers out loud for the first few passes."
           ],
           "coachLine": "Stay on a rung that keeps it even. Fast and rough teaches the wrong thing here.",
+          "cues": [
+            {"when":"even","say":"Say '1-3-2-4' out loud for the first passes.","more":1,"general":true},
+            {"when":"heard","say":"Press each finger right behind the fret."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Say '4-2-3-1' before the way down.","more":0},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Shift during the last note of a pass."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the way down as even as the way up."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5867,6 +5933,15 @@
             "Down, up, down, up, down, up: six is even, so every loop starts on a downstroke."
           ],
           "coachLine": "This is the corner that long runs trip on. Evenness tells the story, and I'll check the notes after.",
+          "cues": [
+            {"when":"even","say":"Keep the six even through every crossing.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Say the six notes once before you start."},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"stringChange","say":"Make the hop smaller, not faster."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6310,6 +6385,16 @@
             "From G and B down, the lower string's upper note is fret 7, not 8 (G, D and A are 5-7; B and the top E are 5-8): the box's shape changes, the picking doesn't."
           ],
           "coachLine": "The change of string pair is the risk. If a note goes missing, look at the beat it changed on.",
+          "cues": [
+            {"when":"even","say":"Find each new pair of strings on the beat.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Know the next string pair before it comes.","more":2},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"stringChange","say":"Change pairs right on the beat."},
+            {"when":"lastBars","say":"Climb back to the top pair just as evenly."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -6880,6 +6965,15 @@
             "Going up, the crossing is inside (upstroke on the lower string, downstroke on the higher); coming round from the higher string's top note to the lower string's first it is outside."
           ],
           "coachLine": "Four to the click at 110 is a little slower than the six-note loop at 80. The turn back to the lower string is the place to listen to.",
+          "cues": [
+            {"when":"even","say":"Count '1 e and a': one loop to each beat.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Say the four notes once before you start."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7219,6 +7313,15 @@
             "If this one is clean and the first loop is not, your inside crossing is the weaker one: spend the extra minutes there."
           ],
           "coachLine": "Compare this with the first loop. A big difference is worth knowing about.",
+          "cues": [
+            {"when":"even","say":"Start each six from its top note, on the beat.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Say the six notes once before you start."},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -7682,6 +7785,16 @@
             "Starting on a downstroke, the change from the top string to the B string is inside both times. The landing note is a downstroke on the G string, an outside crossing."
           ],
           "coachLine": "Even sixteenths first. This one is worth owning at a moderate tempo before it gets fast.",
+          "cues": [
+            {"when":"even","say":"Land the last note right on beat four.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Say the six notes once before you start."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then go."},
+            {"when":"stringChange","say":"Make the hop smaller, not faster."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8109,6 +8222,16 @@
             "Sixteenths: the six notes twice, then a quarter note on the top string's fret 5. Starting on a downstroke, the pick stays outside the pair at each change."
           ],
           "coachLine": "Compare this with the descending take. A big difference is worth a note in your practice.",
+          "cues": [
+            {"when":"even","say":"Play it as evenly as the descending one.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Say the six notes once before you start."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the long note's beat, then go."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8538,6 +8661,16 @@
             "Starting from G on the D string, the B string's notes are a fret higher (6, 8, 10): move the hand up a fret at that string change."
           ],
           "coachLine": "When it is even both ways, the whole neck is the same idea with more strings.",
+          "cues": [
+            {"when":"even","say":"Come back down without repeating the top note.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Have every finger ready before it plays."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8820,6 +8953,18 @@
             "The hand moves up one fret when you reach the B string (6, 8, 10) and again for the top string (7, 8, 10), and back down the same way. Do each move during the string change, not after it."
           ],
           "coachLine": "Long lines are where the time drifts. Evenness across the whole take is the number.",
+          "cues": [
+            {"when":"even","say":"Count '1 e and a' all the way up and down.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Count three notes on each string.","more":0},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"afterHeld","say":"Count the held note out, then start again."},
+            {"when":"shift","say":"Shift as you cross to the B string.","more":1},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the way down as even as the way up."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -8975,6 +9120,18 @@
             "Three is odd, so each group starts on the opposite stroke from the last. That is the point: the crossings keep changing."
           ],
           "coachLine": "A long run like this usually slips in the same place. The evenness after the take helps you find it.",
+          "cues": [
+            {"when":"even","say":"Count '1-trip-let'; each group one note up.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Start each group one note higher."},
+            {"when":"late","say":"Put each group's first note on the click."},
+            {"when":"early","say":"Wait for the click before each group."},
+            {"when":"afterHeld","say":"Count the landing's beat, then start again."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the triplets even right to the landing."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -9272,6 +9429,17 @@
             "Sixteenths. Each group starts one scale note higher going up, and one lower coming down. The first note of each group is on the click."
           ],
           "coachLine": "The turn at the top is the place to listen to.",
+          "cues": [
+            {"when":"even","say":"Put the first note of each group on the beat.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Start each group one note higher, then lower.","more":0},
+            {"when":"late","say":"Put each group's first note on the click."},
+            {"when":"early","say":"Wait for the click before each group."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the groups coming down even to the end."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -9676,6 +9844,17 @@
             "Six is even, so every group starts on a downstroke. The string changes move around inside the beat."
           ],
           "coachLine": "This is fast enough that the onset timing on a real rig is the weakest part of the reading, so trust your ear on the recording too.",
+          "cues": [
+            {"when":"even","say":"Lean a little on the first of each six.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Start each group one note higher, then lower.","more":0},
+            {"when":"late","say":"Put the first of each six on the click."},
+            {"when":"early","say":"Wait for the click before each six."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the falling sixes as even as the climb."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -10080,6 +10259,18 @@
             "The landing is a downstroke after an even number of notes. Arrive on it exactly on beat 3."
           ],
           "coachLine": "Land on time and the run was fine. I'll check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Land the half note exactly on beat three.","more":1,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Start each group one note lower.","more":0},
+            {"when":"late","say":"Put each group's first note on the click."},
+            {"when":"early","say":"Wait for the click before each group."},
+            {"when":"afterHeld","say":"Count the half note's two beats, then go."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the groups even right to the landing."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -10319,7 +10510,19 @@
                   "scale": "naturalMinor",
                   "spelled": ["A", "B", "C", "D", "E", "F", "G"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land the half note exactly on beat three.","more":0,"general":true},
+                  {"when":"heard","say":"Pick every note right through."},
+                  {"when":"extras","say":"Keep the stroke small as you cross strings."},
+                  {"when":"notes","say":"Start each group one note lower."},
+                  {"when":"late","say":"Put each group's first note on the click."},
+                  {"when":"early","say":"Wait for the click before each group."},
+                  {"when":"afterHeld","say":"Count the half note's two beats, then go."},
+                  {"when":"shift","say":"Have each new string's first note ready."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross."},
+                  {"when":"lastBars","say":"Keep the groups even right to the landing."}
+                ]
               },
               {
                 "id": "stringSet=low-middle,-down-from-F",
@@ -10382,7 +10585,19 @@
                   "scale": "naturalMinor",
                   "spelled": ["A", "B", "C", "D", "E", "F", "G"],
                   "cover": false
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Land the half note exactly on beat three.","more":0,"general":true},
+                  {"when":"heard","say":"Pick every note right through."},
+                  {"when":"extras","say":"Keep the stroke small as you cross strings."},
+                  {"when":"notes","say":"Start each group one note lower."},
+                  {"when":"late","say":"Put each group's first note on the click."},
+                  {"when":"early","say":"Wait for the click before each group."},
+                  {"when":"afterHeld","say":"Count the half note's two beats, then go."},
+                  {"when":"shift","say":"Have each new string's first note ready."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross."},
+                  {"when":"lastBars","say":"Keep the groups even right to the landing."}
+                ]
               }
             ]
           }
@@ -10412,6 +10627,14 @@
             "Sixteenths: the fret-12 figure from its top, 15, 13, 12, 13 on the top string (fingers 4, 2, 1, 2), then a quarter note on 12, the E. Everything relaxes during the quarter."
           ],
           "coachLine": "Landing on time counts more than the run. Timing and missed notes are what I have here.",
+          "cues": [
+            {"when":"even","say":"Land the quarter note right with the click.","general":true},
+            {"when":"heard","say":"Pick every note of the burst right through."},
+            {"when":"extras","say":"Stop each burst cleanly on the long note."},
+            {"when":"late","say":"Start each burst right on the click."},
+            {"when":"early","say":"Wait for the click before each burst."},
+            {"when":"afterHeld","say":"Count the long note's beat, then go."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10708,6 +10931,14 @@
             "Sixteenths: the fret-12 figure twice (12, 13, 15, 13, 12, 13, 15, 13), then a half note on 12. The halfway point of the run is where the time usually moves."
           ],
           "coachLine": "If one beat was clean and two is not, that is a stamina question and not a speed one.",
+          "cues": [
+            {"when":"even","say":"Count the burst, then land the half note.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note of the burst right through."},
+            {"when":"extras","say":"Stop each burst cleanly on the long note."},
+            {"when":"late","say":"Start each burst right on the click."},
+            {"when":"early","say":"Wait for the click before each burst."},
+            {"when":"afterHeld","say":"Count the half note's two beats, then go."}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -10995,6 +11226,15 @@
             "Sixteenths on the fret-12 figure. The bar tells you how long to keep going: bar 1 one beat, bar 2 two, bar 3 three, each landing on 12; bar 4 has no rest at all, so the hand has to stay loose while moving."
           ],
           "coachLine": "Most people slip somewhere in the third bar. It helps to know which one is yours.",
+          "cues": [
+            {"when":"even","say":"Play one more beat each bar, then rest.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note of the burst right through."},
+            {"when":"extras","say":"Stop each burst cleanly on the long note."},
+            {"when":"late","say":"Start each burst right on the click."},
+            {"when":"early","say":"Wait for the click before each burst."},
+            {"when":"afterHeld","say":"Count the rest out, then start the burst."},
+            {"when":"lastBars","say":"Keep going through the last four beats.","more":0}
+          ],
           "grading": "graded",
           "feedback": "livePerNote",
           "meter": {
@@ -11473,6 +11713,16 @@
             "One beat of sextuplets from the top string (C, B, A, G, F, E), then D, C and A as quarter notes. Land exactly on beat 2."
           ],
           "coachLine": "Fast notes on a real rig are the hardest to time, so trust the landing and your own ear as much as the numbers.",
+          "cues": [
+            {"when":"even","say":"Land the first quarter note on beat two.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note of the burst right through."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Name the walk-down's notes before you start."},
+            {"when":"late","say":"Start each burst right on the click."},
+            {"when":"early","say":"Wait for the click before each burst."},
+            {"when":"afterHeld","say":"Count the last quarter note, then start."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -11893,6 +12143,17 @@
             "Muting is the technique here: the underside of the first finger damps the string between the octave notes, and the picking hand's palm damps the strings below."
           ],
           "coachLine": "If notes go missing here it is usually the skip or the shift. Slow down until neither is a surprise.",
+          "cues": [
+            {"when":"even","say":"Aim the pick at the far string before you go.","more":0,"general":true},
+            {"when":"heard","say":"Pick the high note as firmly as the low."},
+            {"when":"extras","say":"Rest a finger lightly on the skipped string.","more":2},
+            {"when":"notes","say":"Name each octave's note before you play it."},
+            {"when":"late","say":"Put each beat's low note on the click."},
+            {"when":"early","say":"Wait for the click before each new pair."},
+            {"when":"shift","say":"Arrive at the next pair as each beat starts.","more":1},
+            {"when":"stringChange","say":"Stay clear of the skipped string."},
+            {"when":"lastBars","say":"Come back down as evenly as you went up."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -12234,6 +12495,16 @@
             "Bar 2 comes down in pairs (top E 8-5, G 7-5, B 8-5, D 7-5, G 7-5, A 7-5, D 7-5) and ends low E 5-8, which leads back to the 5 at the start."
           ],
           "coachLine": "Skips are where noise starts. If extra notes show up in the report, the skipped string is the likely source.",
+          "cues": [
+            {"when":"even","say":"Find each new string before its pair starts.","general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Stay clear of the skipped string."},
+            {"when":"notes","say":"Know the next pair before it comes."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"stringChange","say":"Make the hop smaller, not faster.","more":1},
+            {"when":"lastBars","say":"Come back down as evenly as you went up."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -12642,6 +12913,16 @@
             "Every string change is an inside crossing. The two between the D and B strings also skip the G string, the hardest kind: the pick has to escape the strings and clear one."
           ],
           "coachLine": "I'll check the notes against the chord and the timing after the take.",
+          "cues": [
+            {"when":"even","say":"Keep the hand still after the first note.","more":1,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Stay clear of the skipped string."},
+            {"when":"notes","say":"Name each note's chord tone as you play it."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Shift up right after the lowest note."},
+            {"when":"stringChange","say":"Clear the skipped string in one small hop.","more":2}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -12959,7 +13240,17 @@
                   "chord": "Cm",
                   "spelled": ["C", "Eb", "G"],
                   "cover": true
-                }
+                },
+                "cues": [
+                  {"when":"even","say":"Keep the hand still after the first note.","general":true},
+                  {"when":"heard","say":"Pick every note right through."},
+                  {"when":"extras","say":"Stay clear of the skipped string."},
+                  {"when":"notes","say":"Name each note's chord tone as you play it."},
+                  {"when":"late","say":"Put the first note of each beat on the click."},
+                  {"when":"early","say":"Wait for the click at the start of each beat."},
+                  {"when":"shift","say":"Shift up right after the lowest note."},
+                  {"when":"stringChange","say":"Clear the skipped string in one small hop.","more":1}
+                ]
               }
             ]
           }
@@ -12990,6 +13281,17 @@
             "Bar 1 starts on the G string's fret 5, bar 2 the D string's, bar 3 the A string's, bar 4 the low E's, so each bar starts a string lower."
           ],
           "coachLine": "I can check the notes and the timing. Whether the pick fell through or went round is on the checklist.",
+          "cues": [
+            {"when":"even","say":"Let the pick fall through to each new string.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Count three notes on each string."},
+            {"when":"late","say":"Start each run right on the click."},
+            {"when":"early","say":"Wait for the click before each run."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the move to the next string small."},
+            {"when":"lastBars","say":"Start the low E run right on the '1'.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -13146,6 +13448,15 @@
             "B string 5, 6, 8 (fingers 1, 2, 4), top string 5, 8 (fingers 1, 4). Strokes: down, up, down, then down again straight through to the top string, up. The return to the B string is a downstroke after that upstroke: an outside crossing, so the next group starts down again."
           ],
           "coachLine": "Quintuplets are a feel thing, so the evenness bar here is a little looser. I'll check the notes after the take.",
+          "cues": [
+            {"when":"even","say":"Count 'one-two-three-four-five' to each click.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the two strings."},
+            {"when":"notes","say":"Say the five notes once before you start."},
+            {"when":"late","say":"Put the first of each five on the click."},
+            {"when":"early","say":"Wait for the click before each five."},
+            {"when":"stringChange","say":"Keep the move to the next string small."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -13626,6 +13937,17 @@
             "Bar 1 comes down from the D string's fret 9 to the low E, bar 2 from the G string to the A, bar 3 from the B to the D, bar 4 from the top string to the G."
           ],
           "coachLine": "Most players find this direction stickier. I'll check the notes and timing; the strokes are yours to check.",
+          "cues": [
+            {"when":"even","say":"Let each upstroke fall to the string below.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small as you cross strings."},
+            {"when":"notes","say":"Count three notes on each string."},
+            {"when":"late","say":"Start each run right on the click."},
+            {"when":"early","say":"Wait for the click before each run."},
+            {"when":"shift","say":"Have each new string's first note ready."},
+            {"when":"stringChange","say":"Keep the move to the next string small."},
+            {"when":"lastBars","say":"Start the run from the top string on the '1'.","more":1}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -13783,6 +14105,16 @@
             "Listen to the snare, not to your own fingers. If you get lost, catch the next bar line and carry on."
           ],
           "coachLine": "I'll check the notes against the chords after the take. Whether it rings like a chord or sounds separated is yours to judge.",
+          "cues": [
+            {"when":"even","say":"Alternate every stroke, even across strings.","more":1,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"extras","say":"Keep the stroke small: just the strings in use."},
+            {"when":"notes","say":"Know the next chord before it comes."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the last chord as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -21410,6 +21742,15 @@
             "Sixteenths. Start well under your clean tempo. Change position at the bar line, and keep the shift small."
           ],
           "coachLine": "This is a warm-up. It tells you how it went, and it decides nothing.",
+          "cues": [
+            {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
+            {"when":"heard","say":"Pick every note right through."},
+            {"when":"late","say":"Put the first note of each beat on the click."},
+            {"when":"early","say":"Wait for the click at the start of each beat."},
+            {"when":"shift","say":"Keep the shift small, right as each bar starts.","more":0},
+            {"when":"stringChange","say":"Keep the pick close as you cross."},
+            {"when":"lastBars","say":"Keep the second run as even as the first."}
+          ],
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
