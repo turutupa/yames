@@ -70,6 +70,7 @@
       "what1": "Il coach legge le tue take e i tuoi percorsi: ti dà la riga di Oggi, una nota dopo una take e risposte quando chiedi.",
       "question": "Il coach deve rispondere anche con parole sue?",
       "withoutModel": "Disattivato ti dà comunque la riga, la nota, gli strumenti e risposte dalle tue take e dai tuoi percorsi.",
+      "modelBuys": "Con un modello, una domanda che le risposte proprie dell'app non coprono riceve una risposta con le parole del modello, indicata come consiglio generale. Tutto ciò che viene misurato arriva comunque dall'app.",
       "privacy": "Tutto gira su questa macchina. Il tuo audio non esce mai e le build di rilascio non lo registrano.",
       "recommended": "Consigliato",
       "off": {

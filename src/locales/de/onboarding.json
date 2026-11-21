@@ -70,6 +70,7 @@
       "what1": "Der Coach liest deine Takes und deine Pfade: Er gibt dir die Zeile für Heute, eine Notiz nach einem Take und antwortet, wenn du fragst.",
       "question": "Soll der Coach auch mit eigenen Worten antworten?",
       "withoutModel": "Aus gibt dir trotzdem die Zeile, die Notiz, die Werkzeuge und Antworten aus deinen Takes und Pfaden.",
+      "modelBuys": "Mit einem Modell bekommt eine Frage, die die eigenen Antworten der App nicht abdecken, eine Antwort in den eigenen Worten des Modells, gekennzeichnet als allgemeiner Rat. Alles Gemessene kommt in jedem Fall aus der App.",
       "privacy": "Alles läuft auf diesem Rechner. Dein Audio verlässt ihn nie, und Release-Builds nehmen nichts auf.",
       "recommended": "Empfohlen",
       "off": {

@@ -70,6 +70,7 @@
       "what1": "De coach leest je takes en je leerpaden: hij geeft je de regel van Vandaag, een notitie na een take en antwoorden als je iets vraagt.",
       "question": "Moet de coach ook in eigen woorden antwoorden?",
       "withoutModel": "Uit geeft je nog steeds de regel, de notitie, de tools en antwoorden vanuit je takes en leerpaden.",
+      "modelBuys": "Met een model krijgt een vraag die de eigen antwoorden van de app niet dekken een antwoord in de eigen woorden van het model, gemarkeerd als algemeen advies. Alles wat gemeten is komt hoe dan ook uit de app.",
       "privacy": "Alles draait op deze computer. Je audio verlaat hem nooit en releasebuilds nemen niets op.",
       "recommended": "Aanbevolen",
       "off": {

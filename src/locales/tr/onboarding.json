@@ -70,6 +70,7 @@
       "what1": "Koç denemelerini ve yollarını okur: sana Bugün'ün satırını, her denemeden sonra bir not verir ve sorduğunda yanıt verir.",
       "question": "Koç kendi sözleriyle de yanıt versin mi?",
       "withoutModel": "Kapalıyken de satırı, notu, araçları ve denemelerine ve yollarına dayanan yanıtları alırsın.",
+      "modelBuys": "Bir modelle, uygulamanın kendi yanıtlarının kapsamadığı bir soru, modelin kendi sözleriyle bir yanıt alır ve genel tavsiye olarak işaretlenir. Ölçülen her şey her iki durumda da uygulamadan gelir.",
       "privacy": "Her şey bu bilgisayarda çalışır. Sesin dışarı çıkmaz, yayın sürümleri kayıt yapmaz.",
       "recommended": "Önerilen",
       "off": {

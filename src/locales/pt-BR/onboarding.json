@@ -70,6 +70,7 @@
       "what1": "O coach lê suas tomadas e suas trilhas: dá a linha de Hoje, uma nota depois de uma tomada e responde quando você pergunta.",
       "question": "O coach deve responder também com as próprias palavras?",
       "withoutModel": "Desligado, você continua com a linha, a nota, as ferramentas e respostas a partir das suas tomadas e trilhas.",
+      "modelBuys": "Com um modelo, uma pergunta que as respostas próprias do app não cobrem recebe uma resposta com as palavras do próprio modelo, marcada como conselho geral. Tudo o que é medido vem do app de qualquer jeito.",
       "privacy": "Tudo roda nesta máquina. Seu áudio nunca sai dela, e as versões de lançamento não gravam nada.",
       "recommended": "Recomendado",
       "off": {

@@ -70,6 +70,7 @@
       "what1": "Trener czyta twoje podejścia i ścieżki: daje ci wiersz na Dzisiaj, notatkę po podejściu i odpowiada, gdy zapytasz.",
       "question": "Czy trener ma odpowiadać także własnymi słowami?",
       "withoutModel": "Po wyłączeniu nadal dostajesz wiersz, notatkę, narzędzia i odpowiedzi z twoich podejść i ścieżek.",
+      "modelBuys": "Z modelem pytanie, którego nie obejmują własne odpowiedzi aplikacji, dostaje odpowiedź słowami samego modelu, oznaczoną jako ogólna rada. Wszystko, co zmierzone, tak czy inaczej pochodzi z aplikacji.",
       "privacy": "Wszystko działa na tym komputerze. Dźwięk nigdy go nie opuszcza, a wydania nie nagrywają go.",
       "recommended": "Zalecane",
       "off": {

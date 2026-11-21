@@ -128,7 +128,7 @@
       "removeTierLabel": "{{name}} verwijderen",
       "olderCopy": "Er staat ook een oudere kopie van dit model op de schijf · {{size}}",
       "removeOlderCopyLabel": "De oudere kopie van {{name}} verwijderen",
-      "removeModels": "Modellen verwijderen",
+      "removeModels": "Modellen en stemmen verwijderen",
       "stance": "Manier van coachen",
       "stanceHint": "Hoe streng de coach is terwijl je in de tools speelt",
       "stanceStrict": "Streng",
@@ -154,7 +154,8 @@
         "bringBack": "Terughalen",
         "broughtBack": "Weer terug in je Notitieboek.",
         "lineGone": "Een regel die je recente takes niet meer laten zien",
-        "comesBack": "Een regel die je weglaat komt na dertig dagen vanzelf terug. Er wordt niets verwijderd."
+        "comesBack": "Een regel die je weglaat komt na dertig dagen vanzelf terug. Er wordt niets verwijderd.",
+        "unreadableEntries": "Sommige regels zijn weggelaten op een manier die deze versie niet kan lezen. Ze blijven weggelaten, zoals opgeslagen."
       }
     },
     "general": {

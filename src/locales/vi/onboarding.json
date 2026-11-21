@@ -70,6 +70,7 @@
       "what1": "Huấn luyện viên đọc các lượt và Lộ trình của bạn: đưa ra dòng của Hôm nay, một ghi chú sau mỗi lượt, và trả lời khi bạn hỏi.",
       "question": "Huấn luyện viên có nên trả lời cả bằng lời của riêng nó không?",
       "withoutModel": "Tắt vẫn cho bạn dòng đó, ghi chú, các công cụ và câu trả lời từ các lượt và Lộ trình của bạn.",
+      "modelBuys": "Với một mô hình, câu hỏi mà các câu trả lời có sẵn của ứng dụng không bao quát sẽ được trả lời bằng lời của chính mô hình, gắn nhãn là lời khuyên chung. Mọi thứ đã đo đều đến từ ứng dụng trong cả hai trường hợp.",
       "privacy": "Mọi thứ chạy trên máy này. Âm thanh của bạn không bao giờ rời máy, và bản phát hành không ghi âm.",
       "recommended": "Khuyên dùng",
       "off": {

@@ -128,7 +128,7 @@
       "removeTierLabel": "Usuń {{name}}",
       "olderCopy": "Na dysku jest też starsza kopia tego modelu · {{size}}",
       "removeOlderCopyLabel": "Usuń starszą kopię {{name}}",
-      "removeModels": "Usuń modele",
+      "removeModels": "Usuń modele i głosy",
       "stance": "Styl prowadzenia",
       "stanceHint": "Jak surowy jest trener, gdy grasz w narzędziach",
       "stanceStrict": "Ostro",
@@ -154,7 +154,8 @@
         "bringBack": "Przywróć",
         "broughtBack": "Wiersz wrócił do Notatnika.",
         "lineGone": "Wiersz, którego ostatnie podejścia już nie pokazują",
-        "comesBack": "Pominięty wiersz wraca sam po trzydziestu dniach. Nic nie jest usuwane."
+        "comesBack": "Pominięty wiersz wraca sam po trzydziestu dniach. Nic nie jest usuwane.",
+        "unreadableEntries": "Niektóre wiersze zostały pominięte w sposób, którego ta wersja nie potrafi odczytać. Pozostają pominięte, tak jak zapisano."
       }
     },
     "general": {

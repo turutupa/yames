@@ -128,7 +128,7 @@
       "removeTierLabel": "{{name}} entfernen",
       "olderCopy": "Eine ältere Kopie dieses Modells liegt ebenfalls auf der Festplatte · {{size}}",
       "removeOlderCopyLabel": "Die ältere Kopie von {{name}} entfernen",
-      "removeModels": "Modelle entfernen",
+      "removeModels": "Modelle und Stimmen entfernen",
       "stance": "Coaching-Stil",
       "stanceHint": "Wie streng der Coach in den Werkzeugen mit dir ist, während du spielst",
       "stanceStrict": "Streng",
@@ -154,7 +154,8 @@
         "bringBack": "Zurückholen",
         "broughtBack": "Wieder in deinem Notizbuch.",
         "lineGone": "Eine Zeile, die deine letzten Takes nicht mehr zeigen",
-        "comesBack": "Eine Zeile, die du auslässt, kommt nach dreißig Tagen von selbst zurück. Nichts wird gelöscht."
+        "comesBack": "Eine Zeile, die du auslässt, kommt nach dreißig Tagen von selbst zurück. Nichts wird gelöscht.",
+        "unreadableEntries": "Einige Zeilen wurden auf eine Weise ausgelassen, die diese Version nicht lesen kann. Sie bleiben ausgelassen, so wie gespeichert."
       }
     },
     "general": {

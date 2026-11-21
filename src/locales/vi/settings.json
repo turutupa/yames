@@ -128,7 +128,7 @@
       "removeTierLabel": "Gỡ {{name}}",
       "olderCopy": "Một bản sao cũ hơn của mô hình này cũng đang nằm trên ổ đĩa · {{size}}",
       "removeOlderCopyLabel": "Gỡ bản sao cũ hơn của {{name}}",
-      "removeModels": "Gỡ mô hình",
+      "removeModels": "Gỡ mô hình và giọng nói",
       "stance": "Lối huấn luyện",
       "stanceHint": "Huấn luyện viên khắt khe đến đâu khi bạn chơi trong các công cụ",
       "stanceStrict": "Khắt khe",
@@ -154,7 +154,8 @@
         "bringBack": "Đưa trở lại",
         "broughtBack": "Đã trở lại Sổ tay của bạn.",
         "lineGone": "Một dòng mà các lượt gần đây của bạn không còn cho thấy",
-        "comesBack": "Dòng bạn bỏ ra sẽ tự quay lại sau ba mươi ngày. Không có gì bị xóa."
+        "comesBack": "Dòng bạn bỏ ra sẽ tự quay lại sau ba mươi ngày. Không có gì bị xóa.",
+        "unreadableEntries": "Một số dòng đã bị bỏ ra theo cách mà phiên bản này không đọc được. Chúng vẫn được bỏ ra, đúng như đã lưu."
       }
     },
     "general": {

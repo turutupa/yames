@@ -128,7 +128,7 @@
       "removeTierLabel": "Supprimer {{name}}",
       "olderCopy": "Une copie plus ancienne de ce modèle est aussi sur le disque · {{size}}",
       "removeOlderCopyLabel": "Supprimer la copie plus ancienne de {{name}}",
-      "removeModels": "Supprimer les modèles",
+      "removeModels": "Supprimer les modèles et les voix",
       "stance": "Style de coaching",
       "stanceHint": "À quel point le coach est exigeant quand tu joues dans les outils",
       "stanceStrict": "Strict",
@@ -154,7 +154,8 @@
         "bringBack": "Remettre",
         "broughtBack": "De retour dans ton Carnet.",
         "lineGone": "Une ligne que tes prises récentes ne montrent plus",
-        "comesBack": "Une ligne que tu écartes revient d'elle-même au bout de trente jours. Rien n'est supprimé."
+        "comesBack": "Une ligne que tu écartes revient d'elle-même au bout de trente jours. Rien n'est supprimé.",
+        "unreadableEntries": "Certaines lignes ont été écartées d'une manière que cette version ne sait pas lire. Elles restent écartées, telles qu'enregistrées."
       }
     },
     "general": {

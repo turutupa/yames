@@ -128,7 +128,7 @@
       "removeTierLabel": "移除{{name}}",
       "olderCopy": "磁碟上還有這個模型的一份舊副本 · {{size}}",
       "removeOlderCopyLabel": "移除{{name}}的舊副本",
-      "removeModels": "移除模型",
+      "removeModels": "移除模型和語音",
       "stance": "教練風格",
       "stanceHint": "在工具中演奏時教練的嚴格程度",
       "stanceStrict": "嚴格",
@@ -154,7 +154,8 @@
         "bringBack": "恢復",
         "broughtBack": "已回到你的筆記本。",
         "lineGone": "你最近幾遍裡不再出現的一條",
-        "comesBack": "你排除的條目三十天後會自動恢復。不會刪除任何內容。"
+        "comesBack": "你排除的條目三十天後會自動恢復。不會刪除任何內容。",
+        "unreadableEntries": "有些條目是以這個版本無法讀取的方式被排除的。它們會維持排除狀態，按原樣保存。"
       }
     },
     "general": {

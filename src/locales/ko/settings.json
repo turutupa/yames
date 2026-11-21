@@ -128,7 +128,7 @@
       "removeTierLabel": "{{name}} 제거",
       "olderCopy": "이 모델의 이전 사본도 디스크에 있어요 · {{size}}",
       "removeOlderCopyLabel": "{{name}}의 이전 사본 제거",
-      "removeModels": "모델 제거",
+      "removeModels": "모델과 음성 제거",
       "stance": "코칭 방식",
       "stanceHint": "도구에서 연주할 때 코치가 얼마나 엄격한지",
       "stanceStrict": "엄격하게",
@@ -154,7 +154,8 @@
         "bringBack": "다시 넣기",
         "broughtBack": "노트에 다시 넣었어요.",
         "lineGone": "최근 테이크에는 더 이상 나타나지 않는 항목",
-        "comesBack": "뺀 항목은 30일 뒤 저절로 돌아와요. 삭제되는 것은 없어요."
+        "comesBack": "뺀 항목은 30일 뒤 저절로 돌아와요. 삭제되는 것은 없어요.",
+        "unreadableEntries": "일부 항목은 이 버전에서 읽을 수 없는 방식으로 빠져 있어요. 저장된 그대로 계속 빠진 상태로 남아요."
       }
     },
     "general": {

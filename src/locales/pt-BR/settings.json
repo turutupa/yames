@@ -128,7 +128,7 @@
       "removeTierLabel": "Remover {{name}}",
       "olderCopy": "Uma cópia mais antiga deste modelo também está no disco · {{size}}",
       "removeOlderCopyLabel": "Remover a cópia mais antiga de {{name}}",
-      "removeModels": "Remover modelos",
+      "removeModels": "Remover modelos e vozes",
       "stance": "Estilo de treino",
       "stanceHint": "O quanto o coach é exigente enquanto você toca nas ferramentas",
       "stanceStrict": "Rigoroso",
@@ -154,7 +154,8 @@
         "bringBack": "Trazer de volta",
         "broughtBack": "De volta ao seu Caderno.",
         "lineGone": "Uma linha que suas tomadas recentes não mostram mais",
-        "comesBack": "Uma linha deixada de fora volta sozinha depois de trinta dias. Nada é apagado."
+        "comesBack": "Uma linha deixada de fora volta sozinha depois de trinta dias. Nada é apagado.",
+        "unreadableEntries": "Algumas linhas foram deixadas de fora de um jeito que esta versão não consegue ler. Elas continuam de fora, como estão guardadas."
       }
     },
     "general": {

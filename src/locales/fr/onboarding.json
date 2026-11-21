@@ -70,6 +70,7 @@
       "what1": "Le coach lit tes prises et tes parcours : il te donne la ligne d'Aujourd'hui, une note après une prise et des réponses quand tu demandes.",
       "question": "Le coach doit-il aussi répondre avec ses propres mots ?",
       "withoutModel": "Désactivé te donne quand même la ligne, la note, les outils et des réponses tirées de tes prises et de tes parcours.",
+      "modelBuys": "Avec un modèle, une question que les réponses propres à l'app ne couvrent pas reçoit une réponse avec les mots du modèle, signalée comme conseil général. Tout ce qui est mesuré vient de l'app dans les deux cas.",
       "privacy": "Tout tourne sur cette machine. Ton audio n'en sort jamais et les versions publiées ne l'enregistrent pas.",
       "recommended": "Recommandé",
       "off": {

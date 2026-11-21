@@ -70,6 +70,7 @@
       "what1": "El coach lee tus tomas y tus rutas: te da la línea de Hoy, una nota tras una toma y respuestas cuando preguntas.",
       "question": "¿Quieres que el coach también responda con sus propias palabras?",
       "withoutModel": "Desactivado te sigue dando la línea, la nota, las herramientas y respuestas a partir de tus tomas y rutas.",
+      "modelBuys": "Con un modelo, una pregunta que las respuestas propias de la app no cubren recibe una respuesta con las palabras del propio modelo, marcada como consejo general. Todo lo medido sale de la app en cualquier caso.",
       "privacy": "Todo funciona en este equipo. Tu audio nunca sale de él y las versiones publicadas no lo graban.",
       "recommended": "Recomendado",
       "off": {
