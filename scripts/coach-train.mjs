@@ -223,9 +223,17 @@ async function cmdRender(ev, opt) {
 }
 
 async function cmdSample(ev, opt) {
-  if (typeof opt.lang !== "string" || typeof opt.out !== "string") fail("--lang L and --out FILE are required");
+  if (typeof opt.lang !== "string" || typeof opt.out !== "string") fail("--lang L[,L...] and --out FILE|DIR are required");
+  const langs = opt.lang === "all" ? [...ev.EVAL_LANGUAGES] : opt.lang.split(",");
+  if (langs.length > 1) {
+    mkdirSync(opt.out, { recursive: true });
+    for (const lng of langs) sampleOne(opt, lng, path.join(opt.out, `${lng}.jsonl`));
+  } else sampleOne(opt, langs[0], opt.out);
+}
+
+function sampleOne(opt, lang, out) {
   const n = Number(opt.n) || 50;
-  const records = [...readJsonl(path.join(trainDir, "train.jsonl")), ...readJsonl(path.join(trainDir, "validation.jsonl"))].filter((r) => r.language === opt.lang);
+  const records = [...readJsonl(path.join(trainDir, "train.jsonl")), ...readJsonl(path.join(trainDir, "validation.jsonl"))].filter((r) => r.language === lang);
   // Spread over the kinds: an even share of each, the rest at random, seeded.
   let s = Number(opt.seed) || 7;
   const rnd = () => ((s = (s * 1103515245 + 12345) % 2147483648) / 2147483648);
@@ -243,10 +251,11 @@ async function cmdSample(ev, opt) {
     text: r.text,
     where: `${r.situation.view}${r.situation.phase ? ` (${r.situation.phase})` : ""}`,
     expect: r.expect,
+    ...(r.call ? { call: r.call } : {}),
     tags: r.tags,
   }));
-  writeJsonl(opt.out, rows);
-  console.log(`sampled ${rows.length} of ${records.length}`);
+  writeJsonl(out, rows);
+  console.log(`${lang}: sampled ${rows.length} of ${records.length}`);
 }
 
 const opt = args(process.argv.slice(2));

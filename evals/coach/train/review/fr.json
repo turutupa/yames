@@ -1,0 +1,3 @@
+{ "language": "fr", "reviewer": "reviewer-fr", "sampled": 50,
+  "rejected": [],
+  "notes": "Natural, plausible French; calls, tags and expected answers all fit the words. Only mild quirk: fr-00048 adds 'lentement' beside a plain loop_bars call, left as acceptable." }

@@ -1,0 +1,50 @@
+{"id":"zh-CN-00464","wording":"open_step_of_path#0","text":"打开三和弦的第3步","where":"session (result)","expect":{"kind":"none"},"call":{"tool":"open_step","args":{"path":"三和弦","step":3}},"tags":["wrong-screen"]}
+{"id":"zh-CN-00252","wording":"none_unsupported#2","text":"导出我的练习数据","where":"paths","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-CN-00428","wording":"none_wish#4","text":"有点累了，不想练了","where":"paths","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-CN-00579","wording":"load_jam#7","text":"把slow rock调出来","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"load_jam","args":{"jam":"slow rock"}},"tags":["wrong-screen"]}
+{"id":"zh-CN-00515","wording":"play_exercise#3","text":"开始开放 C 和弦的内部这个练习","where":"today","expect":{"kind":"none"},"call":{"tool":"play_exercise","args":{"exercise":"开放 C 和弦的内部"}},"tags":["withheld"]}
+{"id":"zh-CN-00408","wording":"none_offtopic#3","text":"帮我写一下数学作业","where":"today","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-CN-00641","wording":"tempo_bpm#6","text":"bpm换成165吧","where":"today","expect":{"kind":"none"},"call":{"tool":"set_tempo","args":{"bpm":165}},"tags":["wrong-screen"]}
+{"id":"zh-CN-00666","wording":"swap_style#2","text":"替换第3部分，要别的风格","where":"session (ready)","expect":{"kind":"none"},"call":{"tool":"swap_part","args":{"at":3,"choice":"style"}},"tags":["wrong-screen"]}
+{"id":"zh-CN-00057","wording":"none_wish#6","text":"要是能弹得和原曲一样就好了","where":"paths","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-CN-00688","wording":"voice_off#3","text":"我不想听教练的声音了","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"set_setting","args":{"key":"coachVoice","value":"off"}},"tags":["wrong-screen"]}
+{"id":"zh-CN-00167","wording":"none_theory#4","text":"布鲁斯音阶里的蓝调音是什么意思","where":"paths","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-CN-00153","wording":"start_today_at#3","text":"从第1部分练起","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"start_today","args":{"at":1}},"tags":["wrong-screen"]}
+{"id":"zh-CN-00459","wording":"none_theory#3","text":"七和弦是怎么构成的","where":"drill","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-CN-00052","wording":"yours_recording#9","text":"能不能开始录制我的练习","where":"drill","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"zh-CN-00264","wording":"yours_input#8","text":"换一个输入源","where":"beat","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"zh-CN-00025","wording":"yours_grading#8","text":"能不能别再打分了，压力好大","where":"beat","expect":{"kind":"yours","item":"grading"},"tags":["never"]}
+{"id":"zh-CN-00071","wording":"yours_input#8","text":"换一个输入源","where":"session (playing)","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"zh-CN-00442","wording":"yours_recording#0","text":"开始录音","where":"session (playing)","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"zh-CN-00679","wording":"yours_model#8","text":"能不能把模型换成小一点的","where":"today","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-CN-00584","wording":"yours_grades#0","text":"把这个标记为通过","where":"jam","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"zh-CN-00496","wording":"yours_recording#8","text":"停掉录音","where":"session (result)","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"zh-CN-00060","wording":"yours_unfollowing#4","text":"离开速弹这条路线","where":"session (ready)","expect":{"kind":"yours","item":"unfollowing"},"tags":["never"]}
+{"id":"zh-CN-00397","wording":"yours_recording#8","text":"停掉录音","where":"session (result)","expect":{"kind":"yours","item":"recording"},"tags":["never"]}
+{"id":"zh-CN-00323","wording":"yours_deleting#2","text":"清空我的历史记录","where":"today","expect":{"kind":"yours","item":"deleting"},"tags":["never"]}
+{"id":"zh-CN-00176","wording":"yours_model#5","text":"我想升级教练的大脑，下载新模型","where":"jam","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-CN-00649","wording":"yours_model#5","text":"我想升级教练的大脑，下载新模型","where":"today","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-CN-00041","wording":"count_in_on#5","text":"预备拍开","where":"drill","expect":{"kind":"call","tool":"set_setting","args":{"key":"countIn","value":"on"}},"call":{"tool":"set_setting","args":{"key":"countIn","value":"on"}},"tags":[]}
+{"id":"zh-CN-00581","wording":"show_chord#6","text":"来个F#m7b5","where":"songs","expect":{"kind":"call","tool":"show_chord","args":{"chord":"F#m7b5"}},"call":{"tool":"show_chord","args":{"chord":"F#m7b5"}},"tags":[]}
+{"id":"zh-CN-00088","wording":"show_chord#5","text":"麻烦把Cm和弦的指法显示出来","where":"beat","expect":{"kind":"call","tool":"show_chord","args":{"chord":"Cm"}},"call":{"tool":"show_chord","args":{"chord":"Cm"}},"tags":[]}
+{"id":"zh-CN-00017","wording":"show_scale#1","text":"给我看D旋律小调","where":"beat","expect":{"kind":"call","tool":"show_scale","args":{"root":"D","scale":"melodicMinor"}},"call":{"tool":"show_scale","args":{"root":"D","scale":"melodicMinor"}},"tags":[]}
+{"id":"zh-CN-00524","wording":"loop_bar#0","text":"循环第5小节","where":"paths","expect":{"kind":"call","tool":"loop_bars","args":{"from":5}},"call":{"tool":"loop_bars","args":{"from":5}},"tags":[]}
+{"id":"zh-CN-00539","wording":"open_step_here#1","text":"进第15步","where":"paths","expect":{"kind":"call","tool":"open_step","args":{"step":15}},"call":{"tool":"open_step","args":{"step":15}},"tags":[]}
+{"id":"zh-CN-00643","wording":"open_step_of_path#4","text":"麻烦帮我打开变化中的琶音那条路线的第11步","where":"songs","expect":{"kind":"call","tool":"open_step","args":{"path":"变化中的琶音","step":11}},"call":{"tool":"open_step","args":{"path":"变化中的琶音","step":11}},"tags":[]}
+{"id":"zh-CN-00592","wording":"voice_on#3","text":"我想听教练的声音","where":"today","expect":{"kind":"call","tool":"set_setting","args":{"key":"coachVoice","value":"on"}},"call":{"tool":"set_setting","args":{"key":"coachVoice","value":"on"}},"tags":[]}
+{"id":"zh-CN-00611","wording":"tempo_bpm#0","text":"速度调到195","where":"jam","expect":{"kind":"call","tool":"set_tempo","args":{"bpm":195}},"call":{"tool":"set_tempo","args":{"bpm":195}},"tags":[]}
+{"id":"zh-CN-00536","wording":"open_step_here#2","text":"看一下第5步骤","where":"paths","expect":{"kind":"call","tool":"open_step","args":{"step":5}},"call":{"tool":"open_step","args":{"step":5}},"tags":[]}
+{"id":"zh-CN-00030","wording":"set_theme#5","text":"theme换arctic","where":"beat","expect":{"kind":"call","tool":"set_setting","args":{"key":"theme","value":"arctic"}},"call":{"tool":"set_setting","args":{"key":"theme","value":"arctic"}},"tags":[]}
+{"id":"zh-CN-00221","wording":"start_today#4","text":"来，今天的练习开始","where":"beat","expect":{"kind":"call","tool":"start_today","args":{}},"call":{"tool":"start_today","args":{}},"tags":[]}
+{"id":"zh-CN-00091","wording":"open_step_name#0","text":"打开步骤：呼应","where":"today","expect":{"kind":"call","tool":"open_step","args":{"query":"呼应"}},"call":{"tool":"open_step","args":{"query":"呼应"}},"tags":[]}
+{"id":"zh-CN-00523","wording":"open_step_name#2","text":"我想看看五根弦","where":"jam","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"五根弦"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00344","wording":"play_exercise_bpm#6","text":"上的第 165bpm 来","where":"today","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"上的第","bpm":165}},"tags":["ambiguous"]}
+{"id":"zh-CN-00285","wording":"find_edge#1","text":"测一下我在上，然后穿过上的极限速度","where":"setlist","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"上，然后穿过"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00599","wording":"play_exercise#4","text":"我想练下到，开始吧","where":"paths","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"下到"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00290","wording":"find_edge#6","text":"八小节 测极限","where":"drill","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"八小节"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00640","wording":"open_step_name#2","text":"我想看看弦和","where":"progress","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"弦和"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00431","wording":"open_step_name#2","text":"我想看看riff","where":"drill","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"riff"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00183","wording":"play_exercise_bpm#4","text":"开始弦上的一段旋律，速度55","where":"today","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"弦上的一段旋律","bpm":55}},"tags":["ambiguous"]}
+{"id":"zh-CN-00377","wording":"find_edge#7","text":"来，看看我大调五声音阶的极限在哪","where":"drill","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"大调五声音阶"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00452","wording":"play_exercise#6","text":"麻烦帮我播放练习桥段","where":"today","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"桥段"}},"tags":["ambiguous"]}
+{"id":"zh-CN-00353","wording":"play_exercise_bpm#6","text":"持续低音 133bpm 来","where":"beat","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"持续低音","bpm":133}},"tags":["ambiguous"]}

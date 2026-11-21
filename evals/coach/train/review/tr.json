@@ -1,0 +1,3 @@
+{ "language": "tr", "reviewer": "reviewer-tr", "sampled": 50,
+  "rejected": [],
+  "notes": "Natural, consistent Turkish; expected answers fit the words. Only tr-00473 ('bugünü ekranını') is rough from an inserted name, which the brief does not reject." }

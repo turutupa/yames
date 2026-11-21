@@ -19,6 +19,7 @@ import { GO_TO_SCREENS } from "../tools/go";
 import { resolveExercise, resolvePath, resolveStep } from "../tools/resolve";
 import { CHORD_SUFFIXES, NECK_POSITIONS, ROOT_NAMES, SCALE_NAMES } from "../blocks/spec";
 import { commandTableFor } from "../ask/commandTable";
+import { GRAMMAR_QUERY_MAX } from "../ask/grammar";
 import { CARD_IDS } from "../ask/evalCards";
 import { WORLD_FOLLOWED, WORLD_JAMS, WORLD_PRESETS, WORLD_THEMES, effectOf, type EvalLanguage, type EvalView, type Expect, type Situation } from "../ask/evalWorld";
 import { CALL_INTENTS, CARD_INTENTS, NONE_INTENTS, YOURS_INTENTS, slotsIn, type CallIntent, type Filled, type Intent, type Slot } from "./intents";
@@ -103,16 +104,33 @@ function shuffle<T>(rng: Rng, xs: readonly T[]): T[] {
 const UNSPACED = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
 const splitWords = (t: string) => t.split(/[\s・·,、/()（）:：-]+/u).filter(Boolean);
 
+/**
+ * A word a name may stand on alone, or begin or end with: a content word, not
+ * "und", "über", "và", "e" (reviewers rejected names cut at those, c3d1). In a
+ * script without spaces, three characters or more.
+ */
+function contentWord(w: string, stop: ReadonlySet<string>): boolean {
+  if (/\d/.test(w) || stop.has(w.toLowerCase())) return false;
+  return [...w].length >= (UNSPACED.test(w) ? 3 : 5);
+}
+
+/** A run of words (a part of a title) that reads as a name: its first and last words are content words. */
+function goodRun(words: readonly string[], stop: ReadonlySet<string>): boolean {
+  return contentWord(words[0], stop) && contentWord(words[words.length - 1], stop);
+}
+
 /** Name forms: the title, runs of two or more of its words, and its longer single words. */
-function nameForms(title: string): string[] {
+function nameForms(title: string, stop: ReadonlySet<string>): string[] {
   const words = splitWords(title);
   const out = new Set<string>([title]);
   if (UNSPACED.test(title)) {
     out.add(title.replace(/[\s・·]/gu, ""));
-    for (const w of words) if ([...w].length >= 2) out.add(w);
+    for (const w of words) if (contentWord(w, stop)) out.add(w);
   } else {
-    for (let n = 2; n < words.length; n++) for (let i = 0; i + n <= words.length; i++) out.add(words.slice(i, i + n).join(" "));
-    for (const w of words) if ([...w].length >= 4 && !/\d/.test(w)) out.add(w);
+    for (let n = 2; n < words.length; n++) {
+      for (let i = 0; i + n <= words.length; i++) if (goodRun(words.slice(i, i + n), stop)) out.add(words.slice(i, i + n).join(" "));
+    }
+    for (const w of words) if (contentWord(w, stop)) out.add(w);
   }
   return [...out];
 }
@@ -128,6 +146,7 @@ function namesOf<T>(
   titles: readonly string[],
   resolve: (q: string) => { found?: T; several?: readonly T[] },
   idOf: (title: string) => T | undefined,
+  stop: ReadonlySet<string>,
   full = false,
 ): Names {
   const unique = new Set<string>();
@@ -135,14 +154,13 @@ function namesOf<T>(
   for (const title of titles) {
     const own = idOf(title);
     const split = splitWords(title);
-    const forms = full
-      ? nameForms(title)
-      : [title, ...(UNSPACED.test(title) ? [] : split.length > 3 ? [split.slice(0, 2).join(" "), split.slice(-2).join(" ")] : [])];
+    const runs = UNSPACED.test(title) || split.length <= 3 ? [] : [split.slice(0, 2), split.slice(-2)].filter((r) => goodRun(r, stop)).map((r) => r.join(" "));
+    const forms = full ? nameForms(title, stop) : [title, ...runs];
     for (const form of forms) {
       const r = resolve(form);
       if (r.found !== undefined && r.found === own) unique.add(form);
     }
-    for (const w of split) if (!/\d/.test(w) && [...w].length >= (UNSPACED.test(w) ? 2 : 4)) words.add(w.toLowerCase());
+    for (const w of split) if (contentWord(w, stop)) words.add(w.toLowerCase());
   }
   const ambiguous = [...words].filter((w) => {
     const r = resolve(w);
@@ -179,6 +197,12 @@ export function languageData(lang: EvalLanguage, paths: readonly PathDoc[], file
   const stepHits = paths.flatMap((p) => p.steps.map((s) => ({ p, s })));
   const exerciseTitles = [...new Set(paths.flatMap((p) => p.steps.flatMap((s) => s.exercises.map((e) => e.title))))];
   const followedDocs = WORLD_FOLLOWED.map((id) => paths.find((p) => p.id === id)).filter((p): p is PathDoc => !!p);
+  // The language's small words (the command table's fillers, connectors, question and "not a command" words): never a name alone.
+  const stop = new Set<string>(
+    table
+      ? [...table.fillers, ...table.notCommand, ...table.polite, ...table.questions, ...Object.values(table.connectors).flat()].map((w) => w.toLowerCase())
+      : [],
+  );
   return {
     lang,
     paths,
@@ -189,6 +213,7 @@ export function languageData(lang: EvalLanguage, paths: readonly PathDoc[], file
         return "found" in r ? { found: r.found } : "several" in r ? { several: r.several } : {};
       },
       (t) => paths.find((p) => p.title === t),
+      stop,
       true,
     ),
     step: namesOf(
@@ -198,6 +223,7 @@ export function languageData(lang: EvalLanguage, paths: readonly PathDoc[], file
         return "found" in r ? { found: r.found.step.title } : "several" in r ? { several: r.several.map((h) => h.step.title) } : {};
       },
       (t) => t,
+      stop,
     ),
     exercise: namesOf(
       exerciseTitles,
@@ -206,8 +232,9 @@ export function languageData(lang: EvalLanguage, paths: readonly PathDoc[], file
         return "found" in r ? { found: r.found.exercise.title } : "several" in r ? { several: r.several.map((h) => h.exercise.title) } : {};
       },
       (t) => t,
+      stop,
     ),
-    followed: followedDocs.flatMap((p) => nameForms(p.title).filter((f) => {
+    followed: followedDocs.flatMap((p) => nameForms(p.title, stop).filter((f) => {
       const r = resolvePath(f, paths);
       return "found" in r && r.found.id === p.id;
     })),
@@ -456,6 +483,14 @@ export function judge(intent: Intent, f: Filled, situation: Situation, lang: str
       return CARD_IDS.includes(intent.card) ? { expect: { kind: "card", card: intent.card }, tags: ["card"] } : { drop: "card not on coach yet" };
     case "call": {
       const args = intent.args(f);
+      // A name longer than the grammar lets a query be could never be written by the model.
+      const spec = CATALOGUE.tools.find((t) => t.name === intent.tool);
+      for (const field of spec?.args ?? []) {
+        const value = args[field.name];
+        if (typeof value === "string" && field.type.kind === "query" && [...value].length > Math.min(field.type.maxLength, GRAMMAR_QUERY_MAX)) {
+          return { drop: "a name longer than the grammar allows" };
+        }
+      }
       const effect = effectOf({ tool: intent.tool, args }, situation, lang, paths);
       const tags = intent.id === "tempo_faster" || intent.id === "tempo_slower" ? ["relative"] : [];
       if (effect.refused !== null && WRONG_SCREEN.test(effect.refused)) return { expect: { kind: "none" }, tags: [...tags, "wrong-screen"] };
@@ -476,7 +511,8 @@ export function judge(intent: Intent, f: Filled, situation: Situation, lang: str
 // One language
 // ---------------------------------------------------------------------------
 
-const PLAYER_TOOLS = toolCatalogue(COACH_TOOLS).tools.map((t) => t.name);
+const CATALOGUE = toolCatalogue(COACH_TOOLS);
+const PLAYER_TOOLS = CATALOGUE.tools.map((t) => t.name);
 
 /** A shuffled tool list: usually all, sometimes a few withheld (never `keep`; `drop` always). */
 function toolList(rng: Rng, keep: string | null, drop: string | null): string[] {

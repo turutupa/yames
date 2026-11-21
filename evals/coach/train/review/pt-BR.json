@@ -1,0 +1,6 @@
+{ "language": "pt-BR", "reviewer": "reviewer-pt-BR", "sampled": 50,
+  "rejected": [
+    { "id": "pt-BR-00629", "wording": "focus_path#3", "why": "inserted name 'e pentatonicas' is a truncated fragment; the sentence 'concentra na trilha e pentatonicas' reads as a list and the path arg is not a plausible path name" },
+    { "id": "pt-BR-00197", "wording": "follow_path#5", "why": "'entrei em acorde' is past tense (I entered), not a request to follow a path; the not-a-request reading conflicts with the which answer" }
+  ],
+  "notes": "Mostly natural Brazilian Portuguese; two records are broken by a past-tense wording and a truncated path name." }
