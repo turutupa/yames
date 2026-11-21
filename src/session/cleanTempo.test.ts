@@ -11,6 +11,7 @@ import {
   cleanTempoOf,
   countsTowardCleanTempo,
   heldCleanTempo,
+  isTakeIdMarkedNotFair,
   shownCleanTempoOf,
   shownCleanTempoTakeOf,
   type PlayerProgress,
@@ -93,6 +94,15 @@ describe("a Take marked not fair and the clean tempo", () => {
     const p = progress([held("later", 50, 90)], 90);
     expect(shownCleanTempoOf(p, PATH.id, EX.id)).toBe(90);
     expect(shownCleanTempoTakeOf(p, PATH.id, EX.id)).toBeNull();
+  });
+
+  it("a Session's outcome reads the answer kept on its row", () => {
+    const p = progress([first, mark(fastest, "no"), mark(after, "yes")], 72);
+    expect(isTakeIdMarkedNotFair(p, "fastest")).toBe(true);
+    expect(isTakeIdMarkedNotFair(p, "after")).toBe(false);
+    expect(isTakeIdMarkedNotFair(p, "first")).toBe(false);
+    expect(isTakeIdMarkedNotFair(p, "gone")).toBe(false);
+    expect(isTakeIdMarkedNotFair(p, undefined)).toBe(false);
   });
 
   it("reads which Takes held a clean tempo as the long-view query does", () => {

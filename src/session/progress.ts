@@ -138,6 +138,16 @@ export function isMarkedNotFair(take: PathTakeRow): boolean {
 }
 
 /**
+ * The stored Take with this id is marked not fair: a Session's outcome
+ * (`TakeOutcome.takeId`) read against the answer the player gave on it.
+ */
+export function isTakeIdMarkedNotFair(progress: PlayerProgress, takeId: string | undefined): boolean {
+  if (!takeId) return false;
+  const row = progress.takes.find((t) => t.id === takeId);
+  return row !== undefined && isMarkedNotFair(row);
+}
+
+/**
  * Did this Take hold a clean tempo, whatever the player said about it after:
  * caught, passed, and eight bars in a row that held. The same reading as
  * `clean_tempo_spans_sql` in `src-tauri/src/db.rs`, in the same order: a Take
