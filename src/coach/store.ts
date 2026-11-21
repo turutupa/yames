@@ -20,18 +20,25 @@
  * confirm, Leave out, Hide / Not now, Settings' row) and nothing else: the
  * coach stores nothing the player did not press (c4a1b: "a card was shown" is
  * not stored; it lives in memory, c4b2's, unless the owner says otherwise).
- * A stored `null`, a value from a future build or a hand-edited file reads as
- * the default and never throws, so a player who never opens the coach sees no
- * change at all. A dismissal or left-out date in the future (a clock moved
- * back, a hand edit) reads as the moment it was read; the file is not
- * rewritten for it, only by the next press on that key.
+ * A stored `null` (or no value) reads as the default and never throws, so a
+ * player who never opens the coach sees no change at all. A value that is
+ * there but is not one this build reads (a later build's shape, a hand edit)
+ * is never silently replaced (c4a1c, F6): a whole value of the wrong shape
+ * makes the key "unreadable", like a failed read; a map entry the reader drops
+ * and a kept card record's unknown fields are written back as they were; a
+ * goal a press replaces comes back exactly as it was stored on its Undo. A
+ * dismissal or left-out date in the future (a clock moved back, a hand edit)
+ * reads as the moment it was read; the file is not rewritten for it, only by
+ * the next press on that key.
  *
  * The readers the tool host calls are synchronous (a confirm is), so the
  * values are kept in memory after one load (`loadCoachStored`); until that
  * load has finished `coachStoredLoaded()` is false and the host answers
  * "not yet" rather than propose over a goal it has not read. A key whose read
  * failed is "unknown", not its default, for anything that would replace it
- * (`coachStoredUnread`).
+ * (`coachStoredUnread`), and for anything that would show what it governs
+ * (`coachKeyStates`, c4a1c F1): until a key is "read", `cardMayShow` says no
+ * and the Notebook shows no noticed line and no goal.
  *
  * The two map keys (`coach.cards`, `coach.suppressed`) are written whole, so
  * a press on them before the load has finished is queued, shown in memory at
@@ -53,7 +60,11 @@ export type CardRecord = {
 /**
  * The card kinds DESIGN 6.6 orders (milestone, then the weekly look-back, then
  * the plateau question) and the goal question (c4a2). A kind outside this list
- * read from the store is kept as it is (a later build's card), never dropped.
+ * with a valid record is read and kept like the others (a later build's card).
+ * What is really kept on a write (c4a1c, F6): every entry of the stored map
+ * that the reader dropped, as it was, and every unknown field of a kept
+ * record; a press changes only the fields it changes (`dismissed`,
+ * `lastDismissed`) of the one kind it is on.
  */
 export const CARD_KINDS = ["milestone", "weekly", "plateau", "goal"] as const;
 export type CardKind = (typeof CARD_KINDS)[number];
@@ -156,8 +167,18 @@ export function cardOf(cards: CoachCards, kind: string): CardRecord {
  * "Only when I ask"; no after two dismissals (until asked: `withCardAsked`);
  * no within seven days of the last dismissal. "One card per app open" is the
  * caller's (c4b2): this answers for one kind.
+ *
+ * Fails closed (c4a1c, F1): no while `coach.suggestions` or `coach.cards` is
+ * not read yet or could not be read (`states`, from `coachKeyStates()`), since
+ * either may hold "Only when I ask" or two dismissals.
  */
-export function cardMayShow(stored: Pick<CoachStored, "suggestions" | "cards">, kind: string, now: number): boolean {
+export function cardMayShow(
+  stored: Pick<CoachStored, "suggestions" | "cards">,
+  kind: string,
+  now: number,
+  states: Pick<CoachKeyStates, "suggestions" | "cards">,
+): boolean {
+  if (states.suggestions !== "read" || states.cards !== "read") return false;
   if (stored.suggestions === "asked") return false;
   const card = cardOf(stored.cards, kind);
   if (card.dismissed >= CARD_DISMISSALS_TO_STOP) return false;
@@ -207,22 +228,37 @@ export function withoutSuppressed(suppressed: Suppressed, id: string): Suppresse
 // ---------------------------------------------------------------------------
 
 /** The two keys written as a whole map: a write before the load is queued and replayed. */
-type MapKey = "cards" | "suppressed";
+export type CoachMapKey = "cards" | "suppressed";
+type MapKey = CoachMapKey;
 type Queued =
   | { key: "cards"; op: (cards: CoachCards) => CoachCards }
-  | { key: "suppressed"; op: (suppressed: Suppressed) => Suppressed };
+  | { key: "suppressed"; op: (suppressed: Suppressed) => Suppressed; leaveOut?: string };
+
+/**
+ * Where one key stands this run (c4a1c, F1), for the screens to word:
+ * - `"loading"`: the load has not finished: its value is not known yet;
+ * - `"read"`: what is in memory is what was stored (plus this run's presses);
+ * - `"unreadable"`: its read failed, or what is stored is not a value this
+ *   build reads: unknown for the rest of the run.
+ */
+export type CoachKeyState = "loading" | "read" | "unreadable";
+export type CoachKeyStates = Readonly<Record<keyof CoachStored, CoachKeyState>>;
 
 /**
  * What a writer did with the press, for the caller to say so:
  * - `"saved"`: in memory, and sent to the store;
  * - `"queued"`: made before the keys were read: in memory now, replayed onto
- *   what the load reads and saved then;
+ *   what the load reads and saved then. `coachPressSettled(key)` says how it
+ *   ended: `"notSaved"` when the key could not be read (the press holds for
+ *   this run only) or the save failed (c4a1c, F4);
  * - `"unchanged"`: there was nothing to change (nothing written);
  * - `"notRead"`: the key could not be read this run, so a write would replace
  *   what is on disk unseen: nothing changed, nothing written.
  */
 export type Written = "saved" | "queued" | "unchanged" | "notRead";
 
+/** A key whose `storeLoad` failed, told apart from a key with nothing stored. */
+const UNREAD: unique symbol = Symbol("unread");
 let stored: CoachStored = COACH_STORED_DEFAULTS;
 let loaded = false;
 let loading: Promise<CoachStored> | null = null;
@@ -231,11 +267,37 @@ const listeners = new Set<() => void>();
 const writtenEarly = new Set<keyof CoachStored>();
 /** Map writes made before the load finished, in order. */
 const queued: Queued[] = [];
-/** Keys whose read failed this run: "unknown", not their default, for anything that would replace them. */
+/**
+ * Keys whose read failed this run, or whose stored value is not one this
+ * build reads: "unknown", not their default, for anything that would replace
+ * them or show what they govern.
+ */
 const unread = new Set<keyof CoachStored>();
-/** The goal the last `saveGoal` replaced, so its undo brings back its own date (c4a1b, L4). */
-let replacedGoal: CoachGoal | null = null;
+/**
+ * Every goal a `saveGoal` replaced this run, by its text, as it was stored
+ * (the raw value: its own date, and any field this build does not know), so
+ * an Undo, or two in a row, brings each one back exactly (c4a1b L4, c4a1c F2
+ * and F6). In memory only: nothing new is persisted.
+ */
+const replacedGoals = new Map<string, unknown>();
+/** The goal's value as it is on disk now (the raw value read, then each one saved). */
+let goalOnDisk: unknown = undefined;
+/** The map keys as read (records only; `{}` otherwise), and which of their entries the reader kept (F6). */
+const mapOnDisk: Record<MapKey, Record<string, unknown>> = { cards: {}, suppressed: {} };
+const keptAtLoad: Record<MapKey, Set<string>> = { cards: new Set(), suppressed: new Set() };
+/** Map keys holding a press that is not on disk (unread at the load, or a failed save): F4. */
+const unsaved = new Set<MapKey>();
+/** The last save of each map key, for `coachPressSettled`. */
+const lastSave: Partial<Record<MapKey, Promise<void>>> = {};
 let resets = 0;
+
+const ALL_LOADING: CoachKeyStates = Object.freeze({
+  suggestions: "loading",
+  cards: "loading",
+  goal: "loading",
+  suppressed: "loading",
+});
+let keyStates: CoachKeyStates = ALL_LOADING;
 
 function set(next: CoachStored, written?: keyof CoachStored): void {
   if (written && !loaded) writtenEarly.add(written);
@@ -268,6 +330,30 @@ export function coachGoalKnown(): boolean {
   return loaded && !unread.has("goal");
 }
 
+/**
+ * Each key's state now (c4a1c, F1): the same object until one changes, so it
+ * can be a `useSyncExternalStore` snapshot beside `coachStored()`.
+ */
+export function coachKeyStates(): CoachKeyStates {
+  const of = (key: keyof CoachStored): CoachKeyState => (!loaded ? "loading" : unread.has(key) ? "unreadable" : "read");
+  const next = { suggestions: of("suggestions"), cards: of("cards"), goal: of("goal"), suppressed: of("suppressed") };
+  const same = (Object.keys(next) as Array<keyof CoachStored>).every((key) => next[key] === keyStates[key]);
+  if (!same) keyStates = Object.freeze(next);
+  return keyStates;
+}
+
+/**
+ * How the presses on a map key ended (c4a1c, F4), for a caller that was told
+ * `"queued"`: once the load has finished and the key's last save has landed,
+ * `"saved"` when what is on disk is what the player pressed, `"notSaved"` when
+ * a press holds in memory only (the key could not be read, or its save failed).
+ */
+export function coachPressSettled(key: CoachMapKey): Promise<"saved" | "notSaved"> {
+  return loadCoachStored()
+    .then(() => lastSave[key])
+    .then(() => (unsaved.has(key) ? "notSaved" : "saved"));
+}
+
 /** Hear every change (for `useSyncExternalStore`); returns the unsubscribe. */
 export function subscribeCoachStored(listener: () => void): () => void {
   listeners.add(listener);
@@ -284,21 +370,36 @@ export function subscribeCoachStored(listener: () => void): () => void {
 export function loadCoachStored(): Promise<CoachStored> {
   const generation = resets;
   const failed: Array<keyof CoachStored> = [];
-  const failedAs = <T>(key: keyof CoachStored, fallback: T) => () => {
+  const failedAs = (key: keyof CoachStored) => (): typeof UNREAD => {
     failed.push(key);
-    return fallback;
+    return UNREAD;
   };
   loading ??= Promise.all([
-    storeLoad<unknown>("coach.suggestions").then(readSuggestions, failedAs("suggestions", readSuggestions(undefined))),
-    storeLoad<unknown>("coach.cards").then((raw) => readCards(raw, Date.now()), failedAs("cards", COACH_STORED_DEFAULTS.cards)),
-    storeLoad<unknown>("coach.goal").then(readGoal, failedAs("goal", readGoal(undefined))),
-    storeLoad<unknown>("coach.suppressed").then(
-      (raw) => readSuppressed(raw, Date.now()),
-      failedAs("suppressed", COACH_STORED_DEFAULTS.suppressed),
-    ),
-  ]).then(([suggestions, cards, goal, suppressed]) => {
+    storeLoad<unknown>("coach.suggestions").catch(failedAs("suggestions")),
+    storeLoad<unknown>("coach.cards").catch(failedAs("cards")),
+    storeLoad<unknown>("coach.goal").catch(failedAs("goal")),
+    storeLoad<unknown>("coach.suppressed").catch(failedAs("suppressed")),
+  ]).then(([rawSuggestions, rawCards, rawGoal, rawSuppressed]) => {
     if (generation !== resets) return stored; // a test reset since: this read is stale
-    const next: CoachStored = { suggestions, cards, goal, suppressed };
+    const now = Date.now();
+    const raw = (v: unknown): unknown => (v === UNREAD ? undefined : v);
+    // F6: there, but not a value this build reads: unknown, like a failed read, never replaced.
+    const present = (v: unknown) => v !== UNREAD && v !== undefined && v !== null;
+    if (present(rawSuggestions) && rawSuggestions !== "on" && rawSuggestions !== "asked") failed.push("suggestions");
+    if (present(rawCards) && !isRecord(rawCards)) failed.push("cards");
+    if (present(rawGoal) && readGoal(rawGoal) === null) failed.push("goal");
+    if (present(rawSuppressed) && !isRecord(rawSuppressed)) failed.push("suppressed");
+    const next: CoachStored = {
+      suggestions: readSuggestions(raw(rawSuggestions)),
+      cards: readCards(raw(rawCards), now),
+      goal: readGoal(raw(rawGoal)),
+      suppressed: readSuppressed(raw(rawSuppressed), now),
+    };
+    goalOnDisk = raw(rawGoal);
+    mapOnDisk.cards = isRecord(rawCards) ? rawCards : {};
+    mapOnDisk.suppressed = isRecord(rawSuppressed) ? rawSuppressed : {};
+    keptAtLoad.cards = new Set(Object.keys(next.cards));
+    keptAtLoad.suppressed = new Set(Object.keys(next.suppressed));
     // A scalar written before the load finished holds the player's newer value: keep it.
     for (const key of writtenEarly) (next as Record<keyof CoachStored, unknown>)[key] = stored[key];
     for (const key of failed) if (!writtenEarly.has(key)) unread.add(key);
@@ -319,9 +420,11 @@ export function loadCoachStored(): Promise<CoachStored> {
     loaded = true;
     set(next);
     for (const key of replayed) {
-      // Unread: the press holds for this run, and the disk keeps what it had.
-      if (unread.has(key)) console.error(`[coach.store] coach.${key} could not be read: an early press is not saved`);
-      else persistMap(key);
+      // Unread: the press holds for this run, and the disk keeps what it had (`coachPressSettled`: notSaved).
+      if (unread.has(key)) {
+        unsaved.add(key);
+        console.error(`[coach.store] coach.${key} could not be read: an early press is not saved`);
+      } else persistMap(key);
     }
     return stored;
   });
@@ -333,8 +436,8 @@ const notSaved = (key: string) => (err: unknown) => console.error(`[coach.store]
 
 /** Settings → Coach's row and `set_setting`'s confirm. The whole value: once chosen, it is known. */
 export function saveSuggestions(value: Suggestions): void {
+  unread.delete("suggestions"); // before `set`, so a listener reads the key as known
   set({ ...stored, suggestions: value }, "suggestions");
-  unread.delete("suggestions");
   void storeSave("coach.suggestions", value).catch(notSaved("coach.suggestions"));
 }
 
@@ -342,23 +445,55 @@ export function saveSuggestions(value: Suggestions): void {
  * `set_goal`'s confirm (and its undo). `text` is trimmed and held to 200
  * characters. Null, and nothing written, when it is not a goal or when the
  * stored goal is not known (`coachGoalKnown`: not read yet, or its read
- * failed): a goal nobody has seen is never replaced. The text of the goal the
- * last call replaced comes back with its own date (the undo; L4).
+ * failed, or what is stored is not a goal this build reads): a goal nobody
+ * has seen is never replaced. The text of any goal a call replaced this run
+ * comes back exactly as it was stored, its own date included (the Undo, and
+ * an Undo of the one before it: c4a1b L4, c4a1c F2 and F6).
  */
 export function saveGoal(text: string, now: number): CoachGoal | null {
   if (!coachGoalKnown()) return null;
-  const back = replacedGoal !== null && replacedGoal.text === text.trim() ? replacedGoal : null;
-  const goal = readGoal({ text, at: back ? back.at : now });
+  const trimmed = text.trim();
+  const back = replacedGoals.has(trimmed) ? replacedGoals.get(trimmed) : undefined;
+  const goal = back !== undefined ? readGoal(back) : readGoal({ text, at: now });
   if (!goal) return null;
-  replacedGoal = stored.goal;
+  // What goes to disk: the stored value as it was when it comes back, else the new goal.
+  const value = back !== undefined ? back : goal;
+  if (stored.goal !== null) replacedGoals.set(stored.goal.text, goalOnDisk);
+  goalOnDisk = value;
   set({ ...stored, goal }, "goal");
-  void storeSave("coach.goal", goal).catch(notSaved("coach.goal"));
+  void storeSave("coach.goal", value).catch(notSaved("coach.goal"));
   return goal;
 }
 
+/**
+ * The map as it goes to disk (F6): the entries the reader dropped at the load,
+ * as they were; then every entry in memory, a card record over its stored
+ * record's own fields, so a field this build does not know survives a press.
+ */
+function mapForDisk(key: MapKey): Record<string, unknown> {
+  const onDisk = mapOnDisk[key];
+  const out: Record<string, unknown> = {};
+  for (const [id, value] of Object.entries(onDisk)) if (!keptAtLoad[key].has(id)) out[id] = value;
+  const now = key === "cards" ? stored.cards : stored.suppressed;
+  for (const [id, value] of Object.entries(now)) {
+    const was = onDisk[id];
+    out[id] = key === "cards" && isRecord(was) ? { ...was, ...(value as CardRecord) } : value;
+  }
+  return out;
+}
+
 function persistMap(key: MapKey): void {
-  if (key === "cards") void storeSave("coach.cards", stored.cards).catch(notSaved("coach.cards"));
-  else void storeSave("coach.suppressed", stored.suppressed).catch(notSaved("coach.suppressed"));
+  const value = mapForDisk(key);
+  const saving = key === "cards" ? storeSave("coach.cards", value) : storeSave("coach.suppressed", value);
+  lastSave[key] = saving.then(
+    () => {
+      unsaved.delete(key);
+    },
+    (err: unknown) => {
+      unsaved.add(key);
+      notSaved(`coach.${key}`)(err);
+    },
+  );
 }
 
 /** One press on a map key: never from the empty default over the disk (M1). */
@@ -397,11 +532,23 @@ export function saveCardAsked(kind: string): Written {
 
 /** "Leave out" on a noticed line. Not a delete: every Take stays. */
 export function saveSuppressed(id: string, now: number): Written {
-  return writeMap({ key: "suppressed", op: (suppressed) => withSuppressed(suppressed, id, now) });
+  return writeMap({ key: "suppressed", op: (suppressed) => withSuppressed(suppressed, id, now), leaveOut: id });
 }
 
-/** Leave-out's Undo. Writes only when the line was left out. */
+/**
+ * Leave-out's Undo. Writes only when the line was left out. Before the load
+ * (c4a1c, F3) it cancels this run's queued Leave out of that line and queues
+ * nothing: the entry on disk, which nobody has seen yet, stays exactly as it
+ * was. With no such press queued it does nothing ("unchanged").
+ */
 export function saveUnsuppressed(id: string): Written {
+  if (!loaded) {
+    const mine = (q: Queued) => q.key === "suppressed" && q.leaveOut === id;
+    if (!queued.some(mine)) return "unchanged";
+    for (let i = queued.length - 1; i >= 0; i -= 1) if (mine(queued[i])) queued.splice(i, 1);
+    set({ ...stored, suppressed: withoutSuppressed(stored.suppressed, id) });
+    return "queued";
+  }
   return writeMap({ key: "suppressed", op: (suppressed) => withoutSuppressed(suppressed, id) });
 }
 
@@ -415,5 +562,14 @@ export function resetCoachStored(): void {
   writtenEarly.clear();
   queued.length = 0;
   unread.clear();
-  replacedGoal = null;
+  replacedGoals.clear();
+  goalOnDisk = undefined;
+  mapOnDisk.cards = {};
+  mapOnDisk.suppressed = {};
+  keptAtLoad.cards = new Set();
+  keptAtLoad.suppressed = new Set();
+  unsaved.clear();
+  delete lastSave.cards;
+  delete lastSave.suppressed;
+  keyStates = ALL_LOADING;
 }

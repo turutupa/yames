@@ -10,7 +10,10 @@ import en from "../locales/en/notebook.json";
 import type { PathDoc, PathNote } from "../paths/format";
 import type { TakeFacts } from "../session/progress";
 import { notebookFrom } from "./notebook";
-import { COACH_STORED_DEFAULTS } from "./store";
+import { COACH_STORED_DEFAULTS, type CoachKeyState, type CoachKeyStates } from "./store";
+
+const statesAll = (s: CoachKeyState): CoachKeyStates => ({ suggestions: s, cards: s, goal: s, suppressed: s });
+const READ = statesAll("read");
 import { MIN_SESSIONS, MIN_TAKES, TAKES_WINDOW, tendencies, type NoticedLine } from "./tendencies";
 import { totalsFrom } from "../session/totals";
 
@@ -237,6 +240,19 @@ describe("an ungraded player", () => {
       expect(line?.values.now).toBe(13);
       expect(line?.takeIds).toHaveLength(12);
     });
+
+    // c4a1c, F5: seven Sessions are "your last 3 … the 3 before": S4 to S6, not S5 to S7.
+    it("with an odd number of Sessions, compares the newest N with the N right before them", () => {
+      const bars = [150, 150, 150, 600, 40, 40, 40];
+      const groups = bars.map((b, s) => {
+        const take = { bpm: s < 3 ? 95 : 80, bars: b };
+        return [row("u", s * DAY, { ...take, facts: { session: 200 - s } }), row("u", s * DAY + HOUR, { ...take, facts: { session: 200 - s } })];
+      });
+      const line = tendencies(groups.flat(), NOW).find((l) => l.kind === "minutes");
+      // S4 is two Takes of 30 minutes: (60 + 4 + 4) / 3 = 23. Leaving it out for S7 would say 4.
+      expect(line?.values).toEqual({ sessions: 3, now: 13, then: 23 });
+      expect(new Set(line?.takeIds)).toEqual(new Set(groups.slice(0, 6).flat().map((t) => t.id)));
+    });
   });
 
   it("says nothing about a tempo that did not move", () => {
@@ -307,43 +323,72 @@ describe("every line can be said in English, with nothing left unfilled", () => 
 describe("notebookFrom", () => {
   it("one plain object: the lines, the goal, and whether the goal may be asked", () => {
     const rows = tempoHistory();
-    const fresh = notebookFrom(rows, COACH_STORED_DEFAULTS, NOW);
+    const fresh = notebookFrom(rows, COACH_STORED_DEFAULTS, READ, NOW);
     // A line on 8 Takes over two Exercises: not "too few Takes" (c4a1b, L1).
     expect(fresh).toMatchObject({ goal: null, takesRead: 8, firstTakeAt: NOW - 6 * DAY, tooFewTakes: false, askGoal: false });
     expect(ids(fresh.noticed)).toEqual(["tempoEvenness:100:90"]);
 
     const weekOld = [...rows, even("a", 90, 0.85, 8 * DAY)];
-    expect(notebookFrom(weekOld, COACH_STORED_DEFAULTS, NOW)).toMatchObject({ askGoal: true, tooFewTakes: false });
+    expect(notebookFrom(weekOld, COACH_STORED_DEFAULTS, READ, NOW)).toMatchObject({ askGoal: true, tooFewTakes: false });
     const withGoal = { ...COACH_STORED_DEFAULTS, goal: { text: "Play in a band", at: NOW - DAY } };
-    expect(notebookFrom(weekOld, withGoal, NOW)).toMatchObject({ askGoal: false, goal: { text: "Play in a band" } });
+    expect(notebookFrom(weekOld, withGoal, READ, NOW)).toMatchObject({ askGoal: false, goal: { text: "Play in a band" } });
     const quiet = { ...COACH_STORED_DEFAULTS, suggestions: "asked" as const };
-    expect(notebookFrom(weekOld, quiet, NOW).askGoal).toBe(false);
+    expect(notebookFrom(weekOld, quiet, READ, NOW).askGoal).toBe(false);
     const leftOut = { ...COACH_STORED_DEFAULTS, suppressed: { "tempoEvenness:100:90": NOW - DAY } };
-    expect(notebookFrom(weekOld, leftOut, NOW).noticed).toEqual([]);
+    expect(notebookFrom(weekOld, leftOut, READ, NOW).noticed).toEqual([]);
+  });
+
+  // c4a1c, F1: the read side fails closed, before the load and after a failed read alike.
+  describe.each(["loading", "unreadable"] as const)("a key %s", (state) => {
+    const weekOld = () => [...tempoHistory(), even("a", 90, 0.85, 8 * DAY)];
+
+    it("coach.suppressed: no noticed line (any may be one the player left out), and the state says why", () => {
+      const nb = notebookFrom(weekOld(), COACH_STORED_DEFAULTS, { ...READ, suppressed: state }, NOW);
+      expect(nb.noticed).toEqual([]);
+      expect(nb.noticedState).toBe(state);
+      // Measured on the Takes, not on the key: eight Takes are not "too few".
+      expect(nb.tooFewTakes).toBe(false);
+      // The same history with the key read has its line.
+      expect(notebookFrom(weekOld(), COACH_STORED_DEFAULTS, READ, NOW).noticed).not.toEqual([]);
+    });
+
+    it("coach.goal: no goal shown and the goal never asked", () => {
+      const withGoal = { ...COACH_STORED_DEFAULTS, goal: { text: "Play in a band", at: NOW - DAY } };
+      const nb = notebookFrom(weekOld(), withGoal, { ...READ, goal: state }, NOW);
+      expect(nb).toMatchObject({ goal: null, goalState: state, askGoal: false });
+      expect(notebookFrom(weekOld(), COACH_STORED_DEFAULTS, { ...READ, goal: state }, NOW).askGoal).toBe(false);
+    });
+
+    it("coach.suggestions or coach.cards: the goal question is not offered", () => {
+      expect(notebookFrom(weekOld(), COACH_STORED_DEFAULTS, { ...READ, suggestions: state }, NOW).askGoal).toBe(false);
+      expect(notebookFrom(weekOld(), COACH_STORED_DEFAULTS, { ...READ, cards: state }, NOW).askGoal).toBe(false);
+    });
   });
 
   it("\"too few Takes\" only under five Takes played, and never beside a noticed line (c4a1b, L1)", () => {
     const four = tempoHistory().slice(0, 4);
-    expect(notebookFrom(four, COACH_STORED_DEFAULTS, NOW)).toMatchObject({ noticed: [], tooFewTakes: true });
+    expect(notebookFrom(four, COACH_STORED_DEFAULTS, READ, NOW)).toMatchObject({ noticed: [], tooFewTakes: true });
     // Five Takes with nothing to say: the empty state is "nothing noticed", not "too few".
     const five = [0, 1, 2, 3, 4].map((i) => row(`e${i}`, i * DAY));
-    expect(notebookFrom(five, COACH_STORED_DEFAULTS, NOW)).toMatchObject({ noticed: [], tooFewTakes: false });
+    expect(notebookFrom(five, COACH_STORED_DEFAULTS, READ, NOW)).toMatchObject({ noticed: [], tooFewTakes: false });
     const histories = [
       tempoHistory(),
       [0, 1, 2, 3, 4, 5].map((i) => row("held", i * DAY, { facts: { lean: [0, -1, 30, -5] } })),
       [0, 1, 2, 3, 4].map((i) => row("y", i * HOUR, { bpm: 90 - i * 5, facts: { ungraded: "chosen" } })),
     ];
     for (const rows of histories) {
-      const nb = notebookFrom(rows, COACH_STORED_DEFAULTS, NOW, [FX_PATH]);
+      const nb = notebookFrom(rows, COACH_STORED_DEFAULTS, READ, NOW, [FX_PATH]);
       expect(nb.noticed.length).toBeGreaterThan(0);
       expect(nb.tooFewTakes).toBe(false);
     }
   });
 
   it("an empty history: nothing noticed, the empty state's sentence, no goal question", () => {
-    expect(notebookFrom([], COACH_STORED_DEFAULTS, NOW)).toEqual({
+    expect(notebookFrom([], COACH_STORED_DEFAULTS, READ, NOW)).toEqual({
       noticed: [],
+      noticedState: "read",
       goal: null,
+      goalState: "read",
       askGoal: false,
       takesRead: 0,
       firstTakeAt: null,

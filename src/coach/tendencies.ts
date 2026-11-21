@@ -364,7 +364,8 @@ function minutesLine(played: readonly PathTakeRow[], paths: readonly PathDoc[] |
   if (sessions.length < MIN_SESSIONS) return null;
   const half = Math.floor(sessions.length / 2);
   const newer = sessions.slice(0, half);
-  const older = sessions.slice(sessions.length - half);
+  // "the N before them": the N right before the newest N (c4a1c, F5); an odd one out is the oldest.
+  const older = sessions.slice(half, 2 * half);
   const minutes = (group: typeof sessions) =>
     Math.round(mean(group.map((s) => totalsFrom(s.takes, paths ?? []).seconds)) / 60);
   const now = minutes(newer);

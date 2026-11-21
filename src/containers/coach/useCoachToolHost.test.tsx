@@ -232,14 +232,53 @@ describe("useCoachToolHost", () => {
     // No goal before: no undo (clearing a goal is the player's own).
     expect(set.ok && "undo" in set ? set.undo : undefined).toBeUndefined();
     // A second goal: its undo puts the first back, in the store.
-    const second = confirmCoachTool(proposalOf(runCoachTool({ tool: "set_goal", args: { text: "Join a band" } }, host, toolCtx())), host, toolCtx());
-    if (!second.ok || !second.undo) throw new Error("no undo");
-    expect(coachStored().goal?.text).toBe("Join a band");
     const firstAt = coachStored().goal?.at;
-    expect(runCoachUndo(second.undo, host, toolCtx()).ok).toBe(true);
-    expect(coachStored().goal?.text).toBe("Play the solo at 120");
-    // With its own date, not the undo's (c4a1b, L4).
-    expect(store.disk.get("coach.goal")).toEqual({ text: "Play the solo at 120", at: firstAt });
+    expect(typeof firstAt).toBe("number");
+    // The clock moves on, so the undo's own moment is not the first goal's (c4a1c, F7: this can fail).
+    const later = vi.spyOn(Date, "now").mockReturnValue((firstAt as number) + 60_000);
+    try {
+      const second = confirmCoachTool(proposalOf(runCoachTool({ tool: "set_goal", args: { text: "Join a band" } }, host, toolCtx())), host, toolCtx());
+      if (!second.ok || !second.undo) throw new Error("no undo");
+      expect(coachStored().goal).toEqual({ text: "Join a band", at: (firstAt as number) + 60_000 });
+      later.mockReturnValue((firstAt as number) + 120_000);
+      expect(runCoachUndo(second.undo, host, toolCtx()).ok).toBe(true);
+      expect(coachStored().goal?.text).toBe("Play the solo at 120");
+      // With its own date, not the undo's (c4a1b, L4).
+      expect(store.disk.get("coach.goal")).toEqual({ text: "Play the solo at 120", at: firstAt });
+    } finally {
+      later.mockRestore();
+    }
+  });
+
+  // c4a1c, F2 and F7: two receipts' Undos, newest first, each through set_goal's own undo.
+  it("undo, undo: each goal comes back with the date it was set", async () => {
+    const host = renderHook(() => useCoachToolHost(input())).result.current;
+    await act(async () => {
+      await loadCoachStored();
+    });
+    const t0 = Date.UTC(2026, 9, 1);
+    const clock = vi.spyOn(Date, "now");
+    try {
+      const setGoal = (text: string, at: number) => {
+        clock.mockReturnValue(at);
+        const run = runCoachTool({ tool: "set_goal", args: { text } }, host, toolCtx());
+        if (!run.ok || !("proposal" in run)) throw new Error(`no proposal: ${JSON.stringify(run)}`);
+        return confirmCoachTool(run.proposal, host, toolCtx());
+      };
+      setGoal("A", t0 + 1);
+      const b = setGoal("B", t0 + 2);
+      const c = setGoal("C", t0 + 3);
+      if (!b.ok || !b.undo || !c.ok || !c.undo) throw new Error("no undo");
+      clock.mockReturnValue(t0 + 10);
+      expect(runCoachUndo(c.undo, host, toolCtx()).ok).toBe(true);
+      expect(store.disk.get("coach.goal")).toEqual({ text: "B", at: t0 + 2 });
+      clock.mockReturnValue(t0 + 20);
+      expect(runCoachUndo(b.undo, host, toolCtx()).ok).toBe(true);
+      expect(store.disk.get("coach.goal")).toEqual({ text: "A", at: t0 + 1 });
+      expect(coachStored().goal).toEqual({ text: "A", at: t0 + 1 });
+    } finally {
+      clock.mockRestore();
+    }
   });
 
   it("the undo of a second goal puts the first back with the date it was set (c4a1b, L4)", async () => {
