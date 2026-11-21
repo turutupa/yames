@@ -87,7 +87,11 @@
           "lastSession": "지난 세션에서 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요.",
           "lastSession_other": "지난 세션에서 테이크 {{count}}분, 마지막은 {{exercise}}, {{bpm}} BPM이었어요."
         },
-        "samePlace": "오늘도 같은 자리예요."
+        "samePlace": "오늘도 같은 자리예요.",
+        "songDue": {
+          "one": "{{song}}의 {{bar}}마디를 다시 연습할 차례예요.",
+          "range": "{{song}}의 {{from}}–{{to}}마디를 다시 연습할 차례예요."
+        }
       },
       "whatsIn": "구성과 그 이유",
       "min": "분",
@@ -852,6 +856,11 @@
       },
       "chip": {
         "hear": "먼저 들어보기",
+        "hearBack": "{{bar}}번째 마디 듣기: 내 연주, 그다음 시범",
+        "hearYours": "내 연주: {{bar}}번째 마디 · 정지",
+        "hearDemo": "시범: {{bar}}번째 마디 · 정지",
+        "hearBackTune": "내 {{played}}번째 마디 듣기, 그다음 곡의 {{tune}}번째 마디 시범",
+        "hearDemoTune": "시범: 곡의 {{tune}}번째 마디 · 정지",
         "try": "뭘 해볼까요?"
       },
       "ungraded": {

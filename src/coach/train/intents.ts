@@ -32,6 +32,8 @@ import type { ToolArgs } from "../tools/types";
  *   chord as the app writes it (`Am7`, `G`), `theme` a theme's name, `view`
  *   `neck` / `runway` / `tab`, `jam` / `preset` the player's saved names,
  *   `goal` a goal in the player's words (the wordings file's `goals`).
+ * - `metric` one thing a player may think is graded (`ASKABLE_METRICS`), in
+ *   the wordings file's `vocab.metric` words (leg c3int).
  */
 export const SLOTS = [
   "path",
@@ -56,6 +58,7 @@ export const SLOTS = [
   "theme",
   "view",
   "goal",
+  "metric",
 ] as const;
 export type Slot = (typeof SLOTS)[number];
 
@@ -73,7 +76,8 @@ type Base = {
 export type CallIntent = Base & { kind: "call"; tool: string; args: (f: Filled) => ToolArgs };
 export type YoursIntent = Base & { kind: "yours"; item: NeverItem };
 export type NoneIntent = Base & { kind: "none" };
-export type CardIntent = Base & { kind: "card"; card: string };
+/** A card and the arguments its words carry (leg c3int: `premise`, `what`); none when absent. */
+export type CardIntent = Base & { kind: "card"; card: string; args?: (f: Filled) => ToolArgs };
 export type Intent = CallIntent | YoursIntent | NoneIntent | CardIntent;
 
 const v = (f: Filled, s: Slot) => {
@@ -168,9 +172,18 @@ export const NONE_INTENTS: readonly NoneIntent[] = [
   none("none_tuning", "Anything about tuning the guitar ('tune my guitar', 'is my G string flat?'): the app does not talk about tuning."),
   none("none_unsupported", "A request the app has no tool for: buy strings, transpose a song, export data, call a teacher, write a song for me."),
   none("none_wish", "A wish or feeling, not a request ('I want to play faster one day', 'I'm tired of scales')."),
+  // Leg c3int: the cards' near-miss. Nothing measures these and no card names them.
+  none("none_unmeasured", "Was something good that the app does not measure: vibrato, a bend reaching its note, loudness / dynamics, slides."),
 ];
 
-const card = (id: string, cardId: string, meaning: string): CardIntent => ({ id, kind: "card", card: cardId, meaning, slots: [] });
+const card = (id: string, cardId: string, meaning: string, slots: readonly Slot[] = [], args?: (f: Filled) => ToolArgs): CardIntent => ({
+  id,
+  kind: "card",
+  card: cardId,
+  meaning,
+  slots,
+  ...(args ? { args } : {}),
+});
 
 /**
  * Questions a fact card answers (the seven card shapes on `coach-int1`).
@@ -179,8 +192,12 @@ const card = (id: string, cardId: string, meaning: string): CardIntent => ({ id,
  */
 export const CARD_INTENTS: readonly CardIntent[] = [
   card("card_where_slipped", "where_slipped", "Where in my last Take did I slip / lose it?"),
-  card("card_early_or_late", "early_or_late", "Was I early or late / rushing or dragging in that Take?"),
-  card("card_why_not_counted", "why_not_counted", "Why didn't that Take count / pass?"),
+  card("card_early_or_late", "early_or_late", "Was I early or late in that Take? (No direction assumed.)"),
+  // Leg c3int: the premise is part of the answer (the held-out set scores it).
+  card("card_rushing", "early_or_late", "Was I rushing / ahead / speeding up in that Take? (Assumes early.)", [], () => ({ premise: "early" })),
+  card("card_dragging", "early_or_late", "Was I dragging / behind / slowing down in that Take? (Assumes late.)", [], () => ({ premise: "late" })),
+  card("card_why_not_counted", "why_not_counted", "Why didn't that Take count / pass? (No single thing named.)"),
+  card("card_metric_graded", "why_not_counted", "Is my {metric} graded / why wasn't my {metric} counted? (One thing named.)", ["metric"], (f) => ({ what: v(f, "metric") })),
   card("card_what_changed", "what_changed", "What changed between this Take and the one before?"),
   card("card_improving", "improving", "Am I getting better at this Exercise?"),
   card("card_score_made_of", "score_made_of", "What is my score / result made of?"),

@@ -63,7 +63,8 @@ describe("a Take's song ends on the Take's last bar", () => {
       }
     }
     expect(checked).toBeGreaterThan(20);
-  });
+    // 30 s once on a busy machine (leg c3int): headroom, as `paths/generate.test.ts`'s "mostly" test has.
+  }, 120_000);
 });
 
 describe("a Take's Exercise carries the words of the variant it plays", () => {

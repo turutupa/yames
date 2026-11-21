@@ -11,8 +11,7 @@
  *     at the end of c5c3 the list is empty;
  *   - the loader shows a language's own text, a pending instrument falls back
  *     to that language's `generic`, a pending `generic` to English;
- *   - English passes the honesty lint, except for the lines listed by name
- *     (reported to the owner, not rewritten here).
+ *   - English passes the honesty lint, with no exceptions (leg tc1).
  */
 import { afterAll, describe, expect, it } from "vitest";
 import fs from "node:fs";
@@ -209,57 +208,40 @@ describe("toolTips: the loader", () => {
 /**
  * The honesty lint over English (ROADMAP's voice rules): no cause claimed for
  * a mistake, no claim about the body or technique the coach cannot hear,
- * nothing about tuning, and "the pass mark", never "the bar", for a threshold.
- * The lines that fail it today are listed here and reported, not rewritten:
- * rewording the English is the owner's call.
+ * nothing about tuning, "the pass mark", never "the bar", for a threshold,
+ * no pitch word in a timing line and no guitar word in the generic text.
  */
 const LINT: [string, RegExp][] = [
-  ["tuning", /\btun(e|ing)\b|in tune|out of tune/i],
+  ["tuning", /\btun(e|ed|es|er|ers|ing)\b|in tune|out of tune/i],
   ["cause", /\bbecause\b|\bdue to\b/i],
-  ["body", /\btension\b|\btense[sd]?\b|\bposture\b|\bwrist\b|\bshoulders?\b/i],
-  ["threshold called a bar", /\b(the|your) bar\b(?! (line|by bar))/i],
+  ["body", /\btension\b|\btense[sd]?\b|\bposture\b|\bwrists?\b|\bshoulders?\b/i],
+  // "across the bar" / "per bar" is a bar of music; "the bar" as a threshold is not.
+  ["threshold called a bar", /(?<!\b(across|per|in|within|through|over|of|each|every) )\b(the|your) bar\b(?! (line|by bar))/i],
 ];
 
-// 30 lines, found 2026-11-21. Nearly all name the body (tension, wrists,
-// shoulders) in the fatigue and stamina slots; proMode's flat_dynamics.1 says
-// "across the bar", a bar of music, and is a false positive kept on the list.
-const LINT_KNOWN: string[] = [
-  "catalog.acoustic-guitar.fatigue.correction.1",
-  "catalog.acoustic-guitar.fatigue.correction.6",
-  "catalog.acoustic-guitar.fatigue.encouragement.1",
-  "catalog.acoustic-guitar.fatigue.encouragement.2",
-  "catalog.acoustic-guitar.fatigue.encouragement.3",
-  "catalog.acoustic-guitar.fatigue.encouragement.7",
-  "catalog.acoustic-guitar.muddy_hits.neutral.1",
-  "catalog.bass.fatigue.correction.6",
-  "catalog.bass.fatigue.encouragement.2",
-  "catalog.bass.fatigue.encouragement.5",
-  "catalog.drums.fatigue.correction.2",
-  "catalog.electric-guitar.fatigue.correction.0",
-  "catalog.electric-guitar.fatigue.correction.1",
-  "catalog.electric-guitar.fatigue.correction.3",
-  "catalog.electric-guitar.fatigue.correction.6",
-  "catalog.electric-guitar.fatigue.encouragement.1",
-  "catalog.electric-guitar.fatigue.encouragement.2",
-  "catalog.electric-guitar.fatigue.encouragement.3",
-  "catalog.electric-guitar.fatigue.encouragement.7",
-  "catalog.electric-guitar.session_start_cold.neutral.2",
-  "catalog.electric-guitar.stamina.neutral.0",
-  "catalog.generic.check_in.correction.4",
-  "catalog.piano.fatigue.correction.6",
-  "catalog.piano.fatigue.encouragement.2",
-  "catalog.piano.fatigue.encouragement.5",
-  "catalog.piano.fatigue.encouragement.7",
-  "catalog.piano.recovery.encouragement.2",
-  "catalog.piano.stamina.neutral.0",
-  "catalog.piano.stamina.neutral.1",
-  "proMode.generic.flat_dynamics.neutral.1",
-];
+/** A pitch word in a line about timing ("a half-step earlier"). */
+const PITCH_WORD = /\bhalf[- ]steps?\b|\bwhole[- ]steps?\b|\bsemitones?\b/i;
+const TIMING_SCENARIO = /^(rushing|dragging|rushing_trend|dragging_trend|bias_only|oscillating|grid_lost|grid_discontinuity|pace_coaching|ic_placement_drift|ic_spacing_drift|accuracy_drop|recovery)$/;
+/** "Pick attack" is a guitar word: the instrument-neutral `generic` (catalogue and overlays) may not say it. */
+const GUITAR_WORD = /\bpick(ing)? attack\b|\bpick hand\b|\bstrum/i;
+
+// Empty since leg tc1 (2026-11-21), which reworded the 42 lines this lint and
+// the second readers caught (plans/coach/progress/tc1.md). A new hit is a line
+// to reword, not a line to list here.
+const LINT_KNOWN: string[] = [];
 
 describe("toolTips: the English honesty lint", () => {
   it("catches only the lines already reported", () => {
     const hits = leaves(en)
-      .filter(([p, v]) => !p.startsWith("words.") && LINT.some(([, re]) => re.test(v as string)))
+      .filter(([p, v]) => {
+        if (p.startsWith("words.")) return false;
+        const s = v as string;
+        if (LINT.some(([, re]) => re.test(s))) return true;
+        // catalog.<vocabulary>.<scenario>... and <overlay>.generic.<scenario>...
+        const [, vocabulary, scenario] = p.split(".");
+        if (TIMING_SCENARIO.test(scenario) && PITCH_WORD.test(s)) return true;
+        return vocabulary === "generic" && GUITAR_WORD.test(s);
+      })
       .map(([p]) => p);
     expect(hits.sort()).toEqual([...LINT_KNOWN].sort());
   });

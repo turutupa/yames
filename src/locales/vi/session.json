@@ -87,7 +87,11 @@
           "lastSession": "{{count}} phút các lượt chơi trong buổi tập gần nhất, lượt cuối: {{exercise}} ở {{bpm}} BPM.",
           "lastSession_other": "{{count}} phút các lượt chơi trong buổi tập gần nhất, lượt cuối: {{exercise}} ở {{bpm}} BPM."
         },
-        "samePlace": "Hôm nay bắt đầu đúng chỗ đó."
+        "samePlace": "Hôm nay bắt đầu đúng chỗ đó.",
+        "songDue": {
+          "one": "Ô nhịp {{bar}} của {{song}} đã đến lúc tập lại.",
+          "range": "Các ô nhịp {{from}}–{{to}} của {{song}} đã đến lúc tập lại."
+        }
       },
       "whatsIn": "Có gì trong buổi tập, và vì sao",
       "min": "PHÚT",
@@ -852,6 +856,11 @@
       },
       "chip": {
         "hear": "Nghe thử trước",
+        "hearBack": "Nghe ô nhịp {{bar}}: của bạn, rồi bản mẫu",
+        "hearYours": "Của bạn: ô nhịp {{bar}} · Dừng",
+        "hearDemo": "Bản mẫu: ô nhịp {{bar}} · Dừng",
+        "hearBackTune": "Nghe ô nhịp {{played}} của bạn, rồi bản mẫu ô nhịp {{tune}}",
+        "hearDemoTune": "Bản mẫu: ô nhịp {{tune}} của giai điệu · Dừng",
         "try": "Tôi nên thử gì?"
       },
       "ungraded": {

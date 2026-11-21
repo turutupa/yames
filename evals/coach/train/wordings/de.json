@@ -648,6 +648,14 @@
       "ich träume davon, auf der Bühne zu stehen",
       "ich bin frustriert vom Barré"
     ],
+    "none_unmeasured": [
+      "war mein Vibrato gut?",
+      "hat mein Bending den Zielton erreicht?",
+      "war ich laut genug, oder zu leise?",
+      "wie war meine Dynamik im letzten Take?",
+      "sind meine Slides sauber gewesen?",
+      "klingt mein Vibrato eigentlich gleichmäßig"
+    ],
     "card_where_slipped": [
       "wo habe ich mich im letzten Take verspielt?",
       "an welcher Stelle bin ich rausgekommen?",
@@ -660,7 +668,25 @@
       "habe ich gerusht oder geschleppt?",
       "bin ich vor dem Beat oder hinterher gewesen?",
       "war ich im letzten Take eher schnell oder langsam?",
-      "hab ich gedrängelt?"
+      "in welche Richtung bin ich beim Timing gekippt?",
+      "lag ich eher vorne oder hinten?",
+      "wohin hat mein Timing gezogen, nach vorn oder nach hinten?"
+    ],
+    "card_rushing": [
+      "hab ich gedrängelt?",
+      "war ich im letzten Take zu schnell?",
+      "habe ich vorgezogen?",
+      "bin ich dem Beat davongelaufen?",
+      "hab ich mich da beim Spielen beschleunigt",
+      "war ich vor dem Klick?"
+    ],
+    "card_dragging": [
+      "hab ich geschleppt?",
+      "war ich im letzten Take zu langsam?",
+      "bin ich hinter dem Beat hergehinkt?",
+      "habe ich da gebremst?",
+      "hab ich beim Spielen immer weiter verzögert",
+      "war ich hinter dem Klick?"
     ],
     "card_why_not_counted": [
       "warum hat der Take nicht gezählt?",
@@ -668,6 +694,14 @@
       "warum wurde das nicht gewertet?",
       "was hat gefehlt, dass es zählt?",
       "wieso zaehlt mein letzter take nicht"
+    ],
+    "card_metric_graded": [
+      "bewertet die App {metric}?",
+      "warum hat die App {metric} nicht mitgezählt?",
+      "prüft die App {metric}?",
+      "hat die App {metric} in meine Wertung einbezogen?",
+      "zählt die App {metric} irgendwie mit",
+      "kontrolliert die App {metric} im Take?"
     ],
     "card_what_changed": [
       "was war anders als beim Take davor?",
@@ -720,5 +754,17 @@
     "bei Songs mit der Band mithalten",
     "jeden Tag konsequent üben"
   ],
-  "vocab": {}
+  "vocab": {
+    "metric": {
+      "pitch": ["die richtigen Töne", "meine Tonauswahl"],
+      "pickDirection": ["meine Anschlagrichtung", "meinen Wechselschlag"],
+      "muting": ["mein Abdämpfen", "meine Saitengeräusche"],
+      "posture": ["meine Haltung", "meine Sitzhaltung"],
+      "tension": ["meine Anspannung", "meine Verspannung in Händen und Schultern"],
+      "handAttribution": ["die Zuordnung der Fehler zur Hand", "die Handzuordnung"],
+      "fingering": ["meinen Fingersatz", "meine Fingerwahl"],
+      "tone": ["meinen Ton", "meine Klangqualität"],
+      "feel": ["mein Feel", "meinen Groove"]
+    }
+  }
 }

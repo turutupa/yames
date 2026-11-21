@@ -652,6 +652,14 @@
       "feeling a bit unmotivated lately",
       "honestly i just want to jam with friends"
     ],
+    "none_unmeasured": [
+      "was my vibrato any good?",
+      "did my bend reach the note",
+      "how was my vibrato on that last one",
+      "was i too loud or too quiet?",
+      "how were my dynamics",
+      "did my slides sound clean?"
+    ],
     "card_where_slipped": [
       "where did I slip in my last take?",
       "where did i lose it",
@@ -663,8 +671,25 @@
       "was I rushing or dragging?",
       "was i early or late in that take",
       "am i ahead of the beat or behind it?",
+      "which way did my timing lean in that take",
+      "did i lean early or late there?",
+      "was my timing ahead or behind?"
+    ],
+    "card_rushing": [
       "did i speed up during that take?",
-      "was i dragging there? idk"
+      "was i rushing there?",
+      "i think i was rushing, was i?",
+      "was i ahead of the beat in that take",
+      "did i jump ahead of the click?",
+      "was i playing too early"
+    ],
+    "card_dragging": [
+      "was i dragging there? idk",
+      "did i drag in that take?",
+      "was i behind the beat?",
+      "i felt like i was slowing down, did i",
+      "was i playing too late there?",
+      "did i fall behind the click"
     ],
     "card_why_not_counted": [
       "why didn't that take count?",
@@ -672,6 +697,14 @@
       "that take didnt count, why?",
       "can you tell me why it failed?",
       "how come that one doesn't count as a pass"
+    ],
+    "card_metric_graded": [
+      "is my {metric} graded?",
+      "why wasn't my {metric} counted?",
+      "does the app check my {metric}?",
+      "was my {metric} part of the score?",
+      "does my {metric} count here",
+      "is anything checking my {metric} in a take?"
     ],
     "card_what_changed": [
       "what changed since my last take?",
@@ -727,6 +760,17 @@
   "vocab": {
     "screen": {
       "paths": ["paths"]
+    },
+    "metric": {
+      "pitch": ["note accuracy", "playing the right notes", "pitch"],
+      "pickDirection": ["pick direction", "alternate picking"],
+      "muting": ["muting", "string noise control"],
+      "posture": ["posture", "sitting position", "how i hold the guitar"],
+      "tension": ["tension", "hand tension", "shoulder tension"],
+      "handAttribution": ["which hand made the mistake", "hand attribution"],
+      "fingering": ["fingering", "finger choice"],
+      "tone": ["tone", "sound quality"],
+      "feel": ["feel", "groove"]
     },
     "section": {
       "devices": ["audio devices", "devices"],

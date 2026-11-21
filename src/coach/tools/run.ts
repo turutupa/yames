@@ -240,10 +240,30 @@ function runGo(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachCon
   return mint(tool, args, { line: line(key, { ...dry.receipt.values, stops }), resolved: Object.freeze({ ...args }) });
 }
 
-function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext): RunOutcome {
+/**
+ * A `go` tool the model chose (leg c3b2a; the owner's rule: nothing the model
+ * chose runs at once): run dry, and what it would do comes back as a
+ * proposal (the receipt's key under `coachTools.propose.`, with what stops if
+ * it leaves a sound behind). A refusal, or a dry run that would move nothing
+ * ("You're on Today already"), comes back as it is: nothing has moved.
+ */
+function proposeGo(tool: ActTool, args: ToolArgs, host: CoachToolHost, ctx: CoachContext): RunOutcome {
+  const { dry, target } = dryRun(tool, args, host, ctx);
+  if (!dry.ok || !dry.undo) return dry;
+  const stops = tool.leaves && target !== null ? host.sounding(target) : null;
+  const key = dry.receipt.key.replace(/^coachTools\.receipt\./, "coachTools.propose.");
+  // Every `go` tool leaves (`leaves: true`), so `confirmCoachTool` runs this proposal's press as it runs runGo's.
+  return mint(tool, args, { line: line(key, stops ? { ...dry.receipt.values, stops } : dry.receipt.values), resolved: Object.freeze({ ...args }) });
+}
+
+/** Who made a call: a chip or a typed command (`player`), or the model's choice (`model`). */
+export type CallOrigin = { via?: "player" | "model" };
+
+function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext, origin: CallOrigin = {}): RunOutcome {
   const { tool, args } = checked;
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
+  if (tool.kind === "go" && origin.via === "model") return guarded(tool.name, () => proposeGo(tool, args, host, ctx));
   if (tool.kind !== "confirm") return guarded(tool.name, () => issue(runGo(tool, args, host, ctx), host, ctx));
   return guarded(tool.name, (): RunOutcome => {
     const proposed = tool.propose(args, host, ctx);
@@ -258,16 +278,19 @@ function run(checked: CheckedCall, host: CoachToolHost, ctx: CoachContext): RunO
 /**
  * Run a player's call (a chip, a typed command, a model's pick). A `go` or
  * `read` tool acts now; a `confirm` tool returns a proposal and does nothing.
+ * With `{ via: "model" }` a `go` tool is a proposal too (`proposeGo`): only a
+ * `read` tool the model chose acts at once, and it changes nothing.
  */
 export function runCoachTool(
   call: unknown,
   host: CoachToolHost,
   ctx: CoachContext,
   registry: readonly CoachTool[] = COACH_TOOLS,
+  origin: CallOrigin = {},
 ): RunOutcome {
   const checked = checkCall(call, registry, "player");
   if (!checked.ok) return checked;
-  return run(checked.call, host, ctx);
+  return run(checked.call, host, ctx, origin);
 }
 
 /**
@@ -439,9 +462,38 @@ export function confirmCoachTool(
   }
   const wrong = checkContext(tool, ctx);
   if (wrong) return wrong;
+  // What stops is asked again at the press (review c3b2a M2): a proposal minted while
+  // nothing sounded must not stop a click started since without saying so. Not now,
+  // and the proposal stays good for a press once it has stopped (as `runIssuedUndo`).
+  const stops = stopsAtPress(tool, resolved, host, ctx);
+  if (stops && proposal.line.values?.stops !== stops) {
+    issued.set(proposal, resolved);
+    return refuse("notNow", "coachTools.why.notNow.sounding", { stops });
+  }
   // A `go` tool's proposal holds its checked arguments: run it for real now.
   if (tool.kind !== "confirm") return guarded(tool.name, () => issue(tool.run(resolved as ToolArgs, host, ctx), host, ctx));
   return guarded(tool.name, () => issue(tool.commit(resolved, host, ctx), host, ctx));
+}
+
+/**
+ * What a leaving proposal would stop if pressed now: for a `go` tool, the
+ * same dry run as when it was minted (`leavingStops`); for a `confirm` tool
+ * that leaves (start_today), what sounds now, as `run` asked it. A tool that
+ * throws here is reported by the press itself.
+ */
+function stopsAtPress(tool: CoachTool, resolved: unknown, host: CoachToolHost, ctx: CoachContext): Sounding | null {
+  try {
+    if (tool.kind === "go") return tool.leaves ? leavingStops(tool, resolved as ToolArgs, host, ctx).stops : null;
+    if (tool.kind === "confirm") return tool.leaves ? host.sounding() : null;
+  } catch {
+    // Left to the press, which runs inside `guarded`.
+  }
+  return null;
+}
+
+/** Whether a proposal this runner minted can still be pressed (not pressed, dismissed or spent). */
+export function proposalOpen(proposal: Proposal): boolean {
+  return issued.has(proposal);
 }
 
 /** Drop a proposal the player turned down ("Not now"), so it can never be confirmed. */

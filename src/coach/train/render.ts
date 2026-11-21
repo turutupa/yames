@@ -17,7 +17,8 @@
 import type { PathDoc } from "../../paths/format";
 import { COACH_TOOLS, toolCatalogue } from "../tools/registry";
 import type { ToolArgs, ToolCatalogue } from "../tools/types";
-import { choiceContext, choicePrefix } from "../ask/choicePrompt";
+import { choiceContext, choicePrefix, namedTitles } from "../ask/choicePrompt";
+import { commandTableFor } from "../ask/commandTable";
 import { EVAL_CARDS } from "../ask/evalCards";
 import { choiceFactsFor } from "../ask/evalRun";
 import type { EvalLanguage, Expect, Situation } from "../ask/evalWorld";
@@ -42,6 +43,8 @@ export type TrainRecord = {
   expect: Expect;
   /** The call the words ask for, as the runner was given it (absent for yours / none / card intents): what `expect` was judged from. */
   call?: { tool: string; args: ToolArgs };
+  /** The card the words ask for, with its arguments (card intents only, leg c3int): what `expect` was judged from. */
+  card?: { card: string; args: ToolArgs };
   tags: string[];
 };
 
@@ -113,7 +116,9 @@ export function renderRecord(record: TrainRecord, paths: readonly PathDoc[]): Re
   const possible: Record<string, boolean> = {};
   for (const name of possibleList) possible[name] = true;
   const prefix = choicePrefix(catalogue, EVAL_CARDS);
-  const context = choiceContext({ ...facts, possible: possibleList });
+  // The Paths the words could name (leg c3bp), as the app and the eval's `askRequestFor` compute them (leg c3int).
+  const named = namedTitles(record.text, paths.map((p) => p.title), commandTableFor(record.language));
+  const context = choiceContext({ ...facts, possible: possibleList, named });
   const answer = answerText(record.expect, catalogue);
   return {
     id: record.id,

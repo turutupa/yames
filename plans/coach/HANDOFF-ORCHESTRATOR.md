@@ -51,7 +51,9 @@ decisions), `plans/tasks/coach/RULES-FOR-PROMPTS.md` (the rules every agent gets
 - Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
   `ssh rtx … powershell.exe` was refused by this session's permission mode (see "Owed").
 
-## SESSION 5, in flight (started 2026-11-20 23:45 by this machine's clock; newer than everything below)
+## SESSION 5: read `plans/coach/HANDOFF-S5.md` (the current state; it supersedes the table below)
+
+## SESSION 5, first wave (started 2026-11-20 23:45 by this machine's clock; every leg in this table is merged)
 
 Every agent's prompt starts from `/tmp/coach-orch/s5/RULES-INLINE.md` (the rules block, session 5's
 copy; if `/tmp` was cleared, `RULES-FOR-PROMPTS.md` is the same list) plus `code-leg-prompt.md`.

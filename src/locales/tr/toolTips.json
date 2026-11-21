@@ -109,7 +109,7 @@
             "Metronom seni geride bırakıyor. Her tıka adım at.",
             "Hız sarkıyor. Elleri kaldır ve tıkın üstünde çal.",
             "Notalar geç geliyor. Her vuruşun ön kenarını hedefle.",
-            "Sürükleme görünüyor. Tıkın düşündüğünden yarım adım erken olduğunu hayal et."
+            "Sürükleme görünüyor. Her tıkın ortasını değil, ön kenarını hedefle."
           ],
           "correction": [
             "Hâlâ geride duruyorsun — tıkla birlikte çal, onu bekleme.",
@@ -212,7 +212,7 @@
             "Beş dakikadan fazla kesintisiz. Daha fazla zorlamadan önce bedenine kulak ver.",
             "Uzun bir oturum — parmaklarını esnet, sonra geri dön.",
             "Eller yorgun mu? Sonraki geçişten önce 60 saniye ara ver.",
-            "Uzun bir bölüm — devam etmeden önce bileklere ve omuzlara bak.",
+            "Ara vermeden uzun bir bölüm. Devam etmeden önce kısa bir ara verebilirsin.",
             "Kısa bir mola zamanı. Soğuk eller özensiz çalar.",
             "Dur ve esne. İki dakikalık ara, sonraki yirmiyi sağlam tutar.",
             "Kesintisiz seri — daha fazla zorlamadan önce ellere dinlenme ver."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Eller geriliyor mu? Bilekleri salla ve geri dön.",
+            "Vuruşlar aynı tempoda kayıyor. Çubukları bir an bırak, sonra geri dön.",
             "Kalite kayıyor — 60 saniye tabureden kalk.",
             "Ön kollar sana bir şey mi söylüyor? Kısa bir ara, sonra geri gir.",
             "Bagetler ağır mı geliyor? Bırak, esne, sonra dön.",
             "Kavrama sıkılaşıyor mu? Bir dakika setten uzaklaş.",
-            "Bilekler kilitleniyor — kısa bir silkelenme, sonra devam et.",
+            "Doğruluk düşüyor — kısa bir ara, sonra devam et.",
             "Eller olması gerekenden çok çalışıyor. Kısa bir dinlenme.",
             "Bagetleri bir an bırak — kollar sıfırlansın."
           ],
           "correction": [
             "Yorgunluk görünüyor — şimdi dur, bagetleri bırak, 90 saniye dinlen. Yorgun davul çalmak özensiz zamanlamayı yerleştirir.",
             "Zirveyi geçtin — bagetler yere, bir tur yürü, sonra yeniden değerlendir.",
-            "Gerginlik devralmadan dur. 90 saniye ara, su iç, dön.",
-            "Bilekler sıkı. Dur, ön kolları esnet, iki dakika ara ver.",
+            "Vuruşlar bu tempoda kaymaya devam ediyor. 90 saniye ara, su iç, dön.",
+            "Iskalar tek bir tempoda artıyor. Dur, çubukları bırak, iki dakika ara ver.",
             "Bunun ötesine zorlarsan kendini yaralarsın. Şimdi gerçek bir dinlenme.",
             "Davul çalmayı bırak. Birkaç dakika setten uzaklaş.",
             "Bagetler yere. Önce ön kollar, sonra eller, gevşeyince dön.",
@@ -730,7 +730,7 @@
           "neutral": [
             "{staminaMinutes}. dakika civarında ellerin geriliyor. BPM'i 5 kademe düşür ve yeniden kur.",
             "{staminaMinutes}. dakikayı geçince uzuvlar kaymaya başlıyor. Kısa bir mola, sonra geri dön.",
-            "Sette yorgunluk {staminaMinutes}. dakika civarında görünüyor. Bilekleri dinlendir, sonra dön.",
+            "Sette puanların {staminaMinutes}. dakika civarında düşüyor. Kısa bir dinlenme, sonra dön.",
             "{staminaMinutes}. dakika civarında bas davul kilidini kaybetme eğilimindesin. Biraz soluklan."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Sen hazır olunca hazırım. İlk mızrap vuruşundan itibaren takip etmeye başlarım.",
             "Isın ve istediğin an çalmaya başla — dinlemeye başlarım.",
-            "Akort et, yerleş, sonra hazır olunca çal.",
+            "Rahatça otur, yerleş, sonra hazır olunca çal.",
             "Hoş geldin. Mızrap elin gevşeyince başla.",
             "Hazır olduğunda çal, zamanlamanı yakalamaya başlarım.",
             "Acele yok. Mızrap elini gevşet, sonra hazır olunca başla.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Mızrap kolu geriliyor mu? Salla, sonra geri gir.",
-            "Bilek veya ön kol kilitlenmiş gibi mi? Kısa bir ara, sonra geri gir.",
-            "Gerginlik sızıyor — gitarı 60 saniye bırak.",
-            "Omuz yükseliyor mu? İndir, nefes al, sonra devam et.",
+            "Doğruluk birkaç dakikadır düşüyor. Kısa bir ara, sonra geri gir.",
+            "Bu tempoda ıskalar artıyor — gitarı 60 saniye bırak.",
+            "Aynı tempoda uzun bir seri. Nefes al, sonra devam et.",
             "Mızrap vuruşu gerektiğinden daha zor oluyor. Kısa bir dinlenme.",
             "Sap üzerindeki kavrama sıkılaşıyor mu? Gevşet, sonra çal.",
             "Ön kol fazla çalışıyor — salla ve devam et.",
-            "30 saniye ara ver, omuzlarını çevir, sonra geri dön."
+            "30 saniyelik bir ara verebilirsin, sonra geri dön."
           ],
           "correction": [
-            "Yorgunluk mızrap vuruşunda görünüyor — dur, kolu 90 saniye dinlendir. Yorgun mızrap gerginlik biriktirir.",
-            "Zirveyi geçtin — gitarı bırak, bileği esnet, sonra geri gir.",
+            "Doğruluk aynı tempoda düşüyor — dur, gitarı 90 saniye bırak, sonra tekrar bak.",
+            "Puanların zirvenin altında — gitarı bir dakika bırak, sonra geri gir.",
             "Tendonlar şikâyet etmeden önce dur. Tellerden 90 saniye uzak dur.",
-            "Bilek zorlanıyor. Gitarı bırak, ön kolu esnet, iki dakika ara ver.",
+            "Iskalar bu tempoda artmaya devam ediyor. Gitarı bırak, iki dakika ara ver.",
             "Gerçek bir dinlenme — gitar sehpada, bir süre dolaş.",
             "Mızrap kolu şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
-            "Dur. Bilek daireleri, ön kol esnetmeleri, sonra taze dön.",
+            "Burada dur. Gitardan iki dakika uzak kal, sonra taze dön.",
             "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Kesin dur."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "{staminaMinutes}. dakikayı geçince mızrap elin geriliyor. Salla, sonra devam et.",
+            "{staminaMinutes}. dakikayı geçince bu tempoda zamanlaman kayma eğiliminde. Kısa bir ara, sonra devam et.",
             "{staminaMinutes}. dakika civarında mızrap vuruşu kaymaya başlıyor. Kısa bir mola, sonra geri gir.",
             "{staminaMinutes}. dakikada dayanıklılık duvarı — sağ el sıkılaşıyor. 30 saniye dinlen.",
             "{staminaMinutes}. dakika civarında mızrap çalışında keskinliğini kaybetme eğilimindesin. Kısa bir dinlenme, sonra dön."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Sen hazır olunca hazırım. İlk strum'ından itibaren takip etmeye başlarım.",
-            "Akort et ve istediğin an başla — ilk notadan itibaren dinlerim.",
+            "Yerleş ve istediğin an başla — ilk notadan itibaren dinlerim.",
             "Birkaç açık akor çal, sonra hazır olunca başla.",
             "Hoş geldin. Strum elin gevşeyince başla.",
             "Hazır olduğunda çal, zamanlamanı yakalamaya başlarım.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Strum kolu geriliyor mu? Salla, sonra geri gir.",
-            "Bilek kilitlenmiş gibi mi? Kısa bir esneme, sonra geri gir.",
-            "Strum'a gerginlik sızıyor — gitarı 60 saniye bırak.",
-            "Omuz yükseliyor mu? İndir, nefes al, sonra devam et.",
+            "Bu tempoda doğruluk düşüyor. Kısa bir ara, sonra geri gir.",
+            "Strum'a ıskalar sızıyor — gitarı 60 saniye bırak.",
+            "Bir süredir aynı tempoda strum yapıyorsun. Nefes al, sonra devam et.",
             "Strum gerektiğinden daha ağırlaşıyor. Kısa bir dinlenme.",
             "Sap üzerindeki kavrama sıkılaşıyor mu? Gevşet, sonra çal.",
             "Ön kol fazla çalışıyor — salla ve devam et.",
-            "30 saniye ara ver, omuzlarını çevir, sonra geri dön."
+            "İstersen 30 saniye ara ver, sonra geri dön."
           ],
           "correction": [
             "Yorgunluk strum'da görünüyor — dur, tellerden 90 saniye uzak dur.",
-            "Zirveyi geçtin — gitarı bırak, bileği esnet, sonra dön.",
+            "Puanların zirvenin altında — gitarı bir dakika bırak, sonra dön.",
             "Yorgun strum dinamikleri gömer. Dur, dinlen, yeniden başla.",
             "Strum kolu zorlanıyor. Gitarı bırak, ön kolu esnet, iki dakika ara ver.",
             "Gerçek bir dinlenme — gitar sehpada, bir süre dolaş.",
             "Strum eli şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
-            "Kesin dur. Bilek daireleri, ön kol esnetmeleri, gevşeyince devam et.",
+            "Kesin dur. İki dakika ara, sonra hazır olunca devam et.",
             "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Her vuruşa basıyorsun ama vuruş hafif — daha sert bir strum ya da mızrap dene.",
-            "Kapsam iyi, vuruşlar yumuşak. Telleri bilekle daha çok kuvvetle geç.",
+            "Kapsam iyi, vuruşlar yumuşak. Tellerin üzerinden biraz daha sert strum yap.",
             "Vuruşların hepsi orada, sadece sessiz. Telleri daha çok niyetle geç.",
             "Vuruşlara basıyorsun ama yumuşakça — aşağı vuruşta daha keskin bir vuruş dene."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Tel çeken parmaklar geriliyor mu? Kısa bir esneme — geri gir.",
             "Ön kol kilitlenmeye mi başlıyor? Bası 60 saniye bırak.",
-            "Sağ elde gerginlik mi birikiyor? Kısa bir mola, sonra geri gir.",
+            "Notalar aynı tempoda kayıyor. Kısa bir mola, sonra geri gir.",
             "Perde basan el ağırlaşıyor mu? Bir an dur, sonra devam et.",
             "Sağ el sıkı mı hissettiriyor? Salla, sonra devam et.",
-            "Omuz yükseliyor mu? İndir, nefes al, sonra devam et.",
+            "Aynı tempoda uzun bir seri. Nefes al, sonra devam et.",
             "Ön kol fazla çalışıyor. Kısa bir dinlenme.",
-            "30 saniye ara ver, bileklerini çevir, sonra geri dön."
+            "İstersen 30 saniye ara ver, sonra geri dön."
           ],
           "correction": [
             "Yorgunluk vuruşta görünüyor — dur, 90 saniye ara ver, sonra yeniden değerlendir.",
@@ -1505,7 +1505,7 @@
             "Sağ el zorlanıyor. Bası bırak, ön kolu esnet, iki dakika ara ver.",
             "Gerçek bir dinlenme — bas sehpada, bir süre dolaş.",
             "Tel çeken el tamam. En az 90 saniye, sonra yeniden değerlendir.",
-            "Kesin dur. Devam etmeden önce bilek daireleri ve ön kol esnetmeleri.",
+            "Kesin dur. Devam etmeden önce bastan iki dakika uzak kal.",
             "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Eller yeniden senkron. Tut.",
             "İki el kilidi geri geldi. Hiçbir şeyi değiştirme.",
-            "Toparladın — omuzlarda gevşek kal.",
+            "Toparladın — böyle düzenli devam et.",
             "Kaymayı yakaladın. Bunun içinde otur.",
             "Sol ve sağ yeniden senkron oldu. Orada kal.",
             "Düşüşten döndün. Hiçbir şeyi değiştirme.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Bilekler geriliyor mu? Elleri kaldır, nefes al, sonra geri gir.",
+            "Bu tempoda doğruluk düşüyor. Elleri kaldır, nefes al, sonra geri gir.",
             "Ön kollar kilitlenmiş gibi mi? Dur, elleri bırak, nefes al.",
-            "Omuzlara gerginlik sızıyor — 60 saniye tuşlardan uzak dur.",
+            "Bu tempoda ıskalar artıyor — 60 saniye tuşlardan uzak dur.",
             "Parmaklar ağırlaşıyor mu? Kısa bir esneme, sonra devam et.",
             "Eller olması gerekenden çok çalışıyor. Kısa bir dinlenme.",
-            "Omuzlar yükseliyor mu? İndir, nefes al, sonra çal.",
-            "30 saniye ara ver, bileklerini çevir, sonra geri dön.",
-            "Bilekte gerginlik birikiyor. Dur, elleri dizlerine bırak, nefes al."
+            "Bir süredir tuşlardasın. Nefes al, sonra çal.",
+            "30 saniyelik bir ara verebilirsin, sonra geri dön.",
+            "Aynı tempoda doğruluk düşüyor. Dur, elleri dizlerine bırak, nefes al."
           ],
           "correction": [
             "Yorgunluk dokunuşta görünüyor — dur, eller 90 saniye aşağıda.",
             "Zirveyi geçtin — tabureden kalk, salla, sonra dön.",
-            "Yorgun çalmak dinamikleri gömer. Dur, bilekleri dinlendir, yeniden başla.",
-            "Bilekler zorlanıyor. Elleri bırak, ön kolları esnet, iki dakika ara ver.",
+            "Puanlar bu tempoda düşmeye devam ediyor. Dur, dinlen, yeniden başla.",
+            "Iskalar tek bir tempoda artmaya devam ediyor. Elleri tuşlardan çek, iki dakika ara ver.",
             "Gerçek bir dinlenme — ayağa kalk, dolaş, taze dön.",
             "Eller şimdilik tamam. En az 90 saniye, sonra yeniden değerlendir.",
-            "Kesin dur. Devam etmeden önce bilek daireleri ve omuz çevirmeleri.",
+            "Kesin dur. Devam etmeden önce tuşlardan iki dakika uzak kal.",
             "Bunun ötesine zorlarsan kendine sakatlık satın alırsın. Dur ve toparlan."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "{staminaMinutes}. dakika civarında dokunuşunda gerginlik var. Bırak, nefes al, temiz dön.",
-            "{staminaMinutes}. dakika civarında bilek gerginliği sızıyor. Kısa bir dinlenme, sonra devam et.",
+            "Bu tempoda puanların {staminaMinutes}. dakika civarında düşüyor. Nefes al, temiz dön.",
+            "{staminaMinutes}. dakika civarında ıskalar artmaya başlıyor. Kısa bir dinlenme, sonra devam et.",
             "{staminaMinutes}. dakikayı geçince dokunuş ağırlaşıyor. Kısa bir mola, sonra tuşların başına dön.",
             "Ellerde yorgunluk {staminaMinutes}. dakika civarında görünüyor. Dinlen, sonra dön."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Vuruş konumları arasında genlik değişimi düşük — vuruşunun gücünü değiştirmeyi dene.",
+            "Vuruş konumları arasında genlik değişimi düşük — atak şiddetini değiştirmeyi dene.",
             "Ölçü boyunca asgari dinamik şekillendirme — ana vuruşlarda vurgu farkını artır.",
             "Konumlar arasında genlik tutarlı — dinamik bir hiyerarşi kur: ana vuruşlar en güçlü, geri vuruşlar daha hafif."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Ters vurgu örüntüsü algılandı — ana vuruşlar geri vuruşlardan daha sessiz.",
-            "Geri vuruşların baskın — 1. ve 3. vuruşlarda vuruş gücünü artır.",
+            "Geri vuruşların baskın — 1. ve 3. vuruşlarda atak şiddetini artır.",
             "Ana vuruş genliği geri vuruş genliğinin altında — dinamik hiyerarşiyi tersine çevir."
           ]
         },

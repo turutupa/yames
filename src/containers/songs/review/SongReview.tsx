@@ -101,6 +101,12 @@ import { rangeTempoSteps } from "../../../songs/schedule";
 import type { BarRange } from "../../../songs/schedule";
 import { printedBarNumber } from "../../../songs/position";
 import type { Finding, NoteVerdict } from "../../../songs/types";
+// c5a2 — the verdict in the Session's note (DESIGN 3.1), with the Session's fact line.
+import { CoachNote, FactLine } from "../../coach/CoachNote";
+import { askCoach } from "../../coach/askStore";
+import { lineText } from "../../session/lineText";
+import { IS_MOBILE } from "../../../platform";
+import { songFacts } from "./songNote";
 import "../../../styles/songs-review.css";
 
 
@@ -496,6 +502,19 @@ export function SongReview({
     [answer],
   );
 
+  /**
+   * c5a2 — `said`, drawn as the Session draws a result (DESIGN 3.1): the
+   * sentence is the note's headline, under it its source ("Measured") and one
+   * fact line; the fix stays the same `CoachBlocks` button, under the note, with
+   * the same handler. Same sentence, same button, same bag: only the frame.
+   */
+  const sentence = useMemo(() => {
+    const text = said.find((b) => b.type === "text");
+    return text && text.type === "text" ? text : null;
+  }, [said]);
+  const fixes = useMemo(() => said.filter((b) => b.type === "action"), [said]);
+  const noteFacts = useMemo(() => songFacts(facts, pitch), [facts, pitch]);
+
   const others = useMemo(
     () =>
       rest.map((finding) => ({
@@ -608,11 +627,20 @@ export function SongReview({
             own inside the pinned head. On screen at every window height the
             app opens — which is what it means for the coach to have said it. */}
         {headline && said.length > 0 && (
-          <CoachBlocks
-            blocks={said}
-            onAction={handlerFor(headline)}
-            className="songs-review-said"
-          />
+          <div className="songs-review-said">
+            {sentence && (
+              <CoachNote
+                headline={sentence.text}
+                source={sentence.source}
+                kind="song"
+                testId="songs-note"
+                onAsk={IS_MOBILE ? undefined : askCoach}
+              >
+                <FactLine facts={noteFacts} render={(fact) => lineText(t, fact.line)} />
+              </CoachNote>
+            )}
+            {fixes.length > 0 && <CoachBlocks blocks={fixes} onAction={handlerFor(headline)} />}
+          </div>
         )}
       </header>
 

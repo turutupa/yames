@@ -30,7 +30,8 @@ import type { PlayerProgress } from "../../session/progress";
 import type { CoachContext, CoachRun, CoachScreen } from "../context";
 import { notWiredHost, type CoachToolHost, type SafeSettingOption, type SafeSettingValue } from "../tools/host";
 import { COACH_TOOLS } from "../tools/registry";
-import { runCoachTool } from "../tools/run";
+import { checkCall, runCoachTool } from "../tools/run";
+import { FACT_CARDS } from "./intents";
 import type { RunOutcome, ToolArgs, ToolCall } from "../tools/types";
 import { CARD_IDS } from "./evalCards";
 
@@ -390,7 +391,16 @@ export function effectOf(call: ToolCall | unknown, situation: Situation, lang: s
  */
 export function judgeExpected(item: EvalItem, paths: readonly PathDoc[]): string | null {
   const { expect } = item;
-  if (expect.kind === "card") return (CARD_IDS as readonly string[]).includes(expect.card) ? null : `no card "${expect.card}"`;
+  // A Session plays a Step that exists (its Exercise is what the cards read; leg c3b1b).
+  if (item.situation.view === "session" && !stepOf(paths, item.situation.path, item.situation.step).step) {
+    return `no Step ${item.situation.step} on ${item.situation.path}`;
+  }
+  if (expect.kind === "card") {
+    if (!(CARD_IDS as readonly string[]).includes(expect.card)) return `no card "${expect.card}"`;
+    // Its arguments, by the cards' own shape check (leg c3b1b).
+    const checked = checkCall({ tool: expect.card, args: expect.args ?? {} }, FACT_CARDS, "player");
+    return checked.ok ? null : `card ${expect.card}: ${checked.line.key}${checked.detail ? ` (${checked.detail})` : ""}`;
+  }
   if (expect.kind !== "call") return null;
   const effect = effectOf({ tool: expect.tool, args: expect.args }, item.situation, item.lang, paths);
   if (effect.did !== null) return null;

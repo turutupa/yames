@@ -109,7 +109,7 @@
             "Het metronoom laat je achter. Stap in elke klik.",
             "Het tempo zakt in. Til de handen op en speel bovenop de klik.",
             "Noten komen laat. Mik op de voorste rand van elke tel.",
-            "Er is gesleep te zien. Stel je voor dat de klik een halve toon eerder komt dan je denkt."
+            "Er is gesleep te zien. Mik op de voorkant van elke klik, niet op het midden."
           ],
           "correction": [
             "Nog steeds achterblijven. Speel met de klik, wacht er niet op.",
@@ -212,7 +212,7 @@
             "Meer dan vijf minuten aaneen. Check in met je lichaam voordat je verder duwt.",
             "Langdurige sessie: strek je vingers en kom dan terug.",
             "Handen moe? Neem 60 seconden pauze voor de volgende keer.",
-            "Lange reeks: check je polsen en schouders voordat je doorgaat.",
+            "Lange reeks zonder pauze. Een korte pauze is een optie voordat je doorgaat.",
             "Tijd voor een korte pauze. Koude handen spelen slordig.",
             "Pauzeer en strek. Twee minuten rust houdt de volgende twintig degelijk.",
             "Langdurige reeks: geef de handen rust voordat je verder duwt."
@@ -674,20 +674,20 @@
         },
         "fatigue": {
           "encouragement": [
-            "Handen die verkrampen? Schud de polsen uit en kom terug.",
+            "De slagen glippen weg bij hetzelfde tempo. Sticks even neer en kom dan terug.",
             "De kwaliteit drijft weg: kom 60 seconden van de kruk af.",
             "Praten je onderarmen tegen je? Korte pauze en dan weer erin.",
             "Voelen de sticks zwaar? Leg ze neer, strek je en keer terug.",
             "Wordt je grip strak? Stap een minuut weg van de kit.",
-            "De polsen lopen vast: snel uitschudden en dan verder.",
+            "De nauwkeurigheid zakt: even een korte pauze en dan verder.",
             "De handen werken harder dan zou moeten. Even rust.",
             "Leg de sticks even neer: laat de armen bijkomen."
           ],
           "correction": [
             "Vermoeidheid zichtbaar: stop nu, leg de sticks neer, 90 seconden rust. Moe drummen zet slordige timing vast.",
             "Je bent voorbij je piek: sticks neer, loop een rondje en beoordeel dan opnieuw.",
-            "Stop voordat spanning het overneemt. 90 seconden pauze, drink wat en keer terug.",
-            "De polsen zijn strak. Stop, strek de onderarmen en neem twee minuten pauze.",
+            "De slagen blijven wegglijden bij dit tempo. 90 seconden pauze, drink wat en keer terug.",
+            "De missers lopen op bij één tempo. Stop, sticks neer en neem twee minuten pauze.",
             "Als je hier doorheen duwt, doe je jezelf pijn. Nu echt rust nemen.",
             "Stop met drummen. Loop een paar minuten weg van de kit.",
             "Sticks neer. Eerst de onderarmen, dan de handen, en kom terug zodra je los bent.",
@@ -730,7 +730,7 @@
           "neutral": [
             "Rond minuut {staminaMinutes} worden je handen strak. Zet de BPM 5 streepjes lager en bouw opnieuw op.",
             "Voorbij de {staminaMinutes}-minutengrens beginnen de ledematen af te drijven. Korte pauze en dan weer aan de slag.",
-            "Vermoeidheid toont zich rond minuut {staminaMinutes} op de kit. Laat de polsen rusten en keer terug.",
+            "Je scores op de kit zakken rond minuut {staminaMinutes}. Even kort rust en keer dan terug.",
             "Je verliest de kick meestal rond minuut {staminaMinutes}. Neem even een adempauze."
           ]
         },
@@ -835,7 +835,7 @@
           "neutral": [
             "Ik ben klaar wanneer jij het bent. Ik begin te volgen vanaf je eerste aanslag.",
             "Warm je op en start wanneer je wilt: ik begin te luisteren.",
-            "Stem je gitaar, zet je klaar en speel dan wanneer je zover bent.",
+            "Maak het jezelf gemakkelijk, zet je klaar en speel dan wanneer je zover bent.",
             "Fijn dat je er bent. Begin wanneer je aanslaghand los voelt.",
             "Wanneer je klaar bent: speel, dan begin ik je timing op te vangen.",
             "Geen haast. Maak je aanslaghand los en begin dan wanneer je klaar bent.",
@@ -947,22 +947,22 @@
         "fatigue": {
           "encouragement": [
             "Wordt je aanslagarm strak? Schud hem uit en kom dan terug.",
-            "Voelt je pols of onderarm vast? Korte pauze en dan weer erin.",
-            "Er sluipt spanning in: leg de gitaar 60 seconden neer.",
-            "Gaat je schouder omhoog? Laat hem zakken, adem in en ga dan verder.",
+            "De nauwkeurigheid zakt al een paar minuten. Korte pauze en dan weer erin.",
+            "Er sluipen missers in bij dit tempo: leg de gitaar 60 seconden neer.",
+            "Lange reeks in één tempo. Adem in en ga dan verder.",
             "De aanslag wordt zwaarder dan nodig. Even rust.",
             "Knijp je harder in de hals? Ontspan en speel dan.",
             "Je onderarm werkt te hard: schud uit en ga verder.",
-            "Neem 30 seconden, rol de schouders en ga dan weer aan de slag."
+            "Een pauze van 30 seconden is een optie, en dan weer aan de slag."
           ],
           "correction": [
-            "Vermoeidheid zichtbaar in de aanslag: stop, laat de arm 90 seconden rusten. Moe aanslaan bouwt spanning op.",
-            "Je bent over je piek heen: gitaar neer, strek de pols en kom dan terug.",
+            "De nauwkeurigheid zakt bij hetzelfde tempo: stop, gitaar 90 seconden neer en check het dan opnieuw.",
+            "Je scores liggen onder je piek: gitaar een minuut neer en kom dan terug.",
             "Stop voordat de pezen gaan klagen. 90 seconden van de snaren af.",
-            "Je pols wordt overbelast. Leg de gitaar neer, strek de onderarm, twee minuten rust.",
+            "De missers blijven oplopen bij dit tempo. Leg de gitaar neer, twee minuten rust.",
             "Echte rust: gitaar op de standaard, even rondlopen.",
             "Je aanslagarm is voor nu klaar. Minstens 90 seconden en kijk dan opnieuw.",
-            "Stop. Polscirkels, onderarmrekken en kom dan fris terug.",
+            "Stop hier. Twee minuten weg van de gitaar en kom dan fris terug.",
             "Doorduwen hierna koopt je een blessure. Harde stop."
           ]
         },
@@ -1000,7 +1000,7 @@
         },
         "stamina": {
           "neutral": [
-            "Voorbij de {staminaMinutes}-minutengrens spant je aanslaghand aan. Schud hem uit en ga dan verder.",
+            "Voorbij de {staminaMinutes}-minutengrens glipt je timing bij dit tempo meestal weg. Een korte pauze en ga dan verder.",
             "Rond minuut {staminaMinutes} begint de aanslag te drijven. Korte pauze en dan weer erin.",
             "Uithoudingsmuur rond minuut {staminaMinutes}: je rechterhand wordt strak. Rust 30 seconden.",
             "Rond minuut {staminaMinutes} verlies je meestal scherpte in de aanslag. Korte rust en dan terug."
@@ -1106,7 +1106,7 @@
         "session_start_cold": {
           "neutral": [
             "Ik ben klaar wanneer jij het bent. Ik begin te volgen vanaf je eerste strum.",
-            "Stem je gitaar en begin wanneer je wilt: ik luister vanaf de eerste noot.",
+            "Zet je klaar en begin wanneer je wilt: ik luister vanaf de eerste noot.",
             "Strum een paar open akkoorden en speel dan wanneer je zover bent.",
             "Fijn dat je er bent. Begin wanneer je strumhand los voelt.",
             "Wanneer je klaar bent: speel, dan begin ik je timing op te vangen.",
@@ -1219,22 +1219,22 @@
         "fatigue": {
           "encouragement": [
             "Wordt je strumarm strak? Schud hem uit en kom dan terug.",
-            "Voelt je pols vast? Even strekken en dan weer erin.",
-            "Er sluipt spanning in de strum: gitaar 60 seconden neer.",
-            "Gaat je schouder omhoog? Laat hem zakken, adem in en ga dan verder.",
+            "De nauwkeurigheid zakt bij dit tempo. Korte pauze en dan weer erin.",
+            "Er sluipen missers in de strum: gitaar 60 seconden neer.",
+            "Je strumt al een tijdje in één tempo. Adem in en ga dan verder.",
             "De strum wordt zwaarder dan nodig. Even rust.",
             "Knijp je harder in de hals? Ontspan en speel dan.",
             "Je onderarm werkt te hard: schud uit en ga verder.",
-            "Neem 30 seconden, rol de schouders en ga dan weer aan de slag."
+            "Neem 30 seconden als je die wilt en ga dan weer aan de slag."
           ],
           "correction": [
             "Vermoeidheid zichtbaar in de strum: stop, 90 seconden van de snaren af.",
-            "Je bent over je piek heen: leg de gitaar neer, strek de pols en kom dan terug.",
+            "Je scores liggen onder je piek: leg de gitaar een minuut neer en kom dan terug.",
             "Moe strummen begraaft de dynamiek. Stop, rust en begin opnieuw.",
             "Je strumarm wordt overbelast. Leg de gitaar neer, strek de onderarm, twee minuten rust.",
             "Echte rust: gitaar op de standaard, even rondlopen.",
             "Je strumhand is klaar. Minstens 90 seconden en kijk dan opnieuw.",
-            "Harde stop. Polscirkels, onderarmrekken en ga verder zodra je los bent.",
+            "Harde stop. Twee minuten pauze en ga verder zodra je er klaar voor bent.",
             "Doorduwen hierna koopt je een blessure. Stop en herstel."
           ]
         },
@@ -1299,7 +1299,7 @@
         "muddy_hits": {
           "neutral": [
             "Je raakt elke tel, maar de aanslag is licht: probeer een stevigere strum of aanslag met het plectrum.",
-            "Goede dekking, zachte slagen. Meer polskracht door de snaren.",
+            "Goede dekking, zachte slagen. Strum wat harder door de snaren.",
             "De tellen zijn er allemaal, alleen stil. Strum met meer intentie door de snaren.",
             "Je raakt de tellen maar zacht: probeer een scherpere aanslag op de neerslag."
           ]
@@ -1491,12 +1491,12 @@
           "encouragement": [
             "Worden je tokkelvingers strak? Even strekken en dan weer erin.",
             "Begint je onderarm vast te zitten? Bas 60 seconden neer.",
-            "Bouwt er spanning op in je rechterhand? Korte pauze en kom dan terug.",
+            "De noten glippen weg bij hetzelfde tempo. Korte pauze en kom dan terug.",
             "Wordt je grephand zwaar? Neem een moment en ga dan verder.",
             "Voelt je rechterhand strak? Schud uit en ga dan verder.",
-            "Gaat je schouder omhoog? Laat hem zakken, adem in en ga dan verder.",
+            "Lange reeks in één tempo. Adem in en ga dan verder.",
             "Je onderarm werkt te hard. Even rust.",
-            "Neem 30 seconden, rol de polsen en ga dan weer aan de slag."
+            "Neem 30 seconden als je die wilt en ga dan weer aan de slag."
           ],
           "correction": [
             "Vermoeidheid zichtbaar in de aanslag: stop, 90 seconden rust en kijk dan opnieuw.",
@@ -1505,7 +1505,7 @@
             "Je rechterhand wordt overbelast. Leg de bas neer, strek de onderarm, twee minuten rust.",
             "Echte rust: bas op de standaard, even rondlopen.",
             "Je tokkelhand is klaar. Minstens 90 seconden en kijk dan opnieuw.",
-            "Harde stop. Polscirkels en onderarmrekken voordat je verdergaat.",
+            "Harde stop. Twee minuten weg van de bas voordat je verdergaat.",
             "Doorduwen hierna koopt je een blessure. Stop en herstel."
           ]
         },
@@ -1743,7 +1743,7 @@
           "encouragement": [
             "Handen weer synchroon. Houd het vast.",
             "De vergrendeling van twee handen is terug. Verander niets.",
-            "Hersteld: blijf ontspannen in de schouders.",
+            "Hersteld: houd het gelijkmatig.",
             "Je ving de drift op. Blijf hierin zitten.",
             "Links en rechts weer synchroon. Blijf daar.",
             "Terug van de dip. Verander niets.",
@@ -1760,23 +1760,23 @@
         },
         "fatigue": {
           "encouragement": [
-            "Worden de polsen strak? Til de handen op, adem en ga dan weer verder.",
+            "De nauwkeurigheid zakt bij dit tempo. Til de handen op, adem en ga dan weer verder.",
             "Voelen de onderarmen vast? Pauzeer, laat de handen zakken en adem.",
-            "Er sluipt spanning in de schouders: 60 seconden weg van de toetsen.",
+            "Er sluipen missers in bij dit tempo: 60 seconden weg van de toetsen.",
             "Voelen de vingers zwaar? Snel strekken en dan hervatten.",
             "De handen werken harder dan zou moeten. Even rust.",
-            "Klimmen de schouders omhoog? Laat ze zakken, adem en speel dan.",
-            "Neem 30 seconden, draai de polsen rond en ga dan weer verder.",
-            "Spanning in de polsen neemt toe. Pauzeer, laat de handen op je schoot zakken en adem."
+            "Je zit al een tijdje aan de toetsen. Adem en speel dan.",
+            "Een pauze van 30 seconden is een optie, en ga dan weer verder.",
+            "De nauwkeurigheid zakt bij één tempo. Pauzeer, handen op je schoot en adem."
           ],
           "correction": [
             "Vermoeidheid zichtbaar in de aanslag: stop, handen 90 seconden neer.",
             "Je bent voorbij je piek: ga van de pianokruk af, schud het uit en keer dan terug.",
-            "Moe spelen begraaft de dynamiek. Stop, laat de polsen rusten en begin opnieuw.",
-            "De polsen worden overbelast. Leg de handen neer, strek de onderarmen en neem twee minuten pauze.",
+            "De scores blijven zakken bij dit tempo. Stop, rust uit en begin opnieuw.",
+            "De missers blijven oplopen bij één tempo. Handen van de toetsen, twee minuten pauze.",
             "Echte rust: sta op, loop rond en kom fris terug.",
             "De handen zijn voor nu klaar. Minstens 90 seconden en controleer dan opnieuw.",
-            "Harde stop. Polscirkels en schouderrollen voordat je verder gaat.",
+            "Harde stop. Twee minuten weg van de toetsen voordat je verder gaat.",
             "Als je hier doorheen duwt, koop je een blessure. Stop en herstel."
           ]
         },
@@ -1814,8 +1814,8 @@
         },
         "stamina": {
           "neutral": [
-            "Spanning in je aanslag rond minuut {staminaMinutes}. Laat los, adem en kom schoon terug.",
-            "Rond minuut {staminaMinutes} sluipt er spanning in de polsen. Korte rust en hervat dan.",
+            "Je scores bij dit tempo zakken rond minuut {staminaMinutes}. Adem en kom schoon terug.",
+            "Rond minuut {staminaMinutes} beginnen de missers binnen te sluipen. Korte rust en hervat dan.",
             "Voorbij de {staminaMinutes}-minutengrens wordt de aanslag zwaarder. Korte pauze en dan weer aan de toetsen.",
             "Vermoeidheid in de handen toont zich rond minuut {staminaMinutes}. Rust en keer dan terug."
           ]
@@ -2169,7 +2169,7 @@
         },
         "flat_dynamics": {
           "neutral": [
-            "Weinig amplitudevariatie over de telposities: probeer je aanslag te variëren.",
+            "Weinig amplitudevariatie over de telposities: probeer de sterkte van je aanslag te variëren.",
             "Minimale dynamische vormgeving over de maat: vergroot het accentverschil op de zware tellen.",
             "De amplitude is consistent over de posities: bouw een dynamische hiërarchie op: zware tellen het sterkst, offbeats lichter."
           ]
@@ -2177,7 +2177,7 @@
         "weak_downbeats": {
           "neutral": [
             "Anti-accentpatroon gedetecteerd: de zware tellen zijn zachter dan de offbeats.",
-            "Je offbeats domineren: verhoog de aanslag op tel 1 en 3.",
+            "Je offbeats domineren: versterk de aanslag op tel 1 en 3.",
             "De amplitude van de zware tellen ligt onder die van de offbeats: draai de dynamische hiërarchie om."
           ]
         },

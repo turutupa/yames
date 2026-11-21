@@ -104,6 +104,28 @@ describe("start_today", () => {
     expect(proposalOf(runCoachTool(call("start_today"), h, toolCtx())).line.values).toMatchObject({ stops: "click" });
   });
 
+  it("a click started since a proposal that stopped nothing: not now, and the proposal stays good (c3b2ab, M2)", () => {
+    const h = host();
+    const proposal = proposalOf(runCoachTool(call("start_today"), h, toolCtx()));
+    expect(proposal.line.values).not.toHaveProperty("stops");
+    h.play("click");
+    expect(confirmCoachTool(proposal, h, toolCtx())).toMatchObject({
+      ok: false,
+      why: "notNow",
+      line: { key: "coachTools.why.notNow.sounding", values: { stops: "click" } },
+    });
+    expect(h.changes()).toEqual([]);
+    h.play(null);
+    expect(confirmCoachTool(proposal, h, toolCtx()).ok).toBe(true);
+    expect(h.changes()).toEqual([{ member: "startToday", args: [null] }]);
+  });
+
+  it("a proposal that said the click stops still starts while it plays", () => {
+    const h = fakeHost({ paths: TEST_PATHS, sounding: "click" }, { plan: () => PLAN, startToday: () => "done" });
+    const proposal = proposalOf(runCoachTool(call("start_today"), h, toolCtx()));
+    expect(confirmCoachTool(proposal, h, toolCtx()).ok).toBe(true);
+  });
+
   it("a Take started since the proposal: nothing", () => {
     const h = host();
     const proposal = proposalOf(runCoachTool(call("start_today"), h, toolCtx()));
