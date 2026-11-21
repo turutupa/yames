@@ -14,7 +14,7 @@ import { installSettings } from "../../../test/parity/store";
 import { CUSTOM_PATH_ID, buildCustomExercise, customExerciseId } from "../../../paths/custom";
 import type { Recipe } from "../../../paths/custom";
 import { playableDoc } from "../MyExercises";
-import { CHOSEN_TODAY_KEY, resetChosenTodayForTest } from "../../../session/chosenToday";
+import { CHOSEN_TODAY_KEY, resetChosenTodayForTest, updateChosenToday, withKey } from "../../../session/chosenToday";
 import type { ChosenParts } from "../../../session/chosenToday";
 import { dayKey } from "../../../session/swap";
 
@@ -58,7 +58,7 @@ async function mount(stored: unknown) {
   await waitFor(() => expect(hook.result.current.plan.steps.length).toBeGreaterThan(0));
   /** The shell's answer to `setView("session")`: render with the Session's view. */
   const toSession = () => hook.rerender({ ...props, view: "session" });
-  return { ...hook, toSession };
+  return { ...hook, toSession, props };
 }
 
 const mineIn = (steps: ReadonlyArray<{ id: string }>) => steps.filter((s) => s.id.startsWith("mine-"));
@@ -103,6 +103,57 @@ describe("useSessionRun — exercises added to today", () => {
       expect(h.result.current.chosenUnbuilt).toBe(0);
       h.unmount();
     }
+  });
+
+  describe("23:59 to 00:01: one clock (t2eb, review M4)", () => {
+    const EVENING = new Date(2026, 10, 21, 23, 59).getTime();
+    const AFTER = new Date(2026, 10, 22, 0, 1).getTime();
+    let clock = EVENING;
+    afterEach(() => vi.restoreAllMocks());
+
+    it("a move to Paths reads the new day: yesterday's part leaves Today's plan; a press on the new day puts one in", async () => {
+      clock = EVENING;
+      vi.spyOn(Date, "now").mockImplementation(() => clock);
+      const h = await mount({ day: dayKey(EVENING), keys: ["k1"] });
+      act(() => h.result.current.actions.setChosenParts(parts()));
+      await waitFor(() => expect(mineIn(h.result.current.plan.steps)).toHaveLength(1));
+      clock = AFTER;
+      // Same screen, no move: the plan's clock stands, Today and Paths both still read 23:59's day.
+      expect(dayKey(h.result.current.planClock)).toBe(dayKey(EVENING));
+      // Today to Paths: the day is read again.
+      h.rerender({ ...h.props, view: "paths" });
+      await waitFor(() => expect(dayKey(h.result.current.planClock)).toBe(dayKey(AFTER)));
+      expect(mineIn(h.result.current.plan.steps)).toHaveLength(0);
+      // The press writes by the same clock, and Today has the part at once.
+      const now = h.result.current.actions.todayNow();
+      await act(async () => {
+        await updateChosenToday((k) => withKey(k, "k1"), now);
+      });
+      await waitFor(() => expect(mineIn(h.result.current.plan.steps)).toHaveLength(1));
+    });
+
+    it("a Session that started at 23:59 keeps its plan when the press moves the clock past midnight", async () => {
+      clock = EVENING;
+      vi.spyOn(Date, "now").mockImplementation(() => clock);
+      const h = await mount({ day: dayKey(EVENING), keys: ["k1"] });
+      act(() => h.result.current.actions.setChosenParts(parts()));
+      await waitFor(() => expect(mineIn(h.result.current.plan.steps)).toHaveLength(1));
+      const at = h.result.current.plan.steps.findIndex((s) => s.id === "mine-1");
+      act(() => h.result.current.actions.startTodayAt(at));
+      h.toSession();
+      await waitFor(() => expect(h.result.current.run.phase).toBe("ready"));
+      const running = h.result.current.run.plan;
+      expect(mineIn(running!.steps)).toHaveLength(1);
+      clock = AFTER;
+      act(() => {
+        h.result.current.actions.todayNow();
+      });
+      await waitFor(() => expect(dayKey(h.result.current.planClock)).toBe(dayKey(AFTER)));
+      // Today's plan moved to the new day (no part chosen on it); the running Session did not.
+      expect(mineIn(h.result.current.plan.steps)).toHaveLength(0);
+      expect(h.result.current.run.plan).toBe(running);
+      expect(h.result.current.exercise?.id).toBe(customExerciseId(MOCK_17));
+    });
   });
 
   it("nothing chosen, handed in again: the same state, no new plan", async () => {

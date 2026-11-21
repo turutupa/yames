@@ -8,14 +8,17 @@ import {
   CHOSEN_TODAY_KEY,
   CHOSEN_TODAY_MAX,
   chosenKeysOn,
+  chosenNotPlayed,
   chosenTodayStored,
   customDocOf,
+  keysOnList,
   loadChosenToday,
   readChosenToday,
   resetChosenTodayForTest,
   updateChosenToday,
   withKey,
   withKeyAt,
+  withKeyOnList,
   withoutKey,
 } from "./chosenToday";
 import { MY_EXERCISES_KEY, loadMyExercises, resetMyExercisesForTest, updateMyExercises } from "./myExercises";
@@ -83,6 +86,35 @@ describe("the press", () => {
     expect(await updateChosenToday((k) => withKey(k, "more"), NOW)).toBe("unchanged");
     expect(await updateChosenToday(() => [...full, "more"], NOW)).toBe("unchanged");
     expect(fake.writes).toHaveLength(1);
+  });
+
+  it("only exercises on the list fill a place; a removed one's key is dropped only by a press at the cap (t2eb M2)", async () => {
+    const onList = new Set(["a", "b", "d"]);
+    // "c" was removed from the list: it stays stored, and does not count.
+    const keys = ["a", "b", "c"];
+    expect(keys.length).toBe(CHOSEN_TODAY_MAX);
+    expect(keysOnList(keys, onList)).toBe(2);
+    expect(withKeyOnList(keys, "d", onList)).toEqual(["a", "b", "d"]);
+    // Below the cap, a removed one's key is kept (the Remove's Undo brings it back to today).
+    expect(withKeyOnList(["a", "c"], "d", onList)).toEqual(["a", "c", "d"]);
+    // Full of exercises on the list, or already there: unchanged.
+    expect(withKeyOnList(["a", "b", "d"], "e", new Set(["a", "b", "d", "e"]))).toBeNull();
+    expect(withKeyOnList(["a"], "a", onList)).toBeNull();
+    // Through the store: the press at the cap writes the new key and drops "c".
+    const fake = await installSettings({ [CHOSEN_TODAY_KEY]: { day: TODAY, keys } });
+    expect(await updateChosenToday((k) => withKeyOnList(k, "d", onList), NOW)).toBe("saved");
+    expect(fake.writes).toEqual([[CHOSEN_TODAY_KEY, { day: TODAY, keys: ["a", "b", "d"] }]]);
+  });
+
+  it("the parts still to play after a Session are those it did not play (t2eb M1)", () => {
+    const part = (id: string) => ({ exercise: { id } });
+    const chosen = [part("my.a"), part("my.b")];
+    expect(chosenNotPlayed(chosen, [])).toEqual(chosen);
+    // Played "a" (twice, and a Path's Exercise beside it): only "b" is left; "b" ended early stays.
+    expect(chosenNotPlayed(chosen, [{ exerciseId: "my.a" }, { exerciseId: "my.a" }, { exerciseId: "alt-1" }])).toEqual([
+      part("my.b"),
+    ]);
+    expect(chosenNotPlayed(chosen, [{ exerciseId: "my.a" }, { exerciseId: "my.b" }])).toEqual([]);
   });
 
   it("a press on a new day starts from none: yesterday's keys are not carried over", async () => {

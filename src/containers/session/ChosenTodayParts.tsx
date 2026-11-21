@@ -10,14 +10,28 @@
 import { memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { NO_CHOSEN_PARTS, useChosenTodayStored } from "../../session/chosenToday";
-import type { ChosenParts } from "../../session/chosenToday";
+import type { ChosenParts, StoredChosenToday } from "../../session/chosenToday";
+import { dayKey } from "../../session/swap";
 import { useMyExercises } from "../../session/myExercises";
 
 type Props = { onParts: (parts: ChosenParts) => void };
 
+/**
+ * The stored keys, while they can still be planned: chosen today, or yesterday
+ * (a Session that crosses midnight keeps resolving its part). Older ones never
+ * load the list or the generator, so a key pressed once does not load them at
+ * every launch after it (t2eb, review L1).
+ */
+export function liveChosenKeys(stored: StoredChosenToday | null, now: number): readonly string[] {
+  if (!stored) return [];
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  return stored.day === dayKey(now) || stored.day === dayKey(yesterday.getTime()) ? stored.keys : [];
+}
+
 function ChosenTodayPartsImpl({ onParts }: Props) {
   const stored = useChosenTodayStored();
-  const keys = stored?.keys ?? [];
+  const keys = liveChosenKeys(stored, Date.now());
   useEffect(() => {
     if (keys.length === 0) onParts(NO_CHOSEN_PARTS);
   }, [keys.length, onParts]);
