@@ -693,6 +693,15 @@ export function saveCardAsked(kind: string): Written {
   return writeMap({ key: "cards", op: (cards) => withCardAsked(cards, kind) });
 }
 
+/**
+ * The player asked for these kinds again, in one write: "On" pressed under
+ * Settings → Coach → Suggestions (c4b2b), the way back the second "Hide"
+ * names ("Hidden until you ask"). Writes only when some had dismissals.
+ */
+export function saveCardsAsked(kinds: readonly string[]): Written {
+  return writeMap({ key: "cards", op: (cards) => kinds.reduce((acc, kind) => withCardAsked(acc, kind), cards) });
+}
+
 /** "Leave out" on a noticed line. Not a delete: every Take stays. */
 export function saveSuppressed(id: string, now: number): Written {
   return writeMap({ key: "suppressed", op: (suppressed) => withSuppressed(suppressed, id, now), leaveOut: id });

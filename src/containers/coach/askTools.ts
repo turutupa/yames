@@ -32,12 +32,13 @@ import {
   confirmCoachTool,
   dismissProposal,
   pressCoachChip,
+  proposalOpen,
   retireUndo,
   runCoachTool,
   runCoachUndo,
   undoStillGood,
 } from "../../coach/tools/run";
-import { line, type Line, type Proposal, type Refusal, type RunOutcome, type ToolCall, type ToolChoice, type ToolResult } from "../../coach/tools/types";
+import { line, takeRunning, type Line, type Proposal, type Refusal, type RunOutcome, type ToolCall, type ToolChoice, type ToolResult } from "../../coach/tools/types";
 import type { MainView } from "../main-window/MainHeader";
 import { appendAskTurn, askTurnId, getAskState, settleAskTurn, updateAskTurn, type AskTurn } from "./askStore";
 import { NEVER_LIST, type NeverItem } from "./neverList";
@@ -93,6 +94,10 @@ export type ToolBody =
       view?: MainView | null;
       /** The Session's step it was made on, or null outside a Session. */
       step?: number | null;
+      /** The model chose it (leg c3b2a): labelled as the model's reading of the question. */
+      via?: "model";
+      /** Why the last press did nothing, while it stays pressable (something sounds now: c3b2ab, M2). */
+      note?: Line;
     }
   | { kind: "refusal"; line: Line; choices: readonly ToolChoice[] }
   | { kind: "yours"; item: NeverItem };
@@ -141,6 +146,15 @@ export function askCommandFacts(): CommandFacts | null {
 export function askToolContext(): CoachContext | null {
   try {
     return contextOf?.() ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** The tools' host now, or null (leg c3b2a: what sounds, and the jams' and presets' names, for the model's turn). */
+export function askToolHost(): CoachToolHost | null {
+  try {
+    return hostOf();
   } catch {
     return null;
   }
@@ -254,6 +268,53 @@ export function runAskCall(call: ToolCall, said: string): string {
   }
   writeOutcome(id, runCoachTool(call, at.host, at.ctx), at);
   return id;
+}
+
+/**
+ * The model's call (leg c3b2a), as the body of the turn it replaces, or null
+ * for nothing to add. Through the runner as the model's (`via: "model"`): the
+ * shape check with `audience: "player"`, the context, and every `go` or
+ * `confirm` tool a proposal labelled as the model's reading. A `read` tool's
+ * receipt is shown at once (it changes nothing). A refusal, or a receipt from
+ * anything but a `read` tool, adds nothing: the rule-made answer stands.
+ */
+export function modelCallBody(call: ToolCall): ToolBody | null {
+  const at = where();
+  if (!at) return null;
+  const outcome = runCoachTool(call, at.host, at.ctx, undefined, { via: "model" });
+  if (!outcome.ok) return null;
+  if ("proposal" in outcome) return { ...(bodyOf(outcome, at.host, at.ctx) as ToolBody & { kind: "proposal" }), via: "model" };
+  return findTool(call.tool)?.kind === "read" ? bodyOf(outcome, at.host, at.ctx) : null;
+}
+
+/** A Take, a count-in or a jam take's recording starting: who must stop (the model's turn, leg c3b2a). */
+const takeStartListeners = new Set<() => void>();
+
+export function onAskTakeStart(fn: () => void): () => void {
+  takeStartListeners.add(fn);
+  return () => takeStartListeners.delete(fn);
+}
+
+/** A Take runs where the tools look (the context's run), or a jam take is being written: nothing of the model starts. */
+export function askTakeNow(): boolean {
+  if (jamTakeHold !== null) return true;
+  const at = where();
+  if (!at) return false;
+  try {
+    return takeRunning(at.ctx) || at.host.jamTakeRunning();
+  } catch {
+    return true;
+  }
+}
+
+function tellTakeStart(): void {
+  for (const fn of [...takeStartListeners]) {
+    try {
+      fn();
+    } catch {
+      // A listener's failure is not the Take's.
+    }
+  }
 }
 
 function writeOutcome(id: string, outcome: RunOutcome, at: { host: CoachToolHost; ctx: CoachContext }): void {
@@ -402,6 +463,7 @@ export const CHIP_UNDO_SETTLE_MS = 400;
  * (`settleAskTurn` holds it), because nothing of Ask commits during a Take.
  */
 export function noteAskTake(): void {
+  tellTakeStart();
   retireAskChipUndos();
 }
 
@@ -461,6 +523,7 @@ let jamTakeHold: Array<{ id: string; call: ToolCall }> | null = null;
  */
 export function noteAskJamTake(running: boolean): void {
   if (running) {
+    tellTakeStart();
     if (jamTakeHold === null) jamTakeHold = [];
     retireAskChipUndos();
     return;
@@ -621,6 +684,11 @@ export function pressProposal(id: string): void {
     return;
   }
   const result = confirmCoachTool(turn.body.proposal, at.host, at.ctx);
+  // Not now (it would stop what started sounding since it was shown): it stays, and says why.
+  if (!result.ok && result.why === "notNow" && proposalOpen(turn.body.proposal)) {
+    setBody(id, { ...turn.body, note: result.line });
+    return;
+  }
   // The same thing changed again: a chip's earlier Undo for it is not this one's to keep,
   // unless this one's Undo puts back exactly the value it guards (leg chip1c, review chip1b
   // LOW 2: in a Session a second chip press is this proposal, and a nudge's Undo is one rung,

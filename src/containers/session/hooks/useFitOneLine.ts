@@ -139,13 +139,25 @@ export function fitRow(row: HTMLElement): void {
   }
 }
 
-/** Re-fits when `label` changes, on resize, and once the web fonts land. */
-export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
+/**
+ * Re-fits when `label` changes, on resize, and once the web fonts land.
+ *
+ * Keyed on the row element itself, not on a ref object: a row that mounts
+ * after the first render (the footer's row is null while Watch is not
+ * available) or mounts again is a new element under the same ref, and an
+ * effect keyed on the ref would not run for it until the label changed. Pass
+ * the element from a callback ref (`useState`'s setter).
+ *
+ * The controls in the row must not animate their size: the fit takes
+ * `data-fit` off to measure, and a `transition` on padding or width is then
+ * measured mid-way (lf1: Watch under `button`'s `transition: all`).
+ */
+export function useFitRow(row: HTMLElement | null, label: string): void {
   useLayoutEffect(() => {
-    if (!ref.current || typeof window === "undefined") return;
+    if (!row || typeof window === "undefined") return;
     let alive = true;
     const fit = () => {
-      if (alive && ref.current) fitRow(ref.current);
+      if (alive && row.isConnected) fitRow(row);
     };
     fit();
     window.addEventListener("resize", fit);
@@ -155,7 +167,6 @@ export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
     // A theme changes the face without a resize or a new font landing: the
     // row's and the controls' own widths say so. A fit that changes nothing
     // ends the loop.
-    const row = ref.current;
     const sizes = typeof ResizeObserver === "function" ? new ResizeObserver(fit) : null;
     const watchSizes = () => {
       sizes?.disconnect();
@@ -187,7 +198,7 @@ export function useFitRow(ref: RefObject<HTMLElement>, label: string): void {
       window.removeEventListener("resize", fit);
       fonts?.removeEventListener?.("loadingdone", fit);
     };
-  }, [ref, label]);
+  }, [row, label]);
 }
 
 /**

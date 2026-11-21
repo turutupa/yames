@@ -1762,7 +1762,8 @@ impl Db {
         for row in rows {
             let (path_id, exercise_id, at, bpm) = row.map_err(DbError::from)?;
             // Independent of the order the rows come in: the earliest Take is
-            // the first, and the best is the highest tempo, earliest on a tie.
+            // the first (the lower tempo when two share that moment), and the
+            // best is the highest tempo, earliest on a tie.
             match spans.entry((path_id, exercise_id)) {
                 std::collections::btree_map::Entry::Vacant(slot) => {
                     let (path_id, exercise_id) = slot.key().clone();
@@ -1777,7 +1778,7 @@ impl Db {
                 }
                 std::collections::btree_map::Entry::Occupied(mut slot) => {
                     let span = slot.get_mut();
-                    if at < span.first_at {
+                    if at < span.first_at || (at == span.first_at && bpm < span.first_bpm) {
                         span.first_bpm = bpm;
                         span.first_at = at;
                     }
@@ -1868,8 +1869,9 @@ fn history_sql(filter: &HistoryFilter) -> (String, Vec<Box<dyn rusqlite::ToSql>>
 /// Facts that are not JSON are read as having no flag, as `list_path_takes`
 /// keeps such a row.
 ///
-/// Every Take is a candidate, so this reads the table end to end; it walks it
-/// in `path_takes_exercise` order, which spares SQLite a sort.
+/// Every Take is a candidate, so this reads the table end to end, in no
+/// particular order: the fold in `list_clean_tempo_spans` does not depend on
+/// it, so there is no `ORDER BY` and no sort (c4b2, from c4b1's review).
 fn clean_tempo_spans_sql() -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
     let sql = String::from(
         "SELECT path_id, exercise_id, started_at, bpm
@@ -1897,8 +1899,7 @@ fn clean_tempo_spans_sql() -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
            AND COALESCE(
                  CASE WHEN json_valid(facts_json)
                       THEN json_extract(facts_json, '$.fair') END,
-                 '') <> 'no'
-         ORDER BY exercise_id ASC, started_at DESC",
+                 '') <> 'no'",
     );
     (sql, vec![Box::new(CLEAN_TEMPO_MIN_BARS)])
 }
@@ -3313,6 +3314,49 @@ mod tests {
         }
     }
 
+    /// Ties (c4b2, from c4b1's review): two clean Takes at the same moment,
+    /// saved in either order, give the same span. The first is the lower
+    /// tempo of the two; the best is the higher tempo, the earlier on a tie.
+    #[test]
+    fn a_tie_on_the_first_or_the_best_breaks_the_same_way_in_any_order() {
+        let (p, e) = ("p", "x");
+        for order in [[0usize, 1, 2], [2, 1, 0], [1, 2, 0]] {
+            let mut db = Db::open_in_memory().unwrap();
+            let takes = [
+                clean_take("hi", p, e, 10, 70, Some(true)),
+                clean_take("lo", p, e, 10, 64, Some(true)),
+                clean_take("later", p, e, 20, 70, Some(true)),
+            ];
+            for i in order {
+                save_clean(&mut db, &takes[i]);
+            }
+            assert_eq!(
+                db.list_clean_tempo_spans().unwrap(),
+                [span(p, e, (64, 10), (70, 10))],
+                "order {order:?}"
+            );
+        }
+    }
+
+    /// `countsForCleanTempo` stored as JSON `null` is no answer: an old row
+    /// (no `newClean`) then counts by its bar count, as `heldCleanTempo` does.
+    #[test]
+    fn counts_for_clean_tempo_stored_as_null_is_no_answer() {
+        let (p, e) = ("p", "x");
+        let mut db = Db::open_in_memory().unwrap();
+        let mut long = clean_take("long", p, e, 10, 66, None);
+        long.facts["measures"]["pass"] = serde_json::json!({ "countsForCleanTempo": null });
+        save_clean(&mut db, &long);
+        assert_eq!(db.list_clean_tempo_spans().unwrap(), [span(p, e, (66, 10), (66, 10))]);
+
+        let mut db = Db::open_in_memory().unwrap();
+        let mut short = clean_take("short", p, e, 10, 66, None);
+        short.bars = 7;
+        short.facts["measures"]["pass"] = serde_json::json!({ "countsForCleanTempo": null });
+        save_clean(&mut db, &short);
+        assert!(db.list_clean_tempo_spans().unwrap().is_empty());
+    }
+
     /// The same Exercise id on two Paths is two clean tempos, as the ceiling
     /// keys it.
     #[test]
@@ -3397,10 +3441,11 @@ mod tests {
 
         let (sql, args) = clean_tempo_spans_sql();
         let plan = db.explain(&sql, &args);
+        // No sort: the fold does not need an order (c4b2). Which index, if
+        // any, SQLite walks is its business: every row is a candidate.
         assert!(
-            plan.contains("path_takes_exercise") && !plan.contains("TEMP B-TREE"),
-            "the long view should walk `path_takes_exercise` without a sort, \
-             but SQLite plans to: {plan}"
+            !plan.contains("TEMP B-TREE"),
+            "the long view should read the Takes without a sort, but SQLite plans to: {plan}"
         );
         eprintln!("clean tempo spans plan: {plan}");
 

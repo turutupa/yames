@@ -409,6 +409,116 @@
   margin-top: 12px;
 }
 
+/* --- the companion card on Progress (leg c4b2, mock 10) ------------------- */
+
+.companion-card,
+.companion-hidden {
+  width: 100%;
+  box-sizing: border-box;
+}
+.companion-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.companion-kick {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--coach-quiet);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  overflow-wrap: break-word;
+}
+.companion-hide {
+  flex: none;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--coach-quiet);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.companion-hide:hover {
+  color: var(--coach-ink);
+}
+.companion-hide:focus-visible {
+  outline: 2px solid var(--coach-ink);
+  outline-offset: 2px;
+}
+.companion-card p {
+  margin: 0;
+  overflow-wrap: break-word;
+}
+.companion-say {
+  color: var(--coach-ink);
+  font-size: 18px;
+  line-height: 1.35;
+}
+.companion-bench {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+.companion-bench strong {
+  color: var(--coach-ink);
+}
+.companion-moved ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.companion-moved li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  border-top: 1px solid var(--coach-hair);
+}
+.companion-moved li span {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.companion-moved li b {
+  flex: none;
+  color: var(--coach-ink);
+  font-variant-numeric: tabular-nums;
+}
+.companion-plateau {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--coach-hair);
+}
+.companion-plateau-say {
+  color: var(--coach-ink);
+}
+.companion-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.companion-foot {
+  color: var(--coach-faint);
+  font-size: 13px;
+}
+.main-window.is-mobile .companion-hide {
+  min-height: 44px;
+  min-width: 44px;
+}
+.companion-hidden {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* --- small screens and short windows ------------------------------------- */
 
 

@@ -4179,6 +4179,16 @@
   color: var(--l-btn-ink);
   font: 600 12px/1.4 var(--l-body);
   cursor: pointer;
+  /* Colours only. Under `button`'s `transition: all` the footer's fit
+     (`useFitRow`) measured Watch mid-way between its icon and its word: it
+     takes `data-fit` off to measure, which starts the padding on its way
+     back, so the row read as fitting with Watch still narrow and was left
+     3–5px too wide once Watch grew (lf1; Slower and Faster had the same fix
+     in dd9a9680). */
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .practice-watch:hover,
 .practice-sound:hover {
@@ -4221,6 +4231,11 @@
   color: var(--l-btn-ink);
   font: 600 12px/1.4 var(--l-body);
   cursor: pointer;
+  /* Colours only, as Watch's above: its size is measured by the footer's fit. */
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .practice-sound svg {
   fill: currentColor;

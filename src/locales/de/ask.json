@@ -41,7 +41,14 @@
       "phone": "Handys führen noch kein Modell aus, deshalb können getippte Fragen hier nicht beantwortet werden.",
       "nothing": "Diesmal kam keine Antwort zurück."
     },
+    "model": {
+      "plain": "Dazu habe ich aus deinen Takes und Pfaden keine fertige Antwort.",
+      "working": "Ich suche nach mehr…",
+      "stop": "Stopp",
+      "reading": "So habe ich deine Frage verstanden. Es passiert nichts, bis du drückst."
+    },
     "footer": {
+      "choice": "Antworten aus deinen Takes und Pfaden, mit Hilfe des Modells auf diesem Computer. Nichts verlässt ihn.",
       "model": "Beantwortet vom Modell auf diesem Computer. Nichts, was du tippst, verlässt ihn.",
       "local": "Nichts, was du hier tippst, verlässt diesen Computer.",
       "phone": "Nichts, was du hier tippst, verlässt dieses Handy."

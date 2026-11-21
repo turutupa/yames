@@ -23,6 +23,13 @@ import { PHONE_LEARNING_SCENES } from "../../src/shots/scenarios";
  * Only what is on top at its own centre is measured: a control under the
  * first-run overlay is not reachable and not this test's business.
  */
+/** Pictures only when `YAMES_SHOT_DIR` names a folder; a test never writes to a fixed path. */
+const SHOTS_DIR = process.env.YAMES_SHOT_DIR;
+
+async function shot(page: Page, name: string) {
+  if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${name}.png` });
+}
+
 const WIDTHS = [
   { width: 360, height: 800 },
   { width: 412, height: 915 },
@@ -381,6 +388,7 @@ test.describe("the learning side on a phone", () => {
         await watch.tap();
         await expect(watch).toHaveAttribute("data-again", "");
         await settleAnimations(page);
+        await shot(page, `phone-${scene}-tab-footer-after-watch-${size.width}`);
         const row = page.locator('.practice-watchrow[data-place="footer"]');
         const rects = await row.locator("button").evaluateAll((els) =>
           els.map((e) => {
@@ -390,10 +398,13 @@ test.describe("the learning side on a phone", () => {
         );
         expect(rects.length, "Watch, Sound and what the footer carries").toBeGreaterThanOrEqual(3);
         const rowBox = (await row.boundingBox())!;
+        // What the fit saw, for a failure: `data-fit` and the row's own overflow.
+        const overflow = await row.evaluate((el) => `scrollWidth ${el.scrollWidth}, clientWidth ${el.clientWidth}`);
+        const seen = `data-fit=${await row.getAttribute("data-fit")}, row ${Math.round(rowBox.x)}..${Math.round(rowBox.x + rowBox.width)}, ${overflow}, ${JSON.stringify(rects)}`;
         for (const r of rects) {
           // Centred on one line: a taller control may start a few px higher.
-          expect(Math.abs(r.top + r.h / 2 - (rects[0].top + rects[0].h / 2)), "the footer's row broke into two").toBeLessThanOrEqual(2);
-          expect(r.right, "a control runs off the row").toBeLessThanOrEqual(Math.round(rowBox.x + rowBox.width) + 1);
+          expect(Math.abs(r.top + r.h / 2 - (rects[0].top + rects[0].h / 2)), `the footer's row broke into two: ${seen}`).toBeLessThanOrEqual(2);
+          expect(r.right, `a control runs off the row: ${seen}`).toBeLessThanOrEqual(Math.round(rowBox.x + rowBox.width) + 1);
           expect(r.w, "a control is smaller than a thumb").toBeGreaterThanOrEqual(44);
         }
         for (let i = 1; i < rects.length; i++) {
