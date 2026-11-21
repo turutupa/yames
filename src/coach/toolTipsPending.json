@@ -1,9 +1,5 @@
 {
   "de": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -11,10 +7,6 @@
     "piano"
   ],
   "es": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
@@ -22,10 +14,6 @@
     "piano"
   ],
   "fr": [
-    "generic",
-    "defaultMode",
-    "proMode",
-    "words",
     "electric-guitar",
     "acoustic-guitar",
     "bass",
