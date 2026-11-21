@@ -13,6 +13,7 @@ import { answerTyped, setAskNextAnswerer } from "./askTyped";
 import { modelTurnWanted, stopModelTurn } from "./askModelTurn";
 import { AskToolTurn } from "./AskToolTurn";
 import { AskCardChips, AskCardTurn } from "./AskCardTurn";
+import { pressSource } from "./askSources";
 import { askCardChips, askUngradedHere, typedCardAnswerer, withinChipCap } from "./askCards";
 import { askToolChips, noKeyRepeat, onePress, pressChip } from "./askTools";
 import { lineText } from "./toolWords";
@@ -335,8 +336,13 @@ function Turn({ turn }: { turn: AskTurn }) {
           {t("ask.writing")}
         </div>
       ) : (
-        // The model's words are general advice and say so (owner decision 3).
-        <CoachBlocks className="ask-turn ask-turn-coach" blocks={[{ type: "text", text: turn.text, source: { kind: "general" } }]} />
+        // The model's words are general advice and say so (owner decision 3); the
+        // line, pressed, says what that label means (leg c2b2b, `askSources.ts`).
+        <CoachBlocks
+          className="ask-turn ask-turn-coach"
+          blocks={[{ type: "text", text: turn.text, source: { kind: "general" } }]}
+          onSource={(source, words) => pressSource(source, words)}
+        />
       );
   }
 }

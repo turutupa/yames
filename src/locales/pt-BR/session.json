@@ -370,7 +370,7 @@
         "even": "{{value}}% de regularidade para uma meta de {{bar}}%. Todas as notas estavam lá; é o espaço entre elas. Mesmas notas, mesmo andamento.",
         "heard": "Ouvi {{heard}} de {{expected}} notas, e o tempo não passa sem elas.",
         "extras": "{{extras}} notas que eu não esperava. Abafe as cordas soltas se estiverem soando.",
-        "accents": "{{value}}% dos acentos marcados saíram mais fortes que as notas em volta.",
+        "accents": "Em média, os acentos marcados saíram {{value}}% mais fortes que as outras notas.",
         "notes": "{{value}}% das notas que consegui identificar eram as escritas. Mesmas notas, mesmo andamento, e atenção às casas.",
         "evenSome": "{{value}}% de regularidade para uma meta de {{bar}}%, e {{missed}} notas não soaram. Mesmas notas, mesmo andamento, todas elas."
       },

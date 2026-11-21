@@ -370,7 +370,7 @@
         "even": "{{value}}% di regolarità con un'asticella del {{bar}}%. C'erano tutte le note; è lo spazio tra loro. Stesse note, stesso tempo.",
         "heard": "Ho sentito {{heard}} note su {{expected}}, e il tempo non può passare senza di loro.",
         "extras": "{{extras}} note che non mi aspettavo. Smorza le corde libere se stanno suonando.",
-        "accents": "Il {{value}}% degli accenti segnati è uscito più forte delle note intorno.",
+        "accents": "In media, gli accenti segnati sono usciti il {{value}}% più forti delle altre note.",
         "notes": "Il {{value}}% delle note di cui ho riconosciuto l'altezza erano quelle scritte. Stesse note, stesso tempo, e occhio ai tasti.",
         "evenSome": "{{value}}% di regolarità con un'asticella del {{bar}}%, e {{missed}} note non sono uscite. Stesse note, stesso tempo, tutte."
       },

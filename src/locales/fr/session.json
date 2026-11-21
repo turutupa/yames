@@ -370,7 +370,7 @@
         "even": "{{value}} % de régularité pour un seuil de {{bar}} %. Toutes les notes étaient là ; c'est l'espace entre elles. Mêmes notes, même tempo.",
         "heard": "J'ai entendu {{heard}} notes sur {{expected}}, et le placement ne peut pas passer sans elles.",
         "extras": "{{extras}} notes que je n'attendais pas. Étouffe les cordes inutilisées si elles résonnent.",
-        "accents": "{{value}} % des accents marqués sont sortis plus fort que les notes autour.",
+        "accents": "En moyenne, les accents marqués sont sortis {{value}} % plus fort que les autres notes.",
         "notes": "{{value}} % des notes dont j'ai pu reconnaître la hauteur étaient celles écrites. Mêmes notes, même tempo, et attention aux cases.",
         "evenSome": "{{value}} % de régularité pour un seuil de {{bar}} %, et {{missed}} notes n'ont pas sonné. Mêmes notes, même tempo, toutes."
       },
