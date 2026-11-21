@@ -31,6 +31,20 @@ Branch `coach-t2c`, worktree `/home/dgx-delgado/yames-coach-t2c`, logs `/tmp/coa
   root: "in e minor", "in e at the 5th fret", "on e", and a second key ("make a c major exercise
   in e") stay `none`. A table without `article` has no `rootAfter`, so other locales are unchanged.
 
-## Next
+Every new test was run against the old sources (put back from `HEAD~1` for the run, then restored):
+11 failed, as they should (job `coach-t2cc-vbefore`, `/home/dgx-delgado/scratch/jobq/1034-*.log`).
 
-Merge `coach`, gates (tsc, `npm run test`, build, layout ask specs), diff to `/tmp/coach-orch/t2cc-fix.diff`.
+## Commits and gates
+
+`18ed6d83` (the fixes), a whitespace commit, then `merge coach` (lf1, c4b2 and the rest: clean, no
+conflicts). Diff of the two commits: `/tmp/coach-orch/t2cc-fix.diff`.
+
+Gates after the merge (logs `/home/dgx-delgado/scratch/jobq/<id>-<name>.log`):
+- tsc: pass (1035).
+- `npm run test`: 470 of 471 files, 50571 tests pass; the one failing file is the known
+  `TabStage.render.test.tsx` that cannot load through the symlink (1036).
+- build: pass (1037).
+- layout, ask + ask-tools + ask-typed: run 1 (1038) 8 timeouts and run 2 (1063) 10 timeouts, all
+  30 s timeouts at load average 43 to 47 (other legs' suites). Every test passed in one run or the
+  other except `ask-tools:99` ember 1024. `ask-tools.spec.ts` alone with `--workers 2` (1071): 19 of 19
+  pass. ask.spec and ask-typed: all passed in run 2.
