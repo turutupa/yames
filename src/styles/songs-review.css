@@ -50,14 +50,25 @@
  * an `action` button under it. */
 .songs-review-said {
   flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
-/* A verdict is one sentence and reads as one, so it is allowed the room the
-   body's blocks are not — the body's excerpt is a drawing and wants to stay
-   narrow, this is prose. */
-.songs-review-said .coach-block-sentence {
-  font-size: 13.5px;
+/* c5a2 — the sentence is the Session's note now (`CoachNote`, coach.css),
+   the fix's button under it. Inside the review's pinned head, which has to
+   leave the player's own picture on screen at 480 x 780: the note is set a
+   step tighter here than on a Session's result, and casts no shadow inside
+   a panel that is already raised. */
+.songs-review-said > .coach-note {
+  gap: 4px;
+  padding: 10px 14px 10px 13px;
+  box-shadow: none;
+}
+
+.songs-review-said .coach-note-head {
+  font-size: 16px;
 }
 
 .songs-review-title {

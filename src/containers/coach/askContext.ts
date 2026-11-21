@@ -54,8 +54,10 @@ export function askScreenKey(ctx: CoachContext): string {
  * me" (`runAskCall`, `askYours` write the user turn, then the tool turn after
  * it). The model sees no tool turns, so without this it would read a question
  * nobody replied to. A divider between the two does not count as a reply.
+ * The model's turn (`askModelTurn.ts`, its `Before:` line) skips the same
+ * turns by the same rule (review c3b2a M1).
  */
-function answeredByTool(turns: readonly AskTurn[], index: number): boolean {
+export function answeredByTool(turns: readonly AskTurn[], index: number): boolean {
   for (let i = index + 1; i < turns.length; i++) {
     const next = turns[i];
     if (next.kind === "divider") continue;

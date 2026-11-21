@@ -1,0 +1,3 @@
+{ "language": "ko", "reviewer": "reviewer-ko", "sampled": 50,
+  "rejected": [],
+  "notes": "Natural and the expected answers fit the words; a few name insertions are rough (e.g. ko-00117 '움직이는라는', ko-00122) but still understandable, so kept." }

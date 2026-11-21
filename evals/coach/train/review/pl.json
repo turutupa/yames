@@ -1,0 +1,3 @@
+{ "language": "pl", "reviewer": "reviewer-pl", "sampled": 50,
+  "rejected": [],
+  "notes": "Natural, idiomatic Polish; expected answers fit the words. Inserted names (e.g. 'zagraj każdego teraz') are rough but within the allowed roughness." }

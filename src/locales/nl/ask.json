@@ -41,7 +41,14 @@
       "phone": "Telefoons draaien nog geen model, dus getypte vragen kunnen hier niet worden beantwoord.",
       "nothing": "Er kwam dit keer geen antwoord terug."
     },
+    "model": {
+      "plain": "Daar heb ik uit je takes of je leerpaden geen kant-en-klaar antwoord op.",
+      "working": "Ik zoek meer…",
+      "stop": "Stop",
+      "reading": "Zo lees ik je vraag. Er gebeurt niets tot je drukt."
+    },
     "footer": {
+      "choice": "Antwoorden uit je takes en leerpaden, met hulp van het model op deze computer. Niets verlaat hem.",
       "model": "Beantwoord door het model op deze computer. Wat je typt, verlaat hem niet.",
       "local": "Wat je hier typt, verlaat deze computer niet.",
       "phone": "Wat je hier typt, verlaat deze telefoon niet."

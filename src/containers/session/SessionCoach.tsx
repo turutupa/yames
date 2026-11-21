@@ -29,6 +29,7 @@ import { currentStep } from "../../session/runner";
 import type { BigAction, TakeOutcome } from "../../session/runner";
 import { loopLine } from "../../coach/loopLine";
 import { suggestChips } from "../../coach/ask/suggest";
+import { hearBackLabel, hearBackOffer, hearBarOf } from "../../coach/hearBack";
 import { noteNameOf } from "../songs/review/marks";
 import { CoachLine, shortCue } from "../coach/CoachLine";
 import { CoachNote, FactLine, NoteAnswer, NoteBars, NoteChips, NoteCue, NoteLine } from "../coach/CoachNote";
@@ -259,8 +260,31 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
   const next = pick && pick.basis === "measured" && big.kind !== "next" && big.kind !== "finish" ? pick : null;
   const stepNumber = pathStepNumber(session);
   const more = next?.cue.more;
+  // "Hear bar N: yours, then the demo" (c5b2): there, or absent; first, as mock 06 draws it.
+  const hear = session.hear;
+  const hearBar = hear
+    ? hearBackOffer({
+        phase: session.run.phase,
+        ungraded: outcome.ungraded !== undefined,
+        bar: hearBarOf(note),
+        held: hear.held,
+        demo: session.listen?.active ?? false,
+        loop: session.loopSound ?? false,
+      })
+    : null;
+  const hearChip: NoteChip[] =
+    hear && hearBar
+      ? [
+          {
+            kind: "play",
+            label: noteText(t, hearBackLabel(hear.stage, hear.bar ?? hearBar)),
+            onClick: () => hear.toggle(hearBar),
+            testId: "coach-hear-back",
+          },
+        ]
+      : [];
   // Chosen by the one chooser (`coach/ask/suggest.ts`, leg c2b1a); the same chip as before.
-  const chips: NoteChip[] = suggestChips("resultNote", { howTo: howTo.length > 0 }).flatMap((chip): NoteChip[] =>
+  const chips: NoteChip[] = hearChip.concat(suggestChips("resultNote", { howTo: howTo.length > 0 }).flatMap((chip): NoteChip[] =>
     chip.kind === "try"
       ? [
           {
@@ -272,7 +296,7 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
           },
         ]
       : [],
-  );
+  ));
   return (
     <CoachNote headline={headline} live kind="result" testId="coach-note" onAsk={onAsk}>
       <CoachAnswerLine />

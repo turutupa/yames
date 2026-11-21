@@ -41,7 +41,7 @@ export function normalizeWords(text: string): string {
 }
 
 /** A script written without spaces between words (CJK, Thai): matched inside words. */
-const UNSPACED = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}]/u;
+export const UNSPACED = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}]/u;
 
 /**
  * How well `query` names `title`: 2 the same words, 1 every word of the query

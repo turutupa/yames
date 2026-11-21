@@ -1,0 +1,6 @@
+{ "language": "ja", "reviewer": "reviewer-ja", "sampled": 50,
+  "rejected": [
+    { "id": "ja-00492", "wording": "play_exercise#7", "why": "inserted exercise name is truncated ('スタブを'), leaving 'スタブをってやつ', which is garbled" },
+    { "id": "ja-00060", "wording": "find_edge#0", "why": "text starts with a dangling particle ('のルートの限界を探して'); the name is cut off so the sentence is not natural" }
+  ],
+  "notes": "Mostly natural and the expected answers fit; the only problems are two records where a truncated name fragment was inserted." }

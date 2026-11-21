@@ -92,7 +92,11 @@
           "lastSession_many": "{{count}} minutes de prises lors de ta dernière séance, pour finir {{exercise}} à {{bpm}} BPM.",
           "lastSession_other": "{{count}} minutes de prises lors de ta dernière séance, pour finir {{exercise}} à {{bpm}} BPM."
         },
-        "samePlace": "Aujourd'hui, au même endroit."
+        "samePlace": "Aujourd'hui, au même endroit.",
+        "songDue": {
+          "one": "La mesure {{bar}} de {{song}} est à reprendre.",
+          "range": "Les mesures {{from}} à {{to}} de {{song}} sont à reprendre."
+        }
       },
       "whatsIn": "Ce qu'il y a dedans, et pourquoi",
       "min": "MIN",
@@ -873,6 +877,11 @@
       },
       "chip": {
         "hear": "Écouter d'abord",
+        "hearBack": "Écouter la mesure {{bar}} : la vôtre, puis la démo",
+        "hearYours": "La vôtre : mesure {{bar}} · Stop",
+        "hearDemo": "Démo : mesure {{bar}} · Stop",
+        "hearBackTune": "Écouter votre mesure {{played}}, puis la démo de la mesure {{tune}}",
+        "hearDemoTune": "Démo : mesure {{tune}} de la mélodie · Stop",
         "try": "Que dois-je essayer ?"
       },
       "ungraded": {

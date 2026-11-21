@@ -90,7 +90,13 @@ export type CoachEvent =
   // --- elsewhere (later legs) --------------------------------------------
   /** `useJamSession.ts`, where `harmonyStop()` returns. */
   | (Stamp & { type: "jamStopped"; heard?: HeardSummary })
-  /** `useSongAttempt.ts`, when a pass settles. */
+  /**
+   * `useSongAttempt.ts`, when a pass settles. No subscriber yet. It can arrive
+   * after Songs has unmounted (a pass settles up to ~600 ms plus grading after
+   * the stop, and the hook's listener outlives the screen), so it can be
+   * published while a Session Take is running: a future subscriber MUST check
+   * it is not inside a Take before it draws, speaks or renders anything.
+   */
   | (Stamp & { type: "songPassReviewed"; review: SongAttemptReview })
   /** `useSegmentCoach.ts`. */
   | (Stamp & { type: "toolRunEnded"; report: SessionReport })

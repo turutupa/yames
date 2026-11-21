@@ -1,0 +1,11 @@
+{ "language": "de", "reviewer": "reviewer-de", "sampled": 50,
+  "rejected": [
+    { "id": "de-00037", "wording": "open_path#1", "why": "path name 'über' inserted so 'über öffnen' reads as a nonsense fragment" },
+    { "id": "de-00526", "wording": "follow_path#0", "why": "'folge dem Pfad über' reads as a preposition, not a path name; garbled" },
+    { "id": "de-00052", "wording": "focus_path#7", "why": "'fokussiere die Session auf und Pentatonik' garbled by truncated name" },
+    { "id": "de-00093", "wording": "focus_path#2", "why": "'nur aus und Pentatonik' garbled by truncated name" },
+    { "id": "de-00538", "wording": "open_path#2", "why": "'erste akkorde und' truncated name makes the sentence broken" },
+    { "id": "de-00484", "wording": "play_exercise#6", "why": "'mach ohne an' is not a plausible request" },
+    { "id": "de-00370", "wording": "none_future#2", "why": "'erinner mich heute Abend an heute' nonsensical insertion" }
+  ],
+  "notes": "Mostly clean; the never-list, none and which records read naturally. Rejections are where a truncated or stopword path/exercise name ('und', 'über', 'ohne') made the sentence garbled." }

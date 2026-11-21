@@ -192,7 +192,7 @@ function writeResults(dir, title, note, ev, scored) {
   writeFileSync(path.join(dir, "summary.md"), ev.summaryMarkdown(title, rows, note));
   writeFileSync(path.join(dir, "errors.md"), ev.errorsMarkdown(title, errors));
   const total = rows[rows.length - 1];
-  console.log(`${title}: ${total.n} items, right ${total.right}, right tool ${total.rightTool}/${total.calls}, wrong actions ${total.wrongActions}, asked ${total.asked}/${total.which}, no answer ${total.noAnswer}`);
+  console.log(`${title}: ${total.n} items, right ${total.right}, right tool ${total.rightTool}/${total.calls}, wrong actions ${total.wrongActions}, asked ${total.asked}/${total.which}, cards ${total.cardsRight}/${total.cards} (wrong card ${total.cardsWrong}, uninvited ${total.cardsUninvited}), no answer ${total.noAnswer}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -207,7 +207,7 @@ async function cmdRules(ev, opt) {
     const scores = items.map((item) => ev.scoreItem(item, ev.rulesAnswer(item, paths), paths));
     scored.push({ lng, items, scores });
   }
-  writeResults(dir, "Tool eval: the rules (no model)", "Router as `answerTyped` runs it, then Path search. No fact cards (not on `coach` yet).", ev, scored);
+  writeResults(dir, "Tool eval: the rules (no model)", "Router as `answerTyped` runs it, then the fact cards' English matcher (a last Take = a Session's result screen), then Path search.", ev, scored);
 }
 
 /** `--grammar situation|full|none` and `--prompt notes|names` (leg c3b2m): the arm, checked. */

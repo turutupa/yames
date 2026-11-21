@@ -2,19 +2,23 @@
  * The fact cards a choice may name: the ONE list the test set's validator,
  * the choice grammar and the choice prompt read (leg c3b1a).
  *
- * Empty for now, on purpose. The cards (`src/coach/ask/cards.ts`, legs
- * c2b1b and c2b2a) were not on `coach` when this was built; when they are,
- * this becomes one line that reads their list (their ids and one-line
- * descriptions), and leg c3b1b adds the test set's card items. Nothing else
- * changes: the item format, `judgeExpected`, `choiceGrammar` and the prompt
- * already take cards.
+ * The cards' own list (`FACT_CARDS`, `intents.ts`; legs c2b1a / c2b1b),
+ * read as plain data: id, note and closed arguments (leg c3b1b). A card added
+ * there (c2b2a's Path, plan and theory cards) reaches the validator, the
+ * grammar and the prompt with no change here; the test set gets its items
+ * when the card is on `coach`.
  */
+import type { ArgField } from "../tools/types";
+import { FACT_CARDS } from "./intents";
+
 export type EvalCard = {
   id: string;
   /** What it answers, in one line (the prompt's description). */
   note: string;
+  /** Its arguments, typed as a tool's are (all optional today). Absent: the grammar's generic card argument. */
+  args?: readonly ArgField[];
 };
 
-export const EVAL_CARDS: readonly EvalCard[] = [];
+export const EVAL_CARDS: readonly EvalCard[] = FACT_CARDS.map((card) => ({ id: card.name, note: card.note, args: card.args }));
 
 export const CARD_IDS: readonly string[] = EVAL_CARDS.map((card) => card.id);

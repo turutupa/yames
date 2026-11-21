@@ -41,7 +41,14 @@
       "phone": "Telefonlar henüz model çalıştırmıyor, bu yüzden yazılan sorular burada yanıtlanamıyor.",
       "nothing": "Bu sefer yanıt gelmedi."
     },
+    "model": {
+      "plain": "Bunun için denemelerinde ya da yollarında hazır bir yanıtım yok.",
+      "working": "Biraz daha arıyorum…",
+      "stop": "Durdur",
+      "reading": "Sorunu böyle anladım. Sen basana kadar hiçbir şey olmaz."
+    },
     "footer": {
+      "choice": "Yanıtlar denemelerinden ve yollarından gelir; bu bilgisayardaki model de yardımcı olur. Hiçbir şey bilgisayardan çıkmaz.",
       "model": "Bu bilgisayardaki model yanıtladı. Yazdığın hiçbir şey bilgisayardan çıkmaz.",
       "local": "Buraya yazdığın hiçbir şey bu bilgisayardan çıkmaz.",
       "phone": "Buraya yazdığın hiçbir şey bu telefondan çıkmaz."

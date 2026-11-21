@@ -1,0 +1,50 @@
+{"id":"zh-TW-00449","wording":"yours_model#4","text":"切換到另一個模型","where":"today","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-TW-00210","wording":"yours_input#3","text":"不要再監聽我了","where":"jam","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"zh-TW-00405","wording":"yours_grades#7","text":"把乾淨速度改高一點","where":"drill","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"zh-TW-00529","wording":"yours_deleting#5","text":"這遍彈得太爛，去掉吧","where":"jam","expect":{"kind":"yours","item":"deleting"},"tags":["never"]}
+{"id":"zh-TW-00525","wording":"yours_model#6","text":"麻煩換個更聰明的模型","where":"session (result)","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-TW-00363","wording":"yours_model#9","text":"教練的模型幫我更新一下","where":"paths","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-TW-00656","wording":"yours_input#0","text":"把麥克風靜音","where":"settings","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"zh-TW-00676","wording":"yours_model#7","text":"下載llm","where":"session (ready)","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-TW-00028","wording":"yours_grades#3","text":"把成績改成及格","where":"today","expect":{"kind":"yours","item":"grades"},"tags":["never"]}
+{"id":"zh-TW-00659","wording":"yours_grading#9","text":"turn off grading","where":"setlist","expect":{"kind":"yours","item":"grading"},"tags":["never"]}
+{"id":"zh-TW-00126","wording":"yours_input#2","text":"麥克風聲音調小一點","where":"settings","expect":{"kind":"yours","item":"input"},"tags":["never"]}
+{"id":"zh-TW-00121","wording":"yours_model#7","text":"下載llm","where":"tools","expect":{"kind":"yours","item":"model"},"tags":["never"]}
+{"id":"zh-TW-00236","wording":"yours_grading#9","text":"turn off grading","where":"paths","expect":{"kind":"yours","item":"grading"},"tags":["never"]}
+{"id":"zh-TW-00045","wording":"play_exercise_bpm#0","text":"用68bpm播放練習：小七","where":"progress","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"小七","bpm":68}},"tags":["ambiguous"]}
+{"id":"zh-TW-00266","wording":"find_edge#5","text":"麻煩測測弦上的的極限速度","where":"paths","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"弦上的"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00016","wording":"open_step_name#0","text":"打開步驟：八分音符","where":"beat","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"八分音符"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00054","wording":"play_exercise_bpm#7","text":"可不可以照180bpm帶我練上的節奏型？","where":"tools","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"上的節奏型","bpm":180}},"tags":["ambiguous"]}
+{"id":"zh-TW-00470","wording":"play_exercise#3","text":"開始上的十六分音符節奏型這個練習","where":"beat","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"上的十六分音符節奏型"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00674","wording":"open_step_name#0","text":"打開步驟：低音","where":"beat","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"低音"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00570","wording":"open_step_name#5","text":"去solo","where":"drill","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"solo"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00493","wording":"open_step_name#1","text":"八分音符這一步，打開","where":"jam","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"八分音符"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00050","wording":"play_exercise_bpm#2","text":"把根音調到173的速度來一遍","where":"paths","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"根音","bpm":173}},"tags":["ambiguous"]}
+{"id":"zh-TW-00430","wording":"play_exercise#6","text":"麻煩幫我播放練習弦上的旋律","where":"progress","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"弦上的旋律"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00326","wording":"play_exercise_bpm#1","text":"一個降記號，165 bpm，開始","where":"today","expect":{"kind":"which"},"call":{"tool":"play_exercise","args":{"exercise":"一個降記號","bpm":165}},"tags":["ambiguous"]}
+{"id":"zh-TW-00153","wording":"find_edge#1","text":"測一下我在爆發上的極限速度","where":"paths","expect":{"kind":"which"},"call":{"tool":"find_edge","args":{"exercise":"爆發"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00657","wording":"open_step_name#6","text":"可以打開叫和弦內音的那個步驟嗎","where":"settings","expect":{"kind":"which"},"call":{"tool":"open_step","args":{"query":"和弦內音"}},"tags":["ambiguous"]}
+{"id":"zh-TW-00061","wording":"open_path#4","text":"我想看換和弦時的琶音，點開它","where":"today","expect":{"kind":"call","tool":"open_path","args":{"path":"換和弦時的琶音"}},"call":{"tool":"open_path","args":{"path":"換和弦時的琶音"}},"tags":[]}
+{"id":"zh-TW-00580","wording":"open_path#6","text":"開一下 調內和弦","where":"beat","expect":{"kind":"call","tool":"open_path","args":{"path":"調內和弦"}},"call":{"tool":"open_path","args":{"path":"調內和弦"}},"tags":[]}
+{"id":"zh-TW-00129","wording":"tempo_faster#7","text":"太慢了啦，調快一點吧","where":"beat","expect":{"kind":"call","tool":"set_tempo","args":{"direction":"faster"}},"call":{"tool":"set_tempo","args":{"direction":"faster"}},"tags":["relative"]}
+{"id":"zh-TW-00030","wording":"open_path#3","text":"幫我打開吉他初學和弦與刷弦的頁面","where":"setlist","expect":{"kind":"call","tool":"open_path","args":{"path":"吉他初學和弦與刷弦"}},"call":{"tool":"open_path","args":{"path":"吉他初學和弦與刷弦"}},"tags":[]}
+{"id":"zh-TW-00538","wording":"loop_bars#7","text":"重複第8小節到第12小節，速度慢一些","where":"session (ready)","expect":{"kind":"call","tool":"loop_bars","args":{"from":8,"to":12}},"call":{"tool":"loop_bars","args":{"from":8,"to":12}},"tags":[]}
+{"id":"zh-TW-00548","wording":"tempo_bpm#1","text":"設為90bpm","where":"drill","expect":{"kind":"call","tool":"set_tempo","args":{"bpm":90}},"call":{"tool":"set_tempo","args":{"bpm":90}},"tags":[]}
+{"id":"zh-TW-00634","wording":"tempo_bpm#5","text":"麻煩把速度設定為90，謝謝","where":"drill","expect":{"kind":"call","tool":"set_tempo","args":{"bpm":90}},"call":{"tool":"set_tempo","args":{"bpm":90}},"tags":[]}
+{"id":"zh-TW-00595","wording":"suggestions_off#2","text":"別再給我提示了","where":"beat","expect":{"kind":"call","tool":"set_setting","args":{"key":"coachSuggestions","value":"off"}},"call":{"tool":"set_setting","args":{"key":"coachSuggestions","value":"off"}},"tags":[]}
+{"id":"zh-TW-00613","wording":"open_step_of_path#3","text":"我要看路線調內和弦的步驟20","where":"today","expect":{"kind":"call","tool":"open_step","args":{"path":"調內和弦","step":20}},"call":{"tool":"open_step","args":{"path":"調內和弦","step":20}},"tags":[]}
+{"id":"zh-TW-00545","wording":"show_scale#5","text":"麻煩把E五聲在琴頸上標出來","where":"progress","expect":{"kind":"call","tool":"show_scale","args":{"root":"E","scale":"minorPentatonic"}},"call":{"tool":"show_scale","args":{"root":"E","scale":"minorPentatonic"}},"tags":[]}
+{"id":"zh-TW-00039","wording":"start_today#3","text":"我準備好了，開始吧","where":"paths","expect":{"kind":"call","tool":"start_today","args":{}},"call":{"tool":"start_today","args":{}},"tags":[]}
+{"id":"zh-TW-00270","wording":"open_step_name#2","text":"我想看看G","where":"setlist","expect":{"kind":"call","tool":"open_step","args":{"query":"G"}},"call":{"tool":"open_step","args":{"query":"G"}},"tags":[]}
+{"id":"zh-TW-00135","wording":"tempo_slower#3","text":"可以稍微慢一些嗎","where":"session (ready)","expect":{"kind":"call","tool":"set_tempo","args":{"direction":"slower"}},"call":{"tool":"set_tempo","args":{"direction":"slower"}},"tags":["relative"]}
+{"id":"zh-TW-00473","wording":"none_past#7","text":"昨晚打開變速練習發現不一樣了","where":"setlist","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-TW-00283","wording":"none_offtopic#3","text":"幫我寫一下數學作業","where":"beat","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-TW-00204","wording":"start_today_at#5","text":"開始練習，第2部分","where":"session (listening)","expect":{"kind":"none"},"call":{"tool":"start_today","args":{"at":2}},"tags":["wrong-screen"]}
+{"id":"zh-TW-00571","wording":"loop_bars#3","text":"我想反覆練第5小節到第11小節，放慢一點","where":"paths","expect":{"kind":"none"},"call":{"tool":"loop_bars","args":{"from":5,"to":11}},"tags":["withheld"]}
+{"id":"zh-TW-00212","wording":"set_goal#5","text":"新目標：讓掃弦節奏更有律動","where":"session (playing)","expect":{"kind":"none"},"call":{"tool":"set_goal","args":{"text":"讓掃弦節奏更有律動"}},"tags":["wrong-screen"]}
+{"id":"zh-TW-00638","wording":"none_offtopic#3","text":"幫我寫一下數學作業","where":"session (ready)","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-TW-00410","wording":"none_tuning#6","text":"我這個G弦好像偏低","where":"beat","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-TW-00142","wording":"none_past#6","text":"我之前在設定裡改過東西","where":"progress","expect":{"kind":"none"},"tags":["not-a-request"]}
+{"id":"zh-TW-00356","wording":"play_exercise#3","text":"開始C、G、F、C：五在四前面這個練習","where":"settings","expect":{"kind":"none"},"call":{"tool":"play_exercise","args":{"exercise":"C、G、F、C：五在四前面"}},"tags":["withheld"]}
+{"id":"zh-TW-00423","wording":"open_step_name#1","text":"兩次點弦與跳弦，穿過和弦這一步，打開","where":"settings","expect":{"kind":"none"},"call":{"tool":"open_step","args":{"query":"兩次點弦與跳弦，穿過和弦"}},"tags":["withheld"]}
+{"id":"zh-TW-00322","wording":"focus_path#2","text":"今天的計畫只用交替撥弦這條路線","where":"paths","expect":{"kind":"none"},"call":{"tool":"set_focus","args":{"path":"交替撥弦"}},"tags":["withheld"]}

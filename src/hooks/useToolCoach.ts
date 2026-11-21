@@ -34,6 +34,7 @@ import {
 } from "../coach/gatekeeper";
 import {
   createShuffleState,
+  fillTemplate,
   pickTemplate,
   pickTemplateForSeverities,
   recordUtterance,
@@ -41,7 +42,12 @@ import {
   type Vocabulary,
 } from "../coach/templates";
 import { severityPlan, type CoachStance } from "../coach/learningMode";
-import { TEMPLATE_CATALOG } from "../coach/templateCatalog";
+import {
+  TEMPLATE_CATALOG,
+  localizeTipContext,
+  toolTipWords,
+  toolTipsLanguage,
+} from "../coach/templateCatalog";
 import {
   adaptiveScenario,
   buildAdaptiveCommentPrompt,
@@ -533,7 +539,7 @@ export function useToolCoach({
         vocab: vocabRef.current,
         scenario: event.scenario,
         severities,
-        context: event.context,
+        context: localizeTipContext(event.context),
       });
       if (!drawn) {
         coachDebug("event.drop-no-template", { scenario: event.scenario, severities, vocab: vocabRef.current });
@@ -663,7 +669,9 @@ export function useToolCoach({
             });
           }
         }
-        if (!intervention && modelMaySpeak()) {
+        // The model rephrases English only (owner decision 3); in any other
+        // language the template ships as written.
+        if (!intervention && modelMaySpeak() && toolTipsLanguage() === "en") {
           try {
             const narrativeBlock = narrativeRef.current
               ? `\n${formatForLLM(narrativeRef.current)}\n`
@@ -808,7 +816,9 @@ export function useToolCoach({
         maybeSpeakRef.current(comment, "normal");
       };
 
-      if (!modelMaySpeak()) {
+      // The model writes English only (owner decision 3): elsewhere the
+      // template line ships.
+      if (!modelMaySpeak() || toolTipsLanguage() !== "en") {
         emit(fallback);
         return;
       }
@@ -933,7 +943,7 @@ export function useToolCoach({
       const priority = ["bpm-up", "bpm-down", "preset", "time-sig", "grouping", "instrument"];
       changes.sort((a, b) => priority.indexOf(a.kind) - priority.indexOf(b.kind));
       const primary = changes[0];
-      const changeText = changes.map(formatChangeCopy).join("; ");
+      const changeText = changes.map(formatChangeCopy).join(toolTipWords().change.separator);
 
       // Commit the new committed-state BEFORE firing the gatekeeper
       // so any cascading effect re-runs see the post-commit state.
@@ -1399,21 +1409,24 @@ function buildRephrasePrompt(args: {
  * "loading Practice Riff #3". Falls back to a generic "config
  * changed" for unrecognised kinds so the template still resolves.
  */
+// The words are the tip catalogue's (`toolTips.words.change`), in the
+// player's language; English reads exactly as it did.
 function formatChangeCopy(c: { kind: string; from: string | number; to: string | number }): string {
+  const w = toolTipWords().change;
   switch (c.kind) {
     case "bpm-up":
-      return `tempo up to ${c.to} BPM`;
+      return fillTemplate(w.bpmUp, { to: c.to });
     case "bpm-down":
-      return `tempo down to ${c.to} BPM`;
+      return fillTemplate(w.bpmDown, { to: c.to });
     case "preset":
-      return c.to === "free play" ? "preset cleared" : `loading "${c.to}"`;
+      return c.to === "free play" ? w.presetCleared : fillTemplate(w.preset, { to: c.to });
     case "time-sig":
-      return `time signature ${c.to}/4`;
+      return fillTemplate(w.timeSig, { to: c.to });
     case "grouping":
-      return `regrouped to ${String(c.to).split(",").join(" + ")}`;
+      return fillTemplate(w.grouping, { to: String(c.to).split(",").join(" + ") });
     case "instrument":
-      return `switching to ${c.to}`;
+      return fillTemplate(w.instrument, { to: c.to });
     default:
-      return "config changed";
+      return w.other;
   }
 }
