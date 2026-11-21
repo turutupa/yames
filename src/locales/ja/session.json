@@ -27,7 +27,7 @@
       "even": "均等さ",
       "heard": "聞き取れた音",
       "extras": "余分な音",
-      "accents": "決まったアクセント",
+      "accents": "アクセントが他の音より大きかった平均幅",
       "notes": "正しい音"
     },
     "today": {
@@ -71,7 +71,7 @@
         "back": {
           "even": "前回のセッション、{{exercise}}：{{bpm}} BPM で均等さ {{value}}%。",
           "heard": "前回のセッション、{{exercise}}：{{bpm}} BPM で音の {{value}}% を聞き取り。",
-          "accents": "前回のセッション、{{exercise}}：{{bpm}} BPM でアクセントの {{value}}% が正確。",
+          "accents": "前回のセッション、{{exercise}}：{{bpm}} BPM でアクセントが他の音より平均 {{value}}% 大きく出ました。",
           "notes": "前回のセッション、{{exercise}}：{{bpm}} BPM で正しい音 {{value}}%。",
           "plain": "前回のセッションは {{exercise}} の {{bpm}} BPM で終わりました。"
         },
@@ -214,7 +214,7 @@
         "even": "{{bpm}} BPM での均等さが {{value}}% だったからです。合格ラインは {{bar}}% です。",
         "heard": "{{bpm}} BPM で聞き取れた音が {{value}}% だったからです。合格ラインは {{bar}}% です。",
         "extras": "{{bpm}} BPM で余分な音が出ていたからです。合格ラインは 4 小節で {{bar}} 個までです。",
-        "accents": "{{bpm}} BPM で決まったアクセントが {{value}}% だったからです。合格ラインは {{bar}}% です。",
+        "accents": "{{bpm}} BPM でアクセントが他の音より平均 {{value}}% 大きく出ていたからです。合格ラインは {{bar}}% です。",
         "plain": "前回の {{bpm}} BPM のテイクが合格ラインに届かなかったからです。",
         "notes": "{{bpm}} BPM で音程を聞き取れた音のうち、楽譜どおりだったのが {{value}}% だったからです。合格ラインは {{bar}}% です。"
       },
@@ -222,7 +222,7 @@
         "even": "{{bpm}} BPM での均等さが {{value}}%、合格ラインは {{bar}}% なので、今回は {{next}} BPM です。",
         "heard": "{{bpm}} BPM で聞き取れた音が {{value}}%、合格ラインは {{bar}}% なので、今回は {{next}} BPM です。",
         "extras": "{{bpm}} BPM で余分な音が出ていたので、今回は {{next}} BPM です。",
-        "accents": "{{bpm}} BPM で決まったアクセントが {{value}}%、合格ラインは {{bar}}% なので、今回は {{next}} BPM です。",
+        "accents": "{{bpm}} BPM でアクセントが他の音より平均 {{value}}% 大きく出ていて、合格ラインは {{bar}}% なので、今回は {{next}} BPM です。",
         "plain": "前回までの {{bpm}} BPM のテイクが合格ラインに届かなかったので、今回は {{next}} BPM です。",
         "notes": "{{bpm}} BPM で聞き取れた音のうち楽譜どおりが {{value}}%、合格ラインは {{bar}}% なので、今回は {{next}} BPM です。"
       },

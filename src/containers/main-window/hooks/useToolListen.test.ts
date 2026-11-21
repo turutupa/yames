@@ -5,18 +5,29 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LISTEN_IDLE_MS, useToolListen, type ListenCoach } from "./useToolListen";
 
-/** A coach session that does what `useSession` does with its active flag. */
+/**
+ * A coach session that does what `useSession` does with its active flag:
+ * `active` once the start or end has run, `isActive()` as of the calls made
+ * (an end queued already reads as not active; review of c2a2, finding 5).
+ */
 function fakeCoach() {
   let active = false;
+  let asked = false;
   const coach = {
     get active() {
       return active;
     },
-    isActive: () => active,
+    isActive: () => asked,
+    /** What a start or an end does at the moment it is called. */
+    ask(on: boolean) {
+      asked = on;
+    },
     startSession: vi.fn(async () => {
+      asked = true;
       active = true;
     }),
     endSession: vi.fn(async () => {
+      asked = false;
       active = false;
     }),
   };
@@ -170,6 +181,7 @@ describe("Listen", () => {
     coach.endSession.mockImplementation(
       () =>
         new Promise<void>((resolve) => {
+          coach.ask(false);
           finishEnd = () => {
             coach.endSession.mockClear();
             resolve();
@@ -181,7 +193,7 @@ describe("Listen", () => {
     });
     await act(async () => hook.result.current.toggle());
     hook.rerender({ view: "beat", isPlaying: false, coach: snapshot(coach) });
-    act(() => hook.result.current.toggle()); // off: the end is queued, still active
+    act(() => hook.result.current.toggle()); // off: the end is queued, not yet run
     act(() => hook.result.current.toggle()); // on again before it has run
     expect(coach.startSession).toHaveBeenCalledTimes(2);
     await act(async () => finishEnd());

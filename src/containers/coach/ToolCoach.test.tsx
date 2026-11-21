@@ -83,6 +83,21 @@ describe("what the line and the note show", () => {
     expect(view.note?.id).toBe("e");
     expect(view.chips).toEqual([]);
   });
+
+  it("a late mini-report of the last run is never the note of a short run after it (pol2 item 5)", () => {
+    // Run A stopped at T0 - 500; run B started at T0; A's report (slow
+    // rephrase) landed at T0 + 50, while B played; B lasted under 10 s, so
+    // it has no report of its own.
+    const late = run(T0 + 50).map((m) => (m.type === "mini-report" ? { ...m, stoppedAt: T0 - 500 } : m));
+    const view = toolCoachView(late, T0, false);
+    expect(view.note).toBeNull();
+    expect(view.chips).toEqual([]);
+    // B's own report, when it has one, is its note.
+    const own = run(T0 + 9000).map((m) => (m.type === "mini-report" ? { ...m, id: "b", stoppedAt: T0 + 8000 } : { ...m, id: "cb" }));
+    const both = toolCoachView([...late, ...own], T0, false);
+    expect(both.note?.id).toBe("b");
+    expect(both.chips.map((c) => c.id)).toEqual(["best-run-today"]);
+  });
 });
 
 describe("ToolCoach", () => {

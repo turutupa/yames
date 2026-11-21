@@ -130,7 +130,8 @@ export function useSegmentCoach(params: {
   useEffect(() => {
     if (wasPlayingRef.current && !isPlaying && activeRef.current) {
       const segmentBpm = playBpmRef.current;
-      const segmentDurationMs = Date.now() - segmentStartRef.current;
+      const stoppedAt = Date.now();
+      const segmentDurationMs = stoppedAt - segmentStartRef.current;
       // Under 10 s → Signal A (BPM change) or accidental stop.
       // Flush the Rust accumulator so stale data doesn't bleed into the
       // next exercise, but skip the mini-report entirely.
@@ -456,6 +457,7 @@ export function useSegmentCoach(params: {
             content: comment,
             report,
             meta: { bpm: segmentBpm, timeSignature },
+            stoppedAt,
           };
           // Only emit a chip-prompt if the selector returned anything
           // substantive. The Escape chip ("Ask something else…") was

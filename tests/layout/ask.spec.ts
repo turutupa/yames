@@ -146,8 +146,9 @@ for (const theme of THEMES) {
     for (const size of [
       { width: 1280, height: 800 },
       { width: 1024, height: 700 },
+      { width: 1024, height: 768 },
     ]) {
-      test(`the drawer over a result at ${size.width}: the text column stays whole, the button pressable`, async ({ page }) => {
+      test(`the drawer over a result at ${size.width} x ${size.height}: the text column stays whole, the button pressable`, async ({ page }) => {
         await openShot(page, "session-result", size, theme);
         await settleAnimations(page);
         await page.locator('[data-testid="session-coach-ask"]').click();

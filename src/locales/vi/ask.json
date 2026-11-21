@@ -171,7 +171,7 @@
           "even": "Độ đều: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
           "heard": "Số nốt nghe được: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
           "extras": "Nốt thừa: {{before}} ở lượt đó, {{now}} ở lượt {{take}}.",
-          "accents": "Nhấn đúng: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
+          "accents": "Nhấn to hơn các nốt khác, tính trung bình: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
           "notes": "Đúng nốt: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}.",
           "hold": "Độ đều giữ đến cuối: {{before}}% ở lượt đó, {{now}}% ở lượt {{take}}."
         },
@@ -240,8 +240,8 @@
           "heard": "Số nốt nghe được: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
           "heard_other": "Số nốt nghe được: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
           "extras": "Nốt thừa: {{value}} ở lượt {{take}}, nhiều hơn mức đạt cho phép {{gap}} ({{bar}} hoặc ít hơn trong {{over}} ô nhịp).",
-          "accents": "Nhấn đúng: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
-          "accents_other": "Nhấn đúng: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "accents": "Nhấn to hơn các nốt khác, tính trung bình: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
+          "accents_other": "Nhấn to hơn các nốt khác, tính trung bình: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
           "notes": "Đúng nốt: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
           "notes_other": "Đúng nốt: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
           "hold": "Độ đều giữ đến cuối: {{value}}% ở lượt {{take}}, thiếu {{count}} điểm so với mức đạt {{bar}}%.",
@@ -250,7 +250,7 @@
         "under": {
           "even": "Độ đều ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
           "heard": "Số nốt nghe được ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
-          "accents": "Nhấn đúng ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
+          "accents": "Nhấn to hơn các nốt khác, tính trung bình, ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
           "notes": "Đúng nốt ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%.",
           "hold": "Độ đều giữ đến cuối ở lượt {{take}}: thiếu chưa đến một điểm so với mức đạt {{bar}}%."
         },
@@ -260,7 +260,7 @@
           "even": "Độ đều: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
           "heard": "Số nốt nghe được: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
           "extras": "Nốt thừa: {{value}} ở lượt {{take}}, nằm trong mức đạt {{bar}} hoặc ít hơn trong {{over}} ô nhịp.",
-          "accents": "Nhấn đúng: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
+          "accents": "Nhấn to hơn các nốt khác, tính trung bình: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
           "notes": "Đúng nốt: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%.",
           "hold": "Độ đều giữ đến cuối: {{value}}% ở lượt {{take}}, đạt mức đạt {{bar}}%."
         },

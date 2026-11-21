@@ -171,7 +171,7 @@
           "even": "Düzgünlük: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
           "heard": "Duyulan nota: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
           "extras": "Fazla nota: o denemede {{before}}, {{take}}. denemede {{now}}.",
-          "accents": "Oturan aksan: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
+          "accents": "Aksanlar diğer notalardan ortalama olarak daha yüksek: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
           "notes": "Doğru nota: o denemede %{{before}}, {{take}}. denemede %{{now}}.",
           "hold": "Sona kadar korunan düzgünlük: o denemede %{{before}}, {{take}}. denemede %{{now}}."
         },
@@ -240,8 +240,8 @@
           "heard": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
           "heard_other": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
           "extras": "Fazla nota: {{take}}. denemede {{value}}, çıtanın izin verdiğinden {{gap}} fazla ({{over}} ölçüde {{bar}} veya daha az).",
-          "accents": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
-          "accents_other": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "accents": "Aksanlar diğer notalardan ortalama olarak daha yüksek: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
+          "accents_other": "Aksanlar diğer notalardan ortalama olarak daha yüksek: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
           "notes": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
           "notes_other": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
           "hold": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtanın {{count}} puan altında.",
@@ -250,7 +250,7 @@
         "under": {
           "even": "Düzgünlük, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
           "heard": "Duyulan nota, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
-          "accents": "Oturan aksan, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
+          "accents": "Aksanlar diğer notalardan ortalama olarak daha yüksek, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
           "notes": "Doğru nota, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında.",
           "hold": "Sona kadar korunan düzgünlük, {{take}}. denemede: %{{bar}} olan çıtanın bir puandan az altında."
         },
@@ -260,7 +260,7 @@
           "even": "Düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
           "heard": "Duyulan nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
           "extras": "Fazla nota: {{take}}. denemede {{value}}, {{over}} ölçüde {{bar}} veya daha az olan çıtanın içinde.",
-          "accents": "Oturan aksan: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
+          "accents": "Aksanlar diğer notalardan ortalama olarak daha yüksek: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
           "notes": "Doğru nota: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor.",
           "hold": "Sona kadar korunan düzgünlük: {{take}}. denemede %{{value}}, %{{bar}} olan çıtayı karşılıyor."
         },

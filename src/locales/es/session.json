@@ -27,7 +27,7 @@
       "even": "regular",
       "heard": "de las notas oídas",
       "extras": "notas de más",
-      "accents": "acentos clavados",
+      "accents": "más fuertes en los acentos",
       "notes": "notas correctas"
     },
     "today": {
@@ -72,7 +72,7 @@
         "back": {
           "even": "Última sesión, {{exercise}}: {{value}}% de regularidad a {{bpm}} BPM.",
           "heard": "Última sesión, {{exercise}}: {{value}}% de las notas oídas a {{bpm}} BPM.",
-          "accents": "Última sesión, {{exercise}}: {{value}}% de los acentos en su sitio a {{bpm}} BPM.",
+          "accents": "Última sesión, {{exercise}}: los acentos un {{value}}% más fuertes que las otras notas, de media, a {{bpm}} BPM.",
           "notes": "Última sesión, {{exercise}}: {{value}}% de notas correctas a {{bpm}} BPM.",
           "plain": "La última sesión terminó en {{exercise}} a {{bpm}} BPM."
         },
@@ -220,7 +220,7 @@
         "even": "Porque la regularidad fue del {{value}}% a {{bpm}} BPM. El listón está en el {{bar}}%.",
         "heard": "Porque oí el {{value}}% de las notas a {{bpm}} BPM. El listón está en el {{bar}}%.",
         "extras": "Por las notas de más a {{bpm}} BPM. El listón está en {{bar}} como máximo en cuatro compases.",
-        "accents": "Porque el {{value}}% de los acentos cayó en su sitio a {{bpm}} BPM. El listón está en el {{bar}}%.",
+        "accents": "Porque a {{bpm}} BPM los acentos salieron, de media, un {{value}}% más fuertes que las otras notas. El listón está en el {{bar}}%.",
         "plain": "Porque la última toma a {{bpm}} BPM no llegó al listón.",
         "notes": "Porque el {{value}}% de las notas que pude identificar eran las escritas a {{bpm}} BPM. El listón está en el {{bar}}%."
       },
@@ -228,7 +228,7 @@
         "even": "La regularidad fue del {{value}}% a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM.",
         "heard": "Oí el {{value}}% de las notas a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM.",
         "extras": "Hubo notas de más a {{bpm}} BPM, así que esto va a {{next}} BPM.",
-        "accents": "El {{value}}% de los acentos cayó en su sitio a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM.",
+        "accents": "A {{bpm}} BPM los acentos salieron, de media, un {{value}}% más fuertes que las otras notas y el listón está en el {{bar}}%, así que esto va a {{next}} BPM.",
         "plain": "Las últimas tomas a {{bpm}} BPM no llegaron al listón, así que esto va a {{next}} BPM.",
         "notes": "El {{value}}% de las notas que pude identificar eran las escritas a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM."
       },

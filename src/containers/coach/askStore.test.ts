@@ -139,6 +139,33 @@ describe("Ask's store", () => {
     expect(getAskState().turns.at(-1)).toMatchObject({ kind: "divider", text: "Now looking at: Today" });
   });
 
+  it("a canned chip answer written as Ask opens on a new screen comes after the divider, not before it (pol2 item 3)", () => {
+    // A conversation on Today, then the panel closed.
+    openAsk();
+    noteAskScreen("today", "Now looking at: Today");
+    appendAskTurn({ id: askTurnId(), kind: "user", text: "hello" });
+    closeAsk();
+    // On the Metronome a note's chip opens Ask and writes its question and
+    // answer at once, before the panel mounts and says where it is.
+    askCoach();
+    appendAskTurn({ id: askTurnId(), kind: "user", text: "What is a groove?" });
+    appendAskTurn({ id: askTurnId(), kind: "app", text: "Where the notes sit." });
+    noteAskScreen("beat", "Now looking at: Metronome");
+    expect(getAskState().turns.map((t) => ("text" in t ? t.text : t.kind))).toEqual([
+      "hello",
+      "Now looking at: Metronome",
+      "What is a groove?",
+      "Where the notes sit.",
+    ]);
+    // Later turns on the same screen go at the end as before.
+    appendAskTurn({ id: askTurnId(), kind: "user", text: "And then?" });
+    noteAskScreen("beat", "Now looking at: Metronome");
+    expect(getAskState().turns.at(-1)).toMatchObject({ text: "And then?" });
+    // A screen change with the panel open still puts the divider at the end.
+    noteAskScreen("progress", "Now looking at: Progress");
+    expect(getAskState().turns.at(-1)).toMatchObject({ kind: "divider", text: "Now looking at: Progress" });
+  });
+
   it("the conversation outlives the panel being closed", () => {
     const sender = vi.fn();
     registerAskSender(sender);
