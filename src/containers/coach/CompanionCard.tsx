@@ -17,7 +17,10 @@
  *   today's plan on the stuck Exercise itself (`anotherWayPart`); not offered,
  *   and not named in the question, when the plan has none.
  * - "Rest it till …": what the plan already does (the planner parked it on
- *   its own): nothing to change, so no tool; the card says so.
+ *   its own): nothing to change, so no tool; the card says so. Offered only
+ *   when no part of today's plan plays it (`planPartOn`): parking puts an
+ *   Exercise behind the open ones, it does not take it out, and on a day the
+ *   plan holds it the card says which part instead (c4b2b's re-read, MEDIUM 1).
  * The card itself never acts. An answered question is not asked again this
  * run (memory only).
  *
@@ -63,8 +66,7 @@ function useDates() {
 /**
  * The part of today's plan "Try it another way" would swap: an Exercise part
  * on the stuck Exercise itself (c4b2's review, M5), else none and the button
- * is not offered. The planner rests that Exercise, so today's plan rarely
- * holds it; the question then offers two answers, and says two.
+ * is not offered.
  */
 export function anotherWayPart(plan: SessionRun["plan"], plateau: Plateau): number {
   return (plan?.steps ?? []).findIndex(
@@ -72,11 +74,48 @@ export function anotherWayPart(plan: SessionRun["plan"], plateau: Plateau): numb
   );
 }
 
+/**
+ * The first part of today's plan that plays the stuck Exercise, of any kind
+ * (its Exercise block, its warm-up, the band's finisher), or -1.
+ *
+ * Parking does not take an Exercise out of the plan: `openWork` puts it behind
+ * the open ones, so it is still played when its Path has nothing else open
+ * (and the warm-up, a review, a recap or the finisher may play it). Only when
+ * no part plays it does the plan rest it till `restsUntil`; on a day a part
+ * does, "the plan rests it" is false and Rest is not offered (c4b2b's re-read,
+ * MEDIUM 1).
+ */
+export function planPartOn(plan: SessionRun["plan"], plateau: Plateau): number {
+  return (plan?.steps ?? []).findIndex((s) => {
+    const on = s as { pathId?: string; exerciseId?: string };
+    return on.pathId === plateau.path.id && on.exerciseId === plateau.exercise.id;
+  });
+}
+
+/** The question's sentences and which answers it offers, from today's plan. */
+export function plateauWords(plan: SessionRun["plan"], plateau: Plateau) {
+  const held = planPartOn(plan, plateau);
+  const part = anotherWayPart(plan, plateau);
+  const range = plateau.low !== plateau.high;
+  if (held < 0) {
+    return { say: range ? "companion.plateau.sayRange" : "companion.plateau.say", ask: "companion.plateau.askTwo", held, part, rest: true } as const;
+  }
+  return {
+    say: range ? "companion.plateau.sayRangeToday" : "companion.plateau.sayToday",
+    ask: part >= 0 ? "companion.plateau.askToday" : "companion.plateau.askKeep",
+    held,
+    part,
+    rest: false,
+  } as const;
+}
+
 function PlateauQuestion({ plateau, session, onAnswered }: { plateau: Plateau; session: SessionRun; onAnswered: () => void }) {
   const { t } = useTranslation();
   const { until } = useDates();
   const [rested, setRested] = useState(false);
   const day = until(plateau.restsUntil);
+  const words = plateauWords(session.plan, plateau);
+  const part = words.part;
   const values = {
     exercise: plateau.exercise.title,
     sessions: plateau.sessions,
@@ -84,8 +123,8 @@ function PlateauQuestion({ plateau, session, onAnswered }: { plateau: Plateau; s
     low: plateau.low,
     high: plateau.high,
     day,
+    n: words.held + 1,
   };
-  const part = anotherWayPart(session.plan, plateau);
   const ask = (call: Parameters<typeof runAskCall>[0], said: string) => {
     answerPlateau(plateau.key);
     openAsk();
@@ -104,8 +143,7 @@ function PlateauQuestion({ plateau, session, onAnswered }: { plateau: Plateau; s
   return (
     <div className="companion-plateau" data-testid="companion-plateau">
       <p className="companion-plateau-say">
-        {t(plateau.low === plateau.high ? "companion.plateau.say" : "companion.plateau.sayRange", values)}{" "}
-        {t(part >= 0 ? "companion.plateau.ask" : "companion.plateau.askTwo")}
+        {t(words.say, values)} {t(words.ask)}
       </p>
       <div className="companion-buttons">
         <button
@@ -126,17 +164,19 @@ function PlateauQuestion({ plateau, session, onAnswered }: { plateau: Plateau; s
             {another}
           </button>
         )}
-        <button
-          type="button"
-          className="coach-chip"
-          data-testid="companion-plateau-rest"
-          onClick={() => {
-            answerPlateau(plateau.key);
-            setRested(true);
-          }}
-        >
-          {t("companion.plateau.rest", { day })}
-        </button>
+        {words.rest && (
+          <button
+            type="button"
+            className="coach-chip"
+            data-testid="companion-plateau-rest"
+            onClick={() => {
+              answerPlateau(plateau.key);
+              setRested(true);
+            }}
+          >
+            {t("companion.plateau.rest", { day })}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -216,7 +256,7 @@ export function CompanionCard({ session }: { session: SessionRun }) {
   // the player's "Not now" (seven days quiet, not until asked after two), as
   // the plateau card alone does through the budget (c4b2's review, M1).
   const plateauMayShow = cardMayShow(stored, "plateau", Date.now(), states);
-  const [spans, setSpans] = useState<readonly CleanTempoSpanRow[] | null>(null);
+  const [spans, setSpans] = useState<readonly CleanTempoSpanRow[] | "unread" | null>(null);
   const [hiding, setHiding] = useState<"no" | "undo" | "done">("no");
   // The Undo's line, fixed at the press: the first Hide of a kind quiets it for
   // seven days, the second until the player asks (M2).
@@ -233,7 +273,12 @@ export function CompanionCard({ session }: { session: SessionRun }) {
       .then((rows) => {
         if (live) setSpans(rows);
       })
-      .catch(() => {});
+      // A failed call does not leave the dot leading to nothing (c4b2b's
+      // re-read, LOW 2): the look-back shows without what moved, which is not
+      // known (never as "no clean tempo moved").
+      .catch(() => {
+        if (live) setSpans("unread");
+      });
     return () => {
       live = false;
     };

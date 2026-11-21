@@ -109,8 +109,11 @@ export type LookBack = {
 export type LookBackInput = {
   progress: PlayerProgress;
   paths: readonly PathDoc[];
-  /** The long view (`listCleanTempoSpans`); null while it has not answered. */
-  spans: readonly CleanTempoSpanRow[] | null;
+  /**
+   * The long view (`listCleanTempoSpans`); null while it has not answered;
+   * "unread" when the call failed (the look-back then says nothing of what moved).
+   */
+  spans: readonly CleanTempoSpanRow[] | null | "unread";
   now: number;
   weekStart: Weekday;
   /** The player grades their playing (grading not "off"). */
@@ -206,6 +209,10 @@ function cleanMoved(
     const bestInWeek = span.bestAt < end;
     const to = bestInWeek ? span.bestBpm : inWeek;
     if (to === null) continue;
+    // First in the week and best after it: `to` is the week's top in memory,
+    // which is the week's top only when no Take of the week is older than the
+    // oldest one read (c4b2b's re-read, LOW 8).
+    if (isNew && !bestInWeek && !complete) continue;
     // Before the week: none (new), known (the Takes reach back), or not known.
     const from = isNew ? null : complete && was !== null && was < to ? was : null;
     if (!bestInWeek && !isNew && from === null) continue;
@@ -280,6 +287,8 @@ function benchmarkOf(takes: readonly PathTakeRow[], paths: readonly PathDoc[], s
  * +20, not every later week in which the best rose again. That needs the
  * Takes before the week back to the span's first clean Take; when the Takes
  * in memory (`takes`, from `oldest` on) do not reach that far, it is not said.
+ * A best set after the week does not hide a crossing inside it: the week's own
+ * top clean Take is said, as the clean tempo it was then (LOW 3).
  */
 export function bpmMilestones(
   spans: readonly CleanTempoSpanRow[],
@@ -291,9 +300,24 @@ export function bpmMilestones(
 ): BpmMilestone[] {
   const out: BpmMilestone[] = [];
   for (const span of spans) {
-    if (span.bestAt < start || span.bestAt >= end) continue;
+    if (span.bestAt < start || span.firstAt >= end) continue;
     const mark = span.firstBpm + MILESTONE_BPM_UP;
-    if (span.bestBpm < mark) continue;
+    let best = { bpm: span.bestBpm, at: span.bestAt };
+    if (span.bestAt >= end) {
+      // The best came after the week, but the week may still be the one that
+      // first crossed +20 (c4b2b's re-read, LOW 3): its own top clean Take,
+      // read only when the Takes in memory hold the whole span up to it.
+      if (oldest === null || oldest > span.firstAt) continue;
+      let top: PathTakeRow | null = null;
+      for (const t of takes) {
+        if (t.pathId !== span.pathId || t.exerciseId !== span.exerciseId) continue;
+        if (t.startedAt < start || t.startedAt >= end || !countsTowardCleanTempo(t)) continue;
+        if (!top || t.bpm > top.bpm || (t.bpm === top.bpm && t.startedAt < top.startedAt)) top = t;
+      }
+      if (!top) continue;
+      best = { bpm: top.bpm, at: top.startedAt };
+    }
+    if (best.bpm < mark) continue;
     if (span.firstAt < start) {
       if (oldest === null || oldest > span.firstAt) continue;
       const crossedBefore = takes.some(
@@ -308,7 +332,7 @@ export function bpmMilestones(
     }
     const found = exerciseOf(paths, span.pathId, span.exerciseId);
     if (!found) continue;
-    out.push({ ...found, firstBpm: span.firstBpm, firstAt: span.firstAt, bestBpm: span.bestBpm, bestAt: span.bestAt });
+    out.push({ ...found, firstBpm: span.firstBpm, firstAt: span.firstAt, bestBpm: best.bpm, bestAt: best.at });
   }
   return out.sort((a, b) => b.bestBpm - b.firstBpm - (a.bestBpm - a.firstBpm));
 }
@@ -361,9 +385,13 @@ export function lookBack(input: LookBackInput): LookBack | null {
   // A graded player whose whole week went ungraded is spoken to as ungraded.
   const gradedWeek = graded && inWeek.some((t) => !isUngradedTake(t));
   const oldest = oldestRead(progress);
-  const moved = gradedWeek ? cleanMoved(takes, paths, start, end, input.spans, oldest) : playedMoved(inWeek, paths);
+  // The long view could not be read (c4b2b's re-read, LOW 2): what moved is not
+  // known, so no moved rows, no milestone, and the sentence quotes the counts.
+  const unread = input.spans === "unread";
+  const spans = input.spans === "unread" ? null : input.spans;
+  const moved = gradedWeek ? cleanMoved(takes, paths, start, end, spans, oldest) : playedMoved(inWeek, paths);
   const benchmark = gradedWeek ? benchmarkOf(takes, paths, start, end) : null;
-  const milestones = gradedWeek && input.spans ? bpmMilestones(input.spans, paths, start, end, takes, oldest) : [];
+  const milestones = gradedWeek && spans ? bpmMilestones(spans, paths, start, end, takes, oldest) : [];
   const stuck = gradedWeek ? (plateausNow(progress, paths, now, true)[0] ?? null) : null;
   return {
     start,
@@ -371,7 +399,7 @@ export function lookBack(input: LookBackInput): LookBack | null {
     graded: gradedWeek,
     needsSpans: gradedWeek && input.spans === null,
     leftOut,
-    sentence: sentenceOf(gradedWeek, moved, benchmark, counts, exercises, leftOut),
+    sentence: sentenceOf(gradedWeek && !unread, moved, benchmark, counts, exercises, leftOut),
     benchmark,
     moved,
     milestones,

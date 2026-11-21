@@ -162,6 +162,27 @@ describe("lookBack", () => {
     expect(lookBack(input(takes, { spans }))!.moved).toEqual([]);
   });
 
+  it("a long view that could not be read: nothing said of what moved, and the sentence quotes the counts (LOW 2)", () => {
+    const look = lookBack(input(week(), { spans: "unread" }))!;
+    expect(look.needsSpans).toBe(false);
+    expect(look.graded).toBe(true);
+    expect(look.moved).toEqual([]);
+    expect(look.milestones).toEqual([]);
+    // Never "held" ("No clean tempo moved"), which is not known.
+    expect(look.sentence).toEqual({ key: "companion.weekly.say.ungradedLeftOut", values: { sessions: 3, minutes: look.counts.minutes, exercises: 2 } });
+    expect(look.benchmark).not.toBeNull();
+  });
+
+  it("says no first clean tempo of the week when the Takes read do not reach back to it (LOW 8)", () => {
+    // First clean at 70 on day 1, past the Takes read (the oldest is day 3); best after the week.
+    const takes = [clean(A.id, 80, day(3)), below(B.id, 60, day(4)), below(B.id, 60, day(5)), clean(A.id, 100, NOW - 60_000)];
+    const spans: CleanTempoSpanRow[] = [{ pathId: ALT.id, exerciseId: A.id, firstBpm: 70, firstAt: day(1), bestBpm: 100, bestAt: NOW - 60_000 }];
+    expect(lookBack(input(takes, { spans }))!.moved).toEqual([]);
+    // With the Takes back to the first: the week's top is its first clean tempo's row.
+    const all = [clean(A.id, 70, day(1)), ...takes];
+    expect(lookBack(input(all, { spans }))!.moved).toMatchObject([{ isNew: true, to: 80 }]);
+  });
+
   it("does not count a first clean tempo as one that moved (L7)", () => {
     const takes = [clean(A.id, 80, day(0)), below(B.id, 60, day(2)), below(B.id, 60, day(4))];
     const look = lookBack(input(takes))!;
@@ -240,6 +261,18 @@ describe("bpmMilestones (DESIGN 6.5: clean tempo up 20 BPM)", () => {
     expect(mile([span({})], [], day(-5))).toEqual([]);
     // A first clean Take inside the week needs nothing before it.
     expect(mile([span({ firstAt: day(0), bestAt: day(3) })], [], day(0))).toHaveLength(1);
+  });
+
+  it("says a crossing in the week whose best was passed after it, as the week's own top (LOW 3)", () => {
+    const after = NOW - 60_000;
+    const takes = [...read, clean(A.id, 90, day(2)), clean(A.id, 95, after)];
+    expect(mile([span({ bestBpm: 95, bestAt: after })], takes)).toMatchObject([{ firstBpm: 70, bestBpm: 90, bestAt: day(2) }]);
+    // And not again in the week that set the 95: the 90 crossed before it.
+    const thisWeek = weekTotals([], [ALT], NOW, MON).thisWeek;
+    expect(bpmMilestones([span({ bestBpm: 95, bestAt: after })], [ALT], thisWeek.start, thisWeek.end, takes, day(-11))).toEqual([]);
+    // The week's top under +20, or the Takes read short of the first: not said.
+    expect(mile([span({ bestBpm: 95, bestAt: after })], [...read, clean(A.id, 85, day(2)), clean(A.id, 95, after)])).toEqual([]);
+    expect(mile([span({ bestBpm: 95, bestAt: after })], takes.slice(1), day(2))).toEqual([]);
   });
 
   it("joins every span to an Exercise that still exists, and skips my exercises", () => {

@@ -87,15 +87,11 @@ export function writtenOut(exercise: Exercise, bars: number): Exercise {
 }
 
 /**
- * The notes a Take plays: the variant the planner picked (`variantSeed`, an
- * index into the Exercise's variants), or the Exercise as written. The id stays
- * the Exercise's own, so progress and the clean tempo pool across its variants.
- */
-/**
- * Which of the Exercise's variants a seed plays, by `withVariant`'s own rule
- * (the seed modulo the variant count); null: the Exercise as written, or one
- * with no variants. Two Takes are on the same notes when this agrees (the same
- * rule as the history cards' `variantIndex` in `coach/ask/cards.ts`).
+ * Which of the Exercise's variants a seed plays (the seed modulo the variant
+ * count); null: the Exercise as written, or one with no variants. The one copy
+ * of the rule: `withVariant` picks by it, and two Takes are on the same notes
+ * when it agrees (the history cards in `coach/ask/cards.ts`, the look-back's
+ * benchmark in `coach/weekly.ts`).
  */
 export function variantIndexOf(exercise: Exercise, variantSeed: number | null | undefined): number | null {
   const n = exercise.variation?.variants?.length ?? 0;
@@ -103,11 +99,15 @@ export function variantIndexOf(exercise: Exercise, variantSeed: number | null | 
   return ((variantSeed % n) + n) % n;
 }
 
+/**
+ * The notes a Take plays: the variant the planner picked (`variantSeed`, an
+ * index into the Exercise's variants), or the Exercise as written. The id stays
+ * the Exercise's own, so progress and the clean tempo pool across its variants.
+ */
 export function withVariant(exercise: Exercise, variantSeed: number | null | undefined): Exercise {
-  const variants = exercise.variation?.variants;
-  if (variantSeed === null || variantSeed === undefined || !variants?.length) return exercise;
-  const variant = variants[((variantSeed % variants.length) + variants.length) % variants.length];
-  return { ...exerciseWithVariant(exercise, variant), id: exercise.id };
+  const at = variantIndexOf(exercise, variantSeed);
+  if (at === null) return exercise;
+  return { ...exerciseWithVariant(exercise, exercise.variation!.variants![at]), id: exercise.id };
 }
 
 export function buildTake(

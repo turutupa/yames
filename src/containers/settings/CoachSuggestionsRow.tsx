@@ -37,6 +37,7 @@ export function CoachSuggestionsRow() {
 
   // A press whose save did not land says so (c4a2b, L2); the next press that lands clears it.
   const [notSaved, setNotSaved] = useState(false);
+  const [cardsNotRead, setCardsNotRead] = useState(false);
   const mounted = useRef(false);
   useEffect(() => {
     mounted.current = true;
@@ -49,9 +50,14 @@ export function CoachSuggestionsRow() {
     // "On" is how the player asks for the proactive cards again: a card hidden
     // twice ("Hidden until you ask") may come back (c4b2b). Writes nothing
     // when no card was hidden.
-    if (value === "on") saveCardsAsked(BUDGET_ORDER);
-    void coachPressSettled("suggestions").then((end) => {
-      if (mounted.current) setNotSaved(end === "notSaved");
+    const cards = value === "on" ? saveCardsAsked(BUDGET_ORDER) : "unchanged";
+    // The cards' half is followed too (c4b2b's re-read, LOW 4): an unreadable
+    // `coach.cards` changes nothing, not even for this run, and says so; a
+    // failed save holds until Yames closes, as the row's "not saved" says.
+    setCardsNotRead(cards === "notRead");
+    const cardsEnd: Promise<"saved" | "notSaved"> = cards === "saved" || cards === "queued" ? coachPressSettled("cards") : Promise.resolve("saved");
+    void Promise.all([coachPressSettled("suggestions"), cardsEnd]).then((ends) => {
+      if (mounted.current) setNotSaved(ends.includes("notSaved"));
     });
   };
 
@@ -69,6 +75,11 @@ export function CoachSuggestionsRow() {
         {notSaved && (
           <span className="setting-hint" style={{ marginTop: 4 }} role="status" data-testid="coach-suggestions-not-saved">
             {t("notebook.ui.notSaved")}
+          </span>
+        )}
+        {cardsNotRead && (
+          <span className="setting-hint" style={{ marginTop: 4 }} role="status" data-testid="coach-suggestions-cards-not-read">
+            {t("companion.cardsNotRead")}
           </span>
         )}
       </div>

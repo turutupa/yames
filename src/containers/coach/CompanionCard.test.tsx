@@ -14,6 +14,7 @@ const io = vi.hoisted(() => ({
   spans: [] as unknown[],
   release: null as null | (() => void),
   hold: false,
+  fail: false,
 }));
 
 vi.mock("../../ipc", async (importOriginal) => {
@@ -27,8 +28,9 @@ vi.mock("../../ipc", async (importOriginal) => {
     }),
     listCleanTempoSpans: vi.fn(
       () =>
-        new Promise((resolve) => {
-          if (!io.hold) resolve(io.spans);
+        new Promise((resolve, reject) => {
+          if (io.fail) reject(new Error("no long view"));
+          else if (!io.hold) resolve(io.spans);
           else io.release = () => resolve(io.spans);
         }),
     ),
@@ -48,7 +50,7 @@ vi.mock("./askStore", async (importOriginal) => ({
 }));
 
 import i18n from "../../i18n";
-import { companionBlocked, resetCompanion, useCompanion, useCompanionWatch } from "../../coach/companion";
+import { companionBlocked, resetCompanion, useCompanion, useCompanionWatch, useProgressDot } from "../../coach/companion";
 import { resetCardBudget } from "../../coach/cardBudget";
 import { loadCoachStored, resetCoachStored } from "../../coach/store";
 import { countsTowardCleanTempo, type PlayerProgress } from "../../session/progress";
@@ -98,7 +100,12 @@ function Shell({ session, blocked = false }: { session: SessionRun; blocked?: bo
 
 function Card() {
   const c = useCompanion();
-  return <span data-testid="card-kind">{c.card?.kind ?? "none"}</span>;
+  return (
+    <>
+      <span data-testid="card-kind">{c.card?.kind ?? "none"}</span>
+      <span data-testid="companion-dot">{useProgressDot() ? "yes" : "no"}</span>
+    </>
+  );
 }
 
 async function show(session: SessionRun, blocked = false) {
@@ -122,6 +129,7 @@ beforeEach(() => {
   io.saves.length = 0;
   io.spans = [];
   io.hold = false;
+  io.fail = false;
   io.release = null;
   ask.calls.length = 0;
   resetCoachStored();
@@ -147,6 +155,21 @@ describe("the look-back", () => {
     expect(screen.getByTestId("companion-weekly")).toBeInTheDocument();
     expect(screen.getByTestId("companion-moved")).toHaveTextContent(t("companion.weekly.movedFromTo", { from: 70, to: 90 }));
     expect(screen.getByTestId("companion-foot")).toBeInTheDocument();
+    expect(io.saves).toEqual([]);
+  });
+
+  it("a long view that fails: the look-back shows without what moved, never 'no clean tempo moved', and the dot clears (LOW 2)", async () => {
+    const takes = lastWeekTakes();
+    io.fail = true;
+    await show(sessionOf(progress({ takes })));
+    expect(screen.getByTestId("companion-weekly")).toBeInTheDocument();
+    const week = weekTotals(takes, [ALT], NOW, MON).lastWeek;
+    expect(screen.getByTestId("companion-sentence")).toHaveTextContent(
+      t("companion.weekly.say.ungraded", { sessions: week.sessions, minutes: week.minutes, exercises: 2 }),
+    );
+    expect(screen.queryByTestId("companion-moved")).toBeNull();
+    expect(screen.queryByTestId("companion-milestone")).toBeNull();
+    expect(screen.getByTestId("companion-dot")).toHaveTextContent("no");
     expect(io.saves).toEqual([]);
   });
 
@@ -220,13 +243,35 @@ describe("the plateau question alone", () => {
     expect(screen.getByTestId("companion-plateau")).toHaveTextContent(t("companion.plateau.askTwo"));
   });
 
-  it("with today's part on it: three answers, and each press hands Ask a proposal or says a line", async () => {
+  it("with today's part on it: says which part, offers no Rest the plan is not giving, and 'another' proposes the swap (MEDIUM 1)", async () => {
     const takes = stuckTakes();
     await show(sessionOf(progress({ takes }), [A.id, C.id]));
-    expect(screen.getByTestId("companion-plateau")).toHaveTextContent(t("companion.plateau.ask"));
+    const said = screen.getByTestId("companion-plateau");
+    expect(said).toHaveTextContent(t("companion.plateau.sayToday", { exercise: C.title, sessions: 3, bpm: 90, n: 2 }));
+    expect(said).toHaveTextContent(t("companion.plateau.askToday"));
+    expect(screen.queryByTestId("companion-plateau-rest")).toBeNull();
     fireEvent.click(screen.getByTestId("companion-plateau-another"));
     expect(ask.calls).toEqual([{ tool: "swap_part", args: { at: 2, choice: "different" } }]);
     expect(io.saves).toEqual([]);
+  });
+
+  it("held by a part that is not an Exercise block (the warm-up): names the part, asks only Keep at it (MEDIUM 1)", async () => {
+    const takes = stuckTakes();
+    const session = sessionOf(progress({ takes }), [A.id]);
+    (session.plan as unknown as { steps: unknown[] }).steps.unshift({ kind: "metronome", pathId: ALT.id, exerciseId: C.id });
+    await show(session);
+    const said = screen.getByTestId("companion-plateau");
+    expect(said).toHaveTextContent(t("companion.plateau.sayToday", { exercise: C.title, sessions: 3, bpm: 90, n: 1 }));
+    expect(said).toHaveTextContent(t("companion.plateau.askKeep"));
+    expect(screen.queryByTestId("companion-plateau-rest")).toBeNull();
+    expect(screen.queryByTestId("companion-plateau-another")).toBeNull();
+    expect(screen.getByTestId("companion-plateau-keep")).toBeInTheDocument();
+  });
+
+  it("left out of today's plan: the plan rests it, and Rest is offered", async () => {
+    await show(sessionOf(progress({ takes: stuckTakes() }), [A.id]));
+    expect(screen.getByTestId("companion-plateau").textContent).toContain(t("companion.plateau.askTwo"));
+    expect(screen.getByTestId("companion-plateau-rest")).toBeInTheDocument();
   });
 
   it("Rest says a line and changes nothing", async () => {
