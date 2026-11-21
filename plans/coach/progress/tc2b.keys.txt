@@ -3,6 +3,7 @@ catalog.generic.check_in.correction.0
 catalog.generic.check_in.correction.1
 catalog.generic.check_in.correction.4
 catalog.generic.check_in.correction.5
+catalog.generic.fatigue.encouragement.2
 catalog.generic.fatigue.correction.2
 catalog.generic.stamina.neutral.0
 catalog.generic.stamina.neutral.1

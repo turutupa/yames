@@ -200,7 +200,7 @@
           "neutral": [
             "Fünf Minuten drin, nichts zu melden. Solider Pocket. Weitermachen oder den Fokus wechseln?",
             "Ruhige Strecke. Sag mir, woran du arbeitest.",
-            "Langer ununterbrochener Lauf. Wozu willst du Feedback?",
+            "Von mir kam eine Weile nichts. Wozu willst du Feedback?",
             "Fünf Minuten tief drin. Keine Probleme anzusagen – mach weiter.",
             "Gleichmäßige Session. Willst du einen anderen Blickwinkel oder den Kurs halten?",
             "Langer Lauf ohne Ausrutscher. Was kommt als Nächstes?",
@@ -208,12 +208,12 @@
             "Bisher eine ruhige Session. Wähl ein Ziel, wenn du schärferes Feedback willst."
           ],
           "correction": [
-            "Achtung – du bist schon eine Weile dabei. Mach zehn Minuten Pause, wenn du willst.",
-            "Über fünf Minuten am Stück. Magst du eine kurze Pause, bevor du weitermachst?",
+            "Achtung – du bist schon eine Weile dabei. Mach ein paar Minuten Pause, wenn du willst.",
+            "Schon über fünf Minuten dabei. Magst du eine kurze Pause, bevor du weitermachst?",
             "Lange Session – eine kurze Pause ist hier okay, dann komm zurück.",
             "Magst du 60 Sekunden Pause vor dem nächsten Durchgang?",
-            "Lange Strecke ohne Pause. Eine kurze Pause ist eine Option, bevor du weitermachst.",
-            "Lange Zeit ohne Pause. Eine kurze Pause wäre eine Option.",
+            "Lange Strecke seit meinem letzten Tipp. Eine kurze Pause ist eine Option, bevor du weitermachst.",
+            "Fünf Minuten seit meinem letzten Tipp. Eine kurze Pause wäre eine Option.",
             "Pausiere hier, wenn du magst. Zwei Minuten Pause, dann mach weiter.",
             "Langer Lauf – mach eine kurze Pause, bevor du weiter schiebst."
           ]
@@ -222,7 +222,7 @@
           "encouragement": [
             "Die Genauigkeit sinkt seit ein paar Minuten. Gönn dir einen Moment.",
             "Die Genauigkeit sinkt bei diesem Tempo. Kurze Pause, dann komm zurück.",
-            "Die Qualität driftet. Pause, neu ansetzen, zurückkommen.",
+            "Die Qualität lässt nach. Pause, neu ansetzen, zurückkommen.",
             "Die Fehler nehmen im selben Tempo zu. Kurze Pause, dann wieder rein.",
             "Du bist schon eine Weile dabei – leg das Instrument für 60 Sekunden weg.",
             "Die Werte rutschen bei einem Tempo ab. Kurze Pause?",
@@ -242,7 +242,7 @@
           "correction": [
             "Die Genauigkeit sinkt weiter – hör jetzt auf, 90 Sekunden Pause, dann komm zurück.",
             "Die Werte liegen in dieser Session unter deinem Höchstwert. Pausiere, bevor sie weiter sinken.",
-            "Mach die Pause. Die letzten Minuten haben schlechter abgeschnitten als die ersten.",
+            "Mach die Pause. Die letzten Minuten haben schlechter abgeschnitten als die davor.",
             "Stopp, steh auf, geh eine Minute herum. Dann komm zurück.",
             "Die Qualität sinkt seit Minuten. Echte Pause – mindestens 90 Sekunden.",
             "Die Werte fallen bei diesem Tempo weiter. Pausiere, dann prüf noch einmal.",
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Der Score sinkt wieder jenseits der {staminaMinutes}-Minuten-Marke – mach 30 Sekunden Pause und komm dann beim selben BPM zurück.",
-            "Nach der {staminaMinutes}-Minuten-Marke rutscht deine Genauigkeit tendenziell ab. Kurz ausruhen, dann wieder rein.",
-            "Um Minute {staminaMinutes} sinkt deine Genauigkeit tendenziell. Mach eine Pause, dann komm zurück.",
-            "Deine Werte sinken meist um Minute {staminaMinutes} – eine kurze Pause jetzt wäre eine Option."
+            "Deine Sessions hier dauern im Schnitt etwa {staminaMinutes} Minuten, und die jüngeren haben schlechter abgeschnitten als die frühen. Mach 30 Sekunden Pause, wenn du willst, dann weiter mit demselben BPM.",
+            "In einem Tempobereich hier haben deine jüngsten Sessions von etwa {staminaMinutes} Minuten schlechter abgeschnitten als deine frühen. Eine kurze Pause ist eine Option.",
+            "Deine Sessions hier laufen etwa {staminaMinutes} Minuten, und die jüngeren haben schlechter abgeschnitten als die frühen. Eine Pause ist eine Option.",
+            "Etwa {staminaMinutes} Minuten ist deine übliche Session hier, und zuletzt liegen die Werte niedriger als am Anfang. Eine kurze Pause jetzt wäre eine Option."
           ]
         },
         "ramp_complete": {
@@ -676,7 +676,7 @@
           "encouragement": [
             "Die Schläge rutschen beim selben Tempo ab. Sticks kurz weg, dann komm zurück.",
             "Die Qualität driftet – steh 60 Sekunden vom Hocker auf.",
-            "Die Schläge driften im selben Tempo. Kurze Pause, dann wieder rein.",
+            "Die Schläge werden bei demselben Tempo ungenauer. Kurze Pause, dann wieder rein.",
             "Magst du eine Pause? Leg die Sticks ab, dann komm zurück.",
             "Die Fehler nehmen bei diesem Tempo zu. Geh eine Minute weg vom Kit.",
             "Die Genauigkeit sinkt – kurze Pause, dann weitermachen.",
@@ -686,12 +686,12 @@
           "correction": [
             "Die Genauigkeit fällt bei diesem Tempo weiter. Hör jetzt auf, Sticks ab, 90 Sekunden Pause.",
             "Die Werte liegen unter deinem Höchstwert – Sticks ab, geh eine Runde, dann bewerte neu.",
-            "Die Schläge rutschen bei diesem Tempo immer weiter ab. 90 Sekunden Pause, trink etwas, komm zurück.",
+            "Die Schläge werden bei diesem Tempo immer ungenauer. 90 Sekunden Pause, dann komm zurück.",
             "Die Fehler nehmen bei einem Tempo zu. Stopp, Sticks weg, zwei Minuten Pause.",
             "Hör auf, wenn etwas wehtut. So oder so: jetzt eine echte Pause.",
             "Hör auf zu spielen. Geh ein paar Minuten weg vom Kit.",
             "Sticks ab. Zwei Minuten Pause, dann komm zurück, wenn du bereit bist.",
-            "Harter Stopp. Zwei Minuten Pause und ein Schluck Wasser, bevor du zurückkommst."
+            "Harter Stopp. Zwei Minuten Pause, bevor du zurückkommst."
           ]
         },
         "tempo_milestone": {
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Um Minute {staminaMinutes} sinkt deine Genauigkeit tendenziell. Senk das Tempo um 5 BPM und bau neu auf.",
-            "Nach der {staminaMinutes}-Minuten-Marke fangen deine Schläge an zu driften. Kurze Pause, dann weiter.",
-            "Deine Werte am Kit sinken um Minute {staminaMinutes}. Kurze Pause, dann komm zurück.",
-            "Dein Timing am Kit rutscht tendenziell um Minute {staminaMinutes}. Mach eine kurze Pause."
+            "Deine Sessions mit diesem Groove dauern etwa {staminaMinutes} Minuten, und die jüngeren haben schlechter abgeschnitten als die frühen. 5 BPM langsamer zu spielen ist eine Option.",
+            "Am Kit dauern deine Sessions hier etwa {staminaMinutes} Minuten, und deine Werte sind seit den ersten gesunken. Kurze Pause, dann weiter, wenn du willst.",
+            "Deine jüngsten Werte bei diesem Groove liegen unter deinen frühen, bei Sessions von etwa {staminaMinutes} Minuten. Eine kurze Pause ist eine Option.",
+            "Etwa {staminaMinutes} Minuten pro Session bei diesem Groove, und die jüngeren Sessions haben schlechter abgeschnitten. Magst du eine kurze Pause?"
           ]
         },
         "bias_only": {
@@ -963,7 +963,7 @@
             "Echte Pause – Gitarre auf den Ständer, geh ein bisschen herum.",
             "Die Werte fallen weiter. Mindestens 90 Sekunden, dann prüf noch einmal.",
             "Stopp hier. Zwei Minuten weg von der Gitarre, dann komm wieder zu ihr zurück.",
-            "Sofort aufhören. Hör jederzeit auf, wenn etwas wehtut."
+            "Sofort aufhören, und hör jederzeit auf, wenn etwas wehtut."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Nach der {staminaMinutes}-Minuten-Marke rutscht dein Timing bei diesem Tempo tendenziell ab. Kurze Pause, dann mach weiter.",
-            "Um Minute {staminaMinutes} beginnt dein Timing zu driften. Kurze Pause, dann wieder rein.",
-            "Deine Werte sinken um Minute {staminaMinutes}. Ruh dich 30 Sekunden aus, wenn du magst.",
-            "Um Minute {staminaMinutes} landen die Noten neben dem Klick. Kurze Pause, dann zurück."
+            "In einem Tempobereich bei diesem Riff haben deine jüngsten Sessions von etwa {staminaMinutes} Minuten schlechter abgeschnitten als deine frühen. Eine kurze Pause ist eine Option.",
+            "Deine Sessions mit diesem Riff laufen etwa {staminaMinutes} Minuten, und die jüngeren haben schlechter abgeschnitten als die frühen. Kurze Pause, dann wieder rein, wenn du willst.",
+            "Deine Sessions hier dauern im Schnitt {staminaMinutes} Minuten; die jüngeren haben schlechter abgeschnitten. Ruh dich 30 Sekunden aus, wenn du magst.",
+            "Zuletzt liegen deine Werte bei diesem Riff unter deinen frühen, bei Sessions von etwa {staminaMinutes} Minuten. Magst du eine kurze Pause?"
           ]
         },
         "bias_only": {
@@ -1218,7 +1218,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Die Schläge driften bei einem Tempo. Kurze Pause, dann wieder rein.",
+            "Die Schläge werden bei einem Tempo ungenauer. Kurze Pause, dann wieder rein.",
             "Die Genauigkeit rutscht bei diesem Tempo ab. Kurze Pause, dann wieder rein.",
             "Fehler schleichen sich in den Schlag ein – Gitarre 60 Sekunden weglegen.",
             "Du schlägst schon eine Weile im selben Tempo. Pause, dann mach weiter.",
@@ -1235,7 +1235,7 @@
             "Echte Pause – Gitarre auf den Ständer, geh ein bisschen herum.",
             "Die Genauigkeit fällt weiter. Mindestens 90 Sekunden, dann prüf noch einmal.",
             "Sofort aufhören. Zwei Minuten Pause, dann weiter, wenn du so weit bist.",
-            "Mach hier eine echte Pause. Hör früher auf, wenn etwas wehtut."
+            "Mach hier eine echte Pause, und hör jederzeit auf, wenn etwas wehtut."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Deine Werte sinken um Minute {staminaMinutes}. Ruh dich 30 Sekunden aus und setz dann neu an.",
-            "Um Minute {staminaMinutes} beginnen die Schläge zu driften. Kurze Pause, dann wieder rein.",
-            "Nach der {staminaMinutes}-Minuten-Marke lässt deine Genauigkeit tendenziell nach. Kurze Pause, dann weiter.",
-            "Um Minute {staminaMinutes} sinkt die Genauigkeit auf der Akustischen. Mach eine kurze Pause."
+            "Deine Sessions hier laufen etwa {staminaMinutes} Minuten, und deine Werte sind seit den ersten gesunken. 30 Sekunden Pause sind eine Option.",
+            "Die jüngsten Sessions bei dieser Übung haben schlechter abgeschnitten als deine frühen; sie dauern im Schnitt etwa {staminaMinutes} Minuten. Kurze Pause, dann wieder rein, wenn du willst.",
+            "In einem Tempobereich bei dieser Übung haben deine jüngsten Sessions von etwa {staminaMinutes} Minuten schlechter abgeschnitten als deine ersten. Eine kurze Pause ist eine Option.",
+            "Auf der Akustischen dauern deine Sessions hier im Schnitt etwa {staminaMinutes} Minuten, und die jüngeren haben schlechter abgeschnitten. Magst du eine kurze Pause?"
           ]
         },
         "bias_only": {
@@ -1489,7 +1489,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Die Noten driften bei einem Tempo. Kurze Pause – dann wieder rein.",
+            "Die Noten werden bei einem Tempo ungenauer. Kurze Pause – dann wieder rein.",
             "Die Fehler nehmen bei diesem Tempo zu. Bass 60 Sekunden weglegen.",
             "Die Töne rutschen beim selben Tempo ab. Kurze Pause, dann wieder rein.",
             "Magst du einen Moment? Nimm ihn dir, dann mach weiter.",
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Dein Groove beginnt um Minute {staminaMinutes} zu rutschen. Kurze Pause, dann wieder rein.",
-            "Um Minute {staminaMinutes} beginnt deine Genauigkeit zu sinken. Pause, dann zurückkommen.",
-            "Nach der {staminaMinutes}-Minuten-Marke beginnt der Lock mit der Kick zu rutschen. Kurze Pause, dann weiter.",
-            "Deine Werte lassen tendenziell um Minute {staminaMinutes} nach. Nimm dir 30 Sekunden und komm sauber zurück."
+            "Deine jüngsten Sessions bei dieser Linie haben schlechter abgeschnitten als deine frühen, bei etwa {staminaMinutes} Minuten pro Session. Eine kurze Pause ist eine Option.",
+            "Deine Sessions hier laufen etwa {staminaMinutes} Minuten, und die jüngeren haben schlechter abgeschnitten. Pause, dann zurückkommen, wenn du willst.",
+            "In einem Tempobereich bei dieser Linie schneiden deine jüngsten Sessions von etwa {staminaMinutes} Minuten schlechter ab als deine ersten. Eine kurze Pause ist eine Option.",
+            "Etwa {staminaMinutes} Minuten ist eine übliche Session bei dieser Linie, und die jüngeren haben schlechter abgeschnitten als die frühen. Nimm dir 30 Sekunden, wenn du willst."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Senk das Tempo und spiel mit mehr Leichtigkeit. Das Schleppen verschwindet, sobald es sich leicht anfühlt.",
             "Stell dir vor, der Klick kommt ein Haar früher, als er es tut, und triff den.",
             "Stopp, atme durch, dann komm mit leichtem Druck nach vorn rein.",
-            "Die Noten landen hinter dem Klick. Spiel mit leichterem Anschlag und setz früher an."
+            "Die Noten landen hinter dem Klick. Setz jede einen Hauch früher an."
           ]
         },
         "personal_best_streak": {
@@ -1763,7 +1763,7 @@
             "Die Genauigkeit rutscht bei diesem Tempo ab. Kurze Pause, dann komm zurück.",
             "Magst du eine kurze Pause? Geh einen Moment weg von den Tasten.",
             "Bei diesem Tempo schleichen sich Fehler ein – 60 Sekunden weg von den Tasten.",
-            "Die Noten driften bei einem Tempo. Kurze Pause, dann weiter.",
+            "Die Noten werden bei einem Tempo ungenauer. Kurze Pause, dann weiter.",
             "Die Fehler nehmen bei diesem Tempo zu. Kurze Pause.",
             "Du sitzt schon eine Weile an den Tasten. Kurze Pause, dann spiel.",
             "Eine Pause von 30 Sekunden ist eine Option, dann weiter.",
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Deine Werte bei diesem Tempo sinken um Minute {staminaMinutes}. Pause, dann komm sauber zurück.",
-            "Um Minute {staminaMinutes} schleichen sich die Fehler ein. Kurze Pause, dann weiter.",
-            "Nach der {staminaMinutes}-Minuten-Marke wird dein Timing ungleichmäßiger. Kurze Pause, dann zurück an die Tasten.",
-            "Deine Werte sinken um Minute {staminaMinutes}. Pause, dann komm zurück."
+            "Deine jüngsten Sessions bei diesem Stück haben schlechter abgeschnitten als deine frühen; sie dauern etwa {staminaMinutes} Minuten. Eine Pause ist eine Option.",
+            "Deine Sessions bei diesem Stück dauern im Schnitt etwa {staminaMinutes} Minuten, und zuletzt liegen sie niedriger als am Anfang. Kurze Pause, dann weiter, wenn du willst.",
+            "Deine Sessions an den Tasten laufen hier etwa {staminaMinutes} Minuten, und die jüngeren haben schlechter abgeschnitten. Kurze Pause, dann zurück an die Tasten, wenn du willst.",
+            "Zuletzt liegen deine Werte bei diesem Stück unter deinen frühen, bei Sessions von etwa {staminaMinutes} Minuten. Magst du eine Pause?"
           ]
         },
         "bias_only": {

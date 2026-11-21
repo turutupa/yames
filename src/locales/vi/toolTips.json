@@ -200,7 +200,7 @@
           "neutral": [
             "Năm phút rồi, không có gì để báo. Pocket vững. Tiếp tục hay đổi trọng tâm?",
             "Một đoạn yên. Hãy cho tôi biết bạn đang luyện gì.",
-            "Một lượt dài không gián đoạn. Bạn có muốn nhận xét về điều gì không?",
+            "Tôi đã im lặng một lúc rồi. Bạn có muốn nhận xét về điều gì không?",
             "Đã năm phút. Không có vấn đề gì để nêu — cứ tiếp tục.",
             "Buổi tập đều. Bạn muốn một góc nhìn khác, hay giữ hướng hiện tại?",
             "Một lượt dài không trượt. Tiếp theo là gì?",
@@ -208,12 +208,12 @@
             "Đến giờ buổi tập vẫn yên. Hãy chọn một mục tiêu nếu bạn muốn nhận xét sắc hơn."
           ],
           "correction": [
-            "Lưu ý — bạn đã chơi một lúc rồi. Hãy nghỉ 10 phút nếu bạn muốn.",
-            "Hơn năm phút liên tục. Bạn muốn nghỉ ngắn trước khi chơi tiếp không?",
+            "Lưu ý — bạn đã chơi một lúc rồi. Hãy nghỉ vài phút nếu bạn muốn.",
+            "Đã hơn năm phút rồi. Bạn muốn nghỉ ngắn trước khi chơi tiếp không?",
             "Buổi tập kéo dài — nghỉ ngắn lúc này cũng ổn, rồi quay lại.",
             "Bạn muốn nghỉ 60 giây trước lượt tiếp theo không?",
-            "Một đoạn dài không nghỉ. Nghỉ ngắn một chút là một lựa chọn trước khi bạn tiếp tục.",
-            "Chơi một mạch dài không nghỉ. Bạn có thể nghỉ ngắn.",
+            "Một đoạn dài kể từ gợi ý trước của tôi. Nghỉ ngắn một chút là một lựa chọn trước khi bạn tiếp tục.",
+            "Năm phút kể từ gợi ý trước của tôi. Bạn có thể nghỉ ngắn.",
             "Nếu muốn, hãy dừng ở đây. Nghỉ hai phút, rồi chơi tiếp.",
             "Chơi liên tục — hãy nghỉ ngắn trước khi đẩy tiếp."
           ]
@@ -222,7 +222,7 @@
           "encouragement": [
             "Độ chính xác đã tụt trong vài phút qua. Hãy nghỉ một nhịp.",
             "Độ chính xác đang tụt ở tempo này. Dừng nhanh, rồi quay lại.",
-            "Chất lượng đang trôi. Dừng, tập trung lại, rồi quay lại.",
+            "Chất lượng đang giảm. Dừng, tập trung lại, rồi quay lại.",
             "Số lần hụt tăng ở cùng tempo. Nghỉ ngắn, rồi vào lại.",
             "Bạn đã chơi một lúc rồi — hãy đặt nhạc cụ xuống 60 giây.",
             "Điểm đang tụt ở một tempo. Nghỉ nhanh một chút nhé?",
@@ -242,7 +242,7 @@
           "correction": [
             "Độ chính xác cứ tụt — dừng ngay, nghỉ 90 giây, rồi quay lại.",
             "Điểm trong buổi tập này đang thấp hơn đỉnh của bạn. Hãy nghỉ trước khi tụt thêm.",
-            "Hãy nghỉ. Vài phút gần nhất có điểm thấp hơn những phút đầu.",
+            "Hãy nghỉ. Vài phút gần nhất có điểm thấp hơn những phút trước đó.",
             "Dừng, đứng dậy, đi quanh một phút. Rồi quay lại.",
             "Chất lượng đã giảm nhiều phút. Nghỉ thật sự — tối thiểu 90 giây.",
             "Điểm cứ tụt ở tempo này. Dừng, rồi kiểm tra lại.",
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Điểm lại đang tụt sau mốc {staminaMinutes} phút — hãy nghỉ 30 giây, rồi quay lại ở cùng BPM.",
-            "Sau mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi vào lại.",
-            "Độ chính xác của bạn thường tụt quanh phút thứ {staminaMinutes}. Hãy nghỉ, rồi quay lại.",
-            "Điểm của bạn thường tụt quanh phút thứ {staminaMinutes} — bạn có thể nghỉ ngắn lúc này."
+            "Các buổi tập của bạn ở đây dài trung bình khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ 30 giây nếu bạn muốn, rồi giữ nguyên BPM.",
+            "Trong một khoảng tempo, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ ngắn là một lựa chọn.",
+            "Các buổi tập của bạn ở đây dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ một chút là một lựa chọn.",
+            "Một buổi tập thường lệ ở đây dài khoảng {staminaMinutes} phút, và gần đây điểm thấp hơn lúc đầu. Nghỉ ngắn lúc này là một lựa chọn."
           ]
         },
         "ramp_complete": {
@@ -676,7 +676,7 @@
           "encouragement": [
             "Các nhát đánh đang trượt ở cùng một tempo. Đặt dùi xuống một lát, rồi quay lại.",
             "Chất lượng đang trôi — hãy rời ghế ngồi 60 giây.",
-            "Các nhát gõ đang trôi ở cùng tempo. Dừng ngắn, rồi vào lại.",
+            "Các nhát gõ đang kém chính xác ở cùng tempo. Dừng ngắn, rồi vào lại.",
             "Bạn muốn nghỉ không? Đặt dùi xuống, rồi quay lại.",
             "Số lần hụt tăng ở tempo này. Rời bộ trống một phút.",
             "Độ chính xác đang tụt — nghỉ nhanh một chút, rồi tiếp tục.",
@@ -686,12 +686,12 @@
           "correction": [
             "Độ chính xác cứ tụt ở tempo này. Dừng ngay, đặt dùi xuống, nghỉ 90 giây.",
             "Điểm đang thấp hơn đỉnh của bạn — đặt dùi xuống, đi một vòng, rồi đánh giá lại.",
-            "Các nhát đánh cứ trượt ở tempo này. Nghỉ 90 giây, uống nước, rồi quay lại.",
+            "Các nhát đánh cứ kém chính xác ở tempo này. Nghỉ 90 giây, rồi quay lại.",
             "Số lần hụt đang tăng ở một tempo. Dừng, đặt dùi xuống, nghỉ hai phút.",
             "Hãy dừng nếu có chỗ nào đau. Dù sao, nghỉ thật sự ngay bây giờ.",
             "Dừng đánh trống. Rời bộ trống vài phút.",
             "Đặt dùi xuống. Nghỉ hai phút, rồi quay lại khi bạn sẵn sàng.",
-            "Dừng hẳn. Nghỉ hai phút và uống một ngụm nước trước khi quay lại."
+            "Dừng hẳn. Nghỉ hai phút trước khi quay lại."
           ]
         },
         "tempo_milestone": {
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Quanh phút thứ {staminaMinutes} độ chính xác của bạn thường tụt. Giảm BPM 5 nấc và xây lại.",
-            "Qua mốc {staminaMinutes} phút, các nhát gõ bắt đầu trôi. Nghỉ ngắn, rồi quay lại.",
-            "Điểm của bạn trên bộ trống tụt quanh phút thứ {staminaMinutes}. Nghỉ ngắn, rồi quay lại.",
-            "Nhịp của bạn trên bộ trống thường trượt quanh phút thứ {staminaMinutes}. Hãy nghỉ ngắn."
+            "Các buổi tập của bạn với groove này dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Giảm BPM 5 nấc là một lựa chọn.",
+            "Trên bộ trống, các buổi tập của bạn ở đây kéo dài khoảng {staminaMinutes} phút, và điểm đã thấp xuống so với những buổi đầu. Nghỉ ngắn, rồi quay lại, nếu bạn muốn.",
+            "Điểm gần đây của bạn với groove này thấp hơn điểm đầu, qua các buổi tập dài khoảng {staminaMinutes} phút. Nghỉ ngắn là một lựa chọn.",
+            "Khoảng {staminaMinutes} phút mỗi buổi với groove này, và các buổi gần đây có điểm thấp hơn. Bạn muốn nghỉ ngắn không?"
           ]
         },
         "bias_only": {
@@ -963,7 +963,7 @@
             "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
             "Điểm vẫn đang tụt. Tối thiểu 90 giây, rồi kiểm tra lại.",
             "Dừng ở đây. Rời cây đàn hai phút, rồi quay lại với nó.",
-            "Dừng hẳn ở đây. Hãy dừng bất cứ lúc nào có chỗ nào đau."
+            "Dừng hẳn ở đây, và hãy dừng bất cứ lúc nào có chỗ nào đau."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Qua mốc {staminaMinutes} phút, nhịp của bạn ở tempo này dễ bị trượt. Nghỉ ngắn, rồi chơi tiếp.",
-            "Quanh phút thứ {staminaMinutes} nhịp của bạn bắt đầu trôi. Nghỉ ngắn, rồi vào lại.",
-            "Điểm của bạn tụt ở phút thứ {staminaMinutes}. Nghỉ 30 giây nếu bạn muốn.",
-            "Quanh phút thứ {staminaMinutes} các nốt bắt đầu rơi lệch khỏi click. Nghỉ ngắn, rồi quay lại."
+            "Trong một khoảng tempo với riff này, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ ngắn là một lựa chọn.",
+            "Các buổi tập của bạn với riff này dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ nhanh, rồi vào lại, nếu bạn muốn.",
+            "Các buổi tập của bạn ở đây dài trung bình {staminaMinutes} phút; các buổi gần đây có điểm thấp hơn. Nghỉ 30 giây nếu bạn muốn.",
+            "Gần đây điểm của bạn với riff này thấp hơn các buổi đầu, qua các buổi dài khoảng {staminaMinutes} phút. Bạn muốn nghỉ ngắn không?"
           ]
         },
         "bias_only": {
@@ -1218,7 +1218,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Các nhát quạt đang trôi ở một tempo. Dừng ngắn, rồi vào lại.",
+            "Các nhát quạt đang kém chính xác ở một tempo. Dừng ngắn, rồi vào lại.",
             "Độ chính xác đang tụt ở tempo này. Nghỉ nhanh một chút, rồi vào lại.",
             "Số lần hụt đang len vào nhát quạt — đặt đàn xuống 60 giây.",
             "Đã quạt ở một tempo khá lâu. Dừng một lát, rồi tiếp tục.",
@@ -1235,7 +1235,7 @@
             "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
             "Độ chính xác vẫn đang tụt. Tối thiểu 90 giây, rồi kiểm tra lại.",
             "Dừng hẳn. Nghỉ hai phút, rồi tiếp tục khi bạn sẵn sàng.",
-            "Dừng ở đây để nghỉ thật sự. Hãy dừng sớm hơn nếu có chỗ nào đau."
+            "Dừng ở đây để nghỉ thật sự, và hãy dừng bất cứ lúc nào có chỗ nào đau."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Điểm của bạn tụt quanh phút thứ {staminaMinutes}. Nghỉ 30 giây rồi vào lại.",
-            "Quanh phút thứ {staminaMinutes} các nhát quạt bắt đầu trôi. Nghỉ ngắn, rồi vào lại.",
-            "Qua mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi chơi tiếp.",
-            "Độ chính xác tụt ở phút thứ {staminaMinutes} trên cây acoustic. Hãy nghỉ ngắn."
+            "Các buổi tập của bạn ở đây dài khoảng {staminaMinutes} phút, và điểm đã thấp xuống so với những buổi đầu. Nghỉ 30 giây là một lựa chọn.",
+            "Các buổi gần đây với bài này có điểm thấp hơn các buổi đầu; trung bình chúng dài khoảng {staminaMinutes} phút. Nghỉ ngắn, rồi vào lại, nếu bạn muốn.",
+            "Trong một khoảng tempo với bài này, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ ngắn là một lựa chọn.",
+            "Trên cây acoustic, các buổi tập của bạn ở đây dài trung bình khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn. Bạn muốn nghỉ ngắn không?"
           ]
         },
         "bias_only": {
@@ -1489,7 +1489,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Các nốt đang trôi ở một tempo. Dừng nhanh — rồi vào lại.",
+            "Các nốt đang kém chính xác ở một tempo. Dừng nhanh — rồi vào lại.",
             "Số lần hụt tăng ở tempo này. Đặt bass xuống 60 giây.",
             "Các nốt đang trượt ở cùng một tempo. Nghỉ ngắn, rồi vào lại.",
             "Bạn muốn nghỉ một lát không? Cứ nghỉ, rồi tiếp tục.",
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Groove của bạn bắt đầu trượt ở phút thứ {staminaMinutes}. Nghỉ ngắn, rồi vào lại.",
-            "Quanh phút thứ {staminaMinutes} độ chính xác của bạn bắt đầu tụt. Hãy nghỉ rồi quay lại.",
-            "Qua mốc {staminaMinutes} phút, sự khớp của bass bắt đầu trượt. Nghỉ ngắn, rồi chơi tiếp.",
-            "Điểm của bạn thường tụt quanh phút thứ {staminaMinutes}. Nghỉ 30 giây, quay lại cho sạch."
+            "Các buổi tập gần đây của bạn với đường bass này có điểm thấp hơn các buổi đầu, mỗi buổi khoảng {staminaMinutes} phút. Nghỉ ngắn là một lựa chọn.",
+            "Các buổi tập của bạn ở đây dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn. Nghỉ rồi quay lại, nếu bạn muốn.",
+            "Trong một khoảng tempo với đường bass này, các buổi tập gần đây dài khoảng {staminaMinutes} phút của bạn có điểm thấp hơn các buổi đầu. Nghỉ một chút là một lựa chọn.",
+            "Một buổi tập thường lệ với đường bass này dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn các buổi đầu. Nghỉ 30 giây nếu bạn muốn."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Giảm tempo và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
             "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
             "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước.",
-            "Các nốt đang rơi sau click. Hãy chạm nhẹ hơn và nhắm sớm hơn."
+            "Các nốt đang rơi sau click. Hãy nhắm mỗi nốt sớm hơn một chút."
           ]
         },
         "personal_best_streak": {
@@ -1763,7 +1763,7 @@
             "Độ chính xác đang tụt ở tempo này. Dừng ngắn, rồi vào lại.",
             "Bạn muốn dừng ngắn không? Rời khỏi phím đàn một lát.",
             "Số lần hụt đang len vào ở tempo này — rời phím đàn 60 giây.",
-            "Các nốt đang trôi ở một tempo. Dừng nhanh, rồi chơi tiếp.",
+            "Các nốt đang kém chính xác ở một tempo. Dừng nhanh, rồi chơi tiếp.",
             "Số lần hụt tăng ở tempo này. Nghỉ ngắn.",
             "Đã ngồi trước phím đàn khá lâu. Dừng ngắn, rồi chơi.",
             "Nghỉ 30 giây là một lựa chọn, rồi quay lại.",
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Điểm của bạn ở tempo này tụt quanh phút thứ {staminaMinutes}. Dừng một lát, quay lại cho sạch.",
-            "Quanh phút thứ {staminaMinutes} các lần hụt bắt đầu len vào. Nghỉ ngắn, rồi chơi tiếp.",
-            "Qua mốc {staminaMinutes} phút, nhịp của bạn kém đều hơn. Nghỉ ngắn, rồi quay lại với phím đàn.",
-            "Điểm của bạn tụt quanh phút thứ {staminaMinutes}. Nghỉ, rồi quay lại."
+            "Các buổi gần đây với bản nhạc này có điểm thấp hơn các buổi đầu; chúng dài khoảng {staminaMinutes} phút. Dừng một lát là một lựa chọn.",
+            "Các buổi tập của bạn với bản nhạc này dài trung bình khoảng {staminaMinutes} phút, và gần đây điểm thấp hơn lúc đầu. Nghỉ ngắn, rồi chơi tiếp, nếu bạn muốn.",
+            "Các buổi tập trên phím đàn của bạn ở đây dài khoảng {staminaMinutes} phút, và các buổi gần đây có điểm thấp hơn. Nghỉ ngắn, rồi quay lại với phím đàn, nếu bạn muốn.",
+            "Gần đây điểm của bạn với bản nhạc này thấp hơn các buổi đầu, qua các buổi dài khoảng {staminaMinutes} phút. Bạn muốn nghỉ không?"
           ]
         },
         "bias_only": {

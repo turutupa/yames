@@ -200,7 +200,7 @@
           "neutral": [
             "Cinco minutos, nada a sinalizar. Pocket sólido. Continuar ou mudar o foco?",
             "Trecho tranquilo. Diga no que você está trabalhando.",
-            "Uma longa sequência sem interrupção. Quer feedback sobre algo?",
+            "Faz um tempo que não falo nada. Quer feedback sobre algo?",
             "Cinco minutos de prática. Nenhum problema a apontar: continue.",
             "Sessão estável. Quer outro ângulo ou manter o rumo?",
             "Sequência longa sem deslizes. O que vem agora?",
@@ -208,12 +208,12 @@
             "Sessão tranquila até agora. Escolha um alvo se quiser um feedback mais afiado."
           ],
           "correction": [
-            "Atenção: faz um tempo que você está nisso. Pare 10 minutos, se quiser.",
-            "Mais de cinco minutos contínuos. Quer uma pausa curta antes de seguir?",
+            "Atenção: faz um tempo que você está nisso. Pare alguns minutos, se quiser.",
+            "Já são mais de cinco minutos. Quer uma pausa curta antes de seguir?",
             "Sessão prolongada: uma pausa curta é bem-vinda agora, depois volte.",
             "Quer uma pausa de 60 segundos antes da próxima passada?",
-            "Um longo trecho sem pausa. Um descanso curto é uma opção antes de continuar.",
-            "Bastante tempo sem pausa. Dá para fazer uma pausa rápida.",
+            "Um longo trecho desde a minha última dica. Um descanso curto é uma opção antes de continuar.",
+            "Cinco minutos desde a minha última dica. Dá para fazer uma pausa rápida.",
             "Pause aqui, se quiser. Dois minutos de intervalo e depois retome.",
             "Sequência prolongada: faça um descanso curto antes de seguir."
           ]
@@ -222,7 +222,7 @@
           "encouragement": [
             "A precisão vem caindo nos últimos minutos. Faça uma pausa.",
             "A precisão está caindo nesse andamento. Uma pausa rápida e depois volte.",
-            "A qualidade está oscilando. Pause, recomece, volte.",
+            "A qualidade está caindo. Pause, recomece, volte.",
             "Os erros subiram no mesmo andamento. Um descanso breve e volte.",
             "Você está nisso há um tempo: largue o instrumento por 60 segundos.",
             "A pontuação está caindo em um só andamento. Uma pausa rápida?",
@@ -242,7 +242,7 @@
           "correction": [
             "A precisão continua caindo: pare agora, 90 segundos de pausa e depois volte.",
             "Sua pontuação nesta sessão está abaixo do seu pico. Descanse antes que caia mais.",
-            "Faça o descanso. Os últimos minutos tiveram pontuação menor que os primeiros.",
+            "Faça o descanso. Os últimos minutos tiveram pontuação menor que os anteriores.",
             "Pare, levante e ande por um minuto. Depois volte.",
             "A qualidade vem caindo há minutos. Descanso de verdade: 90 segundos no mínimo.",
             "A pontuação continua caindo nesse andamento. Pause e depois reavalie.",
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "A nota está caindo de novo depois dos {staminaMinutes} minutos: pare 30 segundos e volte no mesmo BPM.",
-            "Depois dos {staminaMinutes} minutos sua precisão costuma cair. Descanso breve e volte.",
-            "Sua precisão costuma cair por volta do minuto {staminaMinutes}. Faça uma pausa e depois volte.",
-            "Sua pontuação costuma cair por volta do minuto {staminaMinutes}: dá para fazer um descanso curto agora."
+            "Suas sessões aqui duram em média uns {staminaMinutes} minutos, e as recentes tiveram pontuação menor que as primeiras. Pare 30 segundos, se quiser, e volte no mesmo BPM.",
+            "Em uma faixa de andamento, suas sessões recentes de uns {staminaMinutes} minutos pontuaram abaixo das primeiras. Um descanso breve é uma opção.",
+            "Suas sessões aqui duram uns {staminaMinutes} minutos, e as recentes pontuaram menos que as primeiras. Uma pausa é uma opção.",
+            "Sua sessão habitual aqui dura uns {staminaMinutes} minutos, e ultimamente as pontuações estão menores que no início. Um descanso curto agora é uma opção."
           ]
         },
         "ramp_complete": {
@@ -676,7 +676,7 @@
           "encouragement": [
             "Os toques estão escorregando no mesmo andamento. Baquetas de lado por um momento e volte.",
             "A qualidade está oscilando: saia do banco por 60 segundos.",
-            "As batidas estão derivando no mesmo andamento. Uma pausa breve e volte.",
+            "As batidas estão escorregando no mesmo andamento. Uma pausa breve e volte.",
             "Quer uma pausa? Largue as baquetas e depois volte.",
             "Os erros subiram nesse andamento. Afaste-se da bateria por um minuto.",
             "A precisão está caindo: uma pausa rápida e depois continue.",
@@ -686,12 +686,12 @@
           "correction": [
             "A precisão continua caindo nesse andamento. Pare agora, baquetas no chão, 90 segundos de descanso.",
             "Sua pontuação está abaixo do pico: baquetas no chão, dê uma volta e depois reavalie.",
-            "Os toques continuam escorregando nesse andamento. 90 segundos de pausa, hidrate-se e volte.",
+            "Os toques continuam escorregando nesse andamento. 90 segundos de pausa e volte.",
             "Os erros estão subindo em um só andamento. Pare, baquetas de lado, dois minutos de pausa.",
             "Pare se algo doer. De qualquer forma, descanso de verdade agora.",
             "Pare de tocar. Afaste-se da bateria por uns dois minutos.",
             "Baquetas no chão. Dois minutos de pausa e volte quando quiser.",
-            "Pare de vez. Dois minutos de pausa e um gole de água antes de voltar."
+            "Pare de vez. Dois minutos de pausa antes de voltar."
           ]
         },
         "tempo_milestone": {
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Por volta do minuto {staminaMinutes} sua precisão costuma cair. Baixe o BPM em 5 e reconstrua.",
-            "Depois dos {staminaMinutes} minutos suas batidas começam a derivar. Uma pausa curta e volte ao trabalho.",
-            "Sua pontuação na bateria cai por volta do minuto {staminaMinutes}. Um descanso curto e volte.",
-            "Seu ritmo na bateria costuma escorregar por volta do minuto {staminaMinutes}. Faça uma pausa curta."
+            "Suas sessões nesse groove duram uns {staminaMinutes} minutos, e as recentes tiveram pontuação menor que as primeiras. Baixar o BPM em 5 é uma opção.",
+            "Na bateria, suas sessões aqui duram uns {staminaMinutes} minutos, e sua pontuação caiu desde as primeiras. Uma pausa curta e volte ao trabalho, se quiser.",
+            "Suas pontuações recentes nesse groove estão abaixo das primeiras, em sessões de uns {staminaMinutes} minutos. Um descanso curto é uma opção.",
+            "Uns {staminaMinutes} minutos por sessão nesse groove, e as sessões recentes pontuaram menos. Quer uma pausa curta?"
           ]
         },
         "bias_only": {
@@ -963,7 +963,7 @@
             "Descanso de verdade: guitarra no suporte, ande um pouco.",
             "A pontuação continua caindo. 90 segundos no mínimo e depois reavalie.",
             "Pare por aqui. Dois minutos longe da guitarra e depois volte a ela.",
-            "Pare de vez. Pare a qualquer momento se algo doer."
+            "Pare de vez, e pare a qualquer momento se algo doer."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Depois dos {staminaMinutes} minutos seu ritmo nesse andamento tende a escorregar. Uma pausa curta e depois retome.",
-            "Por volta do minuto {staminaMinutes} seu ritmo começa a derivar. Uma pausa rápida e volte.",
-            "Sua pontuação cai no minuto {staminaMinutes}. Descanse 30 segundos, se quiser.",
-            "Por volta do minuto {staminaMinutes} as notas começam a cair fora do clique. Descanso curto e volte."
+            "Em uma faixa de andamento nesse riff, suas sessões recentes de uns {staminaMinutes} minutos pontuaram abaixo das primeiras. Uma pausa curta é uma opção.",
+            "Suas sessões nesse riff duram uns {staminaMinutes} minutos, e as recentes pontuaram menos que as primeiras. Uma pausa rápida e volte, se quiser.",
+            "Suas sessões aqui duram em média {staminaMinutes} minutos; as recentes pontuaram menos. Descanse 30 segundos, se quiser.",
+            "Ultimamente suas pontuações nesse riff estão abaixo das primeiras, em sessões de uns {staminaMinutes} minutos. Quer um descanso curto?"
           ]
         },
         "bias_only": {
@@ -1218,7 +1218,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "As batidas estão derivando em um só andamento. Uma pausa curta e depois volte.",
+            "As batidas estão escorregando em um só andamento. Uma pausa curta e depois volte.",
             "A precisão está caindo nesse andamento. Uma pausa rápida e depois volte.",
             "Os erros estão aparecendo na batida: largue o violão por 60 segundos.",
             "Faz um tempo que você toca em um só andamento. Pause e depois continue.",
@@ -1235,7 +1235,7 @@
             "Descanso de verdade: violão no suporte, ande um pouco.",
             "A precisão continua caindo. 90 segundos no mínimo e depois reavalie.",
             "Pare de vez. Dois minutos de pausa e depois continue quando estiver pronto.",
-            "Pare por aqui para uma pausa de verdade. Pare antes se algo doer."
+            "Pare por aqui para uma pausa de verdade, e pare a qualquer momento se algo doer."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Sua pontuação cai por volta do minuto {staminaMinutes}. Descanse 30 segundos e retome.",
-            "Por volta do minuto {staminaMinutes} as batidas começam a derivar. Uma pausa breve e volte.",
-            "Depois dos {staminaMinutes} minutos sua precisão costuma escorregar. Descanso curto e retome.",
-            "A precisão cai no minuto {staminaMinutes} no violão. Faça uma pausa curta."
+            "Suas sessões aqui duram uns {staminaMinutes} minutos, e sua pontuação caiu desde as primeiras. Descansar 30 segundos é uma opção.",
+            "As sessões recentes nesse exercício pontuaram menos que as primeiras; duram em média uns {staminaMinutes} minutos. Uma pausa breve e volte, se quiser.",
+            "Em uma faixa de andamento nesse exercício, suas sessões recentes de uns {staminaMinutes} minutos pontuaram menos que as primeiras. Um descanso curto é uma opção.",
+            "No violão, suas sessões aqui duram em média uns {staminaMinutes} minutos, e as recentes pontuaram menos. Quer uma pausa curta?"
           ]
         },
         "bias_only": {
@@ -1489,7 +1489,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "As notas estão derivando em um só andamento. Uma pausa rápida e volte.",
+            "As notas estão escorregando em um só andamento. Uma pausa rápida e volte.",
             "Os erros subiram nesse andamento. Largue o baixo por 60 segundos.",
             "As notas estão escorregando no mesmo andamento. Uma pausa breve e depois volte.",
             "Quer parar um momento? Pare e depois continue.",
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Seu groove começa a escorregar no minuto {staminaMinutes}. Uma pausa curta e volte.",
-            "Por volta do minuto {staminaMinutes} sua precisão começa a cair. Descanse e volte.",
-            "Depois dos {staminaMinutes} minutos a trava com o baixo começa a escorregar. Descanso breve e retome.",
-            "Sua pontuação costuma cair por volta do minuto {staminaMinutes}. Pause 30 segundos e volte limpo."
+            "Suas sessões recentes nessa linha pontuaram menos que as primeiras, com uns {staminaMinutes} minutos cada. Uma pausa curta é uma opção.",
+            "Suas sessões aqui duram uns {staminaMinutes} minutos, e as recentes pontuaram menos. Descanse e volte, se quiser.",
+            "Em uma faixa de andamento nessa linha, suas sessões recentes de uns {staminaMinutes} minutos têm pontuação menor que as primeiras. Um descanso breve é uma opção.",
+            "Uma sessão habitual nessa linha dura uns {staminaMinutes} minutos, e as recentes pontuaram menos que as primeiras. Pause 30 segundos, se quiser."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Baixe o andamento e toque com mais impulso. O arrasto some quando parecer fácil.",
             "Imagine que o clique vem um fio mais cedo do que vem, e vá ao encontro disso.",
             "Pare, respire e depois entre empurrando um pouco para a frente.",
-            "As notas estão caindo atrás do clique. Alivie o toque e mire mais cedo."
+            "As notas estão caindo atrás do clique. Mire cada uma um pouquinho mais cedo."
           ]
         },
         "personal_best_streak": {
@@ -1763,7 +1763,7 @@
             "A precisão está caindo nesse andamento. Uma pausa curta e volte.",
             "Quer uma pausa curta? Afaste-se das teclas por um momento.",
             "Os erros estão aparecendo nesse andamento: 60 segundos longe das teclas.",
-            "As notas estão derivando em um só andamento. Uma pausa rápida e retome.",
+            "As notas estão escorregando em um só andamento. Uma pausa rápida e retome.",
             "Os erros subiram nesse andamento. Um descanso breve.",
             "Faz um tempo que você está nas teclas. Uma pausa curta e depois toque.",
             "Uma pausa de 30 segundos é uma opção, e depois volte.",
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Sua pontuação nesse andamento cai por volta do minuto {staminaMinutes}. Pause e volte limpo.",
-            "Por volta do minuto {staminaMinutes} os erros começam a aparecer. Descanso breve e retome.",
-            "Depois dos {staminaMinutes} minutos seu ritmo fica menos regular. Uma pausa curta e volte às teclas.",
-            "Sua pontuação cai por volta do minuto {staminaMinutes}. Descanse e volte."
+            "Suas sessões recentes nessa peça pontuaram menos que as primeiras; duram uns {staminaMinutes} minutos. Uma pausa é uma opção.",
+            "Suas sessões nessa peça duram em média uns {staminaMinutes} minutos, e ultimamente pontuam menos que no início. Um descanso breve e retome, se quiser.",
+            "Suas sessões nas teclas aqui duram uns {staminaMinutes} minutos, e as recentes pontuaram menos. Uma pausa curta e volte às teclas, se quiser.",
+            "Ultimamente suas pontuações nessa peça estão abaixo das primeiras, em sessões de uns {staminaMinutes} minutos. Quer um descanso?"
           ]
         },
         "bias_only": {

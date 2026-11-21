@@ -200,7 +200,7 @@
           "neutral": [
             "Cinque minuti dentro, niente da segnalare. Pocket solido. Continui o cambi focus?",
             "Tratto silenzioso. Dimmi su cosa stai lavorando.",
-            "Lunga serie ininterrotta. C'è qualcosa su cui vuoi un riscontro?",
+            "Da un po' non dico nulla. C'è qualcosa su cui vuoi un riscontro?",
             "Cinque minuti dentro. Nessun problema da segnalare: continua.",
             "Sessione stabile. Vuoi un altro punto di vista, o restiamo sulla rotta?",
             "Lunga serie senza scivolate. Cosa viene dopo?",
@@ -208,12 +208,12 @@
             "Finora sessione silenziosa. Scegli un obiettivo se vuoi un riscontro più preciso."
           ],
           "correction": [
-            "Attenzione: sei dentro da un po'. Prenditi dieci minuti, se vuoi.",
-            "Più di cinque minuti di fila. Vuoi una breve pausa prima di spingere ancora?",
+            "Attenzione: sei dentro da un po'. Prenditi qualche minuto di pausa, se vuoi.",
+            "Più di cinque minuti già. Vuoi una breve pausa prima di spingere ancora?",
             "Sessione prolungata: qui va bene una breve pausa, poi torna.",
             "Vuoi una pausa di 60 secondi prima del prossimo passaggio?",
-            "Tratto lungo senza pausa. Una breve pausa è un'opzione prima di continuare.",
-            "Lungo tratto senza pause. Una pausa veloce è un'opzione.",
+            "Tratto lungo dal mio ultimo consiglio. Una breve pausa è un'opzione prima di continuare.",
+            "Cinque minuti dal mio ultimo consiglio. Una pausa veloce è un'opzione.",
             "Fermati qui, se ti va. Due minuti di pausa, poi riprendi.",
             "Serie prolungata: fai una breve pausa prima di spingere oltre."
           ]
@@ -222,7 +222,7 @@
           "encouragement": [
             "La precisione è calata negli ultimi minuti. Prenditi un attimo.",
             "La precisione cala a questo tempo. Breve pausa, poi torna.",
-            "La qualità sta andando alla deriva. Fermati, riparti da capo, ritorna.",
+            "La qualità sta calando. Fermati, riparti da capo, ritorna.",
             "Gli errori aumentano mantenendo lo stesso tempo. Breve pausa, poi di nuovo dentro.",
             "Sei andato avanti per un po': metti giù lo strumento per 60 secondi.",
             "I punteggi calano a un solo tempo. Pausa veloce?",
@@ -242,7 +242,7 @@
           "correction": [
             "La precisione continua a calare: fermati ora, 90 secondi di pausa, poi torna.",
             "In questa sessione i punteggi sono sotto il tuo picco. Fai una pausa prima che calino ancora.",
-            "Fai la pausa. Gli ultimi minuti hanno punteggi più bassi dei primi.",
+            "Fai la pausa. Gli ultimi minuti hanno punteggi più bassi di quelli precedenti.",
             "Fermati, alzati, cammina per un minuto. Poi torna.",
             "La qualità cala da minuti. Riposo vero: 90 secondi come minimo.",
             "I punteggi continuano a calare a questo tempo. Fermati, poi ricontrolla.",
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Il punteggio cala di nuovo oltre il minuto {staminaMinutes}: fai 30 secondi di pausa, poi torna agli stessi BPM.",
-            "Oltre il minuto {staminaMinutes} la tua precisione tende a calare. Breve riposo, poi di nuovo dentro.",
-            "La tua precisione tende a calare intorno al minuto {staminaMinutes}. Fai una pausa, poi torna.",
-            "I tuoi punteggi di solito calano intorno al minuto {staminaMinutes}: un breve stacco ora è un'opzione."
+            "Le tue sessioni qui durano in media circa {staminaMinutes} minuti, e le più recenti hanno avuto punteggi più bassi delle prime. Fai 30 secondi di pausa, se vuoi, poi stessi BPM.",
+            "In una fascia di BPM qui, le tue sessioni recenti di circa {staminaMinutes} minuti hanno avuto punteggi sotto le prime. Un breve riposo è un'opzione.",
+            "Le tue sessioni qui durano circa {staminaMinutes} minuti, e le recenti hanno avuto punteggi più bassi delle prime. Una pausa è un'opzione.",
+            "La tua sessione abituale qui dura circa {staminaMinutes} minuti, e ultimamente i punteggi sono più bassi di quelli iniziali. Un breve stacco ora è un'opzione."
           ]
         },
         "ramp_complete": {
@@ -676,7 +676,7 @@
           "encouragement": [
             "I colpi scivolano allo stesso tempo. Bacchette giù un momento, poi torna.",
             "La qualità sta andando alla deriva: alzati dallo sgabello per 60 secondi.",
-            "I colpi vanno alla deriva mantenendo lo stesso tempo. Breve pausa, poi di nuovo dentro.",
+            "I colpi perdono precisione a tempo invariato. Breve pausa, poi di nuovo dentro.",
             "Vuoi una pausa? Posa le bacchette, poi ritorna.",
             "Gli errori aumentano a questo tempo. Allontanati dalla batteria per un minuto.",
             "La precisione cala: una pausa veloce, poi continua.",
@@ -686,12 +686,12 @@
           "correction": [
             "La precisione continua a calare a questo tempo. Fermati ora, bacchette giù, 90 secondi di pausa.",
             "I punteggi sono sotto il tuo picco: bacchette giù, fai un giro, poi rivaluta.",
-            "I colpi continuano a scivolare a questo tempo. 90 secondi di pausa, bevi, ritorna.",
+            "I colpi continuano a perdere precisione a questo tempo. 90 secondi di pausa, poi ritorna.",
             "Gli errori salgono a un solo tempo. Fermati, bacchette giù, due minuti di pausa.",
             "Fermati se qualcosa fa male. In ogni caso, adesso una pausa vera.",
             "Smetti di suonare. Allontanati dalla batteria per un paio di minuti.",
             "Bacchette giù. Due minuti di pausa, poi ritorna quando vuoi.",
-            "Stop deciso. Due minuti di pausa e un sorso d'acqua prima di tornare."
+            "Stop deciso. Due minuti di pausa prima di tornare."
           ]
         },
         "tempo_milestone": {
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Verso il minuto {staminaMinutes} la tua precisione tende a calare. Abbassa i BPM di 5 tacche e ricostruisci.",
-            "Oltre i {staminaMinutes} minuti i tuoi colpi iniziano ad andare alla deriva. Breve pausa, poi riprendi.",
-            "I tuoi punteggi alla batteria calano verso il minuto {staminaMinutes}. Un breve riposo, poi ritorna.",
-            "Il tuo timing alla batteria tende a scivolare verso il minuto {staminaMinutes}. Fai una breve pausa."
+            "Le tue sessioni su questo groove durano circa {staminaMinutes} minuti, e le recenti hanno avuto punteggi più bassi delle prime. Abbassare i BPM di 5 tacche è un'opzione.",
+            "Alla batteria, le tue sessioni qui durano circa {staminaMinutes} minuti, e i tuoi punteggi sono scesi rispetto alle prime. Breve pausa, poi riprendi, se vuoi.",
+            "I tuoi punteggi recenti su questo groove sono sotto i primi, su sessioni di circa {staminaMinutes} minuti. Un breve riposo è un'opzione.",
+            "Circa {staminaMinutes} minuti a sessione su questo groove, e le sessioni recenti hanno avuto punteggi più bassi. Vuoi una breve pausa?"
           ]
         },
         "bias_only": {
@@ -963,7 +963,7 @@
             "Riposo vero: chitarra sul supporto, cammina un po'.",
             "I punteggi continuano a calare. 90 secondi come minimo, poi ricontrolla.",
             "Fermati qui. Due minuti lontano dalla chitarra, poi riprendila.",
-            "Stop netto, qui. Fermati in qualsiasi momento se qualcosa fa male."
+            "Stop netto, qui, e fermati in qualsiasi momento se qualcosa fa male."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Oltre il minuto {staminaMinutes} il tuo timing a questo tempo tende a scivolare. Una breve pausa, poi riprendi.",
-            "Intorno al minuto {staminaMinutes} il tuo timing comincia a scivolare. Breve pausa, poi rientra.",
-            "I tuoi punteggi calano al minuto {staminaMinutes}. Riposa 30 secondi, se vuoi.",
-            "Intorno al minuto {staminaMinutes} le note cominciano a cadere fuori dal click. Breve pausa, poi torna."
+            "In una fascia di BPM su questo riff, le tue sessioni recenti di circa {staminaMinutes} minuti hanno avuto punteggi sotto le prime. Una breve pausa è un'opzione.",
+            "Le tue sessioni su questo riff durano circa {staminaMinutes} minuti, e le recenti hanno avuto punteggi più bassi delle prime. Breve pausa, poi rientra, se vuoi.",
+            "Le tue sessioni qui durano in media {staminaMinutes} minuti; le recenti hanno avuto punteggi più bassi. Riposa 30 secondi, se vuoi.",
+            "Ultimamente i tuoi punteggi su questo riff sono sotto i primi, in sessioni di circa {staminaMinutes} minuti. Vuoi una breve pausa?"
           ]
         },
         "bias_only": {
@@ -1218,7 +1218,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Gli strumming vanno alla deriva a un solo tempo. Breve pausa, poi torna.",
+            "Gli strumming perdono precisione a tempo costante. Breve pausa, poi torna.",
             "La precisione cala a questo tempo. Una pausa veloce, poi rientra.",
             "Gli errori salgono nello strumming: chitarra giù per 60 secondi.",
             "Strimpelli a un solo tempo da un po'. Pausa, poi continua.",
@@ -1235,7 +1235,7 @@
             "Riposo vero: chitarra sul supporto, cammina un po'.",
             "La precisione continua a calare. 90 secondi come minimo, poi ricontrolla.",
             "Stop netto. Due minuti di pausa, poi continua quando sei pronto.",
-            "Fermati qui per una pausa vera. Fermati prima se qualcosa fa male."
+            "Fermati qui per una pausa vera, e fermati in qualsiasi momento se qualcosa fa male."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "I tuoi punteggi calano intorno al minuto {staminaMinutes}. Riposa 30 secondi e riparti.",
-            "Intorno al minuto {staminaMinutes} gli strumming iniziano ad andare alla deriva. Breve pausa, poi rientra.",
-            "Oltre il minuto {staminaMinutes} la tua precisione tende a calare. Breve riposo, poi riprendi.",
-            "La precisione cala al minuto {staminaMinutes} sull'acustica. Fai una breve pausa."
+            "Le tue sessioni qui durano circa {staminaMinutes} minuti, e i tuoi punteggi sono scesi rispetto alle prime. Riposare 30 secondi è un'opzione.",
+            "Le sessioni recenti su questo esercizio hanno avuto punteggi più bassi delle prime; durano in media circa {staminaMinutes} minuti. Breve pausa, poi rientra, se vuoi.",
+            "In una fascia di BPM su questo esercizio, le tue sessioni recenti di circa {staminaMinutes} minuti hanno avuto punteggi più bassi delle prime. Un breve riposo è un'opzione.",
+            "Sull'acustica, le tue sessioni qui durano in media circa {staminaMinutes} minuti, e le recenti hanno avuto punteggi più bassi. Vuoi una breve pausa?"
           ]
         },
         "bias_only": {
@@ -1489,7 +1489,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Le note vanno alla deriva a un solo tempo. Breve pausa e rientra.",
+            "Le note perdono precisione a tempo costante. Breve pausa e rientra.",
             "Gli errori aumentano a questo tempo. Basso giù per 60 secondi.",
             "Le note scivolano allo stesso tempo. Breve pausa, poi rientra.",
             "Vuoi un momento? Prendilo, poi continua.",
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Il tuo groove comincia a scivolare al minuto {staminaMinutes}. Breve pausa, poi rientra.",
-            "Intorno al minuto {staminaMinutes} la tua precisione comincia a calare. Fermati e torna.",
-            "Oltre il minuto {staminaMinutes} l'aggancio del basso comincia a scivolare. Breve riposo, poi riprendi.",
-            "I tuoi punteggi tendono a calare intorno al minuto {staminaMinutes}. Prenditi 30 secondi e torna pulito."
+            "Le tue sessioni recenti su questa linea hanno avuto punteggi più bassi delle prime, di circa {staminaMinutes} minuti ciascuna. Una breve pausa è un'opzione.",
+            "Le tue sessioni qui durano circa {staminaMinutes} minuti, e le recenti hanno avuto punteggi più bassi. Fermati e torna, se vuoi.",
+            "In una fascia di BPM su questa linea, le tue sessioni recenti di circa {staminaMinutes} minuti hanno punteggi più bassi delle prime. Un breve riposo è un'opzione.",
+            "Circa {staminaMinutes} minuti è una sessione abituale su questa linea, e le recenti hanno avuto punteggi più bassi delle prime. Prenditi 30 secondi, se vuoi."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Abbassa il tempo e suona con più slancio. Il trascinamento passa quando diventa facile.",
             "Immagina il clic appena più in anticipo di com'è, e raggiungilo.",
             "Fermati, respira, poi rientra spingendo leggermente in avanti.",
-            "Le note cadono dietro al click. Alleggerisci il tocco e anticipa un po'."
+            "Le note cadono dietro al click. Punta ognuna un filo prima."
           ]
         },
         "personal_best_streak": {
@@ -1763,7 +1763,7 @@
             "La precisione cala a questo tempo. Breve pausa, poi torna dentro.",
             "Vuoi una breve pausa? Allontanati un momento dai tasti.",
             "Gli errori salgono a questo tempo: 60 secondi lontano dai tasti.",
-            "Le note vanno alla deriva a un solo tempo. Breve pausa, poi riprendi.",
+            "Le note perdono precisione a tempo costante. Breve pausa, poi riprendi.",
             "Gli errori aumentano a questo tempo. Breve stacco.",
             "Sei ai tasti da un po'. Breve pausa, poi suona.",
             "Una pausa di 30 secondi è un'opzione, poi riprendi.",
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "I tuoi punteggi a questo tempo calano verso il minuto {staminaMinutes}. Fermati, ritorna pulito.",
-            "Verso il minuto {staminaMinutes} iniziano ad arrivare gli errori. Breve riposo, poi riprendi.",
-            "Oltre i {staminaMinutes} minuti il tuo timing diventa meno regolare. Breve pausa, poi di nuovo ai tasti.",
-            "I tuoi punteggi calano verso il minuto {staminaMinutes}. Riposa, poi ritorna."
+            "Le tue sessioni recenti su questo brano hanno avuto punteggi più bassi delle prime; durano circa {staminaMinutes} minuti. Una pausa è un'opzione.",
+            "Le tue sessioni su questo brano durano in media circa {staminaMinutes} minuti, e ultimamente i punteggi sono più bassi rispetto all'inizio. Breve riposo, poi riprendi, se vuoi.",
+            "Le tue sessioni ai tasti qui durano circa {staminaMinutes} minuti, e le recenti hanno avuto punteggi più bassi. Breve pausa, poi di nuovo ai tasti, se vuoi.",
+            "Ultimamente i tuoi punteggi su questo brano sono sotto i primi, su sessioni di circa {staminaMinutes} minuti. Vuoi una pausa?"
           ]
         },
         "bias_only": {

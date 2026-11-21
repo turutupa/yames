@@ -200,7 +200,7 @@
           "neutral": [
             "Pięć minut za nami, nic do zgłoszenia. Pewny rytm. Grać dalej czy zmienić cel?",
             "Cichy odcinek. Powiedz, nad czym pracujesz.",
-            "Długa nieprzerwana seria. Chcesz uwag do czegoś?",
+            "Od dłuższego czasu milczę. Chcesz uwag do czegoś?",
             "Pięć minut w głąb. Nie ma problemów do wskazania — graj dalej.",
             "Stała sesja. Chcesz innego spojrzenia czy trzymać kurs?",
             "Długa seria bez potknięć. Co dalej?",
@@ -208,12 +208,12 @@
             "Na razie cicha sesja. Wybierz cel, jeśli chcesz ostrzejszych uwag."
           ],
           "correction": [
-            "Uwaga — jesteś w tym już jakiś czas. Zrób 10 minut przerwy, jeśli chcesz.",
-            "Ponad pięć minut ciągłej gry. Chcesz krótką przerwę, zanim pójdziesz dalej?",
+            "Uwaga — jesteś w tym już jakiś czas. Zrób kilka minut przerwy, jeśli chcesz.",
+            "Minęło ponad pięć minut. Chcesz krótką przerwę, zanim pójdziesz dalej?",
             "Długa sesja — krótka przerwa jest tu w porządku, potem wróć.",
             "Chcesz 60 sekund przerwy przed następnym przejściem?",
-            "Długi odcinek bez przerwy. Krótka przerwa to opcja, zanim będziesz kontynuować.",
-            "Długo bez pauzy. Możesz zrobić krótką przerwę.",
+            "Długi odcinek od mojej ostatniej wskazówki. Krótka przerwa to opcja, zanim będziesz kontynuować.",
+            "Pięć minut od mojej ostatniej wskazówki. Możesz zrobić krótką przerwę.",
             "Jeśli chcesz, zrób tu pauzę. Dwie minuty przerwy, potem wróć do gry.",
             "Długa seria — zrób krótką przerwę, zanim pójdziesz dalej."
           ]
@@ -222,7 +222,7 @@
           "encouragement": [
             "Dokładność spada od kilku minut. Zrób chwilę przerwy.",
             "Dokładność spada przy tym tempie. Krótka pauza, potem wróć.",
-            "Jakość dryfuje. Zatrzymaj się, zacznij od nowa, wróć.",
+            "Jakość spada. Zatrzymaj się, zacznij od nowa, wróć.",
             "Pudeł przybywa przy tym samym tempie. Krótki odpoczynek, potem z powrotem.",
             "Grasz już jakiś czas — odłóż instrument na 60 sekund.",
             "Wyniki spadają przy jednym tempie. Krótka przerwa?",
@@ -242,7 +242,7 @@
           "correction": [
             "Dokładność wciąż spada — zatrzymaj się teraz, 90 sekund przerwy, potem wróć.",
             "Wyniki są w tej sesji poniżej twojego szczytu. Odpocznij, zanim spadną jeszcze bardziej.",
-            "Zrób przerwę. Ostatnie kilka minut wypadło słabiej niż pierwsze.",
+            "Zrób przerwę. Ostatnie kilka minut wypadło słabiej niż poprzednie.",
             "Zatrzymaj się, wstań, przejdź się przez minutę. Potem wróć.",
             "Jakość spada od kilku minut. Prawdziwy odpoczynek — minimum 90 sekund.",
             "Wyniki wciąż spadają przy tym tempie. Zatrzymaj się, potem sprawdź jeszcze raz.",
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Wynik znowu spada po {staminaMinutes}. minucie — zrób 30 sekund przerwy, potem wróć przy tym samym BPM.",
-            "Po {staminaMinutes}. minucie twoja dokładność ma tendencję do spadku. Krótki odpoczynek, potem z powrotem.",
-            "Twoja dokładność zwykle spada około {staminaMinutes}. minuty. Zrób przerwę, potem wróć.",
-            "Twoje wyniki zwykle spadają około {staminaMinutes}. minuty — możesz teraz zrobić krótki odpoczynek."
+            "Twoje sesje tutaj trwają średnio około {staminaMinutes} minut, a ostatnie wypadły słabiej niż pierwsze. Jeśli chcesz, zrób 30 sekund przerwy i wróć przy tym samym BPM.",
+            "W jednym zakresie temp ostatnie sesje, trwające około {staminaMinutes} minut, wypadły poniżej pierwszych. Krótki odpoczynek to opcja.",
+            "Twoje sesje tutaj trwają około {staminaMinutes} minut, a ostatnie wypadły słabiej niż pierwsze. Przerwa to opcja.",
+            "Typowa sesja tutaj to około {staminaMinutes} minut, a ostatnio wyniki są niższe niż na początku. Krótki odpoczynek teraz to opcja."
           ]
         },
         "ramp_complete": {
@@ -676,7 +676,7 @@
           "encouragement": [
             "Uderzenia się rozjeżdżają przy tym samym tempie. Pałki na chwilę na bok, potem wróć.",
             "Jakość dryfuje — zejdź ze stołka na 60 sekund.",
-            "Uderzenia dryfują przy tym samym tempie. Krótka pauza, potem wróć.",
+            "Dokładność uderzeń spada przy tym samym tempie. Krótka pauza, potem wróć.",
             "Chcesz przerwę? Odłóż pałki, potem wróć.",
             "Pudeł przybywa przy tym tempie. Odejdź od zestawu na minutę.",
             "Dokładność spada — krótka przerwa, potem kontynuuj.",
@@ -686,12 +686,12 @@
           "correction": [
             "Dokładność wciąż spada przy tym tempie. Zatrzymaj się teraz, pałki na bok, 90 sekund przerwy.",
             "Wyniki są poniżej twojego szczytu — pałki na bok, przejdź się, potem oceń na nowo.",
-            "Uderzenia wciąż się rozjeżdżają przy tym tempie. 90 sekund przerwy, napij się, wróć.",
+            "Dokładność uderzeń wciąż spada przy tym tempie. 90 sekund przerwy, potem wróć.",
             "Pudła rosną przy jednym tempie. Zatrzymaj się, pałki na bok, dwie minuty przerwy.",
             "Przerwij, jeśli cokolwiek boli. Tak czy inaczej, teraz prawdziwa przerwa.",
             "Przestań grać. Odejdź od zestawu na kilka minut.",
             "Pałki na bok. Dwie minuty przerwy, wróć, kiedy zechcesz.",
-            "Twardy stop. Dwie minuty przerwy i łyk wody, zanim wrócisz."
+            "Twardy stop. Dwie minuty przerwy, zanim wrócisz."
           ]
         },
         "tempo_milestone": {
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Około {staminaMinutes}. minuty twoja dokładność zwykle spada. Zmniejsz BPM o 5 kresek i odbuduj.",
-            "Po {staminaMinutes}. minucie twoje uderzenia zaczynają dryfować. Krótka przerwa, potem wróć do gry.",
-            "Twoje wyniki przy zestawie spadają około {staminaMinutes}. minuty. Krótki odpoczynek, potem wróć.",
-            "Twój rytm na zestawie zwykle się rozjeżdża około {staminaMinutes}. minuty. Zrób krótką przerwę."
+            "Twoje sesje przy tym groovie trwają około {staminaMinutes} minut, a ostatnie wypadły słabiej niż pierwsze. Możesz zmniejszyć BPM o 5 kresek.",
+            "Przy zestawie twoje sesje trwają tu około {staminaMinutes} minut, a wyniki są niższe niż w pierwszych sesjach. Krótka przerwa, potem wróć do gry, jeśli chcesz.",
+            "Twoje ostatnie wyniki przy tym groovie są poniżej pierwszych, w sesjach trwających około {staminaMinutes} minut. Krótki odpoczynek to opcja.",
+            "Około {staminaMinutes} minut na sesję przy tym groovie, a ostatnie sesje wypadły słabiej. Chcesz krótką przerwę?"
           ]
         },
         "bias_only": {
@@ -963,7 +963,7 @@
             "Prawdziwy odpoczynek — gitara na stojak, przejdź się trochę.",
             "Wyniki wciąż spadają. Minimum 90 sekund, potem oceń na nowo.",
             "Zatrzymaj się tutaj. Dwie minuty z dala od gitary, potem do niej wróć.",
-            "Twardy stop. Przerwij w każdej chwili, gdy coś zaboli."
+            "Twardy stop, a gdy coś zaboli, przerwij w każdej chwili."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Po {staminaMinutes}. minucie twój rytm przy tym tempie zwykle się rozjeżdża. Krótka przerwa, potem wznów.",
-            "Około {staminaMinutes}. minuty twój rytm zaczyna dryfować. Krótka przerwa, potem wróć.",
-            "Twoje wyniki spadają w {staminaMinutes}. minucie. Odpocznij 30 sekund, jeśli chcesz.",
-            "Około {staminaMinutes}. minuty nuty zaczynają wpadać obok klika. Krótki odpoczynek, potem wróć."
+            "W jednym zakresie temp przy tym riffie ostatnie sesje, trwające około {staminaMinutes} minut, wypadły poniżej pierwszych. Krótka przerwa to opcja.",
+            "Twoje sesje przy tym riffie trwają około {staminaMinutes} minut, a ostatnie wypadły słabiej niż pierwsze. Krótka przerwa, potem wróć, jeśli chcesz.",
+            "Twoje sesje tutaj trwają średnio {staminaMinutes} minut; ostatnie wypadły słabiej. Odpocznij 30 sekund, jeśli chcesz.",
+            "Ostatnio twoje wyniki przy tym riffie są poniżej pierwszych, w sesjach trwających około {staminaMinutes} minut. Chcesz krótki odpoczynek?"
           ]
         },
         "bias_only": {
@@ -1218,7 +1218,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Uderzenia dryfują przy jednym tempie. Krótka pauza, potem wróć.",
+            "Dokładność uderzeń spada przy jednym tempie. Krótka pauza, potem wróć.",
             "Dokładność spada przy tym tempie. Krótka przerwa, potem wróć.",
             "Pudła wkradają się w uderzanie — odłóż gitarę na 60 sekund.",
             "Już jakiś czas uderzasz w jednym tempie. Zatrzymaj się, potem kontynuuj.",
@@ -1235,7 +1235,7 @@
             "Prawdziwy odpoczynek — gitara na stojak, przejdź się trochę.",
             "Dokładność wciąż spada. Minimum 90 sekund, potem oceń na nowo.",
             "Twardy stop. Dwie minuty przerwy, potem kontynuuj, gdy będziesz gotów.",
-            "Zatrzymaj się tutaj na prawdziwą przerwę. Zatrzymaj się wcześniej, jeśli cokolwiek boli."
+            "Zatrzymaj się tutaj na prawdziwą przerwę, a gdy coś zaboli, przerwij w każdej chwili."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Twoje wyniki spadają około {staminaMinutes}. minuty. Odpocznij 30 sekund i podejdź na nowo.",
-            "Około {staminaMinutes}. minuty uderzenia zaczynają dryfować. Krótka przerwa, potem wróć.",
-            "Po {staminaMinutes}. minucie twoja dokładność ma tendencję do spadku. Krótki odpoczynek, potem wznów.",
-            "Dokładność spada w {staminaMinutes}. minucie na akustyku. Zrób krótką przerwę."
+            "Twoje sesje tutaj trwają około {staminaMinutes} minut, a wyniki są niższe niż w pierwszych sesjach. Odpoczynek 30 sekund to opcja.",
+            "Ostatnie sesje przy tym ćwiczeniu wypadły słabiej niż pierwsze; trwają średnio około {staminaMinutes} minut. Krótka przerwa, potem wróć, jeśli chcesz.",
+            "W jednym zakresie temp przy tym ćwiczeniu ostatnie sesje, trwające około {staminaMinutes} minut, wypadły słabiej niż pierwsze. Krótki odpoczynek to opcja.",
+            "Na akustyku twoje sesje tutaj trwają średnio około {staminaMinutes} minut, a ostatnie wypadły słabiej. Chcesz krótką przerwę?"
           ]
         },
         "bias_only": {
@@ -1489,7 +1489,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Nuty dryfują przy jednym tempie. Krótka pauza — i wracaj.",
+            "Dokładność nut spada przy jednym tempie. Krótka pauza — i wracaj.",
             "Pudeł przybywa przy tym tempie. Bas na bok na 60 sekund.",
             "Dźwięki się rozjeżdżają przy tym samym tempie. Krótka przerwa, potem wróć.",
             "Chcesz chwilę? Weź ją, potem kontynuuj.",
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Twój groove zaczyna się rozjeżdżać w {staminaMinutes}. minucie. Krótka przerwa, potem wróć.",
-            "Około {staminaMinutes}. minuty twoja dokładność zaczyna spadać. Odpocznij i wróć.",
-            "Po {staminaMinutes}. minucie zgranie basu zaczyna się osuwać. Krótki odpoczynek, potem wznów.",
-            "Twoje wyniki zwykle spadają około {staminaMinutes}. minuty. Weź 30 sekund, wróć czysto."
+            "Twoje ostatnie sesje przy tej linii wypadły słabiej niż pierwsze, a każda trwa około {staminaMinutes} minut. Krótka przerwa to opcja.",
+            "Twoje sesje tutaj trwają około {staminaMinutes} minut, a ostatnie wypadły słabiej. Odpocznij i wróć, jeśli chcesz.",
+            "W jednym zakresie temp przy tej linii ostatnie sesje, trwające około {staminaMinutes} minut, mają niższy wynik niż pierwsze. Krótki odpoczynek to opcja.",
+            "Zwykła sesja przy tej linii to około {staminaMinutes} minut, a ostatnie wypadły słabiej niż pierwsze. Weź 30 sekund, jeśli chcesz."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Zmniejsz tempo i graj z większym uniesieniem. Ciągnięcie ustępuje, gdy zrobi się łatwo.",
             "Wyobraź sobie, że klik jest o włos wcześniej, niż jest, i spotkaj go tam.",
             "Zatrzymaj się, weź oddech, potem wejdź, lekko pchając do przodu.",
-            "Nuty wpadają za klikiem. Zagraj lżej i celuj wcześniej."
+            "Nuty wpadają za klikiem. Celuj każdą odrobinę wcześniej."
           ]
         },
         "personal_best_streak": {
@@ -1763,7 +1763,7 @@
             "Dokładność spada przy tym tempie. Krótka pauza, potem wróć.",
             "Chcesz krótką pauzę? Odejdź na chwilę od klawiszy.",
             "Pudła się wkradają przy tym tempie — 60 sekund przerwy od klawiszy.",
-            "Nuty dryfują przy jednym tempie. Krótka pauza, potem wznów.",
+            "Dokładność nut spada przy jednym tempie. Krótka pauza, potem wznów.",
             "Pudeł przybywa przy tym tempie. Krótki odpoczynek.",
             "Już jakiś czas siedzisz przy klawiszach. Krótka pauza, potem graj.",
             "30-sekundowa przerwa to opcja, potem wróć do gry.",
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Twoje wyniki przy tym tempie spadają około {staminaMinutes}. minuty. Zrób pauzę, wróć czysto.",
-            "Około {staminaMinutes}. minuty zaczynają się wkradać pudła. Krótki odpoczynek, potem wznów.",
-            "Po {staminaMinutes}. minucie twój rytm staje się mniej równy. Krótka przerwa, potem wróć do klawiszy.",
-            "Twoje wyniki spadają około {staminaMinutes}. minuty. Odpocznij, potem wróć."
+            "Twoje ostatnie sesje przy tym utworze wypadły słabiej niż pierwsze; trwają około {staminaMinutes} minut. Pauza to opcja.",
+            "Twoje sesje przy tym utworze trwają średnio około {staminaMinutes} minut, a ostatnio wypadają słabiej niż na początku. Krótki odpoczynek, potem wznów, jeśli chcesz.",
+            "Twoje sesje przy klawiszach trwają tu około {staminaMinutes} minut, a ostatnie wypadły słabiej. Krótka przerwa, potem wróć do klawiszy, jeśli chcesz.",
+            "Ostatnio twoje wyniki przy tym utworze są poniżej pierwszych, w sesjach trwających około {staminaMinutes} minut. Chcesz odpocząć?"
           ]
         },
         "bias_only": {

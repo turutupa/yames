@@ -200,7 +200,7 @@
           "neutral": [
             "Cinq minutes écoulées, rien à signaler. Groove solide. Tu continues ou tu changes d'objectif ?",
             "Passage calme. Dis-moi ce que tu travailles.",
-            "Longue série ininterrompue. Tu veux un retour sur quelque chose ?",
+            "Je n'ai rien dit depuis un moment. Tu veux un retour sur quelque chose ?",
             "Cinq minutes passées. Aucun problème à signaler — continue.",
             "Séance stable. Tu veux un autre angle, ou tu gardes le cap ?",
             "Longue série sans faux pas. Et ensuite ?",
@@ -208,12 +208,12 @@
             "Séance calme jusqu'ici. Choisis une cible si tu veux un retour plus précis."
           ],
           "correction": [
-            "Attention — ça fait un moment que tu y es. Fais 10 minutes de pause si tu veux.",
-            "Plus de cinq minutes d'affilée. Une courte pause avant de continuer ?",
+            "Attention — ça fait un moment que tu y es. Fais quelques minutes de pause si tu veux.",
+            "Plus de cinq minutes déjà. Une courte pause avant de continuer ?",
             "Séance prolongée — une courte pause est possible ici, puis reviens.",
             "Une pause de 60 secondes avant le prochain passage ?",
-            "Longue durée sans pause. Une courte pause est possible avant de continuer.",
-            "Longue série sans pause. Une courte pause est possible.",
+            "Longue durée depuis mon dernier conseil. Une courte pause est possible avant de continuer.",
+            "Cinq minutes depuis mon dernier conseil. Une courte pause est possible.",
             "Fais une pause ici si tu veux. Deux minutes d'arrêt, puis reprends.",
             "Longue série — fais une courte pause avant d'aller plus loin."
           ]
@@ -222,7 +222,7 @@
           "encouragement": [
             "La précision glisse depuis quelques minutes. Prends un moment.",
             "La précision baisse à ce tempo. Une courte pause, puis reviens.",
-            "La qualité dérive. Pause, nouveau départ, reviens.",
+            "La qualité baisse. Pause, nouveau départ, reviens.",
             "Les ratés augmentent au même tempo. Un bref arrêt, puis reviens.",
             "Tu y es depuis un moment — pose l'instrument 60 secondes.",
             "Les scores glissent sur un même tempo. Petite pause ?",
@@ -242,7 +242,7 @@
           "correction": [
             "La précision continue de baisser — arrête-toi maintenant, 90 secondes de pause, puis reviens.",
             "Les scores sont sous ton meilleur niveau de cette séance. Fais une pause avant qu'ils ne baissent davantage.",
-            "Prends la pause. Les dernières minutes ont des scores plus bas que les premières.",
+            "Prends la pause. Les dernières minutes ont des scores plus bas que celles d'avant.",
             "Arrête-toi, lève-toi, marche une minute. Puis reviens.",
             "La qualité baisse depuis des minutes. Un vrai repos — 90 secondes au minimum.",
             "Les scores continuent de baisser à ce tempo. Pause, puis revérifie.",
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "Le score baisse encore après {staminaMinutes} minutes — fais 30 secondes de pause, puis reviens au même BPM.",
-            "Après {staminaMinutes} minutes, ta précision a tendance à glisser. Un bref repos, puis reviens.",
-            "Ta précision a tendance à baisser vers la minute {staminaMinutes}. Fais une pause, puis reviens.",
-            "Tes scores baissent d'habitude vers la minute {staminaMinutes} — un court arrêt maintenant est possible."
+            "Tes séances ici durent environ {staminaMinutes} minutes en moyenne, et les récentes ont eu des scores plus bas que les premières. Fais 30 secondes de pause si tu veux, puis reprends au même BPM.",
+            "Dans une plage de tempos ici, tes séances récentes d'environ {staminaMinutes} minutes ont eu des scores plus bas que tes premières. Un bref repos est possible.",
+            "Tes séances ici durent environ {staminaMinutes} minutes, et les récentes ont eu des scores plus bas que les premières. Une pause est possible.",
+            "Ta séance habituelle ici dure environ {staminaMinutes} minutes, et ces derniers temps les scores sont plus bas qu'au début. Un court arrêt maintenant est possible."
           ]
         },
         "ramp_complete": {
@@ -676,7 +676,7 @@
           "encouragement": [
             "Les coups dérapent au même tempo. Baguettes posées un instant, puis reviens.",
             "La qualité dérive — lève-toi du tabouret pendant 60 secondes.",
-            "Les coups dérivent au même tempo. Une courte pause, puis reviens.",
+            "Les coups perdent en précision au même tempo. Une courte pause, puis reviens.",
             "Une pause ? Pose les baguettes, puis reviens.",
             "Les ratés augmentent à ce tempo. Éloigne-toi de la batterie une minute.",
             "La précision baisse — petite pause, puis continue.",
@@ -686,12 +686,12 @@
           "correction": [
             "La précision continue de baisser à ce tempo. Arrête-toi maintenant, baguettes posées, 90 secondes de pause.",
             "Les scores sont sous ton meilleur niveau — baguettes posées, fais un tour, puis refais le point.",
-            "Les coups continuent de dériver à ce tempo. 90 secondes de pause, hydrate-toi, reviens.",
+            "Les coups perdent de plus en plus en précision à ce tempo. 90 secondes de pause, puis reviens.",
             "Les ratés augmentent sur un même tempo. Arrête-toi, baguettes posées, deux minutes de pause.",
             "Arrête-toi si quelque chose fait mal. Dans tous les cas, un vrai arrêt maintenant.",
             "Arrête de jouer. Éloigne-toi de la batterie pendant quelques minutes.",
             "Baguettes posées. Deux minutes de pause, puis reviens quand tu veux.",
-            "Arrêt net. Deux minutes de pause et un verre d'eau avant de revenir."
+            "Arrêt net. Deux minutes de pause avant de revenir."
           ]
         },
         "tempo_milestone": {
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Vers la minute {staminaMinutes}, ta précision a tendance à baisser. Baisse de 5 BPM et reconstruis.",
-            "Passé la minute {staminaMinutes}, tes coups commencent à dériver. Une courte pause, puis reviens.",
-            "Tes scores à la batterie baissent vers la minute {staminaMinutes}. Un court repos, puis reviens.",
-            "Ton timing à la batterie a tendance à glisser vers la minute {staminaMinutes}. Fais une courte pause."
+            "Tes séances sur ce groove durent environ {staminaMinutes} minutes, et les récentes ont eu des scores plus bas que les premières. Baisser de 5 BPM est une option.",
+            "À la batterie, tes séances ici durent environ {staminaMinutes} minutes, et tes scores ont baissé depuis les premières. Une courte pause, puis reviens, si tu veux.",
+            "Tes scores récents sur ce groove sont plus bas que les premiers, sur des séances d'environ {staminaMinutes} minutes. Un court repos est possible.",
+            "Environ {staminaMinutes} minutes par séance sur ce groove, et les séances récentes ont eu des scores plus bas. Une courte pause ?"
           ]
         },
         "bias_only": {
@@ -963,7 +963,7 @@
             "Un vrai repos — guitare sur le support, marche un peu.",
             "Les scores continuent de baisser. 90 secondes minimum, puis revérifie.",
             "Arrête-toi ici. Deux minutes loin de la guitare, puis reviens-y.",
-            "Arrêt net ici. Arrête-toi dès que quelque chose fait mal."
+            "Arrêt net ici, et arrête-toi dès que quelque chose fait mal."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Au-delà de {staminaMinutes} minutes, ta précision à ce tempo a tendance à baisser. Une courte pause, puis reprends.",
-            "Vers la minute {staminaMinutes}, ton timing commence à dériver. Courte pause, puis reprends.",
-            "Tes scores baissent à la minute {staminaMinutes}. Arrête-toi 30 secondes si tu veux.",
-            "Vers la minute {staminaMinutes}, les notes tombent à côté du clic. Courte pause, puis reviens."
+            "Dans une plage de tempos sur ce riff, tes séances récentes d'environ {staminaMinutes} minutes ont eu des scores plus bas que tes premières. Une courte pause est possible.",
+            "Tes séances sur ce riff durent environ {staminaMinutes} minutes, et les récentes ont eu des scores plus bas que les premières. Courte pause, puis reprends, si tu veux.",
+            "Tes séances ici durent {staminaMinutes} minutes en moyenne ; les récentes ont eu des scores plus bas. Arrête-toi 30 secondes si tu veux.",
+            "Ces derniers temps, tes scores sur ce riff sont plus bas que tes premiers, sur des séances d'environ {staminaMinutes} minutes. Une courte pause ?"
           ]
         },
         "bias_only": {
@@ -1218,7 +1218,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Les coups de gratte dérivent sur un même tempo. Courte pause, puis reprends.",
+            "Les coups de gratte perdent en précision sur un même tempo. Courte pause, puis reprends.",
             "La précision baisse à ce tempo. Petite pause, puis reprends.",
             "Les ratés s'installent dans le geste — pose la guitare pendant 60 secondes.",
             "Tu grattes sur un même tempo depuis un moment. Pause, puis continue.",
@@ -1235,7 +1235,7 @@
             "Un vrai repos — guitare sur le support, marche un peu.",
             "La précision continue de baisser. 90 secondes minimum, puis revérifie.",
             "Arrêt net. Deux minutes de pause, puis continue quand tu es prêt.",
-            "Arrête-toi ici pour une vraie pause. Arrête-toi plus tôt si quelque chose fait mal."
+            "Arrête-toi ici pour une vraie pause, et arrête-toi dès que quelque chose fait mal."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Tes scores baissent vers la minute {staminaMinutes}. Arrête-toi 30 secondes et reprends.",
-            "Vers la minute {staminaMinutes}, les coups de gratte commencent à dériver. Courte pause, puis reprends.",
-            "Au-delà de {staminaMinutes} minutes, ta précision a tendance à baisser. Courte pause, puis reprends.",
-            "La précision baisse à la minute {staminaMinutes} à l'acoustique. Fais une courte pause."
+            "Tes séances ici durent environ {staminaMinutes} minutes, et tes scores ont baissé depuis les premières. Une pause de 30 secondes est possible.",
+            "Les séances récentes sur cet exercice ont eu des scores plus bas que tes premières ; elles durent environ {staminaMinutes} minutes en moyenne. Courte pause, puis reprends, si tu veux.",
+            "Dans une plage de tempos sur cet exercice, tes séances récentes d'environ {staminaMinutes} minutes ont eu des scores plus bas que tes premières. Une courte pause est possible.",
+            "À l'acoustique, tes séances ici durent environ {staminaMinutes} minutes en moyenne, et les récentes ont eu des scores plus bas. Une courte pause ?"
           ]
         },
         "bias_only": {
@@ -1489,7 +1489,7 @@
         },
         "fatigue": {
           "encouragement": [
-            "Les notes dérivent sur un même tempo. Courte pause — puis reprends.",
+            "Les notes perdent en précision sur un même tempo. Courte pause — puis reprends.",
             "Les ratés augmentent à ce tempo. Pose la basse pendant 60 secondes.",
             "Les notes dérapent au même tempo. Courte pause, puis reprends.",
             "Un moment de pause ? Prends-le, puis continue.",
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Ton groove commence à glisser à la minute {staminaMinutes}. Courte pause, puis reprends.",
-            "Vers la minute {staminaMinutes}, ta précision commence à baisser. Pause, puis reviens.",
-            "Au-delà de {staminaMinutes} minutes, le calage de la basse commence à glisser. Courte pause, puis reprends.",
-            "Tes scores ont tendance à baisser vers la minute {staminaMinutes}. Prends 30 secondes, reviens proprement."
+            "Tes séances récentes sur cette ligne ont eu des scores plus bas que tes premières, d'environ {staminaMinutes} minutes chacune. Une courte pause est possible.",
+            "Tes séances ici durent environ {staminaMinutes} minutes, et les récentes ont eu des scores plus bas. Pause, puis reviens, si tu veux.",
+            "Dans une plage de tempos sur cette ligne, tes séances récentes d'environ {staminaMinutes} minutes ont des scores plus bas que tes premières. Un bref repos est possible.",
+            "Environ {staminaMinutes} minutes, c'est une séance habituelle sur cette ligne, et les récentes ont eu des scores plus bas que les premières. Prends 30 secondes si tu veux."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Baisse le tempo et joue avec plus d'élan. La traîne disparaît quand ça devient facile.",
             "Imagine que le clic est un poil plus tôt qu'il ne l'est, et va le chercher.",
             "Arrête-toi, respire, puis entre en poussant légèrement vers l'avant.",
-            "Les notes tombent derrière le clic. Allège ton toucher et vise plus tôt."
+            "Les notes tombent derrière le clic. Vise chacune un poil plus tôt."
           ]
         },
         "personal_best_streak": {
@@ -1763,7 +1763,7 @@
             "La précision baisse à ce tempo. Courte pause, puis reviens.",
             "Une courte pause ? Éloigne-toi du clavier un instant.",
             "Les ratés s'installent à ce tempo — 60 secondes loin du clavier.",
-            "Les notes dérivent sur un même tempo. Courte pause, puis reprends.",
+            "Les notes perdent en précision sur un même tempo. Courte pause, puis reprends.",
             "Les ratés augmentent à ce tempo. Courte pause.",
             "Tu es au clavier depuis un moment. Courte pause, puis joue.",
             "Une pause de 30 secondes est possible, puis reviens.",
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Tes scores à ce tempo baissent vers la minute {staminaMinutes}. Pause, reviens proprement.",
-            "Vers la minute {staminaMinutes}, les ratés commencent à s'installer. Un bref repos, puis reprends.",
-            "Passé la minute {staminaMinutes}, ton timing devient moins régulier. Une courte pause, puis reviens au clavier.",
-            "Tes scores baissent vers la minute {staminaMinutes}. Arrête-toi, puis reviens."
+            "Tes séances récentes sur ce morceau ont eu des scores plus bas que tes premières ; elles durent environ {staminaMinutes} minutes. Une pause est possible.",
+            "Tes séances sur ce morceau durent environ {staminaMinutes} minutes en moyenne, et ces derniers temps leurs scores sont plus bas qu'au début. Un bref repos, puis reprends, si tu veux.",
+            "Tes séances au clavier ici durent environ {staminaMinutes} minutes, et les récentes ont eu des scores plus bas. Une courte pause, puis reviens au clavier, si tu veux.",
+            "Ces derniers temps, tes scores sur ce morceau sont plus bas que tes premiers, sur des séances d'environ {staminaMinutes} minutes. Une pause ?"
           ]
         },
         "bias_only": {
