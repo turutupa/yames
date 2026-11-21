@@ -32,7 +32,11 @@ def parse_args():
     p.add_argument("--full-finetune", action="store_true", help="train all weights instead of a LoRA")
     p.add_argument("--lora-r", type=int, default=16)
     p.add_argument("--lora-alpha", type=float, default=32)
-    p.add_argument("--lora-dropout", type=float, default=0.05)
+    p.add_argument("--lora-dropout", type=float, default=0.0,
+                   help="0 = no dropout kernel at all (measurably faster on the GB10)")
+    p.add_argument("--lora-cast-input", action="store_true",
+                   help="let peft cast each LoRA input to the adapter's fp32 (its default; slow here: a "
+                        "full copy of every activation per adapted layer). Off: autocast runs it in bf16")
     p.add_argument("--target-modules", default="q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj")
     p.add_argument("--lr", type=float, default=None, help="default 2e-4 LoRA, 1e-5 full")
     p.add_argument("--weight-decay", type=float, default=0.0)
@@ -47,7 +51,9 @@ def parse_args():
     p.add_argument("--master-fp32", action=argparse.BooleanOptionalAction, default=True,
                    help="full fine-tune: fp32 weights + bf16 autocast (default); --no-master-fp32 = pure bf16")
     p.add_argument("--fixed-len", action="store_true",
-                   help="pad every batch to --max-len (timing runs: a stated, constant shape)")
+                   help="pad every batch to --max-len (needs a mask: slow; for timing prefer rows longer "
+                        "than --max-len, which are cut to exactly --max-len and need no padding)")
+    p.add_argument("--no-group-by-length", action="store_true", help="plain shuffled batches")
     p.add_argument("--no-eos", action="store_true")
     p.add_argument("--log-every", type=int, default=10)
     p.add_argument("--no-save", action="store_true", help="timing runs: train, report, save nothing")
@@ -84,12 +90,21 @@ def encode(rows, tok, max_len, add_eos):
     return out, cut, dropped
 
 
-def batches(data, bs, rng):
+def batches(data, bs, rng, group_by_length):
+    """Endless shuffled batches. With group_by_length, rows of similar length share a
+    batch (sorted within windows of 64 batches, then the batches shuffled), so little
+    is padded: a padded batch needs an attention mask, and with a mask SDPA leaves its
+    fast causal kernel (measured: 0.6B, 8 x 1024 padded, 8.4 s a step)."""
     while True:
         idx = list(range(len(data)))
         rng.shuffle(idx)
-        for i in range(0, len(idx) - bs + 1, bs):
-            yield [data[j] for j in idx[i:i + bs]]
+        if group_by_length:
+            win = bs * 64
+            idx = [j for w in range(0, len(idx), win) for j in sorted(idx[w:w + win], key=lambda k: len(data[k][0]))]
+        chunks = [idx[i:i + bs] for i in range(0, len(idx) - bs + 1, bs)]
+        rng.shuffle(chunks)
+        for c in chunks:
+            yield [data[j] for j in c]
 
 
 def collate(items, pad_id, fixed_len, device):
@@ -101,7 +116,9 @@ def collate(items, pad_id, fixed_len, device):
         ids[i, : len(x)] = torch.tensor(x)
         lab[i, : len(y)] = torch.tensor(y)
         att[i, : len(x)] = 1
-    return ids.to(device), lab.to(device), att.to(device)
+    # No padding in the batch: no mask, so attention runs as plain causal (fast path).
+    mask = None if bool(att.all()) else att.to(device)
+    return ids.to(device), lab.to(device), mask
 
 
 def completion_loss(model, ids, att, lab):
@@ -167,6 +184,10 @@ def main():
         if a.grad_checkpointing:
             model.enable_input_require_grads()
         model = get_peft_model(model, cfg)
+        if not a.lora_cast_input:
+            for m in model.modules():
+                if hasattr(m, "lora_A"):
+                    m.cast_input_dtype_enabled = False
         model.print_trainable_parameters()
         trainable = [p for p in model.parameters() if p.requires_grad]
     model.to(dev)
@@ -184,7 +205,7 @@ def main():
           f"grad_ckpt {a.grad_checkpointing} load_dtype {load_dtype} seed {a.seed}", flush=True)
 
     rng = random.Random(a.seed)
-    it = batches(data, a.batch_size, rng)
+    it = batches(data, a.batch_size, rng, not a.no_group_by_length)
     torch.cuda.reset_peak_memory_stats()
     t0 = time.time()
     t_win, tok_win, loss_win = time.time(), 0, []
@@ -197,7 +218,7 @@ def main():
                 loss = completion_loss(model, ids, att, lab) / a.grad_accum
             loss.backward()
             loss_win.append(float(loss.detach()) * a.grad_accum)
-            tok_win += int(att.sum())
+            tok_win += ids.numel() if att is None else int(att.sum())
         torch.nn.utils.clip_grad_norm_(trainable, 1.0)
         opt.step()
         sched.step()
@@ -223,6 +244,7 @@ def main():
         "mode": "full" if a.full_finetune else "lora", "model": a.model, "rows": len(data), "steps": steps,
         "batch_size": a.batch_size, "grad_accum": a.grad_accum, "max_len": a.max_len, "fixed_len": a.fixed_len,
         "grad_checkpointing": a.grad_checkpointing, "lr": lr, "lora_r": a.lora_r, "lora_alpha": a.lora_alpha,
+        "lora_dropout": a.lora_dropout, "lora_cast_input": a.lora_cast_input,
         "trainable_params": n_train, "seconds_total": total, "seconds_first_step": t_first,
         "seconds_per_step_steady": steady,
         "peak_alloc_gib": torch.cuda.max_memory_allocated() / 2**30,

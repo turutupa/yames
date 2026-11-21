@@ -68,6 +68,13 @@ def completion(tool, args):
 
 def main():
     tok_dir, out = sys.argv[1], sys.argv[2]
+    # `--long`: timing data. 80 more (filler) tools in the system turn make every prompt
+    # longer than 1,024 tokens, so --max-len cuts every row to exactly that length and a
+    # batch needs no padding. Not for training anything real.
+    system = SYSTEM
+    if "--long" in sys.argv[3:]:
+        system += "".join(f"\n- extra_tool_{i}: does nothing useful in this timing run, item {i} of eighty"
+                          for i in range(80))
     from transformers import AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(tok_dir)
@@ -75,7 +82,7 @@ def main():
     rng = random.Random(7)
 
     def prompt(user):
-        return tok.apply_chat_template([{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
+        return tok.apply_chat_template([{"role": "system", "content": system}, {"role": "user", "content": user}],
                                        tokenize=False, add_generation_prompt=True, enable_thinking=False)
 
     with open(os.path.join(out, "train.jsonl"), "w", encoding="utf-8") as f:
@@ -83,7 +90,7 @@ def main():
             user, tool, args = requests(rng)
             f.write(json.dumps({"prompt": prompt(user), "completion": completion(tool, args)}, ensure_ascii=False) + "\n")
     with open(os.path.join(out, "system.txt"), "w", encoding="utf-8") as f:
-        f.write(SYSTEM)
+        f.write(system)
     with open(os.path.join(out, "grammar.gbnf"), "w", encoding="utf-8") as f:
         f.write(GRAMMAR)
     with open(os.path.join(out, "probes.txt"), "w", encoding="utf-8") as f:

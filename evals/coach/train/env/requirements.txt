@@ -6,6 +6,8 @@ accelerate==1.16.0
 annotated-doc==0.0.7
 annotated-types==0.8.0
 anyio==4.16.0
+# Added by bnb_check.sh (aarch64 wheel; its NF4 path checked on the GB10).
+bitsandbytes==0.50.2
 click==8.5.1
 cuda-bindings==13.4.4
 cuda-pathfinder==1.8.4
