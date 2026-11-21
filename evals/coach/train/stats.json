@@ -1,0 +1,502 @@
+{
+ "seed": 1,
+ "size": 700,
+ "mix": {
+  "call": 0.4,
+  "which": 0.18,
+  "yours": 0.16,
+  "card": 0,
+  "noneAsked": 0.13,
+  "wrongScreen": 0.09,
+  "withheld": 0.04
+ },
+ "total": 10500,
+ "train": 9975,
+ "validation": 525,
+ "counts": {
+  "en": {
+   "none": 182,
+   "total": 700,
+   "not-a-request": 91,
+   "which": 126,
+   "ambiguous": 126,
+   "call": 280,
+   "already": 31,
+   "relative": 17,
+   "yours": 112,
+   "never": 112,
+   "wrong-screen": 63,
+   "withheld": 28
+  },
+  "es": {
+   "call": 280,
+   "total": 700,
+   "none": 182,
+   "wrong-screen": 63,
+   "not-a-request": 91,
+   "yours": 112,
+   "never": 112,
+   "which": 126,
+   "ambiguous": 126,
+   "withheld": 28,
+   "already": 40,
+   "relative": 16
+  },
+  "de": {
+   "yours": 112,
+   "total": 700,
+   "never": 112,
+   "none": 182,
+   "wrong-screen": 63,
+   "not-a-request": 91,
+   "call": 280,
+   "which": 126,
+   "ambiguous": 126,
+   "relative": 17,
+   "withheld": 28,
+   "already": 34
+  },
+  "fr": {
+   "yours": 112,
+   "total": 700,
+   "never": 112,
+   "call": 280,
+   "none": 182,
+   "not-a-request": 91,
+   "wrong-screen": 63,
+   "which": 126,
+   "ambiguous": 126,
+   "already": 32,
+   "withheld": 28,
+   "relative": 18
+  },
+  "it": {
+   "which": 126,
+   "total": 700,
+   "ambiguous": 126,
+   "call": 280,
+   "none": 182,
+   "not-a-request": 91,
+   "wrong-screen": 63,
+   "yours": 112,
+   "never": 112,
+   "already": 32,
+   "withheld": 28,
+   "relative": 18
+  },
+  "pt-BR": {
+   "yours": 112,
+   "total": 700,
+   "never": 112,
+   "call": 280,
+   "already": 34,
+   "none": 182,
+   "relative": 17,
+   "wrong-screen": 63,
+   "not-a-request": 91,
+   "which": 126,
+   "ambiguous": 126,
+   "withheld": 28
+  },
+  "nl": {
+   "call": 280,
+   "total": 700,
+   "which": 126,
+   "ambiguous": 126,
+   "none": 182,
+   "withheld": 28,
+   "already": 30,
+   "yours": 112,
+   "never": 112,
+   "not-a-request": 91,
+   "wrong-screen": 63,
+   "relative": 15
+  },
+  "pl": {
+   "call": 280,
+   "total": 700,
+   "none": 182,
+   "wrong-screen": 63,
+   "yours": 112,
+   "never": 112,
+   "withheld": 28,
+   "which": 126,
+   "ambiguous": 126,
+   "relative": 16,
+   "not-a-request": 91,
+   "already": 30
+  },
+  "tr": {
+   "none": 182,
+   "total": 700,
+   "withheld": 28,
+   "call": 280,
+   "wrong-screen": 63,
+   "not-a-request": 91,
+   "already": 28,
+   "relative": 19,
+   "which": 126,
+   "ambiguous": 126,
+   "yours": 112,
+   "never": 112
+  },
+  "ru": {
+   "call": 280,
+   "total": 700,
+   "none": 182,
+   "wrong-screen": 63,
+   "which": 126,
+   "ambiguous": 126,
+   "relative": 18,
+   "yours": 112,
+   "never": 112,
+   "not-a-request": 91,
+   "already": 32,
+   "withheld": 28
+  },
+  "vi": {
+   "yours": 112,
+   "total": 700,
+   "never": 112,
+   "call": 280,
+   "which": 126,
+   "ambiguous": 126,
+   "none": 182,
+   "not-a-request": 91,
+   "relative": 20,
+   "wrong-screen": 63,
+   "already": 29,
+   "withheld": 28
+  },
+  "ja": {
+   "none": 182,
+   "total": 700,
+   "wrong-screen": 63,
+   "not-a-request": 91,
+   "yours": 112,
+   "never": 112,
+   "which": 126,
+   "ambiguous": 126,
+   "call": 280,
+   "already": 34,
+   "withheld": 28,
+   "relative": 19
+  },
+  "ko": {
+   "which": 126,
+   "total": 700,
+   "ambiguous": 126,
+   "none": 182,
+   "withheld": 28,
+   "call": 280,
+   "not-a-request": 91,
+   "yours": 112,
+   "never": 112,
+   "wrong-screen": 63,
+   "already": 35,
+   "relative": 13
+  },
+  "zh-CN": {
+   "none": 182,
+   "total": 700,
+   "not-a-request": 91,
+   "yours": 112,
+   "never": 112,
+   "call": 280,
+   "which": 126,
+   "ambiguous": 126,
+   "wrong-screen": 63,
+   "relative": 7,
+   "withheld": 28,
+   "already": 36
+  },
+  "zh-TW": {
+   "yours": 112,
+   "total": 700,
+   "never": 112,
+   "which": 126,
+   "ambiguous": 126,
+   "call": 280,
+   "already": 32,
+   "none": 182,
+   "not-a-request": 91,
+   "wrong-screen": 63,
+   "relative": 20,
+   "withheld": 28
+  }
+ },
+ "validationCounts": {
+  "en": {
+   "which": 6,
+   "total": 35,
+   "ambiguous": 6,
+   "call": 14,
+   "none": 9,
+   "not-a-request": 6,
+   "yours": 6,
+   "never": 6,
+   "already": 4,
+   "wrong-screen": 3
+  },
+  "es": {
+   "yours": 6,
+   "total": 35,
+   "never": 6,
+   "call": 14,
+   "already": 5,
+   "which": 6,
+   "ambiguous": 6,
+   "none": 9,
+   "not-a-request": 6,
+   "wrong-screen": 3
+  },
+  "de": {
+   "which": 6,
+   "total": 35,
+   "ambiguous": 6,
+   "call": 14,
+   "none": 9,
+   "not-a-request": 8,
+   "yours": 6,
+   "never": 6,
+   "already": 7,
+   "wrong-screen": 1
+  },
+  "fr": {
+   "none": 9,
+   "total": 35,
+   "wrong-screen": 2,
+   "not-a-request": 7,
+   "call": 14,
+   "which": 6,
+   "ambiguous": 6,
+   "yours": 6,
+   "never": 6,
+   "already": 6
+  },
+  "it": {
+   "none": 9,
+   "total": 35,
+   "not-a-request": 7,
+   "which": 6,
+   "ambiguous": 6,
+   "wrong-screen": 2,
+   "call": 14,
+   "already": 5,
+   "yours": 6,
+   "never": 6
+  },
+  "pt-BR": {
+   "call": 14,
+   "total": 35,
+   "already": 6,
+   "yours": 6,
+   "never": 6,
+   "none": 9,
+   "not-a-request": 7,
+   "which": 6,
+   "ambiguous": 6,
+   "wrong-screen": 2
+  },
+  "nl": {
+   "call": 14,
+   "total": 35,
+   "already": 7,
+   "which": 6,
+   "ambiguous": 6,
+   "yours": 6,
+   "never": 6,
+   "none": 9,
+   "not-a-request": 8,
+   "wrong-screen": 1
+  },
+  "pl": {
+   "which": 6,
+   "total": 35,
+   "ambiguous": 6,
+   "yours": 6,
+   "never": 6,
+   "call": 14,
+   "none": 9,
+   "wrong-screen": 3,
+   "not-a-request": 6,
+   "already": 5
+  },
+  "tr": {
+   "call": 14,
+   "total": 35,
+   "already": 5,
+   "yours": 6,
+   "never": 6,
+   "which": 6,
+   "ambiguous": 6,
+   "none": 9,
+   "not-a-request": 7,
+   "wrong-screen": 2
+  },
+  "ru": {
+   "none": 9,
+   "total": 35,
+   "wrong-screen": 2,
+   "call": 14,
+   "already": 4,
+   "which": 6,
+   "ambiguous": 6,
+   "yours": 6,
+   "never": 6,
+   "not-a-request": 7
+  },
+  "vi": {
+   "which": 6,
+   "total": 35,
+   "ambiguous": 6,
+   "call": 14,
+   "already": 6,
+   "none": 9,
+   "not-a-request": 6,
+   "yours": 6,
+   "never": 6,
+   "wrong-screen": 3
+  },
+  "ja": {
+   "none": 9,
+   "total": 35,
+   "not-a-request": 7,
+   "call": 14,
+   "yours": 6,
+   "never": 6,
+   "already": 5,
+   "which": 6,
+   "ambiguous": 6,
+   "wrong-screen": 2
+  },
+  "ko": {
+   "call": 14,
+   "total": 35,
+   "none": 9,
+   "not-a-request": 7,
+   "already": 5,
+   "wrong-screen": 1,
+   "which": 6,
+   "ambiguous": 6,
+   "yours": 6,
+   "never": 6,
+   "withheld": 1
+  },
+  "zh-CN": {
+   "yours": 6,
+   "total": 35,
+   "never": 6,
+   "which": 6,
+   "ambiguous": 6,
+   "call": 14,
+   "already": 6,
+   "none": 9,
+   "not-a-request": 4,
+   "wrong-screen": 5
+  },
+  "zh-TW": {
+   "yours": 6,
+   "total": 35,
+   "never": 6,
+   "call": 14,
+   "already": 5,
+   "none": 9,
+   "wrong-screen": 2,
+   "which": 6,
+   "ambiguous": 6,
+   "not-a-request": 7
+  }
+ },
+ "reviewed": {},
+ "drops": {
+  "en": {
+   "leak: too close to a held-out item": 7,
+   "no situation for wrongScreen: suggestions_off": 1,
+   "no situation for wrongScreen: open_settings": 1,
+   "no situation for wrongScreen: loop_bars": 1
+  },
+  "es": {
+   "leak: too close to a held-out item": 10,
+   "no situation for wrongScreen: loop_bar": 1,
+   "no situation for wrongScreen: show_scale": 1
+  },
+  "de": {
+   "leak: too close to a held-out item": 8,
+   "no situation for wrongScreen: voice_off": 1
+  },
+  "fr": {
+   "wording: slots  (want screen)": 1,
+   "leak: too close to a held-out item": 2
+  },
+  "it": {
+   "wording: slots  (want screen)": 1,
+   "leak: too close to a held-out item": 3,
+   "no situation for wrongScreen: loop_bar": 1
+  },
+  "pt-BR": {
+   "leak: too close to a held-out item": 4,
+   "no situation for wrongScreen: show_scale_at": 1,
+   "no situation for wrongScreen: loop_bar": 1
+  },
+  "nl": {
+   "leak: too close to a held-out item": 6,
+   "no situation for wrongScreen: show_scale": 1
+  },
+  "pl": {
+   "leak: too close to a held-out item": 6,
+   "no situation for wrongScreen: show_scale_at": 1,
+   "no situation for wrongScreen: explain_screen": 1
+  },
+  "tr": {
+   "wording: slots  (want screen)": 4,
+   "leak: too close to a held-out item": 1,
+   "no situation for wrongScreen: show_scale_at": 1,
+   "no situation for wrongScreen: loop_bars": 1
+  },
+  "ru": {
+   "leak: too close to a held-out item": 2,
+   "no situation for wrongScreen: loop_bar": 1,
+   "no situation for wrongScreen: set_theme": 1,
+   "no situation for wrongScreen: voice_off": 1,
+   "no situation for wrongScreen: set_goal": 1
+  },
+  "vi": {
+   "wording: slots  (want screen)": 4,
+   "no situation for wrongScreen: show_scale_at": 1,
+   "no situation for wrongScreen: suggestions_on": 1,
+   "no situation for wrongScreen: suggestions_off": 1,
+   "leak: too close to a held-out item": 1
+  },
+  "ja": {
+   "leak: too close to a held-out item": 4,
+   "no situation for wrongScreen: loop_bars": 1,
+   "no situation for wrongScreen: open_settings": 1
+  },
+  "ko": {
+   "leak: too close to a held-out item": 20,
+   "no situation for wrongScreen: open_settings": 1
+  },
+  "zh-CN": {
+   "leak: too close to a held-out item": 28,
+   "no situation for call: test_out_here": 1,
+   "no situation for which: open_path": 33,
+   "no situation for which: open_step_of_path": 33,
+   "no situation for which: test_out_of_path": 32,
+   "no situation for which: follow_path": 32,
+   "no situation for wrongScreen: explain_screen": 1,
+   "no situation for wrongScreen: loop_bars": 1,
+   "no situation for wrongScreen: loop_bar": 1,
+   "no situation for wrongScreen: set_theme": 1,
+   "no situation for wrongScreen: suggestions_off": 1
+  },
+  "zh-TW": {
+   "leak: too close to a held-out item": 1,
+   "no situation for which: open_path": 32,
+   "no situation for which: open_step_of_path": 32,
+   "no situation for which: test_out_of_path": 31,
+   "no situation for which: follow_path": 31,
+   "no situation for wrongScreen: loop_bar": 1
+  }
+ }
+}

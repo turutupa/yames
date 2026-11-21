@@ -17,7 +17,7 @@ import { choiceGrammar } from "../ask/grammar";
 import { gbnfAccepts, gbnfToRegExp } from "./gbnf";
 import { LeakGuard, editDistance, leakKey } from "./leakage";
 import { ASK_SYSTEM_PROMPT, askPromptHead, askPromptTail, renderRecord } from "./render";
-import { generateLanguage, languageData, splitValidation, wordingProblem, type WordingsFile } from "./generate";
+import { ALREADY, WRONG_SCREEN, generateLanguage, languageData, splitValidation, wordingProblem, type WordingsFile } from "./generate";
 import { CALL_INTENTS, INTENTS, intentById } from "./intents";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -138,7 +138,7 @@ describe("the generator (en, a small wordings file)", () => {
       kinds[r.kind] = (kinds[r.kind] ?? 0) + 1;
       if (r.expect.kind === "call") {
         const e = effectOf({ tool: r.expect.tool, args: r.expect.args }, r.situation, "en", paths);
-        expect(e.did !== null || e.refused?.startsWith("notWiredYet:"), `${r.id} ${r.text}`).toBe(true);
+        expect(e.did !== null || e.refused?.startsWith("notWiredYet:") || ALREADY.test(e.refused ?? ""), `${r.id} ${r.text}`).toBe(true);
         expect(r.tools).toContain(r.expect.tool);
         for (const v of Object.values(r.expect.args)) if (typeof v === "number") expect(r.text, r.id).toContain(String(v));
         if (r.expect.args.direction !== undefined) {
@@ -147,7 +147,7 @@ describe("the generator (en, a small wordings file)", () => {
         }
       }
       if (r.expect.kind === "which") expect(effectOf(r.call, r.situation, "en", paths).which, r.id).toBe(true);
-      if (r.tags.includes("wrong-screen")) expect(effectOf(r.call, r.situation, "en", paths).refused, r.id).toMatch(/^notNow:/);
+      if (r.tags.includes("wrong-screen")) expect(effectOf(r.call, r.situation, "en", paths).refused, r.id).toMatch(WRONG_SCREEN);
       if (r.tags.includes("withheld")) expect(r.tools).not.toContain(CALL_INTENTS.find((i) => i.id === r.intent)!.tool);
     }
     // Far fewer calls than the held-out set's two in three; every hard kind present.

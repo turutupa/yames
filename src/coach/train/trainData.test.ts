@@ -22,6 +22,7 @@ import { COACH_TOOLS } from "../tools/registry";
 import { checkCall } from "../tools/run";
 import { EVAL_LANGUAGES, effectOf, parseSetFile } from "../ask/evalWorld";
 import { gbnfToRegExp } from "./gbnf";
+import { ALREADY, WRONG_SCREEN } from "./generate";
 import { LeakGuard } from "./leakage";
 import { renderRecord, type TrainRecord } from "./render";
 
@@ -89,12 +90,13 @@ describe("the training files", () => {
       for (const r of mine) {
         const e = r.call ? effectOf(r.call, r.situation, lng, paths) : null;
         if (r.expect.kind === "call") {
-          if (!e || !(e.did !== null || e.refused?.startsWith("notWiredYet:"))) wrong.push(`${r.id}: not accepted`);
+          const ok = e !== null && (e.did !== null || e.refused?.startsWith("notWiredYet:") || (r.tags.includes("already") && ALREADY.test(e.refused ?? "")));
+          if (!ok) wrong.push(`${r.id}: not accepted`);
           for (const v of Object.values(r.expect.args)) if (typeof v === "number" && !r.text.includes(String(v))) wrong.push(`${r.id}: ${v} not said`);
           if (r.expect.args.direction !== undefined && (r.expect.args.bpm !== undefined || /\d/.test(r.text))) wrong.push(`${r.id}: a number beside a direction`);
         }
         if (r.expect.kind === "which" && !e?.which) wrong.push(`${r.id}: not several`);
-        if (r.tags.includes("wrong-screen") && !e?.refused?.startsWith("notNow:")) wrong.push(`${r.id}: not refused here`);
+        if (r.tags.includes("wrong-screen") && !WRONG_SCREEN.test(e?.refused ?? "")) wrong.push(`${r.id}: not refused here`);
         if (r.tags.includes("withheld") && r.call && r.tools.includes(r.call.tool)) wrong.push(`${r.id}: shown`);
       }
       expect(wrong).toEqual([]);

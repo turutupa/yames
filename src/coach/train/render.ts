@@ -84,7 +84,7 @@ export function shownCatalogue(tools: readonly string[]): ToolCatalogue {
 function orderedArgs(catalogue: ToolCatalogue, tool: string, args: ToolArgs): ToolArgs {
   const spec = catalogue.tools.find((t) => t.name === tool);
   if (!spec) throw new Error(`render: ${tool} is not shown`);
-  const out: ToolArgs = {};
+  const out: Record<string, ToolArgs[string]> = {};
   for (const f of spec.args) if (args[f.name] !== undefined) out[f.name] = args[f.name];
   for (const k of Object.keys(args)) if (!(k in out)) throw new Error(`render: ${tool} has no argument ${k}`);
   return out;

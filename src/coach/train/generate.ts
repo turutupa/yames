@@ -184,7 +184,10 @@ export function languageData(lang: EvalLanguage, paths: readonly PathDoc[], file
     paths,
     path: namesOf(
       paths.map((p) => p.title),
-      (q) => resolvePath(q, paths),
+      (q) => {
+        const r = resolvePath(q, paths);
+        return "found" in r ? { found: r.found } : "several" in r ? { several: r.several } : {};
+      },
       (t) => paths.find((p) => p.title === t),
       true,
     ),
@@ -432,6 +435,11 @@ export function wordingProblem(intent: Intent, template: string): string | null 
 
 export type Judged = { expect: Expect; tags: string[] } | { drop: string };
 
+/** The runner's refusals that mean "not on this screen / not during a Take" (`checkContext`, and a tool's own "not here"). */
+export const WRONG_SCREEN = /^notNow:coachTools\.why\.notNow\.(here|take)\b/;
+/** The ones that mean "that is already so": the request was right, nothing needed changing. */
+export const ALREADY = /^notNow:coachTools\.why\.notNow\.(alreadySetting|alreadyGoal|alreadyMinutes|alreadyFocus|alreadyThere|following)\b/;
+
 /**
  * What the app should do with `intent` said here, with these tools shown.
  * A call: what the runner accepts (a door a later leg wires counts, as in
@@ -450,13 +458,16 @@ export function judge(intent: Intent, f: Filled, situation: Situation, lang: str
       const args = intent.args(f);
       const effect = effectOf({ tool: intent.tool, args }, situation, lang, paths);
       const tags = intent.id === "tempo_faster" || intent.id === "tempo_slower" ? ["relative"] : [];
-      if (effect.refused?.startsWith("notNow:")) return { expect: { kind: "none" }, tags: [...tags, "wrong-screen"] };
-      const accepted = effect.did !== null || effect.refused?.startsWith("notWiredYet:");
+      if (effect.refused !== null && WRONG_SCREEN.test(effect.refused)) return { expect: { kind: "none" }, tags: [...tags, "wrong-screen"] };
+      // Asked for what is already so ("count-in off" while it is off): the call is still what was asked; the app answers "already".
+      const already = effect.refused !== null && ALREADY.test(effect.refused);
+      if (already) tags.push("already");
+      const accepted = effect.did !== null || effect.refused?.startsWith("notWiredYet:") || already;
       if (accepted || effect.which) {
         if (!shown.has(intent.tool)) return { expect: { kind: "none" }, tags: [...tags, "withheld"] };
         return effect.which ? { expect: { kind: "which" }, tags: [...tags, "ambiguous"] } : { expect: { kind: "call", tool: intent.tool, args }, tags };
       }
-      return { drop: `runner: ${effect.refused?.split(" ")[0] ?? "refused"}` };
+      return { drop: `runner: ${effect.refused ?? "refused"}` };
     }
   }
 }
@@ -557,6 +568,7 @@ export function generateLanguage(data: LanguageData, file: WordingsFile, opts: G
       const intent = pool[turn++ % pool.length];
       const wording = pick(rng, usable.get(intent.id)!);
       let done = false;
+      let lastRefusal: string | null = null;
       for (let t = 0; t < TRIES && !done; t++) {
         const situation = sampleSituation(rng, data.paths);
         const f = fillSlots(rng, intent, situation, data, bucket === "which");
@@ -564,6 +576,7 @@ export function generateLanguage(data: LanguageData, file: WordingsFile, opts: G
         const tool = intent.kind === "call" ? (intent as CallIntent).tool : null;
         const shown = new Set(toolList(rng, bucket === "withheld" ? null : tool, bucket === "withheld" ? tool : null));
         const j = judge(intent, f, situation, data.lang, data.paths, shown);
+        if ("drop" in j) lastRefusal = j.drop;
         if ("drop" in j || !wanted(bucket, j)) continue;
         const text = fillText(wording.text, f);
         if (opts.guard.leak(data.lang, text)) {
@@ -596,7 +609,7 @@ export function generateLanguage(data: LanguageData, file: WordingsFile, opts: G
       }
       if (!done) {
         misses++;
-        drop(`no situation for ${bucket}`);
+        drop(`no situation for ${bucket}: ${intent.id}${lastRefusal ? ` (${lastRefusal})` : ""}`);
       }
     }
     if (made < target) drop(`short: ${bucket} ${made}/${target}`);
