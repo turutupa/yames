@@ -192,7 +192,7 @@
             "Meer dan vijf minuten vastgelockt. Wil je dat ik iets specifieks benoem?",
             "Lange reeks: pauzeer als je wilt, ik ben er.",
             "Er loopt een degelijke reeks. Wil je dat ik op iets bijzonders luister?",
-            "Je bent hier al een tijd mee bezig. Adem in als je daar behoefte aan hebt.",
+            "Je bent hier al een tijd mee bezig. Een korte pauze mag, als je dat wilt.",
             "Tot nu toe stil. Vertel me waar je aan werkt en ik let erop.",
             "Nog niets om te benoemen. Waar wil je dat ik op luister?",
             "Stabiele pocket. Ga door, of verander van versnelling als je er klaar voor bent."
@@ -200,7 +200,7 @@
           "neutral": [
             "Vijf minuten bezig, niets te melden. Degelijke pocket. Doorgaan of van focus wisselen?",
             "Stil stuk. Vertel me waar je aan werkt.",
-            "Lange ononderbroken reeks. Wil je ergens feedback op?",
+            "Ik heb een tijdje niets gezegd. Wil je ergens feedback op?",
             "Vijf minuten diep erin. Geen problemen te melden: ga door.",
             "Stabiele sessie. Wil je een andere invalshoek, of de koers houden?",
             "Lange reeks zonder missers. Wat is de volgende stap?",
@@ -208,45 +208,45 @@
             "Tot nu toe een stille sessie. Kies een doel als je scherpere feedback wilt."
           ],
           "correction": [
-            "Let op: je bent hier al een tijd mee bezig. Neem er tien als je handen dat nodig hebben.",
-            "Meer dan vijf minuten aaneen. Check in met je lichaam voordat je verder duwt.",
-            "Langdurige sessie: strek je vingers en kom dan terug.",
-            "Handen moe? Neem 60 seconden pauze voor de volgende keer.",
-            "Lange reeks zonder pauze. Een korte pauze is een optie voordat je doorgaat.",
-            "Tijd voor een korte pauze. Koude handen spelen slordig.",
-            "Pauzeer en strek. Twee minuten rust houdt de volgende twintig degelijk.",
-            "Langdurige reeks: geef de handen rust voordat je verder duwt."
+            "Let op: je bent hier al een tijd mee bezig. Neem een paar minuten pauze, als je dat wilt.",
+            "Al meer dan vijf minuten bezig. Wil je een korte pauze voordat je verder gaat?",
+            "Langdurige sessie: een korte pauze mag hier, en kom dan terug.",
+            "Wil je 60 seconden pauze voor de volgende keer?",
+            "Lange tijd sinds mijn laatste tip. Een korte pauze is een optie voordat je doorgaat.",
+            "Vijf minuten sinds mijn laatste tip. Een korte pauze is een optie.",
+            "Pauzeer hier als je wilt. Twee minuten rust en dan ga je weer verder.",
+            "Langdurige reeks: neem een korte pauze voordat je verder gaat."
           ]
         },
         "fatigue": {
           "encouragement": [
             "De nauwkeurigheid zakt de laatste minuten. Neem even een moment.",
-            "Handen die verkrampen? Snel strekken en fris terugkomen.",
-            "De kwaliteit drijft weg. Pauzeer, adem en keer terug.",
-            "Handen werken harder dan zou moeten. Even rust en dan weer erin.",
+            "De nauwkeurigheid zakt bij dit tempo. Even pauze en kom dan terug.",
+            "De kwaliteit gaat achteruit. Pauzeer, begin opnieuw en keer terug.",
+            "De missers nemen toe bij hetzelfde tempo. Even pauze en dan weer erin.",
             "Je bent al een tijd bezig: leg het instrument 60 seconden neer.",
-            "Het lichaam wordt zwaarder dan de muziek. Even pauzeren.",
-            "Vingers die stijf worden? Schud ze uit en kom dan terug.",
-            "Tijd voor een korte pauze: frisse handen spelen schoner."
+            "De scores zakken bij één tempo. Even pauzeren?",
+            "Wil je een korte pauze? Kom daarna terug in hetzelfde tempo.",
+            "Een korte pauze mag hier: ga daarna weer verder."
           ],
           "neutral": [
-            "De nauwkeurigheid daalde de laatste 3 minuten bij een constante BPM: waarschijnlijk vermoeidheid.",
+            "De nauwkeurigheid daalde de laatste 3 minuten bij een constante BPM. Een pauze is een optie.",
             "De score daalt zonder tempoverandering. Neem rust.",
             "Aanhoudende nauwkeurigheidsdaling op dezelfde BPM: noem het een rustcyclus.",
-            "Hetzelfde tempo, dalende nauwkeurigheid. De handen worden moe.",
-            "De kwaliteit zakt, maar het tempo is niet veranderd: dat is vermoeidheid.",
+            "Hetzelfde tempo, dalende nauwkeurigheid. Een korte pauze is een optie.",
+            "De kwaliteit zakt, maar het tempo is niet veranderd. Wil je een pauze?",
             "Missers nemen toe terwijl de klik gelijk blijft. Tijd voor een pauze.",
-            "Drie minuten daling bij één tempo. Laat de handen rusten.",
-            "Stabiele BPM, dalende nauwkeurigheid: je handen vertellen je iets."
+            "Drie minuten daling bij één tempo. Neem een korte pauze.",
+            "Stabiele BPM, dalende nauwkeurigheid: een goed moment voor een pauze."
           ],
           "correction": [
-            "Vermoeidheid zichtbaar: stop nu, 90 seconden pauze en kom dan terug.",
-            "Je bent voorbij je piekvenster. Rust voordat de kwaliteit verder daalt.",
-            "Neem de rust. Moe spelen leert de handen slordige gewoonten.",
+            "De nauwkeurigheid blijft dalen: stop nu, 90 seconden pauze en kom dan terug.",
+            "De scores liggen deze sessie onder je beste niveau. Pauzeer voordat ze verder dalen.",
+            "Neem de pauze. De laatste minuten scoorden lager dan de minuten ervoor.",
             "Stop, sta op en loop een minuut rond. Kom daarna terug.",
             "De kwaliteit daalt al minuten. Echte rust: minstens 90 seconden.",
-            "De handen zijn voor nu klaar. Pauzeer, schud ze uit, drink wat.",
-            "Doorduwen voorbij moe zet fouten vast. Stop en herstel.",
+            "De scores blijven dalen bij dit tempo. Pauzeer en kijk dan opnieuw.",
+            "De missers blijven oplopen bij één tempo. Stop en neem een pauze.",
             "Leg het instrument neer. Twee minuten rust, beoordeel daarna opnieuw."
           ]
         },
@@ -397,10 +397,10 @@
         },
         "stamina": {
           "neutral": [
-            "De score zakt weer voorbij de {staminaMinutes}-minutengrens: neem 30 seconden en kom terug op dezelfde BPM.",
-            "Voorbij de {staminaMinutes}-minutengrens zakt je nauwkeurigheid meestal. Korte pauze, dan weer erin.",
-            "Je zakt meestal rond minuut {staminaMinutes} weg. Neem een pauze en kom fris terug.",
-            "Een uithoudingsmuur rond minuut {staminaMinutes}: een korte pauze nu bespaart later kwaliteit."
+            "Je sessies hier duren gemiddeld zo'n {staminaMinutes} minuten, en de recente scoorden lager dan de eerste. Neem 30 seconden als je wilt, en ga dan verder op dezelfde BPM.",
+            "In één tempobereik hier scoorden je recente sessies van zo'n {staminaMinutes} minuten lager dan je eerste. Een korte pauze is een optie.",
+            "Je sessies hier duren zo'n {staminaMinutes} minuten, en je recente scoorden lager dan je eerste. Een pauze is een optie.",
+            "Zo'n {staminaMinutes} minuten is je gebruikelijke sessie hier, en de laatste tijd liggen de scores lager dan in het begin. Een korte pauze nu is een optie."
           ]
         },
         "ramp_complete": {
@@ -676,22 +676,22 @@
           "encouragement": [
             "De slagen glippen weg bij hetzelfde tempo. Sticks even neer en kom dan terug.",
             "De kwaliteit drijft weg: kom 60 seconden van de kruk af.",
-            "Praten je onderarmen tegen je? Korte pauze en dan weer erin.",
-            "Voelen de sticks zwaar? Leg ze neer, strek je en keer terug.",
-            "Wordt je grip strak? Stap een minuut weg van de kit.",
+            "De slagen worden onnauwkeuriger bij hetzelfde tempo. Korte pauze en dan weer erin.",
+            "Wil je een pauze? Leg de sticks neer en keer dan terug.",
+            "De missers nemen toe bij dit tempo. Stap een minuut weg van de kit.",
             "De nauwkeurigheid zakt: even een korte pauze en dan verder.",
-            "De handen werken harder dan zou moeten. Even rust.",
-            "Leg de sticks even neer: laat de armen bijkomen."
+            "De nauwkeurigheid zakt bij één tempo. Even pauze.",
+            "Leg de sticks even neer als je wilt, en begin dan opnieuw."
           ],
           "correction": [
-            "Vermoeidheid zichtbaar: stop nu, leg de sticks neer, 90 seconden rust. Moe drummen zet slordige timing vast.",
-            "Je bent voorbij je piek: sticks neer, loop een rondje en beoordeel dan opnieuw.",
-            "De slagen blijven wegglijden bij dit tempo. 90 seconden pauze, drink wat en keer terug.",
+            "De nauwkeurigheid blijft dalen bij dit tempo. Stop nu, sticks neer, 90 seconden rust.",
+            "De scores liggen onder je beste niveau: sticks neer, loop een rondje en beoordeel dan opnieuw.",
+            "De slagen blijven onnauwkeuriger worden bij dit tempo. 90 seconden pauze en keer dan terug.",
             "De missers lopen op bij één tempo. Stop, sticks neer en neem twee minuten pauze.",
-            "Als je hier doorheen duwt, doe je jezelf pijn. Nu echt rust nemen.",
+            "Stop als iets pijn doet. Hoe dan ook: nu een echte pauze.",
             "Stop met drummen. Loop een paar minuten weg van de kit.",
-            "Sticks neer. Eerst de onderarmen, dan de handen, en kom terug zodra je los bent.",
-            "Harde stop. Twee minuten pauze en een slok water voordat je terugkomt."
+            "Sticks neer. Twee minuten pauze en kom terug zodra je er klaar voor bent.",
+            "Harde stop. Twee minuten pauze voordat je terugkomt."
           ]
         },
         "tempo_milestone": {
@@ -712,7 +712,7 @@
             "Meer dan vijf minuten bezig. Wil je dat ik de kick, de hi-hat of allebei benoem?",
             "Je zat diep in de pocket. Vertel me wat je hierna wilt.",
             "Degelijke reeks op de kit. Wil je op iets scherpere feedback?",
-            "Al een tijd bezig. Wil je dat ik luister naar kick, snare of de synchronisatie van de ledematen?",
+            "Al een tijd bezig. Is er iets specifieks waar ik op moet luisteren?",
             "De pocket was stabiel. Wat is de focus vanaf hier?",
             "Lange groove: kies een doel en ik richt me erop.",
             "Meer dan vijf minuten. Vertel me waar je de volgende feedback wilt."
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Rond minuut {staminaMinutes} worden je handen strak. Zet de BPM 5 streepjes lager en bouw opnieuw op.",
-            "Voorbij de {staminaMinutes}-minutengrens beginnen de ledematen af te drijven. Korte pauze en dan weer aan de slag.",
-            "Je scores op de kit zakken rond minuut {staminaMinutes}. Even kort rust en keer dan terug.",
-            "Je verliest de kick meestal rond minuut {staminaMinutes}. Neem even een adempauze."
+            "Je sessies met deze groove duren zo'n {staminaMinutes} minuten, en de recente scoorden lager dan de eerste. De BPM 5 streepjes lager zetten is een optie.",
+            "Op de kit duren je sessies hier zo'n {staminaMinutes} minuten, en je scores zijn gedaald sinds de eerste. Korte pauze en dan weer aan de slag, als je wilt.",
+            "Je recente scores bij deze groove liggen onder je eerste, bij sessies van zo'n {staminaMinutes} minuten. Even kort rusten is een optie.",
+            "Zo'n {staminaMinutes} minuten per sessie bij deze groove, en de recente sessies scoorden lager. Wil je een korte pauze?"
           ]
         },
         "bias_only": {
@@ -946,24 +946,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Wordt je aanslagarm strak? Schud hem uit en kom dan terug.",
+            "De nauwkeurigheid zakt bij één tempo. Korte pauze en dan weer erin.",
             "De nauwkeurigheid zakt al een paar minuten. Korte pauze en dan weer erin.",
             "Er sluipen missers in bij dit tempo: leg de gitaar 60 seconden neer.",
-            "Lange reeks in één tempo. Adem in en ga dan verder.",
-            "De aanslag wordt zwaarder dan nodig. Even rust.",
-            "Knijp je harder in de hals? Ontspan en speel dan.",
-            "Je onderarm werkt te hard: schud uit en ga verder.",
+            "Lange reeks in één tempo. Pauzeer en ga dan verder.",
+            "De missers nemen toe bij dit tempo. Even pauze.",
+            "Wil je een korte pauze? Speel daarna door.",
+            "De scores zakken bij één tempo: korte pauze en ga dan verder.",
             "Een pauze van 30 seconden is een optie, en dan weer aan de slag."
           ],
           "correction": [
             "De nauwkeurigheid zakt bij hetzelfde tempo: stop, gitaar 90 seconden neer en check het dan opnieuw.",
             "Je scores liggen onder je piek: gitaar een minuut neer en kom dan terug.",
-            "Stop voordat de pezen gaan klagen. 90 seconden van de snaren af.",
+            "De nauwkeurigheid blijft dalen bij dit tempo. 90 seconden van de snaren af.",
             "De missers blijven oplopen bij dit tempo. Leg de gitaar neer, twee minuten rust.",
             "Echte rust: gitaar op de standaard, even rondlopen.",
-            "Je aanslagarm is voor nu klaar. Minstens 90 seconden en kijk dan opnieuw.",
-            "Stop hier. Twee minuten weg van de gitaar en kom dan fris terug.",
-            "Doorduwen hierna koopt je een blessure. Harde stop."
+            "De scores blijven dalen. Minstens 90 seconden en kijk dan opnieuw.",
+            "Stop hier. Twee minuten weg van de gitaar en pak hem dan weer op.",
+            "Harde stop hier, en stop op elk moment als iets pijn doet."
           ]
         },
         "tempo_milestone": {
@@ -1000,10 +1000,10 @@
         },
         "stamina": {
           "neutral": [
-            "Voorbij de {staminaMinutes}-minutengrens glipt je timing bij dit tempo meestal weg. Een korte pauze en ga dan verder.",
-            "Rond minuut {staminaMinutes} begint de aanslag te drijven. Korte pauze en dan weer erin.",
-            "Uithoudingsmuur rond minuut {staminaMinutes}: je rechterhand wordt strak. Rust 30 seconden.",
-            "Rond minuut {staminaMinutes} verlies je meestal scherpte in de aanslag. Korte rust en dan terug."
+            "In één tempobereik bij deze riff scoorden je recente sessies van zo'n {staminaMinutes} minuten lager dan je eerste. Een korte pauze is een optie.",
+            "Je sessies met deze riff duren zo'n {staminaMinutes} minuten, en de recente scoorden lager dan de eerste. Korte pauze en dan weer erin, als je wilt.",
+            "Je sessies hier duren gemiddeld {staminaMinutes} minuten; de recente scoorden lager. Rust 30 seconden als je wilt.",
+            "De laatste tijd liggen je scores bij deze riff onder je eerste, bij sessies van zo'n {staminaMinutes} minuten. Wil je een korte pauze?"
           ]
         },
         "bias_only": {
@@ -1218,24 +1218,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Wordt je strumarm strak? Schud hem uit en kom dan terug.",
+            "De strums worden onnauwkeuriger bij één tempo. Korte pauze en dan weer erin.",
             "De nauwkeurigheid zakt bij dit tempo. Korte pauze en dan weer erin.",
             "Er sluipen missers in de strum: gitaar 60 seconden neer.",
-            "Je strumt al een tijdje in één tempo. Adem in en ga dan verder.",
-            "De strum wordt zwaarder dan nodig. Even rust.",
-            "Knijp je harder in de hals? Ontspan en speel dan.",
-            "Je onderarm werkt te hard: schud uit en ga verder.",
+            "Je strumt al een tijdje in één tempo. Pauzeer en ga dan verder.",
+            "De missers nemen toe bij dit tempo. Even pauze.",
+            "Wil je een korte pauze? Speel daarna door.",
+            "De scores zakken bij één tempo: korte pauze en ga dan verder.",
             "Neem 30 seconden als je die wilt en ga dan weer aan de slag."
           ],
           "correction": [
-            "Vermoeidheid zichtbaar in de strum: stop, 90 seconden van de snaren af.",
+            "De strums blijven wegzakken bij dit tempo: stop, 90 seconden van de snaren af.",
             "Je scores liggen onder je piek: leg de gitaar een minuut neer en kom dan terug.",
-            "Moe strummen begraaft de dynamiek. Stop, rust en begin opnieuw.",
-            "Je strumarm wordt overbelast. Leg de gitaar neer, strek de onderarm, twee minuten rust.",
+            "De scores blijven dalen bij één tempo. Stop, neem pauze en begin opnieuw.",
+            "De missers blijven oplopen bij dit tempo. Leg de gitaar neer, twee minuten pauze.",
             "Echte rust: gitaar op de standaard, even rondlopen.",
-            "Je strumhand is klaar. Minstens 90 seconden en kijk dan opnieuw.",
+            "De nauwkeurigheid blijft dalen. Minstens 90 seconden en kijk dan opnieuw.",
             "Harde stop. Twee minuten pauze en ga verder zodra je er klaar voor bent.",
-            "Doorduwen hierna koopt je een blessure. Stop en herstel."
+            "Stop hier voor een echte pauze, en stop op elk moment als iets pijn doet."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Je grepdruk loopt rond minuut {staminaMinutes} op. Rust 30 seconden en begin opnieuw.",
-            "Rond minuut {staminaMinutes} spant de strumarm aan. Korte pauze en dan weer erin.",
-            "Voorbij de {staminaMinutes}-minutengrens zakt je nauwkeurigheid meestal weg. Korte rust en ga dan verder.",
-            "Vermoeidheid toont zich rond minuut {staminaMinutes} op de akoestische. Neem een adempauze."
+            "Je sessies hier duren zo'n {staminaMinutes} minuten, en je scores zijn gedaald sinds de eerste. 30 seconden rust is een optie.",
+            "Recente sessies bij deze oefening scoorden lager dan je eerste; ze duren gemiddeld zo'n {staminaMinutes} minuten. Korte pauze en dan weer erin, als je wilt.",
+            "In één tempobereik bij deze oefening scoorden je recente sessies van zo'n {staminaMinutes} minuten lager dan je eerste. Een korte pauze is een optie.",
+            "Op de akoestische duren je sessies hier gemiddeld zo'n {staminaMinutes} minuten, en de recente scoorden lager. Wil je een korte pauze?"
           ]
         },
         "bias_only": {
@@ -1438,7 +1438,7 @@
             "Je rechterhand sleept. Speel met de klik, wacht niet tot de kick landt.",
             "Til de tokkelvinger eerder op: kom de klik tegemoet op de voorkant van de noot.",
             "Elke noot landt laat. Mik op de voorste rand van elke klik.",
-            "Duw vanuit de onderarm: de vinger wordt zwaar.",
+            "De noten vallen te laat. Begin elke tokkel iets eerder.",
             "Zet het tempo wat lager en speel met meer lift. Het gesleep verdwijnt.",
             "Stel je voor dat de klik een haartje eerder komt dan hij doet en kom die tegemoet.",
             "Stop, adem in en kom dan binnen met een lichte duw naar voren."
@@ -1489,24 +1489,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Worden je tokkelvingers strak? Even strekken en dan weer erin.",
-            "Begint je onderarm vast te zitten? Bas 60 seconden neer.",
+            "De noten worden onnauwkeuriger bij één tempo. Even pauze en dan weer erin.",
+            "De missers nemen toe bij dit tempo. Bas 60 seconden neer.",
             "De noten glippen weg bij hetzelfde tempo. Korte pauze en kom dan terug.",
-            "Wordt je grephand zwaar? Neem een moment en ga dan verder.",
-            "Voelt je rechterhand strak? Schud uit en ga dan verder.",
-            "Lange reeks in één tempo. Adem in en ga dan verder.",
-            "Je onderarm werkt te hard. Even rust.",
+            "Wil je even pauze? Neem die en ga dan verder.",
+            "De nauwkeurigheid zakt bij één tempo. Korte pauze en ga dan verder.",
+            "Lange reeks in één tempo. Korte pauze en ga dan verder.",
+            "De scores zakken bij dit tempo. Even pauze.",
             "Neem 30 seconden als je die wilt en ga dan weer aan de slag."
           ],
           "correction": [
-            "Vermoeidheid zichtbaar in de aanslag: stop, 90 seconden rust en kijk dan opnieuw.",
-            "Je bent over je piek heen: bas neer, strek en kom dan terug.",
-            "Stop nu. Moe tokkelen leert de hand een slordige aanslag.",
-            "Je rechterhand wordt overbelast. Leg de bas neer, strek de onderarm, twee minuten rust.",
+            "De nauwkeurigheid blijft dalen bij dit tempo: stop, 90 seconden pauze en kijk dan opnieuw.",
+            "De scores liggen onder je beste niveau: bas een minuut neer en kom dan terug.",
+            "Stop nu. De missers blijven oplopen bij hetzelfde tempo.",
+            "De missers blijven oplopen bij één tempo. Leg de bas neer, twee minuten pauze.",
             "Echte rust: bas op de standaard, even rondlopen.",
-            "Je tokkelhand is klaar. Minstens 90 seconden en kijk dan opnieuw.",
+            "De nauwkeurigheid blijft dalen. Minstens 90 seconden en kijk dan opnieuw.",
             "Harde stop. Twee minuten weg van de bas voordat je verdergaat.",
-            "Doorduwen hierna koopt je een blessure. Stop en herstel."
+            "Neem nu een echte pauze, en stop als iets pijn doet."
           ]
         },
         "tempo_milestone": {
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Uithoudingsmuur rond minuut {staminaMinutes}: je groove wordt losser. Korte pauze en dan weer erin.",
-            "Rond minuut {staminaMinutes} begint de tokkelhand moe te worden. Rust en kom terug.",
-            "Voorbij de {staminaMinutes}-minutengrens begint de lock met de bas weg te glippen. Korte rust en ga dan verder.",
-            "Je zakt meestal weg rond minuut {staminaMinutes}. Neem 30 seconden en kom schoon terug."
+            "Je recente sessies bij deze lijn scoorden lager dan je eerste, van elk zo'n {staminaMinutes} minuten. Een korte pauze is een optie.",
+            "Je sessies hier duren zo'n {staminaMinutes} minuten, en de recente scoorden lager. Pauzeer en kom terug, als je wilt.",
+            "In één tempobereik bij deze lijn scoren je recente sessies van zo'n {staminaMinutes} minuten lager dan je eerste. Een korte rust is een optie.",
+            "Zo'n {staminaMinutes} minuten is een gebruikelijke sessie bij deze lijn, en de recente scoorden lager dan de eerste. Neem 30 seconden als je wilt."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Zet het tempo omlaag en speel met meer lift. Het gesleep verdwijnt zodra het makkelijk voelt.",
             "Stel je voor dat de klik een haartje eerder komt dan hij doet, en ontmoet dat.",
             "Stop, adem in en kom dan binnen met een lichte duw naar voren.",
-            "De vingers worden zwaar. Maak je aanraking lichter en laat ze zweven."
+            "De noten vallen achter de klik. Mik elke noot een fractie eerder."
           ]
         },
         "personal_best_streak": {
@@ -1760,24 +1760,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "De nauwkeurigheid zakt bij dit tempo. Til de handen op, adem en ga dan weer verder.",
-            "Voelen de onderarmen vast? Pauzeer, laat de handen zakken en adem.",
+            "De nauwkeurigheid zakt bij dit tempo. Korte pauze en ga dan weer verder.",
+            "Wil je een korte pauze? Stap even weg van de toetsen.",
             "Er sluipen missers in bij dit tempo: 60 seconden weg van de toetsen.",
-            "Voelen de vingers zwaar? Snel strekken en dan hervatten.",
-            "De handen werken harder dan zou moeten. Even rust.",
-            "Je zit al een tijdje aan de toetsen. Adem en speel dan.",
+            "De noten worden onnauwkeuriger bij één tempo. Even pauze en dan hervatten.",
+            "De missers nemen toe bij dit tempo. Even pauze.",
+            "Je zit al een tijdje aan de toetsen. Korte pauze en speel dan.",
             "Een pauze van 30 seconden is een optie, en ga dan weer verder.",
-            "De nauwkeurigheid zakt bij één tempo. Pauzeer, handen op je schoot en adem."
+            "De nauwkeurigheid zakt bij één tempo. Pauzeer even en speel dan door."
           ],
           "correction": [
-            "Vermoeidheid zichtbaar in de aanslag: stop, handen 90 seconden neer.",
-            "Je bent voorbij je piek: ga van de pianokruk af, schud het uit en keer dan terug.",
+            "De nauwkeurigheid blijft dalen bij dit tempo: stop, 90 seconden weg van de toetsen.",
+            "De scores liggen onder je beste niveau: ga een minuut van de pianokruk af en keer dan terug.",
             "De scores blijven zakken bij dit tempo. Stop, rust uit en begin opnieuw.",
-            "De missers blijven oplopen bij één tempo. Handen van de toetsen, twee minuten pauze.",
-            "Echte rust: sta op, loop rond en kom fris terug.",
-            "De handen zijn voor nu klaar. Minstens 90 seconden en controleer dan opnieuw.",
+            "De missers blijven oplopen bij één tempo. Twee minuten weg van de toetsen.",
+            "Echte rust: sta op, loop rond en kom dan terug.",
+            "De nauwkeurigheid blijft dalen. Minstens 90 seconden en controleer dan opnieuw.",
             "Harde stop. Twee minuten weg van de toetsen voordat je verder gaat.",
-            "Als je hier doorheen duwt, koop je een blessure. Stop en herstel."
+            "Neem nu een echte pauze, en stop als iets pijn doet."
           ]
         },
         "tempo_milestone": {
@@ -1795,10 +1795,10 @@
         "check_in": {
           "neutral": [
             "Lange tijd achter de toetsen: een stuk, een oefening, iets specifieks?",
-            "Meer dan vijf minuten bezig. Wil je dat ik de linkerhand, de rechterhand of beide benoem?",
+            "Meer dan vijf minuten bezig. Is er iets in het stuk waar je feedback op wilt?",
             "Je zat er helemaal in. Vertel me waar je feedback op wilt.",
             "Degelijke reeks. Wil je scherpere feedback op een bepaalde passage?",
-            "Al een tijd bezig. Linkerhand? Rechterhand? Voicings? Vertel me waar ik moet luisteren.",
+            "Al een tijd bezig. Een passage? Een tempo? Vertel me waar ik moet luisteren.",
             "De pocket was stabiel. Kies een doel als je nauwkeuriger feedback wilt.",
             "Lange tijd achter de toetsen. Wil je dat ik iets markeer?",
             "Je zat er diep in. Vertel me waar ik hierna op moet letten."
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Je scores bij dit tempo zakken rond minuut {staminaMinutes}. Adem en kom schoon terug.",
-            "Rond minuut {staminaMinutes} beginnen de missers binnen te sluipen. Korte rust en hervat dan.",
-            "Voorbij de {staminaMinutes}-minutengrens wordt de aanslag zwaarder. Korte pauze en dan weer aan de toetsen.",
-            "Vermoeidheid in de handen toont zich rond minuut {staminaMinutes}. Rust en keer dan terug."
+            "Je recente sessies bij dit stuk scoorden lager dan je eerste; ze duren zo'n {staminaMinutes} minuten. Een pauze is een optie.",
+            "Je sessies bij dit stuk duren gemiddeld zo'n {staminaMinutes} minuten, en de laatste tijd scoren ze lager dan in het begin. Korte rust en hervat dan, als je wilt.",
+            "Je sessies aan de toetsen hier duren zo'n {staminaMinutes} minuten, en de recente scoorden lager. Korte pauze en dan weer aan de toetsen, als je wilt.",
+            "De laatste tijd liggen je scores bij dit stuk onder je eerste, bij sessies van zo'n {staminaMinutes} minuten. Wil je een pauze?"
           ]
         },
         "bias_only": {
