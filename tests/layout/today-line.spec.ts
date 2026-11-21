@@ -15,9 +15,9 @@ async function shot(page: Page, name: string) {
   if (SHOTS_DIR) await page.screenshot({ path: `${SHOTS_DIR}/${name}.png` });
 }
 
-async function lineFits(page: Page) {
+async function lineFits(page: Page, selector = ".session-today-line") {
   await settleAnimations(page);
-  const line = page.locator(".session-today-line");
+  const line = page.locator(selector);
   await expect(line).toHaveCount(1);
   await expect(line).toBeVisible();
   const box = await line.evaluate((el) => {
@@ -89,6 +89,38 @@ test.describe("Today's line on a computer", () => {
     await lineFits(page);
     await expect(page.getByTestId("today-left-off")).toHaveCount(0);
     await shot(page, "today-back-1440-ember");
+  });
+});
+
+/** The Step page's line sits under the Step's goal and above its Exercises. */
+async function stepLineInPlace(page: Page, box: { top: number; bottom: number }) {
+  await expect(page.getByTestId("step-coach-line")).toContainText("slipped");
+  const goal = await page.locator('[data-testid="step-detail"] .session-lede').first().evaluate((el) => el.getBoundingClientRect().bottom);
+  const grid = await page.locator('[data-testid="step-detail"] .session-stepgrid').first().evaluate((el) => el.getBoundingClientRect().top);
+  expect(box.top).toBeGreaterThanOrEqual(goal - 0.5);
+  expect(box.bottom).toBeLessThanOrEqual(grid + 0.5);
+}
+
+test.describe("The Step page's line", () => {
+  test("under the goal, whole, at 1440x900 in ember", async ({ page }) => {
+    await openShot(page, "step-line", { width: 1440, height: 900 }, "ember");
+    const box = await lineFits(page, ".session-step-line");
+    await stepLineInPlace(page, box);
+    await expect(page.getByTestId("step-coach-line-ask")).toHaveJSProperty("tagName", "BUTTON");
+    await noSidewaysScroll(page, "the Step page");
+    await shot(page, "step-line-1440-ember");
+  });
+});
+
+test.describe("The Step page's line on a phone", () => {
+  test.use({ baseURL: MOBILE_URL, isMobile: true, hasTouch: true });
+  test("under the goal, whole, not a target, at 360x800 in ember", async ({ page }) => {
+    await openShot(page, "phone-step-line", { width: 360, height: 800 }, "ember");
+    const box = await lineFits(page, ".session-step-line");
+    await stepLineInPlace(page, box);
+    await expect(page.getByTestId("step-coach-line-ask")).toHaveCount(0);
+    await noSidewaysScroll(page, "the Step page");
+    await shot(page, "phone-step-line-ember");
   });
 });
 
