@@ -11,7 +11,7 @@ Cues: `src/paths/specs/legato-cues.ts`, attached with `withCues` in `legato.ts`.
   2 warm-ups, 17), advanced (from-nowhere, nowhere-box, six-string-runs, odd-groups, long-lines,
   second-key + 2 warm-ups, 22).
 - [x] Level 1: 13 Exercises. `check`: 0 errors, 0 `cue.refused`, no cue rewritten (`gc3.log`).
-- [ ] Level 2
+- [x] Level 2: 17 Exercises. `check`: 0 errors, 0 `cue.refused`, no cue rewritten (`gc6.log`).
 - [ ] Level 3
 - [ ] Proof-read
 - [ ] Translations
@@ -26,3 +26,7 @@ all three notes" (fingers / fret layout differ on two string sets) -> "Have ever
 the pick."; hammer-climb warm-up "Move the hand up one note", "Move the hand on the picked note",
 "then step up" (hand position / interval) -> "Pick the lower note, hammer the upper one." and "Step up
 on the picked note, not after." (accepted).
+
+Level 2: the roll-climb warm-up refused "the shape changes as it climbs" and "before you reach them"
+("reach" and "shape" are layout words; the string variants are not a uniform transposition) -> "Know
+the next three notes before you play them."
