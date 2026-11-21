@@ -62,7 +62,16 @@
         "changed": "Từ lượt trước đã đổi gì?",
         "improving": "Tôi có tiến bộ không?",
         "madeOf": "Điểm gồm những gì?",
-        "distance": "Còn cách mức đạt bao xa?"
+        "distance": "Còn cách mức đạt bao xa?",
+        "purpose": "Bài này để làm gì?",
+        "how": "Chơi nó thế nào?",
+        "try": "Tôi nên thử gì?",
+        "planWhy": "Sao lại là bài này?",
+        "planTempo": "Sao lại tempo này?",
+        "planNext": "Tiếp theo là gì?",
+        "planReturn": "Khi nào nó quay lại?",
+        "passMarkMs": "Mức đạt độ đều nghĩa là gì?",
+        "cleanTempo": "Tempo sạch là gì?"
       },
       "canAnswer": {
         "ungraded": "Bạn đang chơi không chấm điểm, nên không có số đo nào để trả lời các câu hỏi về lượt của bạn."
@@ -103,7 +112,7 @@
         "evenSome": "Lượt {{take}} có độ đều {{value}}%, so với mức đạt {{bar}}%, và tôi nghe được {{heard}} trên {{expected}} nốt.",
         "heard": "Tôi nghe được {{heard}} trên {{expected}} nốt trong lượt {{take}}, so với mức đạt {{bar}}%.",
         "extras": "Lượt {{take}} có nhiều nốt thừa hơn mức đạt cho phép: {{bar}} hoặc ít hơn trong bốn ô nhịp.",
-        "accents": "Trong lượt {{take}}, {{value}}% số nhấn được đánh dấu to hơn các nốt quanh nó, so với mức đạt {{bar}}%.",
+        "accents": "Trong lượt {{take}}, trung bình các nhấn được đánh dấu to hơn các nốt khác {{value}}%, so với mức đạt {{bar}}%.",
         "notes": "Trong lượt {{take}}, {{value}}% số nốt tôi xác định được cao độ là nốt đã viết, so với mức đạt {{bar}}%."
       },
       "count": {
@@ -203,7 +212,7 @@
           "even": "Độ đều: ít nhất {{bar}}% trong {{over}} ô nhịp liên tiếp.",
           "heard": "Số nốt nghe được: ít nhất {{bar}}% số nốt đã viết.",
           "extras": "Nốt thừa: {{bar}} hoặc ít hơn trong {{over}} ô nhịp.",
-          "accents": "Nhấn: ít nhất {{bar}}% số nhấn được đánh dấu to hơn các nốt quanh nó.",
+          "accents": "Nhấn: trung bình to hơn các nốt khác ít nhất {{bar}}%.",
           "notes": "Đúng nốt: ít nhất {{bar}}% số nốt tôi xác định được cao độ là nốt đã viết.",
           "hold": "Độ đều giữ đến cuối: ít nhất {{bar}}% trên các ô nhịp cuối của đoạn được đánh giá."
         },
@@ -266,7 +275,85 @@
         "unmeasured_other": "{{count}} phép kiểm tra của mức đạt không được đo trong lượt {{take}}.",
         "tempo": "Lượt {{take}} ở {{bpm}} BPM; một lượt sạch ở {{passAt}} BPM trở lên là đạt bài.",
         "none": "Tôi không đo phép kiểm tra nào của mức đạt trong lượt {{take}}."
+      },
+      "path": {
+        "quote": "“{{text}}”",
+        "noExercise": "Không có bài nào trên màn hình để tôi đọc điều đó.",
+        "purposeIntro": "Bài này để làm gì, theo lời của lộ trình:",
+        "purposeNone": "Lộ trình không nêu mục đích của bài này.",
+        "howIntro": "Cách chơi, theo lời của lộ trình:",
+        "howNone": "Lộ trình không nêu cách chơi của bài này.",
+        "tryMeasured": "Gợi ý của lộ trình về phần lượt {{take}} đã đo:",
+        "tryGeneral": "Gợi ý của lộ trình cho bài này:",
+        "tryNone": "Lộ trình không có gợi ý nào cho bài này."
+      },
+      "plan": {
+        "notInPlan": "Không có buổi tập nào đang chạy theo kế hoạch để tôi đọc điều đó.",
+        "why": "Vì sao phần này nằm trong kế hoạch của buổi tập này:",
+        "tempoPlanned": "Phần này được lên kế hoạch ở {{bpm}} BPM.",
+        "tempoNow": "Bây giờ nó ở {{bpm}} BPM.",
+        "tempoNone": "Phần này không có tempo riêng.",
+        "next": "Tiếp theo trong kế hoạch của buổi tập này: {{title}}, {{minutes}} phút.",
+        "nextBpm": "Tiếp theo trong kế hoạch của buổi tập này: {{title}}, ở {{bpm}} BPM, {{minutes}} phút.",
+        "nextLast": "Đây là phần cuối của kế hoạch buổi tập này.",
+        "skip": "Kiểm tra vượt chơi một lượt ở tempo đạt cho mỗi bài được chấm điểm của Bước bạn chưa đạt (khi bạn đã đạt mọi bài thì chơi lại tất cả).",
+        "skipInSession": "Kiểm tra vượt bắt đầu từ trang của một Bước, không phải khi một buổi tập đang chạy.",
+        "minutes": "Kế hoạch hôm nay có các mức {{list}} phút.",
+        "minutesSnapped": "Mức gần nhất với {{asked}} phút là {{to}}.",
+        "minutesNone": "Hãy cho tôi biết bạn có bao nhiêu phút, bằng một con số.",
+        "minutesInSession": "Số phút của một buổi tập đang chạy không đổi được.",
+        "returnDays": "Lịch ôn đưa bài này quay lại trong vòng {{count}} ngày, ở {{bpm}} BPM.",
+        "returnDays_other": "Lịch ôn đưa bài này quay lại trong vòng {{count}} ngày, ở {{bpm}} BPM.",
+        "returnDue": "Bài này đến hạn ôn ngay bây giờ, ở {{bpm}} BPM.",
+        "returnNotPassed": "Bài này chưa đạt; việc ôn bắt đầu khi nó đạt.",
+        "returnUngraded": "Bài này không được chấm điểm, nên không có lịch ôn.",
+        "returnNoPassTempo": "Bài này không có tempo đạt, nên lịch ôn không đưa nó quay lại.",
+        "returnMine": "Bài do bạn tự tạo không nằm trong lộ trình, nên không có lịch ôn.",
+        "returnNotFair": "Một lượt của bài này được đánh dấu là không công bằng, và lịch ôn không bỏ nó ra, nên tôi sẽ không trích dẫn."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} gồm {{notes}}.",
+        "chordUnknown": "Tôi không biết hợp âm đó. Các hợp âm tôi đánh vần được trên {{root}}: {{known}}.",
+        "scalesIntroMajor": "Trên {{chord}}, coi là hợp âm chủ của {{root}} trưởng, ứng dụng chọn các thang âm này, mỗi thang đều có đủ mọi nốt của hợp âm.",
+        "scalesIntroMinor": "Trên {{chord}}, coi là hợp âm chủ của {{root}} thứ, ứng dụng chọn các thang âm này, mỗi thang đều có đủ mọi nốt của hợp âm.",
+        "scalesPlacedMajor": "{{chord}} là hợp âm {{degree}} của {{root}} trưởng, một giọng mà nó thuộc về. Trong giọng đó ứng dụng chọn các thang âm này, mỗi thang đều có đủ mọi nốt của hợp âm.",
+        "scalesPlacedMinor": "{{chord}} là hợp âm {{degree}} của {{root}} thứ, một giọng mà nó thuộc về. Trong giọng đó ứng dụng chọn các thang âm này, mỗi thang đều có đủ mọi nốt của hợp âm.",
+        "scalesPlacedMajorAlso": "{{chord}} là hợp âm {{degree}} của {{root}} trưởng ({{root}} nghe giống {{plain}}), một giọng mà nó thuộc về. Trong giọng đó ứng dụng chọn các thang âm này, mỗi thang đều có đủ mọi nốt của hợp âm.",
+        "scalesPlacedMinorAlso": "{{chord}} là hợp âm {{degree}} của {{root}} thứ ({{root}} nghe giống {{plain}}), một giọng mà nó thuộc về. Trong giọng đó ứng dụng chọn các thang âm này, mỗi thang đều có đủ mọi nốt của hợp âm.",
+        "scalesNoneMajor": "Trong {{root}} trưởng, không thang âm nào ứng dụng chọn cho {{chord}} có đủ mọi nốt của hợp âm.",
+        "scalesNoneMinor": "Trong {{root}} thứ, không thang âm nào ứng dụng chọn cho {{chord}} có đủ mọi nốt của hợp âm.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "Bài này không được chấm điểm, nên không có mức đạt.",
+        "noPassMarkSet": "Chưa đặt mức đạt: bạn đang chơi không chấm điểm, nên không có gì bạn chơi được đo theo mức nào. Để đặt, hãy chọn \"Chấm điểm tôi\" cho \"Chấm điểm phần chơi của tôi\" trong Cài đặt, mục Luyện tập; bạn cũng có thể đổi trong bất kỳ buổi tập nào.",
+        "noSuchMark": "Không có mức đạt nào của bài này là {{value}}%.",
+        "evenNone": "Mức đạt của bài này không có phép kiểm tra độ đều.",
+        "evenNoMs": "Tôi không đổi được mức đạt độ đều của bài này sang mili giây: phách của nó không phải nốt đen.",
+        "evenMs": "Mức đạt độ đều ở đây là {{bar}}%: ở {{bpm}} BPM, với các nốt gần nhau nhất của bài này cách nhau {{gap}} ms, nó cho phép độ lệch khoảng {{ms}} ms quanh nhịp trung bình của chính bạn.",
+        "holdMs": "Mức đạt cho độ đều giữ đến cuối là {{bar}}%, đo trên các ô nhịp cuối của đoạn được đánh giá: ở {{bpm}} BPM, với các nốt gần nhau nhất của bài này cách nhau {{gap}} ms, nó cho phép độ lệch khoảng {{ms}} ms quanh nhịp trung bình của chính bạn.",
+        "heardMark": "{{bar}}% là mức đạt về số nốt nghe được: trong các ô nhịp được đánh giá, ít nhất {{bar}} trên mỗi 100 nốt đã viết phải nghe được.",
+        "accentsMark": "{{bar}}% là mức đạt của nhấn: trung bình, các nhấn được đánh dấu phải to hơn các nốt khác ít nhất {{bar}}%.",
+        "notesMark": "{{bar}}% là mức đạt về đúng nốt: ít nhất {{bar}} trên mỗi 100 nốt tôi xác định được cao độ phải là nốt đã viết.",
+        "markOther": "{{value}}% là mức đạt của một phép kiểm tra khác của bài này, không phải độ đều.",
+        "markAlso": "{{value}}% cũng là mức đạt của một phép kiểm tra khác của bài này.",
+        "evenHow": "Độ đều được đo quanh nhịp trung bình của chính bạn, không phải tiếng click, nên một độ lệch đều đặn không làm nó thấp đi.",
+        "clean": "Tempo sạch của bạn là tempo cao nhất mà một lượt đã đạt với ít nhất {{need}} ô nhịp liên tiếp giữ được mọi phép kiểm tra.",
+        "cleanYours": "Tempo sạch của bạn ở bài này là {{bpm}} BPM.",
+        "cleanNone": "Bạn chưa có tempo sạch ở bài này.",
+        "cleanNotFair": "Các lượt bạn đánh dấu là không công bằng không được tính vào đó.",
+        "cleanMine": "Bài do bạn tự tạo không nằm trong lộ trình, nên tôi không trích dẫn tempo sạch cho chúng."
       }
+    },
+    "source": {
+      "measured": "Đã đo: ứng dụng đọc điều này từ chính các lượt của bạn.",
+      "path": "Từ lộ trình: nguyên văn lời của lộ trình, trích như nó viết.",
+      "app": "Do ứng dụng tính ra: tính theo quy tắc của chính nó, không phải do một mô hình viết.",
+      "general": "Lời khuyên chung: do mô hình trên máy này viết về việc chơi nói chung, không dựa trên cách bạn chơi.",
+      "take": "Lượt {{take}}, như kết quả của nó đã nói: {{text}}",
+      "takeGone": "Kết quả của lượt {{take}} không còn là kết quả đang hiện trên màn hình, nên tôi không mở được ở đây.",
+      "step": "Bước {{step}}, {{title}}, theo lời của lộ trình:",
+      "stepGone": "Tôi không tìm thấy Bước {{step}} để trích dẫn ở đây."
     }
   }
 }

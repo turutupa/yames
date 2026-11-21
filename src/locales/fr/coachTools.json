@@ -31,7 +31,11 @@
       "loadAsked": "Yames t'a d'abord posé la question de tes changements non enregistrés. Rien n'est chargé tant que tu n'as pas répondu.",
       "clickSubdivision": "Clics par temps : {{to}}",
       "setSetting": "{{key}} : {{to}}",
-      "setGoal": "Objectif retenu : « {{to}} »"
+      "setGoal": "Objectif retenu : « {{to}} »",
+      "makeExercise": "{{what}} ajouté à Mes exercices.",
+      "makeExerciseAdding": "Ajout de {{what}} à Mes exercices…",
+      "undoMakeExercise": "Retiré de Mes exercices.",
+      "undoMakeExerciseDoing": "Retrait de l'exercice de Mes exercices…"
     },
     "propose": {
       "goTo": "Ouvrir {{screen}} ?",
@@ -62,7 +66,9 @@
       "clickSubdivision": "Clics par temps : {{from}} → {{to}}",
       "setSetting": "{{key}} : {{from}} → {{to}}",
       "setGoal": "Garder ceci comme objectif : « {{to}} »",
-      "setGoalFrom": "Changer ton objectif de « {{from}} » en « {{to}} »"
+      "setGoalFrom": "Changer ton objectif de « {{from}} » en « {{to}} »",
+      "makeExercise": "Ajoute-le à Mes exercices",
+      "undoMakeExercise": "Retire-le de Mes exercices"
     },
     "stops": {
       "click": "Le clic s'arrête.",
@@ -120,7 +126,8 @@
       "keep": "Garder",
       "go": "Y aller",
       "open": "Ouvrir",
-      "loop": "Boucler"
+      "loop": "Boucler",
+      "add": "Ajouter"
     },
     "why": {
       "which": "Lequel ?",
@@ -181,7 +188,40 @@
         "cap": "Tu suis {{cap}} parcours, le maximum possible. Quitte-en un d'abord sur sa page.",
         "loopBackwards": "La mesure {{to}} vient avant la mesure {{from}}. Nomme d'abord la première mesure."
       },
-      "failed": "Ça n'a pas marché, et rien n'a été changé."
+      "failed": "Ça n'a pas marché, et rien n'a été changé.",
+      "make": {
+        "what": "Dis ce qu'il faut créer : une gamme ou un accord, et sa tonique. Par exemple “pentatonique mineure de A, case 5”.",
+        "root": "Dis aussi sa tonique : par exemple “pentatonique mineure de A”.",
+        "chord": "Dis quel accord est l'arpège : par exemple “arpège de A mineur 7”.",
+        "needScale": "Dis quelle gamme : par exemple “pentatonique mineure de A”.",
+        "scale": "L'app ne sait pas encore créer d'exercice en {{scale}}. Elle crée la pentatonique mineure et majeure, le blues, la majeure, la mineure naturelle et harmonique, le dorien et le mixolydien.",
+        "boxScale": "Une boîte, c'est pour la pentatonique mineure, la pentatonique majeure et le blues, pas pour {{scale}}.",
+        "threeScale": "Trois notes par corde, c'est pour la majeure, la mineure naturelle, la mineure harmonique, le dorien et le mixolydien, pas pour {{scale}}.",
+        "mixed": "Cela nomme une gamme et un accord à la fois, ou un que cette forme n'accepte pas. Dis-en un seul.",
+        "noShapeHere": "Cette forme ne commence pas à la case {{fret}}.",
+        "outOfRange": "À partir de la case {{fret}}, elle dépasse la fin du manche.",
+        "tooManyNotes": "Un passage demande {{count}} mesure.",
+        "tooManyNotes_other": "Un passage demande {{count}} mesures.",
+        "tooLong": "Un passage demande plus de {{count}} mesures, le maximum d'un exercice.",
+        "tooFewNotes": "Il y a trop peu de notes pour autant de mesures : elles remplissent {{count}} mesure.",
+        "tooFewNotes_other": "Il y a trop peu de notes pour autant de mesures : elles remplissent {{count}} mesures.",
+        "unreachable": "Aucune main que l'app connaît ne peut jouer assez vite pour que ce soit évalué.",
+        "notMade": "L'app ne sait pas créer celui-là.",
+        "loading": "L'app prépare le créateur d'exercices. Redemande dans un instant.",
+        "loadFailed": "L'app n'a pas pu charger le créateur d'exercices, donc rien n'a été créé.",
+        "full": "Mes exercices est plein (50) : celui-ci n'a pas été ajouté. Retires-en d'abord un de cette liste.",
+        "already": "Celui-là est déjà dans Mes exercices.",
+        "badRecipe": "L'app ne sait pas créer celui-là.",
+        "unreadable": "Mes exercices n'a pas pu être lu à l'instant, donc rien n'a été ajouté.",
+        "failed": "Mes exercices n'a pas pu être enregistré à l'instant, donc rien n'a été ajouté.",
+        "undo": {
+          "gone": "Il n'est plus dans Mes exercices.",
+          "unreadable": "Mes exercices n'a pas pu être lu à l'instant, donc rien n'a été retiré.",
+          "failed": "Mes exercices n'a pas pu être enregistré à l'instant, donc il y est toujours."
+        },
+        "tooManyNotes_many": "Un passage demande {{count}} mesures.",
+        "tooFewNotes_many": "Il y a trop peu de notes pour autant de mesures : elles remplissent {{count}} mesures."
+      }
     },
     "yours": {
       "input": "Celui-là te revient. Le coach n'active ni ne coupe jamais l'entrée. Écouter dans les outils et la barre de séance le font, et les Réglages ont l'entrée.",
@@ -255,6 +295,26 @@
         "neck": "Manche",
         "runway": "Runway",
         "tab": "Tab"
+      }
+    },
+    "make": {
+      "source": "Calculé par l'app",
+      "graded": "Démarre à {{bpm}} BPM. Le placement et les notes entendues peuvent être évalués ; le reste est à toi.",
+      "startsOn": "Commence sur {{note}} : corde {{string}}, case {{fret}}.",
+      "startsOnString": "Commence sur la corde {{string}}, case {{fret}}.",
+      "notesLabel": "{{n}} notes, cases {{from}} à {{to}}",
+      "openPaths": "Ouvrir Parcours",
+      "undoLeft": "L'annulation a pris fin quand tu as quitté l'écran où cela a été ajouté. Pour le retirer, utilise Retirer dans Mes exercices, sous Parcours.",
+      "chip": {
+        "fret": "Case {{fret}}",
+        "bars": "{{count}} mesure",
+        "bars_other": "{{count}} mesures",
+        "quarters": "En noires",
+        "eighths": "En croches",
+        "eighthTriplets": "En triolets",
+        "sixteenths": "En doubles-croches",
+        "nextPosition": "Position suivante",
+        "bars_many": "{{count}} mesures"
       }
     }
   }

@@ -364,7 +364,7 @@
         "even": "Độ đều {{value}}%, mức là {{bar}}%. Đủ nốt cả; vấn đề là khoảng cách giữa chúng. Cùng nốt, cùng tempo.",
         "heard": "Tôi nghe được {{heard}} trên {{expected}} nốt, mà thiếu nốt thì nhịp không thể đạt.",
         "extras": "{{extras}} nốt tôi không chờ đợi. Nếu dây không chơi đang ngân, hãy chặn chúng lại.",
-        "accents": "{{value}}% số nhấn được đánh dấu vang to hơn các nốt xung quanh.",
+        "accents": "Trung bình, các nhấn được đánh dấu vang to hơn các nốt khác {{value}}%.",
         "notes": "{{value}}% số nốt tôi nhận ra cao độ là đúng nốt đã viết. Cùng nốt, cùng tempo, và để ý phím đàn.",
         "evenSome": "Độ đều {{value}}%, mức là {{bar}}%, và {{missed}} nốt không kêu. Cùng nốt, cùng tempo, đủ từng nốt."
       },

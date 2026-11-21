@@ -62,7 +62,16 @@
         "changed": "Son denemeden beri ne değişti?",
         "improving": "Gelişiyor muyum?",
         "madeOf": "Puan neyden oluşuyor?",
-        "distance": "Çıta ne kadar uzakta?"
+        "distance": "Çıta ne kadar uzakta?",
+        "purpose": "Bu ne işe yarıyor?",
+        "how": "Nasıl çalınır?",
+        "try": "Neyi denemeliyim?",
+        "planWhy": "Neden bu?",
+        "planTempo": "Neden bu tempo?",
+        "planNext": "Sırada ne var?",
+        "planReturn": "Bu ne zaman geri gelir?",
+        "passMarkMs": "Düzgünlük çıtası ne demek?",
+        "cleanTempo": "Temiz tempo nedir?"
       },
       "canAnswer": {
         "ungraded": "Değerlendirmesiz çalıyorsun, bu yüzden denemelerin hakkındaki soruları yanıtlayacak ölçüm yok."
@@ -103,7 +112,7 @@
         "evenSome": "{{take}}. deneme %{{value}} düzgünlükteydi, çıta %{{bar}}; {{expected}} notanın {{heard}} tanesini duydum.",
         "heard": "{{take}}. denemede {{expected}} notanın {{heard}} tanesini duydum, çıta %{{bar}}.",
         "extras": "{{take}}. denemede çıtanın izin verdiğinden daha çok fazla nota vardı: dört ölçüde {{bar}} veya daha az.",
-        "accents": "{{take}}. denemede işaretli aksanlardan çevresindeki notalardan yüksek çıkanların oranı %{{value}}, çıta %{{bar}}.",
+        "accents": "{{take}}. denemede işaretli aksanlar ortalama olarak diğer notalardan %{{value}} daha yüksek çıktı, çıta %{{bar}}.",
         "notes": "{{take}}. denemede ses yüksekliğini belirleyebildiğim notalarda yazılı olanların oranı %{{value}}, çıta %{{bar}}."
       },
       "count": {
@@ -203,7 +212,7 @@
           "even": "Düzgünlük: art arda {{over}} ölçüde en az %{{bar}}.",
           "heard": "Duyulan nota: yazılı notaların en az %{{bar}} oranı.",
           "extras": "Fazla nota: {{over}} ölçüde {{bar}} veya daha az.",
-          "accents": "Aksanlar: işaretli aksanların en az %{{bar}} oranı çevresindeki notalardan yüksek.",
+          "accents": "Aksanlar: ortalama olarak diğer notalardan en az %{{bar}} daha yüksek.",
           "notes": "Doğru nota: ses yüksekliğini belirleyebildiğim notalarda yazılı olanların oranı en az %{{bar}}.",
           "hold": "Sona kadar korunan düzgünlük: değerlendirilen kesitin son ölçülerinde en az %{{bar}}."
         },
@@ -266,7 +275,85 @@
         "unmeasured_other": "Çıtanın {{count}} kontrolü {{take}}. denemede ölçülmedi.",
         "tempo": "{{take}}. deneme {{bpm}} BPM'deydi; {{passAt}} BPM veya daha hızlı temiz bir deneme alıştırmayı geçer.",
         "none": "{{take}}. denemede çıtanın hiçbir kontrolünü ölçmedim."
+      },
+      "path": {
+        "quote": "“{{text}}”",
+        "noExercise": "Ekranda bunu okuyabileceğim bir alıştırma yok.",
+        "purposeIntro": "Bu alıştırmanın ne işe yaradığı, yolun kendi sözleriyle:",
+        "purposeNone": "Yol bu alıştırma için bir amaç vermiyor.",
+        "howIntro": "Nasıl çalınacağı, yolun kendi sözleriyle:",
+        "howNone": "Yol bu alıştırmanın nasıl çalınacağını söylemiyor.",
+        "tryMeasured": "{{take}}. denemenin neyi ölçtüğüne dair yolun notu:",
+        "tryGeneral": "Bu alıştırma için yolun notu:",
+        "tryNone": "Yolun bu alıştırma için bir notu yok."
+      },
+      "plan": {
+        "notInPlan": "Planı olan çalışan bir oturum yok, bu yüzden bunu okuyabileceğim bir yer yok.",
+        "why": "Bu bölümün bu oturumun planında olmasının nedeni:",
+        "tempoPlanned": "Bu bölüm {{bpm}} BPM'de planlanmıştı.",
+        "tempoNow": "Şimdi {{bpm}} BPM'de.",
+        "tempoNone": "Bu bölümün kendine ait bir tempo değeri yok.",
+        "next": "Bu oturumun planında sıradaki: {{title}}, {{minutes}} dk.",
+        "nextBpm": "Bu oturumun planında sıradaki: {{title}}, {{bpm}} BPM'de, {{minutes}} dk.",
+        "nextLast": "Bu oturumun planının son bölümü bu.",
+        "skip": "Sınava gir, henüz geçmediğin adımın değerlendirmeli her alıştırması için geçme temposunda bir deneme çaldırır (hepsini geçtiysen hepsi yeniden).",
+        "skipInSession": "Sınava gir, bir adımın sayfasından başlar; oturum sürerken başlamaz.",
+        "minutes": "Bugünün planı {{list}} dakikalık olarak geliyor.",
+        "minutesSnapped": "{{asked}} dakikaya en yakın olan {{to}}.",
+        "minutesNone": "Kaç dakikan olduğunu bir sayıyla söyle.",
+        "minutesInSession": "Süren bir oturumun dakikası değiştirilemez.",
+        "returnDays": "Tekrar takvimi bu alıştırmayı {{count}} gün içinde, {{bpm}} BPM'de geri getiriyor.",
+        "returnDays_other": "Tekrar takvimi bu alıştırmayı {{count}} gün içinde, {{bpm}} BPM'de geri getiriyor.",
+        "returnDue": "Bu alıştırmanın tekrar zamanı şimdi, {{bpm}} BPM'de.",
+        "returnNotPassed": "Bu alıştırma henüz geçilmedi; tekrarlar geçildikten sonra başlar.",
+        "returnUngraded": "Bu alıştırma değerlendirilmiyor, bu yüzden tekrar takvimi yok.",
+        "returnNoPassTempo": "Bu alıştırmanın geçme tempo değeri yok, bu yüzden tekrar takvimi onu geri getirmiyor.",
+        "returnMine": "Kendi alıştırmaların bir yolda değil, bu yüzden tekrar takvimleri yok.",
+        "returnNotFair": "Bu alıştırmanın bir denemesi adil değil diye işaretlenmiş ve tekrar takvimi onu dışarıda bırakmıyor, bu yüzden alıntılamıyorum."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} şu notalardan oluşur: {{notes}}.",
+        "chordUnknown": "Bu akoru bilmiyorum. {{root}} üzerinde dizebildiğim akorlar: {{known}}.",
+        "scalesIntroMajor": "{{chord}} üzerinde, {{root}} majörün ana akoru sayıldığında, uygulama şu dizileri seçiyor; her birinde akorun bütün notaları var.",
+        "scalesIntroMinor": "{{chord}} üzerinde, {{root}} minörün ana akoru sayıldığında, uygulama şu dizileri seçiyor; her birinde akorun bütün notaları var.",
+        "scalesPlacedMajor": "{{chord}}, {{root}} majörün {{degree}} akoru; ait olduğu tonalitelerden biri. Bu tonalitede uygulama şu dizileri seçiyor; her birinde akorun bütün notaları var.",
+        "scalesPlacedMinor": "{{chord}}, {{root}} minörün {{degree}} akoru; ait olduğu tonalitelerden biri. Bu tonalitede uygulama şu dizileri seçiyor; her birinde akorun bütün notaları var.",
+        "scalesPlacedMajorAlso": "{{chord}}, {{root}} majörün {{degree}} akoru; ait olduğu tonalitelerden biri ({{root}} ile {{plain}} aynı sesi verir). Bu tonalitede uygulama şu dizileri seçiyor; her birinde akorun bütün notaları var.",
+        "scalesPlacedMinorAlso": "{{chord}}, {{root}} minörün {{degree}} akoru; ait olduğu tonalitelerden biri ({{root}} ile {{plain}} aynı sesi verir). Bu tonalitede uygulama şu dizileri seçiyor; her birinde akorun bütün notaları var.",
+        "scalesNoneMajor": "{{root}} majörde, uygulamanın {{chord}} için seçtiği dizilerin hiçbirinde akorun bütün notaları yok.",
+        "scalesNoneMinor": "{{root}} minörde, uygulamanın {{chord}} için seçtiği dizilerin hiçbirinde akorun bütün notaları yok.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "Bu alıştırma değerlendirilmiyor, bu yüzden çıtası yok.",
+        "noPassMarkSet": "Çıta ayarlı değil: değerlendirmesiz çalıyorsun, bu yüzden çaldığın hiçbir şey bir çıtaya karşı ölçülmüyor. Ayarlamak için Ayarlar'da, Pratik altında, \"Çalışımı değerlendir\" için \"Beni değerlendir\"i seç; bunu herhangi bir oturumda da değiştirebilirsin.",
+        "noSuchMark": "Bu alıştırmanın hiçbir çıtası %{{value}} değil.",
+        "evenNone": "Bu alıştırmanın çıtasında düzgünlük kontrolü yok.",
+        "evenNoMs": "Bu alıştırmanın düzgünlük çıtasını milisaniyeye çeviremiyorum: vuruşu dörtlük nota değil.",
+        "evenMs": "Buradaki düzgünlük çıtası %{{bar}}: {{bpm}} BPM'de, bu alıştırmanın birbirine en yakın notaları {{gap}} ms arayla dururken, kendi ortalama zamanlamanın çevresinde yaklaşık {{ms}} ms'lik bir yayılmaya izin veriyor.",
+        "holdMs": "Sona kadar korunan düzgünlük çıtası %{{bar}} ve değerlendirilen kesitin son ölçülerinde ölçülüyor: {{bpm}} BPM'de, bu alıştırmanın birbirine en yakın notaları {{gap}} ms arayla dururken, kendi ortalama zamanlamanın çevresinde yaklaşık {{ms}} ms'lik bir yayılmaya izin veriyor.",
+        "heardMark": "%{{bar}}, duyulan nota çıtası: değerlendirilen ölçülerde yazılı her 100 notadan en az {{bar}} tanesi duyulmalı.",
+        "accentsMark": "%{{bar}}, aksan çıtası: işaretli aksanlar ortalama olarak diğer notalardan en az %{{bar}} daha yüksek çıkmalı.",
+        "notesMark": "%{{bar}}, doğru nota çıtası: perdesini belirleyebildiğim her 100 notadan en az {{bar}} tanesi yazılı olanlar olmalı.",
+        "markOther": "%{{value}}, bu alıştırmanın başka bir kontrolünün çıtası; düzgünlüğünün değil.",
+        "markAlso": "%{{value}} aynı zamanda bu alıştırmanın başka bir kontrolünün de çıtası.",
+        "evenHow": "Düzgünlük, klik çevresinde değil kendi ortalama zamanlamanın çevresinde ölçülür, bu yüzden sabit bir kayma onu düşürmez.",
+        "clean": "Temiz tempon, bir denemenin her kontrolü tutan art arda en az {{need}} ölçüyle geçtiği en yüksek tempodur.",
+        "cleanYours": "Bu alıştırmadaki temiz tempon {{bpm}} BPM.",
+        "cleanNone": "Bu alıştırmada henüz temiz tempon yok.",
+        "cleanNotFair": "Adil değil diye işaretlediğin denemeler buna sayılmaz.",
+        "cleanMine": "Kendi alıştırmaların bir yolda değil, bu yüzden onlar için temiz tempo alıntılamıyorum."
       }
+    },
+    "source": {
+      "measured": "Ölçüldü: uygulama bunu senin kendi denemelerinden okudu.",
+      "path": "Yoldan: yolun kendi yazılı sözleri, olduğu gibi alıntılandı.",
+      "app": "Uygulama hesapladı: kendi kurallarıyla hesaplandı, bir model yazmadı.",
+      "general": "Genel tavsiye: bu bilgisayardaki model genel olarak çalmak üzerine yazdı, senin çalışından değil.",
+      "take": "{{take}}. deneme, sonucunun söylediği gibi: {{text}}",
+      "takeGone": "{{take}}. denemenin sonucu artık ekrandakiyle aynı değil, bu yüzden onu burada açamıyorum.",
+      "step": "{{step}}. adım, {{title}}, yolun kendi sözleriyle:",
+      "stepGone": "{{step}}. adımı burada alıntılamak için bulamıyorum."
     }
   }
 }

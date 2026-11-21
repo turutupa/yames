@@ -364,7 +364,7 @@
         "even": "{{value}}% even against a pass mark of {{bar}}%. Every note was there; it's the spacing between them. Same notes, same tempo.",
         "heard": "I heard {{heard}} of {{expected}} notes, and timing can't pass without them.",
         "extras": "{{extras}} notes I wasn't expecting. Keep the idle strings quiet if they're ringing.",
-        "accents": "{{value}}% of the marked accents came out louder than the notes around them.",
+        "accents": "On average, the marked accents came out {{value}}% louder than the other notes.",
         "notes": "{{value}}% of the notes I could pitch were the written ones. Same notes, same tempo, and watch the frets.",
         "evenSome": "{{value}}% even against a pass mark of {{bar}}%, and {{missed}} notes didn't sound. Same notes, same tempo, every one of them."
       },

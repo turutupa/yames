@@ -31,7 +31,11 @@
       "loadAsked": "Yames önce kaydedilmemiş değişikliklerini sordu. Sen cevaplayana kadar hiçbir şey yüklenmez.",
       "clickSubdivision": "Vuruş başına tık: {{to}}",
       "setSetting": "{{key}}: {{to}}",
-      "setGoal": "Hedef kaydedildi: “{{to}}”"
+      "setGoal": "Hedef kaydedildi: “{{to}}”",
+      "makeExercise": "{{what}} Alıştırmalarım'a eklendi.",
+      "makeExerciseAdding": "{{what}} Alıştırmalarım'a ekleniyor…",
+      "undoMakeExercise": "Alıştırmalarım'dan geri çıkarıldı.",
+      "undoMakeExerciseDoing": "Alıştırmalarım'dan geri çıkarılıyor…"
     },
     "propose": {
       "goTo": "{{screen}} açılsın mı?",
@@ -62,7 +66,9 @@
       "clickSubdivision": "Vuruş başına tık: {{from}} → {{to}}",
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Hedefin olarak kalsın: “{{to}}”",
-      "setGoalFrom": "Hedefini “{{from}}” yerine “{{to}}” yap"
+      "setGoalFrom": "Hedefini “{{from}}” yerine “{{to}}” yap",
+      "makeExercise": "Alıştırmalarım'a ekle",
+      "undoMakeExercise": "Alıştırmalarım'dan geri çıkar"
     },
     "stops": {
       "click": "Tık durur.",
@@ -120,7 +126,8 @@
       "keep": "Kalsın",
       "go": "Git",
       "open": "Aç",
-      "loop": "Döngüye al"
+      "loop": "Döngüye al",
+      "add": "Ekle"
     },
     "why": {
       "which": "Hangisi?",
@@ -181,7 +188,38 @@
         "cap": "{{cap}} yolu takip ediyorsun, en fazla bu kadar olabilir. Önce birini kendi sayfasından bırak.",
         "loopBackwards": "{{to}}. ölçü, {{from}}. ölçüden önce geliyor. Önce ilk ölçüyü söyle."
       },
-      "failed": "Olmadı ve hiçbir şey değişmedi."
+      "failed": "Olmadı ve hiçbir şey değişmedi.",
+      "make": {
+        "what": "Ne yapılacağını söyle: bir gam ya da bir akor ve kökü. Örneğin “A minör pentatonik, 5. perde”.",
+        "root": "Kökünü de söyle: örneğin “A minör pentatonik”.",
+        "chord": "Arpejin hangi akor olduğunu söyle: örneğin “A minör 7 arpej”.",
+        "needScale": "Hangi gam olduğunu söyle: örneğin “A minör pentatonik”.",
+        "scale": "Uygulama henüz {{scale}} ile alıştırma yapamıyor. Minör ve majör pentatonik, blues, majör, doğal ve armonik minör, dorian ve miksolidyen yapabiliyor.",
+        "boxScale": "Kutu kalıbı minör pentatonik, majör pentatonik ve blues içindir, {{scale}} için değil.",
+        "threeScale": "Telde üç nota; majör, doğal minör, armonik minör, dorian ve miksolidyen içindir, {{scale}} için değil.",
+        "mixed": "Bu aynı anda hem bir gamı hem bir akoru adlandırıyor ya da bu kalıbın almadığı birini. Yalnızca birini söyle.",
+        "noShapeHere": "Bu kalıp {{fret}}. perdede başlamıyor.",
+        "outOfRange": "{{fret}}. perdeden itibaren sapın sonundan taşıyor.",
+        "tooManyNotes": "Bir kez baştan sona çalmak {{count}} ölçü ister.",
+        "tooManyNotes_other": "Bir kez baştan sona çalmak {{count}} ölçü ister.",
+        "tooLong": "Bir kez baştan sona çalmak {{count}} ölçüden fazla ister; bir alıştırmada en fazla bu kadar olabilir.",
+        "tooFewNotes": "Bu kadar ölçü için nota çok az: {{count}} ölçüyü dolduruyor.",
+        "tooFewNotes_other": "Bu kadar ölçü için nota çok az: {{count}} ölçüyü dolduruyor.",
+        "unreachable": "Uygulamanın tanıdığı hiçbir el bunu değerlendirilecek kadar hızlı çalamaz.",
+        "notMade": "Uygulama bunu yapamıyor.",
+        "loading": "Uygulama alıştırma oluşturucuyu hazırlıyor. Biraz sonra tekrar sor.",
+        "loadFailed": "Uygulama alıştırma oluşturucuyu yükleyemedi, bu yüzden hiçbir şey yapılmadı.",
+        "full": "Alıştırmalarım dolu (50), bu yüzden bu eklenmedi. Önce oradan birini kaldır.",
+        "already": "Bu zaten Alıştırmalarım'da.",
+        "badRecipe": "Uygulama bunu yapamıyor.",
+        "unreadable": "Alıştırmalarım az önce okunamadı, bu yüzden hiçbir şey eklenmedi.",
+        "failed": "Alıştırmalarım az önce kaydedilemedi, bu yüzden hiçbir şey eklenmedi.",
+        "undo": {
+          "gone": "Artık Alıştırmalarım'da değil.",
+          "unreadable": "Alıştırmalarım az önce okunamadı, bu yüzden hiçbir şey çıkarılmadı.",
+          "failed": "Alıştırmalarım az önce kaydedilemedi, bu yüzden hâlâ orada."
+        }
+      }
     },
     "yours": {
       "input": "Bu sende. Koç girişi asla açıp kapatmaz. Araçlardaki Dinle ve oturum çubuğu bunu yapar, giriş de Ayarlar'da.",
@@ -255,6 +293,25 @@
         "neck": "Sap",
         "runway": "Pist",
         "tab": "Tab"
+      }
+    },
+    "make": {
+      "source": "Uygulama tarafından hazırlandı",
+      "graded": "{{bpm}} BPM ile başlar. Tempo ve duyulan notalar değerlendirilebilir; gerisi sana ait.",
+      "startsOn": "{{note}} notasında başlar: {{string}}. tel, {{fret}}. perde.",
+      "startsOnString": "{{string}}. telde, {{fret}}. perdede başlar.",
+      "notesLabel": "{{n}} nota, {{from}}. ile {{to}}. perde arası",
+      "openPaths": "Yolları aç",
+      "undoLeft": "Geri al, bunun eklendiği ekrandan ayrıldığında sona erdi. Çıkarmak için Yollar'daki Alıştırmalarım'da Kaldır'ı kullan.",
+      "chip": {
+        "fret": "{{fret}}. perde",
+        "bars": "{{count}} ölçü",
+        "bars_other": "{{count}} ölçü",
+        "quarters": "Bunun yerine dörtlükler",
+        "eighths": "Bunun yerine sekizlikler",
+        "eighthTriplets": "Bunun yerine üçlemeler",
+        "sixteenths": "Bunun yerine onaltılıklar",
+        "nextPosition": "Sonraki pozisyon"
       }
     }
   }

@@ -14,6 +14,7 @@
  */
 import type { ToolArgs } from "../tools/types";
 import type { AskableMetric, CardShape } from "./cards";
+import { matchPathCard } from "./pathMatch";
 
 export type CardCall = { tool: CardShape; args: ToolArgs };
 
@@ -137,6 +138,9 @@ const MADE_OF =
 const DISTANCE =
   /\bhow (far|close|much) (am i|was i|is it|was it|was that|is that)? ?(from|to|off|away from|short of|below|under) (the )?pass(ing| mark)?\b|\bhow (far|close) (is|was) (the )?pass mark\b|\bhow (far|close) (off|away) (am i|was i|was it|is it) (from|to) (the )?pass(ing| mark)?\b|\bhow (much|far) (more|better|faster) (do i need|did i need)\b|\bwhat (do|did) i (need|miss) to pass\b|\b(did i|was i|was it) (nearly|almost|close to) pass(ing)?\b|\bby how much did i (miss|fail)\b/;
 
+const SUGGEST_PATH =
+  /^((can you |could you |please )?(suggest|recommend) (me )?(a|another|the next|my next) path|(which|what) path (should|could|do) i (do|try|take|start|play|pick) next|(which|what) path next)\b/;
+
 function metricIn(s: string): AskableMetric | null {
   const found = METRIC_WORDS.filter(([, re]) => re.test(s)).map(([id]) => id);
   return found.length === 1 ? found[0] : null;
@@ -149,6 +153,21 @@ function metricIn(s: string): AskableMetric | null {
 export function matchCard(text: string): CardCall | null {
   const s = normalizeQuestion(text);
   if (!s || s.length > 160) return null;
+  // "Suggest a Path" (c4b3): asked as a request as often as a question.
+  if (SUGGEST_PATH.test(s.replace(/\?/g, "").trim())) return { tool: "suggest_path", args: {} };
+  // The Path, plan, theory and term cards (leg c2b2a): one shape across both
+  // tables, or no card.
+  const found = [...matchPathCard(s, text), ...matchTakeCards(s)];
+  return found.length === 1 ? found[0] : null;
+}
+
+/** The Take cards' table (legs c2b1a, c2b1b): every shape it finds in `s`. */
+function matchTakeCards(s: string): CardCall[] {
+  const one = matchTakeCard(s);
+  return one ? [one] : [];
+}
+
+function matchTakeCard(s: string): CardCall | null {
   const asks = s.endsWith("?") || QUESTION_START.test(s);
   if (!asks || GENERAL_START.test(s)) return null;
   const q = s.replace(/\?/g, "").trim();

@@ -8,9 +8,9 @@ import { DEFAULT_TEST_STATE, mockInvoke, setInvokeResponse } from "../../../test
 import type { PathStateRow } from "../../../ipc";
 import { useSessionRun } from "./useSessionRun";
 
-function mount(states: PathStateRow[] = [], unsubscribed: string[] = []) {
+function mount(states: PathStateRow[] = [], unsubscribed: string[] = [], takes: unknown = []) {
   setInvokeResponse("list_path_states", states);
-  setInvokeResponse("list_path_takes", []);
+  setInvokeResponse("list_path_takes", takes);
   setInvokeResponse("list_exercise_ceilings", []);
   setInvokeResponse("plugin:store|get", (args?: Record<string, unknown>) =>
     args?.key === "session.unsubscribed" ? [unsubscribed, true] : [null, false],
@@ -71,5 +71,26 @@ describe("useSessionRun — startPath", () => {
       expect(result.current.actions.startPath(blues, "beginner")).toBe("cap");
     });
     expect(saved()).toHaveLength(0);
+  });
+});
+
+describe("useSessionRun — takesKnown (rem2c)", () => {
+  it("is false until the Takes read answers, then true", async () => {
+    const { result } = mount();
+    expect(result.current.takesKnown).toBe(false);
+    await waitFor(() => expect(result.current.takesKnown).toBe(true));
+  });
+
+  it("stays false when the Takes read fails, though the Takes read as []", async () => {
+    let asked = 0;
+    const { result } = mount([], [], () => {
+      asked += 1;
+      throw new Error("practice store unreadable");
+    });
+    await waitFor(() => expect(asked).toBe(1));
+    await waitFor(() => expect(result.current.paths.length).toBeGreaterThan(0));
+    await act(async () => {});
+    expect(result.current.progress.takes).toEqual([]);
+    expect(result.current.takesKnown).toBe(false);
   });
 });

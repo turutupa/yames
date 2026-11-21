@@ -11,9 +11,30 @@ import { fakeHost } from "../tools/fakeHost";
 import { isCard } from "./cards";
 import { fixture } from "./cardFixtures";
 import { cardsHere, factCardCatalogue, FACT_CARDS, runFactCard } from "./intents";
+import { rememberPaths } from "../pathSuggest";
+import { NO_PROGRESS } from "../../session/progress";
+import { ALT, SWEEP } from "../../session/testKit";
 
 /** Every card, in the list's order (c2b1a's three, then c2b1b's four). */
 const ALL_CARDS = ["where_slipped", "early_or_late", "why_not_counted", "what_changed", "improving", "score_made_of", "pass_mark_distance"] as const;
+/** c2b2a's: the Path, the plan, theory, the app's terms. */
+const PATH_CARDS = [
+  "exercise_purpose",
+  "exercise_how",
+  "exercise_try",
+  "plan_why",
+  "plan_tempo",
+  "plan_next",
+  "plan_skip",
+  "plan_minutes",
+  "plan_return",
+  "scale_fits",
+  "chord_notes",
+  "pass_mark_ms",
+  "clean_tempo",
+  // Leg c4b3: reads no Take either.
+  "suggest_path",
+] as const;
 
 describe("the cards as read tools", () => {
   it("every card is a player `read` tool with closed arguments (no query, no id)", () => {
@@ -34,7 +55,7 @@ describe("the cards as read tools", () => {
   it("the catalogue is plain data in the registry's shape", () => {
     const catalogue = factCardCatalogue();
     expect(JSON.parse(JSON.stringify(catalogue))).toEqual(catalogue);
-    expect(catalogue.tools.map((t) => t.name)).toEqual([...ALL_CARDS]);
+    expect(catalogue.tools.map((t) => t.name)).toEqual([...ALL_CARDS, ...PATH_CARDS]);
   });
 
   it("the runner's shape check stands in front of every card", () => {
@@ -66,13 +87,44 @@ describe("when: what can be asked here", () => {
     ["no Take yet: only what the score is made of (it reads the Exercise)", {}, { lastTake: undefined }, ["score_made_of"]],
   ];
   it.each(rows)("%s", (_name, shape, over, cards) => {
-    expect(cardsHere(fixture(shape, over).ctx)).toEqual(cards);
+    // The Take's cards; the Path's, plan's and terms' cards (c2b2a) are held below.
+    expect(cardsHere(fixture(shape, over).ctx).filter((n) => (ALL_CARDS as readonly string[]).includes(n))).toEqual(cards);
+  });
+
+  it("a Path suggestion reads no grade and no Take: here for an ungraded player, with no Take, never in a Take (c4b3)", () => {
+    expect(cardsHere(fixture({}, { grading: "off" }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { run: { ...runIn("result"), ungraded: "chosen" } }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { lastTake: undefined }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({ verdict: "notCaught" }).ctx)).toContain("suggest_path");
+    expect(cardsHere(fixture({}, { run: runIn("playing") }).ctx)).not.toContain("suggest_path");
+  });
+
+  it("during a Take: no card at all, the Path's and the plan's included (c2b2a)", () => {
+    expect(cardsHere(fixture({}, { run: runIn("playing") }).ctx)).toEqual([]);
+  });
+
+  it("grading off: the Path's words and the schedule, never the pass mark's terms (c2b2a)", () => {
+    const here = cardsHere(fixture({}, { grading: "off", path: { id: "alternate-picking" } as never }).ctx);
+    expect(here).toContain("plan_return");
+    expect(here).not.toContain("pass_mark_ms");
+    expect(here).not.toContain("clean_tempo");
   });
 
   it("an ungraded player asking anyway gets one line, never a card about quality", () => {
     const out = runFactCard({ tool: "where_slipped", args: {} }, { ...graded, grading: "off" });
     expect(isCard(out)).toBe(false);
     expect(!isCard(out) && out.line.key).toBe("ask.card.notNow.ungraded");
+  });
+
+  it("an ungraded player asking for a Path suggestion is answered, not refused (c4b3)", () => {
+    rememberPaths([ALT, SWEEP]);
+    try {
+      const out = runFactCard({ tool: "suggest_path", args: {} }, { ...graded, grading: "off", progress: NO_PROGRESS });
+      expect(isCard(out) && out.shape).toBe("suggest_path");
+      expect(isCard(out) && out.source).toEqual({ kind: "path" });
+    } finally {
+      rememberPaths([]);
+    }
   });
 
   it("asked about a Take not caught, the where card says it did not measure it (uncertainty by rule)", () => {

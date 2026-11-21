@@ -31,7 +31,11 @@
       "loadAsked": "Yames preguntó primero por tus cambios sin guardar. No se carga nada hasta que respondas.",
       "clickSubdivision": "Clics por pulso: {{to}}",
       "setSetting": "{{key}}: {{to}}",
-      "setGoal": "Objetivo guardado: «{{to}}»"
+      "setGoal": "Objetivo guardado: «{{to}}»",
+      "makeExercise": "{{what}} se añadió a Mis ejercicios.",
+      "makeExerciseAdding": "Añadiendo {{what}} a Mis ejercicios…",
+      "undoMakeExercise": "Se quitó de Mis ejercicios.",
+      "undoMakeExerciseDoing": "Quitándolo de Mis ejercicios…"
     },
     "propose": {
       "goTo": "¿Abrir {{screen}}?",
@@ -62,7 +66,9 @@
       "clickSubdivision": "Clics por pulso: {{from}} → {{to}}",
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Guardar como tu objetivo: «{{to}}»",
-      "setGoalFrom": "Cambiar tu objetivo de «{{from}}» a «{{to}}»"
+      "setGoalFrom": "Cambiar tu objetivo de «{{from}}» a «{{to}}»",
+      "makeExercise": "Añádelo a Mis ejercicios",
+      "undoMakeExercise": "Quítalo de Mis ejercicios"
     },
     "stops": {
       "click": "El clic se detiene.",
@@ -120,7 +126,8 @@
       "keep": "Guárdalo",
       "go": "Ir",
       "open": "Ábrelo",
-      "loop": "Repítelo"
+      "loop": "Repítelo",
+      "add": "Añadirlo"
     },
     "why": {
       "which": "¿Cuál?",
@@ -181,7 +188,40 @@
         "cap": "Sigues {{cap}} rutas, el máximo posible. Deja una primero en su página.",
         "loopBackwards": "El compás {{to}} va antes que el compás {{from}}. Nombra primero el primer compás."
       },
-      "failed": "Eso no funcionó, y no se cambió nada."
+      "failed": "Eso no funcionó, y no se cambió nada.",
+      "make": {
+        "what": "Di qué hacer: una escala o un acorde, y su tónica. Por ejemplo “pentatónica menor de A, traste 5”.",
+        "root": "Di también su tónica: por ejemplo “pentatónica menor de A”.",
+        "chord": "Di qué acorde es el arpegio: por ejemplo “arpegio de A menor 7”.",
+        "needScale": "Di qué escala: por ejemplo “pentatónica menor de A”.",
+        "scale": "La app aún no puede hacer un ejercicio en {{scale}}. Hace la pentatónica menor y mayor, blues, mayor, menor natural y armónica, dórica y mixolidia.",
+        "boxScale": "Una caja es para la pentatónica menor, la pentatónica mayor y el blues, no para {{scale}}.",
+        "threeScale": "Tres notas por cuerda es para mayor, menor natural, menor armónica, dórica y mixolidia, no para {{scale}}.",
+        "mixed": "Eso nombra una escala y un acorde a la vez, o uno que esa forma no admite. Di solo uno.",
+        "noShapeHere": "Esa forma no empieza en el traste {{fret}}.",
+        "outOfRange": "Desde el traste {{fret}} se sale del final del mástil.",
+        "tooManyNotes": "Una pasada necesita {{count}} compás.",
+        "tooManyNotes_other": "Una pasada necesita {{count}} compases.",
+        "tooLong": "Una pasada necesita más de {{count}} compases, el máximo que puede tener un ejercicio.",
+        "tooFewNotes": "Son muy pocas notas para tantos compases: llenan {{count}} compás.",
+        "tooFewNotes_other": "Son muy pocas notas para tantos compases: llenan {{count}} compases.",
+        "unreachable": "Ninguna mano que la app conozca puede tocar tan rápido como para evaluarlo.",
+        "notMade": "La app no puede hacer ese.",
+        "loading": "La app está preparando el creador de ejercicios. Vuelve a preguntar en un momento.",
+        "loadFailed": "La app no pudo cargar el creador de ejercicios, así que no se hizo nada.",
+        "full": "Mis ejercicios está lleno (50), así que este no se añadió. Quita uno de ahí primero.",
+        "already": "Ese ya está en Mis ejercicios.",
+        "badRecipe": "La app no puede hacer ese.",
+        "unreadable": "No se pudo leer Mis ejercicios ahora mismo, así que no se añadió nada.",
+        "failed": "No se pudo guardar Mis ejercicios ahora mismo, así que no se añadió nada.",
+        "undo": {
+          "gone": "Ya no está en Mis ejercicios.",
+          "unreadable": "No se pudo leer Mis ejercicios ahora mismo, así que no se quitó nada.",
+          "failed": "No se pudo guardar Mis ejercicios ahora mismo, así que sigue ahí."
+        },
+        "tooManyNotes_many": "Una pasada necesita {{count}} compases.",
+        "tooFewNotes_many": "Son muy pocas notas para tantos compases: llenan {{count}} compases."
+      }
     },
     "yours": {
       "input": "Eso es cosa tuya. El coach nunca activa ni desactiva la entrada. Escuchar en las herramientas y la barra de sesión lo hacen, y la entrada está en Ajustes.",
@@ -255,6 +295,26 @@
         "neck": "Mástil",
         "runway": "Pista",
         "tab": "Tab"
+      }
+    },
+    "make": {
+      "source": "Calculado por la app",
+      "graded": "Empieza a {{bpm}} BPM. Se pueden evaluar el tiempo y las notas oídas; lo demás es cosa tuya.",
+      "startsOn": "Empieza en {{note}}: cuerda {{string}}, traste {{fret}}.",
+      "startsOnString": "Empieza en la cuerda {{string}}, traste {{fret}}.",
+      "notesLabel": "{{n}} notas, trastes {{from}} a {{to}}",
+      "openPaths": "Abrir Rutas",
+      "undoLeft": "El Deshacer terminó al salir de la pantalla en la que se añadió. Para quitarlo, usa Quitar en Mis ejercicios, en Rutas.",
+      "chip": {
+        "fret": "Traste {{fret}}",
+        "bars": "{{count}} compás",
+        "bars_other": "{{count}} compases",
+        "quarters": "En negras",
+        "eighths": "En corcheas",
+        "eighthTriplets": "En tresillos",
+        "sixteenths": "En semicorcheas",
+        "nextPosition": "Siguiente posición",
+        "bars_many": "{{count}} compases"
       }
     }
   }

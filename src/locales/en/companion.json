@@ -46,6 +46,32 @@
       "another": "Try it another way",
       "rest": "Rest it till {{day}}",
       "rested": "It rests till {{day}}, as the plan already has it. Nothing changed."
+    },
+    "milestone": {
+      "label": "A milestone, from the coach",
+      "kick": "From your Session on {{date}}",
+      "firstPassed": "{{exercise}}: clean at {{bpm}} BPM, at or over its pass mark of {{passAt}}. That is your first Exercise passed.",
+      "stepDone": "{{step}}: {{passed}} of {{count}} Exercises passed, enough to finish the Step. Next on the Path: {{next}}.",
+      "stepDoneRest": "{{step}}: {{passed}} of {{count}} Exercises passed, enough to finish the Step. Next on the Path: {{next}}. The others stay in your reviews until they pass.",
+      "stepDoneLast": "{{step}}: {{passed}} of {{count}} Exercises passed, enough to finish the Step.",
+      "levelDone": "{{level}} on {{path}} is finished: every Step in it is done.",
+      "pathDone": "{{path}} is finished: every Step in it is done.",
+      "pathDoneFrom": "{{path}} is finished from {{level}} on: every Step from there is done.",
+      "benchmark": "Benchmark: {{exercise}}, the same Take at {{bpm}} BPM: {{from}}% even on day {{fromDay}}, {{to}}% on day {{toDay}}.",
+      "payoff": "The Path says: “{{payoff}}”"
+    },
+    "pathSuggest": {
+      "label": "A Path to try next, from the coach",
+      "kick": "A Path to try next",
+      "chip": "Suggest a Path",
+      "next": "{{path}} is the next Path in the curriculum's order that you have not started, and nothing it builds on is missing.",
+      "readyGoal": "{{path}} matches what you said you are working toward, and nothing it builds on is missing.",
+      "buildsOn": "{{path}} builds on {{on}}, which you have started.",
+      "buildsOnLevel": "{{path}} builds on {{on}}, and you are through {{level}} there.",
+      "goal": "You said you are working toward: “{{goal}}”",
+      "open": "Open {{path}}",
+      "none": "Of the Paths you have not started, none has what it builds on in place yet, so there is none to suggest.",
+      "notLoaded": "The Paths are not loaded yet, so there is none to suggest just now."
     }
   }
 }

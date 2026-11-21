@@ -14,16 +14,27 @@
  */
 import type { FactCard, CardShape } from "../../coach/ask/cards";
 import { isCard, lastTakeHere, ungradedPlayer } from "../../coach/ask/cards";
-import { runFactCard } from "../../coach/ask/intents";
+import type { BlockSource } from "../../coach/blocks/resolve";
+import type { TakeOutcome } from "../../session/runner";
+import { findCard, runFactCard } from "../../coach/ask/intents";
 import { matchCard, type CardCall } from "../../coach/ask/match";
 import type { CoachContext } from "../../coach/context";
 import { cardChipsFor, type ChipChoice } from "../../coach/ask/suggest";
 import type { ToolCall } from "../../coach/tools/types";
 import { appendAskTurn, askTurnId, type AskTurn } from "./askStore";
-import { askToolContext } from "./askTools";
+import { askToolContext, runAskCall } from "./askTools";
 
-/** A card turn's body: the card, or the one line that says why there is none. */
-export type CardBody = FactCard | { shape: null; line: FactCard["lines"][number] };
+/**
+ * A card turn's body: the card, or the one line that says why there is none.
+ *
+ * `cites` (leg c2b2b) is the Take a "Measured · Take N" card read, kept so a
+ * press on its source line opens THAT Take's review, not another Exercise's
+ * Take N. A line's `source` is what its source line says (the app's, absent),
+ * and `more` the lines after it (a Step quoted, leg c2b2b).
+ */
+export type CardBody =
+  | (FactCard & { cites?: TakeOutcome })
+  | { shape: null; line: FactCard["lines"][number]; source?: BlockSource; more?: FactCard["lines"] };
 
 const NO_TAKE_KEY = "ask.card.notNow.noTake";
 
@@ -31,13 +42,21 @@ const NO_TAKE_KEY = "ask.card.notNow.noTake";
 export function cardBodyFor(call: ToolCall): CardBody {
   const ctx = askToolContext();
   const out = ctx ? runFactCard(call, ctx) : { line: { key: NO_TAKE_KEY, values: {} } };
-  return isCard(out) ? out : { shape: null, line: out.line };
+  if (!isCard(out)) return { shape: null, line: out.line };
+  // A measured card reads the last Take of the Exercise on screen (`lastTakeHere`).
+  const cites = out.source.kind === "measured" && ctx ? lastTakeHere(ctx)?.outcome : undefined;
+  return cites ? { ...out, cites } : out;
 }
 
-function writeCard(card: CardBody, said: string): string {
+/** The player's words as their turn (when there are any), then the card; returns the card turn's id. */
+export function writeCard(card: CardBody, said: string): string {
   if (said.trim()) appendAskTurn({ id: askTurnId(), kind: "user", text: said.trim() });
   const id = askTurnId();
   appendAskTurn({ id, kind: "card", card });
+  // A card that ends in a drawing or an action (leg c2b2a): the call goes
+  // through the runner like a chip's, as its own turn. An action comes back as
+  // a proposal the player presses or not; nothing changes here.
+  if (card.shape !== null && card.then) runAskCall(card.then, "");
   return id;
 }
 
@@ -64,7 +83,14 @@ export function answerCardFor(text: string): string | null {
   // that line on Songs, Jam or Today would keep the question from the model
   // (review c2b1c M4).
   const ctx = askToolContext();
-  if (!ctx || !readsSomethingHere(call, ctx)) return null;
+  if (!ctx) return null;
+  // The Path, plan, theory and term cards read no Take: typed, they answer only
+  // with a card; "not here" goes on to the next answerer (leg c2b2a).
+  if (findCard(call.tool)?.readsNoTake) {
+    const card = cardBodyFor(call);
+    return card.shape === null ? null : writeCard(card, text);
+  }
+  if (!readsSomethingHere(call, ctx)) return null;
   const card = cardBodyFor(call);
   if (card.shape === null && card.line.key === NO_TAKE_KEY) return null;
   return writeCard(card, text);

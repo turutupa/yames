@@ -95,6 +95,22 @@
       "on": "Włączone",
       "asked": "Tylko gdy zapytam",
       "unreadable": "Twojego wyboru nie udało się teraz odczytać; naciśnięcie jednej z opcji go zapisze."
+    },
+    "reminder": {
+      "label": "Przypomnienie o graniu",
+      "hint": "„Dzisiaj” wspomina o nim po tej godzinie w wybrane dni, jeśli dziś nie zapisano jeszcze żadnego ćwiczenia. Powiadomienia nie ma.",
+      "off": "Wyłączone",
+      "on": "Włączone",
+      "time": "Godzina",
+      "days": "Dni",
+      "quiet": "„Dzisiaj” przestało o nim wspominać: minęły trzy dni przypomnienia bez zapisanego ćwiczenia. Wróci po następnym zapisanym ćwiczeniu.",
+      "noDays": "Nie wybrano żadnych dni, więc „Dzisiaj” o nim nie wspomina.",
+      "unreadable": "Twojego przypomnienia nie udało się teraz odczytać, więc „Dzisiaj” o nim nie wspomina; naciśnięcie Wyłączone lub Włączone zapisze je.",
+      "line": "Twoje przypomnienie: ćwiczenie o {{time}}.",
+      "lineGuitar": "Twoje przypomnienie: gitara o {{time}}.",
+      "lineBass": "Twoje przypomnienie: bas o {{time}}.",
+      "lineDrums": "Twoje przypomnienie: perkusja o {{time}}.",
+      "linePiano": "Twoje przypomnienie: pianino o {{time}}."
     }
   }
 }

@@ -24,7 +24,7 @@
  */
 import type { CoachContext } from "../context";
 import type { Line, ToolCall } from "../tools/types";
-import type { CardShape } from "./cards";
+import { ungradedPlayer, type CardShape } from "./cards";
 import { cardsHere } from "./intents";
 
 export const MAX_CHIPS = 3;
@@ -57,8 +57,13 @@ export type ChipFacts = {
   answered?: CardShape | null;
 };
 
-/** The words on a card's chip: a literal key each (the locale coverage reads them). */
-const CARD_CHIP: Readonly<Record<CardShape, string>> = {
+/**
+ * The words on a card's chip: a literal key each (the locale coverage reads
+ * them). A card whose question needs words of the player's own (a chord, a
+ * number of minutes) or a screen Ask has no context for (Test out, from a
+ * Step's page) has no chip: it is reached by typing (leg c2b2a).
+ */
+const CARD_CHIP: Readonly<Partial<Record<CardShape, string>>> = {
   where_slipped: "ask.card.chip.where",
   early_or_late: "ask.card.chip.lean",
   why_not_counted: "ask.card.chip.count",
@@ -66,7 +71,35 @@ const CARD_CHIP: Readonly<Record<CardShape, string>> = {
   improving: "ask.card.chip.improving",
   score_made_of: "ask.card.chip.madeOf",
   pass_mark_distance: "ask.card.chip.distance",
+  // Leg c4b3: offered before a Take, on Paths and Progress only (`BEFORE_A_TAKE`, last).
+  suggest_path: "companion.pathSuggest.chip",
+  // Leg c2b2a.
+  exercise_purpose: "ask.card.chip.purpose",
+  exercise_how: "ask.card.chip.how",
+  exercise_try: "ask.card.chip.try",
+  plan_why: "ask.card.chip.planWhy",
+  plan_tempo: "ask.card.chip.planTempo",
+  plan_next: "ask.card.chip.planNext",
+  plan_return: "ask.card.chip.planReturn",
+  pass_mark_ms: "ask.card.chip.passMarkMs",
+  clean_tempo: "ask.card.chip.cleanTempo",
 };
+
+/**
+ * Before the first Take of an Exercise (no verdict yet): the Path's words and
+ * the plan's reasons (leg c2b2a). After a Take these follow the Take's own
+ * cards, so they fill a row only where the Take's cards leave room.
+ */
+const BEFORE_A_TAKE: readonly CardShape[] = ["exercise_try", "plan_why", "exercise_purpose", "exercise_how", "plan_tempo", "plan_next", "clean_tempo", "suggest_path"];
+
+/**
+ * Where "Suggest a Path" is offered as a chip (leg c4b3, review M2): the Paths
+ * list and Progress, the two places a player looks for what to do next, and
+ * only before a Take (no verdict), last, within the three. Typed, it is
+ * answered anywhere but a Take.
+ */
+const SUGGEST_PATH_CHIP_SCREENS: ReadonlySet<CoachContext["screen"]> = new Set(["paths", "progress"]);
+const AFTER_THE_TAKE: readonly CardShape[] = ["exercise_try", "plan_next", "exercise_how"];
 
 /**
  * Which cards come first after a Take of each kind; the first three that can
@@ -74,21 +107,21 @@ const CARD_CHIP: Readonly<Record<CardShape, string>> = {
  * second; after a pass, what changed).
  */
 const CARD_ORDER: Readonly<Record<NonNullable<ChipFacts["verdict"]>, readonly CardShape[]>> = {
-  belowBar: ["where_slipped", "pass_mark_distance", "early_or_late", "what_changed", "why_not_counted", "improving", "score_made_of"],
-  passed: ["where_slipped", "what_changed", "early_or_late", "improving", "pass_mark_distance", "score_made_of"],
+  belowBar: ["where_slipped", "pass_mark_distance", "early_or_late", "what_changed", "why_not_counted", "improving", "score_made_of", ...AFTER_THE_TAKE],
+  passed: ["where_slipped", "what_changed", "early_or_late", "improving", "pass_mark_distance", "score_made_of", ...AFTER_THE_TAKE],
   // Nothing was measured: "why didn't that count", and what the score is made of.
-  notCaught: ["why_not_counted", "score_made_of"],
-  tooShort: ["why_not_counted", "score_made_of"],
-  ungraded: ["why_not_counted", "score_made_of"],
+  notCaught: ["why_not_counted", "score_made_of", ...AFTER_THE_TAKE],
+  tooShort: ["why_not_counted", "score_made_of", ...AFTER_THE_TAKE],
+  ungraded: ["why_not_counted", "score_made_of", ...AFTER_THE_TAKE],
 };
 
 function cardChips(facts: ChipFacts): ChipChoice[] {
   const here = new Set(facts.cards ?? []);
-  const order = facts.verdict ? CARD_ORDER[facts.verdict] : [];
+  const order = facts.verdict ? CARD_ORDER[facts.verdict] : BEFORE_A_TAKE;
   return order
-    .filter((shape) => here.has(shape) && shape !== facts.answered)
+    .filter((shape) => here.has(shape) && shape !== facts.answered && CARD_CHIP[shape] !== undefined)
     .slice(0, MAX_CHIPS)
-    .map((shape) => ({ kind: "card" as const, shape, call: { tool: shape, args: {} }, label: { key: CARD_CHIP[shape], values: {} } }));
+    .map((shape) => ({ kind: "card" as const, shape, call: { tool: shape, args: {} }, label: { key: CARD_CHIP[shape] as string, values: {} } }));
 }
 
 /** The chips for one place: at most `MAX_CHIPS`, in the order they are drawn. */
@@ -116,5 +149,8 @@ export function suggestChips(place: ChipPlace, facts: ChipFacts): ChipChoice[] {
 export function cardChipsFor(ctx: CoachContext, place: "askEmpty" | "askAbove", answered: CardShape | null = null): ChipChoice[] {
   const take = ctx.lastTake;
   const verdict = take ? (take.ungraded !== undefined ? "ungraded" : take.grade.verdict) : null;
-  return suggestChips(place, { cards: cardsHere(ctx), verdict, answered });
+  // A player without grading sees no card chips (Ask's empty state says why in
+  // one line); the Path's words and the plan still answer a typed question.
+  const cards = ungradedPlayer(ctx) ? [] : cardsHere(ctx).filter((c) => c !== "suggest_path" || SUGGEST_PATH_CHIP_SCREENS.has(ctx.screen));
+  return suggestChips(place, { cards, verdict, answered });
 }

@@ -62,7 +62,16 @@
         "changed": "Was hat sich seit dem letzten Take geändert?",
         "improving": "Werde ich besser?",
         "madeOf": "Woraus besteht die Wertung?",
-        "distance": "Wie weit ist die Latte weg?"
+        "distance": "Wie weit ist die Latte weg?",
+        "purpose": "Wofür ist das?",
+        "how": "Wie spiele ich es?",
+        "try": "Was soll ich versuchen?",
+        "planWhy": "Warum das?",
+        "planTempo": "Warum dieses Tempo?",
+        "planNext": "Was kommt danach?",
+        "planReturn": "Wann kommt das wieder?",
+        "passMarkMs": "Was bedeutet die Latte für Gleichmäßigkeit?",
+        "cleanTempo": "Was ist ein sauberes Tempo?"
       },
       "canAnswer": {
         "ungraded": "Du spielst ohne Bewertung, deshalb gibt es keine Messwerte, aus denen ich Fragen zu deinen Takes beantworten könnte."
@@ -103,7 +112,7 @@
         "evenSome": "Take {{take}} war {{value}} % gleichmäßig, bei einer Messlatte von {{bar}} %, und ich habe {{heard}} von {{expected}} Tönen gehört.",
         "heard": "Ich habe {{heard}} von {{expected}} Tönen in Take {{take}} gehört, bei einer Messlatte von {{bar}} %.",
         "extras": "Take {{take}} hatte mehr zusätzliche Töne, als die Messlatte erlaubt: {{bar}} oder weniger in vier Takten.",
-        "accents": "In Take {{take}} kamen {{value}} % der markierten Akzente lauter heraus als die Töne um sie herum, bei einer Messlatte von {{bar}} %.",
+        "accents": "In Take {{take}} kamen die markierten Akzente im Durchschnitt {{value}} % lauter heraus als die anderen Töne, bei einer Messlatte von {{bar}} %.",
         "notes": "In Take {{take}} waren {{value}} % der Töne, deren Tonhöhe ich bestimmen konnte, die notierten, bei einer Messlatte von {{bar}} %."
       },
       "count": {
@@ -203,7 +212,7 @@
           "even": "Gleichmäßig: mindestens {{bar}} % über {{over}} Takte in Folge.",
           "heard": "Gehörte Töne: mindestens {{bar}} % der notierten Töne.",
           "extras": "Zusätzliche Töne: {{bar}} oder weniger in {{over}} Takten.",
-          "accents": "Akzente: mindestens {{bar}} % der markierten Akzente lauter als die Töne um sie herum.",
+          "accents": "Akzente: im Durchschnitt mindestens {{bar}} % lauter als die anderen Töne.",
           "notes": "Richtige Töne: mindestens {{bar}} % der Töne, deren Tonhöhe ich bestimmen kann, sind die notierten.",
           "hold": "Gleichmäßigkeit bis zum Ende gehalten: mindestens {{bar}} % über die letzten Takte des beurteilten Abschnitts."
         },
@@ -266,7 +275,85 @@
         "unmeasured_other": "{{count}} Prüfungen der Messlatte wurden in Take {{take}} nicht gemessen.",
         "tempo": "Take {{take}} lag bei {{bpm}} BPM; ein sauberer Take bei {{passAt}} BPM oder schneller besteht die Übung.",
         "none": "Ich habe in Take {{take}} keine Prüfung der Messlatte gemessen."
+      },
+      "path": {
+        "quote": "„{{text}}“",
+        "noExercise": "Auf dem Bildschirm ist keine Übung, aus der ich das lesen könnte.",
+        "purposeIntro": "Wofür diese Übung da ist, in den Worten des Pfads:",
+        "purposeNone": "Der Pfad nennt keinen Zweck für diese Übung.",
+        "howIntro": "So spielst du sie, in den Worten des Pfads:",
+        "howNone": "Der Pfad gibt keine Spielanleitung für diese Übung.",
+        "tryMeasured": "Der Hinweis des Pfads zu dem, was Take {{take}} gemessen hat:",
+        "tryGeneral": "Der Hinweis des Pfads zu dieser Übung:",
+        "tryNone": "Der Pfad hat keinen Hinweis zu dieser Übung."
+      },
+      "plan": {
+        "notInPlan": "Es läuft keine Session mit einem Plan, aus dem ich das lesen könnte.",
+        "why": "Warum dieser Teil im Plan dieser Session steht:",
+        "tempoPlanned": "Dieser Teil war mit {{bpm}} BPM geplant.",
+        "tempoNow": "Jetzt liegt er bei {{bpm}} BPM.",
+        "tempoNone": "Dieser Teil hat kein eigenes Tempo.",
+        "next": "Als Nächstes im Plan dieser Session: {{title}}, {{minutes}} Min.",
+        "nextBpm": "Als Nächstes im Plan dieser Session: {{title}}, bei {{bpm}} BPM, {{minutes}} Min.",
+        "nextLast": "Das ist der letzte Teil im Plan dieser Session.",
+        "skip": "Austesten spielt einen Take im Bestehenstempo für jede bewertete Übung des Schritts, den du noch nicht bestanden hast (alle noch einmal, wenn du jede bestanden hast).",
+        "skipInSession": "Austesten startest du auf der Seite eines Schritts, nicht während eine Session läuft.",
+        "minutes": "Den Plan für heute gibt es mit {{list}} Minuten.",
+        "minutesSnapped": "Am nächsten an {{asked}} Minuten liegt {{to}}.",
+        "minutesNone": "Sag mir als Zahl, wie viele Minuten du hast.",
+        "minutesInSession": "Die Minuten einer laufenden Session lassen sich nicht ändern.",
+        "returnDays": "Der Wiederholungsplan bringt diese Übung innerhalb von {{count}} Tag zurück, bei {{bpm}} BPM.",
+        "returnDays_other": "Der Wiederholungsplan bringt diese Übung innerhalb von {{count}} Tagen zurück, bei {{bpm}} BPM.",
+        "returnDue": "Diese Übung ist jetzt zur Wiederholung fällig, bei {{bpm}} BPM.",
+        "returnNotPassed": "Diese Übung ist noch nicht bestanden; Wiederholungen beginnen erst danach.",
+        "returnUngraded": "Diese Übung wird nicht bewertet, deshalb hat sie keinen Wiederholungsplan.",
+        "returnNoPassTempo": "Diese Übung hat kein Bestehenstempo, deshalb bringt der Wiederholungsplan sie nicht zurück.",
+        "returnMine": "Deine eigenen Übungen gehören zu keinem Pfad, deshalb haben sie keinen Wiederholungsplan.",
+        "returnNotFair": "Ein Take dieser Übung ist als nicht fair markiert, und der Wiederholungsplan lässt ihn nicht weg, deshalb zitiere ich ihn nicht."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} ist {{notes}}.",
+        "chordUnknown": "Diesen Akkord kenne ich nicht. Akkorde, die ich auf {{root}} bilden kann: {{known}}.",
+        "scalesIntroMajor": "Über {{chord}}, als Grundakkord von {{root}}-Dur verstanden, wählt die App diese Skalen, jede mit jedem Ton des Akkords darin.",
+        "scalesIntroMinor": "Über {{chord}}, als Grundakkord von {{root}}-Moll verstanden, wählt die App diese Skalen, jede mit jedem Ton des Akkords darin.",
+        "scalesPlacedMajor": "{{chord}} ist der {{degree}}-Akkord von {{root}}-Dur, einer Tonart, in die er gehört. In dieser Tonart wählt die App diese Skalen, jede mit jedem Ton des Akkords darin.",
+        "scalesPlacedMinor": "{{chord}} ist der {{degree}}-Akkord von {{root}}-Moll, einer Tonart, in die er gehört. In dieser Tonart wählt die App diese Skalen, jede mit jedem Ton des Akkords darin.",
+        "scalesPlacedMajorAlso": "{{chord}} ist der {{degree}}-Akkord von {{root}}-Dur, einer Tonart, in die er gehört ({{root}} klingt genauso wie {{plain}}). In dieser Tonart wählt die App diese Skalen, jede mit jedem Ton des Akkords darin.",
+        "scalesPlacedMinorAlso": "{{chord}} ist der {{degree}}-Akkord von {{root}}-Moll, einer Tonart, in die er gehört ({{root}} klingt genauso wie {{plain}}). In dieser Tonart wählt die App diese Skalen, jede mit jedem Ton des Akkords darin.",
+        "scalesNoneMajor": "In {{root}}-Dur hat keine der Skalen, die die App für {{chord}} wählt, jeden Ton des Akkords.",
+        "scalesNoneMinor": "In {{root}}-Moll hat keine der Skalen, die die App für {{chord}} wählt, jeden Ton des Akkords.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "Diese Übung wird nicht bewertet, deshalb hat sie keine Messlatte.",
+        "noPassMarkSet": "Es ist keine Messlatte gesetzt: Du spielst ohne Bewertung, deshalb wird nichts, was du spielst, an einer gemessen. Um eine zu setzen, wähle in den Einstellungen unter Üben bei „Mein Spiel bewerten“ die Option „Bewerte mich“; du kannst auch in jeder Session umschalten.",
+        "noSuchMark": "Keine Messlatte dieser Übung liegt bei {{value}} %.",
+        "evenNone": "Die Messlatte dieser Übung hat keine Prüfung der Gleichmäßigkeit.",
+        "evenNoMs": "Ich kann die Messlatte für Gleichmäßigkeit dieser Übung nicht in Millisekunden angeben: Ihr Schlag ist keine Viertelnote.",
+        "evenMs": "Die Messlatte für Gleichmäßigkeit liegt hier bei {{bar}} %: Bei {{bpm}} BPM, mit {{gap}} ms Abstand zwischen den engsten Tönen dieser Übung, erlaubt sie eine Streuung von etwa {{ms}} ms um dein eigenes durchschnittliches Timing.",
+        "holdMs": "Die Messlatte für die bis zum Ende gehaltene Gleichmäßigkeit liegt bei {{bar}} %, gemessen über die letzten Takte des beurteilten Abschnitts: Bei {{bpm}} BPM, mit {{gap}} ms Abstand zwischen den engsten Tönen dieser Übung, erlaubt sie eine Streuung von etwa {{ms}} ms um dein eigenes durchschnittliches Timing.",
+        "heardMark": "{{bar}} % ist die Messlatte für gehörte Töne: In den beurteilten Takten müssen mindestens {{bar}} von je 100 notierten Tönen gehört werden.",
+        "accentsMark": "{{bar}} % ist die Messlatte für Akzente: Im Durchschnitt müssen die markierten Akzente mindestens {{bar}} % lauter herauskommen als die anderen Töne.",
+        "notesMark": "{{bar}} % ist die Messlatte für richtige Töne: Mindestens {{bar}} von je 100 Tönen, deren Tonhöhe ich bestimmen konnte, müssen die notierten sein.",
+        "markOther": "{{value}} % ist die Messlatte einer anderen Prüfung dieser Übung, nicht der Gleichmäßigkeit.",
+        "markAlso": "{{value}} % ist auch die Messlatte einer anderen Prüfung dieser Übung.",
+        "evenHow": "Gleichmäßigkeit wird um dein eigenes durchschnittliches Timing gemessen, nicht am Klick, deshalb senkt eine gleichbleibende Abweichung sie nicht.",
+        "clean": "Dein sauberes Tempo ist das höchste Tempo, bei dem ein Take mit mindestens {{need}} Takten in Folge bestanden hat, die jede Prüfung gehalten haben.",
+        "cleanYours": "Dein sauberes Tempo bei dieser Übung ist {{bpm}} BPM.",
+        "cleanNone": "Du hast bei dieser Übung noch kein sauberes Tempo.",
+        "cleanNotFair": "Takes, die du als nicht fair markiert hast, zählen dafür nicht.",
+        "cleanMine": "Deine eigenen Übungen gehören zu keinem Pfad, deshalb nenne ich dafür kein sauberes Tempo."
       }
+    },
+    "source": {
+      "measured": "Gemessen: Die App hat das aus deinen eigenen Takes abgelesen.",
+      "path": "Aus dem Pfad: die eigenen Worte des Pfads, so zitiert, wie sie dastehen.",
+      "app": "Von der App berechnet: nach ihren eigenen Regeln errechnet, nicht von einem Modell geschrieben.",
+      "general": "Allgemeiner Rat: vom Modell auf diesem Computer über das Spielen im Allgemeinen geschrieben, nicht aus deinem Spiel.",
+      "take": "Take {{take}}, wie sein Ergebnis es sagte: {{text}}",
+      "takeGone": "Das Ergebnis von Take {{take}} ist nicht mehr das auf dem Bildschirm, deshalb kann ich es hier nicht öffnen.",
+      "step": "Schritt {{step}}, {{title}}, in den Worten des Pfads:",
+      "stepGone": "Ich finde Schritt {{step}} nicht, um ihn hier zu zitieren."
     }
   }
 }

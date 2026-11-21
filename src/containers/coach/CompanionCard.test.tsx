@@ -52,6 +52,7 @@ vi.mock("./askStore", async (importOriginal) => ({
 import i18n from "../../i18n";
 import { companionBlocked, resetCompanion, useCompanion, useCompanionWatch, useProgressDot } from "../../coach/companion";
 import { resetCardBudget } from "../../coach/cardBudget";
+import { milestonesNow } from "../../coach/milestones";
 import { loadCoachStored, resetCoachStored } from "../../coach/store";
 import { countsTowardCleanTempo, type PlayerProgress } from "../../session/progress";
 import { ALT, DAY, NOW, progress, take } from "../../session/testKit";
@@ -231,6 +232,41 @@ describe("the look-back", () => {
     await show(sessionOf(progress({ takes })));
     expect(screen.getByTestId("companion-weekly")).toBeInTheDocument();
     expect(screen.queryByTestId("companion-plateau")).toBeNull();
+  });
+});
+
+describe("a milestone (c4b3)", () => {
+  /** Last week's three Sessions, and yesterday B passed for the first time. */
+  const passTakes = () => {
+    const passB = B.tempo.passAtBpm ?? 80;
+    return { takes: [...lastWeekTakes(), clean(B.id, passB, NOW - DAY)], ceilings: [{ exerciseKey: `${ALT.id}/${B.id}`, cleanBpm: passB, lastPracticed: NOW - DAY }] };
+  };
+
+  it("comes before the look-back in the budget, says its line, and Hide writes the milestone kind once", async () => {
+    const { takes, ceilings } = passTakes();
+    io.spans = spansOf(takes);
+    const prog = progress({ takes, ceilings });
+    const [m] = milestonesNow(prog, [ALT], NOW, true);
+    expect(m).toBeDefined();
+    await show(sessionOf(prog));
+    expect(screen.getByTestId("card-kind")).toHaveTextContent("milestone");
+    expect(screen.queryByTestId("companion-weekly")).toBeNull();
+    expect(screen.getByTestId("companion-milestone-line")).toHaveTextContent(t(`companion.milestone.${m.line.key}`, m.line.values));
+    expect(screen.getByTestId("companion-dot")).toHaveTextContent("no");
+    fireEvent.click(screen.getByTestId("companion-hide"));
+    await act(async () => {
+      vi.advanceTimersByTime(UNDO_MS);
+    });
+    expect(io.saves).toEqual([["coach.cards", { milestone: { dismissed: 1, lastDismissed: NOW } }]]);
+  });
+
+  it("a milestone hidden within seven days leaves the slot to the look-back", async () => {
+    io.disk.set("coach.cards", { milestone: { dismissed: 1, lastDismissed: NOW - DAY } });
+    const { takes, ceilings } = passTakes();
+    io.spans = spansOf(takes);
+    await show(sessionOf(progress({ takes, ceilings })));
+    expect(screen.getByTestId("card-kind")).toHaveTextContent("weekly");
+    expect(screen.queryByTestId("companion-milestone-card")).toBeNull();
   });
 });
 

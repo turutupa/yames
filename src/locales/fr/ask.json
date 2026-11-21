@@ -62,7 +62,16 @@
         "changed": "Qu'est-ce qui a changé depuis la dernière prise ?",
         "improving": "Est-ce que je progresse ?",
         "madeOf": "De quoi se compose le score ?",
-        "distance": "À quelle distance est le seuil ?"
+        "distance": "À quelle distance est le seuil ?",
+        "purpose": "À quoi ça sert ?",
+        "how": "Comment le jouer ?",
+        "try": "Que dois-je essayer ?",
+        "planWhy": "Pourquoi ça ?",
+        "planTempo": "Pourquoi ce tempo ?",
+        "planNext": "Et ensuite ?",
+        "planReturn": "Quand ça revient ?",
+        "passMarkMs": "Que veut dire le seuil de régularité ?",
+        "cleanTempo": "Qu'est-ce qu'un tempo propre ?"
       },
       "canAnswer": {
         "ungraded": "Tu joues sans évaluation, donc il n'y a aucune mesure pour répondre aux questions sur tes prises."
@@ -104,7 +113,7 @@
         "evenSome": "La prise {{take}} était régulière à {{value}} %, pour un seuil de {{bar}} %, et j'ai entendu {{heard}} notes sur {{expected}}.",
         "heard": "J'ai entendu {{heard}} notes sur {{expected}} dans la prise {{take}}, pour un seuil de {{bar}} %.",
         "extras": "La prise {{take}} avait plus de notes en trop que le seuil n'en permet : {{bar}} ou moins sur quatre mesures.",
-        "accents": "Dans la prise {{take}}, {{value}} % des accents marqués sont sortis plus fort que les notes autour, pour un seuil de {{bar}} %.",
+        "accents": "Dans la prise {{take}}, les accents marqués sont sortis en moyenne {{value}} % plus fort que les autres notes, pour un seuil de {{bar}} %.",
         "notes": "Dans la prise {{take}}, {{value}} % des notes dont j'ai pu reconnaître la hauteur étaient celles écrites, pour un seuil de {{bar}} %."
       },
       "count": {
@@ -213,7 +222,7 @@
           "even": "Régulier : au moins {{bar}} % sur {{over}} mesures de suite.",
           "heard": "Notes entendues : au moins {{bar}} % des notes écrites.",
           "extras": "Notes en trop : {{bar}} ou moins sur {{over}} mesures.",
-          "accents": "Accents : au moins {{bar}} % des accents marqués plus forts que les notes autour.",
+          "accents": "Accents : en moyenne, au moins {{bar}} % plus forts que les autres notes.",
           "notes": "Bonnes notes : au moins {{bar}} % des notes dont je peux reconnaître la hauteur sont celles écrites.",
           "hold": "Régularité tenue jusqu'à la fin : au moins {{bar}} % sur les dernières mesures du passage jugé."
         },
@@ -284,7 +293,86 @@
         "unmeasured_other": "{{count}} vérifications du seuil n'ont pas été mesurées dans la prise {{take}}.",
         "tempo": "La prise {{take}} était à {{bpm}} BPM ; une prise propre à {{passAt}} BPM ou plus vite réussit l'exercice.",
         "none": "Je n'ai mesuré aucune vérification du seuil dans la prise {{take}}."
+      },
+      "path": {
+        "quote": "“{{text}}”",
+        "noExercise": "Aucun exercice n'est à l'écran, je n'ai donc rien à lire pour répondre.",
+        "purposeIntro": "À quoi sert cet exercice, dans les mots du parcours :",
+        "purposeNone": "Le parcours ne donne aucun but pour cet exercice.",
+        "howIntro": "Comment le jouer, dans les mots du parcours :",
+        "howNone": "Le parcours ne donne aucune consigne pour jouer cet exercice.",
+        "tryMeasured": "La consigne du parcours sur ce que la prise {{take}} a mesuré :",
+        "tryGeneral": "La consigne du parcours pour cet exercice :",
+        "tryNone": "Le parcours n'a aucune consigne pour cet exercice."
+      },
+      "plan": {
+        "notInPlan": "Aucune séance n'est en cours avec un plan, je n'ai donc rien à lire pour répondre.",
+        "why": "Pourquoi cette partie est dans le plan de cette séance :",
+        "tempoPlanned": "Cette partie était prévue à {{bpm}} BPM.",
+        "tempoNow": "Elle est à {{bpm}} BPM maintenant.",
+        "tempoNone": "Cette partie n'a pas de tempo propre.",
+        "next": "Ensuite dans le plan de cette séance : {{title}}, {{minutes}} min.",
+        "nextBpm": "Ensuite dans le plan de cette séance : {{title}}, à {{bpm}} BPM, {{minutes}} min.",
+        "nextLast": "C'est la dernière partie du plan de cette séance.",
+        "skip": "Valider l'étape joue une prise au tempo de réussite de chaque exercice évalué de l'étape que tu n'as pas encore réussie (tous à nouveau, quand tu les as tous réussis).",
+        "skipInSession": "Valider l'étape se lance depuis la page d'une étape, pas pendant qu'une séance est en cours.",
+        "minutes": "Le plan d'aujourd'hui existe en {{list}} minutes.",
+        "minutesSnapped": "Le plus proche de {{asked}} minutes est {{to}}.",
+        "minutesNone": "Dis-moi combien de minutes tu as, avec un nombre.",
+        "minutesInSession": "Les minutes d'une séance en cours ne peuvent pas changer.",
+        "returnDays": "Le calendrier de révision ramène cet exercice dans {{count}} jour, à {{bpm}} BPM.",
+        "returnDays_many": "Le calendrier de révision ramène cet exercice dans {{count}} jours, à {{bpm}} BPM.",
+        "returnDays_other": "Le calendrier de révision ramène cet exercice dans {{count}} jours, à {{bpm}} BPM.",
+        "returnDue": "Cet exercice est à réviser maintenant, à {{bpm}} BPM.",
+        "returnNotPassed": "Cet exercice n'est pas encore réussi ; les révisions commencent une fois qu'il l'est.",
+        "returnUngraded": "Cet exercice n'est pas évalué, donc il n'a pas de calendrier de révision.",
+        "returnNoPassTempo": "Cet exercice n'a pas de tempo de réussite, donc le calendrier de révision ne le ramène pas.",
+        "returnMine": "Tes propres exercices ne sont pas dans un parcours, donc ils n'ont pas de calendrier de révision.",
+        "returnNotFair": "Une prise de cet exercice est marquée comme non équitable, et le calendrier de révision ne l'écarte pas, donc je ne la cite pas."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} se compose de {{notes}}.",
+        "chordUnknown": "Je ne connais pas cet accord. Accords que je sais épeler sur {{root}} : {{known}}.",
+        "scalesIntroMajor": "Sur {{chord}}, pris comme l'accord de tonique de {{root}} majeur, l'app choisit ces gammes, chacune contenant toutes les notes de l'accord.",
+        "scalesIntroMinor": "Sur {{chord}}, pris comme l'accord de tonique de {{root}} mineur, l'app choisit ces gammes, chacune contenant toutes les notes de l'accord.",
+        "scalesPlacedMajor": "{{chord}} est l'accord {{degree}} de {{root}} majeur, une tonalité à laquelle il appartient. Dans cette tonalité, l'app choisit ces gammes, chacune contenant toutes les notes de l'accord.",
+        "scalesPlacedMinor": "{{chord}} est l'accord {{degree}} de {{root}} mineur, une tonalité à laquelle il appartient. Dans cette tonalité, l'app choisit ces gammes, chacune contenant toutes les notes de l'accord.",
+        "scalesPlacedMajorAlso": "{{chord}} est l'accord {{degree}} de {{root}} majeur, une tonalité à laquelle il appartient ({{root}} sonne comme {{plain}}). Dans cette tonalité, l'app choisit ces gammes, chacune contenant toutes les notes de l'accord.",
+        "scalesPlacedMinorAlso": "{{chord}} est l'accord {{degree}} de {{root}} mineur, une tonalité à laquelle il appartient ({{root}} sonne comme {{plain}}). Dans cette tonalité, l'app choisit ces gammes, chacune contenant toutes les notes de l'accord.",
+        "scalesNoneMajor": "En {{root}} majeur, aucune des gammes que l'app choisit pour {{chord}} ne contient toutes les notes de l'accord.",
+        "scalesNoneMinor": "En {{root}} mineur, aucune des gammes que l'app choisit pour {{chord}} ne contient toutes les notes de l'accord.",
+        "scale": "{{root}} {{name}} : {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "Cet exercice n'est pas évalué, donc il n'a pas de seuil.",
+        "noPassMarkSet": "Aucun seuil n'est défini : tu joues sans évaluation, donc rien de ce que tu joues n'est mesuré par rapport à un seuil. Pour en définir un, choisis « Évalue-moi » pour « Évaluer mon jeu » dans Paramètres, sous Pratique ; tu peux aussi changer dans n'importe quelle séance.",
+        "noSuchMark": "Aucun seuil de cet exercice n'est de {{value}} %.",
+        "evenNone": "Le seuil de cet exercice n'a pas de contrôle de régularité.",
+        "evenNoMs": "Je ne peux pas exprimer en millisecondes le seuil de régularité de cet exercice : son temps n'est pas une noire.",
+        "evenMs": "Le seuil de régularité ici est de {{bar}} % : à {{bpm}} BPM, avec les notes les plus proches de cet exercice séparées de {{gap}} ms, il autorise un écart d'environ {{ms}} ms autour de ton propre timing moyen.",
+        "holdMs": "Le seuil de la régularité tenue jusqu'à la fin est de {{bar}} %, mesuré sur les dernières mesures du passage jugé : à {{bpm}} BPM, avec les notes les plus proches de cet exercice séparées de {{gap}} ms, il autorise un écart d'environ {{ms}} ms autour de ton propre timing moyen.",
+        "heardMark": "{{bar}} % est le seuil des notes entendues : dans les mesures jugées, au moins {{bar}} notes écrites sur 100 doivent être entendues.",
+        "accentsMark": "{{bar}} % est le seuil des accents : en moyenne, les accents marqués doivent sortir au moins {{bar}} % plus fort que les autres notes.",
+        "notesMark": "{{bar}} % est le seuil des notes justes : au moins {{bar}} notes sur 100 que j'ai pu situer en hauteur doivent être les notes écrites.",
+        "markOther": "{{value}} % est le seuil d'un autre des contrôles de cet exercice, pas celui de sa régularité.",
+        "markAlso": "{{value}} % est aussi le seuil d'un autre des contrôles de cet exercice.",
+        "evenHow": "La régularité se mesure autour de ton propre timing moyen, pas du clic, donc un décalage constant ne la fait pas baisser.",
+        "clean": "Ton tempo propre est le tempo le plus haut auquel une prise a réussi avec au moins {{need}} mesures de suite qui ont tenu tous les contrôles.",
+        "cleanYours": "Ton tempo propre sur cet exercice est de {{bpm}} BPM.",
+        "cleanNone": "Tu n'as pas encore de tempo propre sur cet exercice.",
+        "cleanNotFair": "Les prises que tu as marquées comme non équitables n'y comptent pas.",
+        "cleanMine": "Tes propres exercices ne sont pas dans un parcours, donc je ne cite pas de tempo propre pour eux."
       }
+    },
+    "source": {
+      "measured": "Mesuré : l'app l'a lu dans tes propres prises.",
+      "path": "Tiré du parcours : les mots écrits du parcours lui-même, cités tels quels.",
+      "app": "Calculé par l'app : calculé par ses propres règles, pas écrit par un modèle.",
+      "general": "Conseil général : écrit par le modèle de cet ordinateur sur le jeu en général, pas tiré de ton jeu.",
+      "take": "Prise {{take}}, comme son résultat le disait : {{text}}",
+      "takeGone": "Le résultat de la prise {{take}} n'est plus celui à l'écran, donc je ne peux pas l'ouvrir ici.",
+      "step": "Étape {{step}}, {{title}}, dans les mots du parcours :",
+      "stepGone": "Je ne trouve pas l'étape {{step}} pour la citer ici."
     }
   }
 }

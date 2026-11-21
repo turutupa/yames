@@ -62,7 +62,16 @@
         "changed": "Co się zmieniło od ostatniego podejścia?",
         "improving": "Czy robię postępy?",
         "madeOf": "Z czego składa się wynik?",
-        "distance": "Jak daleko do poprzeczki?"
+        "distance": "Jak daleko do poprzeczki?",
+        "purpose": "Do czego to służy?",
+        "how": "Jak to zagrać?",
+        "try": "Co mam wypróbować?",
+        "planWhy": "Dlaczego to?",
+        "planTempo": "Dlaczego to tempo?",
+        "planNext": "Co dalej?",
+        "planReturn": "Kiedy to wróci?",
+        "passMarkMs": "Co znaczy poprzeczka równości?",
+        "cleanTempo": "Czym jest czyste tempo?"
       },
       "canAnswer": {
         "ungraded": "Grasz bez oceny, więc nie ma pomiarów, z których mógłbym odpowiadać na pytania o twoje podejścia."
@@ -105,7 +114,7 @@
         "evenSome": "Podejście {{take}} było {{value}}% równo, przy poprzeczce {{bar}}%, a usłyszałem {{heard}} z {{expected}} nut.",
         "heard": "Usłyszałem {{heard}} z {{expected}} nut w podejściu {{take}}, przy poprzeczce {{bar}}%.",
         "extras": "W podejściu {{take}} było więcej dodatkowych nut, niż dopuszcza poprzeczka: {{bar}} lub mniej w czterech taktach.",
-        "accents": "W podejściu {{take}} {{value}}% zaznaczonych akcentów wypadło głośniej niż nuty wokół nich, przy poprzeczce {{bar}}%.",
+        "accents": "W podejściu {{take}} zaznaczone akcenty wypadły średnio o {{value}}% głośniej niż pozostałe nuty, przy poprzeczce {{bar}}%.",
         "notes": "W podejściu {{take}} {{value}}% nut, których wysokość mogłem określić, było zapisanymi, przy poprzeczce {{bar}}%."
       },
       "count": {
@@ -223,7 +232,7 @@
           "even": "Równo: co najmniej {{bar}}% przez {{over}} taktów z rzędu.",
           "heard": "Usłyszane nuty: co najmniej {{bar}}% zapisanych nut.",
           "extras": "Dodatkowe nuty: {{bar}} lub mniej w {{over}} taktach.",
-          "accents": "Akcenty: co najmniej {{bar}}% zaznaczonych akcentów głośniej niż nuty wokół nich.",
+          "accents": "Akcenty: średnio co najmniej o {{bar}}% głośniej niż pozostałe nuty.",
           "notes": "Właściwe nuty: co najmniej {{bar}}% nut, których wysokość mogę określić, to zapisane.",
           "hold": "Równość utrzymana do końca: co najmniej {{bar}}% w ostatnich taktach ocenianego odcinka."
         },
@@ -302,7 +311,87 @@
         "unmeasured_other": "Nie zmierzono {{count}} kontroli poprzeczki w podejściu {{take}}.",
         "tempo": "Podejście {{take}} było przy {{bpm}} BPM; czyste podejście przy {{passAt}} BPM lub szybciej zalicza ćwiczenie.",
         "none": "Nie zmierzyłem żadnej kontroli poprzeczki w podejściu {{take}}."
+      },
+      "path": {
+        "quote": "„{{text}}”",
+        "noExercise": "Na ekranie nie ma ćwiczenia, z którego mógłbym to odczytać.",
+        "purposeIntro": "Do czego służy to ćwiczenie, słowami ścieżki:",
+        "purposeNone": "Ścieżka nie podaje celu tego ćwiczenia.",
+        "howIntro": "Jak je zagrać, słowami ścieżki:",
+        "howNone": "Ścieżka nie podaje, jak zagrać to ćwiczenie.",
+        "tryMeasured": "Wskazówka ścieżki do tego, co zmierzyło podejście {{take}}:",
+        "tryGeneral": "Wskazówka ścieżki do tego ćwiczenia:",
+        "tryNone": "Ścieżka nie ma wskazówki do tego ćwiczenia."
+      },
+      "plan": {
+        "notInPlan": "Nie trwa sesja z planem, z której mógłbym to odczytać.",
+        "why": "Dlaczego ta część jest w planie tej sesji:",
+        "tempoPlanned": "Ta część była zaplanowana przy {{bpm}} BPM.",
+        "tempoNow": "Teraz jest przy {{bpm}} BPM.",
+        "tempoNone": "Ta część nie ma własnego tempa.",
+        "next": "Dalej w planie tej sesji: {{title}}, {{minutes}} min.",
+        "nextBpm": "Dalej w planie tej sesji: {{title}}, przy {{bpm}} BPM, {{minutes}} min.",
+        "nextLast": "To ostatnia część planu tej sesji.",
+        "skip": "Zaliczenie gra jedno podejście w tempie zaliczenia każdego ocenianego ćwiczenia z kroku, który nie jest jeszcze zaliczony (wszystkich ponownie, gdy każde jest już zaliczone).",
+        "skipInSession": "Zaliczenie zaczyna się ze strony kroku, nie podczas trwającej sesji.",
+        "minutes": "Plan na dziś jest dostępny na {{list}} minut.",
+        "minutesSnapped": "Najbliżej {{asked}} minut jest {{to}}.",
+        "minutesNone": "Powiedz mi liczbą, ile masz minut.",
+        "minutesInSession": "Minut trwającej sesji nie można zmienić.",
+        "returnDays": "Harmonogram powtórek przywraca to ćwiczenie w ciągu {{count}} dnia, przy {{bpm}} BPM.",
+        "returnDays_few": "Harmonogram powtórek przywraca to ćwiczenie w ciągu {{count}} dni, przy {{bpm}} BPM.",
+        "returnDays_many": "Harmonogram powtórek przywraca to ćwiczenie w ciągu {{count}} dni, przy {{bpm}} BPM.",
+        "returnDays_other": "Harmonogram powtórek przywraca to ćwiczenie w ciągu {{count}} dnia, przy {{bpm}} BPM.",
+        "returnDue": "To ćwiczenie jest teraz do powtórki, przy {{bpm}} BPM.",
+        "returnNotPassed": "To ćwiczenie nie jest jeszcze zaliczone; powtórki zaczynają się, gdy będzie.",
+        "returnUngraded": "To ćwiczenie nie jest oceniane, więc nie ma harmonogramu powtórek.",
+        "returnNoPassTempo": "To ćwiczenie nie ma tempa zaliczenia, więc harmonogram powtórek go nie przywraca.",
+        "returnMine": "Twoje własne ćwiczenia nie są na żadnej ścieżce, więc nie mają harmonogramu powtórek.",
+        "returnNotFair": "Podejście do tego ćwiczenia jest oznaczone jako niesprawiedliwe, a harmonogram powtórek go nie pomija, więc go nie cytuję."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} to {{notes}}.",
+        "chordUnknown": "Nie znam tego akordu. Akordy, które umiem zapisać na {{root}}: {{known}}.",
+        "scalesIntroMajor": "Do {{chord}}, rozumianego jako akord główny tonacji {{root}}-dur, aplikacja wybiera te skale, a każda zawiera wszystkie nuty akordu.",
+        "scalesIntroMinor": "Do {{chord}}, rozumianego jako akord główny tonacji {{root}}-moll, aplikacja wybiera te skale, a każda zawiera wszystkie nuty akordu.",
+        "scalesPlacedMajor": "{{chord}} to akord {{degree}} stopnia w tonacji {{root}}-dur, jednej z tonacji, do których należy. W tej tonacji aplikacja wybiera te skale, a każda zawiera wszystkie nuty akordu.",
+        "scalesPlacedMinor": "{{chord}} to akord {{degree}} stopnia w tonacji {{root}}-moll, jednej z tonacji, do których należy. W tej tonacji aplikacja wybiera te skale, a każda zawiera wszystkie nuty akordu.",
+        "scalesPlacedMajorAlso": "{{chord}} to akord {{degree}} stopnia w tonacji {{root}}-dur, jednej z tonacji, do których należy ({{root}} brzmi tak samo jak {{plain}}). W tej tonacji aplikacja wybiera te skale, a każda zawiera wszystkie nuty akordu.",
+        "scalesPlacedMinorAlso": "{{chord}} to akord {{degree}} stopnia w tonacji {{root}}-moll, jednej z tonacji, do których należy ({{root}} brzmi tak samo jak {{plain}}). W tej tonacji aplikacja wybiera te skale, a każda zawiera wszystkie nuty akordu.",
+        "scalesNoneMajor": "W tonacji {{root}}-dur żadna ze skal, które aplikacja wybiera dla {{chord}}, nie zawiera wszystkich nut akordu.",
+        "scalesNoneMinor": "W tonacji {{root}}-moll żadna ze skal, które aplikacja wybiera dla {{chord}}, nie zawiera wszystkich nut akordu.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "To ćwiczenie nie jest oceniane, więc nie ma poprzeczki.",
+        "noPassMarkSet": "Poprzeczka nie jest ustawiona: grasz bez oceny, więc nic, co grasz, nie jest z nią porównywane. Aby ją ustawić, wybierz w Ustawieniach, w sekcji Ćwiczenie, przy „Oceniaj moją grę” opcję „Oceń mnie”; możesz też przełączyć w dowolnej sesji.",
+        "noSuchMark": "Żadna poprzeczka tego ćwiczenia nie wynosi {{value}}%.",
+        "evenNone": "Poprzeczka tego ćwiczenia nie ma kontroli równości.",
+        "evenNoMs": "Nie mogę podać poprzeczki równości tego ćwiczenia w milisekundach: jego miara nie jest ćwierćnutą.",
+        "evenMs": "Poprzeczka równości wynosi tu {{bar}}%: przy {{bpm}} BPM, gdy najbliższe nuty tego ćwiczenia dzieli {{gap}} ms, dopuszcza rozrzut około {{ms}} ms wokół twojego własnego średniego czasu.",
+        "holdMs": "Poprzeczka równości utrzymanej do końca wynosi {{bar}}%, mierzona na końcowych taktach ocenianego odcinka: przy {{bpm}} BPM, gdy najbliższe nuty tego ćwiczenia dzieli {{gap}} ms, dopuszcza rozrzut około {{ms}} ms wokół twojego własnego średniego czasu.",
+        "heardMark": "{{bar}}% to poprzeczka usłyszanych nut: w ocenianych taktach trzeba usłyszeć co najmniej {{bar}} na każde 100 zapisanych nut.",
+        "accentsMark": "{{bar}}% to poprzeczka akcentów: zaznaczone akcenty muszą wypaść średnio co najmniej o {{bar}}% głośniej niż pozostałe nuty.",
+        "notesMark": "{{bar}}% to poprzeczka właściwych nut: co najmniej {{bar}} na każde 100 nut, których wysokość mogłem określić, musi być zapisanymi.",
+        "markOther": "{{value}}% to poprzeczka innej kontroli tego ćwiczenia, nie jego równości.",
+        "markAlso": "{{value}}% to także poprzeczka innej kontroli tego ćwiczenia.",
+        "evenHow": "Równość mierzy się wokół twojego własnego średniego czasu, nie metronomu, więc stałe odchylenie jej nie obniża.",
+        "clean": "Twoje czyste tempo to najwyższe tempo, przy którym podejście zaliczyło poprzeczkę z co najmniej {{need}} taktami z rzędu, które spełniły każdą kontrolę.",
+        "cleanYours": "Twoje czyste tempo w tym ćwiczeniu to {{bpm}} BPM.",
+        "cleanNone": "Nie masz jeszcze czystego tempa w tym ćwiczeniu.",
+        "cleanNotFair": "Podejścia oznaczone jako niesprawiedliwe się do niego nie liczą.",
+        "cleanMine": "Twoje własne ćwiczenia nie są na żadnej ścieżce, więc nie podaję dla nich czystego tempa."
       }
+    },
+    "source": {
+      "measured": "Zmierzone: aplikacja odczytała to z twoich własnych podejść.",
+      "path": "Ze ścieżki: własne słowa ścieżki, zacytowane tak, jak są.",
+      "app": "Wyliczone przez aplikację: policzone według jej własnych reguł, nie napisane przez model.",
+      "general": "Ogólna rada: napisana przez model na tym komputerze o graniu w ogóle, nie z twojej gry.",
+      "take": "Podejście {{take}}, tak jak podał jego wynik: {{text}}",
+      "takeGone": "Wynik podejścia {{take}} nie jest już tym na ekranie, więc nie mogę go tu otworzyć.",
+      "step": "Krok {{step}}, {{title}}, słowami ścieżki:",
+      "stepGone": "Nie mogę znaleźć kroku {{step}}, żeby go tu zacytować."
     }
   }
 }

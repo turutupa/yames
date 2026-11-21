@@ -62,7 +62,16 @@
         "changed": "Wat is er veranderd sinds de vorige take?",
         "improving": "Word ik beter?",
         "madeOf": "Waaruit bestaat de score?",
-        "distance": "Hoe ver ligt de lat?"
+        "distance": "Hoe ver ligt de lat?",
+        "purpose": "Waar is dit voor?",
+        "how": "Hoe speel ik het?",
+        "try": "Wat moet ik proberen?",
+        "planWhy": "Waarom dit?",
+        "planTempo": "Waarom dit tempo?",
+        "planNext": "Wat komt hierna?",
+        "planReturn": "Wanneer komt dit terug?",
+        "passMarkMs": "Wat betekent de lat voor gelijkmatigheid?",
+        "cleanTempo": "Wat is een schoon tempo?"
       },
       "canAnswer": {
         "ungraded": "Je speelt zonder beoordeling, dus er zijn geen metingen om vragen over je takes mee te beantwoorden."
@@ -103,7 +112,7 @@
         "evenSome": "Take {{take}} was {{value}}% gelijkmatig, bij een lat van {{bar}}%, en ik hoorde {{heard}} van {{expected}} noten.",
         "heard": "Ik hoorde {{heard}} van {{expected}} noten in take {{take}}, bij een lat van {{bar}}%.",
         "extras": "Take {{take}} had meer extra noten dan de lat toestaat: {{bar}} of minder in vier maten.",
-        "accents": "In take {{take}} kwam {{value}}% van de gemarkeerde accenten luider uit dan de noten eromheen, bij een lat van {{bar}}%.",
+        "accents": "In take {{take}} kwamen de gemarkeerde accenten gemiddeld {{value}}% luider uit dan de andere noten, bij een lat van {{bar}}%.",
         "notes": "In take {{take}} was {{value}}% van de noten waarvan ik de toonhoogte kon bepalen de genoteerde, bij een lat van {{bar}}%."
       },
       "count": {
@@ -203,7 +212,7 @@
           "even": "Gelijkmatig: minstens {{bar}}% over {{over}} maten achter elkaar.",
           "heard": "Gehoorde noten: minstens {{bar}}% van de genoteerde noten.",
           "extras": "Extra noten: {{bar}} of minder in {{over}} maten.",
-          "accents": "Accenten: minstens {{bar}}% van de gemarkeerde accenten luider dan de noten eromheen.",
+          "accents": "Accenten: gemiddeld minstens {{bar}}% luider dan de andere noten.",
           "notes": "Juiste noten: minstens {{bar}}% van de noten waarvan ik de toonhoogte kan bepalen is de genoteerde.",
           "hold": "Gelijkmatigheid tot het einde volgehouden: minstens {{bar}}% over de laatste maten van het beoordeelde stuk."
         },
@@ -266,7 +275,85 @@
         "unmeasured_other": "{{count}} controles van de lat zijn in take {{take}} niet gemeten.",
         "tempo": "Take {{take}} stond op {{bpm}} BPM; een schone take op {{passAt}} BPM of sneller haalt de oefening.",
         "none": "Ik heb in take {{take}} geen enkele controle van de lat gemeten."
+      },
+      "path": {
+        "quote": "“{{text}}”",
+        "noExercise": "Er staat geen oefening in beeld waaruit ik dat kan lezen.",
+        "purposeIntro": "Waar deze oefening voor is, in de woorden van het leerpad:",
+        "purposeNone": "Het leerpad geeft geen doel voor deze oefening.",
+        "howIntro": "Hoe je haar speelt, in de woorden van het leerpad:",
+        "howNone": "Het leerpad geeft geen uitleg over hoe je deze oefening speelt.",
+        "tryMeasured": "De aanwijzing van het leerpad bij wat take {{take}} mat:",
+        "tryGeneral": "De aanwijzing van het leerpad bij deze oefening:",
+        "tryNone": "Het leerpad heeft geen aanwijzing bij deze oefening."
+      },
+      "plan": {
+        "notInPlan": "Er loopt geen sessie met een plan waaruit ik dat kan lezen.",
+        "why": "Waarom dit onderdeel in het plan van deze sessie staat:",
+        "tempoPlanned": "Dit onderdeel was gepland op {{bpm}} BPM.",
+        "tempoNow": "Nu staat het op {{bpm}} BPM.",
+        "tempoNone": "Dit onderdeel heeft geen eigen tempo.",
+        "next": "Hierna in het plan van deze sessie: {{title}}, {{minutes}} min.",
+        "nextBpm": "Hierna in het plan van deze sessie: {{title}}, op {{bpm}} BPM, {{minutes}} min.",
+        "nextLast": "Dit is het laatste onderdeel van het plan van deze sessie.",
+        "skip": "Uittesten speelt één take op het slaagtempo van elke beoordeelde oefening van de stap die je nog niet hebt gehaald (allemaal opnieuw, als je ze allemaal hebt gehaald).",
+        "skipInSession": "Uittesten start je vanaf de pagina van een stap, niet terwijl een sessie loopt.",
+        "minutes": "Het plan van vandaag is er in {{list}} minuten.",
+        "minutesSnapped": "Het dichtst bij {{asked}} minuten ligt {{to}}.",
+        "minutesNone": "Zeg me als getal hoeveel minuten je hebt.",
+        "minutesInSession": "De minuten van een lopende sessie kunnen niet veranderen.",
+        "returnDays": "Het herhaalschema brengt deze oefening binnen {{count}} dag terug, op {{bpm}} BPM.",
+        "returnDays_other": "Het herhaalschema brengt deze oefening binnen {{count}} dagen terug, op {{bpm}} BPM.",
+        "returnDue": "Deze oefening is nu aan herhaling toe, op {{bpm}} BPM.",
+        "returnNotPassed": "Deze oefening is nog niet gehaald; herhalingen beginnen zodra dat zo is.",
+        "returnUngraded": "Deze oefening wordt niet beoordeeld, dus ze heeft geen herhaalschema.",
+        "returnNoPassTempo": "Deze oefening heeft geen slaagtempo, dus het herhaalschema brengt haar niet terug.",
+        "returnMine": "Je eigen oefeningen staan niet in een leerpad, dus ze hebben geen herhaalschema.",
+        "returnNotFair": "Een take van deze oefening is als niet eerlijk gemarkeerd, en het herhaalschema laat hem niet weg, dus ik citeer hem niet."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} is {{notes}}.",
+        "chordUnknown": "Dat akkoord ken ik niet. Akkoorden die ik op {{root}} kan spellen: {{known}}.",
+        "scalesIntroMajor": "Over {{chord}}, opgevat als het thuisakkoord van {{root}} majeur, kiest de app deze toonladders, elk met alle noten van het akkoord erin.",
+        "scalesIntroMinor": "Over {{chord}}, opgevat als het thuisakkoord van {{root}} mineur, kiest de app deze toonladders, elk met alle noten van het akkoord erin.",
+        "scalesPlacedMajor": "{{chord}} is het {{degree}}-akkoord van {{root}} majeur, een toonsoort waarin het thuishoort. In die toonsoort kiest de app deze toonladders, elk met alle noten van het akkoord erin.",
+        "scalesPlacedMinor": "{{chord}} is het {{degree}}-akkoord van {{root}} mineur, een toonsoort waarin het thuishoort. In die toonsoort kiest de app deze toonladders, elk met alle noten van het akkoord erin.",
+        "scalesPlacedMajorAlso": "{{chord}} is het {{degree}}-akkoord van {{root}} majeur, een toonsoort waarin het thuishoort ({{root}} klinkt hetzelfde als {{plain}}). In die toonsoort kiest de app deze toonladders, elk met alle noten van het akkoord erin.",
+        "scalesPlacedMinorAlso": "{{chord}} is het {{degree}}-akkoord van {{root}} mineur, een toonsoort waarin het thuishoort ({{root}} klinkt hetzelfde als {{plain}}). In die toonsoort kiest de app deze toonladders, elk met alle noten van het akkoord erin.",
+        "scalesNoneMajor": "In {{root}} majeur heeft geen van de toonladders die de app voor {{chord}} kiest alle noten van het akkoord.",
+        "scalesNoneMinor": "In {{root}} mineur heeft geen van de toonladders die de app voor {{chord}} kiest alle noten van het akkoord.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "Deze oefening wordt niet beoordeeld, dus ze heeft geen lat.",
+        "noPassMarkSet": "Er is geen lat ingesteld: je speelt zonder beoordeling, dus niets van wat je speelt wordt aan een lat gemeten. Om er een in te stellen, kies je in Instellingen, onder Oefenen, bij “Mijn spel beoordelen” voor “Beoordeel me”; je kunt ook in elke sessie omschakelen.",
+        "noSuchMark": "Geen lat van deze oefening is {{value}}%.",
+        "evenNone": "De lat van deze oefening heeft geen gelijkmatigheidscontrole.",
+        "evenNoMs": "Ik kan de lat voor gelijkmatigheid van deze oefening niet in milliseconden uitdrukken: haar tel is geen kwartnoot.",
+        "evenMs": "De lat voor gelijkmatigheid is hier {{bar}}%: op {{bpm}} BPM, met de dichtstbijzijnde noten van deze oefening {{gap}} ms uit elkaar, staat ze een spreiding van ongeveer {{ms}} ms toe rond je eigen gemiddelde timing.",
+        "holdMs": "De lat voor gelijkmatigheid tot het einde volgehouden is {{bar}}%, gemeten over de slotmaten van het beoordeelde stuk: op {{bpm}} BPM, met de dichtstbijzijnde noten van deze oefening {{gap}} ms uit elkaar, staat ze een spreiding van ongeveer {{ms}} ms toe rond je eigen gemiddelde timing.",
+        "heardMark": "{{bar}}% is de lat voor gehoorde noten: in de beoordeelde maten moeten minstens {{bar}} van elke 100 genoteerde noten gehoord worden.",
+        "accentsMark": "{{bar}}% is de lat voor accenten: gemiddeld moeten de gemarkeerde accenten minstens {{bar}}% luider uitkomen dan de andere noten.",
+        "notesMark": "{{bar}}% is de lat voor juiste noten: minstens {{bar}} van elke 100 noten waarvan ik de toonhoogte kon bepalen, moeten de genoteerde zijn.",
+        "markOther": "{{value}}% is de lat van een andere controle van deze oefening, niet van de gelijkmatigheid.",
+        "markAlso": "{{value}}% is ook de lat van een andere controle van deze oefening.",
+        "evenHow": "Gelijkmatigheid wordt gemeten rond je eigen gemiddelde timing, niet de klik, dus een vaste afwijking verlaagt haar niet.",
+        "clean": "Je schone tempo is het hoogste tempo waarop een take de lat haalde met minstens {{need}} maten achter elkaar die aan elke controle voldeden.",
+        "cleanYours": "Je schone tempo op deze oefening is {{bpm}} BPM.",
+        "cleanNone": "Je hebt nog geen schoon tempo op deze oefening.",
+        "cleanNotFair": "Takes die je als niet eerlijk hebt gemarkeerd, tellen daarvoor niet mee.",
+        "cleanMine": "Je eigen oefeningen staan niet in een leerpad, dus ik noem er geen schoon tempo voor."
       }
+    },
+    "source": {
+      "measured": "Gemeten: de app las dit af uit je eigen takes.",
+      "path": "Uit het leerpad: de eigen woorden van het leerpad, geciteerd zoals ze er staan.",
+      "app": "Berekend door de app: berekend met haar eigen regels, niet geschreven door een model.",
+      "general": "Algemeen advies: geschreven door het model op deze computer over spelen in het algemeen, niet uit jouw spel.",
+      "take": "Take {{take}}, zoals het resultaat het zei: {{text}}",
+      "takeGone": "Het resultaat van take {{take}} is niet meer het resultaat in beeld, dus ik kan het hier niet openen.",
+      "step": "Stap {{step}}, {{title}}, in de woorden van het leerpad:",
+      "stepGone": "Ik kan stap {{step}} niet vinden om hem hier te citeren."
     }
   }
 }

@@ -31,7 +31,11 @@
       "loadAsked": "Yames 先问了你未保存的更改。你回答之前不会载入任何内容。",
       "clickSubdivision": "每拍点击数：{{to}}",
       "setSetting": "{{key}}：{{to}}",
-      "setGoal": "已记下目标：“{{to}}”"
+      "setGoal": "已记下目标：“{{to}}”",
+      "makeExercise": "已把{{what}}加入我的练习。",
+      "makeExerciseAdding": "正在把{{what}}加入我的练习…",
+      "undoMakeExercise": "已从我的练习中移除。",
+      "undoMakeExerciseDoing": "正在把它从我的练习中移除…"
     },
     "propose": {
       "goTo": "打开{{screen}}？",
@@ -62,7 +66,9 @@
       "clickSubdivision": "每拍点击数：{{from}} → {{to}}",
       "setSetting": "{{key}}：{{from}} → {{to}}",
       "setGoal": "把这个记为你的目标：“{{to}}”",
-      "setGoalFrom": "把你的目标从“{{from}}”改为“{{to}}”"
+      "setGoalFrom": "把你的目标从“{{from}}”改为“{{to}}”",
+      "makeExercise": "把它加入我的练习",
+      "undoMakeExercise": "把它从我的练习中移除"
     },
     "stops": {
       "click": "节拍点击会停止。",
@@ -120,7 +126,8 @@
       "keep": "保留",
       "go": "前往",
       "open": "打开",
-      "loop": "循环"
+      "loop": "循环",
+      "add": "添加"
     },
     "why": {
       "which": "是哪一个？",
@@ -181,7 +188,38 @@
         "cap": "你已跟随 {{cap}} 条路线，这是上限。请先去它的页面退出一条。",
         "loopBackwards": "第{{to}}小节在第{{from}}小节之前。请先说起始的小节。"
       },
-      "failed": "没有成功，也没有改动任何内容。"
+      "failed": "没有成功，也没有改动任何内容。",
+      "make": {
+        "what": "说出要做什么：一个音阶或一个和弦，以及它的根音。例如“A 小调五声，5 品”。",
+        "root": "也说出它的根音。例如“A 小调五声”。",
+        "chord": "说出琶音是哪个和弦。例如“Am7 琶音”。",
+        "needScale": "说出是哪个音阶。例如“A 小调五声”。",
+        "scale": "应用暂时还不能做{{scale}}的练习。它能做小调五声、大调五声、布鲁斯、大调、自然小调、和声小调、多利亚和混合利底亚。",
+        "boxScale": "音阶框适用于小调五声、大调五声和布鲁斯，不适用于{{scale}}。",
+        "threeScale": "每弦三音适用于大调、自然小调、和声小调、多利亚和混合利底亚，不适用于{{scale}}。",
+        "mixed": "这同时指了一个音阶和一个和弦，或者是该指型不支持的。请只说一个。",
+        "noShapeHere": "这个指型不是从第 {{fret}} 品开始的。",
+        "outOfRange": "从第 {{fret}} 品起，会超出琴颈的末端。",
+        "tooManyNotes": "弹一遍需要 {{count}} 小节。",
+        "tooManyNotes_other": "弹一遍需要 {{count}} 小节。",
+        "tooLong": "弹一遍需要的小节数超过 {{count}}，而这是一个练习最多能有的小节数。",
+        "tooFewNotes": "音太少，不够这么多小节：它们只填满 {{count}} 小节。",
+        "tooFewNotes_other": "音太少，不够这么多小节：它们只填满 {{count}} 小节。",
+        "unreachable": "应用所知道的任何手，都弹不了这么快，没法评分。",
+        "notMade": "应用做不出这个。",
+        "loading": "应用正在准备练习生成器。请稍后再问一次。",
+        "loadFailed": "应用没能载入练习生成器，所以什么也没做。",
+        "full": "我的练习已满（50 个），所以这个没有加入。请先在那里移除一个。",
+        "already": "这个已经在我的练习里了。",
+        "badRecipe": "应用做不出这个。",
+        "unreadable": "刚才读不了我的练习，所以什么也没加入。",
+        "failed": "刚才保存不了我的练习，所以什么也没加入。",
+        "undo": {
+          "gone": "它已经不在我的练习里了。",
+          "unreadable": "刚才读不了我的练习，所以什么也没移除。",
+          "failed": "刚才保存不了我的练习，所以它还在那里。"
+        }
+      }
     },
     "yours": {
       "input": "这个由你来定。教练从不开关输入。工具里的“聆听”和练习栏可以开关，输入在设置里。",
@@ -255,6 +293,25 @@
         "neck": "琴颈",
         "runway": "跑道",
         "tab": "六线谱"
+      }
+    },
+    "make": {
+      "source": "由应用算出",
+      "graded": "从 {{bpm}} BPM 开始。节奏和听到的音可以评分，其余由你自己判断。",
+      "startsOn": "从 {{note}} 开始：第 {{string}} 弦，第 {{fret}} 品。",
+      "startsOnString": "从第 {{string}} 弦，第 {{fret}} 品开始。",
+      "notesLabel": "{{n}} 个音，第 {{from}} 到 {{to}} 品",
+      "openPaths": "打开路线",
+      "undoLeft": "离开添加它的那个界面时，撤销就失效了。要移除它，请在路线里的我的练习中点“移除”。",
+      "chip": {
+        "fret": "第 {{fret}} 品",
+        "bars": "{{count}} 小节",
+        "bars_other": "{{count}} 小节",
+        "quarters": "改用四分音符",
+        "eighths": "改用八分音符",
+        "eighthTriplets": "改用三连音",
+        "sixteenths": "改用十六分音符",
+        "nextPosition": "下一个把位"
       }
     }
   }

@@ -62,7 +62,16 @@
         "changed": "Cosa è cambiato dall'ultimo take?",
         "improving": "Sto migliorando?",
         "madeOf": "Da cosa è composto il punteggio?",
-        "distance": "Quanto manca all'asticella?"
+        "distance": "Quanto manca all'asticella?",
+        "purpose": "A cosa serve?",
+        "how": "Come si suona?",
+        "try": "Cosa dovrei provare?",
+        "planWhy": "Perché questo?",
+        "planTempo": "Perché questo tempo?",
+        "planNext": "Cosa viene dopo?",
+        "planReturn": "Quando ritorna?",
+        "passMarkMs": "Cosa significa l'asticella di regolarità?",
+        "cleanTempo": "Cos'è un tempo pulito?"
       },
       "canAnswer": {
         "ungraded": "Stai suonando senza valutazione, quindi non ci sono misurazioni da cui rispondere a domande sui tuoi take."
@@ -104,7 +113,7 @@
         "evenSome": "Il take {{take}} era regolare al {{value}}%, contro un'asticella del {{bar}}%, e ho sentito {{heard}} note su {{expected}}.",
         "heard": "Ho sentito {{heard}} note su {{expected}} nel take {{take}}, contro un'asticella del {{bar}}%.",
         "extras": "Il take {{take}} aveva più note in più di quante ne ammetta l'asticella: {{bar}} o meno in quattro battute.",
-        "accents": "Nel take {{take}}, il {{value}}% degli accenti segnati è uscito più forte delle note intorno, contro un'asticella del {{bar}}%.",
+        "accents": "Nel take {{take}}, gli accenti segnati sono usciti in media il {{value}}% più forti delle altre note, contro un'asticella del {{bar}}%.",
         "notes": "Nel take {{take}}, il {{value}}% delle note di cui ho potuto riconoscere l'altezza erano quelle scritte, contro un'asticella del {{bar}}%."
       },
       "count": {
@@ -213,7 +222,7 @@
           "even": "Regolare: almeno {{bar}}% su {{over}} battute di fila.",
           "heard": "Note sentite: almeno il {{bar}}% delle note scritte.",
           "extras": "Note in più: {{bar}} o meno in {{over}} battute.",
-          "accents": "Accenti: almeno il {{bar}}% degli accenti segnati più forti delle note intorno.",
+          "accents": "Accenti: in media almeno il {{bar}}% più forti delle altre note.",
           "notes": "Note giuste: almeno il {{bar}}% delle note di cui posso riconoscere l'altezza sono quelle scritte.",
           "hold": "Regolarità mantenuta fino alla fine: almeno {{bar}}% sulle ultime battute del tratto giudicato."
         },
@@ -284,7 +293,86 @@
         "unmeasured_other": "{{count}} controlli dell'asticella non sono stati misurati nel take {{take}}.",
         "tempo": "Il take {{take}} era a {{bpm}} BPM; un take pulito a {{passAt}} BPM o più veloce supera l'esercizio.",
         "none": "Non ho misurato nessun controllo dell'asticella nel take {{take}}."
+      },
+      "path": {
+        "quote": "“{{text}}”",
+        "noExercise": "Non c'è nessun esercizio sullo schermo da cui io possa leggerlo.",
+        "purposeIntro": "A cosa serve questo esercizio, con le parole del percorso:",
+        "purposeNone": "Il percorso non indica alcuno scopo per questo esercizio.",
+        "howIntro": "Come si suona, con le parole del percorso:",
+        "howNone": "Il percorso non indica come suonare questo esercizio.",
+        "tryMeasured": "L'indicazione del percorso su ciò che la take {{take}} ha misurato:",
+        "tryGeneral": "L'indicazione del percorso per questo esercizio:",
+        "tryNone": "Il percorso non ha nessuna indicazione per questo esercizio."
+      },
+      "plan": {
+        "notInPlan": "Non c'è nessuna sessione con un piano in corso da cui io possa leggerlo.",
+        "why": "Perché questa parte è nel piano di questa sessione:",
+        "tempoPlanned": "Questa parte era prevista a {{bpm}} BPM.",
+        "tempoNow": "Ora è a {{bpm}} BPM.",
+        "tempoNone": "Questa parte non ha un tempo suo.",
+        "next": "Dopo, nel piano di questa sessione: {{title}}, {{minutes}} min.",
+        "nextBpm": "Dopo, nel piano di questa sessione: {{title}}, a {{bpm}} BPM, {{minutes}} min.",
+        "nextLast": "Questa è l'ultima parte del piano di questa sessione.",
+        "skip": "La verifica suona una take al tempo di superamento di ogni esercizio valutato della tappa che non hai ancora superato (tutti di nuovo, quando li hai superati tutti).",
+        "skipInSession": "La verifica parte dalla pagina di una tappa, non mentre una sessione è in corso.",
+        "minutes": "Il piano di oggi esiste in {{list}} minuti.",
+        "minutesSnapped": "Il più vicino a {{asked}} minuti è {{to}}.",
+        "minutesNone": "Dimmi quanti minuti hai, con un numero.",
+        "minutesInSession": "I minuti di una sessione in corso non si possono cambiare.",
+        "returnDays": "Il calendario di ripasso riporta questo esercizio entro {{count}} giorno, a {{bpm}} BPM.",
+        "returnDays_many": "Il calendario di ripasso riporta questo esercizio entro {{count}} giorni, a {{bpm}} BPM.",
+        "returnDays_other": "Il calendario di ripasso riporta questo esercizio entro {{count}} giorni, a {{bpm}} BPM.",
+        "returnDue": "Questo esercizio è da ripassare ora, a {{bpm}} BPM.",
+        "returnNotPassed": "Questo esercizio non è ancora superato; i ripassi iniziano quando lo è.",
+        "returnUngraded": "Questo esercizio non è valutato, quindi non ha un calendario di ripasso.",
+        "returnNoPassTempo": "Questo esercizio non ha un tempo di superamento, quindi il calendario di ripasso non lo riporta.",
+        "returnMine": "I tuoi esercizi non sono in un percorso, quindi non hanno un calendario di ripasso.",
+        "returnNotFair": "Una take di questo esercizio è segnata come non equa, e il calendario di ripasso non la esclude, quindi non la cito."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} è {{notes}}.",
+        "chordUnknown": "Non conosco quell'accordo. Accordi che so comporre su {{root}}: {{known}}.",
+        "scalesIntroMajor": "Su {{chord}}, preso come accordo di tonica di {{root}} maggiore, l'app sceglie queste scale, ciascuna con tutte le note dell'accordo.",
+        "scalesIntroMinor": "Su {{chord}}, preso come accordo di tonica di {{root}} minore, l'app sceglie queste scale, ciascuna con tutte le note dell'accordo.",
+        "scalesPlacedMajor": "{{chord}} è l'accordo {{degree}} di {{root}} maggiore, una tonalità a cui appartiene. In quella tonalità l'app sceglie queste scale, ciascuna con tutte le note dell'accordo.",
+        "scalesPlacedMinor": "{{chord}} è l'accordo {{degree}} di {{root}} minore, una tonalità a cui appartiene. In quella tonalità l'app sceglie queste scale, ciascuna con tutte le note dell'accordo.",
+        "scalesPlacedMajorAlso": "{{chord}} è l'accordo {{degree}} di {{root}} maggiore, una tonalità a cui appartiene ({{root}} suona come {{plain}}). In quella tonalità l'app sceglie queste scale, ciascuna con tutte le note dell'accordo.",
+        "scalesPlacedMinorAlso": "{{chord}} è l'accordo {{degree}} di {{root}} minore, una tonalità a cui appartiene ({{root}} suona come {{plain}}). In quella tonalità l'app sceglie queste scale, ciascuna con tutte le note dell'accordo.",
+        "scalesNoneMajor": "In {{root}} maggiore, nessuna delle scale che l'app sceglie per {{chord}} ha tutte le note dell'accordo.",
+        "scalesNoneMinor": "In {{root}} minore, nessuna delle scale che l'app sceglie per {{chord}} ha tutte le note dell'accordo.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "Questo esercizio non è valutato, quindi non ha un'asticella.",
+        "noPassMarkSet": "Nessuna asticella è impostata: stai suonando senza valutazione, quindi nulla di ciò che suoni viene misurato rispetto a una. Per impostarla, scegli «Valutami» per «Valuta come suono» in Impostazioni, sotto Pratica; puoi anche cambiarlo in qualsiasi sessione.",
+        "noSuchMark": "Nessuna asticella di questo esercizio è del {{value}}%.",
+        "evenNone": "L'asticella di questo esercizio non ha un controllo di regolarità.",
+        "evenNoMs": "Non posso esprimere in millisecondi l'asticella di regolarità di questo esercizio: il suo battito non è una semiminima.",
+        "evenMs": "L'asticella di regolarità qui è del {{bar}}%: a {{bpm}} BPM, con le note più vicine di questo esercizio a {{gap}} ms l'una dall'altra, ammette una dispersione di circa {{ms}} ms intorno al tuo tempismo medio.",
+        "holdMs": "L'asticella della regolarità mantenuta fino alla fine è del {{bar}}%, misurata sulle ultime battute del tratto giudicato: a {{bpm}} BPM, con le note più vicine di questo esercizio a {{gap}} ms l'una dall'altra, ammette una dispersione di circa {{ms}} ms intorno al tuo tempismo medio.",
+        "heardMark": "{{bar}}% è l'asticella delle note sentite: nelle battute giudicate, almeno {{bar}} note scritte su 100 devono essere sentite.",
+        "accentsMark": "{{bar}}% è l'asticella degli accenti: in media, gli accenti segnati devono uscire almeno il {{bar}}% più forti delle altre note.",
+        "notesMark": "{{bar}}% è l'asticella delle note giuste: almeno {{bar}} note su 100 di quelle di cui ho potuto riconoscere l'altezza devono essere quelle scritte.",
+        "markOther": "{{value}}% è l'asticella di un altro dei controlli di questo esercizio, non della sua regolarità.",
+        "markAlso": "{{value}}% è anche l'asticella di un altro dei controlli di questo esercizio.",
+        "evenHow": "La regolarità si misura intorno al tuo tempismo medio, non al click, quindi uno scarto costante non la abbassa.",
+        "clean": "Il tuo tempo pulito è il tempo più alto a cui una take è stata superata con almeno {{need}} battute di fila che hanno retto tutti i controlli.",
+        "cleanYours": "Il tuo tempo pulito su questo esercizio è {{bpm}} BPM.",
+        "cleanNone": "Non hai ancora un tempo pulito su questo esercizio.",
+        "cleanNotFair": "Le take che hai segnato come non eque non contano per questo.",
+        "cleanMine": "I tuoi esercizi non sono in un percorso, quindi non cito un tempo pulito per loro."
       }
+    },
+    "source": {
+      "measured": "Misurato: l'app l'ha letto dalle tue take.",
+      "path": "Dal percorso: le parole scritte del percorso stesso, citate così come sono.",
+      "app": "Calcolato dall'app: calcolato con le sue regole, non scritto da un modello.",
+      "general": "Consiglio generale: scritto dal modello di questo computer sul suonare in generale, non dal tuo modo di suonare.",
+      "take": "Take {{take}}, come diceva il suo risultato: {{text}}",
+      "takeGone": "Il risultato della take {{take}} non è più quello sullo schermo, quindi non posso aprirlo qui.",
+      "step": "Tappa {{step}}, {{title}}, con le parole del percorso:",
+      "stepGone": "Non trovo la tappa {{step}} per citarla qui."
     }
   }
 }

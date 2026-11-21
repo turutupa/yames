@@ -62,7 +62,16 @@
         "changed": "¿Qué cambió desde la última toma?",
         "improving": "¿Estoy mejorando?",
         "madeOf": "¿De qué se compone la puntuación?",
-        "distance": "¿A cuánto está el listón?"
+        "distance": "¿A cuánto está el listón?",
+        "purpose": "¿Para qué sirve?",
+        "how": "¿Cómo se toca?",
+        "try": "¿Qué pruebo?",
+        "planWhy": "¿Por qué esto?",
+        "planTempo": "¿Por qué este tempo?",
+        "planNext": "¿Qué viene después?",
+        "planReturn": "¿Cuándo vuelve esto?",
+        "passMarkMs": "¿Qué significa el listón de regularidad?",
+        "cleanTempo": "¿Qué es un tempo limpio?"
       },
       "canAnswer": {
         "ungraded": "Estás tocando sin evaluación, así que no hay mediciones con las que responder preguntas sobre tus tomas."
@@ -104,7 +113,7 @@
         "evenSome": "La toma {{take}} salió un {{value}}% regular, frente a un listón del {{bar}}%, y oí {{heard}} de {{expected}} notas.",
         "heard": "Oí {{heard}} de {{expected}} notas en la toma {{take}}, frente a un listón del {{bar}}%.",
         "extras": "La toma {{take}} tuvo más notas de más de las que permite el listón: {{bar}} o menos en cuatro compases.",
-        "accents": "En la toma {{take}}, el {{value}}% de los acentos marcados sonó más fuerte que las notas de alrededor, frente a un listón del {{bar}}%.",
+        "accents": "En la toma {{take}}, los acentos marcados salieron, de media, un {{value}}% más fuertes que las otras notas, frente a un listón del {{bar}}%.",
         "notes": "En la toma {{take}}, el {{value}}% de las notas cuya altura pude determinar eran las escritas, frente a un listón del {{bar}}%."
       },
       "count": {
@@ -213,7 +222,7 @@
           "even": "Regular: al menos {{bar}}% durante {{over}} compases seguidos.",
           "heard": "Notas oídas: al menos el {{bar}}% de las notas escritas.",
           "extras": "Notas de más: {{bar}} o menos en {{over}} compases.",
-          "accents": "Acentos: al menos el {{bar}}% de los acentos marcados más fuertes que las notas de alrededor.",
+          "accents": "Acentos: de media, al menos un {{bar}}% más fuertes que las otras notas.",
           "notes": "Notas correctas: al menos el {{bar}}% de las notas cuya altura puedo determinar son las escritas.",
           "hold": "Regularidad mantenida hasta el final: al menos {{bar}}% en los últimos compases del tramo evaluado."
         },
@@ -284,7 +293,86 @@
         "unmeasured_other": "{{count}} comprobaciones del listón no se midieron en la toma {{take}}.",
         "tempo": "La toma {{take}} estuvo a {{bpm}} BPM; una toma limpia a {{passAt}} BPM o más rápido supera el ejercicio.",
         "none": "No medí ninguna comprobación del listón en la toma {{take}}."
+      },
+      "path": {
+        "quote": "“{{text}}”",
+        "noExercise": "No hay ningún ejercicio en pantalla del que pueda leer eso.",
+        "purposeIntro": "Para qué sirve este ejercicio, con las palabras de la ruta:",
+        "purposeNone": "La ruta no da ningún propósito para este ejercicio.",
+        "howIntro": "Cómo se toca, con las palabras de la ruta:",
+        "howNone": "La ruta no da ninguna indicación de cómo tocar este ejercicio.",
+        "tryMeasured": "La indicación de la ruta sobre lo que midió la toma {{take}}:",
+        "tryGeneral": "La indicación de la ruta para este ejercicio:",
+        "tryNone": "La ruta no tiene ninguna indicación para este ejercicio."
+      },
+      "plan": {
+        "notInPlan": "No hay ninguna sesión con un plan en marcha de la que pueda leer eso.",
+        "why": "Por qué esta parte está en el plan de esta sesión:",
+        "tempoPlanned": "Esta parte estaba planeada a {{bpm}} BPM.",
+        "tempoNow": "Ahora está a {{bpm}} BPM.",
+        "tempoNone": "Esta parte no tiene un tempo propio.",
+        "next": "Lo siguiente en el plan de esta sesión: {{title}}, {{minutes}} min.",
+        "nextBpm": "Lo siguiente en el plan de esta sesión: {{title}}, a {{bpm}} BPM, {{minutes}} min.",
+        "nextLast": "Esta es la última parte del plan de esta sesión.",
+        "skip": "Hacer examen reproduce una toma al tempo de aprobado de cada ejercicio evaluado del paso que aún no has superado (todos otra vez, cuando has superado todos).",
+        "skipInSession": "Hacer examen se inicia desde la página de un paso, no mientras una sesión está en marcha.",
+        "minutes": "El plan de hoy viene en {{list}} minutos.",
+        "minutesSnapped": "Lo más cercano a {{asked}} minutos es {{to}}.",
+        "minutesNone": "Dime cuántos minutos tienes, con un número.",
+        "minutesInSession": "Los minutos de una sesión en marcha no se pueden cambiar.",
+        "returnDays": "El calendario de repaso trae este ejercicio de vuelta en {{count}} día, a {{bpm}} BPM.",
+        "returnDays_many": "El calendario de repaso trae este ejercicio de vuelta en {{count}} días, a {{bpm}} BPM.",
+        "returnDays_other": "El calendario de repaso trae este ejercicio de vuelta en {{count}} días, a {{bpm}} BPM.",
+        "returnDue": "Este ejercicio toca repasarlo ahora, a {{bpm}} BPM.",
+        "returnNotPassed": "Este ejercicio aún no está superado; los repasos empiezan cuando lo esté.",
+        "returnUngraded": "Este ejercicio no está evaluado, así que no tiene calendario de repaso.",
+        "returnNoPassTempo": "Este ejercicio no tiene tempo de aprobado, así que el calendario de repaso no lo trae de vuelta.",
+        "returnMine": "Tus propios ejercicios no están en una ruta, así que no tienen calendario de repaso.",
+        "returnNotFair": "Una toma de este ejercicio está marcada como no justa, y el calendario de repaso no la deja fuera, así que no la cito."
+      },
+      "theory": {
+        "chordNotes": "{{chord}} es {{notes}}.",
+        "chordUnknown": "No conozco ese acorde. Acordes que sé deletrear sobre {{root}}: {{known}}.",
+        "scalesIntroMajor": "Sobre {{chord}}, tomado como el acorde de tónica de {{root}} mayor, la app elige estas escalas, cada una con todas las notas del acorde.",
+        "scalesIntroMinor": "Sobre {{chord}}, tomado como el acorde de tónica de {{root}} menor, la app elige estas escalas, cada una con todas las notas del acorde.",
+        "scalesPlacedMajor": "{{chord}} es el acorde {{degree}} de {{root}} mayor, una tonalidad a la que pertenece. En esa tonalidad la app elige estas escalas, cada una con todas las notas del acorde.",
+        "scalesPlacedMinor": "{{chord}} es el acorde {{degree}} de {{root}} menor, una tonalidad a la que pertenece. En esa tonalidad la app elige estas escalas, cada una con todas las notas del acorde.",
+        "scalesPlacedMajorAlso": "{{chord}} es el acorde {{degree}} de {{root}} mayor, una tonalidad a la que pertenece ({{root}} suena igual que {{plain}}). En esa tonalidad la app elige estas escalas, cada una con todas las notas del acorde.",
+        "scalesPlacedMinorAlso": "{{chord}} es el acorde {{degree}} de {{root}} menor, una tonalidad a la que pertenece ({{root}} suena igual que {{plain}}). En esa tonalidad la app elige estas escalas, cada una con todas las notas del acorde.",
+        "scalesNoneMajor": "En {{root}} mayor, ninguna de las escalas que la app elige para {{chord}} tiene todas las notas del acorde.",
+        "scalesNoneMinor": "En {{root}} menor, ninguna de las escalas que la app elige para {{chord}} tiene todas las notas del acorde.",
+        "scale": "{{root}} {{name}}: {{notes}}."
+      },
+      "term": {
+        "ungradedExercise": "Este ejercicio no está evaluado, así que no tiene listón.",
+        "noPassMarkSet": "No hay listón fijado: estás tocando sin evaluación, así que nada de lo que tocas se mide contra uno. Para fijarlo, elige «Evalúame» en «Evaluar cómo toco», en Ajustes, dentro de Práctica; también puedes cambiarlo en cualquier sesión.",
+        "noSuchMark": "Ningún listón de este ejercicio es del {{value}}%.",
+        "evenNone": "El listón de este ejercicio no tiene comprobación de regularidad.",
+        "evenNoMs": "No puedo expresar en milisegundos el listón de regularidad de este ejercicio: su pulso no es una negra.",
+        "evenMs": "El listón de regularidad aquí es del {{bar}}%: a {{bpm}} BPM, con las notas más cercanas de este ejercicio a {{gap}} ms una de otra, permite una dispersión de unos {{ms}} ms alrededor de tu propio tiempo medio.",
+        "holdMs": "El listón de la regularidad mantenida hasta el final es del {{bar}}%, medido sobre los compases finales del tramo evaluado: a {{bpm}} BPM, con las notas más cercanas de este ejercicio a {{gap}} ms una de otra, permite una dispersión de unos {{ms}} ms alrededor de tu propio tiempo medio.",
+        "heardMark": "{{bar}}% es el listón de las notas oídas: en los compases evaluados, se deben oír al menos {{bar}} de cada 100 notas escritas.",
+        "accentsMark": "{{bar}}% es el listón de los acentos: de media, los acentos marcados deben salir al menos un {{bar}}% más fuertes que las otras notas.",
+        "notesMark": "{{bar}}% es el listón de las notas correctas: al menos {{bar}} de cada 100 notas que pude identificar deben ser las escritas.",
+        "markOther": "{{value}}% es el listón de otra de las comprobaciones de este ejercicio, no de su regularidad.",
+        "markAlso": "{{value}}% es también el listón de otra de las comprobaciones de este ejercicio.",
+        "evenHow": "La regularidad se mide alrededor de tu propio tiempo medio, no del clic, así que una inclinación constante no la baja.",
+        "clean": "Tu tempo limpio es el tempo más alto al que una toma pasó con al menos {{need}} compases seguidos que cumplieron todas las comprobaciones.",
+        "cleanYours": "Tu tempo limpio en este ejercicio es {{bpm}} BPM.",
+        "cleanNone": "Todavía no tienes un tempo limpio en este ejercicio.",
+        "cleanNotFair": "Las tomas que marcaste como no justas no cuentan para él.",
+        "cleanMine": "Tus propios ejercicios no están en una ruta, así que no cito un tempo limpio para ellos."
       }
+    },
+    "source": {
+      "measured": "Medido: la app lo leyó de tus propias tomas.",
+      "path": "De la ruta: las palabras escritas de la propia ruta, citadas tal cual.",
+      "app": "Calculado por la app: calculado con sus propias reglas, no escrito por un modelo.",
+      "general": "Consejo general: escrito por el modelo de este ordenador sobre tocar en general, no sobre cómo tocas.",
+      "take": "Toma {{take}}, como lo decía su resultado: {{text}}",
+      "takeGone": "El resultado de la toma {{take}} ya no es el que está en pantalla, así que no puedo abrirlo aquí.",
+      "step": "Paso {{step}}, {{title}}, con las palabras de la ruta:",
+      "stepGone": "No encuentro el paso {{step}} para citarlo aquí."
     }
   }
 }

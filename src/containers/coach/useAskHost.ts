@@ -70,12 +70,26 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
       };
     },
     progress: () => latest.current.session.progress,
-    plan: () => (latest.current.view === "session" ? (latest.current.session.plan ?? undefined) : undefined),
+    // In a Session, the plan it RUNS (a Step's page, Test out, a step inserted:
+    // not Today's, review c2b2a H1); on Today, Today's plan; elsewhere none.
+    plan: () => {
+      const { view, session } = latest.current;
+      if (view === "session") return session.run.phase !== "idle" ? (session.run.plan ?? undefined) : undefined;
+      return view === "today" ? (session.plan ?? undefined) : undefined;
+    },
     run: () => (latest.current.view === "session" ? latest.current.session.run : undefined),
     path: () => {
       const s = latest.current.session;
       if (latest.current.view !== "session" || !s.take) return undefined;
       return s.paths.find((p) => p.id === s.take?.pathId);
+    },
+    // The Step of the plan step on screen: a Path card's source says its number (leg c2b2a).
+    step: () => {
+      const s = latest.current.session;
+      if (latest.current.view !== "session") return undefined;
+      const planned = currentStep(s.run);
+      if (!planned || planned.kind !== "exercise") return undefined;
+      return s.paths.find((p) => p.id === planned.pathId)?.steps.find((st) => st.id === planned.stepId);
     },
     exercise: () => {
       const s = latest.current.session;

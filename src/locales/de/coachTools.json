@@ -31,7 +31,11 @@
       "loadAsked": "Yames hat zuerst nach deinen ungespeicherten Änderungen gefragt. Bis du antwortest, wird nichts geladen.",
       "clickSubdivision": "Klicks pro Schlag: {{to}}",
       "setSetting": "{{key}}: {{to}}",
-      "setGoal": "Ziel gemerkt: „{{to}}“"
+      "setGoal": "Ziel gemerkt: „{{to}}“",
+      "makeExercise": "{{what}} zu Meine Übungen hinzugefügt.",
+      "makeExerciseAdding": "{{what}} wird zu Meine Übungen hinzugefügt …",
+      "undoMakeExercise": "Wieder aus Meine Übungen herausgenommen.",
+      "undoMakeExerciseDoing": "Wird wieder aus Meine Übungen herausgenommen …"
     },
     "propose": {
       "goTo": "{{screen}} öffnen?",
@@ -62,7 +66,9 @@
       "clickSubdivision": "Klicks pro Schlag: {{from}} → {{to}}",
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Das als Ziel merken: „{{to}}“",
-      "setGoalFrom": "Dein Ziel von „{{from}}“ auf „{{to}}“ ändern"
+      "setGoalFrom": "Dein Ziel von „{{from}}“ auf „{{to}}“ ändern",
+      "makeExercise": "Zu Meine Übungen hinzufügen",
+      "undoMakeExercise": "Wieder aus Meine Übungen herausnehmen"
     },
     "stops": {
       "click": "Der Klick stoppt.",
@@ -120,7 +126,8 @@
       "keep": "Merken",
       "go": "Los",
       "open": "Öffnen",
-      "loop": "Wiederholen"
+      "loop": "Wiederholen",
+      "add": "Hinzufügen"
     },
     "why": {
       "which": "Welcher?",
@@ -181,7 +188,38 @@
         "cap": "Du folgst {{cap}} Pfaden, mehr geht nicht. Verlasse zuerst einen auf seiner Seite.",
         "loopBackwards": "Takt {{to}} kommt vor Takt {{from}}. Nenne zuerst den ersten Takt."
       },
-      "failed": "Das hat nicht geklappt, und es wurde nichts geändert."
+      "failed": "Das hat nicht geklappt, und es wurde nichts geändert.",
+      "make": {
+        "what": "Sag, was gemacht werden soll: eine Tonleiter oder ein Akkord und sein Grundton. Zum Beispiel „A-Moll-Pentatonik, 5. Bund“.",
+        "root": "Nenne auch den Grundton: zum Beispiel „A-Moll-Pentatonik“.",
+        "chord": "Sag, welcher Akkord das Arpeggio ist: zum Beispiel „A-Moll-7-Arpeggio“.",
+        "needScale": "Sag, welche Tonleiter: zum Beispiel „A-Moll-Pentatonik“.",
+        "scale": "Die App kann noch keine Übung in {{scale}} machen. Sie macht Moll- und Dur-Pentatonik, Blues, Dur, natürliches und harmonisches Moll, Dorisch und Mixolydisch.",
+        "boxScale": "Eine Box gibt es für die Moll-Pentatonik, die Dur-Pentatonik und den Blues, nicht für {{scale}}.",
+        "threeScale": "Drei Töne pro Saite gibt es für Dur, natürliches Moll, harmonisches Moll, Dorisch und Mixolydisch, nicht für {{scale}}.",
+        "mixed": "Das nennt eine Tonleiter und einen Akkord zugleich, oder eins, das diese Form nicht kennt. Nenne nur eins.",
+        "noShapeHere": "Diese Form beginnt nicht auf Bund {{fret}}.",
+        "outOfRange": "Ab Bund {{fret}} läuft sie über das Ende des Griffbretts hinaus.",
+        "tooManyNotes": "Ein Durchgang braucht {{count}} Takt.",
+        "tooManyNotes_other": "Ein Durchgang braucht {{count}} Takte.",
+        "tooLong": "Ein Durchgang braucht mehr als {{count}} Takte, so viele sind das Maximum für eine Übung.",
+        "tooFewNotes": "Das sind zu wenige Töne für so viele Takte: Sie füllen {{count}} Takt.",
+        "tooFewNotes_other": "Das sind zu wenige Töne für so viele Takte: Sie füllen {{count}} Takte.",
+        "unreachable": "Keine Hand, die die App kennt, kann das schnell genug spielen, um es zu bewerten.",
+        "notMade": "Die App kann diese nicht machen.",
+        "loading": "Die App bereitet den Übungsgenerator vor. Frag gleich noch einmal.",
+        "loadFailed": "Die App konnte den Übungsgenerator nicht laden, deshalb wurde nichts gemacht.",
+        "full": "Die Liste Meine Übungen ist voll (50), deshalb wurde diese nicht hinzugefügt. Entferne dort zuerst eine.",
+        "already": "Diese ist schon in Meine Übungen.",
+        "badRecipe": "Die App kann diese nicht machen.",
+        "unreadable": "Die Liste Meine Übungen ließ sich gerade nicht lesen, deshalb wurde nichts hinzugefügt.",
+        "failed": "Die Liste Meine Übungen ließ sich gerade nicht speichern, deshalb wurde nichts hinzugefügt.",
+        "undo": {
+          "gone": "Sie ist nicht mehr in Meine Übungen.",
+          "unreadable": "Die Liste Meine Übungen ließ sich gerade nicht lesen, deshalb wurde nichts herausgenommen.",
+          "failed": "Die Liste Meine Übungen ließ sich gerade nicht speichern, deshalb ist sie noch dort."
+        }
+      }
     },
     "yours": {
       "input": "Das ist deine Sache. Der Coach schaltet den Eingang nie ein oder aus. „Zuhören“ in den Werkzeugen und die Session-Leiste tun das, und in den Einstellungen liegt der Eingang.",
@@ -255,6 +293,25 @@
         "neck": "Griffbrett",
         "runway": "Runway",
         "tab": "Tab"
+      }
+    },
+    "make": {
+      "source": "Von der App ausgearbeitet",
+      "graded": "Beginnt bei {{bpm}} BPM. Timing und gehörte Töne können bewertet werden; der Rest liegt bei dir.",
+      "startsOn": "Beginnt auf {{note}}: Saite {{string}}, Bund {{fret}}.",
+      "startsOnString": "Beginnt auf Saite {{string}}, Bund {{fret}}.",
+      "notesLabel": "{{n}} Töne, Bund {{from}} bis {{to}}",
+      "openPaths": "Pfade öffnen",
+      "undoLeft": "Das Rückgängig endete, als du den Bildschirm verlassen hast, auf dem das hinzugefügt wurde. Zum Herausnehmen nutze Entfernen in Meine Übungen unter Pfade.",
+      "chip": {
+        "fret": "Bund {{fret}}",
+        "bars": "{{count}} Takt",
+        "bars_other": "{{count}} Takte",
+        "quarters": "Stattdessen Viertel",
+        "eighths": "Stattdessen Achtel",
+        "eighthTriplets": "Stattdessen Triolen",
+        "sixteenths": "Stattdessen Sechzehntel",
+        "nextPosition": "Nächste Lage"
       }
     }
   }

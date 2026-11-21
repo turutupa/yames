@@ -31,7 +31,11 @@
       "loadAsked": "Yames đã hỏi về các thay đổi chưa lưu của bạn trước. Chưa tải gì cho đến khi bạn trả lời.",
       "clickSubdivision": "Số tiếng click mỗi phách: {{to}}",
       "setSetting": "{{key}}: {{to}}",
-      "setGoal": "Đã giữ mục tiêu: “{{to}}”"
+      "setGoal": "Đã giữ mục tiêu: “{{to}}”",
+      "makeExercise": "Đã thêm {{what}} vào Bài của tôi.",
+      "makeExerciseAdding": "Đang thêm {{what}} vào Bài của tôi…",
+      "undoMakeExercise": "Đã gỡ khỏi Bài của tôi.",
+      "undoMakeExerciseDoing": "Đang gỡ khỏi Bài của tôi…"
     },
     "propose": {
       "goTo": "Mở {{screen}}?",
@@ -62,7 +66,9 @@
       "clickSubdivision": "Số tiếng click mỗi phách: {{from}} → {{to}}",
       "setSetting": "{{key}}: {{from}} → {{to}}",
       "setGoal": "Giữ làm mục tiêu của bạn: “{{to}}”",
-      "setGoalFrom": "Đổi mục tiêu của bạn từ “{{from}}” thành “{{to}}”"
+      "setGoalFrom": "Đổi mục tiêu của bạn từ “{{from}}” thành “{{to}}”",
+      "makeExercise": "Thêm vào Bài của tôi",
+      "undoMakeExercise": "Gỡ khỏi Bài của tôi"
     },
     "stops": {
       "click": "Tiếng click dừng.",
@@ -120,7 +126,8 @@
       "keep": "Giữ",
       "go": "Đi",
       "open": "Mở",
-      "loop": "Lặp lại"
+      "loop": "Lặp lại",
+      "add": "Thêm"
     },
     "why": {
       "which": "Cái nào?",
@@ -181,7 +188,38 @@
         "cap": "Bạn đang theo {{cap}} lộ trình, nhiều nhất có thể. Hãy bỏ một lộ trình ở trang của nó trước.",
         "loopBackwards": "Ô nhịp {{to}} đứng trước ô nhịp {{from}}. Hãy nói ô nhịp đầu trước."
       },
-      "failed": "Không được, và chưa có gì bị thay đổi."
+      "failed": "Không được, và chưa có gì bị thay đổi.",
+      "make": {
+        "what": "Hãy nói cần tạo gì: một thang âm hoặc một hợp âm, và nốt gốc của nó. Ví dụ “ngũ cung thứ A, phím 5”.",
+        "root": "Hãy nói thêm nốt gốc: ví dụ “ngũ cung thứ A”.",
+        "chord": "Hãy nói arpeggio là hợp âm nào: ví dụ “arpeggio A thứ 7”.",
+        "needScale": "Hãy nói thang âm nào: ví dụ “ngũ cung thứ A”.",
+        "scale": "Ứng dụng chưa tạo được bài ở {{scale}}. Nó tạo được ngũ cung thứ và trưởng, blues, trưởng, thứ tự nhiên và thứ hòa thanh, dorian và mixolydian.",
+        "boxScale": "Một hộp dành cho ngũ cung thứ, ngũ cung trưởng và blues, không phải {{scale}}.",
+        "threeScale": "Ba nốt mỗi dây dành cho trưởng, thứ tự nhiên, thứ hòa thanh, dorian và mixolydian, không phải {{scale}}.",
+        "mixed": "Câu đó nêu cùng lúc một thang âm và một hợp âm, hoặc một thứ mà hình thế này không nhận. Hãy chỉ nói một.",
+        "noShapeHere": "Hình thế đó không bắt đầu ở phím {{fret}}.",
+        "outOfRange": "Từ phím {{fret}}, nó chạy quá cuối cần đàn.",
+        "tooManyNotes": "Một lượt chơi cần {{count}} ô nhịp.",
+        "tooManyNotes_other": "Một lượt chơi cần {{count}} ô nhịp.",
+        "tooLong": "Một lượt chơi cần hơn {{count}} ô nhịp, mức tối đa của một bài.",
+        "tooFewNotes": "Quá ít nốt cho từng ấy ô nhịp: chúng chỉ lấp đầy {{count}} ô nhịp.",
+        "tooFewNotes_other": "Quá ít nốt cho từng ấy ô nhịp: chúng chỉ lấp đầy {{count}} ô nhịp.",
+        "unreachable": "Không bàn tay nào mà ứng dụng biết có thể chơi nhanh đến mức chấm điểm được.",
+        "notMade": "Ứng dụng không tạo được bài đó.",
+        "loading": "Ứng dụng đang chuẩn bị công cụ tạo bài. Hãy hỏi lại sau một lát.",
+        "loadFailed": "Ứng dụng không tải được công cụ tạo bài, nên chưa tạo gì cả.",
+        "full": "Bài của tôi đã đầy (50), nên bài này chưa được thêm. Hãy xóa bớt một bài ở đó trước.",
+        "already": "Bài đó đã có trong Bài của tôi.",
+        "badRecipe": "Ứng dụng không tạo được bài đó.",
+        "unreadable": "Lúc này không đọc được Bài của tôi, nên chưa thêm gì cả.",
+        "failed": "Lúc này không lưu được Bài của tôi, nên chưa thêm gì cả.",
+        "undo": {
+          "gone": "Nó không còn trong Bài của tôi nữa.",
+          "unreadable": "Lúc này không đọc được Bài của tôi, nên chưa xóa gì cả.",
+          "failed": "Lúc này không lưu được Bài của tôi, nên nó vẫn còn đó."
+        }
+      }
     },
     "yours": {
       "input": "Việc này là của bạn. Huấn luyện viên không bao giờ bật hay tắt đầu vào. Nút Nghe ở công cụ và thanh buổi tập làm việc đó, còn đầu vào nằm trong Cài đặt.",
@@ -255,6 +293,25 @@
         "neck": "Cần đàn",
         "runway": "Đường băng",
         "tab": "Tab"
+      }
+    },
+    "make": {
+      "source": "Do ứng dụng tính ra",
+      "graded": "Bắt đầu ở {{bpm}} BPM. Nhịp và các nốt nghe được có thể được chấm điểm; phần còn lại là việc của bạn.",
+      "startsOn": "Bắt đầu ở {{note}}: dây {{string}}, phím {{fret}}.",
+      "startsOnString": "Bắt đầu ở dây {{string}}, phím {{fret}}.",
+      "notesLabel": "{{n}} nốt, phím {{from}} đến {{to}}",
+      "openPaths": "Mở Lộ trình",
+      "undoLeft": "Hoàn tác đã hết hiệu lực khi bạn rời màn hình nơi bài này được thêm. Để gỡ bài này ra, hãy dùng Xóa trong Bài của tôi, ở Lộ trình.",
+      "chip": {
+        "fret": "Phím {{fret}}",
+        "bars": "{{count}} ô nhịp",
+        "bars_other": "{{count}} ô nhịp",
+        "quarters": "Đổi sang nốt đen",
+        "eighths": "Đổi sang nốt móc đơn",
+        "eighthTriplets": "Đổi sang nốt chùm ba",
+        "sixteenths": "Đổi sang nốt móc kép",
+        "nextPosition": "Vị trí kế tiếp"
       }
     }
   }
