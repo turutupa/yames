@@ -63,6 +63,7 @@ import type { BeatPosition } from "../../../songs/position";
 import type { AppState, Subdivision } from "../../../types";
 import type { Exercise, PathDoc, Step } from "../../../paths/format";
 import { FIRST_PATH_ID, findExercise, isRunnable, loadAllPacks } from "../../../session/packs";
+import { CUSTOM_PATH_ID } from "../../../paths/custom";
 import { gradeTake } from "../../../session/grade";
 import type { BarCheck, TakeGrade } from "../../../session/grade";
 import { measureTake } from "../../../session/takeMeasures";
@@ -397,6 +398,8 @@ export function useSessionRun(input: SessionRunInput) {
   // Each transition is also told to the coach (stepReady, takeStarted, takeResult, timedEnded, sessionRecap).
   const dispatch = useCoachPublishingDispatch(dispatchRun);
   const [paths, setPaths] = useState<PathDoc[]>([]);
+  /** The document of the custom Exercise last played (`playExercise`), or null. */
+  const [customPath, setCustomPath] = useState<PathDoc | null>(null);
   const { i18n } = useTranslation();
   const packLanguage = i18n.resolvedLanguage ?? i18n.language ?? "en";
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
@@ -767,7 +770,10 @@ export function useSessionRun(input: SessionRunInput) {
 
   // --- what is on the stage ------------------------------------------------
   const step = currentStep(run);
-  const current = useMemo(() => exerciseOf(step, paths), [step, paths]);
+  // A custom Exercise (My exercises) is played from a one-Step document of its
+  // own, held here for the Session it was started for; never in `paths`.
+  const runPaths = useMemo(() => (customPath ? [...paths, customPath] : paths), [paths, customPath]);
+  const current = useMemo(() => exerciseOf(step, runPaths), [step, runPaths]);
 
   const take: TakePlan | null = useMemo(() => {
     if (!current) return null;
@@ -1412,7 +1418,8 @@ export function useSessionRun(input: SessionRunInput) {
     const ahead = [placedPast, testedPast].find(
       (s): s is Step => !!s && currentAt(s.id) > currentAt(storedStep),
     );
-    const moved = ahead ?? nextStepAfterPass(nextProgress, path);
+    // A custom Exercise is part of no Path: it moves no one anywhere.
+    const moved = path.id === CUSTOM_PATH_ID ? null : (ahead ?? nextStepAfterPass(nextProgress, path));
     const state0 = progress.states.find((s) => s.pathId === path.id);
     const nextState: PathStateRow | null = moved
       ? {
@@ -1560,6 +1567,8 @@ export function useSessionRun(input: SessionRunInput) {
       // The tour's look at a ready screen is not playing: nothing is started.
       const played = isPreview ? [] : next.steps;
       for (const pathId of new Set(played.flatMap((s) => ("pathId" in s && s.pathId ? [s.pathId] : [])))) {
+        // My exercises is not a Path: playing one starts nothing.
+        if (pathId === CUSTOM_PATH_ID) continue;
         if (!progress.states.some((s) => s.pathId === pathId) && subscribed < SUBSCRIPTION_CAP) {
           subscribed += 1;
           const row: PathStateRow = { pathId, startedAt: now, updatedAt: now };
@@ -1614,6 +1623,8 @@ export function useSessionRun(input: SessionRunInput) {
     (path: PathDoc, pathStep: Step, exercise: Exercise) => {
       const takes = takesOf(progress, path.id, exercise.id);
       const last = lastCaughtTake(takes);
+      // A custom Exercise's document is not a pack's: the runner holds it.
+      if (path.id === CUSTOM_PATH_ID) setCustomPath(path);
       begin({
         minutes: 5,
         mood: "returning",

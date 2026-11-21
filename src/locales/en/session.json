@@ -436,6 +436,31 @@
       "heard": "In free play you were in {{key}}, mostly on {{chords}}.",
       "heardKey": "In free play you were in {{key}}."
     },
+    "myExercises": {
+      "title": "My exercises",
+      "intro": "Exercises you made. They belong to no Path and pass nothing.",
+      "shape": {
+        "box": "{{root}} {{scale}}, the box at fret {{position}}",
+        "threePerString": "{{root}} {{scale}}, three notes a string from fret {{position}}",
+        "arpeggio": "{{chord}} arpeggio from fret {{position}}",
+        "oneString": "{{root}} {{scale}} along string {{string}} from fret {{position}}",
+        "chromatic": "Chromatic, one finger a fret from fret {{position}}"
+      },
+      "direction": {
+        "up": "up",
+        "down": "down",
+        "upAndBack": "up and back down"
+      },
+      "line": "{{shape}}: {{direction}}. {{bars}}.",
+      "bars_one": "{{count}} bar",
+      "bars_other": "{{count}} bars",
+      "remove": "Remove",
+      "removeLabel": "Remove {{what}} from My exercises",
+      "removed": "Removed from My exercises.",
+      "undo": "Undo",
+      "cantBuild": "This one can't be built any more: this version of Yames no longer makes it. It stays here until you remove it.",
+      "howTo": "Play it as written, with the click."
+    },
     "paths": {
       "title": "Paths",
       "intro": "Pick a goal. Nothing is locked: you can start any Step and change your mind.",

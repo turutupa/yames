@@ -1683,6 +1683,11 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "myExercises": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [
