@@ -234,8 +234,32 @@ function check(dir, loc, section) {
   process.exit(bad.length ? 1 : 0);
 }
 
-const [cmd, a, b, c] = process.argv.slice(2);
+/** A second reader's sample: n random lines per locale from its fragments. */
+function sample(dir, n, seed, only) {
+  const en = english();
+  const rnd = mulberry(seed);
+  fs.mkdirSync(path.join(dir, "review"), { recursive: true });
+  for (const loc of locales()) {
+    if (only && !only.split(",").includes(loc)) continue;
+    const all = [];
+    for (const s of SECTIONS) {
+      const frag = path.join(dir, loc, `${s}.json`);
+      if (!fs.existsSync(frag)) continue;
+      for (const [p, e, t] of pairs(get(en, s), read(frag), "")) all.push({ section: s, path: p, en: e, [loc]: t });
+    }
+    const picked = [];
+    while (picked.length < Math.min(n, all.length)) {
+      const c = all.splice(Math.floor(rnd() * all.length), 1)[0];
+      picked.push(c);
+    }
+    write(path.join(dir, "review", `${loc}.json`), picked);
+    console.log(`${loc}\t${picked.length}`);
+  }
+}
+
+const [cmd, a, b, c, d] = process.argv.slice(2);
 if (cmd === "check") check(a, b, c);
+else if (cmd === "sample") sample(a, Number(b ?? 60), Number(c ?? 1), d);
 else if (cmd === "sections") sections(a);
 else if (cmd === "merge") merge(a);
 else if (cmd === "report") report(Number(a ?? 0), Number(b ?? 1));

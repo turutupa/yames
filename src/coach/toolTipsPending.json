@@ -1,97 +1,39 @@
 {
-  "de": [
-    "acoustic-guitar",
-    "bass",
-    "drums",
-    "piano"
-  ],
-  "es": [
-    "acoustic-guitar",
-    "bass",
-    "drums",
-    "piano"
-  ],
-  "fr": [
-    "acoustic-guitar",
-    "bass",
-    "drums",
-    "piano"
-  ],
-  "it": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
-    "drums",
-    "piano"
-  ],
   "ja": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ],
   "ko": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ],
   "nl": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ],
   "pl": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ],
   "pt-BR": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
-    "drums",
     "piano"
   ],
   "ru": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
-    "drums",
     "piano"
   ],
   "tr": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ],
   "vi": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ],
   "zh-CN": [
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ],
   "zh-TW": [
-    "generic",
-    "electric-guitar",
-    "acoustic-guitar",
-    "bass",
     "drums",
     "piano"
   ]

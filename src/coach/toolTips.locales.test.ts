@@ -39,20 +39,16 @@ const G1 = ["generic", "defaultMode", "proMode", "words"];
 const G2 = ["electric-guitar", "acoustic-guitar", "bass"];
 const G3 = ["drums", "piano"];
 const STILL_PENDING: Record<string, string[]> = {
-  de: [...G2.slice(1), ...G3],
-  es: [...G2.slice(1), ...G3],
-  fr: [...G2.slice(1), ...G3],
-  it: [...G2, ...G3],
-  ja: [...G2, ...G3],
-  ko: [...G2, ...G3],
-  nl: [...G2, ...G3],
-  pl: [...G2, ...G3],
-  "pt-BR": [...G2, ...G3],
-  ru: [...G2, ...G3],
-  tr: [...G2, ...G3],
-  vi: [...G2, ...G3],
-  "zh-CN": [...G2, ...G3],
-  "zh-TW": [G1[0], ...G2, ...G3],
+  ja: G3,
+  ko: G3,
+  nl: G3,
+  pl: G3,
+  "pt-BR": ["piano"],
+  ru: ["piano"],
+  tr: G3,
+  vi: G3,
+  "zh-CN": G3,
+  "zh-TW": G3,
 };
 
 type Tree = { [k: string]: Tree | Tree[] | string | string[] };

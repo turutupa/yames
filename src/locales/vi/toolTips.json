@@ -833,814 +833,814 @@
       "electric-guitar": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking from your first pick.",
-            "Get warmed up and hit play whenever — I'll start listening.",
-            "Tune up, settle in, then play when you're ready.",
-            "Good to have you. Start when the picking hand feels loose.",
-            "Whenever you're set — play and I'll start catching your timing.",
-            "No rush. Get the pick hand loose, then start when ready.",
-            "Ready when you are. I'll track from the first note.",
-            "Set up whenever — I'm listening from your first pick."
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ lần gảy đầu tiên của bạn.",
+            "Khởi động xong thì cứ bấm chơi bất cứ lúc nào — tôi sẽ bắt đầu nghe.",
+            "Lên dây xong, ngồi cho ổn, rồi chơi khi bạn sẵn sàng.",
+            "Rất vui có bạn. Hãy bắt đầu khi tay gảy đã thấy thả lỏng.",
+            "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho tay gảy thả lỏng, rồi bắt đầu khi bạn sẵn sàng.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ nốt đầu tiên.",
+            "Chuẩn bị lúc nào cũng được — tôi nghe từ lần gảy đầu tiên của bạn."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's build on that picking.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — good foundation.",
-            "Back at the guitar. {lastScore} at {lastBpm} BPM last session. Let's push it.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Pick up where you left off.",
-            "Back at it. {lastScore} at {lastBpm} BPM last time — solid baseline.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the line last session. Let's match it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last time — let's go."
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên cách gảy đó.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — một nền tảng tốt.",
+            "Lại cầm cây guitar rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy đẩy lên nữa.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ chỗ bạn đã dừng.",
+            "Lại bắt đầu nào. Lần trước {lastScore} ở {lastBpm} BPM — một mốc nền vững.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của buổi trước. Hãy bằng nó.",
+            "Rất vui bạn quay lại. Lần trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Picking hand is losing the grid. Anchor your palm against the bridge.",
-            "Hits are scattering. Slow the picking pattern and accent beat 1.",
-            "Mute the strings and pick down-up to the click for a bar, then come back in.",
-            "Stop, play just one open string to the click for four beats, then add the riff back.",
-            "Picking's drifting. Drop the tempo and rebuild from a clean bar.",
-            "Pattern's coming apart. Pause, count yourself in slow, then play.",
-            "Lift the pick off the strings and just hear the click for a bar.",
-            "Slow it down five BPM and play through it clean before bringing speed back."
+            "Tay gảy đang mất lưới nhịp. Hãy tựa cạnh bàn tay vào ngựa đàn.",
+            "Các lần đánh đang tản mát. Hãy làm chậm mẫu gảy và nhấn phách 1.",
+            "Hãy chặn các dây và gảy xuống-lên theo tiếng click trong một ô nhịp, rồi vào lại.",
+            "Dừng lại, gảy chỉ một dây buông theo tiếng click trong bốn phách, rồi thêm riff trở lại.",
+            "Cách gảy đang trôi. Hãy giảm tempo và xây lại từ một ô nhịp sạch.",
+            "Mẫu chơi đang rã ra. Dừng, đếm vào chậm, rồi chơi.",
+            "Nhấc phím gảy khỏi dây và chỉ nghe tiếng click trong một ô nhịp.",
+            "Giảm năm BPM và chơi sạch cả đoạn trước khi đưa tốc độ trở lại."
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Picking hand is landing before the click. Let it wait.",
-            "You're a touch ahead — hear the click, then pick.",
-            "Notes are arriving early. Sit further back in each beat."
+            "Tay gảy đang rơi trước tiếng click. Hãy để nó chờ.",
+            "Bạn đang hơi đi trước — nghe tiếng click rồi hãy gảy.",
+            "Các nốt đang đến sớm. Hãy ngồi lùi sâu hơn trong mỗi phách."
           ],
           "correction": [
-            "Down-picks are leading — land the up-picks right on the click.",
-            "Picking hand's rushing. Let the metronome lead each down-stroke.",
-            "Count the in-between eighths and feel the gap between each click.",
-            "Pull the tempo back five BPM and let the click pull each note out of you.",
-            "Pause one bar. Hear the click, then come in right on beat 1.",
-            "Drop your right hand to your lap, breathe, then start playing again.",
-            "Hands are racing. Mute the strings and tap the click with the pick for a bar first.",
-            "Stop trying to push the metronome. Let it pull you for one full bar."
+            "Các nhát gảy xuống đang dẫn đầu — hãy đặt các nhát gảy lên đúng vào tiếng click.",
+            "Tay gảy đang vội. Hãy để máy đếm nhịp dẫn từng nhát gảy xuống.",
+            "Hãy đếm các nốt móc đơn ở giữa và cảm nhận khoảng cách giữa hai tiếng click.",
+            "Giảm tempo năm BPM và để tiếng click kéo từng nốt ra khỏi bạn.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào đúng phách 1.",
+            "Hạ tay phải xuống đùi, hít thở, rồi bắt đầu chơi lại.",
+            "Đôi tay đang chạy đua. Hãy chặn các dây và dùng phím gảy gõ theo tiếng click trong một ô nhịp trước.",
+            "Đừng cố đẩy máy đếm nhịp nữa. Hãy để nó kéo bạn đi trọn một ô nhịp."
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "The pick is landing behind the click. Bring it forward.",
-            "You're sitting late — start the stroke a fraction sooner.",
-            "Each note is a little behind. Aim at the front of the click."
+            "Phím gảy đang rơi sau tiếng click. Hãy đưa nó lên trước.",
+            "Bạn đang ngồi trễ — hãy bắt đầu nhát gảy sớm hơn một chút.",
+            "Mỗi nốt đang hơi sau. Hãy nhắm vào phần đầu của tiếng click."
           ],
           "correction": [
-            "Up-picks are lagging — meet the click on the down.",
-            "Picking hand's dragging. Play with the click, don't wait for it.",
-            "Let the pick lead — meet each note rather than reaching for it.",
-            "Each note's landing late. Aim for the front edge of every click.",
-            "Drop the tempo a bit and play with more lift. The drag clears when it feels easy.",
-            "Imagine the click is a hair earlier than it is, and meet that.",
-            "Stop, take a breath, then come in pushing slightly forward.",
-            "The pick's catching — ease the pressure and let it flow."
+            "Các nhát gảy lên đang chậm — hãy gặp tiếng click ở nhát gảy xuống.",
+            "Tay gảy đang kéo chậm. Hãy chơi cùng tiếng click, đừng chờ nó.",
+            "Hãy để phím gảy dẫn — gặp từng nốt thay vì với tới nó.",
+            "Mỗi nốt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
+            "Giảm tempo một chút và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước.",
+            "Phím gảy đang vướng — hãy giảm lực ép và để nó chảy."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Picking's locked — keep going.",
-            "Clean run going. Stay there.",
-            "Streak holding — don't change anything.",
-            "Right hand is in the pocket. Hold.",
-            "That's the feel — keep it.",
-            "Pick attack is even. Yes.",
-            "Tight and clean. Don't speed up yet.",
-            "Eyes closed. Keep going."
+            "Cách gảy đang khớp — cứ tiếp tục.",
+            "Chuỗi sạch đang chạy. Ở lại đó.",
+            "Chuỗi đang giữ — đừng đổi gì cả.",
+            "Tay phải đang ở trong pocket. Giữ.",
+            "Đó là cảm giác ấy — hãy giữ nó.",
+            "Lực gảy đang đều. Đúng rồi.",
+            "Chặt và sạch. Chưa tăng tốc vội.",
+            "Nhắm mắt lại. Cứ tiếp tục."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — picking hand is locked.",
-            "Picking-hand pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this riff.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. The pick attack's settled.",
-            "Locked at {bpmLow}–{bpmHigh} BPM. New baseline for this part.",
-            "{bpmLow}–{bpmHigh} BPM owned. Don't drop back below it.",
-            "Down-up alternation is steady at {bpmLow}–{bpmHigh} BPM.",
-            "Picking grooved at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — tay gảy đã khớp.",
+            "Pocket của tay gảy giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — mốc nền mới cho riff này.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Lực gảy đã ổn định.",
+            "Khớp ở {bpmLow}–{bpmHigh} BPM. Mốc nền mới cho đoạn này.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Đừng tụt xuống dưới nó.",
+            "Gảy xuống-lên luân phiên đều ở {bpmLow}–{bpmHigh} BPM.",
+            "Cách gảy vào groove ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Picking hand back — hold it.",
-            "Pulled it back. Stay loose.",
-            "Recovered — keep this feel.",
-            "You felt the slip and brought it back. That's the skill.",
-            "Right hand re-synced. Don't change anything.",
-            "Back from the dip. Stay relaxed.",
-            "Pocket recovered. Sit in it.",
-            "Caught the drift. Hold this exact feel."
+            "Tay gảy đã trở lại — giữ nó.",
+            "Kéo lại được rồi. Giữ thoải mái.",
+            "Đã hồi lại — giữ cảm giác này.",
+            "Bạn đã cảm thấy nó trượt và kéo nó lại. Đó mới là kỹ năng.",
+            "Tay phải đã khớp lại. Đừng đổi gì cả.",
+            "Đã thoát khỏi chỗ tụt. Giữ thư thái.",
+            "Pocket đã hồi lại. Ngồi trong đó.",
+            "Bắt kịp độ trôi. Giữ đúng cảm giác này."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Clean again — stay there.",
-            "Picking's back. Hold it.",
-            "Back on the click. Keep it."
+            "Sạch lại rồi — ở lại đó.",
+            "Cách gảy đã trở lại. Giữ nó.",
+            "Lại đúng tiếng click. Giữ nó."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Picking arm tightening up? Shake it out, then back in.",
-            "Wrist or forearm feeling locked? Quick pause, then come back in.",
-            "Tension creeping in — set the guitar down for 60 seconds.",
-            "Shoulder lifting? Drop it, breathe, then resume.",
-            "Pick attack getting harder than it needs to be. Brief rest.",
-            "Grip tightening on the neck? Loosen up, then play.",
-            "Forearm working too hard — shake out and continue.",
-            "Take 30 seconds, roll the shoulders, then back to it."
+            "Cánh tay gảy đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
+            "Cổ tay hay cẳng tay thấy cứng? Dừng nhanh một chút, rồi vào lại.",
+            "Sự căng đang len vào — hãy đặt cây đàn xuống 60 giây.",
+            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi chơi tiếp.",
+            "Lực gảy đang nặng hơn mức cần. Nghỉ ngắn.",
+            "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
+            "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
+            "Nghỉ 30 giây, xoay vai, rồi quay lại."
           ],
           "correction": [
-            "Fatigue's showing in the pick attack — stop, rest the arm 90 seconds. Tired picking builds tension.",
-            "You're past peak — guitar down, stretch the wrist, then back in.",
-            "Stop before the tendons start complaining. 90 seconds off the strings.",
-            "Wrist is straining. Set the guitar down, stretch the forearm, two minutes off.",
-            "Real rest — guitar on the stand, walk around for a bit.",
-            "Picking arm is done for now. 90 seconds minimum, then re-check.",
-            "Stop. Wrist circles, forearm stretches, then come back fresh.",
-            "Push past this and you'll buy yourself an injury. Hard stop."
+            "Mệt đã lộ ra ở lực gảy — dừng, cho cánh tay nghỉ 90 giây. Gảy khi mệt sinh ra căng cơ.",
+            "Bạn đã qua đỉnh — đặt đàn xuống, duỗi cổ tay, rồi vào lại.",
+            "Dừng trước khi gân bắt đầu kêu ca. Rời dây đàn 90 giây.",
+            "Cổ tay đang căng quá. Đặt đàn xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
+            "Cánh tay gảy tạm xong rồi. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng. Xoay cổ tay, duỗi cẳng tay, rồi quay lại cho tươi.",
+            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng hẳn."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — make sure the up-picks are as loud as the downs before pushing.",
-            "{bpmLow} BPM milestone. Hold this until the pick attack is even.",
-            "New band: {bpmLow}-{bpmHigh}. Pick down-up on a single open string before climbing.",
-            "{bpmLow} BPM is fresh. Stay flat and let the right hand settle.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Earn {bpmLow} BPM before chasing more. Hold it until it feels boring.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Don't speed up until it's automatic."
+            "Ở {bpmLow} BPM — hãy chắc các nhát gảy lên to bằng nhát gảy xuống trước khi đẩy.",
+            "Mốc {bpmLow} BPM. Giữ ở đây cho đến khi lực gảy đều.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Gảy xuống-lên trên một dây buông trước khi leo.",
+            "{bpmLow} BPM còn mới. Giữ ngang và để tay phải ổn định.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Giữ cho đến khi thấy nhàm.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Đừng tăng tốc cho đến khi nó thành tự động."
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch with the guitar — riff, chords, something specific?",
-            "Five-plus minutes in. Want me to call out picking, rhythm, or both?",
-            "You've been locked in. Tell me what you want feedback on.",
-            "Solid run going. Want sharper feedback on a specific section?",
-            "Been at it a while. Picking? Strumming? Tell me where to listen.",
-            "Pocket's been steady. Pick a target if you want closer feedback.",
-            "Long stretch with the guitar. Anything you want me to flag?",
-            "You've been deep in it. Tell me what to listen for next."
+            "Đã chơi guitar một đoạn dài — riff, hợp âm, hay điều gì cụ thể?",
+            "Hơn năm phút rồi. Bạn muốn tôi nhận xét cách gảy, nhịp điệu, hay cả hai?",
+            "Bạn đã tập trung rất lâu. Hãy cho tôi biết bạn muốn nhận xét về điều gì.",
+            "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một đoạn cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Cách gảy? Quạt chả? Hãy cho tôi biết nghe ở đâu.",
+            "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
+            "Đã chơi guitar một đoạn dài. Bạn muốn tôi nêu điều gì không?",
+            "Bạn đã chơi rất sâu. Hãy cho tôi biết tiếp theo nên nghe điều gì."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Made it to {endBpm}. Solid ramp from {startBpm} — pick attack stayed even.",
-            "Ramp done — {startBpm} to {endBpm}. Picking hand held the climb.",
-            "Target reached: {endBpm} BPM. You picked through the whole ramp from {startBpm}.",
-            "{endBpm} BPM reached. Ramp from {startBpm} complete — picking clean."
+            "Đã tới {endBpm}. Đợt tăng từ {startBpm} vững — lực gảy giữ đều.",
+            "Xong đợt tăng — {startBpm} đến {endBpm}. Tay gảy đã giữ được suốt đợt leo.",
+            "Đạt mục tiêu: {endBpm} BPM. Bạn đã gảy xuyên suốt đợt tăng từ {startBpm}.",
+            "Đã đạt {endBpm} BPM. Đợt tăng từ {startBpm} hoàn tất — gảy sạch."
           ]
         },
         "stamina": {
           "neutral": [
-            "Past the {staminaMinutes}-minute mark your picking hand tenses. Shake it out, then resume.",
-            "Around minute {staminaMinutes} the pick attack starts to drift. Quick break, then back in.",
-            "Stamina wall at minute {staminaMinutes} — right hand tightens. Rest 30 seconds.",
-            "You tend to lose edge on the picking around minute {staminaMinutes}. Short rest, then return."
+            "Qua mốc {staminaMinutes} phút, tay gảy của bạn căng lên. Lắc cho thả lỏng, rồi chơi tiếp.",
+            "Quanh phút thứ {staminaMinutes} lực gảy bắt đầu trôi. Nghỉ ngắn, rồi vào lại.",
+            "Bức tường sức bền ở phút thứ {staminaMinutes} — tay phải siết lại. Nghỉ 30 giây.",
+            "Bạn thường mất độ sắc khi gảy quanh phút thứ {staminaMinutes}. Nghỉ ngắn, rồi quay lại."
           ]
         },
         "bias_only": {
           "neutral": [
-            "Your notes are consistently {biasMs}ms {direction} the click. Shift the whole phrase {correctionDirection} — it's a timing lean, not chaos.",
-            "Every hit lands {biasMs}ms {direction}. That's a consistent lean — shift your timing {correctionDirection} to center it.",
-            "Tight scatter, {biasMs}ms {direction}. Shift your timing {correctionDirection} to land on the click."
+            "Các nốt của bạn nhất quán {direction} {biasMs}ms so với tiếng click. Hãy dịch cả câu {correctionDirection} — đó là độ nghiêng của nhịp, không phải hỗn loạn.",
+            "Mọi lần đánh đều rơi {direction} {biasMs}ms. Đó là một độ nghiêng nhất quán — hãy dịch nhịp của bạn {correctionDirection} để đưa nó vào giữa.",
+            "Độ tản thấp, {direction} {biasMs}ms. Hãy dịch nhịp của bạn {correctionDirection} để rơi đúng tiếng click."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "{attemptCount} attempts at {bpm} and the score's not moving. Drop to {suggestedBpm}, lock it in, then push again.",
-            "Ceiling confirmed at {bpm} — {attemptCount} tries. Park at {suggestedBpm} for a week and build it solid."
+            "{attemptCount} lần thử ở {bpm} mà điểm không nhúc nhích. Hãy xuống {suggestedBpm}, làm cho chắc, rồi đẩy lại.",
+            "Trần ở {bpm} đã xác nhận — {attemptCount} lần thử. Đậu ở {suggestedBpm} một tuần và xây cho vững."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Lost the grid there — fill or free? If intentional, ignore me.",
-            "Correlation dropped off the click — were you running a fill?"
+            "Vừa mất lưới — nốt đệm hay chơi tự do? Nếu có chủ ý thì cứ bỏ qua tôi.",
+            "Độ tương quan rời khỏi tiếng click — bạn đang chơi một nốt đệm phải không?"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "You're landing the beats but the pick attack is light — try a firmer stroke.",
-            "Good coverage, weak transient. Drive the pick through the string.",
-            "Every beat lands, but softly. A harder attack sharpens the signal.",
-            "Beats are all there — just dig in more with the pick for a cleaner attack."
+            "Bạn đang trúng các phách nhưng lực gảy nhẹ — hãy thử nhát gảy chắc hơn.",
+            "Độ phủ tốt, transient yếu. Hãy đưa phím gảy xuyên qua dây.",
+            "Phách nào cũng có, nhưng nhẹ. Gảy mạnh hơn sẽ làm tín hiệu sắc hơn.",
+            "Các phách đều có đủ — chỉ cần ấn phím gảy sâu hơn để lực gảy sạch hơn."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your picking drifted from the click. Mute and re-enter on the downbeat.",
-            "Grid tracking dropped — stop the riff, find the pulse, then come back in.",
-            "Went off-tempo there. Let the click breathe and re-lock your strumming.",
-            "The pick drifted from the grid. Take a beat and come back on the one."
+            "Cách gảy của bạn đã trôi khỏi tiếng click. Hãy chặn dây và vào lại ở phách mạnh.",
+            "Theo dõi lưới đã đứt — dừng riff, tìm nhịp, rồi vào lại.",
+            "Vừa lệch tempo. Hãy để tiếng click thở và khớp lại cách quạt của bạn.",
+            "Phím gảy đã trôi khỏi lưới. Nghỉ một nhịp và vào lại ở phách một."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're picking about half the expected beats — try to hit every note in the phrase.",
-            "Coverage is low — make sure each beat gets a pick, not just the ones that sit well.",
-            "Around half the beats are going unplayed. Focus on completing the full riff.",
-            "Beat coverage is low. Slow down if needed and make sure every beat lands."
+            "Bạn đang gảy khoảng một nửa số phách dự kiến — hãy cố đánh mọi nốt trong câu.",
+            "Độ phủ thấp — hãy chắc mỗi phách đều có một nhát gảy, không chỉ những phách thấy dễ chịu.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung hoàn thành trọn riff.",
+            "Độ phủ phách thấp. Hãy chậm lại nếu cần và chắc chắn mỗi phách đều rơi."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your note placement is solid — but the space between notes keeps wandering. Try counting the subdivisions out loud as you pick.",
-            "On the beat well, but the gap between pick strokes is uneven. Tap your foot on every subdivision to anchor the spacing.",
-            "Beat timing is there — but the space between notes is shifting. Count sixteenths out loud as you play and let your mouth set the grid.",
-            "Placement is locked — spacing is drifting. Slow the riff down until the gaps feel even, then speed back up."
+            "Vị trí nốt của bạn vững — nhưng khoảng cách giữa các nốt cứ lang thang. Hãy thử đếm thành tiếng các nốt chia nhỏ khi gảy.",
+            "Đúng phách tốt, nhưng khoảng cách giữa các nhát gảy không đều. Hãy gõ chân trên mỗi nốt chia nhỏ để neo khoảng cách.",
+            "Nhịp phách đã có — nhưng khoảng cách giữa các nốt đang dịch chuyển. Hãy đếm thành tiếng nốt móc kép khi chơi và để miệng đặt lưới.",
+            "Vị trí đã khóa — khoảng cách đang trôi. Hãy làm chậm riff cho đến khi các khoảng thấy đều, rồi tăng tốc lại."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your spacing is really even — but you're landing off the beat. Try anticipating the click by a hair and drive each note right on it.",
-            "Even spacing between notes, but the picks are shifted from the grid. Lock the first note of each riff to the beat, then let the rest follow.",
-            "The rhythm between your notes is consistent — now bring the whole riff onto the click. Aim for the center of each beat, not the edge.",
-            "Good spacing feel. Focus on where each note lands relative to the click — play just slightly ahead of where you expect the beat."
+            "Khoảng cách của bạn rất đều — nhưng bạn đang rơi lệch phách. Hãy đón trước tiếng click một chút và đánh từng nốt ngay vào nó.",
+            "Khoảng cách giữa các nốt đều, nhưng các nhát gảy bị dịch khỏi lưới. Hãy khóa nốt đầu của mỗi riff vào phách, rồi để phần còn lại theo sau.",
+            "Nhịp giữa các nốt của bạn nhất quán — giờ hãy đưa cả riff vào đúng tiếng click. Nhắm vào tâm của mỗi phách, không phải mép.",
+            "Cảm giác khoảng cách tốt. Hãy tập trung vào chỗ mỗi nốt rơi so với tiếng click — chơi hơi trước chỗ bạn đoán phách."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Spacing and placement both locked in. That's the groove right there.",
-            "Note spacing and beat placement both on point. Clean riff.",
-            "Both dimensions dialed — you're playing exactly where you intend to be.",
-            "Timing is locked across the board. That's what the riff should feel like."
+            "Khoảng cách và vị trí đều đã khớp. Đó chính là groove.",
+            "Khoảng cách nốt và vị trí phách đều chuẩn. Riff sạch.",
+            "Cả hai chiều đều vững — bạn đang chơi đúng chỗ bạn định.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác mà riff nên có."
           ]
         },
         "low_confidence": {
           "neutral": [
-            "Your signal is noisy on my end — I'm reading this stretch less clearly.",
-            "Hard to tell picked notes from string noise right now. Take the numbers loosely.",
-            "The input is murky for the last half-minute. My read is softer than usual."
+            "Tín hiệu của bạn đang nhiễu ở phía tôi — tôi đang đọc đoạn này kém rõ hơn.",
+            "Lúc này khó phân biệt nốt được gảy với tạp âm của dây. Hãy xem các con số một cách lỏng lẻo.",
+            "Đầu vào bị đục trong nửa phút qua. Số đọc của tôi mềm hơn thường lệ."
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next note."
+            "{change}. Đoạn mới từ đây.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ nốt tiếp theo."
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "The pause closed that segment — {score}% at {bpm} BPM.",
-            "Strings went quiet long enough to end it: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that stretch."
+            "Quãng nghỉ đã khép đoạn đó — {score}% ở {bpm} BPM.",
+            "Dây đàn im đủ lâu để kết thúc nó: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Let's see how today sits."
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi sạch với bạn — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Xem hôm nay thế nào."
           ]
         }
       },
       "acoustic-guitar": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking from your first strum.",
-            "Get tuned up and start whenever — I'll listen from the first note.",
-            "Strum a few open chords, then play when you're ready.",
-            "Good to have you. Start when the strum hand feels loose.",
-            "Whenever you're set — play and I'll start catching your timing.",
-            "No rush. Get the strumming arm loose, then start.",
-            "Ready when you are. I'll track from the first strum.",
-            "Set up and start whenever — I'm listening."
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ nhịp quạt đầu tiên của bạn.",
+            "Lên dây xong cứ bắt đầu bất cứ lúc nào — tôi sẽ nghe từ nốt đầu tiên.",
+            "Quạt vài hợp âm buông, rồi chơi khi bạn sẵn sàng.",
+            "Rất vui có bạn. Hãy bắt đầu khi tay quạt đã thấy thả lỏng.",
+            "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho cánh tay quạt thả lỏng, rồi bắt đầu.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ nhịp quạt đầu tiên.",
+            "Chuẩn bị xong cứ bắt đầu bất cứ lúc nào — tôi đang nghe."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's build on that.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — good foundation.",
-            "Back with the acoustic. {lastScore} at {lastBpm} BPM last session. Let's keep it going.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Pick up where you left off.",
-            "Back at it. {lastScore} at {lastBpm} BPM last time — solid starting point.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the line last session. Let's match it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last time — let's go."
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên đó.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — một nền tảng tốt.",
+            "Lại với cây acoustic rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy tiếp tục.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy tiếp tục từ chỗ bạn đã dừng.",
+            "Lại bắt đầu nào. Lần trước {lastScore} ở {lastBpm} BPM — một điểm xuất phát vững.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của buổi trước. Hãy bằng nó.",
+            "Rất vui bạn quay lại. Lần trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Strumming hand is losing the grid. Lock to the downbeat first.",
-            "Hits are scattering. Soften the strum and accent the downbeat.",
-            "Just down-strums on open strings to the click, then come back in.",
-            "Stop, play a single chord on every click for a bar, then add the pattern.",
-            "Drop the pattern. One down-strum per click for four beats, then layer back in.",
-            "Slow down. Get one chord per click clean before adding the up-strums.",
-            "Pause and breathe. Find the click, then start fresh.",
-            "Pull the tempo down five BPM and play it clean."
+            "Tay quạt đang mất lưới nhịp. Hãy khóa vào phách mạnh trước.",
+            "Các lần đánh đang tản mát. Quạt nhẹ lại và nhấn phách mạnh.",
+            "Chỉ quạt xuống trên các dây buông theo tiếng click, rồi vào lại.",
+            "Dừng lại, chơi một hợp âm trên mỗi tiếng click trong một ô nhịp, rồi thêm mẫu quạt vào.",
+            "Bỏ mẫu quạt. Một nhát quạt xuống mỗi tiếng click trong bốn phách, rồi thêm dần lại.",
+            "Chậm lại. Làm cho sạch một hợp âm mỗi tiếng click trước khi thêm các nhát quạt lên.",
+            "Dừng và hít thở. Tìm tiếng click, rồi bắt đầu lại.",
+            "Giảm tempo năm BPM và chơi cho sạch."
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "The down-strum is arriving before the click. Let it wait.",
-            "Strumming arm is leading a touch — hear the click, then move.",
-            "You're a shade early. Let the click pull the strum out of you."
+            "Nhát quạt xuống đang đến trước tiếng click. Hãy để nó chờ.",
+            "Cánh tay quạt đang dẫn trước một chút — nghe tiếng click rồi hãy di chuyển.",
+            "Bạn hơi sớm một chút. Hãy để tiếng click kéo nhát quạt ra khỏi bạn."
           ],
           "correction": [
-            "Strumming arm is leading — land the down-strum right on the click.",
-            "Strumming hand's rushing. Let the click drive the strum.",
-            "Count the in-betweens — feel the gap between each click.",
-            "Pull the tempo back five BPM and let the click pull each strum out of you.",
-            "Pause one bar. Hear the click, then come in on beat 1.",
-            "Drop your strumming arm to your side, breathe, then start again.",
-            "Hands are racing. Mute the strings and tap the click with the pick for a bar.",
-            "Stop trying to push the metronome. Let it pull you for one full bar."
+            "Cánh tay quạt đang dẫn trước — hãy đặt nhát quạt xuống đúng vào tiếng click.",
+            "Tay quạt đang vội. Hãy để tiếng click dẫn nhát quạt.",
+            "Đếm các nốt ở giữa — cảm nhận khoảng cách giữa hai tiếng click.",
+            "Giảm tempo năm BPM và để tiếng click kéo từng nhát quạt ra khỏi bạn.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào ở phách 1.",
+            "Hạ cánh tay quạt xuống bên hông, hít thở, rồi bắt đầu lại.",
+            "Đôi tay đang chạy đua. Hãy chặn các dây và dùng phím gảy gõ theo tiếng click trong một ô nhịp.",
+            "Đừng cố đẩy máy đếm nhịp nữa. Hãy để nó kéo bạn đi trọn một ô nhịp."
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "The strum is landing behind the click. Bring it forward.",
-            "Strumming arm is trailing — start the stroke a fraction sooner.",
-            "You're sitting late. Aim the down-strum at the front of the click."
+            "Nhát quạt đang rơi sau tiếng click. Hãy đưa nó lên trước.",
+            "Cánh tay quạt đang tụt lại — hãy bắt đầu nhát quạt sớm hơn một chút.",
+            "Bạn đang ngồi trễ. Hãy nhắm nhát quạt xuống vào phần đầu của tiếng click."
           ],
           "correction": [
-            "Strum is lagging — meet the click on the down.",
-            "Strumming hand's dragging. Play with the click; don't wait for it.",
-            "Give the strum more momentum and meet the click on the down.",
-            "Each strum's landing late. Aim for the front edge of every click.",
-            "Drop the tempo and play with more lift. The drag will clear when it feels easy.",
-            "Imagine the click is a hair earlier than it is, and meet that.",
-            "Stop, take a breath, then come in pushing slightly forward.",
-            "The strum's getting caught — ease off and let it flow."
+            "Nhát quạt đang chậm — hãy gặp tiếng click ở nhát xuống.",
+            "Tay quạt đang kéo chậm. Hãy chơi cùng tiếng click, đừng chờ nó.",
+            "Hãy cho nhát quạt thêm đà và gặp tiếng click ở nhát xuống.",
+            "Mỗi nhát quạt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
+            "Giảm tempo và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết khi bạn thấy nhẹ nhàng.",
+            "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước.",
+            "Nhát quạt đang bị vướng — hãy nới lực và để nó chảy."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Strumming's locked — keep going.",
-            "Nice groove going. Stay.",
-            "Streak holding — stay there.",
-            "Right hand in the pocket. Hold.",
-            "That's the feel — keep it.",
-            "Down-up balance is right. Yes.",
-            "Tight and even. Don't speed up yet.",
-            "Eyes closed. Keep going."
+            "Cách quạt đang khớp — cứ tiếp tục.",
+            "Groove đang chạy tốt. Ở lại đó.",
+            "Chuỗi đang giữ — cứ ở đó.",
+            "Tay phải đang ở trong pocket. Giữ.",
+            "Đó là cảm giác ấy — hãy giữ nó.",
+            "Độ cân bằng xuống-lên đúng rồi. Đúng vậy.",
+            "Chặt và đều. Chưa tăng tốc vội.",
+            "Nhắm mắt lại. Cứ tiếp tục."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — strumming is locked.",
-            "Strumming pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this pattern.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. The strum's settled.",
-            "Locked at {bpmLow}–{bpmHigh} BPM. New baseline for this pattern.",
-            "{bpmLow}–{bpmHigh} BPM owned. Don't drop below it.",
-            "Down-up alternation is steady at {bpmLow}–{bpmHigh} BPM.",
-            "Pattern grooved at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — cách quạt đã khớp.",
+            "Pocket của cách quạt giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — mốc nền mới cho mẫu quạt này.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Cách quạt đã ổn định.",
+            "Khớp ở {bpmLow}–{bpmHigh} BPM. Mốc nền mới cho mẫu quạt này.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Đừng tụt xuống dưới nó.",
+            "Quạt xuống-lên luân phiên đều ở {bpmLow}–{bpmHigh} BPM.",
+            "Mẫu quạt vào groove ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Strum back on the grid. Hold it.",
-            "Pulled the pattern back. Stay loose.",
-            "Recovered — keep this feel.",
-            "You felt the slip and brought it back. That's the skill.",
-            "Right hand re-synced. Don't change anything.",
-            "Back from the dip. Stay loose.",
-            "Pattern's clean again. Sit in this.",
-            "Caught the drift. Hold this exact feel."
+            "Nhát quạt đã về lại lưới. Giữ nó.",
+            "Đã kéo mẫu quạt về lại. Giữ thoải mái.",
+            "Đã hồi lại — giữ cảm giác này.",
+            "Bạn đã cảm thấy nó trượt và kéo nó lại. Đó mới là kỹ năng.",
+            "Tay phải đã khớp lại. Đừng đổi gì cả.",
+            "Đã thoát khỏi chỗ tụt. Giữ thoải mái.",
+            "Mẫu quạt lại sạch. Ngồi trong đó.",
+            "Bắt kịp độ trôi. Giữ đúng cảm giác này."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Back on track.",
-            "Strum's clean again. Hold it.",
-            "Pulled it back. Stay there."
+            "Đã trở lại đúng đường.",
+            "Cách quạt lại sạch. Giữ nó.",
+            "Đã kéo lại. Ở lại đó."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Strumming arm tightening up? Shake it out, then back in.",
-            "Wrist feeling locked? Quick stretch, then come back in.",
-            "Tension creeping into the strum — guitar down for 60 seconds.",
-            "Shoulder lifting? Drop it, breathe, then continue.",
-            "Strum getting heavier than it needs to be. Brief rest.",
-            "Grip tightening on the neck? Loosen up, then play.",
-            "Forearm working too hard — shake out and continue.",
-            "Take 30 seconds, roll the shoulders, then back to it."
+            "Cánh tay quạt đang căng lên? Lắc cho thả lỏng, rồi vào lại.",
+            "Cổ tay thấy cứng? Duỗi nhanh một chút, rồi vào lại.",
+            "Sự căng đang len vào nhát quạt — đặt đàn xuống 60 giây.",
+            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi tiếp tục.",
+            "Nhát quạt đang nặng hơn mức cần. Nghỉ ngắn.",
+            "Tay nắm cần đàn đang siết lại? Thả lỏng, rồi chơi.",
+            "Cẳng tay đang làm việc quá sức — lắc cho thả lỏng rồi tiếp tục.",
+            "Nghỉ 30 giây, xoay vai, rồi quay lại."
           ],
           "correction": [
-            "Fatigue's showing in the strum — stop, 90 seconds off the strings.",
-            "You're past peak — set the guitar down, stretch the wrist, then return.",
-            "Tired strumming buries the dynamics. Stop, rest, restart.",
-            "Strumming arm is straining. Set the guitar down, stretch the forearm, two minutes off.",
-            "Real rest — guitar on the stand, walk around for a bit.",
-            "Strumming hand is done. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles, forearm stretches, then continue when loose.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "Mệt đã lộ ra ở nhát quạt — dừng, rời dây đàn 90 giây.",
+            "Bạn đã qua đỉnh — đặt đàn xuống, duỗi cổ tay, rồi quay lại.",
+            "Quạt khi mệt làm chìm đi độ mạnh nhẹ. Dừng, nghỉ, rồi bắt đầu lại.",
+            "Cánh tay quạt đang căng quá. Đặt đàn xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Nghỉ thật sự — đàn lên giá, đi quanh một lúc.",
+            "Tay quạt đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng hẳn. Xoay cổ tay, duỗi cẳng tay, rồi tiếp tục khi đã thả lỏng.",
+            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — make sure each strum has equal weight before climbing.",
-            "{bpmLow} BPM milestone. Hold here until the down-up balance is even.",
-            "New band: {bpmLow}-{bpmHigh}. Try the pattern on one chord first, then move.",
-            "{bpmLow} BPM is fresh. Stay flat until the strum feels easy.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Hold it until it feels boring.",
-            "Earn {bpmLow} BPM before chasing more. Stay here."
+            "Ở {bpmLow} BPM — hãy chắc mỗi nhát quạt có lực ngang nhau trước khi leo.",
+            "Mốc {bpmLow} BPM. Giữ ở đây cho đến khi độ cân bằng xuống-lên đều.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Thử mẫu quạt trên một hợp âm trước, rồi mới chuyển.",
+            "{bpmLow} BPM còn mới. Giữ ngang cho đến khi nhát quạt thấy dễ.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Giữ cho đến khi thấy nhàm.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Ở lại đây."
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch on the acoustic — chords, fingerpicking, something specific?",
-            "Five-plus minutes in. Want me to call out the strumming or the chord changes?",
-            "You've been locked in. Tell me what you want feedback on.",
-            "Solid run going. Want sharper feedback on a specific section?",
-            "Been at it a while. Strumming? Chord changes? Tell me where to listen.",
-            "Pocket's been steady. Pick a target if you want closer feedback.",
-            "Long stretch with the acoustic. Anything you want me to flag?",
-            "You've been deep in it. Tell me what to listen for next."
+            "Đã chơi acoustic một đoạn dài — hợp âm, fingerpicking, hay điều gì cụ thể?",
+            "Hơn năm phút rồi. Bạn muốn tôi nhận xét cách quạt hay các lần chuyển hợp âm?",
+            "Bạn đã tập trung rất lâu. Hãy cho tôi biết bạn muốn nhận xét về điều gì.",
+            "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một đoạn cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Cách quạt? Chuyển hợp âm? Hãy cho tôi biết nghe ở đâu.",
+            "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
+            "Đã chơi acoustic một đoạn dài. Bạn muốn tôi nêu điều gì không?",
+            "Bạn đã chơi rất sâu. Hãy cho tôi biết tiếp theo nên nghe điều gì."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm}. Strumming held through the climb.",
-            "Made it to {endBpm} BPM. You strummed through the ramp from {startBpm}.",
-            "Target reached: {endBpm} BPM. Ramp from {startBpm} complete — pattern stayed.",
-            "{endBpm} BPM reached. Good ramp from {startBpm} on the acoustic."
+            "Xong đợt tăng — {startBpm} đến {endBpm}. Cách quạt giữ được suốt đợt leo.",
+            "Đã tới {endBpm} BPM. Bạn đã quạt xuyên suốt đợt tăng từ {startBpm}.",
+            "Đạt mục tiêu: {endBpm} BPM. Đợt tăng từ {startBpm} hoàn tất — mẫu quạt vẫn giữ.",
+            "Đã đạt {endBpm} BPM. Đợt tăng từ {startBpm} trên cây acoustic tốt."
           ]
         },
         "stamina": {
           "neutral": [
-            "Your fretting pressure rises around minute {staminaMinutes}. Rest 30 seconds and re-approach.",
-            "Around minute {staminaMinutes} the strumming arm tightens. Brief break, then back in.",
-            "Past the {staminaMinutes}-minute mark your accuracy tends to slip. Short rest, then resume.",
-            "Fatigue shows at minute {staminaMinutes} on the acoustic. Take a breather."
+            "Lực bấm của bạn tăng lên quanh phút thứ {staminaMinutes}. Nghỉ 30 giây rồi vào lại.",
+            "Quanh phút thứ {staminaMinutes} cánh tay quạt căng lên. Nghỉ ngắn, rồi vào lại.",
+            "Qua mốc {staminaMinutes} phút, độ chính xác của bạn thường tụt. Nghỉ ngắn, rồi chơi tiếp.",
+            "Mệt lộ ra ở phút thứ {staminaMinutes} trên cây acoustic. Hãy nghỉ lấy hơi."
           ]
         },
         "bias_only": {
           "neutral": [
-            "Pick is landing {biasMs}ms {direction} consistently. Not chaos — shift your timing {correctionDirection} to center it.",
-            "Consistent lean: {biasMs}ms {direction}. Shift the whole phrase {correctionDirection} and you'll be centered."
+            "Phím gảy đang rơi {direction} {biasMs}ms một cách nhất quán. Không phải hỗn loạn — hãy dịch nhịp của bạn {correctionDirection} để đưa nó vào giữa.",
+            "Độ nghiêng nhất quán: {direction} {biasMs}ms. Hãy dịch cả câu {correctionDirection} và bạn sẽ vào giữa."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "{attemptCount} attempts at {bpm} and it's not settling. Try {suggestedBpm} for two sessions, then revisit.",
-            "Ceiling confirmed at {bpm} — drop to {suggestedBpm} and let the fretting hand catch up."
+            "{attemptCount} lần thử ở {bpm} mà vẫn chưa ổn định. Hãy thử {suggestedBpm} trong hai buổi, rồi quay lại.",
+            "Trần ở {bpm} đã xác nhận — hãy xuống {suggestedBpm} và để tay bấm bắt kịp."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Lost the grid there. Fill or improv? If intentional, carry on.",
-            "Correlation dropped off the click — are you running a fill?"
+            "Vừa mất lưới. Nốt đệm hay ngẫu hứng? Nếu có chủ ý thì cứ tiếp tục.",
+            "Độ tương quan rời khỏi tiếng click — bạn đang chơi một nốt đệm phải không?"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "You're landing every beat but the attack is light — try a firmer strum or pick.",
-            "Good coverage, soft hits. More wrist force through the strings.",
-            "Beats are all there, just quiet. Drive through the strings with more intent.",
-            "Landing the beats but softly — try a sharper attack on the downstroke."
+            "Bạn đang trúng mọi phách nhưng lực đánh nhẹ — hãy thử quạt hoặc gảy chắc hơn.",
+            "Độ phủ tốt, các lần đánh mềm. Thêm lực cổ tay xuyên qua các dây.",
+            "Các phách đều có đủ, chỉ là nhỏ. Hãy đánh xuyên qua các dây với nhiều chủ ý hơn.",
+            "Trúng các phách nhưng nhẹ — hãy thử đánh sắc hơn ở nhát quạt xuống."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your strumming drifted from the click. Stop and re-enter on the downbeat.",
-            "Grid tracking dropped — let the click run a bar, then strum back in.",
-            "Went off-tempo there. Dampen the strings and re-lock to the click.",
-            "The strum pattern wandered from the grid. Take a breath and re-enter clean."
+            "Cách quạt của bạn đã trôi khỏi tiếng click. Hãy dừng và vào lại ở phách mạnh.",
+            "Theo dõi lưới đã đứt — hãy để tiếng click chạy một ô nhịp, rồi quạt vào lại.",
+            "Vừa lệch tempo. Hãy chặn các dây và khớp lại với tiếng click.",
+            "Mẫu quạt đã lang thang khỏi lưới. Hít một hơi rồi vào lại cho sạch."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're strumming about half the expected beats — try to hit every beat in the pattern.",
-            "Coverage is low — make sure each beat gets a strum, not just the strong ones.",
-            "Around half the beats are going unplayed. Focus on completing the full strum pattern.",
-            "Beat coverage is low. Count aloud and make sure every downbeat and upbeat lands."
+            "Bạn đang quạt khoảng một nửa số phách dự kiến — hãy cố đánh mọi phách trong mẫu quạt.",
+            "Độ phủ thấp — hãy chắc mỗi phách đều có một nhát quạt, không chỉ những phách mạnh.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung hoàn thành trọn mẫu quạt.",
+            "Độ phủ phách thấp. Hãy đếm thành tiếng và chắc chắn mọi phách mạnh lẫn phách nhẹ đều rơi."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your strum lands on the beat well — but the space between strokes keeps shifting. Try counting the subdivisions out loud as you strum.",
-            "On the beat consistently, but the gap between strums is uneven. Tap your foot on every subdivision to lock the spacing.",
-            "Beat placement is solid — but spacing between strums is wandering. Count the subdivisions aloud and let your voice keep the pattern even.",
-            "Good beat placement — the space between strums is drifting though. Slow the pattern down until the gaps feel equal, then speed back up."
+            "Nhát quạt của bạn đúng phách tốt — nhưng khoảng cách giữa các nhát cứ dịch chuyển. Hãy thử đếm thành tiếng các nốt chia nhỏ khi quạt.",
+            "Đúng phách đều đặn, nhưng khoảng cách giữa các nhát quạt không đều. Hãy gõ chân trên mỗi nốt chia nhỏ để khóa khoảng cách.",
+            "Vị trí phách vững — nhưng khoảng cách giữa các nhát quạt đang lang thang. Hãy đếm thành tiếng các nốt chia nhỏ và để giọng bạn giữ mẫu quạt đều.",
+            "Vị trí phách tốt — nhưng khoảng cách giữa các nhát quạt đang trôi. Hãy làm chậm mẫu quạt cho đến khi các khoảng thấy bằng nhau, rồi tăng tốc lại."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your strum spacing is even — but you're landing off the beat. Anticipate the click by a hair and drive each strum right on it.",
-            "Even spacing between strums, but the pattern is shifted from the grid. Lock the downstroke of each bar to the beat, then let the rest follow.",
-            "The rhythm between strums is consistent — now anchor the whole pattern to the click. Aim for the center of each beat.",
-            "Good spacing feel. Focus on where each strum lands relative to the click — play just slightly ahead of where you expect the beat."
+            "Khoảng cách giữa các nhát quạt của bạn đều — nhưng bạn đang rơi lệch phách. Hãy đón trước tiếng click một chút và đánh từng nhát quạt ngay vào nó.",
+            "Khoảng cách giữa các nhát quạt đều, nhưng mẫu quạt bị dịch khỏi lưới. Hãy khóa nhát xuống của mỗi ô nhịp vào phách, rồi để phần còn lại theo sau.",
+            "Nhịp giữa các nhát quạt nhất quán — giờ hãy neo cả mẫu quạt vào tiếng click. Nhắm vào tâm của mỗi phách.",
+            "Cảm giác khoảng cách tốt. Hãy tập trung vào chỗ mỗi nhát quạt rơi so với tiếng click — chơi hơi trước chỗ bạn đoán phách."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Strum spacing and beat placement both locked in. That's a clean strum pattern.",
-            "Spacing and placement both on point. The pattern is sitting exactly where it should.",
-            "Both dimensions dialed — you're playing with real precision right now.",
-            "Timing locked across the board. That's the strum feel you want."
+            "Khoảng cách và vị trí phách của nhát quạt đều đã khớp. Đó là một mẫu quạt sạch.",
+            "Khoảng cách và vị trí đều chuẩn. Mẫu quạt đang nằm đúng chỗ của nó.",
+            "Cả hai chiều đều vững — lúc này bạn đang chơi rất chính xác.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác quạt mà bạn muốn."
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The room is crowding your signal — I'm reading this stretch less clearly.",
-            "Hard to tell strums from room noise right now. Take the numbers loosely.",
-            "Your sound is arriving murky for the last half-minute. My read is softer than usual."
+            "Căn phòng đang lấn tín hiệu của bạn — tôi đang đọc đoạn này kém rõ hơn.",
+            "Lúc này khó phân biệt nhát quạt với tạp âm phòng. Hãy xem các con số một cách lỏng lẻo.",
+            "Âm thanh của bạn đến chỗ tôi bị đục trong nửa phút qua. Số đọc của tôi mềm hơn thường lệ."
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next strum."
+            "{change}. Đoạn mới từ đây.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ nhát quạt tiếp theo."
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "The pause closed that segment — {score}% at {bpm} BPM.",
-            "The strumming stopped long enough to end it: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that stretch."
+            "Quãng nghỉ đã khép đoạn đó — {score}% ở {bpm} BPM.",
+            "Tiếng quạt ngừng đủ lâu để kết thúc nó: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Let's see how today sits."
+            "{bpmLow}–{bpmHigh} là chỗ bài này thôi sạch với bạn — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Xem hôm nay thế nào."
           ]
         }
       },
       "bass": {
         "session_start_cold": {
           "neutral": [
-            "Ready when you are. I'll start tracking from your first pluck.",
-            "Get warmed up and start whenever — I'll start listening from the first note.",
-            "Loosen the plucking hand, then play when you're ready.",
-            "Good to have you. Start when the fingers feel loose.",
-            "Whenever you're set — play and I'll start picking up your timing.",
-            "No rush. Get the right hand loose, then start when ready.",
-            "Ready when you are. I'll track from the first pluck.",
-            "Set up whenever — I'm listening from your first note."
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ bắt đầu theo dõi từ lần búng dây đầu tiên của bạn.",
+            "Khởi động xong cứ bắt đầu bất cứ lúc nào — tôi sẽ nghe từ nốt đầu tiên.",
+            "Thả lỏng tay búng dây, rồi chơi khi bạn sẵn sàng.",
+            "Rất vui có bạn. Hãy bắt đầu khi các ngón tay đã thấy thả lỏng.",
+            "Khi nào bạn sẵn sàng — cứ chơi, tôi sẽ bắt đầu bắt nhịp của bạn.",
+            "Không vội. Cho tay phải thả lỏng, rồi bắt đầu khi sẵn sàng.",
+            "Sẵn sàng khi bạn sẵn sàng. Tôi sẽ theo dõi từ lần búng dây đầu tiên.",
+            "Chuẩn bị lúc nào cũng được — tôi nghe từ nốt đầu tiên của bạn."
           ]
         },
         "session_start_returning": {
           "neutral": [
-            "Welcome back. Last session: {lastScore} at {lastBpm} BPM. Let's build on that groove.",
-            "Good to see you. You hit {lastScore} at {lastBpm} BPM last time — solid bass line.",
-            "Back on the bass. {lastScore} at {lastBpm} BPM last session. Let's keep it going.",
-            "Welcome back — {lastScore} / {lastBpm} BPM last time. Ready when you are.",
-            "Last session: {lastScore} at {lastBpm} BPM. Pick up the groove.",
-            "Back at it. {lastScore} at {lastBpm} BPM last time — good starting point.",
-            "Welcome back. {lastScore} at {lastBpm} BPM was the mark last session. Let's hit it.",
-            "Good to have you back. {lastScore} at {lastBpm} BPM last time — let's go."
+            "Chào mừng bạn quay lại. Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy xây tiếp trên groove đó.",
+            "Rất vui gặp lại bạn. Lần trước bạn đạt {lastScore} ở {lastBpm} BPM — một dòng bass vững.",
+            "Lại với cây bass rồi. Buổi trước là {lastScore} ở {lastBpm} BPM. Hãy tiếp tục.",
+            "Chào mừng bạn quay lại — lần trước {lastScore} / {lastBpm} BPM. Sẵn sàng khi bạn sẵn sàng.",
+            "Buổi tập trước: {lastScore} ở {lastBpm} BPM. Hãy nối lại groove.",
+            "Lại bắt đầu nào. Lần trước {lastScore} ở {lastBpm} BPM — một điểm xuất phát tốt.",
+            "Chào mừng bạn quay lại. {lastScore} ở {lastBpm} BPM là mốc của buổi trước. Hãy chạm tới nó.",
+            "Rất vui bạn quay lại. Lần trước {lastScore} ở {lastBpm} BPM — bắt đầu thôi."
           ]
         },
         "accuracy_drop": {
           "correction": [
-            "Right hand is drifting from the kick. Reset on beat 1.",
-            "Hits are scattering. Slow the fingering and lock to the kick.",
-            "Stop, play just root notes to the click, then add the line.",
-            "Drop everything but the root and the click for a bar, then come back to the line.",
-            "Pull back to one note per click. Build the line back up from there.",
-            "Pause the line. Sit with the click for four beats, then come back in.",
-            "Drop the tempo a few BPM and play it clean.",
-            "Slow it down. Get the root note on every click before adding anything fancy."
+            "Tay phải đang trôi khỏi tiếng kick. Hãy đặt lại ở phách 1.",
+            "Các lần đánh đang tản mát. Làm chậm cách bấm ngón và khóa vào tiếng kick.",
+            "Dừng lại, chỉ chơi các nốt gốc theo tiếng click, rồi thêm dòng bass vào.",
+            "Bỏ hết, chỉ giữ nốt gốc và tiếng click trong một ô nhịp, rồi quay lại dòng bass.",
+            "Lùi về một nốt mỗi tiếng click. Xây lại dòng bass từ đó.",
+            "Tạm dừng dòng bass. Ngồi cùng tiếng click bốn phách, rồi vào lại.",
+            "Giảm tempo vài BPM và chơi cho sạch.",
+            "Chậm lại. Chơi nốt gốc trên mỗi tiếng click cho chắc trước khi thêm bất cứ thứ gì cầu kỳ."
           ]
         },
         "rushing_trend": {
           "neutral": [
-            "Plucking hand is arriving before the click. Let the click come to you.",
-            "The line is pulling ahead — hold each root a moment longer.",
-            "You're a touch early. Play the note where the click is, not before it."
+            "Tay búng dây đang đến trước tiếng click. Hãy để tiếng click đến với bạn.",
+            "Dòng bass đang vượt lên trước — hãy giữ mỗi nốt gốc lâu thêm một chút.",
+            "Bạn hơi sớm một chút. Hãy chơi nốt ở chỗ có tiếng click, không phải trước nó."
           ],
           "correction": [
-            "Plucking hand is leading the kick — hold it back.",
-            "Right hand's rushing. Sit deeper behind the beat with the drummer.",
-            "Count the in-betweens — place each pluck right on the click, not before.",
-            "Drop the tempo five BPM and let the click pull each note out of you.",
-            "Pull the right hand back. The kick should land first, then your note.",
-            "Stop, count yourself in slow, then play right on top of the click.",
-            "Hands are racing. Mute the strings and tap the click with one finger first.",
-            "Pause one bar. Hear the click, then come in on beat 1."
+            "Tay búng dây đang dẫn trước tiếng kick — hãy giữ nó lại.",
+            "Tay phải đang vội. Hãy ngồi sâu hơn sau phách cùng tay trống.",
+            "Đếm các nốt ở giữa — đặt mỗi lần búng dây đúng vào tiếng click, không phải trước nó.",
+            "Giảm tempo năm BPM và để tiếng click kéo từng nốt ra khỏi bạn.",
+            "Kéo tay phải lại. Tiếng kick phải rơi trước, rồi mới đến nốt của bạn.",
+            "Dừng lại, đếm vào chậm, rồi chơi ngay trên tiếng click.",
+            "Đôi tay đang chạy đua. Hãy chặn các dây và dùng một ngón gõ theo tiếng click trước.",
+            "Dừng một ô nhịp. Nghe tiếng click, rồi vào ở phách 1."
           ]
         },
         "dragging_trend": {
           "neutral": [
-            "The line is sitting behind the click. Bring it up.",
-            "You're landing late — start the pluck a fraction sooner.",
-            "Each root is arriving after the beat. Aim at the front of it."
+            "Dòng bass đang ngồi sau tiếng click. Hãy đưa nó lên.",
+            "Bạn đang rơi trễ — hãy bắt đầu lần búng dây sớm hơn một chút.",
+            "Mỗi nốt gốc đang đến sau phách. Hãy nhắm vào phần đầu của nó."
           ],
           "correction": [
-            "Plucks are lagging the kick — push slightly into each note.",
-            "Right hand's dragging. Play with the click; don't wait for the kick to land.",
-            "Lift the plucking finger sooner — meet the click on the front of the note.",
-            "Each note's landing late. Aim for the front edge of every click.",
-            "Push from the forearm — the finger's getting heavy.",
-            "Drop the tempo a bit and play with more lift. The drag clears.",
-            "Imagine the click is a hair earlier than it is, and meet that.",
-            "Stop, take a breath, then come in pushing slightly forward."
+            "Các lần búng dây đang chậm so với tiếng kick — hãy đẩy nhẹ vào mỗi nốt.",
+            "Tay phải đang kéo chậm. Hãy chơi cùng tiếng click, đừng chờ tiếng kick rơi.",
+            "Hãy nhấc ngón búng dây sớm hơn — gặp tiếng click ở phần đầu của nốt.",
+            "Mỗi nốt đang rơi trễ. Hãy nhắm vào mép đầu của mọi tiếng click.",
+            "Đẩy từ cẳng tay — ngón tay đang nặng dần.",
+            "Giảm tempo một chút và chơi với nhiều lực nâng hơn. Việc kéo chậm sẽ hết.",
+            "Hãy hình dung tiếng click sớm hơn thực tế một chút, và gặp nó.",
+            "Dừng lại, hít một hơi, rồi vào lại với chút đẩy về phía trước."
           ]
         },
         "personal_best_streak": {
           "encouragement": [
-            "Locked with the kick.",
-            "Pocket. Stay.",
-            "Streak going — stay there.",
-            "Yes. Don't change anything.",
-            "Right hand in the pocket. Hold.",
-            "Bass and click are one thing now. Keep it.",
-            "Tight. Sit in this.",
-            "That's the groove — stay there."
+            "Khớp với tiếng kick.",
+            "Pocket. Ở lại.",
+            "Chuỗi đang chạy — ở lại đó.",
+            "Đúng rồi. Đừng đổi gì cả.",
+            "Tay phải đang ở trong pocket. Giữ.",
+            "Bass và tiếng click giờ là một. Giữ nó.",
+            "Chặt. Ngồi trong đó.",
+            "Đó là groove — ở lại đó."
           ]
         },
         "new_band_locked": {
           "encouragement": [
-            "{bpmLow}–{bpmHigh} BPM band sustained — bass-kick lock is solid.",
-            "Root-note pocket holding at {bpmLow}–{bpmHigh} BPM.",
-            "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this groove.",
-            "Held {bpmLow}–{bpmHigh} BPM clean. Right hand's settled.",
-            "Locked at {bpmLow}–{bpmHigh} BPM. Don't drop below it.",
-            "{bpmLow}–{bpmHigh} BPM owned. New baseline.",
-            "Bass and click together at {bpmLow}–{bpmHigh} BPM. Solid.",
-            "Pocket sustained at {bpmLow}–{bpmHigh} BPM for a full minute."
+            "Dải {bpmLow}–{bpmHigh} BPM được giữ vững — bass và kick khớp chắc.",
+            "Pocket của nốt gốc giữ vững ở {bpmLow}–{bpmHigh} BPM.",
+            "Giữ vững ở {bpmLow}–{bpmHigh} BPM — mốc nền mới cho groove này.",
+            "Giữ sạch {bpmLow}–{bpmHigh} BPM. Tay phải đã ổn định.",
+            "Khớp ở {bpmLow}–{bpmHigh} BPM. Đừng tụt xuống dưới nó.",
+            "Làm chủ {bpmLow}–{bpmHigh} BPM. Mốc nền mới.",
+            "Bass và tiếng click đi cùng nhau ở {bpmLow}–{bpmHigh} BPM. Vững.",
+            "Pocket giữ vững ở {bpmLow}–{bpmHigh} BPM trong trọn một phút."
           ]
         },
         "recovery": {
           "encouragement": [
-            "Back in the pocket. Stay.",
-            "Pulled the line back. Hold it.",
-            "Bass-kick lock recovered. Keep it.",
-            "Right hand re-synced. Don't change anything.",
-            "You caught the slip. Sit in this.",
-            "Pocket's back. Stay loose.",
-            "Recovery's clean. Hold this exact feel.",
-            "Brought it home. Stay there a minute."
+            "Đã về lại pocket. Ở lại.",
+            "Đã kéo dòng bass về lại. Giữ nó.",
+            "Bass và kick đã khớp lại. Giữ nó.",
+            "Tay phải đã khớp lại. Đừng đổi gì cả.",
+            "Bạn đã bắt kịp chỗ trượt. Ngồi trong đó.",
+            "Pocket đã trở lại. Giữ thoải mái.",
+            "Hồi phục sạch. Giữ đúng cảm giác này.",
+            "Đã đưa nó về nhà. Ở lại đó một phút."
           ]
         },
         "recovery_confirmed": {
           "encouragement": [
-            "Groove's back.",
-            "Bass-kick lock — hold it.",
-            "Back in the pocket. Stay."
+            "Groove đã trở lại.",
+            "Bass và kick khớp — giữ nó.",
+            "Đã về lại pocket. Ở lại."
           ]
         },
         "fatigue": {
           "encouragement": [
-            "Plucking fingers tightening up? Quick stretch — back in.",
-            "Forearm starting to lock? Bass down for 60 seconds.",
-            "Tension building in the right hand? Brief break, then come back in.",
-            "Fretting hand getting heavy? Take a moment, then continue.",
-            "Right hand feels tight? Shake it out, then resume.",
-            "Shoulder lifting? Drop it, breathe, then continue.",
-            "Forearm working too hard. Quick rest.",
-            "Take 30 seconds, roll the wrists, then back to it."
+            "Các ngón búng dây đang căng lên? Duỗi nhanh — rồi vào lại.",
+            "Cẳng tay bắt đầu cứng? Đặt bass xuống 60 giây.",
+            "Sự căng đang tăng ở tay phải? Nghỉ ngắn, rồi vào lại.",
+            "Tay bấm đang nặng dần? Dừng một lát, rồi tiếp tục.",
+            "Tay phải thấy căng? Lắc cho thả lỏng, rồi chơi tiếp.",
+            "Vai đang nhướn lên? Hạ nó xuống, hít thở, rồi tiếp tục.",
+            "Cẳng tay đang làm việc quá sức. Nghỉ nhanh một chút.",
+            "Nghỉ 30 giây, xoay cổ tay, rồi quay lại."
           ],
           "correction": [
-            "Fatigue's showing in the attack — stop, 90 seconds off, then re-check.",
-            "You're past peak — bass down, stretch, then back in.",
-            "Stop now. Tired plucking teaches the hand a sloppy attack.",
-            "Right hand is straining. Set the bass down, stretch the forearm, two minutes off.",
-            "Real rest — bass on the stand, walk around for a bit.",
-            "Plucking hand is done. 90 seconds minimum, then re-check.",
-            "Hard stop. Wrist circles and forearm stretches before continuing.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "Mệt đã lộ ra ở lực búng — dừng, nghỉ 90 giây, rồi kiểm tra lại.",
+            "Bạn đã qua đỉnh — đặt bass xuống, duỗi người, rồi vào lại.",
+            "Dừng ngay. Búng dây khi mệt dạy bàn tay một lực búng cẩu thả.",
+            "Tay phải đang căng quá. Đặt bass xuống, duỗi cẳng tay, nghỉ hai phút.",
+            "Nghỉ thật sự — bass lên giá, đi quanh một lúc.",
+            "Tay búng dây đã xong. Tối thiểu 90 giây, rồi kiểm tra lại.",
+            "Dừng hẳn. Xoay cổ tay và duỗi cẳng tay trước khi tiếp tục.",
+            "Cố vượt qua đây là tự rước chấn thương vào mình. Dừng và hồi phục."
           ]
         },
         "tempo_milestone": {
           "encouragement": [
-            "At {bpmLow} BPM — make sure each note rings clean before climbing.",
-            "{bpmLow} BPM milestone. Lock root notes to the click before pushing.",
-            "New band: {bpmLow}-{bpmHigh}. Walk it slow first, then add the fancy notes.",
-            "{bpmLow} BPM is fresh. Stay here until each note sounds full.",
-            "Park at {bpmLow} BPM. The next jump comes after a clean minute.",
-            "Hit {bpmLow} BPM — now build a couple of clean bars before going higher.",
-            "{bpmLow}-{bpmHigh} BPM is brand new. Hold it until it feels easy.",
-            "Earn {bpmLow} BPM before chasing more. Stay flat."
+            "Ở {bpmLow} BPM — hãy chắc mỗi nốt ngân sạch trước khi leo.",
+            "Mốc {bpmLow} BPM. Khóa các nốt gốc vào tiếng click trước khi đẩy.",
+            "Dải mới: {bpmLow}-{bpmHigh}. Đi chậm dòng bass trước, rồi mới thêm các nốt cầu kỳ.",
+            "{bpmLow} BPM còn mới. Ở lại đây cho đến khi mỗi nốt nghe đầy đặn.",
+            "Đậu ở {bpmLow} BPM. Bước nhảy kế tiếp đến sau một phút sạch.",
+            "Đã chạm {bpmLow} BPM — giờ hãy xây vài ô nhịp sạch trước khi lên cao hơn.",
+            "{bpmLow}-{bpmHigh} BPM còn mới tinh. Giữ cho đến khi thấy dễ.",
+            "Giành lấy {bpmLow} BPM trước khi đuổi theo mốc cao hơn. Giữ ngang."
           ]
         },
         "check_in": {
           "neutral": [
-            "Long stretch on the bass — line, groove, something specific?",
-            "Five-plus minutes locked with the kick. Anything you want to dial in?",
-            "You've been deep in the pocket. What's next?",
-            "Solid run going. Want sharper feedback on a specific part?",
-            "Been at it a while. Walking line? Root notes? Tell me where to listen.",
-            "Pocket's been steady. Pick a target if you want closer feedback.",
-            "Long stretch on the bass. Anything you want me to flag?",
-            "You've been holding it down. Tell me what to listen for next."
+            "Đã chơi bass một đoạn dài — dòng bass, groove, hay điều gì cụ thể?",
+            "Hơn năm phút khớp với tiếng kick. Bạn có muốn chỉnh điều gì không?",
+            "Bạn đã ở sâu trong pocket. Tiếp theo là gì?",
+            "Đang chơi vững. Bạn có muốn nhận xét sắc hơn ở một phần cụ thể không?",
+            "Bạn đã chơi một lúc rồi. Dòng walking? Nốt gốc? Hãy cho tôi biết nghe ở đâu.",
+            "Pocket đã vững suốt. Hãy chọn một mục tiêu nếu bạn muốn nhận xét kỹ hơn.",
+            "Đã chơi bass một đoạn dài. Bạn muốn tôi nêu điều gì không?",
+            "Bạn đã giữ nền rất vững. Hãy cho tôi biết tiếp theo nên nghe điều gì."
           ]
         },
         "ramp_complete": {
           "neutral": [
-            "Ramp done — {startBpm} to {endBpm}. Bass-kick lock held the climb.",
-            "Made it to {endBpm} BPM. You plucked through the ramp from {startBpm}.",
-            "Target reached: {endBpm} BPM. Ramp from {startBpm} complete — groove stayed.",
-            "{endBpm} BPM reached. Solid ramp from {startBpm} on the bass."
+            "Xong đợt tăng — {startBpm} đến {endBpm}. Bass và kick khớp vững suốt đợt leo.",
+            "Đã tới {endBpm} BPM. Bạn đã búng dây xuyên suốt đợt tăng từ {startBpm}.",
+            "Đạt mục tiêu: {endBpm} BPM. Đợt tăng từ {startBpm} hoàn tất — groove vẫn giữ.",
+            "Đã đạt {endBpm} BPM. Đợt tăng từ {startBpm} trên cây bass vững."
           ]
         },
         "stamina": {
           "neutral": [
-            "Stamina wall at minute {staminaMinutes} — your groove loosens. Short break, then back in.",
-            "Around minute {staminaMinutes} the plucking hand starts to fatigue. Rest and return.",
-            "Past the {staminaMinutes}-minute mark the bass lock starts to slip. Brief rest, then resume.",
-            "You tend to fade around minute {staminaMinutes}. Take 30 seconds, come back clean."
+            "Bức tường sức bền ở phút thứ {staminaMinutes} — groove của bạn lỏng ra. Nghỉ ngắn, rồi vào lại.",
+            "Quanh phút thứ {staminaMinutes} tay búng dây bắt đầu mệt. Hãy nghỉ rồi quay lại.",
+            "Qua mốc {staminaMinutes} phút, sự khớp của bass bắt đầu trượt. Nghỉ ngắn, rồi chơi tiếp.",
+            "Bạn thường yếu đi quanh phút thứ {staminaMinutes}. Nghỉ 30 giây, quay lại cho sạch."
           ]
         },
         "bias_only": {
           "neutral": [
-            "Pluck is {biasMs}ms {direction} the click every time — low jitter, just offset. Adjust your attack {correctionDirection}.",
-            "Your attack sits {biasMs}ms {direction}. Very consistent — just shift {correctionDirection} to land on the beat."
+            "Lần búng dây luôn {direction} {biasMs}ms so với tiếng click — độ rung thấp, chỉ là bị lệch. Hãy chỉnh lực búng {correctionDirection}.",
+            "Lực búng của bạn nằm {direction} {biasMs}ms. Rất nhất quán — chỉ cần dịch {correctionDirection} để rơi đúng phách."
           ]
         },
         "pace_coaching": {
           "neutral": [
-            "Ceiling at {bpm} — {attemptCount} sessions in. Lock {suggestedBpm} first, then come back.",
-            "{attemptCount} attempts at {bpm} BPM and the groove's not locking. Drop to {suggestedBpm} and consolidate."
+            "Trần ở {bpm} — đã {attemptCount} buổi. Hãy khóa {suggestedBpm} trước, rồi quay lại.",
+            "{attemptCount} lần thử ở {bpm} BPM mà groove chưa khớp. Hãy xuống {suggestedBpm} và củng cố."
           ]
         },
         "grid_lost": {
           "neutral": [
-            "Lost the grid there. Fill or improv? If intentional, carry on.",
-            "Correlation dropped off the click — are you running a fill?"
+            "Vừa mất lưới. Nốt đệm hay ngẫu hứng? Nếu có chủ ý thì cứ tiếp tục.",
+            "Độ tương quan rời khỏi tiếng click — bạn đang chơi một nốt đệm phải không?"
           ]
         },
         "muddy_hits": {
           "neutral": [
-            "Landing every note but the signal is soft — dig in more with your plucking hand.",
-            "Good coverage but the attack is quiet. More finger pressure on each pluck.",
-            "Every beat's there, just soft. Try plucking more aggressively.",
-            "Beats are landing but the transient is weak — anchor harder on the string."
+            "Trúng mọi nốt nhưng tín hiệu mềm — hãy ấn sâu hơn bằng tay búng dây.",
+            "Độ phủ tốt nhưng lực búng nhỏ. Thêm lực ngón tay vào mỗi lần búng.",
+            "Phách nào cũng có, chỉ là nhẹ. Hãy thử búng dây mạnh dạn hơn.",
+            "Các phách đã rơi nhưng transient yếu — hãy tì chắc hơn lên dây."
           ]
         },
         "grid_discontinuity": {
           "neutral": [
-            "Your groove drifted from the click. Mute and re-enter on the downbeat.",
-            "Grid tracking dropped — stop the line, find the pulse, and re-lock.",
-            "Went off-tempo there. Let the click breathe and re-anchor your bass line.",
-            "The groove drifted from the grid. Take a beat and lock back in on the root."
+            "Groove của bạn đã trôi khỏi tiếng click. Hãy chặn dây và vào lại ở phách mạnh.",
+            "Theo dõi lưới đã đứt — dừng dòng bass, tìm nhịp, rồi khớp lại.",
+            "Vừa lệch tempo. Hãy để tiếng click thở và neo lại dòng bass của bạn.",
+            "Groove đã trôi khỏi lưới. Nghỉ một nhịp và khớp lại ở nốt gốc."
           ]
         },
         "low_completeness": {
           "neutral": [
-            "You're playing about half the expected beats — try to lock in every note of the line.",
-            "Coverage is low — make sure each beat gets a pluck, not just the root notes.",
-            "Around half the beats are going unplayed. Focus on filling out the full bass line.",
-            "Beat coverage is low. Slow down if needed and make sure every note lands."
+            "Bạn đang chơi khoảng một nửa số phách dự kiến — hãy cố khớp mọi nốt của dòng bass.",
+            "Độ phủ thấp — hãy chắc mỗi phách đều có một lần búng dây, không chỉ các nốt gốc.",
+            "Khoảng một nửa số phách không được chơi. Hãy tập trung chơi trọn dòng bass.",
+            "Độ phủ phách thấp. Hãy chậm lại nếu cần và chắc chắn mọi nốt đều rơi."
           ]
         },
         "ic_spacing_drift": {
           "neutral": [
-            "Your plucking lands on the beat well — but the space between notes keeps shifting. Try counting the subdivisions out loud as you play.",
-            "Beat placement is solid, but the gap between plucks is uneven. Tap your foot on every subdivision to lock the note spacing.",
-            "On the beat consistently, but spacing between notes is wandering. Count the subdivisions out loud — let your voice set the grid.",
-            "Good beat placement — the space between plucks is drifting though. Slow the line down until the gaps feel equal, then speed up."
+            "Các lần búng dây của bạn đúng phách tốt — nhưng khoảng cách giữa các nốt cứ dịch chuyển. Hãy thử đếm thành tiếng các nốt chia nhỏ khi chơi.",
+            "Vị trí phách vững, nhưng khoảng cách giữa các lần búng không đều. Hãy gõ chân trên mỗi nốt chia nhỏ để khóa khoảng cách các nốt.",
+            "Đúng phách đều đặn, nhưng khoảng cách giữa các nốt đang lang thang. Hãy đếm thành tiếng các nốt chia nhỏ — để giọng bạn đặt lưới.",
+            "Vị trí phách tốt — nhưng khoảng cách giữa các lần búng đang trôi. Hãy làm chậm dòng bass cho đến khi các khoảng thấy bằng nhau, rồi tăng tốc."
           ]
         },
         "ic_placement_drift": {
           "neutral": [
-            "Your pluck spacing is even — but you're landing off the beat. Anticipate the click by a hair and drive each pluck right on it.",
-            "Even spacing between notes, but the line is sitting off the grid. Lock the first note of each bar to the click, then let the rest follow.",
-            "The rhythm between plucks is consistent — now anchor the whole line to the grid. Aim for the center of each beat.",
-            "Good spacing feel in the line. Focus on where each pluck lands relative to the click — play slightly ahead of where you expect the beat."
+            "Khoảng cách các lần búng của bạn đều — nhưng bạn đang rơi lệch phách. Hãy đón trước tiếng click một chút và búng mỗi nốt ngay vào nó.",
+            "Khoảng cách giữa các nốt đều, nhưng dòng bass nằm lệch khỏi lưới. Hãy khóa nốt đầu của mỗi ô nhịp vào tiếng click, rồi để phần còn lại theo sau.",
+            "Nhịp giữa các lần búng nhất quán — giờ hãy neo cả dòng bass vào lưới. Nhắm vào tâm của mỗi phách.",
+            "Cảm giác khoảng cách trong dòng bass tốt. Hãy tập trung vào chỗ mỗi lần búng rơi so với tiếng click — chơi hơi trước chỗ bạn đoán phách."
           ]
         },
         "ic_both_locked": {
           "neutral": [
-            "Pluck spacing and beat placement both locked in. That's the pocket right there.",
-            "Spacing and placement both on point. The bass line is sitting exactly where it should.",
-            "Both dimensions dialed — you're grooving with real precision.",
-            "Timing locked across the board. That's the bass line feel you want."
+            "Khoảng cách búng và vị trí phách đều đã khớp. Đó chính là pocket.",
+            "Khoảng cách và vị trí đều chuẩn. Dòng bass đang nằm đúng chỗ của nó.",
+            "Cả hai chiều đều vững — bạn đang groove rất chính xác.",
+            "Nhịp được khóa trên mọi mặt. Đó là cảm giác dòng bass mà bạn muốn."
           ]
         },
         "low_confidence": {
           "neutral": [
-            "The low end is hard to read on my end — I'm less sure of this stretch.",
-            "Your signal is muddy down there. Take the last half-minute's numbers loosely.",
-            "Hard to pick attacks out of the low end right now. My read is softer than usual."
+            "Phần âm trầm khó đọc ở phía tôi — tôi kém chắc về đoạn này.",
+            "Tín hiệu của bạn bị đục ở dải trầm. Hãy xem các con số của nửa phút qua một cách lỏng lẻo.",
+            "Lúc này khó tách các lần búng khỏi dải trầm. Số đọc của tôi mềm hơn thường lệ."
           ]
         },
         "boundary_signal_a": {
           "neutral": [
-            "{change}. New segment from here.",
-            "{change}. The previous stretch is closed and counted.",
-            "{change} — scoring starts again on the next note."
+            "{change}. Đoạn mới từ đây.",
+            "{change}. Đoạn trước đã đóng và được tính.",
+            "{change} — điểm bắt đầu tính lại từ nốt tiếp theo."
           ]
         },
         "boundary_signal_b": {
           "neutral": [
-            "The pause closed that segment — {score}% at {bpm} BPM.",
-            "The line went quiet long enough to end it: {score}% at {bpm} BPM.",
-            "{score}% at {bpm} BPM logged for that stretch."
+            "Quãng nghỉ đã khép đoạn đó — {score}% ở {bpm} BPM.",
+            "Dòng bass im đủ lâu để kết thúc nó: {score}% ở {bpm} BPM.",
+            "Đã ghi {score}% ở {bpm} BPM cho đoạn đó."
           ]
         },
         "preset_ceiling_hit": {
           "neutral": [
-            "{bpmLow}–{bpmHigh} is where this line stops sitting right — {attemptCount} sessions, each near {score}.",
-            "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
-            "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play."
+            "{bpmLow}–{bpmHigh} là chỗ dòng bass này thôi vào đúng chỗ — {attemptCount} buổi, đều quanh {score}.",
+            "Bạn lại ở {bpmLow}–{bpmHigh}. {attemptCount} lượt gần nhất ở đây đều quanh {score}.",
+            "{attemptCount} buổi ở tempo này, buổi nào cũng gần {score}. Đáng biết khi bạn chơi."
           ]
         }
       },
