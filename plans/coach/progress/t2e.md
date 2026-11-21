@@ -56,4 +56,20 @@ new memos depend on the store, the parts and `planClock` only.
 
 ## Gates
 
-See the report (logs under `/tmp/coach-t2e/`).
+Logs under `/tmp/coach-t2e/`. `coach` merged in at the end: already up to date.
+- `npx tsc --noEmit`: pass (coach-t2e-tsc-3). `npm run build`: pass (coach-t2e-build).
+- `npm run test` (`vitest.log`): 51,805 passed; failures were the known `TabStage.render.test.tsx` (it cannot load
+  through the symlink) and `parity/surface` (the new settings key). The manifest was regenerated with
+  `UPDATE_PARITY_MANIFEST=1`, then `src/test/parity` passed (coach-t2e-parity-2). One "Timeout calling onTaskUpdate"
+  under load.
+- Layout (`layout.log`): today-line, my-exercises, coach-session, short-window, phone-learning, planner, swap,
+  today-anchor, today-focus, paths-prereq: 444 passed, 4 failed, all `page.goto` / test timeouts under load (3
+  `today-anchor` hero, 1 `short-window` session-ask-ready tab ember 1280). Re-run alone: 4 of 4 passed
+  (coach-t2e-layout-2).
+- `today-mine.spec.ts`: 4 passed (coach-t2e-scenes-3). Pictures in `/tmp/coach-t2e/shots/`: `today-mine-1440.png`,
+  `today-mine-390.png`, `paths-mine-today-1440.png`.
+- `smooth.spec.ts --workers=2` (`smooth.log`): 17 passed, 1 failed, "Ask commits nothing during a running Take"
+  (long task 54 ms in the best of 3 windows). The same test alone, repeated 3 times, passed 3 of 3 on t2e and 3 of 3
+  on `coach` untouched, so the first run was the busy machine.
+- Not run: the full layout suite (the orchestrator's); `test:rust` (no Rust).
+- Review: `/tmp/coach-orch/t2e-review.diff` (src, locales excluded).
