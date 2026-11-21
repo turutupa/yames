@@ -72,6 +72,12 @@ trigger no Take of the Exercise can produce (no open string, no `openString` cue
 
 1. `npm run paths -- gen <path> && npm run paths -- strings <path> && npm run paths -- check <path>`:
    every `cue.*` rule, and every overlay's cue at most 48 characters, counted in characters (an error).
+   `check` also prints, per pack, every cue a variant cannot say (`info  cue.refused`) and every cue,
+   purpose or how-to line a variant says in other words (`info  variant.rewritten`, from and to): read
+   the rewritten ones too. A note name is said again for a variant only where every note moved one
+   interval, or where the sentence puts the note at a fret or on a string (vr1); otherwise the cue is
+   refused for that variant. `ERROR variant.rewrite` is variant text the rewriter would not write.
+   No side script is needed for this any more.
 2. Proof-read before translating: a fresh reader (`model: "sonnet"`) that did not write them gets only
    the cues, each Exercise's tab and purpose, the triggers and these rules, reads as a guitar teacher and
    objects; fix or answer every objection, both lists in the leg's progress file (c4c's is the example).

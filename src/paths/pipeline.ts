@@ -29,6 +29,13 @@ export type { CurriculumIssue } from "./curriculum";
 export type { Issue, PathDoc };
 export { checkOverlay, englishStrings, mergeTranslations, readOverlay, serializeOverlay, stringsToTranslate };
 export { CUE_MAX_CHARS } from "./format";
+import { rewriteReport } from "./rewrites";
+import type { RewriteReport } from "./rewrites";
+
+/** What the variant rewriter says for a pack on disk (`rewrites.ts`), held against its spec. */
+export function variantRewrites(spec: PathSpec, doc: PathDoc): RewriteReport {
+  return rewriteReport(doc, spec.variantText ? buildPath({ ...spec, variantText: false }) : null);
+}
 
 export function allSpecs(): readonly PathSpec[] {
   return SPECS;

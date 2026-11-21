@@ -92,10 +92,23 @@ function check(pipeline, id) {
     const bad = pipeline.errorsIn(issues).length;
     errors += bad;
     console.log(`${bad === 0 ? "ok  " : "FAIL"} ${pipeline.summary(JSON.parse(onDisk))} ${bad} errors, ${issues.length - bad} warnings.`);
+    errors += printRewrites(pipeline, spec, JSON.parse(onDisk));
   }
   errors += checkCurriculumOnDisk(pipeline);
   if (errors === 0) errors += checkStrings(pipeline, id);
   if (errors > 0) fail(`${errors} errors.`);
+}
+
+// What the variant rewriter said for each variant (src/paths/rewrites.ts): every sentence said in other
+// words, every cue a variant cannot say, for a person to read; and as errors, variant text in the pack
+// the rewriter would not write for those notes.
+function printRewrites(pipeline, spec, doc) {
+  const r = pipeline.variantRewrites(spec, doc);
+  for (const x of r.rewritten) console.log(`info  variant.rewritten  ${x.where} [${x.kind}]\n      "${x.from}"\n   -> "${x.to}"`);
+  for (const x of r.refused) console.log(`info  cue.refused  ${x.where}\n      "${x.cue}": ${x.reason}`);
+  for (const x of r.errors) console.log(`ERROR variant.rewrite  ${x.where} [${x.kind}]\n      ${x.message}: "${x.text}"`);
+  console.log(`${r.errors.length === 0 ? "ok  " : "FAIL"} ${doc.id}: variant rewriter: ${r.rewritten.length} sentences said in other words, ${r.refused.length} cues a variant cannot say. ${r.errors.length} errors.`);
+  return r.errors.length;
 }
 
 // How the Paths build on each other is a property of all of them together,
