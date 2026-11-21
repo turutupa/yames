@@ -386,6 +386,9 @@ fn faded_copy(samples: &[f32], rate: u32) -> Vec<f32> {
 pub struct HearSlice {
     pub pcm: Vec<f32>,
     pub rate: u32,
+    /// The slot's epoch when the copy was cut, read under the same lock: a
+    /// forget since (the input stopped) refuses the hand-over (c5b1c, L3).
+    epoch: u64,
 }
 
 impl HearSlice {
@@ -487,29 +490,67 @@ impl HeardTakeSlot {
         let slot = self.take.lock().unwrap_or_else(|e| e.into_inner());
         let take = slot.as_ref().filter(|t| t.serial == serial).ok_or(HearRefused::NotHeld)?;
         let range = take.span(from_bar, to_bar)?;
-        Ok(HearSlice { pcm: faded_copy(&take.samples[range], take.rate), rate: take.rate })
+        let epoch = self.epoch.load(Ordering::Acquire);
+        Ok(HearSlice { pcm: faded_copy(&take.samples[range], take.rate), rate: take.rate, epoch })
     }
 
     /// Hand a slice to the audio thread through the jam's listen-back path.
     /// The caller holds the app state's lock and has seen the transport
     /// stopped, so a Start (which cuts under the same lock) cannot slip
     /// between the hand-over and the record of its generation.
+    ///
+    /// Refused when the slot was forgotten since the slice was cut (c5b1c,
+    /// review L3: the input stopped, and none of the player's audio may play
+    /// or stay in the take slot after that). The epoch is compared, and the
+    /// generation recorded, under the held Take's lock, which every forget
+    /// takes to move the epoch: a forget either came first (refused here) or
+    /// comes after the claim is recorded, and its `clear` then takes the
+    /// slice out. Lock order: state (the caller's) → held Take → `retired` /
+    /// `play`, the order the review's table already gives; nothing that holds
+    /// `retired` or `play` takes the held Take's lock.
     pub fn start(&self, handoff: &TakeHandoff, slice: HearSlice) -> Result<HearBack, String> {
         let length_ms = slice.length_ms();
-        let generation = handoff
-            .set_play(Some(TakePlayback { pcm: Arc::new(slice.pcm), sample_rate: slice.rate }))
-            .ok_or_else(|| "the bar could not be handed to the audio engine".to_string())?;
-        self.playing.store(generation, Ordering::Release);
-        Ok(HearBack { generation, length_ms })
+        let outcome = {
+            let _held = self.take.lock().unwrap_or_else(|e| e.into_inner());
+            if self.epoch.load(Ordering::Acquire) != slice.epoch {
+                Err(slice)
+            } else {
+                let generation = handoff
+                    .set_play(Some(TakePlayback { pcm: Arc::new(slice.pcm), sample_rate: slice.rate }))
+                    .ok_or_else(|| "the bar could not be handed to the audio engine".to_string())?;
+                self.playing.store(generation, Ordering::Release);
+                Ok(generation)
+            }
+        };
+        match outcome {
+            Ok(generation) => Ok(HearBack { generation, length_ms }),
+            // the copy is freed here, outside the lock
+            Err(slice) => {
+                drop(slice);
+                Err("the input stopped: that Take's audio is no longer held".into())
+            }
+        }
     }
 
     /// `stop_hear_take`: stop the hear-back `generation` named, and nothing
     /// else. `true` when it was still in the slot.
     pub fn stop(&self, handoff: &TakeHandoff, generation: u64) -> bool {
-        if self.playing.compare_exchange(generation, NO_HEAR, Ordering::AcqRel, Ordering::Acquire).is_err() {
+        self.stop_with(handoff, generation, || {})
+    }
+
+    /// [`Self::stop`], with `between` run after the take slot is emptied and
+    /// before the claim is dropped, so a test can put a Start's `cut` there.
+    /// The slot is emptied FIRST (c5b1c, review L1): while the claim is
+    /// still recorded, a racing `cut` either clears the slot itself or finds
+    /// it already empty, and never raises the transport over a hear-back.
+    fn stop_with(&self, handoff: &TakeHandoff, generation: u64, between: impl FnOnce()) -> bool {
+        if generation == NO_HEAR || self.playing.load(Ordering::Acquire) != generation {
             return false;
         }
         let cleared = handoff.clear_play_if(generation);
+        between();
+        // a Start's cut or a newer hear-back may have moved it: then it is theirs
+        let _ = self.playing.compare_exchange(generation, NO_HEAR, Ordering::AcqRel, Ordering::Acquire);
         handoff.drain_retired();
         cleared
     }
@@ -533,12 +574,25 @@ impl HeardTakeSlot {
     /// after any cut, for the NEXT drain (the input's stop drains again once
     /// the analyzer has joined). `true` when it cleared the slot.
     pub fn clear(&self, handoff: &TakeHandoff, playing_too: bool) -> bool {
+        self.clear_with(handoff, playing_too, || {})
+    }
+
+    /// [`Self::clear`], with `between` run after the take slot is emptied and
+    /// before the claim is dropped (a test's seam). Slot first, claim second
+    /// (c5b1c, review L1): a Start whose `cut` lands between the two finds
+    /// the claim, and the slot already empty; one landing before them clears
+    /// it itself, and this `clear_play_if` then misses (whichever bumps the
+    /// generation first wins). A Start can no longer see no claim while the
+    /// hear-back still holds the take slot.
+    fn clear_with(&self, handoff: &TakeHandoff, playing_too: bool, between: impl FnOnce()) -> bool {
         let generation = self.playing.load(Ordering::Acquire);
-        let cleared = generation != NO_HEAR
-            && (playing_too || handoff.has_ended(generation))
-            // a Start's cut or a stop that got here first has it
-            && self.playing.compare_exchange(generation, NO_HEAR, Ordering::AcqRel, Ordering::Acquire).is_ok()
-            && handoff.clear_play_if(generation);
+        let mut cleared = false;
+        if generation != NO_HEAR && (playing_too || handoff.has_ended(generation)) {
+            cleared = handoff.clear_play_if(generation);
+            between();
+            // a Start's cut, a stop or a newer hear-back may have moved it
+            let _ = self.playing.compare_exchange(generation, NO_HEAR, Ordering::AcqRel, Ordering::Acquire);
+        }
         handoff.drain_retired();
         cleared
     }
@@ -819,6 +873,31 @@ mod tests {
         assert!(slot.stop(&handoff, h.generation));
     }
 
+    /// c5b1c, review L3: a bar cut before the input's stop is not handed to
+    /// the audio thread after it, even when a pass begun during the stop has
+    /// kept the same Take again; one cut after it is.
+    #[test]
+    fn a_slice_cut_before_a_forget_is_refused_after_it() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        slot.keep(take(1), slot.epoch());
+        let before = slot.slice(1, 1, 1).unwrap();
+        slot.forget();
+        assert!(slot.start(&handoff, before).is_err(), "a bar played after the input stopped");
+        assert!(!handoff.is_playing_back());
+        // a pass that read the new epoch keeps the Take again: still refused
+        let before = slot.slice(1, 1, 1);
+        assert!(before.is_err(), "nothing held after the forget");
+        slot.keep(take(1), slot.epoch());
+        let stale = HearSlice { pcm: vec![0.0; 8], rate: 48_000, epoch: slot.epoch() - 1 };
+        assert!(slot.start(&handoff, stale).is_err());
+        assert!(!handoff.is_playing_back());
+        // a bar cut now plays
+        let now = slot.slice(1, 1, 1).unwrap();
+        assert!(slot.start(&handoff, now).is_ok());
+        assert!(handoff.is_playing_back());
+    }
+
     /// c5b1b, review L1: `forget_heard_take` takes a FINISHED hear-back's
     /// slice out of the take slot (a playing one plays out); the input's
     /// stop takes it playing or not. A jam's take is never touched, and the
@@ -854,6 +933,53 @@ mod tests {
         handoff.note_ended(jam);
         assert!(!slot.clear(&handoff, true));
         assert!(handoff.is_playing_back(), "the jam's take was cleared");
+    }
+
+    /// c5b1c, review L1: a Start whose `cut` lands between a clear's (or a
+    /// stop's) two steps raises the transport over an EMPTY take slot, so the
+    /// click starts at once rather than behind the player's bar. With the
+    /// claim dropped first (the old order), the cut found nothing to cut and
+    /// the bar was still in the slot here.
+    #[test]
+    fn a_start_between_a_clears_two_steps_finds_the_take_slot_empty() {
+        let handoff = TakeHandoff::new();
+        let slot = HeardTakeSlot::new();
+        slot.keep(take(1), slot.epoch());
+        for playing_too in [true, false] {
+            let h = slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+            if !playing_too {
+                handoff.note_ended(h.generation);
+            }
+            let cleared = slot.clear_with(&handoff, playing_too, || {
+                // the Start: engine lock → state lock → cut, then the transport
+                slot.cut(&handoff);
+                assert!(!handoff.is_playing_back(), "the transport rose over the hear-back");
+            });
+            assert!(cleared);
+            assert!(!handoff.is_playing_back());
+            assert!(!slot.cut(&handoff), "the claim outlived the clear");
+        }
+        // the same for `stop_hear_take`
+        let h = slot.start(&handoff, slot.slice(1, 2, 2).unwrap()).unwrap();
+        let stopped = slot.stop_with(&handoff, h.generation, || {
+            slot.cut(&handoff);
+            assert!(!handoff.is_playing_back(), "the transport rose over the hear-back");
+        });
+        assert!(stopped);
+        assert!(!slot.cut(&handoff), "the claim outlived the stop");
+        // a cut that got in BEFORE both steps: the clear finds nothing left
+        let h = slot.start(&handoff, slot.slice(1, 3, 3).unwrap()).unwrap();
+        assert!(slot.cut(&handoff));
+        assert!(!slot.clear(&handoff, true));
+        assert!(!slot.stop(&handoff, h.generation));
+        // and a newer hear-back started between the steps keeps its claim
+        let old = slot.start(&handoff, slot.slice(1, 1, 1).unwrap()).unwrap();
+        let mut newer = None;
+        slot.stop_with(&handoff, old.generation, || {
+            newer = Some(slot.start(&handoff, slot.slice(1, 2, 2).unwrap()).unwrap());
+        });
+        assert!(handoff.is_playing_back());
+        assert!(slot.stop(&handoff, newer.unwrap().generation), "the newer hear-back lost its claim");
     }
 
     /// c5b1b, review L1: what the audio thread retired is drained by a clear.
