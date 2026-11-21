@@ -175,7 +175,7 @@
           "even": "Régulier : {{before}} % dans cette prise, {{now}} % dans la prise {{take}}.",
           "heard": "Notes entendues : {{before}} % dans cette prise, {{now}} % dans la prise {{take}}.",
           "extras": "Notes en trop : {{before}} dans cette prise, {{now}} dans la prise {{take}}.",
-          "accents": "Accents placés : {{before}} % dans cette prise, {{now}} % dans la prise {{take}}.",
+          "accents": "Accents plus forts que les autres notes, en moyenne : {{before}} % dans cette prise, {{now}} % dans la prise {{take}}.",
           "notes": "Bonnes notes : {{before}} % dans cette prise, {{now}} % dans la prise {{take}}.",
           "hold": "Régularité tenue jusqu'à la fin : {{before}} % dans cette prise, {{now}} % dans la prise {{take}}."
         },
@@ -253,9 +253,9 @@
           "heard_many": "Notes entendues : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
           "heard_other": "Notes entendues : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
           "extras": "Notes en trop : {{value}} dans la prise {{take}}, {{gap}} de plus que le seuil n'en permet ({{bar}} ou moins sur {{over}} mesures).",
-          "accents": "Accents placés : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
-          "accents_many": "Accents placés : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
-          "accents_other": "Accents placés : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "accents": "Accents plus forts que les autres notes, en moyenne : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
+          "accents_many": "Accents plus forts que les autres notes, en moyenne : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
+          "accents_other": "Accents plus forts que les autres notes, en moyenne : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
           "notes": "Bonnes notes : {{value}} % dans la prise {{take}}, à {{count}} point du seuil de {{bar}} %.",
           "notes_many": "Bonnes notes : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
           "notes_other": "Bonnes notes : {{value}} % dans la prise {{take}}, à {{count}} points du seuil de {{bar}} %.",
@@ -266,7 +266,7 @@
         "under": {
           "even": "Régulier dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
           "heard": "Notes entendues dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
-          "accents": "Accents placés dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
+          "accents": "Accents plus forts que les autres notes, en moyenne, dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
           "notes": "Bonnes notes dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %.",
           "hold": "Régularité tenue jusqu'à la fin dans la prise {{take}} : à moins d'un point du seuil de {{bar}} %."
         },
@@ -277,7 +277,7 @@
           "even": "Régulier : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %.",
           "heard": "Notes entendues : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %.",
           "extras": "Notes en trop : {{value}} dans la prise {{take}}, dans le seuil de {{bar}} ou moins sur {{over}} mesures.",
-          "accents": "Accents placés : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %.",
+          "accents": "Accents plus forts que les autres notes, en moyenne : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %.",
           "notes": "Bonnes notes : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %.",
           "hold": "Régularité tenue jusqu'à la fin : {{value}} % dans la prise {{take}}, ce qui atteint le seuil de {{bar}} %."
         },

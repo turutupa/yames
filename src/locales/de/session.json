@@ -27,7 +27,7 @@
       "even": "gleichmäßig",
       "heard": "der Töne gehört",
       "extras": "zusätzliche Töne",
-      "accents": "Akzente getroffen",
+      "accents": "lauter bei den Akzenten",
       "notes": "richtige Töne"
     },
     "today": {
@@ -71,7 +71,7 @@
         "back": {
           "even": "Letzte Session, {{exercise}}: {{value}} % gleichmäßig bei {{bpm}} BPM.",
           "heard": "Letzte Session, {{exercise}}: {{value}} % der Töne gehört bei {{bpm}} BPM.",
-          "accents": "Letzte Session, {{exercise}}: {{value}} % der Akzente getroffen bei {{bpm}} BPM.",
+          "accents": "Letzte Session, {{exercise}}: die Akzente im Durchschnitt {{value}} % lauter als die anderen Töne, bei {{bpm}} BPM.",
           "notes": "Letzte Session, {{exercise}}: {{value}} % richtige Töne bei {{bpm}} BPM.",
           "plain": "Die letzte Session endete bei {{exercise}} mit {{bpm}} BPM."
         },
@@ -214,7 +214,7 @@
         "even": "Weil die Gleichmäßigkeit bei {{bpm}} BPM {{value}} % war. Die Messlatte liegt bei {{bar}} %.",
         "heard": "Weil ich bei {{bpm}} BPM {{value}} % der Töne gehört habe. Die Messlatte liegt bei {{bar}} %.",
         "extras": "Wegen zusätzlicher Töne bei {{bpm}} BPM. Die Messlatte liegt bei höchstens {{bar}} in vier Takten.",
-        "accents": "Weil bei {{bpm}} BPM {{value}} % der Akzente saßen. Die Messlatte liegt bei {{bar}} %.",
+        "accents": "Weil die Akzente bei {{bpm}} BPM im Durchschnitt {{value}} % lauter herauskamen als die anderen Töne. Die Messlatte liegt bei {{bar}} %.",
         "plain": "Weil der letzte Take bei {{bpm}} BPM die Messlatte nicht erreicht hat.",
         "notes": "Weil bei {{bpm}} BPM {{value}} % der Töne, deren Höhe ich erkennen konnte, die notierten waren. Die Messlatte liegt bei {{bar}} %."
       },
@@ -222,7 +222,7 @@
         "even": "Die Gleichmäßigkeit war {{value}} % bei {{bpm}} BPM und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM.",
         "heard": "Ich habe bei {{bpm}} BPM {{value}} % der Töne gehört und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM.",
         "extras": "Bei {{bpm}} BPM gab es zusätzliche Töne, also jetzt {{next}} BPM.",
-        "accents": "Bei {{bpm}} BPM saßen {{value}} % der Akzente und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM.",
+        "accents": "Bei {{bpm}} BPM kamen die Akzente im Durchschnitt {{value}} % lauter heraus als die anderen Töne und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM.",
         "plain": "Die letzten Takes bei {{bpm}} BPM haben die Messlatte nicht erreicht, also jetzt {{next}} BPM.",
         "notes": "{{value}} % der erkennbaren Töne waren bei {{bpm}} BPM die notierten und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM."
       },

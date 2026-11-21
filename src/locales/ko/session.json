@@ -27,7 +27,7 @@
       "even": "고르기",
       "heard": "들린 음",
       "extras": "불필요한 음",
-      "accents": "살아난 액센트",
+      "accents": "악센트가 다른 음보다 큰 평균 정도",
       "notes": "맞는 음"
     },
     "today": {
@@ -71,7 +71,7 @@
         "back": {
           "even": "지난 세션, {{exercise}}: {{bpm}} BPM에서 고르기 {{value}}%.",
           "heard": "지난 세션, {{exercise}}: {{bpm}} BPM에서 음의 {{value}}% 들림.",
-          "accents": "지난 세션, {{exercise}}: {{bpm}} BPM에서 악센트 {{value}}% 정확.",
+          "accents": "지난 세션, {{exercise}}: {{bpm}} BPM에서 악센트가 다른 음보다 평균 {{value}}% 크게 나왔어요.",
           "notes": "지난 세션, {{exercise}}: {{bpm}} BPM에서 맞는 음 {{value}}%.",
           "plain": "지난 세션은 {{exercise}}, {{bpm}} BPM에서 끝났어요."
         },
@@ -214,7 +214,7 @@
         "even": "{{bpm}} BPM에서 고르기가 {{value}}%였기 때문입니다. 통과 기준은 {{bar}}%입니다.",
         "heard": "{{bpm}} BPM에서 음의 {{value}}%만 들렸기 때문입니다. 통과 기준은 {{bar}}%입니다.",
         "extras": "{{bpm}} BPM에서 불필요한 음이 있었기 때문입니다. 통과 기준은 네 마디에 {{bar}}개 이하입니다.",
-        "accents": "{{bpm}} BPM에서 액센트의 {{value}}%가 살아났기 때문입니다. 통과 기준은 {{bar}}%입니다.",
+        "accents": "{{bpm}} BPM에서 액센트가 다른 음보다 평균 {{value}}% 크게 나왔기 때문입니다. 통과 기준은 {{bar}}%입니다.",
         "plain": "{{bpm}} BPM의 지난 테이크가 통과 기준에 못 미쳤기 때문입니다.",
         "notes": "{{bpm}} BPM에서 음정을 알아들은 음 중 {{value}}%가 악보대로였기 때문입니다. 통과 기준은 {{bar}}%입니다."
       },
@@ -222,7 +222,7 @@
         "even": "{{bpm}} BPM에서 고르기가 {{value}}%, 통과 기준은 {{bar}}%라서 이번엔 {{next}} BPM입니다.",
         "heard": "{{bpm}} BPM에서 음의 {{value}}%가 들렸고 통과 기준은 {{bar}}%라서 이번엔 {{next}} BPM입니다.",
         "extras": "{{bpm}} BPM에서 불필요한 음이 있어서 이번엔 {{next}} BPM입니다.",
-        "accents": "{{bpm}} BPM에서 액센트의 {{value}}%가 살아났고 통과 기준은 {{bar}}%라서 이번엔 {{next}} BPM입니다.",
+        "accents": "{{bpm}} BPM에서 액센트가 다른 음보다 평균 {{value}}% 크게 나왔고 통과 기준은 {{bar}}%라서 이번엔 {{next}} BPM입니다.",
         "plain": "{{bpm}} BPM의 지난 테이크들이 통과 기준에 못 미쳐서 이번엔 {{next}} BPM입니다.",
         "notes": "{{bpm}} BPM에서 알아들은 음 중 {{value}}%가 악보대로였고 통과 기준은 {{bar}}%라서 이번엔 {{next}} BPM입니다."
       },

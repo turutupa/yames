@@ -27,7 +27,7 @@
       "even": "gelijkmatig",
       "heard": "van de noten gehoord",
       "extras": "extra noten",
-      "accents": "accenten raak",
+      "accents": "luider bij de accenten",
       "notes": "juiste noten"
     },
     "today": {
@@ -71,7 +71,7 @@
         "back": {
           "even": "Laatste sessie, {{exercise}}: {{value}}% gelijkmatig op {{bpm}} BPM.",
           "heard": "Laatste sessie, {{exercise}}: {{value}}% van de noten gehoord op {{bpm}} BPM.",
-          "accents": "Laatste sessie, {{exercise}}: {{value}}% van de accenten raak op {{bpm}} BPM.",
+          "accents": "Laatste sessie, {{exercise}}: de accenten gemiddeld {{value}}% luider dan de andere noten, op {{bpm}} BPM.",
           "notes": "Laatste sessie, {{exercise}}: {{value}}% juiste noten op {{bpm}} BPM.",
           "plain": "De laatste sessie eindigde bij {{exercise}} op {{bpm}} BPM."
         },
@@ -214,7 +214,7 @@
         "even": "Omdat de gelijkmatigheid {{value}}% was op {{bpm}} BPM. De lat ligt op {{bar}}%.",
         "heard": "Omdat ik {{value}}% van de noten hoorde op {{bpm}} BPM. De lat ligt op {{bar}}%.",
         "extras": "Door extra noten op {{bpm}} BPM. De lat ligt op hoogstens {{bar}} in vier maten.",
-        "accents": "Omdat {{value}}% van de accenten raak was op {{bpm}} BPM. De lat ligt op {{bar}}%.",
+        "accents": "Omdat de accenten op {{bpm}} BPM gemiddeld {{value}}% luider uitkwamen dan de andere noten. De lat ligt op {{bar}}%.",
         "plain": "Omdat de laatste take op {{bpm}} BPM de lat niet haalde.",
         "notes": "Omdat {{value}}% van de noten waarvan ik de toonhoogte kon horen de geschreven waren op {{bpm}} BPM. De lat ligt op {{bar}}%."
       },
@@ -222,7 +222,7 @@
         "even": "De gelijkmatigheid was {{value}}% op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM.",
         "heard": "Ik hoorde {{value}}% van de noten op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM.",
         "extras": "Er waren extra noten op {{bpm}} BPM, dus nu {{next}} BPM.",
-        "accents": "{{value}}% van de accenten was raak op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM.",
+        "accents": "Op {{bpm}} BPM kwamen de accenten gemiddeld {{value}}% luider uit dan de andere noten en de lat ligt op {{bar}}%, dus nu {{next}} BPM.",
         "plain": "De laatste takes op {{bpm}} BPM haalden de lat niet, dus nu {{next}} BPM.",
         "notes": "{{value}}% van de herkende noten waren de geschreven op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM."
       },

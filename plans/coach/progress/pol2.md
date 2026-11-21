@@ -7,11 +7,36 @@ Extras copied from `/tmp/coach-orch/s6/pol2-extras.md` (below, verbatim index).
 
 ### The brief (items 1 to 15)
 
-(filled in as each is checked)
+| # | State | Commit / note |
+|---|---|---|
+| 1 | done | `6c0a00a3`: the head's view switch moves in beside the drawer (ask.css); ask.spec at 1024x700 / x768 (switch left of the drawer, picture's frame unchanged), the result's column also at 1024x768. The note under the head stays covered (DESIGN 3.3: covers the picture, never the controls; c2a1's decision kept). |
+| 2 | gone | chip1b's `onePress` covers the question chips (AskPanel.tsx:240, AskToolTurn.tsx:245, AskCardTurn.tsx:70). |
+| 3 | done | `2a758277`: askStore puts the divider before turns written since the open (askStore.test.ts). |
+| 4 | done | `9ece5bfe`: the chip's canned answer speaks through `speakAndReveal` (useToolCoach.ts; useToolCoach.chipSpeech.test.tsx). R-adjacent: useToolCoach.ts is the old useSession body. |
+| 5 | done | `b4ddda25`: mini-report carries `stoppedAt` (useSegmentCoach.ts), ToolCoach skips one from before this run with its chips. Not in useSession.ts. |
+| 6 | left | 1024x700 tool line cuts the beat row mid-circle: needs pictures. |
+| 7 | left | 620 px header "Save preset" → "Sa": needs pictures and the base-worktree check. |
+| 8 | done | `c459404e`: `borrowedRef = isActive()`, `endingRef` gone; the test's fake coach answers isActive like useSession. |
+| 9 | done | `c459404e`: useSessionRun.race.test.tsx (test only). |
+| 10 | done | `c459404e`: dead `.coach-card` rules out of session.css; the useSession comment was already gone (c5c1). |
+| 11 | done | `f7a22a51`: usePathsPlace.move writes the scroll only while Paths shows (usePathsPlace.test.ts, new). |
+| 12 | left | mock 16's row mark on the page: a feature with a layout scene. |
+| 13 | done | `5d4e8cc4`: AskPanel `place` prop (MainWindow passes `placeKey` on Paths) keys the chips' memo; AskPanel.test.tsx. |
+| 14 | gone | all three fixed by t1b1 ("…is gone, so nothing was loaded"; `presetStops`; `coachTools.value.auto`). |
+| 15 | half | `8560246d`: "show" + a screen's own name → go_to (router.ts, every locale via its table; tests en/es/de). Left: "play some music" near-miss needs a table word list; the tables are c5a1b's next. |
 
 ### Extras
 
-(filled in as each is checked)
+| # | State | Note |
+|---|---|---|
+| A1 | done | `6a6c9f23`: cut at a sentence end (cards.ts `pieces`), one source line under consecutive same-source text blocks (CoachBlocks.tsx). |
+| A2 | done; native read wanted: vi label long ("nhấn" as a noun), ja/ko "平均幅 / 평균 정도" stiff, tr `metric.accents` compact, ru "на 12% громче" order; zh also changed 比其他音响 → 比其他音更响 in the already-correct siblings (accentsMark etc.), "音响" read as "speakers" | English `0847d98f`; fact checked against `src-tauri/src/score/pass.rs:481-493` (`accent_agreement`: mean accented amplitude / mean plain amplitude − 1, clamped 0..1). Fourteen locales by three sonnet translators + three proof-readers. |
+| A3 | t2g's | fixed on `coach-t2g` (db87ad57), not yet on `coach` when checked. |
+| A4 | left | "Rest it till Monday 4:49 AM": the time is deliberate (review L11 of c4b4: the rest ends at last Take + 48 h; a weekday alone is wrong for part of that day). Day-only needs either rounding in the planner (`parkedUntil`, t2e's file) or a rule for which day to name: a product call. The 34 px Paths card at 1160 not reached. |
+| A5 | done | `d40f525e`: helpMatch TUNING. |
+| A6-A11 | left | not reached. |
+| B12 | report only | see the final report. |
+| C13 | left | not reached. |
 
 ## The extras list (copy of /tmp/coach-orch/s6/pol2-extras.md)
 

@@ -27,7 +27,7 @@
       "even": "régulier",
       "heard": "des notes entendues",
       "extras": "notes en trop",
-      "accents": "accents placés",
+      "accents": "plus fort sur les accents",
       "notes": "bonnes notes"
     },
     "today": {
@@ -72,7 +72,7 @@
         "back": {
           "even": "Dernière séance, {{exercise}} : {{value}} % de régularité à {{bpm}} BPM.",
           "heard": "Dernière séance, {{exercise}} : {{value}} % des notes entendues à {{bpm}} BPM.",
-          "accents": "Dernière séance, {{exercise}} : {{value}} % des accents bien placés à {{bpm}} BPM.",
+          "accents": "Dernière séance, {{exercise}} : les accents {{value}} % plus forts que les autres notes, en moyenne, à {{bpm}} BPM.",
           "notes": "Dernière séance, {{exercise}} : {{value}} % de bonnes notes à {{bpm}} BPM.",
           "plain": "La dernière séance s'est arrêtée sur {{exercise}} à {{bpm}} BPM."
         },
@@ -220,7 +220,7 @@
         "even": "Parce que la régularité était de {{value}} % à {{bpm}} BPM. Le seuil est à {{bar}} %.",
         "heard": "Parce que j'ai entendu {{value}} % des notes à {{bpm}} BPM. Le seuil est à {{bar}} %.",
         "extras": "À cause de notes en trop à {{bpm}} BPM. Le seuil est de {{bar}} au plus sur quatre mesures.",
-        "accents": "Parce que {{value}} % des accents sont bien tombés à {{bpm}} BPM. Le seuil est à {{bar}} %.",
+        "accents": "Parce qu'à {{bpm}} BPM les accents sont sortis, en moyenne, {{value}} % plus fort que les autres notes. Le seuil est à {{bar}} %.",
         "plain": "Parce que la dernière prise à {{bpm}} BPM n'a pas atteint le seuil.",
         "notes": "Parce que {{value}} % des notes dont j'ai pu reconnaître la hauteur étaient celles écrites à {{bpm}} BPM. Le seuil est à {{bar}} %."
       },
@@ -228,7 +228,7 @@
         "even": "La régularité était de {{value}} % à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM.",
         "heard": "J'ai entendu {{value}} % des notes à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM.",
         "extras": "Il y avait des notes en trop à {{bpm}} BPM, donc on passe à {{next}} BPM.",
-        "accents": "{{value}} % des accents sont bien tombés à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM.",
+        "accents": "À {{bpm}} BPM, les accents sont sortis, en moyenne, {{value}} % plus fort que les autres notes et le seuil est à {{bar}} %, donc on passe à {{next}} BPM.",
         "plain": "Les dernières prises à {{bpm}} BPM n'ont pas atteint le seuil, donc on passe à {{next}} BPM.",
         "notes": "{{value}} % des notes reconnues étaient celles écrites à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM."
       },

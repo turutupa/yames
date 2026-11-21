@@ -171,7 +171,7 @@
           "even": "Gelijkmatig: {{before}}% in die take, {{now}}% in take {{take}}.",
           "heard": "Gehoorde noten: {{before}}% in die take, {{now}}% in take {{take}}.",
           "extras": "Extra noten: {{before}} in die take, {{now}} in take {{take}}.",
-          "accents": "Accenten raak: {{before}}% in die take, {{now}}% in take {{take}}.",
+          "accents": "Accenten gemiddeld luider dan de andere noten: {{before}}% in die take, {{now}}% in take {{take}}.",
           "notes": "Juiste noten: {{before}}% in die take, {{now}}% in take {{take}}.",
           "hold": "Gelijkmatigheid tot het einde volgehouden: {{before}}% in die take, {{now}}% in take {{take}}."
         },
@@ -240,8 +240,8 @@
           "heard": "Gehoorde noten: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
           "heard_other": "Gehoorde noten: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
           "extras": "Extra noten: {{value}} in take {{take}}, {{gap}} meer dan de lat toestaat ({{bar}} of minder in {{over}} maten).",
-          "accents": "Accenten raak: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
-          "accents_other": "Accenten raak: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
+          "accents": "Accenten gemiddeld luider dan de andere noten: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
+          "accents_other": "Accenten gemiddeld luider dan de andere noten: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
           "notes": "Juiste noten: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
           "notes_other": "Juiste noten: {{value}}% in take {{take}}, {{count}} punten onder de lat van {{bar}}%.",
           "hold": "Gelijkmatigheid tot het einde volgehouden: {{value}}% in take {{take}}, {{count}} punt onder de lat van {{bar}}%.",
@@ -250,7 +250,7 @@
         "under": {
           "even": "Gelijkmatig in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
           "heard": "Gehoorde noten in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
-          "accents": "Accenten raak in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
+          "accents": "Accenten gemiddeld luider dan de andere noten in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
           "notes": "Juiste noten in take {{take}}: minder dan een punt onder de lat van {{bar}}%.",
           "hold": "Gelijkmatigheid tot het einde volgehouden in take {{take}}: minder dan een punt onder de lat van {{bar}}%."
         },
@@ -260,7 +260,7 @@
           "even": "Gelijkmatig: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt.",
           "heard": "Gehoorde noten: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt.",
           "extras": "Extra noten: {{value}} in take {{take}}, binnen de lat van {{bar}} of minder in {{over}} maten.",
-          "accents": "Accenten raak: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt.",
+          "accents": "Accenten gemiddeld luider dan de andere noten: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt.",
           "notes": "Juiste noten: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt.",
           "hold": "Gelijkmatigheid tot het einde volgehouden: {{value}}% in take {{take}}, wat de lat van {{bar}}% haalt."
         },

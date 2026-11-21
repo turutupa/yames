@@ -175,7 +175,7 @@
           "even": "Regular: {{before}}% en esa toma, {{now}}% en la toma {{take}}.",
           "heard": "Notas oídas: {{before}}% en esa toma, {{now}}% en la toma {{take}}.",
           "extras": "Notas de más: {{before}} en esa toma, {{now}} en la toma {{take}}.",
-          "accents": "Acentos clavados: {{before}}% en esa toma, {{now}}% en la toma {{take}}.",
+          "accents": "Acentos más fuertes que las otras notas, de media: {{before}}% en esa toma, {{now}}% en la toma {{take}}.",
           "notes": "Notas correctas: {{before}}% en esa toma, {{now}}% en la toma {{take}}.",
           "hold": "Regularidad mantenida hasta el final: {{before}}% en esa toma, {{now}}% en la toma {{take}}."
         },
@@ -253,9 +253,9 @@
           "heard_many": "Notas oídas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
           "heard_other": "Notas oídas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
           "extras": "Notas de más: {{value}} en la toma {{take}}, {{gap}} más de las que permite el listón ({{bar}} o menos en {{over}} compases).",
-          "accents": "Acentos clavados: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
-          "accents_many": "Acentos clavados: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
-          "accents_other": "Acentos clavados: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "accents": "Acentos más fuertes que las otras notas, de media: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
+          "accents_many": "Acentos más fuertes que las otras notas, de media: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
+          "accents_other": "Acentos más fuertes que las otras notas, de media: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
           "notes": "Notas correctas: {{value}}% en la toma {{take}}, a {{count}} punto del listón del {{bar}}%.",
           "notes_many": "Notas correctas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
           "notes_other": "Notas correctas: {{value}}% en la toma {{take}}, a {{count}} puntos del listón del {{bar}}%.",
@@ -266,7 +266,7 @@
         "under": {
           "even": "Regular en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
           "heard": "Notas oídas en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
-          "accents": "Acentos clavados en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
+          "accents": "Acentos más fuertes que las otras notas, de media, en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
           "notes": "Notas correctas en la toma {{take}}: a menos de un punto del listón del {{bar}}%.",
           "hold": "Regularidad mantenida hasta el final en la toma {{take}}: a menos de un punto del listón del {{bar}}%."
         },
@@ -277,7 +277,7 @@
           "even": "Regular: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%.",
           "heard": "Notas oídas: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%.",
           "extras": "Notas de más: {{value}} en la toma {{take}}, dentro del listón de {{bar}} o menos en {{over}} compases.",
-          "accents": "Acentos clavados: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%.",
+          "accents": "Acentos más fuertes que las otras notas, de media: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%.",
           "notes": "Notas correctas: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%.",
           "hold": "Regularidad mantenida hasta el final: {{value}}% en la toma {{take}}, que alcanza el listón del {{bar}}%."
         },

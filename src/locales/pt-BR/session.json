@@ -27,7 +27,7 @@
       "even": "regular",
       "heard": "das notas ouvidas",
       "extras": "notas a mais",
-      "accents": "acentos certeiros",
+      "accents": "mais fortes nos acentos",
       "notes": "notas certas"
     },
     "today": {
@@ -72,7 +72,7 @@
         "back": {
           "even": "Última sessão, {{exercise}}: {{value}}% de regularidade a {{bpm}} BPM.",
           "heard": "Última sessão, {{exercise}}: {{value}}% das notas ouvidas a {{bpm}} BPM.",
-          "accents": "Última sessão, {{exercise}}: {{value}}% dos acentos no lugar a {{bpm}} BPM.",
+          "accents": "Última sessão, {{exercise}}: os acentos {{value}}% mais fortes que as outras notas, em média, a {{bpm}} BPM.",
           "notes": "Última sessão, {{exercise}}: {{value}}% de notas certas a {{bpm}} BPM.",
           "plain": "A última sessão terminou assim: {{exercise}} a {{bpm}} BPM."
         },
@@ -220,7 +220,7 @@
         "even": "Porque a regularidade foi de {{value}}% a {{bpm}} BPM. A meta é {{bar}}%.",
         "heard": "Porque eu ouvi {{value}}% das notas a {{bpm}} BPM. A meta é {{bar}}%.",
         "extras": "Por causa de notas a mais a {{bpm}} BPM. A meta é no máximo {{bar}} a cada quatro compassos.",
-        "accents": "Porque {{value}}% dos acentos caíram no lugar a {{bpm}} BPM. A meta é {{bar}}%.",
+        "accents": "Porque a {{bpm}} BPM os acentos saíram, em média, {{value}}% mais fortes que as outras notas. A meta é {{bar}}%.",
         "plain": "Porque a última tomada a {{bpm}} BPM não bateu a meta.",
         "notes": "Porque {{value}}% das notas que consegui identificar eram as escritas a {{bpm}} BPM. A meta é {{bar}}%."
       },
@@ -228,7 +228,7 @@
         "even": "A regularidade foi de {{value}}% a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "heard": "Eu ouvi {{value}}% das notas a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "extras": "Teve notas a mais a {{bpm}} BPM, então agora vai a {{next}} BPM.",
-        "accents": "{{value}}% dos acentos caíram no lugar a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
+        "accents": "A {{bpm}} BPM os acentos saíram, em média, {{value}}% mais fortes que as outras notas e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "plain": "As últimas tomadas a {{bpm}} BPM não bateram a meta, então agora vai a {{next}} BPM.",
         "notes": "{{value}}% das notas identificadas eram as escritas a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM."
       },

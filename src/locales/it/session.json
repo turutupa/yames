@@ -27,7 +27,7 @@
       "even": "regolare",
       "heard": "delle note sentite",
       "extras": "note in più",
-      "accents": "accenti a segno",
+      "accents": "più forte sugli accenti",
       "notes": "note giuste"
     },
     "today": {
@@ -72,7 +72,7 @@
         "back": {
           "even": "Ultima sessione, {{exercise}}: {{value}}% di regolarità a {{bpm}} BPM.",
           "heard": "Ultima sessione, {{exercise}}: {{value}}% delle note sentite a {{bpm}} BPM.",
-          "accents": "Ultima sessione, {{exercise}}: {{value}}% degli accenti a segno a {{bpm}} BPM.",
+          "accents": "Ultima sessione, {{exercise}}: gli accenti il {{value}}% più forti delle altre note, in media, a {{bpm}} BPM.",
           "notes": "Ultima sessione, {{exercise}}: {{value}}% di note giuste a {{bpm}} BPM.",
           "plain": "L'ultima sessione è finita su {{exercise}} a {{bpm}} BPM."
         },
@@ -220,7 +220,7 @@
         "even": "Perché la regolarità era del {{value}}% a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "heard": "Perché ho sentito il {{value}}% delle note a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "extras": "Per le note in più a {{bpm}} BPM. L'asticella è {{bar}} al massimo su quattro battute.",
-        "accents": "Perché il {{value}}% degli accenti è andato a segno a {{bpm}} BPM. L'asticella è al {{bar}}%.",
+        "accents": "Perché a {{bpm}} BPM gli accenti sono usciti, in media, il {{value}}% più forti delle altre note. L'asticella è al {{bar}}%.",
         "plain": "Perché l'ultima take a {{bpm}} BPM non ha superato l'asticella.",
         "notes": "Perché il {{value}}% delle note di cui ho riconosciuto l'altezza erano quelle scritte a {{bpm}} BPM. L'asticella è al {{bar}}%."
       },
@@ -228,7 +228,7 @@
         "even": "La regolarità era del {{value}}% a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "heard": "Ho sentito il {{value}}% delle note a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "extras": "C'erano note in più a {{bpm}} BPM, quindi ora si va a {{next}} BPM.",
-        "accents": "Il {{value}}% degli accenti è andato a segno a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
+        "accents": "A {{bpm}} BPM gli accenti sono usciti, in media, il {{value}}% più forti delle altre note e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "plain": "Le ultime take a {{bpm}} BPM non hanno superato l'asticella, quindi ora si va a {{next}} BPM.",
         "notes": "Il {{value}}% delle note riconosciute erano quelle scritte a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM."
       },
