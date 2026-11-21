@@ -51,6 +51,36 @@ decisions), `plans/tasks/coach/RULES-FOR-PROMPTS.md` (the rules every agent gets
 - Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
   `ssh rtx … powershell.exe` was refused by this session's permission mode (see "Owed").
 
+## Session 3: what changed in how the build runs (read before anything in "How this build runs")
+
+- **OWNER-UPDATES 18:08 to 18:35, 2026-11-20:** full throttle, no cap on agents; **every heavy
+  command goes through the job queue** (`~/.local/bin/job submit … -- bash plans/coach/tools/run.sh
+  <cmd>`, `--lock coach-layout` on any Playwright run; `job wait NAME --timeout 9m`; `job logs NAME -n
+  40`); training approved after c3b (PLAN: leg c3d). `RULES-FOR-PROMPTS.md` has the rule; `run.sh`
+  reads `/tmp/coach-orch/limits` ("full" now; write "day" when the owner restores weekday limits).
+  The queue runs six jobs at a time: a wave of twelve legs waits on it, which is fine.
+  `job cancel` needs `XDG_RUNTIME_DIR=/run/user/1000` in front of it from this shell.
+- **Set-up and clean-up are one call each:** `bash plans/coach/tools/new-leg.sh <leg> …` (worktree,
+  branch, node_modules link, log folder) and `bash plans/coach/tools/done-leg.sh <leg> …` (only a
+  merged and clean worktree; unlinks first; keeps the branch).
+- **Cue legs get a three-line prompt** that points at `plans/tasks/coach/cues-prompt.md` plus the
+  Path's four particulars (session 3's Agent calls are the shape).
+- **Orchestrator gates as queue jobs:** `job submit --name coach-gates-<x> --ram 12G --est 25m --cwd
+  ~/yames-coach-build -- bash plans/coach/tools/gates-cues.sh` (or `gates.sh <specs>` with `--lock
+  coach-layout`). Merge several finished cue legs, then gate once. The full layout suite runs in the
+  pinned worktree `~/yames-coach-night` (re-point it with `git -C ~/yames-coach-night merge --ff-only
+  coach` before a new run), so merges into the main checkout do not move files under Playwright.
+- **The probe** takes the build's lock alone and so stops every leg's gates while it waits for a
+  quiet machine: run it when few legs are at their gates, and give it a short wait
+  (`PROBE_WAIT_MIN=5`). Tonight's numbers are in `PROGRESS.md`. **The Vulkan run is blocked** (no
+  Vulkan headers or `glslc` on this DGX; the leg that would build them in the home folder was
+  refused by the permission mode; `plans/tasks/coach/pv1-probe-vulkan.md`): it needs the owner.
+  c3b2 (measuring Qwen3 4B / 8B) needs the same thing, or the RTX.
+- **No longer owed:** the Windows run (green, per the relay). **Still with the owner:** the chip
+  question (two presses stay).
+- `today-line.spec.ts` still has a fixed `/tmp` default on `coach`; pol1's first item fixes it (the
+  owner fixed it on `revamp`, which this checkout cannot fetch: expect a trivial conflict there).
+
 ## State (update this section at every merge)
 
 Merged on `coach`, session 1: c0, c1a, pm, ms1, c1b1, fix1, c2a1 (+b), c1c, c3a (+b), ms2 (+b), c4c.
@@ -68,7 +98,14 @@ In flight when this was last written (check `git worktree list`, `git branch --n
 
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
-| – | – | **Nothing is in flight and nothing is unmerged** (session 2 stopped at 17:45 PT on 2026-11-20, at its context limit, after delivery 1i). The only worktrees are the main checkout and `~/yames-coach-base`. | Start with the night gates under "Owed" if it is after 8 PM Pacific or a weekend; otherwise launch the next legs and run them at 8 PM. |
+| – | – | **Session 3 (from 17:46 PT, 2026-11-20).** Merged: t1b2a, cues5 → delivery 1j (with the probe's p99s). Read "Session 3" below first: the rules changed tonight (the job queue, no agent cap). | – |
+| t1b2b | `~/yames-coach-t1b2b` | launched 18:30: fourteen command tables, the wiring `answerTyped` in Ask's send path, one scene | review the wiring's diff (independent reader), then merge |
+| c2b1a | `~/yames-coach-c2b1a` | launched 18:30: `intents.ts`, `cards.ts`, `suggest.ts`, `match.ts`, a card turn kind, three cards in English | review the Ask thread / store diff, then merge (second of the two to merge rebases on the first) |
+| pol1 | `~/yames-coach-pol1` | launched 19:15: ten polish items, the Session and Today | merge; it changed text on screens, so the full layout suite after |
+| cues6 to cues10 | `~/yames-coach-cues6` … `10` | launched 18:30: classic-rock, legato, triads, funk-lines, metal-rhythm | read the twelve cues, merge, `gates-cues.sh` as a queue job |
+| cues11, 12, 13a, 14 | `~/yames-coach-cues11` … | launched 19:15: arpeggios-over-changes, tapping, sweep-picking (first half), shred | as above; then **cues13b** (the rest of Sweep Picking) from `coach` after 13a merges |
+| briefs | `~/yames-coach-briefs` | launched 19:20: writes the next legs' briefs and `plans/tasks/coach/NEXT-LEGS.md` (docs only) | read them, edit, merge, launch from the index |
+| night | `~/yames-coach-night` | a pinned worktree for the full layout suite (queue job `coach-layout-full`, lock `coach-layout`) | failures go to a small leg fix2; then `done-leg.sh night` |
 
 **vr1** (the variant rewriter, a defect found by cues4) is merged: no false sentence had shipped; `npm
 run paths -- check` now lists rewritten and refused variant sentences, so cue legs no longer need
