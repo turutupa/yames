@@ -105,6 +105,8 @@ test("P1: a pass that held the bar that slipped goes again once, with Up to N on
   const up = page.locator('[data-testid="session-up-to"]');
   await expect(up).toBeVisible();
   await expect(up).toHaveText(/^Up to \d+ BPM$/);
+  // The way up is "Up to N" alone: no Faster beside it (pol1).
+  await expect(page.locator('[data-testid="session-tonal"] [data-testid="session-faster"]')).toHaveCount(0);
   await expect(page.locator('[data-testid="coach-history"]')).toContainText("Once more at");
   await fits(page, "once-more at 1440");
   await page.setViewportSize(SHORT);

@@ -222,10 +222,21 @@ function backLine(input: TodayLineInput, session: readonly PathTakeRow[]): Today
         : { key: `${K}.back.plain`, values: { exercise: exercise.title, bpm: last.bpm } },
     );
   }
+  // The days away as a plain number, then the tempo today starts at: no
+  // "rungs lower than it would have", which named neither.
+  const said = lines.length > 0;
+  const days = plan.daysAway ?? 0;
+  if (days > 0) lines.push({ key: `${K}.${said ? "backAgo" : "backAway"}`, values: { count: days } });
   const first = firstExerciseStep(plan);
-  const drop = rungsToDrop(plan.daysAway ?? 0);
-  if (first && first.why.code === "backEased" && drop > 0) {
-    lines.push({ key: `${K}.backRungs`, values: { count: drop } });
+  if (first && first.why.code === "backEased" && rungsToDrop(days) > 0) {
+    // The Exercise is named only when it is not the one the sentence before named.
+    const sameExercise = said && !!last && first.pathId === last.pathId && first.exerciseId === last.exerciseId;
+    const firstExercise = exerciseOf(paths, first.pathId, first.exerciseId);
+    if (sameExercise || !firstExercise) {
+      lines.push({ key: `${K}.backStartsAt`, values: { bpm: first.bpm } });
+    } else {
+      lines.push({ key: `${K}.backStartsAtOther`, values: { exercise: firstExercise.title, bpm: first.bpm } });
+    }
   }
   return lines.length > 0 ? { kind: "back", lines } : null;
 }

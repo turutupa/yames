@@ -17,8 +17,7 @@ import {
 } from "./runner";
 import type { RunEvent, RunState, TakeOutcome } from "./runner";
 import { isExercisePassed, isUngradedTake } from "./progress";
-import { totalsFrom } from "../containers/session/ProgressView";
-import { ALT, DAY, NOW, missed, progress, take } from "./testKit";
+import { ALT, NOW, missed, progress, take } from "./testKit";
 
 const EX = ALT.steps[0].exercises[0];
 
@@ -209,18 +208,5 @@ describe("played without grading", () => {
     expect(isExercisePassed(withQuiet, ALT.id, EX)).toBe(false);
   });
 
-  it("counts toward minutes and the streak", () => {
-    const quiet = take(EX.id, {
-      bpm: 60,
-      bars: 16,
-      startedAt: NOW - 1000,
-      caught: false,
-      facts: { verdict: "ungraded", ungraded: "inputOff" },
-    });
-    const without = totalsFrom([], [ALT], NOW);
-    const withIt = totalsFrom([quiet], [ALT], NOW);
-    expect(withIt.seconds).toBeGreaterThan(without.seconds);
-    expect(withIt.streak).toBe(1);
-    expect(totalsFrom([quiet, take(EX.id, { startedAt: NOW - DAY })], [ALT], NOW).streak).toBe(2);
-  });
+  // "Counts toward minutes and the streak" lives in `totals.test.ts`, with `totalsFrom`.
 });

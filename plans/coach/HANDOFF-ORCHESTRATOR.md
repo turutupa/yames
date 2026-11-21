@@ -51,6 +51,72 @@ decisions), `plans/tasks/coach/RULES-FOR-PROMPTS.md` (the rules every agent gets
 - Never: GitHub (no push, issues, PRs, boards), `npm install`, `npm run tauri dev`, `rm`, `sudo`.
   `ssh rtx … powershell.exe` was refused by this session's permission mode (see "Owed").
 
+## READ THIS FIRST: where session 3 stopped (2026-11-20, about 21:00 PT, at its context limit)
+
+This section is newer than the "In flight" table under "State" below; where they differ, this wins.
+
+**Delivered:** 1j, 1k and 1l (`STATUS.md`). `coach` is gated green with cues13b merged: **all sixteen
+Paths have cues** (item 5 below is done). **Nothing is running.** Worktrees left on purpose:
+`~/yames-coach-t1b2b`, `-c2b1a`, `-c4a1`, `-t2a` (unmerged work), `-cues13b` (merged: `done-leg.sh
+cues13b`), `-night`, `-base`.
+
+**t1b2c finished** (item 1 below): all six findings fixed with tests on `coach-t1b2b`, `coach` merged
+in without conflict, gates green (`plans/coach/progress/t1b2c.md`). What is left of item 1 is the
+second reader on the fix (`git diff 6ae65f54^..coach-t1b2b` is too wide: give it the fix commit
+`304b7213` and the files `router.ts`, `askTyped.ts`, `askTools.ts` (`runTypedCall`), `resolve.ts`
+(`titleMatch`'s joined match), `AskPanel.tsx`), then the merge. For c2b1b: the next answerer must be
+synchronous (a Promise counts as "not answered").
+
+**On branches, not merged. Do these first, in this order:**
+
+1. **`coach-t1b2b`** (`~/yames-coach-t1b2b`): typed commands in fifteen languages, wired. Review
+   `/tmp/coach-orch/t1b2b-review.md`: MERGE AFTER FIXES (HIGH: ja "コースを開けて" leaves one kana that
+   resolves to a real Path and navigates at once). **Fix leg t1b2c was launched at 20:40 on the same
+   worktree** (the review as its work list; it also merges `coach` in and runs the gates). If its
+   report is in `plans/coach/progress/t1b2b.md` and the branch is clean: have a fresh reviewer re-read
+   the fix (diff of `router.ts`, `askTyped.ts`, `AskPanel.tsx`, the four no-spaces tables), then merge,
+   `gates.sh` with `ask ask-tools ask-typed smooth short-window`. If the agent died: relaunch it with
+   session 3's prompt (the "Leg t1b2c review fixes" Agent call: `code-leg-prompt.md` plus the review).
+2. **`coach-c2b1a`** (`~/yames-coach-c2b1a`): fact cards' machinery and three cards. Review
+   `/tmp/coach-orch/c2b1a-review.md`: MERGE AFTER FIXES, eleven findings; **F1 and F2 make a card say
+   something not measured** (self-checked Exercise answered "grading is off"; the premise lines claim a
+   whole-Take lean the app does not measure); F5 puts raw findings into a model's prompt; F6 the
+   matcher's wrong matches. Launch a fix agent on that worktree (the review as its work list, every
+   finding with a test; then `git merge coach` after t1b2b is in, resolving `AskPanel.tsx`); re-read;
+   merge; gates with `ask ask-tools coach-session smooth`. Then launch **c2b1b**.
+3. **`coach-c4a1`** (`~/yames-coach-c4a1`): the four stored keys (`src/coach/store.ts`), tendencies,
+   `notebookFrom`. Reported, **not reviewed**: flag R (settings store). Make the diff
+   (`git diff coach...coach-c4a1 -- src ':(exclude)src/locales'`), send it to a fresh reviewer (the
+   questions: no write without a press, defaults change nothing, a null reads as no choice, the load
+   race with a press, the tendencies say only what was measured and with their count and window),
+   fix, merge; **regenerate the parity manifest** (`UPDATE_PARITY_MANIFEST=1`: c4b1 merged first and
+   also changed it). Its full vitest run after its last fix is owed.
+4. **`coach-t2a`** (`~/yames-coach-t2a`): `buildCustomExercise(recipe)`, pure, gated on its branch,
+   no review flag (it touches only new files and one Rust test harness). Merge, then
+   `gates-rust.sh` as a queue job **and** `node scripts/rust-test.mjs --test path_exercises` (the
+   harness `npm run test:rust` does not run). Its decisions to confirm are in its report
+   (`progress/t2a.md`): position is the first note's fret, never moved; only "up and back" loops;
+   sweeps left out.
+5. **`coach-cues13b`** (`~/yames-coach-cues13b`): Sweep Picking's other 35 Exercises, launched 20:20.
+   When it reports: read its twelve cues, merge, `gates-cues.sh` as a queue job: then all sixteen
+   Paths have cues (say so in STATUS).
+
+**Then**, from `plans/tasks/coach/NEXT-LEGS.md`: c2b1b ‖ c2ca ‖ t2b (R) ‖ c4a2 (not beside c2b1b) →
+c2b2a → c3b1 ‖ c4b2 (its brief now starts with c4b1's review notes) → c2b2b → c2cb → **delivery 2** →
+pol2 → t2c → t2d. Prompts: three lines pointing at `code-leg-prompt.md` (code legs) or
+`cues-prompt.md` (content), as in session 3.
+
+**Owed gates:** `smooth.spec.ts` alone on a quiet machine; the full layout suite again (pol1 changed
+text; run it after t1b2b and c2b1a merge, in `~/yames-coach-night` after `merge --ff-only coach`); the
+last two CPU-model probe runs are not worth making (see `PROGRESS.md`); the Vulkan probe is blocked.
+
+**Small things with no leg:** First Chords' fourteen `cue.refused` (pol1's item 10); Today's header
+"WELCOME BACK. IT HAS BEEN 12 DAYS"; `rem` Part 2 (option A) after c4a2; lb1; a stray helper file
+`~/scratch/reuse14.py` (harmless; `rm` asks, so it was left); the unhandled "window is not defined"
+errors vitest prints from `useDownbeatPulse.ts` and `askTools.test.tsx` timers after teardown.
+
+**Questions with the owner** are listed in `STATUS.md`, delivery 1k (four; none blocks a leg).
+
 ## Session 3: what changed in how the build runs (read before anything in "How this build runs")
 
 - **OWNER-UPDATES 18:08 to 18:35, 2026-11-20:** full throttle, no cap on agents; **every heavy
@@ -99,13 +165,25 @@ In flight when this was last written (check `git worktree list`, `git branch --n
 | Leg | Worktree / branch | State | Next |
 |---|---|---|---|
 | – | – | **Session 3 (from 17:46 PT, 2026-11-20).** Merged: t1b2a, cues5 → delivery 1j (with the probe's p99s). Read "Session 3" below first: the rules changed tonight (the job queue, no agent cap). | – |
-| t1b2b | `~/yames-coach-t1b2b` | launched 18:30: fourteen command tables, the wiring `answerTyped` in Ask's send path, one scene | review the wiring's diff (independent reader), then merge |
-| c2b1a | `~/yames-coach-c2b1a` | launched 18:30: `intents.ts`, `cards.ts`, `suggest.ts`, `match.ts`, a card turn kind, three cards in English | review the Ask thread / store diff, then merge (second of the two to merge rebases on the first) |
-| pol1 | `~/yames-coach-pol1` | launched 19:15: ten polish items, the Session and Today | merge; it changed text on screens, so the full layout suite after |
-| cues6 to cues10 | `~/yames-coach-cues6` … `10` | launched 18:30: classic-rock, legato, triads, funk-lines, metal-rhythm | read the twelve cues, merge, `gates-cues.sh` as a queue job |
-| cues11, 12, 13a, 14 | `~/yames-coach-cues11` … | launched 19:15: arpeggios-over-changes, tapping, sweep-picking (first half), shred | as above; then **cues13b** (the rest of Sweep Picking) from `coach` after 13a merges |
-| briefs | `~/yames-coach-briefs` | launched 19:20: writes the next legs' briefs and `plans/tasks/coach/NEXT-LEGS.md` (docs only) | read them, edit, merge, launch from the index |
-| night | `~/yames-coach-night` | a pinned worktree for the full layout suite (queue job `coach-layout-full`, lock `coach-layout`) | failures go to a small leg fix2; then `done-leg.sh night` |
+| **Merged since 1j, not yet delivered** | – | cues6 to cues12 and cues13a (twelve Paths cued, Sweep Picking half), pol1, rem Part 1 (a report), the briefs (`plans/tasks/coach/NEXT-LEGS.md` is the index of what to launch next and in what order). `PROGRESS.md` has each row. | **Delivery 1k is blocked on gt1**: on `coach` the vitest gate fails for one test's 20 s timeout (`generate.test.ts` "subdivisions … mostly": the cues slowed the generator). When gt1 merges: `gates-cues.sh` as a queue job, then the STATUS line and the bundle. |
+| gt1 | `~/yames-coach-gt1` | launched 19:40: where the cues' variant work costs time, whether any runs on the player's device, the fix | merge (read its answer about runtime first), gate, deliver 1k |
+| t1b2b | `~/yames-coach-t1b2b` | built and reported; **review running** → `/tmp/coach-orch/t1b2b-review.md` | a fresh small agent on the same worktree with the review as its work list; merge **first** of the two Ask legs; gates `gates.sh ask ask-tools ask-typed smooth short-window` |
+| c2b1a | `~/yames-coach-c2b1a` | built and reported; **review running** → `/tmp/coach-orch/c2b1a-review.md` | a fix agent: the review's findings, then `git merge coach` (after t1b2b is in) and resolve `AskPanel.tsx`; merge; then launch **c2b1b** (brief exists) |
+| c4b1 | `~/yames-coach-c4b1` | built and reported; **review running** → `/tmp/coach-orch/c4b1-review.md` | fix agent if needed; merge with `gates-rust.sh` as a queue job; the parity manifest: whichever of c4b1 / c4a1 merges second regenerates it |
+| c4a1 | `~/yames-coach-c4a1` | launched 19:25 (R: settings store) | review its "diff for review", merge; then c4a2 (not beside c2b1b) |
+| t2a | `~/yames-coach-t2a` | launched 19:25 (`buildCustomExercise`, pure) | merge (check no diff under `src/paths/packs/`); then t2b (R) |
+| cues14 | `~/yames-coach-cues14` | launched 19:15: Shred | read the twelve cues, merge |
+| cues13b | `~/yames-coach-cues13b` | launched 20:20: Sweep Picking's other 35 Exercises | merge: then **all sixteen Paths have cues** |
+| night | `~/yames-coach-night` | the pinned worktree for the full layout suite | the suite ran once (1,423 passed, 1 load failure in `smooth`); **owed: `smooth.spec.ts` alone on a quiet machine, and the full suite again after pol1 / t1b2b / c2b1a merge** (`git -C ~/yames-coach-night merge --ff-only coach` first) |
+
+Next after these, from `NEXT-LEGS.md`: c2b1b ‖ c2ca ‖ t2b; c4a2; c2b2a; c3b1; c4b2; c2b2b → c2cb →
+**delivery 2** → pol2 → t2c → t2d. Small things with no leg yet: First Chords' fourteen cues a variant
+cannot say (pol1's item 10, content); Today's header kick "WELCOME BACK. IT HAS BEEN 12 DAYS" (the
+owner's rule is no "welcome back"); `rem` Part 2 = option A, after c4a2; lb1 (`loop_bars`' bars door, R).
+**The session allows about twenty agents at once, helpers included**: twelve legs with translators
+hit it (helpers were refused for a few minutes and one leg translated three languages itself). Eight
+legs at a time is the practical ceiling. **A half leg can still be too big** (c2b1a: 359k): a leg
+that adds a turn kind to Ask, three cards and their tests should have been two.
 
 **vr1** (the variant rewriter, a defect found by cues4) is merged: no false sentence had shipped; `npm
 run paths -- check` now lists rewritten and refused variant sentences, so cue legs no longer need

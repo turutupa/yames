@@ -35,7 +35,7 @@ import {
 } from "../../session/runner";
 import type { TakeOutcome } from "../../session/runner";
 import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
-import { AskStart, LoopButton, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
+import { AskStart, LoopButton, ReadyInput, TempoNudges, bigLabel, fasterOnRow, startButton, takeCanStart, timedHowKey } from "./parts";
 import { TakeOrder } from "../coach/CoachLine";
 import {
   CoachAnswerLine,
@@ -1220,7 +1220,7 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
           <div className="session-nudges" data-testid="session-tonal">
             <UpToButton session={session} />
             {session.loop?.front && <LoopButton session={session} />}
-            <TempoNudges run={run} exercise={exercise} session={session} />
+            <TempoNudges run={run} exercise={exercise} session={session} faster={fasterOnRow(session.big)} />
             {session.loop && !session.loop.front && <LoopButton session={session} />}
             {/* Every fifth Take where the pick matters: one ungraded Take to watch it. */}
             {session.eyes && (
