@@ -3999,6 +3999,20 @@ Accuracy: 82\nUser asks: hello?<|im_end|>\n\
         assert_eq!(precheck_grammar("root ::= \"(\" root? \")\" | \"x\""), Ok(()));
     }
 
+    /// Leg c3b1a: the choice grammar generated from the tool registry
+    /// (`src/coach/ask/grammar.ts`; `grammar.test.ts` keeps this fixture equal
+    /// to what it generates) passes every bound the worker checks: size,
+    /// expanded elements, rules, alternatives, depth and parse stacks.
+    #[test]
+    fn the_generated_choice_grammar_passes_the_precheck() {
+        const CHOICE_GBNF: &str = include_str!("../../src/coach/ask/choice-grammar.gbnf");
+        assert_eq!(precheck_grammar(CHOICE_GBNF), Ok(()));
+        let (elements, stacks) = grammar_measures(CHOICE_GBNF).unwrap();
+        eprintln!("[precheck] choice-grammar.gbnf: {} bytes, {elements} elements, {stacks} parse stacks at most", CHOICE_GBNF.len());
+        assert!(elements <= ASK_GRAMMAR_MAX_ELEMENTS / 2, "{elements}");
+        assert!(stacks <= ASK_GRAMMAR_MAX_STACKS / 2, "{stacks}");
+    }
+
     /// Pure-Rust half of the fuzz: whatever bytes arrive, the precheck
     /// returns, it never panics. The llama.cpp half is in `llm_tests`.
     #[test]
