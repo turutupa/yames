@@ -18,10 +18,13 @@ import { useSyncExternalStore } from "react";
 import type { PathTakeRow } from "../../ipc";
 import type { PathDoc } from "../../paths/format";
 import type { ToolBody } from "./askTools";
+import type { CardBody } from "./askCards";
 
 export type AskTurn =
   /** What a tool did, would do, could not do, or will not do (leg t1b1, `askTools.ts`). */
   | { id: string; kind: "tool"; body: ToolBody }
+  /** A fact card the app wrote from what it measured (leg c2b1a, `askCards.ts`). */
+  | { id: string; kind: "card"; card: CardBody }
   | { id: string; kind: "user"; text: string }
   /** The model's words. `pending` while it is still writing them. */
   | { id: string; kind: "coach"; text: string; pending?: boolean }

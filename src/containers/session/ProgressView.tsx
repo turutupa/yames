@@ -13,10 +13,9 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathTakeRow } from "../../ipc";
 import type { PathDoc } from "../../paths/format";
-import { currentStepOf, factsOf, isUngradedTake } from "../../session/progress";
+import { countsTowardCleanTempo, currentStepOf, factsOf, isUngradedTake } from "../../session/progress";
 import { findExercise } from "../../session/packs";
 import { totalsFrom } from "../../session/totals";
-import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { useNeck3d } from "./hooks/useNeck";
 import { rise } from "./TodayView";
@@ -54,11 +53,6 @@ type PathGroup = {
   lastAt: number;
 };
 
-/** Does this Take count for a clean tempo: eight bars in a row that held. */
-function countsClean(take: PathTakeRow): boolean {
-  return factsOf(take).measures?.pass?.countsForCleanTempo ?? take.bars >= CLEAN_TEMPO_MIN_BARS;
-}
-
 export function groupsFrom(takes: readonly PathTakeRow[], paths: readonly PathDoc[]): PathGroup[] {
   const byPath = new Map<string, Map<string, PathTakeRow[]>>();
   for (const take of [...takes].reverse()) {
@@ -82,7 +76,8 @@ export function groupsFrom(takes: readonly PathTakeRow[], paths: readonly PathDo
         const measured = factsOf(take).measures?.evenness;
         if (take.caught && typeof measured === "number") evenness.push(measured);
         const best = clean[clean.length - 1]?.bpm ?? 0;
-        if (take.passed && countsClean(take) && take.bpm > best) {
+        // A Take marked not fair is left out (`countsTowardCleanTempo`).
+        if (countsTowardCleanTempo(take) && take.bpm > best) {
           clean.push({ at: take.startedAt, bpm: take.bpm });
           pathClean.push({ at: take.startedAt, bpm: take.bpm });
         }

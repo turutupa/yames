@@ -74,7 +74,7 @@ import { loopTitleLine } from "../../coach/loopLine";
 import { exerciseWords, plannedPurpose } from "../../session/exerciseWords";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { roleKey } from "./todayPlan";
-import { factsOf } from "../../session/progress";
+import { cleanBeforeOutcome, factsOf, lastRaisedOutcome, outcomeCountsTowardCleanTempo } from "../../session/progress";
 import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
@@ -1041,10 +1041,12 @@ export function borderline(outcome: TakeOutcome): boolean {
   return !heldThroughout;
 }
 
-function CleanTempoLine({ outcome }: { outcome: TakeOutcome }) {
+function CleanTempoLine({ outcome, notFair }: { outcome: TakeOutcome; notFair: boolean }) {
   const { t } = useTranslation();
   const earned = outcome.grade.cleanBpm;
-  if (earned === null) return null;
+  // Marked not fair, or kept with no record of a clean tempo: not one Progress
+  // will show, so not one to announce (owner, 1k questions, item 3; nf1b L1).
+  if (earned === null || notFair) return null;
   if (outcome.cleanBefore !== null && outcome.cleanBefore >= earned) return null;
   return (
     <div className="session-clean" data-testid="session-clean">
@@ -1203,7 +1205,7 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
             )}
           </div>
           <DecidingNumber outcome={outcome} />
-          <CleanTempoLine outcome={outcome} />
+          <CleanTempoLine outcome={outcome} notFair={!outcomeCountsTowardCleanTempo(session.progress, outcome.takeId)} />
           {onEdge && <EdgePanel session={session} />}
           {/* The coach's note: the finding, the Take bar by bar and one fact
               line, all in one place (DESIGN 4.2; UI_DECISIONS U4.2). The
@@ -1769,11 +1771,14 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
   if (isEdgeStep(step)) {
     const reached = outcomes.reduce<number | null>(
       (most, o) =>
-        o.grade.verdict === "passed" && o.grade.cleanBpm !== null
+        o.grade.verdict === "passed" && o.grade.cleanBpm !== null && outcomeCountsTowardCleanTempo(session.progress, o.takeId)
           ? Math.max(most ?? 0, o.grade.cleanBpm)
           : most,
       null,
     );
+    // Read now, not when the first Take settled: an earlier Take marked not
+    // fair on the recap drops out of "before" (nf1b L2).
+    const before = cleanBeforeOutcome(session.progress, session.run.outcomes, first);
     return (
       <div className="session-recap-item session-glass session-rise">
         <div className="session-recap-text">
@@ -1784,9 +1789,7 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
         </div>
         {reached !== null && (
           <div className="session-recap-number">
-            {first.cleanBefore !== null && first.cleanBefore !== reached && (
-              <span>{first.cleanBefore} → </span>
-            )}
+            {before !== null && before !== reached && <span>{before} → </span>}
             <b>{reached}</b>
             <small>{t("session.edge.recap")}</small>
           </div>
@@ -1851,9 +1854,8 @@ function RecapScreen({ session }: { session: SessionRun }) {
   const minutes = Math.max(1, Math.round(session.playedMs / 60_000));
   const streak = totalsFrom(session.progress.takes, session.paths).streak;
   // The best news first: a clean tempo that rose, then a pass, then the time put in.
-  const raised = [...run.outcomes]
-    .reverse()
-    .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
+  // "Rose" against the "before" read now (nf1c L2).
+  const raised = lastRaisedOutcome(session.progress, run.outcomes);
   // Decided once, as the recap opens: an answer given on a result earlier in
   // the Session means no question here, and an answer given here keeps its
   // thanks on screen rather than taking the question away.

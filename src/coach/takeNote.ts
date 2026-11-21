@@ -558,6 +558,19 @@ function commonNote(onsetIds: number[], review: TakeReview): Direction["note"] {
   return { midi: best.midi, string: best.string, fret: best.fret };
 }
 
+/**
+ * No bar inside the scorer's held stretch is crossed on the strip. The
+ * stretch is pooled over windows (`score/pass.rs`) and the strip judges each
+ * bar alone, so "N bars in a row held" is said only when this holds: else the
+ * sentence argues with the picture (the result note, and the fact cards).
+ */
+export function heldStretchUncrossed(
+  cells: ReadonlyArray<{ n: number; state: string }>,
+  held: { from: number; count: number } | null,
+): boolean {
+  return !!held && !cells.some((c) => c.n >= held.from && c.n < held.from + held.count && c.state === "missed");
+}
+
 function directionLine(direction: Direction): Line {
   const { way, note } = direction;
   if (!note) return { key: `session.note.direction.${way}`, values: {} };
@@ -648,11 +661,8 @@ export function takeNote(
         // a bar inside it can still be crossed on the strip, which judges each
         // bar alone. "N bars in a row held" over a crossed bar argued with the
         // picture under it: said only when every bar of the stretch is uncrossed.
-        const held = stripped.held;
-        const heldUncrossed =
-          !!held && !cells.some((c) => c.n >= held.from && c.n < held.from + held.count && c.state === "missed");
         const label: Line =
-          passed && stripped.held && heldUncrossed
+          passed && stripped.held && heldStretchUncrossed(cells, stripped.held)
             ? { key: "session.note.strip.held", values: { count: stripped.held.count } }
             : patternBars > 1 && rounds > 1
               ? { key: "session.note.strip.roundEvery", values: { count: patternBars } }

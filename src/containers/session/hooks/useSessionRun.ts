@@ -83,6 +83,7 @@ import {
   levelOfStep,
   levelStartIndex,
   nextStepAfterPass,
+  shownCleanTempoOf,
   takesOf,
   withHeardIt,
   withUpstroke,
@@ -1285,7 +1286,7 @@ export function useSessionRun(input: SessionRunInput) {
           measures: quiet,
           grade: UNGRADED_GRADE,
           previousValue: null,
-          cleanBefore: cleanTempoOf(progress, path.id, exercise.id),
+          cleanBefore: shownCleanTempoOf(progress, path.id, exercise.id),
           takeId: row.id,
           ungraded: state.ungraded,
         },
@@ -1357,7 +1358,10 @@ export function useSessionRun(input: SessionRunInput) {
       measures,
       grade,
       previousValue: previousValueOf(earlier, metric),
-      cleanBefore,
+      // What the result and the notes quote as "before": the clean tempo the
+      // app shows, which leaves out a Take marked not fair. `raised` above
+      // (what is stored, and what the planner reads) stays on the ceiling.
+      cleanBefore: shownCleanTempoOf(progress, path.id, exercise.id),
       takeId: row.id,
     };
     // Where it slipped and how often it has (the note's own facts), kept on
