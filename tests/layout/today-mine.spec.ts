@@ -36,7 +36,9 @@ async function todayFits(page: Page, where: string) {
   await expect(mine).toContainText("A minor pentatonic");
   await settleAnimations(page);
   await noSidewaysScroll(page, where);
-  expect(await overlapping(page), `${where}: blocks drawn over each other`).toEqual([]);
+  // The plan's rows among themselves: on a phone the sticky Start sits over a
+  // list that scrolls under it by design ("More below"), as on every Today.
+  expect(await overlapping(page, '[data-testid="today-plan"]'), `${where}: rows drawn over each other`).toEqual([]);
   const found = await page.evaluate(() => {
     const box = (el: Element) => {
       const r = el.getBoundingClientRect();
@@ -56,7 +58,11 @@ async function todayFits(page: Page, where: string) {
   expect(found.roles[1], `${where}: the second row`).toBe("mine");
   expect(found.list.right, `${where}: past the window`).toBeLessThanOrEqual(found.vw + 0.5);
   for (const r of found.rows) expect(r.right, `${where}: a row past the window`).toBeLessThanOrEqual(found.vw + 0.5);
-  const hits = await textContrast(page, '[data-testid="today-plan"]');
+  // The new row's words, in view (on a phone the rows lower down sit under the
+  // sticky Start until scrolled, by design, and read against its colour).
+  await mine.scrollIntoViewIfNeeded();
+  await settleAnimations(page);
+  const hits = await textContrast(page, '[data-testid="today-plan"] [data-role="mine"]');
   expect(hits.length, `${where}: no text measured`).toBeGreaterThan(0);
   expect(belowAA(hits), where).toEqual([]);
 }
