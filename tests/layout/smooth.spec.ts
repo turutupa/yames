@@ -183,13 +183,18 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
    * `bestWindow` could outlast the Take, and once the Take ends Ask opens as
    * the bar promised, which read as "rendered during the Take". Now every
    * window measured begins and ends with the Take playing (one that the Take
-   * ended in is thrown away, and the scene is opened once more if none fit),
-   * the counts of the DOM are read while it plays, and AskPanel's renders are
-   * summed over every window kept, not read from the best one alone.
+   * ended in is thrown away), the counts of the DOM are read while it plays,
+   * and AskPanel's renders are summed over every window kept, not read from
+   * the best one alone. When the Take ends before the three windows the old
+   * test had and none was free of long tasks, the scene is opened again (three
+   * openings at most) for the rest of the three: never more windows than
+   * before, only every one of them inside a running Take.
    */
   await installPerf(page, { countRenders: true });
-  let kept: { best: PerfSample; askRenders: number } | null = null;
-  for (let attempt = 0; attempt < 2 && !kept; attempt++) {
+  let best: PerfSample | null = null;
+  let askRenders = 0;
+  let windows = 0;
+  for (let opening = 0; opening < 3; opening++) {
     await openShot(page, "session-playing", WIDE);
     await takeRunning(page);
     await page.keyboard.press("Shift+Slash");
@@ -199,13 +204,21 @@ test("Ask commits nothing during a running Take: the Ask key there is one static
     if ((await takePhase(page)) !== "playing") continue;
     expect(await page.locator(".ask-panel").count(), "the Ask panel is mounted during the Take").toBe(0);
     expect(await page.locator('[data-testid="session-coach-ask"]').count(), "an Ask button in the bar during the Take").toBe(0);
-    kept = await windowsInTake(page);
+    const kept = await windowsInTake(page, 3 - windows);
+    windows += kept.windows.length;
+    for (const s of kept.windows) {
+      askRenders += s.renders.AskPanel ?? 0;
+      if (!best || s.longTasks < best.longTasks) best = s;
+    }
+    // Done at a window free of long tasks, or at the old test's three windows
+    // in all: never more chances than it had, only all of them inside a Take.
+    if ((best && best.longTasks === 0) || windows >= 3) break;
   }
-  expect(kept, "no measuring window began and ended inside the Take, in two openings of the scene").not.toBeNull();
-  const s = kept!.best;
+  expect(best, "no measuring window began and ended inside the Take, in three openings of the scene").not.toBeNull();
+  const s = best!;
   expect(s.commits, "the Take is running").toBeGreaterThan(0);
-  expect(kept!.askRenders, "the Ask panel rendered during the Take").toBe(0);
-  expect(s.longTasks, `long tasks in the best of three windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
+  expect(askRenders, `the Ask panel rendered during the Take (${windows} windows)`).toBe(0);
+  expect(s.longTasks, `long tasks in the best of ${windows} windows (longest ${s.longTaskMaxMs} ms)`).toBe(0);
 });
 
 /** What the Take's big button says it is doing. */
@@ -214,23 +227,20 @@ function takePhase(page: Page): Promise<string | null> {
 }
 
 /**
- * `bestWindow`, held inside the Take: up to three windows, each kept only when
- * the Take was playing when it ended (it was when the first began, and a
- * window after one the Take ended in is not taken). The best kept window by
- * long tasks, and the Ask panel's renders over all kept windows; null when
- * not one window fit.
+ * `bestWindow`'s windows, held inside the Take: up to `most`, each kept only
+ * when the Take was still playing as it ended (it was as the first began, and
+ * none is taken after one the Take ended in); it stops early at a window free
+ * of long tasks, as `bestWindow` does.
  */
-async function windowsInTake(page: Page): Promise<{ best: PerfSample; askRenders: number } | null> {
-  let best: PerfSample | null = null;
-  let askRenders = 0;
-  for (let i = 0; i < 3; i++) {
+async function windowsInTake(page: Page, most: number): Promise<{ windows: PerfSample[] }> {
+  const windows: PerfSample[] = [];
+  for (let i = 0; i < most; i++) {
     const s = await samplePerf(page, WINDOW_MS);
     if ((await takePhase(page)) !== "playing") break;
-    askRenders += s.renders.AskPanel ?? 0;
-    if (!best || s.longTasks < best.longTasks) best = s;
+    windows.push(s);
     if (s.longTasks === 0) break;
   }
-  return best ? { best, askRenders } : null;
+  return { windows };
 }
 
 test("the open Ask panel on a tool screen does not re-render with the beat", async ({ page }) => {
