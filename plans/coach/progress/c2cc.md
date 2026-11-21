@@ -55,6 +55,23 @@ not changed here).
 Ember, Today); ja search passage (phone, Manuscript); "What is this screen for?" on Today (1440 Manuscript, phone Ember)
 and on the result (1440 Ember, phone Manuscript). Pictures only to `$YAMES_SHOT_DIR`.
 
-## Gates
+## Merge of `coach` (`946262c3`)
 
-(pending)
+Conflicts in `cards.ts` (both `suggest_path` and `AnswerShape` kept), `suggest.ts` (c4b3's Paths/Progress filter, then
+the help chip last), `askCards.ts` (imports), `AskPanel.tsx` (imports: `pressSource` kept, `typedRuleAnswerer` in
+place of `typedCardAnswerer`). Ask's empty state: three chips at most; on Paths and Progress "Suggest a Path" (first two
+card chips kept) then "What is this screen for?"; on Today and in a Session the screen's cards (two at most) then the
+help chip (`askCards.test.tsx` "with the help chip").
+
+## Gates (after the merge)
+
+- tsc: pass (`coach-c2cc-tsc2`). Build: pass (`coach-c2cc-build`).
+- `npm run test`: 484 of 485 files, 51,918 passed, 10 skipped; the one failed file is the known
+  `TabStage.render.test.tsx` (`/tmp/coach-c2cb/c2cc-test.log`).
+- Layout `ask ask-tools ask-cards ask-typed short-window phone-header ask-help` (`--lock coach-layout`): 152 passed,
+  1 failed: my ja search scene, which tried only the first eight fixture questions (`/tmp/coach-c2cb/c2cc-pw.log`).
+  Fixed to try them all; `ask-help.spec.ts` alone (`--workers=2`, `coach-c2cc-pw2`): 6 passed.
+- Shots: `/tmp/coach-c2cb/shots/` (`ember-help-search-1440`, `manuscript-help-search-phone-ja`,
+  `ember-help-result-1440`, and the rest of the scenes).
+- Observation for c2ca: in ja only one of the fixture questions (休符のところでもテンポをキープするには) got a passage in
+  the phone scene; the others got "Nothing in your Paths answers that".

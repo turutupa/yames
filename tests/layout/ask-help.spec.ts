@@ -39,7 +39,7 @@ const lastCard = (page: Page, panel: string) => page.locator(`${panel} [data-tes
 
 /** Sends fixture questions until one is answered by a quoted passage; returns it. */
 async function askUntilSearch(page: Page, panel: string, lng: string): Promise<string> {
-  for (const q of questions(lng).slice(0, 8)) {
+  for (const q of questions(lng)) {
     const before = await turns(page, panel).count();
     await send(page, panel, q);
     await expect.poll(() => turns(page, panel).count()).toBeGreaterThanOrEqual(before + 2);
