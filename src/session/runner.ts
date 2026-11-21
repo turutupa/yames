@@ -46,6 +46,7 @@ import { takeBarsOf, type TakeGrade } from "./grade";
 import { hasRungAbove, hasRungBelow, rungAbove, rungBelow } from "./ladder";
 import type { LoopStep, PlanStep, SessionPlan } from "./planner";
 import type { TakeMeasures } from "./takeMeasures";
+import { withVariant } from "./take";
 
 export type RunPhase =
   /** No Session. */
@@ -738,17 +739,23 @@ function loopStepOf(
  * - `outsideTune`: a bar before 1 or past the last bar the Take prints;
  * - `backwards`: the last bar asked is before the first;
  * - `acrossRounds`: the two bars fall in different rounds of the pattern
- *   (bars 4 and 5 of a four-bar tune are its last bar and its first again).
+ *   (bars 4 and 5 of a four-bar tune are its last bar and its first again);
+ * - `oneBar`: a range of bars on an Exercise one bar long (lb1b L2).
  */
-export type LoopRefusal = "notHere" | "outsideTune" | "backwards" | "acrossRounds";
+export type LoopRefusal = "notHere" | "outsideTune" | "backwards" | "acrossRounds" | "oneBar";
 
 /**
  * The door behind `loop_bars` (leg lb1): the loop `loopOffer` would build,
  * for pattern bars the player chose. Only from an Exercise's ready screen or
  * its result, as the runner's `loop` event; a fresh step with no Take yet is
- * allowed (the tempo is still two rungs under the step's). A range the player
- * asks for is honoured inside the pattern even past `LOOP_MAX_BARS`: that is
- * the coach's own offer, not the player's request.
+ * allowed (the tempo is still two rungs under the step's).
+ *
+ * A range the player asks for is honoured inside the pattern even past
+ * `LOOP_MAX_BARS` (the orchestrator's decision, lb1b L3): that cap is the
+ * coach's own offer, "the pattern bar (or two)"; this is the player's own
+ * request, made in words and pressed. It stores nothing, moves no plan, writes
+ * no Take, and costs no memory a two-bar loop does not (the schedule is built
+ * once; the deviations are capped at `STRIP_NOTES`).
  */
 export function loopAt(
   state: RunState,
@@ -782,6 +789,9 @@ export function printedLoopBars(
   if (!Number.isInteger(fromBar) || !Number.isInteger(toBar)) return { refused: "outsideTune" };
   if (toBar < fromBar) return { refused: "backwards" };
   const own = Math.max(1, exercise.bars);
+  // A one-bar Exercise: every Take bar is its bar 1, so a range is answered
+  // with that, not with rounds or a bar the tune lacks (lb1b L2).
+  if (own === 1 && fromBar >= 1 && fromBar !== toBar) return { refused: "oneBar" };
   if (fromBar < 1 || toBar > Math.max(own, takeBarsOf(exercise))) return { refused: "outsideTune" };
   if (toBar <= own) return { fromBar, toBar };
   const round = (bar: number) => Math.floor((bar - 1) / own);
@@ -807,7 +817,9 @@ export function loopAsked(
   // Where the player is comes first: off an Exercise's screen no bar number matters.
   const here = loopAt(state, exercise, 1, 1);
   if (!exercise || "refused" in here) return here;
-  const bars = printedLoopBars(exercise, fromBar, toBar);
+  // The Take as it was printed: a variant may ask for more bars than the
+  // Exercise as written (`passBars`), and its Take bars are real (lb1b L1).
+  const bars = printedLoopBars(withVariant(exercise, here.loop.variantSeed), fromBar, toBar);
   if ("refused" in bars) return bars;
   return loopAt(state, exercise, bars.fromBar, bars.toBar);
 }

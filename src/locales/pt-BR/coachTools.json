@@ -139,7 +139,8 @@
         "rung": "Não há andamento para definir aí.",
         "settingValue": "{{key}} não pode ser “{{query}}”. Estes são os valores possíveis:",
         "loopBar": "Esta melodia não tem o compasso {{bar}}.",
-        "loopAcross": "Os compassos {{from}} a {{to}} passam do fim da melodia e voltam ao início dela. Peça compassos dentro de uma volta só."
+        "loopAcross": "Os compassos {{from}} a {{to}} passam do fim da melodia e voltam ao início dela. Peça compassos dentro de uma volta só.",
+        "loopOneBar": "Este Exercício tem um só compasso: peça o compasso 1."
       },
       "notNow": {
         "take": "Depois desta tomada.",

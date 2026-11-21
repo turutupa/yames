@@ -139,7 +139,8 @@
         "rung": "Nie ma tam tempa do ustawienia.",
         "settingValue": "{{key}} nie może mieć wartości „{{query}}”. Możliwe wartości to:",
         "loopBar": "Ta melodia nie ma taktu {{bar}}.",
-        "loopAcross": "Takty {{from}} do {{to}} wychodzą za koniec melodii i wracają na jej początek. Poproś o takty z jednego przebiegu melodii."
+        "loopAcross": "Takty {{from}} do {{to}} wychodzą za koniec melodii i wracają na jej początek. Poproś o takty z jednego przebiegu melodii.",
+        "loopOneBar": "To ćwiczenie ma jeden takt: poproś o takt 1."
       },
       "notNow": {
         "take": "Po tym podejściu.",

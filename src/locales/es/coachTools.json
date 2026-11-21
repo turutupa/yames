@@ -139,7 +139,8 @@
         "rung": "Ahí no hay ningún tempo que fijar.",
         "settingValue": "{{key}} no puede ser «{{query}}». Estos son los valores posibles:",
         "loopBar": "Esta melodía no tiene el compás {{bar}}.",
-        "loopAcross": "Los compases {{from}} a {{to}} se salen del final de la melodía y vuelven a su principio. Pide compases dentro de una sola vuelta."
+        "loopAcross": "Los compases {{from}} a {{to}} se salen del final de la melodía y vuelven a su principio. Pide compases dentro de una sola vuelta.",
+        "loopOneBar": "Este Ejercicio tiene un solo compás: pide el compás 1."
       },
       "notNow": {
         "take": "Después de esta toma.",

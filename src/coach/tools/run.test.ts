@@ -299,7 +299,7 @@ describe("the block actions, through the tools' host", () => {
   });
 
   it("a block's loopBars names a song's bars: it never reaches the Session's loop door (leg lb1)", () => {
-    const host = fakeHost({ session: true }, { loopAsk: () => ({ fromBar: 1, toBar: 4, bpm: 60 }), loopBars: () => "done" });
+    const host = fakeHost({ session: true }, { loopAsk: () => ({ fromBar: 1, toBar: 4, bpm: 60, loopId: "s#loop", variantSeed: null }), loopBars: () => "done" });
     expect(runBlockAction({ kind: "loopBars", score: "s", fromBar: 1, toBar: 4 }, host)).toBe("notWiredYet");
     expect(host.calls).toEqual([]);
   });

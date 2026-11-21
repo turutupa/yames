@@ -200,11 +200,25 @@ describe("useCoachToolHost", () => {
     });
     const { result } = renderHook(() => useCoachToolHost(props));
     sessionCalls.length = 0;
-    expect(result.current.loopAsk(1, 1)).toEqual({ fromBar: 1, toBar: 1, bpm: rungBelow(EX, rungBelow(EX, ready.bpm)) });
+    const at = ready.plan!.steps[ready.stepIndex] as { id: string; variantSeed?: number | null };
+    expect(result.current.loopAsk(1, 1)).toEqual({
+      fromBar: 1,
+      toBar: 1,
+      bpm: rungBelow(EX, rungBelow(EX, ready.bpm)),
+      loopId: `${at.id}#loop`,
+      variantSeed: at.variantSeed ?? null,
+    });
     expect(result.current.loopAsk(2, 1)).toEqual({ refused: "backwards" });
     expect(sessionCalls).toEqual([]);
     expect(result.current.loopBars(1, 1)).toBe("done");
     expect(sessionCalls).toEqual([["startLoop", [{ fromBar: 1, toBar: 1 }]]]);
+    // A loop the Session did not start is not "done": the receipt is never "Looping…" then (lb1b L4).
+    const refusing = input({
+      view: "session",
+      session: { ...base, run: ready, exercise: EX, actions: { ...base.actions, startLoop: () => "notHere" } } as unknown as SessionRun,
+    });
+    const { result: noLoop } = renderHook(() => useCoachToolHost(refusing));
+    expect(noLoop.current.loopBars(1, 1)).toBe("notHere");
     const idle = input();
     const { result: away } = renderHook(() => useCoachToolHost(idle));
     expect(away.current.loopAsk(1, 1)).toEqual({ refused: "notHere" });

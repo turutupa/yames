@@ -179,6 +179,8 @@ const BAND_VOLUME_KEY = "session.bandVolume";
 /** Settings → Practice → "Grade my playing", now a choice of three (`session/grading.ts`). */
 import { setTakeContext } from "../../../settings/recordingSession";
 import { useCoachPublishingDispatch } from "../../../coach/sessionEvents";
+import type { PublishingDispatch } from "../../../coach/sessionEvents";
+import { soundIsStarting } from "../../../coach/voice";
 export { GRADING_KEY } from "../../../session/grading";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
@@ -397,7 +399,20 @@ export function useSessionRun(input: SessionRunInput) {
   const { view, setView, isPlaying, beat, listening } = input;
   const [run, dispatchRun] = useReducer(runReducer, IDLE);
   // Each transition is also told to the coach (stepReady, takeStarted, takeResult, timedEnded, sessionRecap).
-  const dispatch = useCoachPublishingDispatch(dispatchRun);
+  const publishing = useCoachPublishingDispatch(dispatchRun);
+  /**
+   * The run as of the last dispatch, ahead of the render that shows it: a
+   * press read off the last render could start a loop the reducer then ignores
+   * (`startLoop`, lb1b L4). The same pure reducer, so it equals `run` at render.
+   */
+  const runNow = useRef<RunState>(IDLE);
+  const dispatch: PublishingDispatch = useCallback(
+    (event, review) => {
+      runNow.current = runReducer(runNow.current, event);
+      publishing(event, review);
+    },
+    [publishing],
+  );
   const [paths, setPaths] = useState<PathDoc[]>([]);
   const { i18n } = useTranslation();
   const packLanguage = i18n.resolvedLanguage ?? i18n.language ?? "en";
@@ -1850,20 +1865,38 @@ export function useSessionRun(input: SessionRunInput) {
   /**
    * With no bars, the Session's own offer (`loop`). With bars as printed
    * (`loop_bars`, leg lb1), the loop `loopAsked` builds for them, or why not.
-   * Null when a loop started. A click handler's event is not bars.
+   * Null when a loop started, and only then. A click handler's event is not bars.
+   *
+   * Read at the press, never off the last render (lb1b L4): the run as of the
+   * last dispatch (`runNow`), the Exercise of ITS step, so the identity is
+   * stable and a step the reducer has already left is refused, not reported
+   * as looping.
    */
+  const loopFrom = useRef({ paths, notYetTwice });
+  loopFrom.current = { paths, notYetTwice };
   const startLoop = useCallback(
     // `{ nativeEvent }`: the Session's loop button passes `startLoop` itself as its onClick.
     (bars?: { fromBar: number; toBar: number } | { nativeEvent: unknown }): LoopRefusal | null => {
-      const asked = isLoopBars(bars) ? loopAsked(run, exercise, bars.fromBar, bars.toBar) : loop;
+      // Between a Start and the engine's report the runner is still `ready`
+      // and the count-in is about to begin: no loop then, by any door (the
+      // Session's Loop button, the coach keys, `loop_bars`). lb1b M1.
+      if (soundIsStarting()) return "notHere";
+      const state = runNow.current;
+      const shown = exerciseOf(currentStep(state), loopFrom.current.paths)?.exercise ?? null;
+      const asked = isLoopBars(bars)
+        ? loopAsked(state, shown, bars.fromBar, bars.toBar)
+        : loopOffer(state, shown, { notYetTwice: loopFrom.current.notYetTwice });
       if (!asked) return "notHere";
       if ("refused" in asked) return asked.refused;
+      const event = { type: "loop", loop: asked.loop, now: Date.now() } as const;
+      // The reducer's own word: a loop it would not start is not reported as started.
+      if (runReducer(state, event).phase !== "looping") return "notHere";
       if (listen.active) listen.stop({ tail: false });
       autoStart.current = false;
-      dispatch({ type: "loop", loop: asked.loop, now: Date.now() });
+      dispatch(event);
       return null;
     },
-    [loop, listen, run, exercise],
+    [listen, dispatch],
   );
 
   /** "This one is for your eyes": offered on this result (`eyesOffer`). */

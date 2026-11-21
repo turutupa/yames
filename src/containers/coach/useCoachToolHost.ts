@@ -228,8 +228,10 @@ export function buildCoachToolHost(latest: { readonly current: CoachToolHostInpu
     loopAsk: (fromBar, toBar) => {
       const asked = loopAsked(session().run, session().exercise, fromBar, toBar);
       if ("refused" in asked) return { refused: asked.refused };
-      return { fromBar: asked.loop.fromBar, toBar: asked.loop.toBar, bpm: asked.loop.bpm };
+      const { fromBar: from, toBar: to, bpm, id, variantSeed } = asked.loop;
+      return { fromBar: from, toBar: to, bpm, loopId: id, variantSeed: variantSeed ?? null };
     },
+    // `startLoop` answers null only when the reducer took the loop (lb1b L4): only then "done".
     loopBars: (fromBar, toBar) => session().actions.startLoop({ fromBar, toBar }) ?? "done",
     findEdge: (pathId, exerciseId) => {
       const { path, step, exercise } = exerciseOf(pathId, exerciseId);

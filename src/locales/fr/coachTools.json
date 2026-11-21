@@ -139,7 +139,8 @@
         "rung": "Il n'y a pas de tempo à régler là.",
         "settingValue": "{{key}} ne peut pas être « {{query}} ». Voici ce que ça peut être :",
         "loopBar": "Cette mélodie n'a pas de mesure {{bar}}.",
-        "loopAcross": "Les mesures {{from}} à {{to}} dépassent la fin de la mélodie et reprennent à son début. Demande des mesures à l'intérieur d'un seul passage."
+        "loopAcross": "Les mesures {{from}} à {{to}} dépassent la fin de la mélodie et reprennent à son début. Demande des mesures à l'intérieur d'un seul passage.",
+        "loopOneBar": "Cet exercice n'a qu'une mesure : demande la mesure 1."
       },
       "notNow": {
         "take": "Après cette prise.",

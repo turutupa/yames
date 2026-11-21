@@ -139,7 +139,8 @@
         "rung": "Ở đó không có tempo nào để đặt.",
         "settingValue": "{{key}} không thể là “{{query}}”. Đây là những giá trị có thể chọn:",
         "loopBar": "Giai điệu này không có ô nhịp {{bar}}.",
-        "loopAcross": "Ô nhịp {{from}} đến {{to}} chạy quá cuối giai điệu rồi vòng lại đoạn đầu. Hãy chọn các ô nhịp trong một vòng của giai điệu."
+        "loopAcross": "Ô nhịp {{from}} đến {{to}} chạy quá cuối giai điệu rồi vòng lại đoạn đầu. Hãy chọn các ô nhịp trong một vòng của giai điệu.",
+        "loopOneBar": "Bài này chỉ có một ô nhịp: hãy chọn ô nhịp 1."
       },
       "notNow": {
         "take": "Sau lượt này.",

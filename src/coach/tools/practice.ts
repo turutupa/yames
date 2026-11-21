@@ -377,8 +377,18 @@ const testOut = defineConfirmTool<TestOut>({
   },
 });
 
-/** `loop_bars` resolved: the bars as asked (for the press), the pattern bars and tempo the loop plays. */
-type LoopBars = { asked: { from: number; to: number }; fromBar: number; toBar: number; bpm: number };
+/**
+ * `loop_bars` resolved: the bars as asked (for the press), the pattern bars and
+ * tempo the loop plays, and the Exercise and variant it was proposed on.
+ */
+type LoopBars = {
+  asked: { from: number; to: number };
+  fromBar: number;
+  toBar: number;
+  bpm: number;
+  loopId: string;
+  variantSeed: number | null;
+};
 
 /** The runner's reason a loop cannot start, in words (`runner.loopAsked`). */
 function loopRefused(why: LoopRefusal, from: number, to: number): Refusal {
@@ -391,6 +401,8 @@ function loopRefused(why: LoopRefusal, from: number, to: number): Refusal {
       return refuse("refused", "coachTools.why.refused.loopBackwards", { from, to });
     case "acrossRounds":
       return refuse("notFound", "coachTools.why.notFound.loopAcross", { from, to });
+    case "oneBar":
+      return refuse("notFound", "coachTools.why.notFound.loopOneBar");
   }
 }
 
@@ -432,6 +444,8 @@ const loopBars = defineConfirmTool<LoopBars>({
     if (now === "notWiredYet") return notWiredYet("loop_bars");
     if ("refused" in now) return gone(`the loop cannot start now: ${now.refused}`);
     if (now.fromBar !== resolved.fromBar || now.toBar !== resolved.toBar || now.bpm !== resolved.bpm) return gone("the tempo or the step moved");
+    // Bound to the Exercise and the variant it was proposed on, by the tool itself (lb1b L5).
+    if (now.loopId !== resolved.loopId || now.variantSeed !== resolved.variantSeed) return gone("the Exercise or its variant changed");
     const out = host.loopBars(from, to);
     if (out === "notWiredYet") return notWiredYet("loop_bars");
     if (out !== "done") return gone(`the loop did not start: ${out}`);

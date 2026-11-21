@@ -12,7 +12,7 @@ import { ALT as REAL_ALT, passed, progress } from "../../session/testKit";
 import type { CoachContext } from "../context";
 import { fakeHost, toolCtx, type FakeHost } from "./fakeHost";
 import type { CoachToolHost } from "./host";
-import { playStartBpm } from "./practice";
+import { PRACTICE_TOOLS, playStartBpm } from "./practice";
 import { confirmCoachTool, runCoachTool, runCoachUndo } from "./run";
 import { ALT, TEST_PATHS, runIn } from "./testPaths";
 import type { Proposal, RunOutcome, ToolArgs, ToolResult } from "./types";
@@ -416,7 +416,8 @@ describe("loop_bars (leg lb1)", () => {
     fakeHost(
       { paths: TEST_PATHS, session: true },
       {
-        loopAsk: (from, to) => (to > 12 ? { refused: "outsideTune" } : { fromBar: ((from - 1) % 4) + 1, toBar: ((to - 1) % 4) + 1, bpm: 72 }),
+        loopAsk: (from, to) =>
+          to > 12 ? { refused: "outsideTune" } : { fromBar: ((from - 1) % 4) + 1, toBar: ((to - 1) % 4) + 1, bpm: 72, loopId: "focus#loop", variantSeed: null },
         loopBars: () => "done",
         ...over,
       },
@@ -446,22 +447,49 @@ describe("loop_bars (leg lb1)", () => {
     ["outsideTune", "notFound", "coachTools.why.notFound.loopBar", { bar: 4 }],
     ["backwards", "refused", "coachTools.why.refused.loopBackwards", { from: 3, to: 4 }],
     ["acrossRounds", "notFound", "coachTools.why.notFound.loopAcross", { from: 3, to: 4 }],
+    ["oneBar", "notFound", "coachTools.why.notFound.loopOneBar", {}],
   ] as const)("the runner's %s, in words, and nothing done", (refused, why, key, values) => {
     const h = host({ loopAsk: () => ({ refused }) });
     expect(runCoachTool(call("loop_bars", { from: 3, to: 4 }), h, session())).toMatchObject({ ok: false, why, line: { key, values } });
     expect(h.changes()).toEqual([]);
   });
 
-  it("never during a Take: the tool's own when refuses before the host is asked", () => {
+  it("never during a Take: the runner refuses before the host is asked", () => {
     const h = host();
     expect(runCoachTool(call("loop_bars", { from: 1 }), h, session("playing"))).toMatchObject({ ok: false, why: "notNow", line: { key: "coachTools.why.notNow.take" } });
     expect(h.calls.filter((c) => c.member === "loopAsk" || c.member === "loopBars")).toEqual([]);
   });
 
+  it("never during a Take: the tool's own when refuses too, whatever the runner checks first (lb1b L6)", () => {
+    const tool = PRACTICE_TOOLS.find((t) => t.name === "loop_bars")!;
+    // Deleting the tool's `when` (a default of "anywhere") fails the first two lines.
+    expect(tool.when(session("playing"))).toBe(false);
+    expect(tool.when(session("listening"))).toBe(false);
+    expect(tool.when(session("ready"))).toBe(true);
+    expect(tool.when(session("result"))).toBe(true);
+  });
+
+  it("the press is bound to the Exercise and the variant it was proposed on (lb1b L5)", () => {
+    // A fresh proposal for each press, so no refusal below is a spent one's.
+    const fresh = () => proposalOf(runCoachTool(call("loop_bars", { from: 1, to: 2 }), host(), session()));
+    const same = { fromBar: 1, toBar: 2, bpm: 72 };
+    const next = host({ loopAsk: () => ({ ...same, loopId: "block-1#loop", variantSeed: null }) });
+    expect(confirmCoachTool(fresh(), next, session())).toMatchObject({ ok: false, line: { key: "coachTools.why.refused.proposal" } });
+    const variant = host({ loopAsk: () => ({ ...same, loopId: "focus#loop", variantSeed: 2 }) });
+    expect(confirmCoachTool(fresh(), variant, session())).toMatchObject({ ok: false, line: { key: "coachTools.why.refused.proposal" } });
+    expect(next.changes()).toEqual([]);
+    expect(variant.changes()).toEqual([]);
+    // The same step and variant: the press loops.
+    const h = host();
+    const again = proposalOf(runCoachTool(call("loop_bars", { from: 1, to: 2 }), h, session()));
+    done(confirmCoachTool(again, h, session()));
+    expect(h.changes()).toEqual([{ member: "loopBars", args: [1, 2] }]);
+  });
+
   it("the press re-checks: a tempo moved or a Take started since the proposal does nothing", () => {
     const h = host();
     const proposal = proposalOf(runCoachTool(call("loop_bars", { from: 1, to: 2 }), h, session()));
-    const moved = host({ loopAsk: (from, to) => ({ fromBar: from, toBar: to, bpm: 66 }) });
+    const moved = host({ loopAsk: (from, to) => ({ fromBar: from, toBar: to, bpm: 66, loopId: "focus#loop", variantSeed: null }) });
     expect(confirmCoachTool(proposal, moved, session())).toMatchObject({ ok: false, why: "refused", line: { key: "coachTools.why.refused.proposal" } });
     const taking = host({ loopAsk: () => ({ refused: "notHere" }) });
     expect(confirmCoachTool(proposal, taking, session())).toMatchObject({ ok: false, why: "refused", line: { key: "coachTools.why.refused.proposal" } });

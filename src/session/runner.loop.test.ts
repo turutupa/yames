@@ -3,6 +3,7 @@
  * P1, once more here, and P2, leave it (DESIGN 4.2).
  */
 import { describe, expect, it } from "vitest";
+import type { Exercise } from "../paths/format";
 import { takeBarsOf, type TakeGrade } from "./grade";
 import { planSession } from "./planner";
 import type { LoopStep, SessionPlan } from "./planner";
@@ -367,6 +368,42 @@ describe("printedLoopBars: bars as the Session prints them", () => {
     expect(loopAsked(IDLE, FOUR, 99, 1)).toEqual({ refused: "notHere" });
     expect(loopAsked(ready, FOUR, 4, 5)).toEqual({ refused: "acrossRounds" });
     expect(loopAsked(ready, FOUR, 7, 8)).toEqual(loopAt(ready, FOUR, 3, 4));
+  });
+
+  it("a variant that asks for more bars prints a longer Take: its bars are not outside the tune (lb1b L1)", () => {
+    const longer = { ...FOUR.passBars[0], overBars: takeBars + 8 };
+    const variant = {
+      id: "long",
+      tab: FOUR.tab,
+      position: FOUR.position,
+      crossing: FOUR.crossing,
+      notes: FOUR.notes,
+      rests: FOUR.rests,
+      backing: FOUR.backing,
+      computed: FOUR.computed,
+      passBars: [longer],
+    };
+    const VARIED = { ...FOUR, variation: { ...FOUR.variation, variants: [variant] } } as unknown as Exercise;
+    expect(takeBarsOf(VARIED)).toBe(takeBars);
+    const bar = takeBars + 2;
+    const asWritten = atFocus();
+    expect(loopAsked(asWritten, VARIED, bar, bar)).toEqual({ refused: "outsideTune" });
+    const played = run(atFocus(), { type: "setVariant", seed: 0 });
+    const fold = ((bar - 1) % 4) + 1;
+    expect(loopAsked(played, VARIED, bar, bar)).toEqual(loopAt(played, VARIED, fold, fold));
+  });
+
+  it("a one-bar Exercise: bar 1, and any Take bar, loop it; a range says it has one bar (lb1b L2)", () => {
+    const ONE = { ...EX, bars: 1 };
+    const ready = atFocus();
+    expect(printedLoopBars(ONE, 1, 1)).toEqual({ fromBar: 1, toBar: 1 });
+    expect(printedLoopBars(ONE, 3, 3)).toEqual({ fromBar: 1, toBar: 1 });
+    expect(printedLoopBars(ONE, 1, 2)).toEqual({ refused: "oneBar" });
+    expect(printedLoopBars(ONE, 2, 3)).toEqual({ refused: "oneBar" });
+    expect(printedLoopBars(ONE, 2, 1)).toEqual({ refused: "backwards" });
+    expect(printedLoopBars(ONE, 0, 1)).toEqual({ refused: "outsideTune" });
+    expect(loopAsked(ready, ONE, 1, 1)).toEqual(loopAt(ready, ONE, 1, 1));
+    expect(loopAsked(ready, ONE, 1, 2)).toEqual({ refused: "oneBar" });
   });
 });
 

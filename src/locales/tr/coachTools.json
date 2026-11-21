@@ -139,7 +139,8 @@
         "rung": "Orada ayarlanacak bir tempo yok.",
         "settingValue": "{{key}} “{{query}}” olamaz. Olabilecekler şunlar:",
         "loopBar": "Bu melodide {{bar}}. ölçü yok.",
-        "loopAcross": "{{from}}–{{to}}. ölçüler melodinin sonundan taşıp yeniden başına geçiyor. Melodinin tek bir turu içinden ölçüler iste."
+        "loopAcross": "{{from}}–{{to}}. ölçüler melodinin sonundan taşıp yeniden başına geçiyor. Melodinin tek bir turu içinden ölçüler iste.",
+        "loopOneBar": "Bu Alıştırma tek ölçü: 1. ölçüyü iste."
       },
       "notNow": {
         "take": "Bu denemeden sonra.",

@@ -139,7 +139,8 @@
         "rung": "Er is daar geen tempo om in te stellen.",
         "settingValue": "{{key}} kan niet “{{query}}” zijn. Dit kan het wel zijn:",
         "loopBar": "Deze melodie heeft geen maat {{bar}}.",
-        "loopAcross": "Maat {{from}} tot {{to}} lopen voorbij het einde van de melodie en weer in het begin. Vraag om maten binnen één ronde."
+        "loopAcross": "Maat {{from}} tot {{to}} lopen voorbij het einde van de melodie en weer in het begin. Vraag om maten binnen één ronde.",
+        "loopOneBar": "Deze oefening heeft één maat: vraag om maat 1."
       },
       "notNow": {
         "take": "Na deze take.",

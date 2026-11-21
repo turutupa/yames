@@ -187,7 +187,7 @@ describe("the never-list", () => {
     expect(STILL_NOT_WIRED).not.toContain("loopAsk");
     expect(STILL_NOT_WIRED).toEqual([]);
     // The proposal asks the read only; the press alone changes something.
-    const host = fakeHost({ view: "session", session: true }, { loopAsk: () => ({ fromBar: 1, toBar: 2, bpm: 60 }), loopBars: () => "done" });
+    const host = fakeHost({ view: "session", session: true }, { loopAsk: () => ({ fromBar: 1, toBar: 2, bpm: 60, loopId: "s#loop", variantSeed: null }), loopBars: () => "done" });
     const out = runCoachTool({ tool: "loop_bars", args: SAMPLE_ARGS.loop_bars }, host, toolCtx({ screen: "session", run: runIn("ready") }));
     expect(out).toMatchObject({ ok: true, proposal: { tool: "loop_bars" } });
     expect(host.changes()).toEqual([]);

@@ -139,7 +139,8 @@
         "rung": "Dort gibt es kein Tempo zum Setzen.",
         "settingValue": "{{key}} kann nicht „{{query}}“ sein. Möglich sind:",
         "loopBar": "Diese Melodie hat keinen Takt {{bar}}.",
-        "loopAcross": "Takt {{from}} bis {{to}} laufen über das Ende der Melodie hinaus und wieder an ihren Anfang. Frag nach Takten innerhalb eines Durchgangs."
+        "loopAcross": "Takt {{from}} bis {{to}} laufen über das Ende der Melodie hinaus und wieder an ihren Anfang. Frag nach Takten innerhalb eines Durchgangs.",
+        "loopOneBar": "Diese Übung hat nur einen Takt: frag nach Takt 1."
       },
       "notNow": {
         "take": "Nach diesem Take.",

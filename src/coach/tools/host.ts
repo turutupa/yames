@@ -227,8 +227,14 @@ export type CoachToolHost = {
   loopBars: (fromBar: number, toBar: number) => HostOutcome | LoopRefusal;
 };
 
-/** What `loopAsk` answers: the loop a press would start, in pattern bars, or the runner's reason. */
-export type LoopAsk = { fromBar: number; toBar: number; bpm: number } | { refused: LoopRefusal };
+/**
+ * What `loopAsk` answers: the loop a press would start, in pattern bars, or
+ * the runner's reason. `loopId` (`<step id>#loop`) and `variantSeed` bind a
+ * proposal to the Exercise and the variant it was made on (lb1b L5).
+ */
+export type LoopAsk =
+  | { fromBar: number; toBar: number; bpm: number; loopId: string; variantSeed: number | null }
+  | { refused: LoopRefusal };
 
 /**
  * Every member, at runtime. The check below fails to compile when the

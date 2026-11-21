@@ -139,7 +139,8 @@
         "rung": "There's no tempo to set there.",
         "settingValue": "{{key}} can't be “{{query}}”. These are what it can be:",
         "loopBar": "This tune has no bar {{bar}}.",
-        "loopAcross": "Bars {{from}} to {{to}} run off the end of the tune and into its start again. Ask for bars inside one round of it."
+        "loopAcross": "Bars {{from}} to {{to}} run off the end of the tune and into its start again. Ask for bars inside one round of it.",
+        "loopOneBar": "This Exercise has one bar: ask for bar 1."
       },
       "notNow": {
         "take": "After this Take.",
