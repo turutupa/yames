@@ -758,6 +758,7 @@
       "done": "Đã ghim {{chord}}, thế {{shape}}, lên màn hình Jam.",
       "noNeck": "Nhạc cụ của bạn không có cần đàn để ghim một thế bấm.",
       "noShape": "Cần đàn của bạn không có thế bấm đó của {{chord}}.",
+      "otherJam": "Thế bấm này được vẽ cho một jam khác, nên không được ghim vào jam này.",
       "changed": "Thế ghim đã đổi từ đó, nên được giữ nguyên.",
       "restored": "Thế bấm đã ghim trước đó đã trở lại.",
       "cleared": "Hiện không còn gì được ghim."

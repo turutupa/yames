@@ -769,6 +769,7 @@
       "done": "{{chord}}, {{shape}} basışı, Jam ekranına sabitlendi.",
       "noNeck": "Enstrümanında basış sabitlenecek bir sap yok.",
       "noShape": "Senin sapında {{chord}} akorunun böyle bir basışı yok.",
+      "otherJam": "Bu basış başka bir jam için çizildi, o yüzden bu jama sabitlenmiyor.",
       "changed": "Sabitleme bu arada değişti, bu yüzden olduğu gibi bırakıldı.",
       "restored": "Önceden sabitlenen basış geri geldi.",
       "cleared": "Şu an hiçbir şey sabitli değil."

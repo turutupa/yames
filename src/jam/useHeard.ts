@@ -35,7 +35,8 @@ function inTurn<T>(job: () => Promise<T>): Promise<T> {
  * When it stops, the coach's bus hears `jamStopped` once (leg c5a1), carrying
  * what the last stretch of hearing in that run came to, when there was one;
  * with "Hear what I play" off nothing was heard and the event has no `heard`.
- * Published once the stop has returned, never while the band plays.
+ * Published once the stop has returned, never while the band plays, with the
+ * jam that played (`runKey`, as it was while it played) as its `jam`.
  */
 export function useHeard({
   active,
@@ -43,12 +44,15 @@ export function useHeard({
   bpm,
   formBar,
   jamRun = false,
+  runKey = null,
 }: {
   active: boolean;
   chart: HeardChart | null;
   bpm: number;
   formBar: number;
   jamRun?: boolean;
+  /** The playing jam as `jamHeardKey` writes it; `jamStopped` carries it as `jam`. */
+  runKey?: string | null;
 }): HeardLive | null {
   const [live, setLive] = useState<HeardLive | null>(null);
   const running = useRef(false);
@@ -112,19 +116,31 @@ export function useHeard({
     };
   }, [active, chartKey]);
 
-  // The jam's run. Declared after the hearing above on purpose: a stop ends
-  // both in one commit, and React runs the cleanups in this order, so the
-  // hearing's stop is already in `heardInRun` when the run's end reads it.
+  // The jam that is playing, as it was while it played (`runKey`): kept by an
+  // effect, so the commit that stops the jam (and may already show another)
+  // does not overwrite it before the run's end reads it.
+  const runKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (jamRun) runKeyRef.current = runKey;
+  }, [jamRun, runKey]);
+
+  // The jam's run. A stop ends it and the hearing above in one commit; the
+  // run's end reads the hearing's stop one microtask later, after every
+  // cleanup of that commit has run, so it does not rest on the order React
+  // runs them in (review c5a1 L1).
   useEffect(() => {
     if (!jamRun) return;
     heardInRun.current = null;
     return () => {
       const at = Date.now();
-      const heard = heardInRun.current;
-      heardInRun.current = null;
-      void (heard ?? Promise.resolve(null)).then((summary) =>
-        publish(summary ? { type: "jamStopped", at, heard: summary } : { type: "jamStopped", at }),
-      );
+      const jam = runKeyRef.current ?? undefined;
+      void Promise.resolve().then(() => {
+        const heard = heardInRun.current;
+        heardInRun.current = null;
+        return (heard ?? Promise.resolve(null)).then((summary) =>
+          publish({ type: "jamStopped", at, ...(jam ? { jam } : {}), ...(summary ? { heard: summary } : {}) }),
+        );
+      });
     };
   }, [jamRun]);
 

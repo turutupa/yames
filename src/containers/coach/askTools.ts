@@ -88,6 +88,8 @@ export type ToolBody =
       /** The app is still finding out (a preset being re-read): the receipt says it is at it. */
       settling?: boolean;
       blocks?: readonly ResolvedBlock[];
+      /** The jam the blocks were drawn on (`ToolDone.forJam`): what "Pin this shape" pins to. */
+      forJam?: string;
       /** Where to go next (`ToolDone.next`, leg t2c: "Open Paths"). */
       next?: readonly ToolChoice[];
       undo: UndoState | null;
@@ -229,6 +231,7 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext, chi
     receipt: outcome.receipt,
     ...(outcome.later ? { settling: true } : {}),
     ...(outcome.blocks ? { blocks: outcome.blocks } : {}),
+    ...(outcome.forJam ? { forJam: outcome.forJam } : {}),
     ...(outcome.next && outcome.next.length > 0 ? { next: outcome.next } : {}),
     // The step as `useAskHost` says it to `noteAskToolView`: null outside a running Session.
     undo: undoOf(outcome, host, Date.now(), chip ? { step: ctx.run && ctx.run.phase !== "idle" ? ctx.run.stepIndex : null } : undefined),

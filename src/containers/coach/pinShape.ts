@@ -44,8 +44,9 @@ export type JamPinDoor = {
 };
 
 export type PinRecord =
-  | { state: "live"; jamId: string; before: JamPin | null; set: JamPin; until: number; receipt: Line }
-  | { state: "gone" | "done" | "refusedUndo"; receipt: Line; note: Line }
+  /** `note`: an Undo pressed during a Take, refused; the Undo stays for the rest of its time (review c5a1 L4). */
+  | { state: "live"; jamId: string; before: JamPin | null; set: JamPin; until: number; receipt: Line; note?: Line }
+  | { state: "gone" | "done"; receipt: Line; note: Line }
   | { state: "refused"; note: Line };
 
 let door: JamPinDoor | null = null;
@@ -90,8 +91,12 @@ function refuse(key: string, note: Line): void {
   tell();
 }
 
-/** The press on "Pin this shape". `key` is the receipt's turn id. */
-export function pressPinShape(key: string, action: PinAction, now = Date.now()): void {
+/**
+ * The press on "Pin this shape". `key` is the receipt's turn id; `forJam` the
+ * id of the jam the grip was drawn on (`ToolDone.forJam`): with another jam on
+ * the screen now, the press is refused (review c5a1 L3).
+ */
+export function pressPinShape(key: string, action: PinAction, now = Date.now(), forJam?: string): void {
   const held = records.get(key);
   if (held && held.state !== "refused") return;
   if (!door) return refuse(key, line("coachTools.why.notNow.here"));
@@ -102,6 +107,7 @@ export function pressPinShape(key: string, action: PinAction, now = Date.now()):
   }
   const jam = door.jamOnScreen();
   if (!jam) return refuse(key, line("coachTools.why.notNow.here"));
+  if (forJam !== undefined && jam.id !== forJam) return refuse(key, line("jam.pin.otherJam"));
   const neck = door.neck();
   if (!neck) return refuse(key, line("jam.pin.noNeck"));
   const chord = parseChordName(action.chord);
@@ -142,7 +148,8 @@ export function pressPinUndo(key: string, now = Date.now()): void {
     take = true;
   }
   if (take) {
-    records.set(key, { state: "refusedUndo", receipt, note: line("coachTools.why.notNow.take") });
+    // Refused, and still offered: the player can press it again once the Take ends.
+    records.set(key, { ...record, note: line("coachTools.why.notNow.take") });
     return tell();
   }
   const jam = door.jamOnScreen();

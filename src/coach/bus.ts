@@ -91,9 +91,11 @@ export type CoachEvent =
   /**
    * `useHeard.ts`, once per stop of a jam on the Jam screen, after the
    * hearing's `harmonyStop()` has returned. `heard` only when "Hear what I
-   * play" heard something in that run; `at` is the stop.
+   * play" heard something in that run; `at` is the stop. `jam` is the jam
+   * that played, as `jamHeardKey` writes it (its id and its chart), so the
+   * line after the stop is said beside that jam only.
    */
-  | (Stamp & { type: "jamStopped"; heard?: HeardSummary })
+  | (Stamp & { type: "jamStopped"; heard?: HeardSummary; jam?: string })
   /**
    * `useSongAttempt.ts`, when a pass settles. No subscriber yet. It can arrive
    * after Songs has unmounted (a pass settles up to ~600 ms plus grading after

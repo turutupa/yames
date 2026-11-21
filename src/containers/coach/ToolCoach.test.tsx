@@ -9,6 +9,8 @@ import { notifySettingsChange } from "../../ipc";
 import type { HeardSummary } from "../../ipc";
 import { publish, resetCoachBus } from "../../coach/bus";
 import { createJam } from "../../jam/jams";
+import { jamHarmony } from "../../jam/display";
+import { jamHeardKey } from "../../jam/heard";
 
 afterEach(cleanup);
 
@@ -322,12 +324,13 @@ describe("ToolCoach on Jam: the line after a stop (leg c5a1)", () => {
     chordBeats: 42,
     beats: 90,
   };
+  const of = (j: typeof jam) => jamHeardKey(j, jamHarmony(j));
   afterEach(() => resetCoachBus());
 
   it("shows the line once the jam stops, and hides it when the next play starts", () => {
     const { rerender } = render(<ToolCoach {...base} isPlaying jam={jam} />);
     rerender(<ToolCoach {...base} isPlaying={false} jam={jam} />);
-    act(() => publish({ type: "jamStopped", at: Date.now() + 5, heard }));
+    act(() => publish({ type: "jamStopped", at: Date.now() + 5, heard, jam: of(jam) }));
     const line = screen.getByTestId("tool-coach-jam-line");
     expect(line.textContent).toContain("Am, Dm");
     expect(line.textContent).toContain("The chart has");
@@ -336,18 +339,38 @@ describe("ToolCoach on Jam: the line after a stop (leg c5a1)", () => {
     expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
   });
 
+  it("goes when another jam is picked after the stop, or this jam's key is edited, and stays while nothing changed (review c5a1 M2)", () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying jam={jam} />);
+    rerender(<ToolCoach {...base} isPlaying={false} jam={jam} />);
+    act(() => publish({ type: "jamStopped", at: Date.now() + 5, heard, jam: of(jam) }));
+    expect(screen.getByTestId("tool-coach-jam-line").textContent).toContain("Am, Dm");
+    // Untouched: the same jam, a fresh object of the same content, keeps the line.
+    rerender(<ToolCoach {...base} isPlaying={false} jam={{ ...jam }} />);
+    expect(screen.getByTestId("tool-coach-jam-line").textContent).toContain("Am, Dm");
+    // Another jam picked without pressing play: what was heard was not its playing.
+    const other = createJam("Two-five", { key: "C", chords: false });
+    rerender(<ToolCoach {...base} isPlaying={false} jam={other} />);
+    expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
+    // The same jam with its key edited since the stop.
+    rerender(<ToolCoach {...base} isPlaying={false} jam={{ ...jam, key: "Em" }} />);
+    expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
+    // Back to the jam as it was: the stop was of this one.
+    rerender(<ToolCoach {...base} isPlaying={false} jam={jam} />);
+    expect(screen.getByTestId("tool-coach-jam-line").textContent).toContain("Am, Dm");
+  });
+
   it("says nothing for a stop with hearing off, or a stop from before this screen", () => {
     const { rerender } = render(<ToolCoach {...base} listenOn={false} isPlaying={false} jam={jam} />);
     act(() => publish({ type: "jamStopped", at: Date.now() + 5 }));
     expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
-    act(() => publish({ type: "jamStopped", at: 1, heard }));
+    act(() => publish({ type: "jamStopped", at: 1, heard, jam: of(jam) }));
     rerender(<ToolCoach {...base} listenOn={false} isPlaying={false} jam={jam} />);
     expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
   });
 
   it("is not shown under another tool", () => {
     render(<ToolCoach {...base} isPlaying={false} />);
-    act(() => publish({ type: "jamStopped", at: Date.now() + 5, heard }));
+    act(() => publish({ type: "jamStopped", at: Date.now() + 5, heard, jam: of(jam) }));
     expect(screen.queryByTestId("tool-coach-jam-line")).toBeNull();
   });
 });

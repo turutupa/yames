@@ -7,11 +7,11 @@
 import { describe, expect, it } from "vitest";
 import type { JamHarmony } from "../../jam/display";
 import { jamHarmony } from "../../jam/display";
-import { chordName, type Chord, type Key } from "../../jam/harmony";
+import { chordIntervals, chordName, type Chord, type ChordQuality, type Key } from "../../jam/harmony";
 import { createJam } from "../../jam/jams";
 import type { CoachContext } from "../context";
 import type { FactCard } from "./cards";
-import { changeNoteLines, withChangeNote } from "./changeNote";
+import { changeNoteLines, roleOfInterval, withChangeNote } from "./changeNote";
 
 const chart = (key: Key, chords: Chord[]): JamHarmony => ({ key, concert: key, chords });
 const C_MAJOR: Key = { root: 0, mode: "major" };
@@ -96,6 +96,19 @@ describe("changeNoteLines", () => {
     expect(changeNoteLines(twoFiveOne, "H7")).toBeNull();
   });
 
+  it("Bm to E7#9: the #9 (F##) is not the third; F# moves a whole step up to G#, the third (review c5a1 M1)", () => {
+    // Bm = B D F#. E7#9 = E G# B D F## (F## sounds as G, a minor third above E, but it is the sharp ninth).
+    // F# leaves; it could go up a half step to F## (the #9, no role) or a whole step to G# (the third).
+    const sharpNine = chart({ root: 4, mode: "major" }, [
+      { root: 11, quality: "min" },
+      { root: 4, quality: "7sharp9" },
+    ]);
+    expect(changeNoteLines(sharpNine, "E7#9")).toEqual([
+      { key: "jam.change.wholeUp", values: { from: "Bm", to: "E7#9", note: "F#", target: "G#" } },
+      { key: "jam.change.third", values: { to: "E7#9", target: "G#" } },
+    ]);
+  });
+
   it("the chord as the asker typed it matches the chart's by sound (A#7 is the chart's Bb7)", () => {
     const flat = chart({ root: 5, mode: "major" }, [
       { root: 5, quality: "7" },
@@ -106,6 +119,54 @@ describe("changeNoteLines", () => {
       { key: "jam.change.halfDown", values: { from: "F7", to: "Bb7", note: "Eb", target: "D" } },
       { key: "jam.change.third", values: { to: "Bb7", target: "D" } },
     ]);
+  });
+});
+
+describe("roleOfInterval: a tone is called the third or the seventh only when it is that degree", () => {
+  // Written by hand, one entry per stack position (root first), from what each
+  // tone IS: 3/4 the third, b7/maj7 the seventh (bb7 in dim7), everything else
+  // (root, fifth, sixth, 2, 4, 9, b9, #9, 11, 13) no role.
+  const T = "third";
+  const S = "seventh";
+  const _ = null;
+  const cases: Array<[ChordQuality, number[], Array<"third" | "seventh" | null>]> = [
+    ["7sharp9", [0, 4, 7, 10, 15], [_, T, _, S, _]],
+    ["7b9", [0, 4, 7, 10, 13], [_, T, _, S, _]],
+    ["9", [0, 4, 7, 10, 14], [_, T, _, S, _]],
+    ["maj9", [0, 4, 7, 11, 14], [_, T, _, S, _]],
+    ["m9", [0, 3, 7, 10, 14], [_, T, _, S, _]],
+    ["11", [0, 4, 7, 10, 14, 17], [_, T, _, S, _, _]],
+    ["m11", [0, 3, 7, 10, 14, 17], [_, T, _, S, _, _]],
+    ["13", [0, 4, 7, 10, 14, 21], [_, T, _, S, _, _]],
+    ["m13", [0, 3, 7, 10, 14, 21], [_, T, _, S, _, _]],
+    ["maj13", [0, 4, 7, 11, 14, 21], [_, T, _, S, _, _]],
+    ["add9", [0, 2, 4, 7], [_, _, T, _]],
+    ["madd9", [0, 3, 7, 14], [_, T, _, _]],
+    ["69", [0, 4, 7, 9, 14], [_, T, _, _, _]],
+    ["6", [0, 4, 7, 9], [_, T, _, _]],
+    ["m6", [0, 3, 7, 9], [_, T, _, _]],
+    ["sus2", [0, 2, 7], [_, _, _]],
+    ["sus4", [0, 5, 7], [_, _, _]],
+    ["7sus4", [0, 5, 7, 10], [_, _, _, S]],
+    ["7sus2", [0, 2, 7, 10], [_, _, _, S]],
+    ["9sus4", [0, 5, 7, 10, 14], [_, _, _, S, _]],
+    ["dim7", [0, 3, 6, 9], [_, T, _, S]],
+    ["m7b5", [0, 3, 6, 10], [_, T, _, S]],
+    ["7sharp5", [0, 4, 8, 10], [_, T, _, S]],
+    ["mMaj7", [0, 3, 7, 11], [_, T, _, S]],
+    ["5", [0, 7], [_, _]],
+    ["maj", [0, 4, 7], [_, T, _]],
+    ["min", [0, 3, 7], [_, T, _]],
+    ["dim", [0, 3, 6], [_, T, _]],
+    ["aug", [0, 4, 8], [_, T, _]],
+    ["7", [0, 4, 7, 10], [_, T, _, S]],
+    ["maj7", [0, 4, 7, 11], [_, T, _, S]],
+    ["m7", [0, 3, 7, 10], [_, T, _, S]],
+  ];
+  it.each(cases)("%s", (quality, stack, roles) => {
+    // The stack is restated by hand so a change to the table cannot pass silently.
+    expect(chordIntervals(quality)).toEqual(stack);
+    expect(stack.map((i) => roleOfInterval(i, quality))).toEqual(roles);
   });
 });
 

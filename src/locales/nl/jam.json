@@ -769,6 +769,7 @@
       "done": "{{chord}}, greep {{shape}}, vastgezet op het jamscherm.",
       "noNeck": "Je instrument heeft geen hals om een greep aan vast te zetten.",
       "noShape": "Zo'n greep van {{chord}} bestaat niet op je hals.",
+      "otherJam": "Deze greep is voor een andere jam getekend, dus hij wordt niet aan deze vastgezet.",
       "changed": "De vastgezette greep is intussen veranderd, dus hij blijft zoals hij is.",
       "restored": "De eerder vastgezette greep is terug.",
       "cleared": "Er is nu niets vastgezet."

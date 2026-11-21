@@ -26,7 +26,7 @@
 import { jamHarmony, type JamHarmony } from "../../jam/display";
 import type { CoachContext } from "../context";
 import type { FactCard, NoCard } from "./cards";
-import { chordIntervals, chordName, chordNotes, parseChordName, pitchClass, sameChord, type Chord } from "../../jam/harmony";
+import { chordIntervals, chordName, chordNotes, parseChordName, pitchClass, sameChord, type Chord, type ChordQuality } from "../../jam/harmony";
 import { spellChord } from "../../paths/theory";
 import type { Line } from "../tools/types";
 
@@ -41,14 +41,24 @@ function tonesOf(symbol: string, chord: Chord): Tone[] | null {
   }
   const intervals = chordIntervals(chord.quality);
   if (names.length !== intervals.length) return null;
-  return intervals.map((interval, order) => ({ pc: pitchClass(chord.root + interval), name: names[order], interval: interval % 12, order }));
+  return intervals.map((interval, order) => ({ pc: pitchClass(chord.root + interval), name: names[order], interval, order }));
+}
+
+/**
+ * What a chord tone is, from its interval above the root as the chord's stack
+ * holds it (not folded into one octave: the #9 of a 7#9 sits 15 semitones up,
+ * the same pitch class as a minor third, and is not the chord's third; review
+ * c5a1 M1). The third or the seventh, or null for every other tone.
+ */
+export function roleOfInterval(interval: number, quality: ChordQuality): "third" | "seventh" | null {
+  if (interval === 3 || interval === 4) return "third";
+  if (interval === 10 || interval === 11 || (quality === "dim7" && interval === 9)) return "seventh";
+  return null;
 }
 
 /** What the arriving note is in the chord it arrives in: its third, its seventh, or another tone. */
 function roleOf(tone: Tone, chord: Chord): "third" | "seventh" | null {
-  if (tone.interval === 3 || tone.interval === 4) return "third";
-  if (tone.interval === 10 || tone.interval === 11 || (chord.quality === "dim7" && tone.interval === 9)) return "seventh";
-  return null;
+  return roleOfInterval(tone.interval, chord.quality);
 }
 
 /** Signed semitones from one pitch class to another, the short way round. */

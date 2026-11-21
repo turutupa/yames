@@ -789,6 +789,7 @@
       "done": "Przypięto {{chord}}, chwyt {{shape}}, do ekranu jamu.",
       "noNeck": "Twój instrument nie ma gryfu, do którego można przypiąć chwyt.",
       "noShape": "Na twoim gryfie nie ma takiego chwytu akordu {{chord}}.",
+      "otherJam": "Ten chwyt narysowano dla innego jamu, więc nie jest przypięty do tego.",
       "changed": "Przypięcie zmieniło się w międzyczasie, więc zostaje bez zmian.",
       "restored": "Wcześniej przypięty chwyt wrócił.",
       "cleared": "Teraz nic nie jest przypięte."

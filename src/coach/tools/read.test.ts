@@ -71,9 +71,12 @@ describe("show_chord", () => {
 
   it("on the Jam screen the grip carries 'Pin this shape', and drawing it changes nothing (leg c5a1)", () => {
     const host = fakeHost();
-    const onJam = toolCtx({ jam: { jam: createJam("Slow rock", { key: "Am" }) } });
+    const drawnOn = createJam("Slow rock", { key: "Am" });
+    const onJam = toolCtx({ jam: { jam: drawnOn } });
     const out = result(runCoachTool({ tool: "show_chord", args: { chord: "Am7", shape: 2 } }, host, onJam));
     expect(out.ok && out.blocks?.map((b) => b.type)).toEqual(["chordShape", "action"]);
+    // the receipt says which jam the grip was drawn on (review c5a1 L3)
+    expect(out.ok && "forJam" in out && out.forJam).toBe(drawnOn.id);
     expect(out.ok && out.blocks?.[1]).toMatchObject({ type: "action", action: { kind: "pinShape", chord: "Am7", shape: 1 }, label: { key: "coachBlocks.action.pinShape" } });
     expect(host.changes()).toEqual([]);
     // anywhere else, the grip alone; and a shape past the last is still not found on Jam

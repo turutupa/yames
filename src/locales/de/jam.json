@@ -769,6 +769,7 @@
       "done": "{{chord}}, Griff {{shape}}, an den Jam-Bildschirm angeheftet.",
       "noNeck": "Dein Instrument hat keinen Hals, an den sich ein Griff anheften ließe.",
       "noShape": "Einen solchen Griff von {{chord}} gibt es auf deinem Hals nicht.",
+      "otherJam": "Dieser Griff wurde für einen anderen Jam gezeichnet, deshalb wird er an diesen nicht angeheftet.",
       "changed": "Die Anheftung hat sich inzwischen geändert und bleibt deshalb, wie sie ist.",
       "restored": "Der zuvor angeheftete Griff ist wieder da.",
       "cleared": "Jetzt ist nichts angeheftet."

@@ -779,6 +779,7 @@
       "done": "Fijado {{chord}}, posición {{shape}}, en la pantalla de Jam.",
       "noNeck": "Tu instrumento no tiene mástil donde fijar una posición.",
       "noShape": "No hay esa posición de {{chord}} en tu mástil.",
+      "otherJam": "Esta posición se dibujó para otro jam, así que no se fija en este.",
       "changed": "La posición fijada ha cambiado desde entonces, así que se queda como está.",
       "restored": "Vuelve la posición fijada antes.",
       "cleared": "Ahora no hay nada fijado."

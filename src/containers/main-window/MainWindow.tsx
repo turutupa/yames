@@ -124,7 +124,7 @@ import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
 import { barInView, jamHarmony, nextChange } from "../../jam/display";
 import { chordName, displayTransposition } from "../../jam/harmony";
-import { heardChart, heardLine } from "../../jam/heard";
+import { heardChart, heardLine, jamHeardKey } from "../../jam/heard";
 import { useHeard } from "../../jam/useHeard";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
@@ -682,6 +682,7 @@ export function MainWindow() {
   const heardJam = mode === "jam" ? jamSession.jam : null;
   const heardInSession = mode === "session" && sessionStep?.kind === "jam" && !sessionStep.exerciseId;
   const heardChartNow = useMemo(() => (heardJam ? heardChart(heardJam) : null), [heardJam]);
+  const heardJamKey = useMemo(() => (heardJam ? jamHeardKey(heardJam, jamHarmony(heardJam)) : null), [heardJam]);
   const heardLive = useHeard({
     active: jamHear && state.isPlaying && evaluation.enabled && (!!heardJam || heardInSession),
     chart: heardChartNow,
@@ -689,6 +690,7 @@ export function MainWindow() {
     formBar: currentBeat?.formBar ?? 0,
     // A jam on the Jam screen: its stop is the coach's `jamStopped` (leg c5a1).
     jamRun: !!heardJam && state.isPlaying,
+    runKey: heardJamKey,
   });
   // Recording session (card #109): a jam or the Session's free play is kept
   // while it plays and the input listens. A finisher too, ungraded.

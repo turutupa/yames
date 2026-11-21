@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { HeardLive, HeardSummary } from "../ipc";
-import { forgetHeard, heardLine, heardRecap, heardSince, jamHeardLine, rememberHeard, RECAP_MIN_HEARD_S } from "./heard";
-import type { JamHarmony } from "./display";
+import { forgetHeard, heardLine, heardRecap, heardSince, jamHeardKey, jamHeardLine, jamStopLine, rememberHeard, RECAP_MIN_HEARD_S } from "./heard";
+import { jamHarmony, type JamHarmony } from "./display";
+import { createJam } from "./jams";
 
 const live = (over: Partial<HeardLive>): HeardLive => ({
   keyState: "listening",
@@ -201,5 +202,52 @@ describe("jamHeardLine: the line under Jam's stage after a stop (leg c5a1)", () 
       ],
     };
     expect(jamHeardLine(heardOf([[10, "maj", 30]]), f)).toEqual([{ key: "jam.heard.stopLine", values: { heard: "Bb", chart: "F, Bb, C7" } }]);
+  });
+
+  it("rests on enough chord: 20 s of single notes and one 2-beat strum say nothing (review c5a1 L2)", () => {
+    // The engine's summary keeps a chord of 2 beats when it is all the chord there was.
+    expect(jamHeardLine(heardOf([[0, "maj", 2]], { heardS: 20 }), aMinorChart)).toBeNull();
+    // Seven beats of chord in all: still under two bars of 4/4.
+    expect(jamHeardLine(heardOf([[9, "min", 4], [5, "maj", 3]]), aMinorChart)).toBeNull();
+    // Eight beats, but F only 3 of them: Am is named, F is not.
+    expect(jamHeardLine(heardOf([[9, "min", 5], [5, "maj", 3]]), aMinorChart)).toEqual([
+      { key: "jam.heard.stopLine", values: { heard: "Am", chart: "Am, F, C, G" } },
+    ]);
+    // A thin chord beside a long one is left out: Dm for 3 beats of 33.
+    expect(jamHeardLine(heardOf([[9, "min", 30], [2, "min", 3]]), aMinorChart)).toEqual([
+      { key: "jam.heard.stopLine", values: { heard: "Am", chart: "Am, F, C, G" } },
+    ]);
+  });
+});
+
+describe("jamStopLine: said only beside the jam that was heard (review c5a1 M2)", () => {
+  const heard: HeardSummary = {
+    reading: { keyState: "settled", key: aMinor, chord: null, settledAtS: 12, heardS: 60 },
+    chords: [
+      { root: 9, quality: "min", beats: 30 },
+      { root: 2, quality: "min", beats: 12 },
+    ],
+    chordBeats: 42,
+    beats: 160,
+  };
+  const jamA = createJam("Slow rock", { key: "Am", chords: false });
+  const stop = { heard, jam: jamHeardKey(jamA, jamHarmony(jamA)) };
+
+  it("the same jam, untouched: the line", () => {
+    const lines = jamStopLine(stop, { ...jamA });
+    expect(lines?.[0].key).toBe("jam.heard.stopLine");
+    expect(lines?.[0].values.heard).toBe("Am, Dm");
+  });
+
+  it("another jam picked since the stop: nothing", () => {
+    expect(jamStopLine(stop, createJam("Two-five", { key: "C", chords: false }))).toBeNull();
+  });
+
+  it("the same jam with its key edited since the stop: nothing", () => {
+    expect(jamStopLine(stop, { ...jamA, key: "Em" })).toBeNull();
+  });
+
+  it("a stop that does not say which jam it was: nothing", () => {
+    expect(jamStopLine({ heard }, jamA)).toBeNull();
   });
 });

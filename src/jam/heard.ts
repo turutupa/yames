@@ -11,7 +11,7 @@
 import type { HeardChart, HeardChord, HeardKey, HeardLive, HeardQuality, HeardSummary } from "../ipc";
 import { chordName, chordNotes, keyRootName, parseChordName, sameChord, transposeChord } from "./harmony";
 import type { Chord, ChordQuality, Key } from "./harmony";
-import type { JamHarmony } from "./display";
+import { jamHarmony, type JamHarmony } from "./display";
 import { chordsForJam, jamChangesBars } from "./progression";
 import { jamKey } from "./compile";
 import type { Jam } from "./types";
@@ -113,6 +113,40 @@ export function heardRecap(summary: HeardSummary | null): { key: HeardKeyName; r
   return { key: line.key, relative: line.relative, chords };
 }
 
+/**
+ * How much chord the jam's stop line rests on (review c5a1 L2). The engine's
+ * summary (`harmony/worker.rs` `Heard::summary`) keeps any chord shown for at
+ * least 2 beats and a tenth of the beats that showed one, so 20 s of single
+ * notes and one strum would still name a chord "heard most". The line asks for
+ * more: two bars of common time with a chord shown in all (8 beats), and each
+ * chord it names shown for at least one bar (4 beats). Below that the tenth's
+ * share is at most one beat and adds nothing, so these two are the floor.
+ */
+export const JAM_LINE_MIN_CHORD_BEATS = 8;
+export const JAM_LINE_MIN_BEATS_PER_CHORD = 4;
+
+/**
+ * Who a jam's stop line belongs to: the jam's id and the chart as the Jam
+ * screen reads it (key, transposition, chords). `jamStopped` carries the one
+ * taken while the jam played, and the line is said only beside a jam with the
+ * same one: not beside another jam picked since, nor beside this jam after its
+ * key or chords were edited (review c5a1 M2).
+ */
+export function jamHeardKey(jam: Jam, harmony: JamHarmony): string {
+  return JSON.stringify([jam.id, harmony.key, harmony.concert, harmony.chords]);
+}
+
+/**
+ * The stop line for the jam on screen now, or null: only when the stop was of
+ * this very jam, with the chart it has now (`jamHeardKey`).
+ */
+export function jamStopLine(stopped: { heard?: HeardSummary; jam?: string } | null | undefined, jam: Jam): HeardSentence[] | null {
+  if (!stopped?.heard || !stopped.jam) return null;
+  const harmony = jamHarmony(jam);
+  if (jamHeardKey(jam, harmony) !== stopped.jam) return null;
+  return jamHeardLine(stopped.heard, harmony);
+}
+
 /** A sentence the page words: an i18n key and its values (the coach's `Line`). */
 export type HeardSentence = { key: string; values: Record<string, string | number> };
 
@@ -132,6 +166,8 @@ export type HeardSentence = { key: string; values: Record<string, string | numbe
  * - **The recap's floor** (`heardRecap`): a key that settled, and at least
  *   `RECAP_MIN_HEARD_S` of playing. And at least one chord: a line of single
  *   notes names none (a chord is named only when a beat held several voices).
+ * - **Enough chord** (review c5a1 L2): `JAM_LINE_MIN_CHORD_BEATS` beats with a
+ *   chord in all, and each chord named held for `JAM_LINE_MIN_BEATS_PER_CHORD`.
  * - **Five qualities.** The engine names major, minor, 7, maj7 and m7 from a
  *   triad and a seventh, so it cannot tell a chord from another with the same
  *   notes (Am7 and C6 are one set). When every note of a chord it named is
@@ -144,6 +180,7 @@ export type HeardSentence = { key: string; values: Record<string, string | numbe
 export function jamHeardLine(summary: HeardSummary | null | undefined, chart: JamHarmony): HeardSentence[] | null {
   const r = summary?.reading;
   if (!summary || !r || r.keyState !== "settled" || !r.key || r.heardS < RECAP_MIN_HEARD_S) return null;
+  if (summary.chordBeats < JAM_LINE_MIN_CHORD_BEATS) return null;
   const semitones = pc(chart.key.root - chart.concert.root);
   const spell: HeardKey = { tonic: pc(chart.concert.root), mode: chart.concert.mode };
   const charted: { chord: Chord; name: string }[] = [];
@@ -153,7 +190,7 @@ export function jamHeardLine(summary: HeardSummary | null | undefined, chart: Ja
   if (charted.length === 0) return null;
   const heard: { chord: Chord; name: string }[] = [];
   for (const c of summary.chords) {
-    if (!c.quality) continue;
+    if (!c.quality || c.beats < JAM_LINE_MIN_BEATS_PER_CHORD) continue;
     const name = chordNameOf(c, spell, semitones);
     if (!name) continue;
     const chord = transposeChord({ root: pc(c.root), quality: QUALITY[c.quality] }, semitones);

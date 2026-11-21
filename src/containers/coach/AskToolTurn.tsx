@@ -94,7 +94,7 @@ function usePin(id: string, blocks: ToolBody & { kind: "receipt" }) {
   const shown = record && record.state !== "refused" ? blocks.blocks?.filter((b) => !(b.type === "action" && b.action.kind === "pinShape")) : blocks.blocks;
   const onAction = pinnable
     ? (action: CoachAction) => {
-        if (action.kind === "pinShape") pressPinShape(id, action);
+        if (action.kind === "pinShape") pressPinShape(id, action, Date.now(), blocks.forJam);
       }
     : undefined;
   return { record, shown, onAction };
@@ -128,7 +128,7 @@ function PinReceipt({ id, record }: { id: string; record: PinRecord }) {
           {t("coachTools.undo.generic")}
         </button>
       )}
-      {record.state !== "live" && (
+      {record.note && (record.state !== "live" || live) && (
         <p className="ask-tool-note" data-testid="ask-pin-note">
           {record.state === "done" ? `${t("coachTools.ui.undone")} ` : ""}
           {lineText(t, record.note)}

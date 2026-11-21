@@ -81,7 +81,7 @@ const showChord: ActTool = {
     // `pinShape`): a button, pressed or not; drawing it pins nothing.
     if (ctx.jam) {
       const { blocks } = resolveCoachAnswer({ blocks: [grip, { type: "action", action: { kind: "pinShape", chord, shape } }] }, {});
-      if (blocks.length === 2 && blocks[0].type === "chordShape") return { ok: true, receipt, blocks };
+      if (blocks.length === 2 && blocks[0].type === "chordShape") return { ok: true, receipt, blocks, forJam: ctx.jam.jam.id };
     }
     return show(grip, receipt);
   },

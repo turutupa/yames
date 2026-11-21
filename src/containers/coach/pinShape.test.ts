@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createJam } from "../../jam/jams";
 import type { Jam } from "../../jam/types";
 import { UNDO_MS } from "./askTools";
-import { pinRecord, pressPinShape, pressPinUndo, registerJamPin, resetPinsForTests, type JamPin } from "./pinShape";
+import { pinRecord, pinUndoLive, pressPinShape, pressPinUndo, registerJamPin, resetPinsForTests, type JamPin } from "./pinShape";
 
 afterEach(() => resetPinsForTests());
 
@@ -23,6 +23,7 @@ function stage(start: JamPin | null, over: { take?: boolean; neck?: "guitar" | "
   });
   return {
     setPin,
+    id: () => jam.id,
     pin: () => jam.pinnedShape ?? null,
     takeStarts: () => (take = true),
     takeEnds: () => (take = false),
@@ -98,13 +99,35 @@ describe("pressPinShape", () => {
     expect(s.pin()).toEqual(AM7_PIN);
   });
 
-  it("Undo refused during a Take", () => {
+  it("Undo refused during a Take, and still there to press once the Take ends (review c5a1 L4)", () => {
     const s = stage(G_PIN);
     pressPinShape("t1", AM7, 1_000);
     s.takeStarts();
     pressPinUndo("t1", 2_000);
     expect(s.pin()).toEqual(AM7_PIN);
-    expect(pinRecord("t1")).toMatchObject({ state: "refusedUndo", note: { key: "coachTools.why.notNow.take" } });
+    expect(pinRecord("t1")).toMatchObject({ state: "live", until: 1_000 + UNDO_MS, note: { key: "coachTools.why.notNow.take" } });
+    expect(pinUndoLive(pinRecord("t1"), 2_000)).toBe(true);
+    s.takeEnds();
+    pressPinUndo("t1", 3_000);
+    expect(s.pin()).toEqual(G_PIN);
+    expect(pinRecord("t1")).toMatchObject({ state: "done", note: { key: "jam.pin.restored" } });
+  });
+
+  it("an old receipt's press is refused when another jam is on the screen (review c5a1 L3)", () => {
+    const s = stage(G_PIN);
+    const drawnOn = "a-jam-that-is-gone";
+    pressPinShape("t1", AM7, 1_000, drawnOn);
+    expect(s.setPin).not.toHaveBeenCalled();
+    expect(s.pin()).toEqual(G_PIN);
+    expect(pinRecord("t1")).toEqual({ state: "refused", note: { key: "jam.pin.otherJam", values: {} } });
+  });
+
+  it("a receipt drawn on the jam that is on the screen pins to it", () => {
+    const s = stage(null);
+    pressPinShape("t1", AM7, 1_000, s.id());
+    expect(s.setPin).toHaveBeenCalledTimes(1);
+    expect(s.pin()).toEqual(AM7_PIN);
+    expect(pinRecord("t1")).toMatchObject({ state: "live" });
   });
 
   it("refused off the Jam screen, without a neck, for a grip the neck does not have, and with no door", () => {

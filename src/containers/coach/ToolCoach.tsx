@@ -41,8 +41,7 @@ import { CoachNote, NoteChips, NoteLine } from "./CoachNote";
 import { suggestChips } from "../../coach/ask/suggest";
 import type { AskHandler } from "./askStore";
 import { useCoachEvent } from "../../coach/useCoachEvent";
-import { jamHeardLine } from "../../jam/heard";
-import { jamHarmony } from "../../jam/display";
+import { jamStopLine } from "../../jam/heard";
 import type { Jam } from "../../jam/types";
 import "../../styles/coach.css";
 
@@ -332,7 +331,8 @@ function useJamStopLine(jam: Jam | null, isPlaying: boolean, runStartedAt: numbe
   const stopped = useCoachEvent("jamStopped");
   return useMemo(() => {
     if (!jam || isPlaying || !stopped?.heard || stopped.at < runStartedAt) return null;
-    return jamHeardLine(stopped.heard, jamHarmony(jam));
+    // Only beside the jam that was heard, as it was then (review c5a1 M2).
+    return jamStopLine(stopped, jam);
   }, [jam, isPlaying, stopped, runStartedAt]);
 }
 

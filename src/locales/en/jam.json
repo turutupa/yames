@@ -769,6 +769,7 @@
       "done": "Pinned {{chord}}, shape {{shape}}, to the Jam screen.",
       "noNeck": "Your instrument has no neck to pin a grip to.",
       "noShape": "There is no such grip of {{chord}} on your neck.",
+      "otherJam": "This grip was drawn for another jam, so it is not pinned to this one.",
       "changed": "The pin has changed since, so it is left as it is.",
       "restored": "The grip pinned before is back.",
       "cleared": "Nothing is pinned now."

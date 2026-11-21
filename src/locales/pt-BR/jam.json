@@ -779,6 +779,7 @@
       "done": "{{chord}} fixado, forma {{shape}}, na tela Jam.",
       "noNeck": "Seu instrumento não tem braço para fixar uma forma.",
       "noShape": "Não existe essa forma de {{chord}} no seu braço.",
+      "otherJam": "Essa forma foi desenhada para outro jam, por isso não fica fixada neste.",
       "changed": "A fixação mudou desde então, por isso fica como está.",
       "restored": "A forma fixada antes voltou.",
       "cleared": "Agora não há nada fixado."

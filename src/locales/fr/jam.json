@@ -779,6 +779,7 @@
       "done": "{{chord}} épinglé, position {{shape}}, sur l'écran Jam.",
       "noNeck": "Ton instrument n'a pas de manche où épingler une position.",
       "noShape": "Il n'y a pas cette position de {{chord}} sur ton manche.",
+      "otherJam": "Cette position a été dessinée pour un autre jam, elle n'est donc pas épinglée à celui-ci.",
       "changed": "L'épingle a changé depuis, donc elle reste telle quelle.",
       "restored": "La position épinglée avant est de retour.",
       "cleared": "Plus rien n'est épinglé."
