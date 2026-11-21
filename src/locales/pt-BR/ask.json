@@ -45,6 +45,67 @@
       "model": "Respondido pelo modelo neste computador. Nada do que você digita sai dele.",
       "local": "Nada do que você digita aqui sai deste computador.",
       "phone": "Nada do que você digita aqui sai deste celular."
+    },
+    "card": {
+      "chips": "About your last Take:",
+      "chip": {
+        "where": "Where did it slip?",
+        "lean": "Was I early or late?",
+        "count": "Why didn't that count?"
+      },
+      "canAnswer": {
+        "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
+      },
+      "tooShort": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "slip": {
+        "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
+        "noBars": "I didn't measure Take {{take}} bar by bar, so I can't say where it slipped."
+      },
+      "lean": {
+        "premise": {
+          "early": "In Take {{take}} your notes landed early, not late.",
+          "late": "In Take {{take}} your notes landed late, not early."
+        },
+        "premiseNone": {
+          "early": "Take {{take}} didn't lean early: no bar was more than {{ms}} ms off the rest of it.",
+          "late": "Take {{take}} didn't lean late: no bar was more than {{ms}} ms off the rest of it."
+        },
+        "bar": {
+          "early": "Bar {{bar}} of the tune: {{ms}} ms earlier than the rest of the Take.",
+          "late": "Bar {{bar}} of the tune: {{ms}} ms later than the rest of the Take."
+        },
+        "none": "No bar of Take {{take}} leaned early or late by more than {{ms}} ms.",
+        "notMeasured": "I didn't measure which way Take {{take}} leaned: there is no note-by-note timing for it."
+      },
+      "count": {
+        "passed": "Take {{take}} did count: it met the pass mark at {{bpm}} BPM.",
+        "below": "Take {{take}} did count, as a Take below the pass mark at {{bpm}} BPM.",
+        "notCaught": "I didn't measure Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
+        "tooShort": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
+        "unfair": "You marked this grade as not fair. It is kept as measured, with your answer beside it.",
+        "pitchGraded": "The pitch of your notes is part of this Exercise's grade.",
+        "ungraded": {
+          "eyes": "I didn't measure Take {{take}}: it was the one for your eyes, so nothing was graded.",
+          "chosen": "I didn't measure Take {{take}}: you chose to just play it, so nothing was graded.",
+          "inputOff": "I didn't measure Take {{take}}: the input wasn't on, so nothing was graded.",
+          "gradingOff": "I didn't measure Take {{take}}: grading is off, so nothing was graded."
+        }
+      },
+      "notMeasured": {
+        "pitch": "I didn't measure that. This Exercise times your notes and doesn't check their pitch.",
+        "pickDirection": "I didn't measure that. The app has only sound, and a downstroke and an upstroke can sound alike.",
+        "muting": "I didn't measure that. The app can't tell a muted string from a loud one next to it.",
+        "posture": "I didn't measure that. The app has no picture of you.",
+        "tension": "I didn't measure that. Only you can feel tension, and it comes before it can be heard.",
+        "handAttribution": "I didn't measure that. A late note sounds the same from either hand.",
+        "fingering": "I didn't measure that. The same pitch sounds the same from any finger.",
+        "tone": "I didn't measure that. Tone and touch aren't measured.",
+        "feel": "I didn't measure that. Whether it sounds good isn't something the app measures."
+      },
+      "notNow": {
+        "noTake": "There's no Take of this Exercise to answer from yet.",
+        "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
+      }
     }
   }
 }

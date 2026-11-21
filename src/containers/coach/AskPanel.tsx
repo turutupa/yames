@@ -9,6 +9,8 @@ import { CoachModelSelector } from "../main-window/CoachModelSelector";
 import { CoachGlyph } from "./CoachGlyph";
 import { consumeAskFocus, noteAskScreen, sendAsk, useAskState, type AskTurn } from "./askStore";
 import { AskToolTurn } from "./AskToolTurn";
+import { AskCardChips, AskCardTurn } from "./AskCardTurn";
+import { askCardChips, askUngradedHere } from "./askCards";
 import { askToolChips, onePress, runAskCall } from "./askTools";
 import { lineText } from "./toolWords";
 import "../../styles/ask.css";
@@ -174,6 +176,15 @@ function AskConversation({
   // the thread is written (a turn updated in place too: a proposal's press changes
   // what the chips may offer), never per beat (the panel renders from its store alone).
   const chips = useMemo(() => askToolChips(), [lookingKey, turns]);
+  // The fact cards' question chips (leg c2b1a), chosen the same way, never per beat.
+  const cards = useMemo(() => askCardChips(turns.length === 0 ? "askEmpty" : "askAbove", turns), [lookingKey, turns]);
+  const ungraded = useMemo(() => turns.length === 0 && askUngradedHere(), [lookingKey, turns]);
+  const cardRow =
+    cards.length > 0 ? (
+      <div className="ask-chips ask-card-chips" data-testid="ask-card-chips">
+        <AskCardChips chips={cards} />
+      </div>
+    ) : null;
   const chipRow =
     chips.length > 0 ? (
       <div className="ask-chips" data-testid="ask-tool-chips">
@@ -210,14 +221,22 @@ function AskConversation({
           <div className="ask-empty" data-testid="ask-empty">
             <p className="ask-empty-title">{t("ask.empty.title")}</p>
             <p className="ask-empty-text">{t(emptyKey)}</p>
-            {chipRow && <p className="ask-empty-text ask-empty-tools">{t("coachTools.ui.chipsIntro")}</p>}
+            {ungraded && <p className="ask-empty-text" data-testid="ask-card-ungraded">{t("ask.card.canAnswer.ungraded")}</p>}
+            {cardRow && <p className="ask-empty-text ask-empty-tools">{t("ask.card.chips")}</p>}
+            {cardRow}
+            {chipRow &&<p className="ask-empty-text ask-empty-tools">{t("coachTools.ui.chipsIntro")}</p>}
             {chipRow}
           </div>
         ) : (
           turns.map((turn) => <Turn key={turn.id} turn={turn} />)
         )}
       </div>
-      {turns.length > 0 && chipRow && <div className="ask-chip-row">{chipRow}</div>}
+      {turns.length > 0 && (cardRow || chipRow) && (
+        <div className="ask-chip-row">
+          {cardRow}
+          {chipRow}
+        </div>
+      )}
       <form className="ask-compose" onSubmit={send}>
         <textarea
           ref={inputRef}
@@ -254,6 +273,8 @@ function Turn({ turn }: { turn: AskTurn }) {
       return <div className="ask-turn ask-turn-app">{turn.text}</div>;
     case "tool":
       return <AskToolTurn id={turn.id} body={turn.body} />;
+    case "card":
+      return <AskCardTurn card={turn.card} />;
     case "divider":
       return (
         <div className="ask-divider" role="separator">

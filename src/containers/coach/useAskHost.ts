@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { lastEvent } from "../../coach/bus";
 import { buildCoachContext, contextForModel, type CoachScreen, type CoachSources } from "../../coach/context";
 import { getCoachModelSnapshot } from "../../hooks/coachLoader";
 import type { Jam } from "../../jam/types";
@@ -84,6 +85,17 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
       if (latest.current.view !== "session") return undefined;
       const outcomes = latest.current.session.run.outcomes;
       return outcomes[outcomes.length - 1];
+    },
+    // The last Take's analysis, as the bus carried it with that Take's result
+    // (the note reads the same one): the fact cards' places and leans (c2b1a).
+    review: () => {
+      if (latest.current.view !== "session") return undefined;
+      const outcomes = latest.current.session.run.outcomes;
+      const last = outcomes[outcomes.length - 1];
+      const event = lastEvent("takeResult");
+      if (!last || !event) return undefined;
+      const same = event.outcome === last || (!!last.takeId && event.outcome.takeId === last.takeId);
+      return same ? (event.review ?? undefined) : undefined;
     },
     jam: () => (latest.current.view === "jam" && latest.current.jam ? { jam: latest.current.jam } : undefined),
     song: () => {

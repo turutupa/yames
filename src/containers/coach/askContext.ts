@@ -46,7 +46,8 @@ function answeredByTool(turns: readonly AskTurn[], index: number): boolean {
   for (let i = index + 1; i < turns.length; i++) {
     const next = turns[i];
     if (next.kind === "divider") continue;
-    return next.kind === "tool";
+    // A fact card answers its question the same way (leg c2b1a).
+    return next.kind === "tool" || next.kind === "card";
   }
   return false;
 }
