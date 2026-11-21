@@ -211,7 +211,9 @@ export function NoteChips({ chips }: { chips: readonly NoteChip[] }) {
     <div className="coach-chips">
       {chips.map((chip) => (
         <button
-          key={chip.label}
+          // By its test id where it has one: a chip whose words change while it
+          // plays ("Hear bar N", c5b2) stays the same button, and keeps the focus.
+          key={chip.testId ?? chip.label}
           type="button"
           className="coach-chip"
           data-kind={chip.kind}
