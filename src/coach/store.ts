@@ -1,5 +1,5 @@
 /**
- * The coach's four stored keys (DESIGN 9.5), each with a typed reader and
+ * The coach's five stored keys (DESIGN 9.5), each with a typed reader and
  * writer, in the settings store (`settings.json`), never in SQLite.
  *
  * | Key | Holds | Default (missing, null or malformed) |
@@ -8,6 +8,7 @@
  * | `coach.cards` | per card kind: times dismissed, last dismissed | `{}` |
  * | `coach.goal` | `{ text, at }`: one sentence (at most 200 characters) and its date | `null` (no goal) |
  * | `coach.suppressed` | noticed-line id → the date it was left out | `{}` |
+ * | `coach.reminder` | `{ on, time: "HH:MM", days: 0..6 (0 = Sunday), since }` (leg rem2) | off, 18:00, every day |
  *
  * Why here and not beside `CoachSettingsSection.tsx`: that section writes its
  * keys inline (`storeSave("coachMode", …)`) and reads none of them; they are
@@ -84,11 +85,30 @@ export type CoachGoal = {
 /** Noticed-line id → when it was left out. */
 export type Suppressed = Readonly<Record<string, number>>;
 
+/**
+ * The practice reminder (leg rem2; OWNER-UPDATES 2026-11-20: in the app only,
+ * Today mentions it). No notification, nothing in the background.
+ */
+export type CoachReminder = {
+  on: boolean;
+  /** Local time, "HH:MM", 24-hour. */
+  time: string;
+  /** Local weekdays, 0 = Sunday; sorted, no repeats. */
+  days: readonly number[];
+  /**
+   * When the press that turned it on was made (ms); null when off or when an
+   * older value carried no date. Only the quiet rule reads it: a reminder day
+   * before the player turned the reminder on is never counted as ignored.
+   */
+  since: number | null;
+};
+
 export type CoachStored = {
   suggestions: Suggestions;
   cards: CoachCards;
   goal: CoachGoal | null;
   suppressed: Suppressed;
+  reminder: CoachReminder;
 };
 
 /** As `set_goal` takes it (`tools/settings.ts` `MAX_GOAL`). */
@@ -102,11 +122,20 @@ export const SUPPRESS_DAYS = 30;
 
 const DAY_MS = 86_400_000;
 
+/** Off; what the first On fills in (judgement call 22): 18:00, all seven days. */
+export const REMINDER_OFF: CoachReminder = Object.freeze({
+  on: false,
+  time: "18:00",
+  days: Object.freeze([0, 1, 2, 3, 4, 5, 6]),
+  since: null,
+}) as CoachReminder;
+
 export const COACH_STORED_DEFAULTS: CoachStored = Object.freeze({
   suggestions: "on",
   cards: Object.freeze({}),
   goal: null,
   suppressed: Object.freeze({}),
+  reminder: REMINDER_OFF,
 }) as CoachStored;
 
 // ---------------------------------------------------------------------------
@@ -147,6 +176,37 @@ export function readGoal(raw: unknown): CoachGoal | null {
   const text = raw.text.trim();
   if (text.length === 0 || text.length > GOAL_MAX_CHARS) return null;
   return { text, at: isTime(raw.at) ? raw.at : null };
+}
+
+const REMINDER_TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * The reminder as stored, or null when what is there is not one this build
+ * reads (a wrong type in any of `on`, `time`, `days`; a day outside 0..6).
+ * `since` is optional: missing, null or not a time reads as null. Repeated
+ * days are read once, in order.
+ */
+export function readReminderStrict(raw: unknown): CoachReminder | null {
+  if (!isRecord(raw)) return null;
+  if (typeof raw.on !== "boolean") return null;
+  if (typeof raw.time !== "string" || !REMINDER_TIME.test(raw.time)) return null;
+  if (!Array.isArray(raw.days)) return null;
+  const days = new Set<number>();
+  for (const d of raw.days) {
+    if (typeof d !== "number" || !Number.isInteger(d) || d < 0 || d > 6) return null;
+    days.add(d);
+  }
+  return {
+    on: raw.on,
+    time: raw.time,
+    days: [...days].sort((a, b) => a - b),
+    since: isTime(raw.since) ? raw.since : null,
+  };
+}
+
+/** Anything in, a reminder out: missing or malformed reads as off, never a throw. */
+export function readReminder(raw: unknown): CoachReminder {
+  return readReminderStrict(raw) ?? REMINDER_OFF;
 }
 
 /** `now`: when it is read. A line left out after it reads as left out `now` (not rewritten). */
@@ -301,8 +361,10 @@ const atLoad: Record<MapKey, Record<string, unknown>> = { cards: {}, suppressed:
  */
 const CLOSED_CARD: CardRecord = Object.freeze({ dismissed: CARD_DISMISSALS_TO_STOP, lastDismissed: null });
 const CLOSED_SUPPRESSED = Number.POSITIVE_INFINITY;
-/** The keys whose last press `coachPressSettled` follows: the two maps, the goal and Suggestions (c4a2b, L2). */
-export type CoachSettledKey = CoachMapKey | "goal" | "suggestions";
+/** The keys whose last press `coachPressSettled` follows: the two maps, the goal, Suggestions (c4a2b, L2) and the reminder. */
+export type CoachSettledKey = CoachMapKey | "goal" | "suggestions" | "reminder";
+/** The reminder's value as it is on disk now (the raw value read, then each one saved): its unknown fields survive a press. */
+let reminderOnDisk: unknown = undefined;
 /** Keys holding a press that is not on disk (unread at the load, or a failed save): F4. */
 const unsaved = new Set<CoachSettledKey>();
 /** The last save of each key, for `coachPressSettled`. */
@@ -314,6 +376,7 @@ const ALL_LOADING: CoachKeyStates = Object.freeze({
   cards: "loading",
   goal: "loading",
   suppressed: "loading",
+  reminder: "loading",
 });
 let keyStates: CoachKeyStates = ALL_LOADING;
 
@@ -354,7 +417,13 @@ export function coachGoalKnown(): boolean {
  */
 export function coachKeyStates(): CoachKeyStates {
   const of = (key: keyof CoachStored): CoachKeyState => (!loaded ? "loading" : unread.has(key) ? "unreadable" : "read");
-  const next = { suggestions: of("suggestions"), cards: of("cards"), goal: of("goal"), suppressed: of("suppressed") };
+  const next = {
+    suggestions: of("suggestions"),
+    cards: of("cards"),
+    goal: of("goal"),
+    suppressed: of("suppressed"),
+    reminder: of("reminder"),
+  };
   const same = (Object.keys(next) as Array<keyof CoachStored>).every((key) => next[key] === keyStates[key]);
   if (!same) keyStates = Object.freeze(next);
   return keyStates;
@@ -379,7 +448,7 @@ export function subscribeCoachStored(listener: () => void): () => void {
 }
 
 /**
- * Read the four keys once (later calls share the first). A key that cannot be
+ * Read the five keys once (later calls share the first). A key that cannot be
  * read is its default in memory and is marked unread (`coachStoredUnread`).
  * Writes nothing of its own: only a map press queued before it finished is
  * saved, replayed onto what was read. Every key is named as a literal at its
@@ -397,7 +466,8 @@ export function loadCoachStored(): Promise<CoachStored> {
     storeLoad<unknown>("coach.cards").catch(failedAs("cards")),
     storeLoad<unknown>("coach.goal").catch(failedAs("goal")),
     storeLoad<unknown>("coach.suppressed").catch(failedAs("suppressed")),
-  ]).then(([rawSuggestions, rawCards, rawGoal, rawSuppressed]) => {
+    storeLoad<unknown>("coach.reminder").catch(failedAs("reminder")),
+  ]).then(([rawSuggestions, rawCards, rawGoal, rawSuppressed, rawReminder]) => {
     if (generation !== resets) return stored; // a test reset since: this read is stale
     const now = Date.now();
     const raw = (v: unknown): unknown => (v === UNREAD ? undefined : v);
@@ -407,13 +477,16 @@ export function loadCoachStored(): Promise<CoachStored> {
     if (present(rawCards) && !isRecord(rawCards)) failed.push("cards");
     if (present(rawGoal) && readGoal(rawGoal) === null) failed.push("goal");
     if (present(rawSuppressed) && !isRecord(rawSuppressed)) failed.push("suppressed");
+    if (present(rawReminder) && readReminderStrict(rawReminder) === null) failed.push("reminder");
     const next: CoachStored = {
       suggestions: readSuggestions(raw(rawSuggestions)),
       cards: readCards(raw(rawCards), now),
       goal: readGoal(raw(rawGoal)),
       suppressed: readSuppressed(raw(rawSuppressed), now),
+      reminder: readReminder(raw(rawReminder)),
     };
     goalOnDisk = raw(rawGoal);
+    reminderOnDisk = raw(rawReminder);
     mapOnDisk.cards = isRecord(rawCards) ? rawCards : {};
     mapOnDisk.suppressed = isRecord(rawSuppressed) ? rawSuppressed : {};
     keptAtLoad.cards = new Set(Object.keys(next.cards));
@@ -466,7 +539,7 @@ const notSaved = (key: string) => (err: unknown) => console.error(`[coach.store]
  * "notSaved" for `coachPressSettled`, so the screen that made the press can
  * say the choice holds for this run only; the next save that lands clears it.
  */
-function followSave(key: "goal" | "suggestions", saving: Promise<void>): void {
+function followSave(key: "goal" | "suggestions" | "reminder", saving: Promise<void>): void {
   lastSave[key] = saving.then(
     () => {
       unsaved.delete(key);
@@ -509,6 +582,44 @@ export function saveGoal(text: string, now: number, options: { restore?: boolean
   set({ ...stored, goal }, "goal");
   followSave("goal", storeSave("coach.goal", value));
   return goal;
+}
+
+/** What Settings → Coach's reminder row chooses: the whole reminder but its date. */
+export type ReminderChoice = Pick<CoachReminder, "on" | "time" | "days">;
+
+/**
+ * Settings → Coach's reminder row, and nothing else (no tool, no card, no
+ * clean-up ever calls it: the coach never switches the reminder on or off).
+ * The row's own press is the whole value the player sees, so, as with
+ * Suggestions, it is allowed over a value that could not be read; any field of
+ * the stored object this build does not know is written back as it was.
+ * Refused (null, nothing written) before the load has finished: the row's
+ * controls wait for it, since turning it on keeps the stored time and days.
+ * `since` is `now` when this press turns it on, kept while it stays on, null
+ * when it goes off. Null too when the choice is not a reminder (a bad time or
+ * day) or changes nothing.
+ */
+export function saveReminder(choice: ReminderChoice, now: number): CoachReminder | null {
+  if (!loaded) return null;
+  const was = stored.reminder;
+  const known = !unread.has("reminder");
+  const since = !choice.on ? null : known && was.on && was.since !== null ? was.since : now;
+  const next = readReminderStrict({ on: choice.on, time: choice.time, days: [...choice.days], since });
+  if (!next) return null;
+  const same =
+    known &&
+    next.on === was.on &&
+    next.time === was.time &&
+    next.since === was.since &&
+    next.days.length === was.days.length &&
+    next.days.every((d, i) => d === was.days[i]);
+  if (same) return null;
+  const value: Record<string, unknown> = { ...(isRecord(reminderOnDisk) ? reminderOnDisk : {}), ...next, days: [...next.days] };
+  reminderOnDisk = value;
+  unread.delete("reminder"); // before `set`, so a listener reads the key as known
+  set({ ...stored, reminder: next }, "reminder");
+  followSave("reminder", storeSave("coach.reminder", value));
+  return next;
 }
 
 /**
@@ -625,6 +736,7 @@ export function resetCoachStored(): void {
   unread.clear();
   replacedGoals.clear();
   goalOnDisk = undefined;
+  reminderOnDisk = undefined;
   mapOnDisk.cards = {};
   mapOnDisk.suppressed = {};
   keptAtLoad.cards = new Set();
@@ -636,5 +748,6 @@ export function resetCoachStored(): void {
   delete lastSave.suppressed;
   delete lastSave.goal;
   delete lastSave.suggestions;
+  delete lastSave.reminder;
   keyStates = ALL_LOADING;
 }

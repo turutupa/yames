@@ -24,9 +24,33 @@ export function coachSessionBusy(): boolean {
   return busy;
 }
 
+/**
+ * Called on every change of the hold, not only of the Session flag: a Session
+ * starting or ending, and (rem2b) the click starting or stopping
+ * (`setCoachClickPlaying`). Read `coachSessionBusy` or `coachHeld` for which.
+ */
 export function subscribeCoachSessionBusy(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
   };
+}
+
+/**
+ * The click is sounding (a Take, its count-in, or the metronome on its own),
+ * as `MainWindow` reports it through `useCoachModelDriver`. The practice
+ * reminder (rem2b) reads nothing and arms no timer while it is, nor while a
+ * Session is in progress: Settings can be opened in the middle of a Take.
+ */
+let clickPlaying = false;
+
+export function setCoachClickPlaying(next: boolean): void {
+  if (next === clickPlaying) return;
+  clickPlaying = next;
+  for (const listener of [...listeners]) listener();
+}
+
+/** The click sounds, or a Session is in progress: background work waits. */
+export function coachHeld(): boolean {
+  return busy || clickPlaying;
 }

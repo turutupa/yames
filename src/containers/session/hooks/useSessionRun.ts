@@ -554,10 +554,22 @@ export function useSessionRun(input: SessionRunInput) {
 
   // --- what the store knows ------------------------------------------------
   const loadedRef = useRef(false);
+  // rem2c: whether the Takes in `progress` came from a read that answered. A
+  // read that failed leaves `[]` there for the plan's sake, and the practice
+  // reminder must not take that `[]` for "no Takes" (nor the `[]` a press
+  // builds from NO_PROGRESS before the first read lands).
+  const [takesKnown, setTakesKnown] = useState(false);
   const refresh = useCallback(async () => {
+    let takesAnswered = false;
     const [states, takes, ceilings, unsubscribed] = await Promise.all([
       listPathStates().catch(() => [] as PathStateRow[]),
-      listPathTakes(TAKES_TO_READ).catch(() => [] as PathTakeRow[]),
+      listPathTakes(TAKES_TO_READ).then(
+        (rows) => {
+          takesAnswered = true;
+          return rows;
+        },
+        () => [] as PathTakeRow[],
+      ),
       listExerciseCeilings().catch(() => []),
       storeLoad<string[]>(UNSUBSCRIBED_KEY).catch(() => undefined),
     ]);
@@ -567,6 +579,7 @@ export function useSessionRun(input: SessionRunInput) {
       ceilings,
       unsubscribed: Array.isArray(unsubscribed) ? unsubscribed.filter((id) => typeof id === "string") : [],
     });
+    setTakesKnown(takesAnswered);
   }, []);
 
   // The learning side is on screen, or the first-run wizard is asking about it.
@@ -2531,6 +2544,8 @@ export function useSessionRun(input: SessionRunInput) {
     offMix,
     setInMix,
     progress,
+    /** rem2c: `progress.takes` came from a read that answered (false before it, or when it failed). */
+    takesKnown,
     take,
     exercise,
     stepNow: step,
