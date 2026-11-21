@@ -85,6 +85,22 @@ if [ ! -e /tmp/yames-dgx-full ] && [ "$limits" != "full" ]; then
   fi
 fi
 
+# Full throttle still shares twenty cores between six queue jobs: with every
+# vitest run at its default of one worker a core the load average sat near 100
+# (2026-11-20 19:30) and timing-based tests failed for that alone. Eight
+# workers a run costs little and keeps the machine usable.
+joined=" $* "
+case "$joined" in
+  *" --maxWorkers"*) ;;
+  *" vitest "*) set -- "$@" --maxWorkers=8 ;;
+  " npm run test "*)
+    case "$joined" in
+      *" -- "*) set -- "$@" --maxWorkers=8 ;;
+      *) set -- "$@" -- --maxWorkers=8 ;;
+    esac
+    ;;
+esac
+
 # Evenings and weekends: commands run side by side, but under a shared hold on
 # the same lock, so the orchestrator can take it alone (flock -x) for a
 # click-jitter probe run, which needs a machine with nothing else on it.
