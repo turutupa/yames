@@ -16,6 +16,7 @@ import type { CustomSummary } from "../../paths/custom";
 import { tempoRange } from "../../session/coachWords";
 import { shownCleanTempoOf, takesOf } from "../../session/progress";
 import {
+  myExercisesNow,
   myExercisesStoredEntries,
   removeMyExercise,
   restoreMyExercise,
@@ -23,6 +24,17 @@ import {
   useMyExercises,
 } from "../../session/myExercises";
 import type { MyExercise, RemovedMyExercise } from "../../session/myExercises";
+import {
+  CHOSEN_TODAY_MAX,
+  chosenKeysOn,
+  keysOnList,
+  updateChosenToday,
+  useChosenTodayStored,
+  withKeyAt,
+  withKeyOnList,
+  withoutKey,
+} from "../../session/chosenToday";
+import { dayKey } from "../../session/swap";
 import { buildMyExercises, keyOf, myExerciseLine } from "../../session/myExerciseBuild";
 import type { SessionRun } from "./hooks/useSessionRun";
 
@@ -45,8 +57,55 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
   const rows = useMemo(() => buildMyExercises(list), [list]);
   const [removed, setRemoved] = useState<RemovedMyExercise | null>(null);
   /** Why the last press changed nothing, said under the list (`session.myExercises.<notice>`). */
-  const [notice, setNotice] = useState<null | "notSaved" | "undoFull" | "undoAlready">(null);
-  if (list.length === 0 && !removed && !notice) return null;
+  const [notice, setNotice] = useState<null | "notSaved" | "undoFull" | "undoAlready" | "todayFull">(null);
+  // "Add to today" (t2e): the keys chosen for today, and the last such press, for its Undo.
+  // Today is the day of the plan's clock, the one Today and the Session read (t2eb, M4).
+  const todayKeys = chosenKeysOn(useChosenTodayStored(), session.planClock);
+  const [todayUndo, setTodayUndo] = useState<{ key: string; at: number; added: boolean; day: string } | null>(null);
+  if (list.length === 0 && !removed && !notice && !todayUndo) return null;
+
+  /**
+   * "Add to today" / "Take off today": the player's press, the only writer of
+   * today's choice. `wasIn` is what the row said: the press does that, on the
+   * day it is pressed (the plan's clock moved to now), and nothing else.
+   */
+  const toggleToday = async (key: string, wasIn: boolean) => {
+    const now = session.actions.todayNow();
+    let at = -1;
+    let full = false;
+    const result = await updateChosenToday((keys) => {
+      at = keys.indexOf(key);
+      if (wasIn) return withoutKey(keys, key);
+      // Only exercises still on the list fill a place (t2eb, review M2).
+      const onList = new Set(myExercisesNow().flatMap((e) => keyOf(e) ?? []));
+      full = keysOnList(keys, onList) >= CHOSEN_TODAY_MAX && !keys.includes(key);
+      return withKeyOnList(keys, key, onList);
+    }, now);
+    if (result === "saved") {
+      setTodayUndo({ key, at, added: !wasIn, day: dayKey(now) });
+      setRemoved(null);
+      setNotice(null);
+    } else if (full) setNotice("todayFull");
+    else if (result !== "unchanged") setNotice("notSaved");
+  };
+  const undoToday = async () => {
+    if (!todayUndo) return;
+    const { key, at, added, day } = todayUndo;
+    const now = session.actions.todayNow();
+    // An Undo belongs to the day of its press: after midnight there is nothing to undo (t2eb, review L4).
+    if (dayKey(now) !== day) {
+      setTodayUndo(null);
+      return;
+    }
+    const result = await updateChosenToday(
+      (keys) => (added ? withoutKey(keys, key) : withKeyAt(keys, key, at)),
+      now,
+    );
+    if (result === "saved" || result === "unchanged") {
+      setTodayUndo(null);
+      setNotice(null);
+    } else setNotice("notSaved");
+  };
 
   // Both go through the store's one writer: it waits for the load and refuses
   // (and the player is told) when the stored list could not be read.
@@ -59,6 +118,7 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
     });
     if (result === "saved" && got.removed) {
       setRemoved(got.removed);
+      setTodayUndo(null);
       setNotice(null);
     } else if (result !== "unchanged") setNotice("notSaved");
   };
@@ -125,6 +185,7 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
           const line = myExerciseLine(t, summary);
           const range = tempoRange(exercise);
           const played = takesOf(session.progress, CUSTOM_PATH_ID, exercise.id).length;
+          const inToday = todayKeys.includes(key);
           // The clean tempo the app shows: a Take marked not fair left out (nf1).
           const clean = shownCleanTempoOf(session.progress, CUSTOM_PATH_ID, exercise.id);
           return (
@@ -152,6 +213,11 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
                     </b>
                   </div>
                 )}
+                {inToday && (
+                  <div className="session-quiet" data-testid="my-exercise-in-today">
+                    {t("session.myExercises.inToday")}
+                  </div>
+                )}
               </div>
               <div className="session-myex-actions">
                 <button
@@ -167,6 +233,18 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
                 </button>
                 <button
                   type="button"
+                  className="session-secondary session-myex-today"
+                  onClick={() => void toggleToday(key, inToday)}
+                  aria-label={t(
+                    inToday ? "session.myExercises.takeOffTodayLabel" : "session.myExercises.addTodayLabel",
+                    { what: line },
+                  )}
+                  data-testid="my-exercise-today"
+                >
+                  {t(inToday ? "session.myExercises.takeOffToday" : "session.myExercises.addToday")}
+                </button>
+                <button
+                  type="button"
                   className="session-link session-myex-remove"
                   onClick={() => void remove(entry)}
                   aria-label={t("session.myExercises.removeLabel", { what: line })}
@@ -179,13 +257,28 @@ export default function MyExercisesList({ session, style }: { session: SessionRu
           );
         })}
       </div>
-      {(removed || notice) && (
+      {(removed || notice || todayUndo) && (
         <div className="session-myex-undo" role="status">
           <span className="session-quiet" data-testid="my-exercise-notice">
-            {t(notice ? `session.myExercises.${notice}` : "session.myExercises.removed")}
+            {t(
+              notice
+                ? `session.myExercises.${notice}`
+                : todayUndo
+                  ? todayUndo.added
+                    ? "session.myExercises.addedToday"
+                    : "session.myExercises.takenOffToday"
+                  : "session.myExercises.removed",
+              // `graded`: the Session's cap, one more than today's (`CHOSEN_TODAY_MAX` says why).
+              { max: CHOSEN_TODAY_MAX, graded: CHOSEN_TODAY_MAX + 1 },
+            )}
           </span>
-          {removed && (
-            <button type="button" className="session-link" onClick={() => void undo()} data-testid="my-exercise-undo">
+          {(removed || todayUndo) && (
+            <button
+              type="button"
+              className="session-link"
+              onClick={() => void (todayUndo ? undoToday() : undo())}
+              data-testid="my-exercise-undo"
+            >
               {t("session.myExercises.undo")}
             </button>
           )}

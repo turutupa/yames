@@ -186,7 +186,8 @@
         "shape": "Questo l'app non può farlo.",
         "proposal": "Nel frattempo è cambiato, quindi non è stato fatto nulla. Chiedi di nuovo.",
         "cap": "Segui {{cap}} percorsi, il massimo possibile. Lasciane prima uno dalla sua pagina.",
-        "loopBackwards": "La battuta {{to}} viene prima della battuta {{from}}. Nomina prima la prima battuta."
+        "loopBackwards": "La battuta {{to}} viene prima della battuta {{from}}. Nomina prima la prima battuta.",
+        "loopOwn": "Per ora un loop riproduce solo un esercizio di un percorso, e questo è uno dei tuoi esercizi."
       },
       "failed": "Non ha funzionato, e non è stato cambiato nulla.",
       "make": {

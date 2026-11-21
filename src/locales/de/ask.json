@@ -171,7 +171,7 @@
           "even": "Gleichmäßig: {{before}} % in jenem Take, {{now}} % in Take {{take}}.",
           "heard": "Gehörte Töne: {{before}} % in jenem Take, {{now}} % in Take {{take}}.",
           "extras": "Zusätzliche Töne: {{before}} in jenem Take, {{now}} in Take {{take}}.",
-          "accents": "Akzente getroffen: {{before}} % in jenem Take, {{now}} % in Take {{take}}.",
+          "accents": "Akzente im Durchschnitt lauter als die anderen Töne: {{before}} % in jenem Take, {{now}} % in Take {{take}}.",
           "notes": "Richtige Töne: {{before}} % in jenem Take, {{now}} % in Take {{take}}.",
           "hold": "Gleichmäßigkeit bis zum Ende gehalten: {{before}} % in jenem Take, {{now}} % in Take {{take}}."
         },
@@ -240,8 +240,8 @@
           "heard": "Gehörte Töne: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
           "heard_other": "Gehörte Töne: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
           "extras": "Zusätzliche Töne: {{value}} in Take {{take}}, {{gap}} mehr, als die Messlatte erlaubt ({{bar}} oder weniger in {{over}} Takten).",
-          "accents": "Akzente getroffen: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
-          "accents_other": "Akzente getroffen: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
+          "accents": "Akzente im Durchschnitt lauter als die anderen Töne: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
+          "accents_other": "Akzente im Durchschnitt lauter als die anderen Töne: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
           "notes": "Richtige Töne: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
           "notes_other": "Richtige Töne: {{value}} % in Take {{take}}, {{count}} Punkte unter der Messlatte von {{bar}} %.",
           "hold": "Gleichmäßigkeit bis zum Ende gehalten: {{value}} % in Take {{take}}, {{count}} Punkt unter der Messlatte von {{bar}} %.",
@@ -250,7 +250,7 @@
         "under": {
           "even": "Gleichmäßig in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
           "heard": "Gehörte Töne in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
-          "accents": "Akzente getroffen in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
+          "accents": "Akzente im Durchschnitt lauter als die anderen Töne in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
           "notes": "Richtige Töne in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %.",
           "hold": "Gleichmäßigkeit bis zum Ende gehalten in Take {{take}}: weniger als einen Punkt unter der Messlatte von {{bar}} %."
         },
@@ -260,7 +260,7 @@
           "even": "Gleichmäßig: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht.",
           "heard": "Gehörte Töne: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht.",
           "extras": "Zusätzliche Töne: {{value}} in Take {{take}}, innerhalb der Messlatte von {{bar}} oder weniger in {{over}} Takten.",
-          "accents": "Akzente getroffen: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht.",
+          "accents": "Akzente im Durchschnitt lauter als die anderen Töne: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht.",
           "notes": "Richtige Töne: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht.",
           "hold": "Gleichmäßigkeit bis zum Ende gehalten: {{value}} % in Take {{take}}, das die Messlatte von {{bar}} % erreicht."
         },

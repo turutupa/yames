@@ -133,7 +133,7 @@ import { useAudioOutputDevices } from "./hooks/useAudioOutputDevices";
 import { useFullscreenLifecycle } from "./hooks/useFullscreenLifecycle";
 import { useAppUpdates } from "./hooks/useAppUpdates";
 import { NEVER_NEWER, useNewerVersion } from "./hooks/useNewerVersion";
-import { usePathsPlace } from "./hooks/usePathsPlace";
+import { placeKey, usePathsPlace } from "./hooks/usePathsPlace";
 import { useTabRouting } from "./hooks/useTabRouting";
 import { useDownbeatPulse } from "./hooks/useDownbeatPulse";
 import { useInputTester } from "./hooks/useInputTester";
@@ -149,6 +149,7 @@ import { useSessionRun } from "../session/hooks/useSessionRun";
 import { startSessionInput } from "../../session/inputStart";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
 import { TodayView } from "../session/TodayView";
+import { ChosenTodayParts } from "../session/ChosenTodayParts";
 import { SessionView } from "../session/SessionView";
 import { LeaveSessionDialog } from "../session/LeaveSessionDialog";
 import { PathsView } from "../session/PathsView";
@@ -2308,6 +2309,8 @@ export function MainWindow() {
 
   return (
     <>
+    {/* Today's chosen exercises, built outside the runner and handed in (t2e). Memoised: no per-beat render. */}
+    <ChosenTodayParts onParts={sessionRun.actions.setChosenParts} />
     <ZenTransition isActive={isFullscreen} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
       <FullscreenView
         state={state}
@@ -3152,7 +3155,7 @@ export function MainWindow() {
           is closed, so nothing of it runs during a Take. Only Ask: the tools'
           coach is Listen, the line and the note under the stage (leg c2a2). */}
       {askState.open && askShownOn(view) && (
-        <AskPanel lookingAt={ask.lookingAt} onClose={ask.panel.close} />
+        <AskPanel lookingAt={ask.lookingAt} onClose={ask.panel.close} place={view === "paths" ? placeKey(pathsPlace.at) : ""} />
       )}
       </div>{/* main-body */}
       </LearningNeck>

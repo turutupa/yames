@@ -188,9 +188,12 @@ describe("asksAboutTuning", () => {
     "I keep fine tuning my vibrato",
     "how fast is the tune",
     "skip to the end of the tune",
+    // pol2 extras A5: a move, not a tuning.
+    "move it a half step down",
+    "take the riff a whole step down",
   ];
   for (const text of NO) it(`"${text}" is not about tuning`, () => expect(asksAboutTuning(text)).toBe(false));
-  const STILL = ["tune my guitar", "can you tune the B string for me", "tune the strings", "How do you tune a bass?", "is there a tuner?"];
+  const STILL = ["tune my guitar", "can you tune the B string for me", "tune the strings", "How do you tune a bass?", "is there a tuner?", "I'm tuned half step down", "half step down tuning", "should I tune a whole step down"];
   for (const text of STILL) it(`"${text}" is still about tuning`, () => expect(asksAboutTuning(text)).toBe(true));
 });
 

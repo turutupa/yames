@@ -27,7 +27,7 @@
       "even": "równo",
       "heard": "nut usłyszanych",
       "extras": "dodatkowe nuty",
-      "accents": "trafione akcenty",
+      "accents": "głośniej na akcentach",
       "notes": "właściwe nuty"
     },
     "today": {
@@ -73,7 +73,7 @@
         "back": {
           "even": "Ostatnia sesja, {{exercise}}: {{value}}% równo przy {{bpm}} BPM.",
           "heard": "Ostatnia sesja, {{exercise}}: {{value}}% nut usłyszanych przy {{bpm}} BPM.",
-          "accents": "Ostatnia sesja, {{exercise}}: {{value}}% akcentów trafionych przy {{bpm}} BPM.",
+          "accents": "Ostatnia sesja, {{exercise}}: akcenty średnio o {{value}}% głośniej niż pozostałe nuty, przy {{bpm}} BPM.",
           "notes": "Ostatnia sesja, {{exercise}}: {{value}}% właściwych nut przy {{bpm}} BPM.",
           "plain": "Ostatnia sesja skończyła się tak: {{exercise}} przy {{bpm}} BPM."
         },
@@ -132,8 +132,21 @@
         "yourTurn": "Twoja kolej · niesprawdzane",
         "finisher": "Na koniec · bez oceny",
         "jam": "Jam · bez oceny",
-        "drill": "Rampa tempa"
+        "drill": "Rampa tempa",
+        "mine": "Twoje ćwiczenie"
       },
+      "chosenLeftOut": "{{count}} dodane przez ciebie ćwiczenie nie zmieściło się w {{minutes}} min. Wybierz więcej minut albo zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOut_few": "{{count}} dodane przez ciebie ćwiczenia nie zmieściły się w {{minutes}} min. Wybierz więcej minut albo zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOut_many": "{{count}} dodanych przez ciebie ćwiczeń nie zmieściło się w {{minutes}} min. Wybierz więcej minut albo zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOut_other": "{{count}} dodanego przez ciebie ćwiczenia nie zmieściło się w {{minutes}} min. Wybierz więcej minut albo zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded": "{{count}} dodane przez ciebie ćwiczenie nie zmieściło się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded_few": "{{count}} dodane przez ciebie ćwiczenia nie zmieściły się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded_many": "{{count}} dodanych przez ciebie ćwiczeń nie zmieściło się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
+      "chosenLeftOutGraded_other": "{{count}} dodanego przez ciebie ćwiczenia nie zmieściło się: w sesji obowiązuje limit ćwiczeń: {{max}}, a twoje Ścieżki zajmują dziś {{taken}} z nich. Więcej minut miejsca nie zrobi; zdejmij jedno w Moich ćwiczeniach.",
+      "chosenUnbuilt": "{{count}} dodane na dziś ćwiczenie nie może być już zbudowane, więc je pominięto.",
+      "chosenUnbuilt_few": "{{count}} dodane na dziś ćwiczenia nie mogą być już zbudowane, więc je pominięto.",
+      "chosenUnbuilt_many": "{{count}} dodanych na dziś ćwiczeń nie może być już zbudowanych, więc je pominięto.",
+      "chosenUnbuilt_other": "{{count}} dodanego na dziś ćwiczenia nie może być już zbudowane, więc je pominięto.",
       "reason": {
         "firstEver": "Twoje pierwsze. Trzymaj się dokładnie klika; szybkość przyjdzie później.",
         "newExercise": "Nowe dla ciebie. Powoli i czysto.",
@@ -167,7 +180,8 @@
         "keepWarmYesterday": "Żeby nie wystygło, grane wczoraj.",
         "keepWarmToday": "Żeby nie wystygło, już grane dzisiaj.",
         "keepWarmNew": "Pierwszy przedsmak.",
-        "focusChosen": "Dziś tylko ta ścieżka, tak jak wybrano."
+        "focusChosen": "Dziś tylko ta ścieżka, tak jak wybrano.",
+        "chosenToday": "Dodane przez ciebie na dziś."
       },
       "from": "{{path}} · {{level}} · Krok {{step}}",
       "fromNoLevel": "{{path}} · Krok {{step}}",
@@ -226,7 +240,7 @@
         "even": "Bo równość wyniosła {{value}}% przy {{bpm}} BPM. Poprzeczka to {{bar}}%.",
         "heard": "Bo przy {{bpm}} BPM usłyszałem {{value}}% nut. Poprzeczka to {{bar}}%.",
         "extras": "Przez dodatkowe nuty przy {{bpm}} BPM. Poprzeczka to najwyżej {{bar}} na cztery takty.",
-        "accents": "Bo przy {{bpm}} BPM trafiło {{value}}% akcentów. Poprzeczka to {{bar}}%.",
+        "accents": "Bo przy {{bpm}} BPM akcenty wypadły średnio o {{value}}% głośniej niż pozostałe nuty. Poprzeczka to {{bar}}%.",
         "plain": "Bo ostatnie podejście przy {{bpm}} BPM nie przeskoczyło poprzeczki.",
         "notes": "Bo {{value}}% nut, których wysokość rozpoznałem, było zapisanymi przy {{bpm}} BPM. Poprzeczka to {{bar}}%."
       },
@@ -234,7 +248,7 @@
         "even": "Równość wyniosła {{value}}% przy {{bpm}} BPM, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM.",
         "heard": "Przy {{bpm}} BPM usłyszałem {{value}}% nut, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM.",
         "extras": "Przy {{bpm}} BPM były dodatkowe nuty, więc teraz {{next}} BPM.",
-        "accents": "Przy {{bpm}} BPM trafiło {{value}}% akcentów, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM.",
+        "accents": "Przy {{bpm}} BPM akcenty wypadły średnio o {{value}}% głośniej niż pozostałe nuty, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM.",
         "plain": "Ostatnie podejścia przy {{bpm}} BPM nie przeskoczyły poprzeczki, więc teraz {{next}} BPM.",
         "notes": "{{value}}% rozpoznanych nut było zapisanymi przy {{bpm}} BPM, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM."
       },
@@ -277,6 +291,7 @@
       "newFromSibling": "Nowe. Zaczyna się od {{bpm}} BPM, około 80% twojego czystego tempa {{clean}} BPM w {{sibling}}.",
       "newFromSiblingNoClean": "Nowe. Zaczyna się od {{bpm}} BPM, wyliczone z twoich podejść w {{sibling}}.",
       "focusChosen": "Na dziś wybrano {{path}}, więc cała sesja pochodzi z tej ścieżki.",
+      "chosenToday": "Jedno z twoich własnych ćwiczeń, dodane przez ciebie do dzisiejszej sesji.",
       "playedUngraded": "Tam, gdzie skończyłeś: {{bpm}} BPM."
     },
     "bar": {
@@ -494,7 +509,15 @@
       "undoFull": "Moje ćwiczenia są pełne (50), więc Cofnij nie może przywrócić tego ćwiczenia.",
       "undoAlready": "To ćwiczenie jest już z powrotem w Moich ćwiczeniach.",
       "cantBuild": "Tego nie da się już zbudować: ta wersja Yames już go nie tworzy. Zostaje tutaj, dopóki go nie usuniesz.",
-      "howTo": "Zagraj to tak, jak zapisano, z metronomem."
+      "howTo": "Zagraj to tak, jak zapisano, z metronomem.",
+      "addToday": "Dodaj na dziś",
+      "addTodayLabel": "Dodaj {{what}} do dzisiejszej sesji",
+      "takeOffToday": "Zdejmij z sesji",
+      "takeOffTodayLabel": "Zdejmij {{what}} z dzisiejszej sesji",
+      "inToday": "W dzisiejszej sesji",
+      "addedToday": "Dodano do dzisiejszej sesji, po rozgrzewce.",
+      "takenOffToday": "Zdjęto z dzisiejszej sesji.",
+      "todayFull": "Na dziś jest już {{max}} twoich ćwiczeń, czyli najwięcej: w sesji obowiązuje limit ocenianych ćwiczeń: {{graded}}, a jedno miejsce zostaje dla twoich Ścieżek. Najpierw zdejmij jedno."
     },
     "paths": {
       "title": "Ścieżki",

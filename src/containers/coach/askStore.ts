@@ -132,6 +132,10 @@ export function openAsk(request: AskRequest = {}): void {
     return;
   }
   if (!state.open) {
+    // Turns written from here until the panel says where it is (a chip's
+    // canned answer is written before the panel mounts) belong after the
+    // divider, if one is owed (pol2 item 3; review c2a2, note 5).
+    unplacedFrom = state.turns.length;
     const from = request.from === undefined ? activeElement() : request.from;
     // Focus that is already inside the panel is not where to come back to.
     returnFocus = from && !(from instanceof Element && from.closest("[data-ask-panel]")) ? from : null;
@@ -316,13 +320,20 @@ export function releaseHeldAsk(): void {
  * another screen gets a divider first ("Now looking at: Progress").
  */
 export function noteAskScreen(key: string, dividerText: string): void {
+  const at = unplacedFrom;
+  unplacedFrom = null;
   if (state.screenKey === key) return;
-  if (state.turns.length > 0 && state.screenKey !== null) {
-    appendAskTurn({ id: askTurnId(), kind: "divider", text: dividerText }, key);
+  const before = at === null ? state.turns.length : Math.min(at, state.turns.length);
+  if (before > 0 && state.screenKey !== null) {
+    const divider: AskTurn = { id: askTurnId(), kind: "divider", text: dividerText };
+    set({ turns: [...state.turns.slice(0, before), divider, ...state.turns.slice(before)], screenKey: key });
   } else {
     set({ screenKey: key });
   }
 }
+
+/** Where the turns written since the panel opened begin, until it notes its screen. */
+let unplacedFrom: number | null = null;
 
 function activeElement(): Element | null {
   return typeof document === "undefined" ? null : document.activeElement;
@@ -335,6 +346,7 @@ export function __resetAskStoreForTests(): void {
   sender = null;
   takeRunning = () => false;
   held = [];
+  unplacedFrom = null;
   nextId = 0;
   notebookSource = null;
   keptDraft = "";

@@ -27,7 +27,7 @@
       "even": "düzgünlük",
       "heard": "duyulan nota",
       "extras": "fazla nota",
-      "accents": "oturan aksan",
+      "accents": "diğer notalardan daha yüksek aksan",
       "notes": "doğru nota"
     },
     "today": {
@@ -71,7 +71,7 @@
         "back": {
           "even": "Son oturum, {{exercise}}: {{bpm}} BPM'de %{{value}} düzgün.",
           "heard": "Son oturum, {{exercise}}: {{bpm}} BPM'de notaların %{{value}}'i duyuldu.",
-          "accents": "Son oturum, {{exercise}}: {{bpm}} BPM'de vurguların %{{value}}'i yerinde.",
+          "accents": "Son oturum, {{exercise}}: {{bpm}} BPM'de aksanlar ortalama olarak diğer notalardan %{{value}} daha yüksek.",
           "notes": "Son oturum, {{exercise}}: {{bpm}} BPM'de %{{value}} doğru nota.",
           "plain": "Son oturum şunda bitti: {{exercise}}, {{bpm}} BPM'de."
         },
@@ -120,8 +120,15 @@
         "yourTurn": "Sıra sende · kontrol yok",
         "finisher": "Kapanış · notlanmaz",
         "jam": "Jam · notlanmaz",
-        "drill": "Tempo rampası"
+        "drill": "Tempo rampası",
+        "mine": "Senin alıştırman"
       },
+      "chosenLeftOut": "Eklediğin {{count}} alıştırma {{minutes}} dakikaya sığmadı. Daha fazla dakika seç ya da Alıştırmalarım'dan birini çıkar.",
+      "chosenLeftOut_other": "Eklediğin {{count}} alıştırma {{minutes}} dakikaya sığmadı. Daha fazla dakika seç ya da Alıştırmalarım'dan birini çıkar.",
+      "chosenLeftOutGraded": "Eklediğin {{count}} alıştırma sığmadı: bir oturum en fazla {{max}} alıştırma çalar ve Yolların bugün bunlardan {{taken}} tanesini alıyor. Daha fazla dakika yer açmaz; Alıştırmalarım'dan birini çıkar.",
+      "chosenLeftOutGraded_other": "Eklediğin {{count}} alıştırma sığmadı: bir oturum en fazla {{max}} alıştırma çalar ve Yolların bugün bunlardan {{taken}} tanesini alıyor. Daha fazla dakika yer açmaz; Alıştırmalarım'dan birini çıkar.",
+      "chosenUnbuilt": "Bugün için eklediğin {{count}} alıştırma artık oluşturulamıyor, o yüzden dışarıda bırakıldı.",
+      "chosenUnbuilt_other": "Bugün için eklediğin {{count}} alıştırma artık oluşturulamıyor, o yüzden dışarıda bırakıldı.",
       "reason": {
         "firstEver": "İlkin. Kliğe tam otur; hız sonra gelir.",
         "newExercise": "Senin için yeni. Yavaş al ve temiz tut.",
@@ -155,7 +162,8 @@
         "keepWarmYesterday": "Sıcak kalsın, en son dün çalındı.",
         "keepWarmToday": "Sıcak kalsın, bugün zaten çalındı.",
         "keepWarmNew": "İlk tadımlık.",
-        "focusChosen": "Seçtiğin gibi, bugün yalnızca bu yol."
+        "focusChosen": "Seçtiğin gibi, bugün yalnızca bu yol.",
+        "chosenToday": "Bugün için sen ekledin."
       },
       "from": "{{path}} · {{level}} · Adım {{step}}",
       "fromNoLevel": "{{path}} · Adım {{step}}",
@@ -214,7 +222,7 @@
         "even": "Çünkü {{bpm}} BPM'de düzgünlük %{{value}} idi. Çıta %{{bar}}.",
         "heard": "Çünkü {{bpm}} BPM'de notaların %{{value}} kadarını duydum. Çıta %{{bar}}.",
         "extras": "Çünkü {{bpm}} BPM'de fazla notalar vardı. Çıta dört ölçüde en fazla {{bar}}.",
-        "accents": "Çünkü {{bpm}} BPM'de aksanların %{{value}} kadarı oturdu. Çıta %{{bar}}.",
+        "accents": "Çünkü {{bpm}} BPM'de aksanlar ortalama olarak diğer notalardan %{{value}} daha yüksek çıktı. Çıta %{{bar}}.",
         "plain": "Çünkü {{bpm}} BPM'deki son deneme çıtayı geçemedi.",
         "notes": "Çünkü {{bpm}} BPM'de perdesini seçebildiğim notaların %{{value}}'i yazılanlardı. Çıta %{{bar}}."
       },
@@ -222,7 +230,7 @@
         "even": "{{bpm}} BPM'de düzgünlük %{{value}} idi ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM.",
         "heard": "{{bpm}} BPM'de notaların %{{value}} kadarını duydum ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM.",
         "extras": "{{bpm}} BPM'de fazla notalar vardı, o yüzden şimdi {{next}} BPM.",
-        "accents": "{{bpm}} BPM'de aksanların %{{value}} kadarı oturdu ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM.",
+        "accents": "{{bpm}} BPM'de aksanlar ortalama olarak diğer notalardan %{{value}} daha yüksek çıktı ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM.",
         "plain": "{{bpm}} BPM'deki son denemeler çıtayı geçemedi, o yüzden şimdi {{next}} BPM.",
         "notes": "{{bpm}} BPM'de seçebildiğim notaların %{{value}}'i yazılanlardı ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM."
       },
@@ -265,6 +273,7 @@
       "newFromSibling": "Yeni. {{sibling}} üzerindeki temiz {{clean}} BPM temponun yaklaşık %80'i olan {{bpm}} BPM'den başlar.",
       "newFromSiblingNoClean": "Yeni. {{sibling}} üzerindeki kayıtlarından hesaplanan {{bpm}} BPM'den başlar.",
       "focusChosen": "Bugün için {{path}} yolunu seçtin, oturumun tamamı oradan.",
+      "chosenToday": "Kendi alıştırmalarından biri, bugünkü oturuma senin eklediğin.",
       "playedUngraded": "Kaldığın yerden: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +479,15 @@
       "undoFull": "Alıştırmalarım dolu (50), bu yüzden Geri al bunu geri koyamaz.",
       "undoAlready": "Bu alıştırma zaten Alıştırmalarım'da.",
       "cantBuild": "Bu artık oluşturulamıyor: Yames'in bu sürümü onu artık üretmiyor. Sen kaldırana kadar burada durur.",
-      "howTo": "Yazıldığı gibi çal, klikle birlikte."
+      "howTo": "Yazıldığı gibi çal, klikle birlikte.",
+      "addToday": "Bugüne ekle",
+      "addTodayLabel": "{{what}} alıştırmasını bugünkü oturuma ekle",
+      "takeOffToday": "Bugünden çıkar",
+      "takeOffTodayLabel": "{{what}} alıştırmasını bugünkü oturumdan çıkar",
+      "inToday": "Bugünkü oturumda",
+      "addedToday": "Bugünkü oturuma, ısınmadan sonra eklendi.",
+      "takenOffToday": "Bugünkü oturumdan çıkarıldı.",
+      "todayFull": "Bugün zaten alabileceği en fazla sayıda, {{max}} alıştırmanı içeriyor: bir oturum en fazla {{graded}} puanlanan alıştırma çalar ve bir yer Yollarına ayrılır. Önce birini çıkar."
     },
     "paths": {
       "title": "Yollar",

@@ -403,6 +403,8 @@ function loopRefused(why: LoopRefusal, from: number, to: number): Refusal {
       return refuse("notFound", "coachTools.why.notFound.loopAcross", { from, to });
     case "oneBar":
       return refuse("notFound", "coachTools.why.notFound.loopOneBar");
+    case "ownExercise":
+      return refuse("refused", "coachTools.why.refused.loopOwn");
   }
 }
 

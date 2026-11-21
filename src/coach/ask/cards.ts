@@ -1100,18 +1100,44 @@ export function cardAnswer(card: FactCard, word: (l: Line) => string): ResolvedB
   return resolveCoachAnswer({ blocks }, {}, { source: card.source }).blocks;
 }
 
-/** A sentence in pieces of at most `MAX_SENTENCE` characters, cut at spaces (a word longer than that, at the limit). */
+/**
+ * A passage in pieces of at most `MAX_SENTENCE` characters: cut after the
+ * last sentence end that fits (pol2 extras A1: a German Path passage was cut
+ * mid-sentence, "…an die du denken musst," / "das Timing."), else at a space,
+ * else (a word longer than a block) at the limit.
+ */
 function pieces(s: string): string[] {
   const out: string[] = [];
   let rest = s;
   while (rest.length > MAX_SENTENCE) {
+    const end = lastSentenceEnd(rest, MAX_SENTENCE);
     const space = rest.lastIndexOf(" ", MAX_SENTENCE);
-    const cut = space > 0 ? space : MAX_SENTENCE;
+    const cut = end > 0 ? end : space > 0 ? space : MAX_SENTENCE;
     out.push(rest.slice(0, cut));
     rest = rest.slice(cut).trimStart();
   }
   if (rest) out.push(rest);
   return out;
+}
+
+/**
+ * Where the last whole sentence of `text` that ends within `limit` characters
+ * ends (the index after its mark and any closing quote), or 0. A mark counts
+ * when a space follows it (".", "!", "?", "…"), or always for the full-width
+ * marks of Chinese and Japanese ("。", "！", "？").
+ */
+function lastSentenceEnd(text: string, limit: number): number {
+  for (let i = Math.min(limit, text.length) - 1; i > 0; i--) {
+    const ch = text[i];
+    let j = i + 1;
+    const fullWidth = "。！？".includes(ch);
+    if (!fullWidth && !".!?…".includes(ch)) continue;
+    // A closing quote after the mark stays with its sentence (German closes with “).
+    while (j < text.length && "\"”’“»」』)".includes(text[j])) j++;
+    if (j > limit) continue;
+    if (fullWidth || text[j] === " ") return j;
+  }
+  return 0;
 }
 
 /**

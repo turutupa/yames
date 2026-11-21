@@ -720,7 +720,12 @@ function parseVerb(id: VerbId, rest: Toks, c: Compiled, f: CommandFacts, ordinal
         const scale = scaleCall(q, c);
         if (scale) return [scale];
         const chord = chordCall(q, c);
-        return chord ? [chord] : null;
+        if (chord) return [chord];
+        // "show me my progress": a screen by its own name, nothing else after
+        // the verb, is going there (pol2 item 15; from the table's screen
+        // words, so in every language).
+        const screen = exactId(q, c.screens);
+        return screen ? [call("go_to", { screen })] : null;
       });
     }
     case "follow": {

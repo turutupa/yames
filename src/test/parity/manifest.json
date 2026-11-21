@@ -1729,6 +1729,11 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "myExercises.today": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

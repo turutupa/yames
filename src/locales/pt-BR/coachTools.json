@@ -186,7 +186,8 @@
         "shape": "Isso não é algo que o app possa fazer.",
         "proposal": "Isso mudou desde então, então nada foi feito. Pergunte de novo.",
         "cap": "Você segue {{cap}} trilhas, o máximo possível. Deixe uma primeiro na página dela.",
-        "loopBackwards": "O compasso {{to}} vem antes do compasso {{from}}. Diga o primeiro compasso primeiro."
+        "loopBackwards": "O compasso {{to}} vem antes do compasso {{from}}. Diga o primeiro compasso primeiro.",
+        "loopOwn": "Por enquanto, só dá para repetir em loop um exercício de uma Trilha, e este é um dos seus próprios exercícios."
       },
       "failed": "Isso não funcionou, e nada foi alterado.",
       "make": {

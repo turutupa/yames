@@ -1,7 +1,10 @@
 # Session 6's handoff (read after `HANDOFF-ORCHESTRATOR.md`'s first section and `HANDOFF-S5.md`'s "How session 5 ran")
 
 Kept current by session 6's orchestrator. Newer than `HANDOFF-S5.md`; where they differ, this wins.
-Last update: 2026-11-21, 06:45 by this machine's clock.
+Last update: 2026-11-21, 09:30 by this machine's clock. **Session 6 ended at its context limit with NO
+agent running**; `coach` is gated green at delivery 2a (vitest 52,090, layout 413 + 250; `STATUS.md`).
+One branch is unmerged on purpose: `coach-rules1` (its row below). Two training jobs run in the queue
+on their own (B2, then A).
 
 ## How session 6 ran (what changed in the method)
 
@@ -36,29 +39,42 @@ Last update: 2026-11-21, 06:45 by this machine's clock.
 
 ## Delivered this session
 
-**1r** (`STATUS.md`): t2c (+ t2cc), c2b2a (+ c2b2ac), rem2 (+ rem2c), tc2 (+ tc2b), c4b3 (+ c4b3b),
-c2b2b, rtx1. `coach` gated green there (vitest 51,270, `test:rust` 1,280 here and 1,276 on the RTX).
-Merged after 1r and gated (tsc, vitest **51,788**, build): **t2f** (the phone's Ask sheet lost every
-press made with the keyboard up), **t2d** (+ t2dc: the exercise command in fourteen more languages).
-The Ask layout specs after that merge: 66 passed, 1 failed (`ask-make-phone.spec.ts:88`: after the
-"Open Paths" chip the Undo is still there); job `coach-layout-s6d-2` re-runs it alone three times.
-**If it fails alone it is a real defect of the t2f + t2d merge** (t2f's spec passed on its branch,
-before t2d): give it to a small leg. Delivery 1s is owed once that is settled and c4b4 is merged.
+**1r** and **delivery 2** (`STATUS.md`; the plan's d4: Ask answers and acts with the selector on
+Off). At delivery 2 `coach` was gated green: tsc, vitest **52,024**, build, `test:rust` 1,280 (1,276
+on the RTX at 1r), the named layout specs; **the full layout suite at 1r: 1,493 passed, 6 timeouts
+that pass alone** (151 of 151). Merged after delivery 2, **not yet gated on `coach`**: t2g (the phone
+make scene's failure was the spec's own double tap inside Chromium's 450 ms window, which the press
+guard ignores on purpose; the spec waits now; a receipt's chip to the screen already showing goes
+away), rtx2 and c3da (notes and scripts). Gate with `gates.sh` and `ask-make-phone ask-make ask
+ask-tools phone-header` after the next merge.
 
 ## State (worktree `~/yames-coach-<leg>`; check `git branch --no-merged coach`, `job ls`)
 
 | Leg | State | Next |
 |---|---|---|
-| **c4b4** (companion scenes; `pathSuggest.next` reworded) | reported, gated on its branch, **not merged** only because a layout job was queued on the main checkout | test-merge, merge, `companion rail phone-learning short-window paths-prereq session` |
-| **c2cc** (on `-c2cb`: the help set's review fixes `c2cb-review.md` + its scenes) | running | read `/tmp/coach-orch/c2cc-fix.diff` (the tuning refusal's patterns above all), merge → **delivery 2** (Ask answers and acts with the selector on Off). Open point from c4b4: the "Suggest a Path" chip under the heading "About your last Take:" (c2cb's `takeCards` condition should fix it) |
-| **c6ab** (on `-c6a`: `c6a-review.md`: an unreadable `coach.suppressed` entry blanks the app in Settings) | running | read `/tmp/coach-orch/c6ab-fix.diff`, merge, `coach-settings settings firstrun phone-tabs reminder coach-model`; then **c6b** (docs, last) |
-| **c5a1c** (on `-c5a1`: `c5a1-review.md`: the #9 called a third; the stop line beside another jam) | running | a short re-read of `/tmp/coach-orch/c5a1c-fix.diff` (`useHeard.ts` if it changed), merge, `jam jam-watch jam-coach tool-coach ask ask-tools`; then **c5a1b** ("Make this my finisher": brief item 5 of `c5a1-jam.md`; registry + command tables + settings store + `planner.ts`; **R**; after t2e merges, both add a planner input) |
-| **t2e** (My exercises in Today: a store key, `PlannerInput.chosen`, the runner's custom documents) | running | **R: the store reviewer on `/tmp/coach-orch/t2e-review.diff`** (store, `planner.ts`, `useSessionRun.ts`), fix, merge, `gates.sh` + `today-line my-exercises coach-session short-window phone-learning planner swap smooth` |
-| **c3d2** training | **B1 (0.6B full) finishes about 07:45**; B2 (1.7B LoRA) and A (4B LoRA) follow on the same lock | see "The router" below |
-| **full layout suite** | job `coach-layout-full-s6` (low priority, in `~/yames-coach-night` at delivery 1r) | read `/tmp/coach-orch/layout-full-s6.log`; a real failure gets a small leg |
+| **t2e** (+ t2eb: My exercises in Today) | **merged** (review `t2e-review.md`, re-read `t2eb-review.md`: MERGE, five LOW for pol3); gates on `coach`: jobs `coach-gates-s6i`, `coach-layout-s6i` (see STATUS's last line for their result) | `done-leg.sh t2e`; `smooth.spec.ts` on a quiet machine |
+| **rules1** (+ rules1b; branch `coach-rules1`, worktree `-rules1`: the typed rules' defects from `progress/c3da.md` 1c) | **NOT merged: the second re-read `/tmp/coach-orch/rules1b-review.md` is MERGE AFTER FIXES with a HIGH**: rules1b's "step 0" refuses musical-note lines as grades in es / pt-BR / fr / de ("toca la nota sin vibrato", "spiel die Note ohne Vibrato": "nota / Note" is also a note, and bare "without" words became act words); "how do I improve my score?" is refused in six languages; vi bare "tắt" matches "tóm tắt" | **rules1c** on that worktree with `rules1b-review.md` as its list (count a "without" word only right before a grades word; on a question-shaped line only negation / off / stop words count; drop vi bare "tắt"; ja "なし"; M4 comparatives read after the question checks), then **a third reader** (the never-list has now been wrong in both directions: do not skip it), merge, `ask ask-tools ask-typed`. No held-out line or paraphrase in a test. The chain's rules were fixed from held-out misses, so the CHAIN numbers on those fifteen items are no longer blind: say so beside any chain figure |
+| **pol2** (the polish list, first part) | **merged** (short review `pol2-review.md`: no HIGH) | **pol3**: first `pol2-review.md`'s M1 (the "Now looking at" divider still lands after a chip's answer when Ask reopens on another screen: `setLookingAt(null)` while the panel is closed, clear `unplacedFrom` in `closeAsk`) and L1 to L3 (L2: `forceReveal` renders once when Start cuts the voice: return `prev` when no message has the id); then `progress/pol2-HANDOFF.md`'s list (brief items 1, 6, 7, 12, 15b; extras A4, A6 to A11, C13); B12: raising the cards' share of the choice prompt from 300 to 320 tokens lets `suggest_path`'s short be "which Path to try next": do it in c3d2b, before the data is rendered |
+| **c3d2** training | B1 done (below); **B2 (1.7B LoRA) running since about 07:30, est 9 h; A (4B LoRA, est 22 h) after it**, same lock | `job ls`; `~/scratch/yames-c3d/runs/<candidate>/RESULT.md`; `tabulate.mjs --all`, commit |
 
 ## The router (c3d): what I decided and what is next
 
+- **B1's numbers** (0.6B full fine-tune, 610 MiB Q8_0; `evals/coach/results/2026-11-21-c3d2-b1.md`):
+  held-out wrong action **1.6%** (stock 4B 8.3%, 8B 11.2% in the chain), right tool **78.7% chain /
+  83.6% alone** (gate 90%), validation exact match 93.3%, 0.07 s a turn. **On the RTX's Vulkan every
+  answer equals the DGX's** (`progress/rtx2.md`; 0.06 s; 1.4 GB of GPU memory; load 1.2 s); **the first
+  turn after a load on a cold shader cache takes 5 to 10 s: c3d3 must warm the context with one
+  throwaway decode on the worker thread.** rtx2 also ran the frozen CUDA binary once on B1's Q4_K_M
+  for a side-by-side (one more line in `heldout/COUNT`; not used to choose anything).
+- **`progress/c3da.md`** reads the misses: the router says "which one?" too often (16 of 30), has
+  seen too few `load_preset` / `load_jam` (37 records) and `set_tempo {bpm}` (74) lines, almost no
+  questions about unmeasured things that should get "none" (87 against 1,995 card records); ten
+  ordered changes to the data are in its section 5 (a leg that writes training data reads sections 3
+  and 5 only: section 1c quotes held-out lines). **Per language the gate cannot be read**: twelve
+  languages have 9 tool calls (one miss is 89%); about 456 more hand-written held-out items bring
+  them to the size of en / es / de (its own leg, sonnet writers and a second reader per language);
+  until then gate on the pooled numbers and say so. On the chain's order: keep the rules first, fix
+  them (rules1), and let a Path search passage end the turn only when the model says none.
 - **The three candidates running are a SELECTION run** on the old prompt (seven cards, long card
   lines). The choice prompt has changed since (21 cards, each with a hand-written `short`; 1,397 of
   1,400 tokens) and will change again: c5a1b adds a tool (`make_finisher`), c3c adds the "advice"
@@ -78,13 +94,12 @@ before t2d): give it to a small leg. Delivery 1s is owed once that is settled an
 
 ## Not started, in the order I would run them
 
-1. **pol2** (`pol2-tools-and-ask.md`) after c2cc merges (it touches every Ask file). Add to its list:
-   `rem2c-review.md` L1 to L6; `t2dc-review.md` L1, L2, L5 (de "1 takt"; a bar count equal to an
-   ordinal fret; the missing cases); `c2b2ab-review.md` leftovers; c2b2b's: a long quote cut between
-   words into two blocks each with its own source line, the "accents landed N%" strings, the Italian
-   Take gender; c4b4's: the plateau button shows a time with the day, the suggestion card 34 px short
-   of the grid on Paths; t2d's: the old receipt keeps its "Open Paths" chip on Paths; `c6a-review.md`
-   L3, L4; the two flaky tests named above; plus HANDOFF-S5's list.
+1. **c5a1b** ("Make this my finisher": item 5 of `c5a1-jam.md`; a `confirm` tool in the registry,
+   its command words, `coach.finisher` in the settings store, a planner input beside t2e's `chosen`
+   (`progress/t2e.md` says where); **R: the store reviewer**) once t2e and rules1 are merged. It is
+   the last tool: after it and c3c's grammar hunk the catalogue is frozen for **c3d2b**.
+   Then **pol3** (what `pol2-HANDOFF.md` lists, plus: the Italian Take gender in `ask.json`; looping
+   an own exercise, which t2eb only stops offering; `t2e-review.md`'s LOW items t2eb left).
 2. **tc3**: about 60 tip lines that credit a hand ("Picking hand is landing before the click") or
    give body instructions, and two lines named in `progress/tc2b.md`.
 3. **"Hear it"** for an exercise's preview (no door plays an Exercise outside a Session: its own leg,

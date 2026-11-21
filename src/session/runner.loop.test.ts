@@ -21,12 +21,15 @@ import {
   loopAt,
   loopBars,
   loopOffer,
+  OWN_EXERCISES_PATH_ID,
   printedLoopBars,
   runReducer,
   timedTempoAdjustable,
 } from "./runner";
 import type { RunEvent, RunState, TakeOutcome, TakeSpot } from "./runner";
 import { ALT, NOW, missed, progress } from "./testKit";
+import { MY_EXERCISES_PATH_ID } from "./myExercises";
+import { CUSTOM_PATH_ID } from "../paths/custom";
 
 const EX = ALT.steps[0].exercises[0];
 
@@ -404,6 +407,37 @@ describe("printedLoopBars: bars as the Session prints them", () => {
     expect(printedLoopBars(ONE, 0, 1)).toEqual({ refused: "outsideTune" });
     expect(loopAsked(ready, ONE, 1, 1)).toEqual(loopAt(ready, ONE, 1, 1));
     expect(loopAsked(ready, ONE, 1, 2)).toEqual({ refused: "oneBar" });
+  });
+});
+
+describe("the player's own exercise has no loop (t2eb, review M5)", () => {
+  /** The same ready screen, its step one of My exercises (as "Add to today" plans it). */
+  function own(state: RunState): RunState {
+    const steps = state.plan!.steps.map((s, i) =>
+      i === state.stepIndex && s.kind === "exercise" ? { ...s, pathId: OWN_EXERCISES_PATH_ID } : s,
+    );
+    return { ...state, plan: { ...state.plan!, steps } };
+  }
+
+  it("the id is the one My exercises plays under", () => {
+    expect(OWN_EXERCISES_PATH_ID).toBe(MY_EXERCISES_PATH_ID);
+    expect(OWN_EXERCISES_PATH_ID).toBe(CUSTOM_PATH_ID);
+  });
+
+  it("no Loop button where a Path's Exercise would get one", () => {
+    const pathTake = take(atFocus(), "belowBar", SLIPPED);
+    expect(loopOffer(pathTake, EX)).not.toBeNull();
+    expect(loopOffer(own(pathTake), EX)).toBeNull();
+    const notYet = take(atFocus(true), "ungraded", undefined, true);
+    expect(loopOffer(own(notYet), EX, { notYetTwice: true })).toBeNull();
+  });
+
+  it("loop_bars is refused with its own reason, never proposed", () => {
+    const ready = own(atFocus());
+    expect(loopAt(ready, EX, 1, 1)).toEqual({ refused: "ownExercise" });
+    expect(loopAsked(ready, EX, 1, 1)).toEqual({ refused: "ownExercise" });
+    // Off an Exercise's screen, where the player is still comes first.
+    expect(loopAsked(IDLE, EX, 1, 1)).toEqual({ refused: "notHere" });
   });
 });
 

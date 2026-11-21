@@ -1144,14 +1144,19 @@ export function useToolCoach({
           // answer as the app's own words, and are spoken as before.
           askCoach();
           appendAskTurn({ id: askTurnId(), kind: "user", text: chip.label });
-          appendAskTurn({ id: askTurnId(), kind: "app", text: chip.answer });
+          const answerId = askTurnId();
+          appendAskTurn({ id: answerId, kind: "app", text: chip.answer });
           if (narrativeRef.current) {
             narrativeRef.current = appendCoachUtterance(
               narrativeRef.current,
               chip.answer,
             );
           }
-          maybeSpeak(chip.answer, "normal");
+          // Through the reveal queue (pol2 item 4): its own speech-started
+          // event is its own, and does not reveal a line waiting behind it.
+          // The id is the Ask turn's, which is not in the feed, so nothing
+          // in the feed is hidden or shown by it.
+          speakAndReveal(answerId, chip.answer, "normal");
         } else {
           // LLM pathway — the chip label is asked in Ask, where the
           // model can handle it as a question.
@@ -1230,7 +1235,7 @@ export function useToolCoach({
         break;
       }
     }
-  }, [bpm, setBpm, maybeSpeak, instrument, evaluation.selectedDevice, voiceMode]);
+  }, [bpm, setBpm, speakAndReveal, instrument, evaluation.selectedDevice, voiceMode]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);

@@ -27,7 +27,7 @@
       "even": "regolare",
       "heard": "delle note sentite",
       "extras": "note in più",
-      "accents": "accenti a segno",
+      "accents": "più forte sugli accenti",
       "notes": "note giuste"
     },
     "today": {
@@ -72,7 +72,7 @@
         "back": {
           "even": "Ultima sessione, {{exercise}}: {{value}}% di regolarità a {{bpm}} BPM.",
           "heard": "Ultima sessione, {{exercise}}: {{value}}% delle note sentite a {{bpm}} BPM.",
-          "accents": "Ultima sessione, {{exercise}}: {{value}}% degli accenti a segno a {{bpm}} BPM.",
+          "accents": "Ultima sessione, {{exercise}}: gli accenti il {{value}}% più forti delle altre note, in media, a {{bpm}} BPM.",
           "notes": "Ultima sessione, {{exercise}}: {{value}}% di note giuste a {{bpm}} BPM.",
           "plain": "L'ultima sessione è finita su {{exercise}} a {{bpm}} BPM."
         },
@@ -126,8 +126,18 @@
         "yourTurn": "Tocca a te · non controllato",
         "finisher": "Per chiudere · senza voto",
         "jam": "Jam · senza voto",
-        "drill": "Rampa di tempo"
+        "drill": "Rampa di tempo",
+        "mine": "Il tuo esercizio"
       },
+      "chosenLeftOut": "{{count}} esercizio che hai aggiunto non è entrato in {{minutes}} minuti. Scegli più minuti, o toglilo da I miei esercizi.",
+      "chosenLeftOut_many": "{{count}} esercizi che hai aggiunto non sono entrati in {{minutes}} minuti. Scegli più minuti, o togline uno da I miei esercizi.",
+      "chosenLeftOut_other": "{{count}} esercizi che hai aggiunto non sono entrati in {{minutes}} minuti. Scegli più minuti, o togline uno da I miei esercizi.",
+      "chosenLeftOutGraded": "{{count}} esercizio che hai aggiunto non è entrato: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; toglilo da I miei esercizi.",
+      "chosenLeftOutGraded_many": "{{count}} esercizi che hai aggiunto non sono entrati: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; togline uno da I miei esercizi.",
+      "chosenLeftOutGraded_other": "{{count}} esercizi che hai aggiunto non sono entrati: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; togline uno da I miei esercizi.",
+      "chosenUnbuilt": "{{count}} esercizio che hai aggiunto per oggi non si può più costruire, quindi resta fuori.",
+      "chosenUnbuilt_many": "{{count}} esercizi che hai aggiunto per oggi non si possono più costruire, quindi restano fuori.",
+      "chosenUnbuilt_other": "{{count}} esercizi che hai aggiunto per oggi non si possono più costruire, quindi restano fuori.",
       "reason": {
         "firstEver": "Il tuo primo. Stai preciso sul click; la velocità arriva dopo.",
         "newExercise": "Nuovo per te. Vai piano e tienilo pulito.",
@@ -161,7 +171,8 @@
         "keepWarmYesterday": "Per tenerlo caldo, suonato ieri.",
         "keepWarmToday": "Per tenerlo caldo, già suonato oggi.",
         "keepWarmNew": "Un primo assaggio.",
-        "focusChosen": "Oggi solo questo percorso, come hai scelto."
+        "focusChosen": "Oggi solo questo percorso, come hai scelto.",
+        "chosenToday": "L'hai aggiunto per oggi."
       },
       "from": "{{path}} · {{level}} · Tappa {{step}}",
       "fromNoLevel": "{{path}} · Tappa {{step}}",
@@ -220,7 +231,7 @@
         "even": "Perché la regolarità era del {{value}}% a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "heard": "Perché ho sentito il {{value}}% delle note a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "extras": "Per le note in più a {{bpm}} BPM. L'asticella è {{bar}} al massimo su quattro battute.",
-        "accents": "Perché il {{value}}% degli accenti è andato a segno a {{bpm}} BPM. L'asticella è al {{bar}}%.",
+        "accents": "Perché a {{bpm}} BPM gli accenti sono usciti, in media, il {{value}}% più forti delle altre note. L'asticella è al {{bar}}%.",
         "plain": "Perché l'ultima take a {{bpm}} BPM non ha superato l'asticella.",
         "notes": "Perché il {{value}}% delle note di cui ho riconosciuto l'altezza erano quelle scritte a {{bpm}} BPM. L'asticella è al {{bar}}%."
       },
@@ -228,7 +239,7 @@
         "even": "La regolarità era del {{value}}% a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "heard": "Ho sentito il {{value}}% delle note a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "extras": "C'erano note in più a {{bpm}} BPM, quindi ora si va a {{next}} BPM.",
-        "accents": "Il {{value}}% degli accenti è andato a segno a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
+        "accents": "A {{bpm}} BPM gli accenti sono usciti, in media, il {{value}}% più forti delle altre note e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "plain": "Le ultime take a {{bpm}} BPM non hanno superato l'asticella, quindi ora si va a {{next}} BPM.",
         "notes": "Il {{value}}% delle note riconosciute erano quelle scritte a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM."
       },
@@ -271,6 +282,7 @@
       "newFromSibling": "Nuovo. Parte da {{bpm}} BPM, circa l’80% del tuo tempo pulito di {{clean}} BPM su {{sibling}}.",
       "newFromSiblingNoClean": "Nuovo. Parte da {{bpm}} BPM, calcolati dai tuoi take su {{sibling}}.",
       "focusChosen": "Hai scelto {{path}} per oggi, quindi tutta la sessione viene da lì.",
+      "chosenToday": "Uno dei tuoi esercizi, aggiunto da te alla sessione di oggi.",
       "playedUngraded": "Dove l'hai lasciato: {{bpm}} BPM."
     },
     "bar": {
@@ -482,7 +494,15 @@
       "undoFull": "I miei esercizi è pieno (50), quindi Annulla non può rimettere questo.",
       "undoAlready": "Questo è già tornato in I miei esercizi.",
       "cantBuild": "Questo non si può più costruire: questa versione di Yames non lo crea più. Resta qui finché non lo rimuovi.",
-      "howTo": "Suonalo come scritto, con il click."
+      "howTo": "Suonalo come scritto, con il click.",
+      "addToday": "Aggiungi a oggi",
+      "addTodayLabel": "Aggiungi {{what}} alla sessione di oggi",
+      "takeOffToday": "Togli da oggi",
+      "takeOffTodayLabel": "Togli {{what}} dalla sessione di oggi",
+      "inToday": "Nella sessione di oggi",
+      "addedToday": "Aggiunto alla sessione di oggi, dopo il riscaldamento.",
+      "takenOffToday": "Tolto dalla sessione di oggi.",
+      "todayFull": "Oggi contiene già {{max}} dei tuoi esercizi, il massimo consentito: una sessione ne riproduce al massimo {{graded}}, e un posto resta riservato ai tuoi percorsi. Togline uno prima."
     },
     "paths": {
       "title": "Percorsi",

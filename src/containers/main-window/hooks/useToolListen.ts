@@ -62,8 +62,6 @@ export function useToolListen({
    * hook's own `startSession()` started is ever ended here).
    */
   const borrowedRef = useRef(false);
-  /** This hook's own end, while it is still queued or running. */
-  const endingRef = useRef<Promise<void> | null>(null);
   const latest = useRef(coach);
   latest.current = coach;
 
@@ -79,13 +77,7 @@ export function useToolListen({
       borrowedRef.current = false;
       return;
     }
-    const p: Promise<void> = latest.current
-      .endSession()
-      .catch(() => {})
-      .finally(() => {
-        if (endingRef.current === p) endingRef.current = null;
-      });
-    endingRef.current = p;
+    void latest.current.endSession().catch(() => {});
   }, [claim]);
 
   const toggle = useCallback(() => {
@@ -93,9 +85,10 @@ export function useToolListen({
       end();
       return;
     }
-    // A session that is active and is not this hook's own one still ending
-    // belongs to someone else: show the switch on, start nothing, own nothing.
-    borrowedRef.current = latest.current.isActive() && endingRef.current === null;
+    // A session that is active belongs to someone else: show the switch on,
+    // start nothing, own nothing. This hook's own end, still queued, already
+    // reads as not active (`isActive()` answers as of the calls made).
+    borrowedRef.current = latest.current.isActive();
     claim(true);
     if (borrowedRef.current) return;
     // Queued behind any end still running (`useSession`'s lifecycle turn).

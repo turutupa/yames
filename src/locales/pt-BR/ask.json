@@ -175,7 +175,7 @@
           "even": "Regular: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
           "heard": "Notas ouvidas: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
           "extras": "Notas a mais: {{before}} nessa tomada, {{now}} na tomada {{take}}.",
-          "accents": "Acentos certeiros: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
+          "accents": "Acentos mais fortes que as outras notas, em média: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
           "notes": "Notas certas: {{before}}% nessa tomada, {{now}}% na tomada {{take}}.",
           "hold": "Regularidade mantida até o fim: {{before}}% nessa tomada, {{now}}% na tomada {{take}}."
         },
@@ -253,9 +253,9 @@
           "heard_many": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
           "heard_other": "Notas ouvidas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
           "extras": "Notas a mais: {{value}} na tomada {{take}}, {{gap}} a mais do que a meta permite ({{bar}} ou menos em {{over}} compassos).",
-          "accents": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
-          "accents_many": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
-          "accents_other": "Acentos certeiros: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "accents": "Acentos mais fortes que as outras notas, em média: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
+          "accents_many": "Acentos mais fortes que as outras notas, em média: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
+          "accents_other": "Acentos mais fortes que as outras notas, em média: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
           "notes": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} ponto da meta de {{bar}}%.",
           "notes_many": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
           "notes_other": "Notas certas: {{value}}% na tomada {{take}}, a {{count}} pontos da meta de {{bar}}%.",
@@ -266,7 +266,7 @@
         "under": {
           "even": "Regular na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
           "heard": "Notas ouvidas na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
-          "accents": "Acentos certeiros na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
+          "accents": "Acentos mais fortes que as outras notas, em média, na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
           "notes": "Notas certas na tomada {{take}}: a menos de um ponto da meta de {{bar}}%.",
           "hold": "Regularidade mantida até o fim na tomada {{take}}: a menos de um ponto da meta de {{bar}}%."
         },
@@ -277,7 +277,7 @@
           "even": "Regular: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
           "heard": "Notas ouvidas: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
           "extras": "Notas a mais: {{value}} na tomada {{take}}, dentro da meta de {{bar}} ou menos em {{over}} compassos.",
-          "accents": "Acentos certeiros: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
+          "accents": "Acentos mais fortes que as outras notas, em média: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
           "notes": "Notas certas: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%.",
           "hold": "Regularidade mantida até o fim: {{value}}% na tomada {{take}}, que atinge a meta de {{bar}}%."
         },

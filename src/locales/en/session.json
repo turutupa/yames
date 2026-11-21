@@ -27,7 +27,7 @@
       "even": "even",
       "heard": "of the notes heard",
       "extras": "extra notes",
-      "accents": "accents landed",
+      "accents": "louder on the accents",
       "notes": "right notes"
     },
     "today": {
@@ -71,7 +71,7 @@
         "back": {
           "even": "Last Session, {{exercise}}: {{value}}% even at {{bpm}} BPM.",
           "heard": "Last Session, {{exercise}}: {{value}}% of the notes heard at {{bpm}} BPM.",
-          "accents": "Last Session, {{exercise}}: {{value}}% of the accents landed at {{bpm}} BPM.",
+          "accents": "Last Session, {{exercise}}: the accents {{value}}% louder than the other notes on average, at {{bpm}} BPM.",
           "notes": "Last Session, {{exercise}}: {{value}}% right notes at {{bpm}} BPM.",
           "plain": "Last Session ended on {{exercise}} at {{bpm}} BPM."
         },
@@ -120,8 +120,15 @@
         "yourTurn": "Your turn · not checked",
         "finisher": "Finisher · not graded",
         "jam": "Jam · not graded",
-        "drill": "Tempo ramp"
+        "drill": "Tempo ramp",
+        "mine": "Your exercise"
       },
+      "chosenLeftOut": "{{count}} exercise you added didn't fit in {{minutes}} minutes. Choose more minutes, or take one off in My exercises.",
+      "chosenLeftOut_other": "{{count}} exercises you added didn't fit in {{minutes}} minutes. Choose more minutes, or take one off in My exercises.",
+      "chosenLeftOutGraded": "{{count}} exercise you added didn't fit: a Session plays {{max}} exercises at most, and your Paths have {{taken}} of them today. More minutes won't make room; take one off in My exercises.",
+      "chosenLeftOutGraded_other": "{{count}} exercises you added didn't fit: a Session plays {{max}} exercises at most, and your Paths have {{taken}} of them today. More minutes won't make room; take one off in My exercises.",
+      "chosenUnbuilt": "{{count}} exercise you added for today can't be built any more, so it's left out.",
+      "chosenUnbuilt_other": "{{count}} exercises you added for today can't be built any more, so they're left out.",
       "reason": {
         "firstEver": "Your first one. Sit right on the click; speed comes later.",
         "newExercise": "New to you. Take it slow and keep it clean.",
@@ -155,7 +162,8 @@
         "keepWarmYesterday": "Keeping it warm, last played yesterday.",
         "keepWarmToday": "Keeping it warm, played earlier today.",
         "keepWarmNew": "A first taste.",
-        "focusChosen": "Only this Path today, as you chose."
+        "focusChosen": "Only this Path today, as you chose.",
+        "chosenToday": "You added it for today."
       },
       "from": "{{path}} · {{level}} · Step {{step}}",
       "fromNoLevel": "{{path}} · Step {{step}}",
@@ -214,7 +222,7 @@
         "even": "Because evenness was {{value}}% at {{bpm}} BPM. The pass mark is {{bar}}%.",
         "heard": "Because I heard {{value}}% of the notes at {{bpm}} BPM. The pass mark is {{bar}}%.",
         "extras": "Because of extra notes at {{bpm}} BPM. The pass mark is {{bar}} or fewer in four bars.",
-        "accents": "Because {{value}}% of the accents landed at {{bpm}} BPM. The pass mark is {{bar}}%.",
+        "accents": "Because at {{bpm}} BPM the accents came out {{value}}% louder than the other notes on average. The pass mark is {{bar}}%.",
         "plain": "Because the last Take at {{bpm}} BPM didn't meet the pass mark.",
         "notes": "Because {{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM. The pass mark is {{bar}}%."
       },
@@ -222,7 +230,7 @@
         "even": "Evenness was {{value}}% at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
         "heard": "I heard {{value}}% of the notes at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
         "extras": "There were extra notes at {{bpm}} BPM, so this is {{next}} BPM.",
-        "accents": "{{value}}% of the accents landed at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM.",
+        "accents": "At {{bpm}} BPM the accents came out {{value}}% louder than the other notes on average and the pass mark is {{bar}}%, so this is {{next}} BPM.",
         "plain": "The last Takes at {{bpm}} BPM didn't meet the pass mark, so this is {{next}} BPM.",
         "notes": "{{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM and the pass mark is {{bar}}%, so this is {{next}} BPM."
       },
@@ -265,6 +273,7 @@
       "newFromSibling": "New. It starts at {{bpm}} BPM, about 80% of your clean {{clean}} BPM on {{sibling}}.",
       "newFromSiblingNoClean": "New. It starts at {{bpm}} BPM, worked out from your Takes on {{sibling}}.",
       "focusChosen": "You chose {{path}} for today, so the whole Session comes from it.",
+      "chosenToday": "One of your own exercises, added to today's Session by you.",
       "playedUngraded": "Where you left it: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +479,15 @@
       "undoFull": "My exercises is full (50), so Undo can't put this one back.",
       "undoAlready": "That one is already back on My exercises.",
       "cantBuild":"This one can't be built any more: this version of Yames no longer makes it. It stays here until you remove it.",
-      "howTo": "Play it as written, with the click."
+      "howTo": "Play it as written, with the click.",
+      "addToday": "Add to today",
+      "addTodayLabel": "Add {{what}} to today's Session",
+      "takeOffToday": "Take off today",
+      "takeOffTodayLabel": "Take {{what}} off today's Session",
+      "inToday": "In today's Session",
+      "addedToday": "Added to today's Session, after the warm-up.",
+      "takenOffToday": "Taken off today's Session.",
+      "todayFull": "Today already holds {{max}} of your exercises, the most it takes: a Session plays {{graded}} exercises at most, and one place is kept for your Paths. Take one off first."
     },
     "paths": {
       "title": "Paths",

@@ -470,6 +470,8 @@ describe("loop_bars (leg lb1)", () => {
     ["backwards", "refused", "coachTools.why.refused.loopBackwards", { from: 3, to: 4 }],
     ["acrossRounds", "notFound", "coachTools.why.notFound.loopAcross", { from: 3, to: 4 }],
     ["oneBar", "notFound", "coachTools.why.notFound.loopOneBar", {}],
+    // The player's own exercise: refused with a true sentence, never a dead press (t2eb M5).
+    ["ownExercise", "refused", "coachTools.why.refused.loopOwn", {}],
   ] as const)("the runner's %s, in words, and nothing done", (refused, why, key, values) => {
     const h = host({ loopAsk: () => ({ refused }) });
     expect(runCoachTool(call("loop_bars", { from: 3, to: 4 }), h, session())).toMatchObject({ ok: false, why, line: { key, values } });

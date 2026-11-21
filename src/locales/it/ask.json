@@ -175,7 +175,7 @@
           "even": "Regolare: {{before}}% in quel take, {{now}}% nel take {{take}}.",
           "heard": "Note sentite: {{before}}% in quel take, {{now}}% nel take {{take}}.",
           "extras": "Note in più: {{before}} in quel take, {{now}} nel take {{take}}.",
-          "accents": "Accenti a segno: {{before}}% in quel take, {{now}}% nel take {{take}}.",
+          "accents": "Accenti più forti delle altre note, in media: {{before}}% in quel take, {{now}}% nel take {{take}}.",
           "notes": "Note giuste: {{before}}% in quel take, {{now}}% nel take {{take}}.",
           "hold": "Regolarità mantenuta fino alla fine: {{before}}% in quel take, {{now}}% nel take {{take}}."
         },
@@ -253,9 +253,9 @@
           "heard_many": "Note sentite: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
           "heard_other": "Note sentite: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
           "extras": "Note in più: {{value}} nel take {{take}}, {{gap}} in più di quante ne ammetta l'asticella ({{bar}} o meno in {{over}} battute).",
-          "accents": "Accenti a segno: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
-          "accents_many": "Accenti a segno: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
-          "accents_other": "Accenti a segno: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "accents": "Accenti più forti delle altre note, in media: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
+          "accents_many": "Accenti più forti delle altre note, in media: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
+          "accents_other": "Accenti più forti delle altre note, in media: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
           "notes": "Note giuste: {{value}}% nel take {{take}}, a {{count}} punto dall'asticella del {{bar}}%.",
           "notes_many": "Note giuste: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
           "notes_other": "Note giuste: {{value}}% nel take {{take}}, a {{count}} punti dall'asticella del {{bar}}%.",
@@ -266,7 +266,7 @@
         "under": {
           "even": "Regolare nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
           "heard": "Note sentite nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
-          "accents": "Accenti a segno nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
+          "accents": "Accenti più forti delle altre note, in media, nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
           "notes": "Note giuste nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%.",
           "hold": "Regolarità mantenuta fino alla fine nel take {{take}}: a meno di un punto dall'asticella del {{bar}}%."
         },
@@ -277,7 +277,7 @@
           "even": "Regolare: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%.",
           "heard": "Note sentite: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%.",
           "extras": "Note in più: {{value}} nel take {{take}}, entro l'asticella di {{bar}} o meno in {{over}} battute.",
-          "accents": "Accenti a segno: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%.",
+          "accents": "Accenti più forti delle altre note, in media: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%.",
           "notes": "Note giuste: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%.",
           "hold": "Regolarità mantenuta fino alla fine: {{value}}% nel take {{take}}, che raggiunge l'asticella del {{bar}}%."
         },

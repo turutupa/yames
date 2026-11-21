@@ -272,7 +272,16 @@ export function updateMyExercises(fn: (list: readonly MyExercise[]) => MyExercis
     set("read", rows);
     return "saved";
   };
-  const result = writing.then(run, run);
+  return queueMyExercisesWrite(run);
+}
+
+/**
+ * Run `write` after every My exercises writer before it (the list's and
+ * today's choice, `chosenToday.ts`), so the two keys are changed one press at
+ * a time, each from what the press before it left (t2e).
+ */
+export function queueMyExercisesWrite<T>(write: () => Promise<T>): Promise<T> {
+  const result = writing.then(write, write);
   writing = result;
   return result;
 }

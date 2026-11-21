@@ -179,7 +179,7 @@
           "even": "Równo: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
           "heard": "Usłyszane nuty: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
           "extras": "Dodatkowe nuty: {{before}} w tamtym podejściu, {{now}} w podejściu {{take}}.",
-          "accents": "Akcenty trafione: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
+          "accents": "Akcenty średnio głośniej niż pozostałe nuty: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
           "notes": "Właściwe nuty: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}.",
           "hold": "Równość utrzymana do końca: {{before}}% w tamtym podejściu, {{now}}% w podejściu {{take}}."
         },
@@ -266,10 +266,10 @@
           "heard_many": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
           "heard_other": "Usłyszane nuty: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%.",
           "extras": "Dodatkowe nuty: {{value}} w podejściu {{take}}, o {{gap}} więcej, niż dopuszcza poprzeczka ({{bar}} lub mniej w {{over}} taktach).",
-          "accents": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
-          "accents_few": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
-          "accents_many": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
-          "accents_other": "Akcenty trafione: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%.",
+          "accents": "Akcenty średnio głośniej niż pozostałe nuty: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
+          "accents_few": "Akcenty średnio głośniej niż pozostałe nuty: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
+          "accents_many": "Akcenty średnio głośniej niż pozostałe nuty: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
+          "accents_other": "Akcenty średnio głośniej niż pozostałe nuty: {{value}}% w podejściu {{take}}, {{count}} punktu poniżej poprzeczki {{bar}}%.",
           "notes": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{count}} punkt poniżej poprzeczki {{bar}}%.",
           "notes_few": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{count}} punkty poniżej poprzeczki {{bar}}%.",
           "notes_many": "Właściwe nuty: {{value}}% w podejściu {{take}}, {{count}} punktów poniżej poprzeczki {{bar}}%.",
@@ -282,7 +282,7 @@
         "under": {
           "even": "Równo w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
           "heard": "Usłyszane nuty w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
-          "accents": "Akcenty trafione w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
+          "accents": "Akcenty średnio głośniej niż pozostałe nuty w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
           "notes": "Właściwe nuty w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%.",
           "hold": "Równość utrzymana do końca w podejściu {{take}}: mniej niż punkt poniżej poprzeczki {{bar}}%."
         },
@@ -294,7 +294,7 @@
           "even": "Równo: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
           "heard": "Usłyszane nuty: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
           "extras": "Dodatkowe nuty: {{value}} w podejściu {{take}}, w granicach poprzeczki: {{bar}} lub mniej w {{over}} taktach.",
-          "accents": "Akcenty trafione: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
+          "accents": "Akcenty średnio głośniej niż pozostałe nuty: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
           "notes": "Właściwe nuty: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%.",
           "hold": "Równość utrzymana do końca: {{value}}% w podejściu {{take}}, co osiąga poprzeczkę {{bar}}%."
         },

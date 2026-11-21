@@ -27,7 +27,7 @@
       "even": "regular",
       "heard": "das notas ouvidas",
       "extras": "notas a mais",
-      "accents": "acentos certeiros",
+      "accents": "mais fortes nos acentos",
       "notes": "notas certas"
     },
     "today": {
@@ -72,7 +72,7 @@
         "back": {
           "even": "Última sessão, {{exercise}}: {{value}}% de regularidade a {{bpm}} BPM.",
           "heard": "Última sessão, {{exercise}}: {{value}}% das notas ouvidas a {{bpm}} BPM.",
-          "accents": "Última sessão, {{exercise}}: {{value}}% dos acentos no lugar a {{bpm}} BPM.",
+          "accents": "Última sessão, {{exercise}}: os acentos {{value}}% mais fortes que as outras notas, em média, a {{bpm}} BPM.",
           "notes": "Última sessão, {{exercise}}: {{value}}% de notas certas a {{bpm}} BPM.",
           "plain": "A última sessão terminou assim: {{exercise}} a {{bpm}} BPM."
         },
@@ -126,8 +126,18 @@
         "yourTurn": "Sua vez · não verificado",
         "finisher": "Para fechar · sem nota",
         "jam": "Jam · sem nota",
-        "drill": "Rampa de tempo"
+        "drill": "Rampa de tempo",
+        "mine": "Seu exercício"
       },
+      "chosenLeftOut": "{{count}} exercício que você adicionou não coube em {{minutes}} minutos. Escolha mais minutos ou tire-o em Meus exercícios.",
+      "chosenLeftOut_many": "{{count}} exercícios que você adicionou não couberam em {{minutes}} minutos. Escolha mais minutos ou tire algum em Meus exercícios.",
+      "chosenLeftOut_other": "{{count}} exercícios que você adicionou não couberam em {{minutes}} minutos. Escolha mais minutos ou tire algum em Meus exercícios.",
+      "chosenLeftOutGraded": "{{count}} exercício que você adicionou não coube: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire-o em Meus exercícios.",
+      "chosenLeftOutGraded_many": "{{count}} exercícios que você adicionou não couberam: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire algum em Meus exercícios.",
+      "chosenLeftOutGraded_other": "{{count}} exercícios que você adicionou não couberam: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire algum em Meus exercícios.",
+      "chosenUnbuilt": "{{count}} exercício que você adicionou para hoje não pode mais ser montado, então fica de fora.",
+      "chosenUnbuilt_many": "{{count}} exercícios que você adicionou para hoje não podem mais ser montados, então ficam de fora.",
+      "chosenUnbuilt_other": "{{count}} exercícios que você adicionou para hoje não podem mais ser montados, então ficam de fora.",
       "reason": {
         "firstEver": "Seu primeiro. Fique em cima do clique; a velocidade vem depois.",
         "newExercise": "Novo para você. Vá devagar e mantenha limpo.",
@@ -161,7 +171,8 @@
         "keepWarmYesterday": "Para não esfriar, tocado ontem.",
         "keepWarmToday": "Para não esfriar, já tocado hoje.",
         "keepWarmNew": "Uma primeira provada.",
-        "focusChosen": "Hoje só esta trilha, como você escolheu."
+        "focusChosen": "Hoje só esta trilha, como você escolheu.",
+        "chosenToday": "Você o adicionou para hoje."
       },
       "from": "{{path}} · {{level}} · Etapa {{step}}",
       "fromNoLevel": "{{path}} · Etapa {{step}}",
@@ -220,7 +231,7 @@
         "even": "Porque a regularidade foi de {{value}}% a {{bpm}} BPM. A meta é {{bar}}%.",
         "heard": "Porque eu ouvi {{value}}% das notas a {{bpm}} BPM. A meta é {{bar}}%.",
         "extras": "Por causa de notas a mais a {{bpm}} BPM. A meta é no máximo {{bar}} a cada quatro compassos.",
-        "accents": "Porque {{value}}% dos acentos caíram no lugar a {{bpm}} BPM. A meta é {{bar}}%.",
+        "accents": "Porque a {{bpm}} BPM os acentos saíram, em média, {{value}}% mais fortes que as outras notas. A meta é {{bar}}%.",
         "plain": "Porque a última tomada a {{bpm}} BPM não bateu a meta.",
         "notes": "Porque {{value}}% das notas que consegui identificar eram as escritas a {{bpm}} BPM. A meta é {{bar}}%."
       },
@@ -228,7 +239,7 @@
         "even": "A regularidade foi de {{value}}% a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "heard": "Eu ouvi {{value}}% das notas a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "extras": "Teve notas a mais a {{bpm}} BPM, então agora vai a {{next}} BPM.",
-        "accents": "{{value}}% dos acentos caíram no lugar a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
+        "accents": "A {{bpm}} BPM os acentos saíram, em média, {{value}}% mais fortes que as outras notas e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "plain": "As últimas tomadas a {{bpm}} BPM não bateram a meta, então agora vai a {{next}} BPM.",
         "notes": "{{value}}% das notas identificadas eram as escritas a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM."
       },
@@ -271,6 +282,7 @@
       "newFromSibling": "Novo. Começa em {{bpm}} BPM, cerca de 80% do seu tempo limpo de {{clean}} BPM em {{sibling}}.",
       "newFromSiblingNoClean": "Novo. Começa em {{bpm}} BPM, calculado a partir dos seus takes em {{sibling}}.",
       "focusChosen": "Você escolheu {{path}} para hoje, então a sessão inteira vem dele.",
+      "chosenToday": "Um dos seus próprios exercícios, adicionado por você à sessão de hoje.",
       "playedUngraded": "De onde você parou: {{bpm}} BPM."
     },
     "bar": {
@@ -482,7 +494,15 @@
       "undoFull": "Meus exercícios está cheio (50), então Desfazer não pode colocar este de volta.",
       "undoAlready": "Este já voltou para Meus exercícios.",
       "cantBuild": "Este não pode mais ser montado: esta versão do Yames não o gera mais. Ele fica aqui até você removê-lo.",
-      "howTo": "Toque como está escrito, com o click."
+      "howTo": "Toque como está escrito, com o click.",
+      "addToday": "Adicionar a hoje",
+      "addTodayLabel": "Adicionar {{what}} à sessão de hoje",
+      "takeOffToday": "Tirar de hoje",
+      "takeOffTodayLabel": "Tirar {{what}} da sessão de hoje",
+      "inToday": "Na sessão de hoje",
+      "addedToday": "Adicionado à sessão de hoje, depois do aquecimento.",
+      "takenOffToday": "Tirado da sessão de hoje.",
+      "todayFull": "Hoje já tem {{max}} dos seus exercícios, o máximo permitido: uma sessão toca no máximo {{graded}} exercícios avaliados, e uma vaga fica reservada para suas Trilhas. Tire um primeiro."
     },
     "paths": {
       "title": "Trilhas",

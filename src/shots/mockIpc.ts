@@ -16,6 +16,8 @@ import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
 import type { Shot } from "./scenarios";
 import { RUNNABLE_PATH_IDS } from "../session/packs";
 import { storedFocus } from "../session/focus";
+import { dayKey } from "../session/swap";
+import { CHOSEN_TODAY_KEY } from "../session/chosenToday";
 import { STARTER_JAMS } from "../jam/jams";
 import { jamToSetlistStep } from "../setlist/setlists";
 import { bandStateForBar } from "../jam/practice";
@@ -1302,6 +1304,9 @@ export function installShotMock(shot: Shot, theme: string): void {
   if (shot.session?.focus) store.set("session.todayFocus", storedFocus(shot.session.focus, Date.now()));
   if (shot.session?.offMix) store.set("session.offMix", shot.session.offMix);
   if (shot.session?.myExercises) store.set("myExercises", shot.session.myExercises);
+  // t2e: recipe keys added to today, on today's day (no generator in the harness:
+  // the keys are written out in the scene; `scenarios.chosen.test.ts` holds them true).
+  if (shot.session?.chosenToday) store.set(CHOSEN_TODAY_KEY, { day: dayKey(Date.now()), keys: shot.session.chosenToday });
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 

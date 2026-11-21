@@ -467,11 +467,23 @@ export function CoachBlocks({ blocks, onAction, slots, className, onSource }: Co
           data-block={block.type}
         >
           <Block block={block} slots={filled} onAction={onAction} />
-          {block.source ? <SourceLine source={block.source} onPress={onSource} /> : null}
+          {block.source && !sameSourceNext(blocks, index) ? <SourceLine source={block.source} onPress={onSource} /> : null}
         </div>
       ))}
     </div>
   );
+}
+
+/**
+ * A text block followed by another text block with the same source: one
+ * passage cut in two (a Path's words longer than a block), so one source line,
+ * under the last (pol2 extras A1; mocks 08 and 15: one source under the text).
+ */
+function sameSourceNext(blocks: CoachBlocksProps["blocks"], index: number): boolean {
+  const block = blocks[index];
+  const next = blocks[index + 1];
+  if (!next || block.type !== "text" || next.type !== "text" || !block.source || !next.source) return false;
+  return JSON.stringify(block.source) === JSON.stringify(next.source);
 }
 
 export default CoachBlocks;
