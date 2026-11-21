@@ -51,4 +51,17 @@ Layout: a drummer's Today says drums (`reminder.spec.ts`).
 
 ## Merge and gates
 
-`merge coach` clean. Gates: see the report (filled below when done).
+`merge coach` clean (no conflicts). Gates after the merge (job logs `/home/dgx-delgado/scratch/jobq/`):
+- tsc 0 (1042); build 0 (1051).
+- `npm run test` (1043): 3 failures, all expected: TabStage.render (the known symlink) and the parity
+  manifest's three "added on purpose" (regenerated with UPDATE_PARITY_MANIFEST=1, job 1065, committed).
+  Changed files re-run (1075): all pass but `useSessionRun.startPath` "loads the Paths off the learning side",
+  which fails when the file runs alone on `coach` untouched too (1088); passes in the full suite.
+- `npm run test:rust` (1044): 1279 of 1280, the failure `harmony::worker::...waits_for_one_window_at_most`
+  ("waited 20s", a timing test on a loaded box; passed pre-merge in 1022 and re-run alone in 1089: 17/17).
+  The new store test passes (1022, 1044).
+- Layout reminder today-line settings short-window phone-learning (1074): 334 passed, 1 failed (my new drummer
+  check: that scene has no practice so the quiet rule held); fixed to Today's line scene with
+  `?instrument=bass` (harness param added), reminder.spec re-run 12/12 (1090).
+
+Review diff: `/tmp/coach-orch/rem2c-review.diff` (2bbe3fd0^..0baf24c7, src + src-tauri, locales excluded).
