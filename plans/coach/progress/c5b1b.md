@@ -67,6 +67,32 @@ lock, allocation or free was added on the audio thread; the lock order stays acy
   does, as a jam's own listen-back does.
 - `stop_evaluation` now takes the engine's state (Tauri injects it; no frontend change).
 
-## Gates
+## Gates (after `git merge coach`, clean, manifest auto-merged)
 
-(filled in below as they run)
+- `npm run test:rust`: before the merge 1249 passed, 0 failed. After it 1250 passed, 1 failed:
+  `take::tests::a_speaker_that_never_stops_talking_does_not_hang_the_stop_button` ("the stand-in
+  speaker was quiet while Stop ran"), a timing test at load 75 in code this leg does not touch;
+  re-run alone: pass.
+- The probe's own tests (`node scripts/rust-test.mjs --bin click-jitter-probe`; `test:rust` does
+  not run a binary's tests): 3 passed.
+- `test:dsp`, `test:highbpm`, `npx tsc --noEmit`, `npm run build`, the probe's release build: pass.
+- vitest: 49042 passed; only `TabStage.render.test.tsx` fails to load (known).
+
+## The probe
+
+| run | load (1/5/15) at start, end | p99 ms | missed | allocs / frees | dropped | starts as fresh | start to click (max) |
+|---|---|---|---|---|---|---|---|
+| `--no-llm --hear-take --volume 0.01` (10 spans; 5 played out, 4 cut; device 44.1 kHz, Take 48 kHz, so resampled) | 62.6 / 64.7 / 60.9, 36.4 | 3.86 (FAIL, busy box) | 0 | 0 / 0 | 0 | 0 wrong of 8 first beats, 9 Starts | 35.9 ms |
+
+The four hard numbers are 0; the p99 is meaningless at load 62. The quiet-machine runs (load
+under 6) stay with the orchestrator:
+
+```sh
+job submit --name coach-c5b1-probe-build --ram 12G --est 20m --cwd /home/dgx-delgado/yames-coach-c5b1 -- \
+  bash /home/dgx-delgado/yames-coach-build/plans/coach/tools/run.sh bash plans/coach/tools/probe-c5b1.sh build <out>
+# then one job per run, NOT through run.sh (it takes the build's lock alone):
+job submit --name coach-c5b1-probe-<label> --ram 4G --est 15m --cwd /home/dgx-delgado/yames-coach-c5b1 -- \
+  bash plans/coach/tools/probe-c5b1.sh run <out> <label> <args>
+# <args>: --no-llm | --no-llm --hear-take | --no-llm --hear-take --song-loop --song-take |
+#         --no-llm --jam-swap --jam-move --jam-take | --no-llm --song-loop --song-take
+```
