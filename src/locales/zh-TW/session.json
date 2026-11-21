@@ -33,7 +33,8 @@
     "today": {
       "title": "今天",
       "leadFirst": "你的第一節課",
-      "leadBack": "歡迎回來。已經 {{days}} 天了",
+      "leadLast": "上次練習：{{count}} 天前",
+      "leadLast_other": "上次練習：{{count}} 天前",
       "minutes": "{{minutes}} 分鐘",
       "start": "開始",
       "howLong": "你有多少時間？分鐘數：",

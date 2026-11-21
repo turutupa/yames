@@ -696,8 +696,9 @@ export const FIRST_CHORDS_CUES: CueBook = {
   "warmup-advanced.small-barre": [
     g("Lay the first finger flat over both strings.", 0),
     c("heard", "Pick both strings together on each click."),
-    c("late", ARRIVE),
-    c("early", ARRIVE_EARLY),
+    // Not ARRIVE / ARRIVE_EARLY: "each new fret" is refused on the variants (other strings, coming down).
+    c("late", "Land the flat finger right on each click."),
+    c("early", "Wait for the click before each move."),
     c("shift", EASE, 0),
     c("stringChange", "Strike both strings in one small stroke."),
     c("lastBars", "Keep the finger flat to the last note."),

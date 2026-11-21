@@ -54,10 +54,30 @@ export function titleMatch(query: string, title: string): 0 | 1 | 2 {
   if (q.length === 0 || t.length === 0) return 0;
   if (q === t) return 2;
   const words = t.split(" ");
+  // A player of a script without spaces types a title's words run together ("얼터네이트피킹"
+  // for "얼터네이트 피킹", "オルタネイトピッキング" for "オルタネイト・ピッキング"; review t1b2b, finding 4).
+  const joined = t.replace(/ /g, "");
   const every = q.split(" ").every((part) =>
-    UNSPACED.test(part) ? t.includes(part) : words.some((word) => word.startsWith(part)),
+    UNSPACED.test(part) ? t.includes(part) || joined.includes(part) : words.some((word) => word.startsWith(part)),
   );
   return every ? 1 : 0;
+}
+
+/**
+ * Whether `query` names `title` by its whole words, as typed text must before
+ * it opens anything at once (review t1b2c, finding 5): the title itself, or a
+ * run of two or more of its words in order. One word that is not the whole
+ * title ("class", "first", "over") is not: a casual sentence is full of words
+ * that start or sit inside a title, and the player gets one press instead.
+ * A script without spaces: only the whole title, typed with or without them.
+ */
+export function wholeTitleWords(query: string, title: string): boolean {
+  const q = normalizeWords(query);
+  const t = normalizeWords(title);
+  if (q.length === 0 || t.length === 0) return false;
+  if (q === t || q.replace(/ /g, "") === t.replace(/ /g, "")) return true;
+  if (UNSPACED.test(q)) return false;
+  return q.includes(" ") && ` ${t} `.includes(` ${q} `);
 }
 
 /**

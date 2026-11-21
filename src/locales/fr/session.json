@@ -33,7 +33,9 @@
     "today": {
       "title": "Aujourd'hui",
       "leadFirst": "Ta première séance",
-      "leadBack": "Bon retour. Ça fait {{days}} jours",
+      "leadLast": "Dernière séance : il y a {{count}} jour",
+      "leadLast_many": "Dernière séance : il y a {{count}} jours",
+      "leadLast_other": "Dernière séance : il y a {{count}} jours",
       "minutes": "{{minutes}} min",
       "start": "Commencer",
       "howLong": "Combien de temps as-tu ? Minutes :",

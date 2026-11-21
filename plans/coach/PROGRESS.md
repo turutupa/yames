@@ -34,7 +34,18 @@ orchestrator keeps. Newest last.
   as queue jobs, measured against the stock models on a held-out set before anything ships. Applied to
   PLAN.md ("Not in this plan" no longer lists fine-tuning; it is leg c3d, after c3b).
 - The chip question from 1h ("should a chip's own press count") is still with the owner: the two-press
-  behaviour stays, and nothing built in session 3 depends on it.
+  behaviour stays, and nothing built in session 3 depends on it. **Answered, see the next entry.**
+- 2026-11-20, "owner decisions on the 1k questions" (session 4 applied them as legs): (1) a chip's own
+  press is the press for a reversible one-step change, always with Undo; multi-step or not undoable
+  still goes through a proposal → leg **chip1** (`chip1-chip-press-counts.md`; the orchestrator's
+  reading, recorded as a reading: typed commands keep their proposal, because free text can be misread
+  and a chip cannot). (2) The practice reminder is in-app only → **rem Part 2, option A**, after c4a2.
+  (3) A Take marked "not fair" is out of both the clean tempo Progress shows and milestones → leg
+  **nf1** (`nf1-not-fair-takes.md`; R: `db.rs`). (4) Today's header says the plain fact → leg **hd1**
+  (`hd1-today-header.md`; English "Last Session: 12 days ago"), with the relay's 19:35 note (headroom
+  for `generate.test.ts` "mostly" and `smooth.spec.ts` "Ask commits nothing").
+- 2026-11-20 20:05 (relay): the Vulkan probe (pv1) runs on the RTX by the relay, with Qwen3 4B Q4_K_M;
+  its numbers will be appended to OWNER-UPDATES. Not run on the DGX. c3b uses them when they land.
 
 ## What happened to wave 1's first run
 
@@ -89,6 +100,12 @@ ms1's first run had put the selector in the left rail: the relaunch moves it to 
 | t1b2b typed commands in fifteen languages, wired (session 3) | built; **with the reviewer** (`/tmp/coach-orch/t1b2b-review.md`) | `coach-t1b2b` | – | `progress/t1b2b.md` on its branch. Fourteen tables, per language a dozen commands and 34 to 40 near-misses re-read by a second reader; `answerTyped` (the router, then the slot `setAskNextAnswerer`, then the model or the plain statement); `verbFinal` (de, nl, tr), `ordinalPlaces` (ja, ko, zh). Screens read against mock 16. **Open:** in ja / ko / zh a sentence with a verb and leftover characters can become a call with the leftover as a name (the reviewer is asked whether that needs a guard before merge). |
 | c2b1a fact cards, machinery and three cards in English (session 3) | built (359k tokens: too big even as a half); **with the reviewer** (`/tmp/coach-orch/c2b1a-review.md`) | `coach-c2b1a` | – | `progress/c2b1a.md` on its branch. `intents.ts`, `cards.ts`, `suggest.ts`, `match.ts`, a `card` turn kind, `answerCardFor(text)`; where it slipped, early or late (the premise answered first), why it did not count. The cards are their own list (`FACT_CARDS`), not entries of `COACH_TOOLS`. 51 `ask.card.*` strings are English in fourteen locales until c2b1b. Merges after t1b2b (it must merge `coach` and plug nothing: c2b1b plugs the slot). |
 | gt1 the generator's time | running | `coach-gt1` | – | Brief `gt1-generator-time.md`: where the cues' variant work costs time, whether any of it runs on the player's device, the fix, the tests kept honest. The cue merges' vitest gate waits on it. |
+| gt1, cues13a/b, cues14, c4b1 (session 3) | merged | – | 2026-11-20 | See `STATUS.md` deliveries 1k and 1l and each `progress/<leg>.md`; the rows above marked "running" or "with the reviewer" for them are older than their merges. |
+| t2a `buildCustomExercise` (session 4) | merged | `coach-t2a` | 2026-11-20 | `progress/t2a.md`. Pure (`src/paths/custom.ts`, `customGrid.ts`), no pack changed. Its decisions accepted: position is the first note's fret and never moved; only "up and back" loops; sweeps left out. On `coach`: tsc, vitest 418 files / 47,918, build; `test:rust` 1,228 + 1 (`harmony::worker::tests::an_input_restarted_under_it_ends_it` timed out at 20 s with eight legs' jobs running and passes alone: not t2a's, which touches no `src-tauri/src`); `--test path_exercises` 12 passed. |
+| fc1 First Chords' refused cues (session 4) | merged | `coach-fc1` | 2026-11-20 | `progress/fc1.md`. The fourteen were two cues on one Exercise's seven variants ("each new fret"): now "Land the flat finger right on each click." and "Wait for the click before each move." (read by the orchestrator: accepted). **0 `cue.refused` on every Path.** Native reads: ja (two endings), tr. |
+
+**`smooth.spec.ts` on a quiet machine (session 4, 20:10 PT, load 7 falling, nothing else running, in
+`~/yames-coach-night` at `coach` + t2a): 17 passed in 45 s.** The gate owed since delivery 1j is paid.
 
 **The full layout suite on `coach`** (`ffabfcb7`: delivery 1i plus cues5 and t1b2a; queue job
 `coach-layout-full`, 55 minutes behind the probe's lock, 18.4 minutes of tests): **1,423 passed, 1
@@ -157,5 +174,18 @@ See PLAN.md, "Things the orchestrator decided". Additions go here with the date 
 - 2026-11-20. **`run.sh` sets `TMPDIR=/tmp/coach-tmp`.** `/tmp` is shared with the other account, which
   runs the same Rust suite: `take_video`'s fifteen tests write fixed names under `temp_dir()` and failed
   here with PermissionDenied on that account's folders (c3a's run). Not a code defect.
+- 2026-11-20 (session 4). **"Hear bar N: yours" keeps one Take in RAM (option A of `c5b1`'s brief).**
+  The design assumed the Take's audio is already held; it is freed when the grade is published
+  (`timing.rs`, `drop(audio)`). The notes thread now moves it into one "last heard Take" slot,
+  replaced by the next Take, dropped when the input stops; never on disk, never in an event, the tap
+  armed on no Take it is not armed on today, recording untouched. Where no audio was captured (input
+  off, MIDI) the control is absent. Playback reuses the jam's take listen-back path
+  (`TakeHandoff::set_play`), which silences the click while it plays: no new branch in the callback.
+- 2026-11-20 (session 4). **c4a1's `saveCardShown` / `lastShown` removed** (review M2): it stored a
+  value when a card was drawn, with no press, and nothing read it. "A card was shown" lives in memory
+  unless the owner says otherwise (c4b2).
+- 2026-11-20 (session 4). **Typed text never opens a Path at once on a partial word** ("go to class"
+  opened Classic Rock: the second review's finding 5, older than the fix): a partial match is one
+  press. And in ja / ko / zh every typed name is resolved before the one-press choice is shown.
 - 2026-11-20. `tuningSuspected` stays always false for now: the Session does not keep the pitch
   verdicts the note would need. Nothing is said about tuning in any case (owner decision 9).

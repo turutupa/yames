@@ -16,8 +16,27 @@ import {
   snapPart,
   snapToRung,
   titleMatch,
+  wholeTitleWords,
 } from "./resolve";
 import { ALT, ALT_BLUES, LEGATO_ES, TEST_PATHS } from "./testPaths";
+
+describe("wholeTitleWords: what typed text may open at once (review t1b2c, finding 5)", () => {
+  it("the whole title, or a run of two or more of its words", () => {
+    expect(wholeTitleWords("classic rock", "Classic Rock")).toBe(true);
+    expect(wholeTitleWords("Triads", "Triads")).toBe(true);
+    expect(wholeTitleWords("first chords", "First Chords and Strumming")).toBe(true);
+    expect(wholeTitleWords("rock clasico", "Rock clásico")).toBe(true);
+    expect(wholeTitleWords("オルタネイトピッキング", "オルタネイト・ピッキング")).toBe(true);
+  });
+  it("not a prefix, one word of a longer title, or words out of order", () => {
+    expect(wholeTitleWords("class", "Classic Rock")).toBe(false);
+    expect(wholeTitleWords("first", "First Chords and Strumming")).toBe(false);
+    expect(wholeTitleWords("over", "Arpeggios over Changes")).toBe(false);
+    expect(wholeTitleWords("rock classic", "Classic Rock")).toBe(false);
+    expect(wholeTitleWords("ブルース", "ブルースとペンタトニック")).toBe(false);
+    expect(wholeTitleWords("", "Triads")).toBe(false);
+  });
+});
 
 describe("normalizeWords", () => {
   it.each([
@@ -42,6 +61,11 @@ describe("titleMatch", () => {
     ["", "Ligado", 0],
     ["拨弦", "交替拨弦", 1],
     ["扫弦", "交替拨弦", 0],
+    // Typed run together, as the router hands it over (review t1b2b, finding 4).
+    ["얼터네이트피킹", "얼터네이트 피킹", 1],
+    ["블루스와펜타토닉", "블루스와 펜타토닉", 1],
+    ["オルタネイトピッキング", "オルタネイト・ピッキング", 1],
+    ["피킹얼터네이트", "얼터네이트 피킹", 0],
   ] as const)("%s in %s = %i", (query, title, score) => {
     expect(titleMatch(query, title)).toBe(score);
   });
