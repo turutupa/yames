@@ -8,11 +8,21 @@ import i18n from "../i18n";
 import en from "../locales/en/coach.json";
 import { bannedClaimsIn } from "../paths/honesty";
 import type { Evidence, Finding, FindingKind } from "../songs/types";
-import { TOOL_FINDING_MIN_RUN_MS, toolFinding, toolFindingText } from "./toolFinding";
+import { type FreePlayCounts, TOOL_FINDING_MIN_RUN_MS, toolFinding, toolFindingText } from "./toolFinding";
 
 const RUN = 30_000;
 
-function finding(kind: FindingKind, evidence: Partial<Evidence>): Finding {
+const NO_COUNTS: FreePlayCounts = {
+  counted: 0,
+  agreeing: 0,
+  lowNotes: 0,
+  highNotes: 0,
+  lowSpreadMs: 0,
+  highSpreadMs: 0,
+};
+
+/** A finding as `analyze_free_play` sends it; `counts: null` = an older payload without them. */
+function finding(kind: FindingKind, evidence: Partial<Evidence>, counts: Partial<FreePlayCounts> | null = {}): Finding {
   return {
     kind,
     noteIds: [],
@@ -27,48 +37,64 @@ function finding(kind: FindingKind, evidence: Partial<Evidence>): Finding {
       passes: 1,
       passesAffected: 1,
       ...evidence,
-    },
+      ...(counts ? { freePlay: { ...NO_COUNTS, ...counts } } : {}),
+    } as Evidence,
   };
 }
 
 const T = (key: string, values?: Record<string, unknown>) => i18n.t(key, { ...values, lng: "en" }) as string;
 
-describe("toolFinding: one sentence per kind", () => {
+const DRIFT = { counted: 60, agreeing: 20 };
+
+describe("toolFinding: one sentence per kind, with what it counted (c5c2b M3)", () => {
   it.each([
     [
       "beat late",
-      finding("beatPositionBias", { beatPosition: 3, meanDeviationMs: 40.4 }),
-      "Beat 3 of the bar came 40 ms late on average, out of line with the other beats.",
+      finding("beatPositionBias", { beatPosition: 3, meanDeviationMs: 40.4 }, { counted: 16, agreeing: 15 }),
+      "On beat 3 of the bar your notes came 40 ms later than on the other beats, on average: 15 of the 16 notes on that beat were later than that average.",
     ],
     [
       "beat early",
-      finding("beatPositionBias", { beatPosition: 1, meanDeviationMs: -17.6 }),
-      "Beat 1 of the bar came 18 ms early on average, out of line with the other beats.",
+      finding("beatPositionBias", { beatPosition: 1, meanDeviationMs: -17.6 }, { counted: 12, agreeing: 9 }),
+      "On beat 1 of the bar your notes came 18 ms earlier than on the other beats, on average: 9 of the 12 notes on that beat were earlier than that average.",
     ],
     [
       "the off-beat eighth",
-      finding("subdivisionWeak", { subdivisionPosition: [1, 2], onsets: 48, hits: 16 }),
-      "No note landed on the off-beat eighth in 32 of 48 beats.",
+      finding("subdivisionWeak", { subdivisionPosition: [1, 2] }, { counted: 48, agreeing: 32 }),
+      "No note landed on the off-beat eighth on 32 of the 48 beats you played through.",
     ],
     [
       "the fourth sixteenth",
-      finding("subdivisionWeak", { subdivisionPosition: [3, 4], onsets: 40, hits: 31 }),
-      "No note landed on the fourth sixteenth in 9 of 40 beats.",
+      finding("subdivisionWeak", { subdivisionPosition: [3, 4] }, { counted: 40, agreeing: 9 }),
+      "No note landed on the fourth sixteenth on 9 of the 40 beats you played through.",
     ],
     [
-      "the ceiling",
-      finding("tempoCeiling", { bpmBand: [100, 140], spreadMs: 45 }),
-      "Your timing held at 100 BPM and slipped at 140 BPM.",
+      "the ceiling, as played",
+      finding(
+        "tempoCeiling",
+        { bpmBand: [100, 110], spreadMs: 30 },
+        { lowBpm: [100, 108], highBpm: [112, 116], lowNotes: 36, highNotes: 24, lowSpreadMs: 2, highSpreadMs: 30 },
+      ),
+      "At 100–108 BPM, at least half of your 36 notes landed within 2 ms of their usual place against the click; at 112–116 BPM, at least half of your 24 notes were 30 ms or more from it.",
+    ],
+    [
+      "the ceiling at one tempo each",
+      finding(
+        "tempoCeiling",
+        { bpmBand: [100, 140], spreadMs: 45 },
+        { lowBpm: [100, 100], highBpm: [140, 140], lowNotes: 20, highNotes: 20, lowSpreadMs: 2, highSpreadMs: 45 },
+      ),
+      "At 100 BPM, at least half of your 20 notes landed within 2 ms of their usual place against the click; at 140 BPM, at least half of your 20 notes were 45 ms or more from it.",
     ],
     [
       "drift later",
-      finding("drift", { meanDeviationMs: 40.2 }),
-      "By the last third of the run you were landing 40 ms later than in the first third.",
+      finding("drift", { meanDeviationMs: 40.2 }, DRIFT),
+      "Over a stretch of 60 notes, the last 20 landed 40 ms later against the click than the first 20, on average.",
     ],
     [
       "drift earlier",
-      finding("drift", { meanDeviationMs: -12.5 }),
-      "By the last third of the run you were landing 13 ms earlier than in the first third.",
+      finding("drift", { meanDeviationMs: -12.5 }, DRIFT),
+      "Over a stretch of 60 notes, the last 20 landed 13 ms earlier against the click than the first 20, on average.",
     ],
   ])("%s", (_name, f, text) => {
     const line = toolFinding([f], RUN);
@@ -79,15 +105,18 @@ describe("toolFinding: one sentence per kind", () => {
 
   it("says the headline only: findings[0], whatever follows it", () => {
     const line = toolFinding(
-      [finding("drift", { meanDeviationMs: 30 }), finding("beatPositionBias", { beatPosition: 2, meanDeviationMs: 25 })],
+      [
+        finding("drift", { meanDeviationMs: 30 }, DRIFT),
+        finding("beatPositionBias", { beatPosition: 2, meanDeviationMs: 25 }, { counted: 12, agreeing: 12 }),
+      ],
       RUN,
     );
     expect(line?.kind).toBe("drift");
   });
 
   it("numbers are whole and unsigned, the direction is in the words", () => {
-    const line = toolFinding([finding("drift", { meanDeviationMs: -6.49 })], RUN)!;
-    expect(line.values).toEqual({ ms: 6 });
+    const line = toolFinding([finding("drift", { meanDeviationMs: -6.49 }, DRIFT)], RUN)!;
+    expect(line.values).toEqual({ ms: 6, notes: 60, third: 20 });
     expect(line.key).toBe("toolCoach.finding.driftEarly");
   });
 });
@@ -99,22 +128,56 @@ describe("toolFinding: when there is nothing to say", () => {
   });
 
   it("a run under the note's 10 s", () => {
-    const f = finding("drift", { meanDeviationMs: 40 });
+    const f = finding("drift", { meanDeviationMs: 40 }, DRIFT);
     expect(toolFinding([f], TOOL_FINDING_MIN_RUN_MS - 1)).toBeNull();
     expect(toolFinding([f], TOOL_FINDING_MIN_RUN_MS)).not.toBeNull();
     expect(toolFinding([f], Number.NaN)).toBeNull();
   });
 
   it("a beat or a drift whose number would read as on time", () => {
-    expect(toolFinding([finding("beatPositionBias", { beatPosition: 2, meanDeviationMs: 2.4 })], RUN)).toBeNull();
-    expect(toolFinding([finding("drift", { meanDeviationMs: -2.4 })], RUN)).toBeNull();
+    expect(
+      toolFinding([finding("beatPositionBias", { beatPosition: 2, meanDeviationMs: 2.4 }, { counted: 12, agreeing: 12 })], RUN),
+    ).toBeNull();
+    expect(toolFinding([finding("drift", { meanDeviationMs: -2.4 }, DRIFT)], RUN)).toBeNull();
   });
 
   it("evidence it needs and does not have", () => {
-    expect(toolFinding([finding("beatPositionBias", { meanDeviationMs: 30 })], RUN)).toBeNull();
-    expect(toolFinding([finding("subdivisionWeak", { subdivisionPosition: [1, 5], onsets: 20, hits: 4 })], RUN)).toBeNull();
-    expect(toolFinding([finding("subdivisionWeak", { subdivisionPosition: [1, 2], onsets: 20, hits: 20 })], RUN)).toBeNull();
+    expect(toolFinding([finding("beatPositionBias", { meanDeviationMs: 30 }, { counted: 12, agreeing: 12 })], RUN)).toBeNull();
+    expect(
+      toolFinding([finding("subdivisionWeak", { subdivisionPosition: [1, 5] }, { counted: 20, agreeing: 16 })], RUN),
+    ).toBeNull();
+    expect(
+      toolFinding([finding("subdivisionWeak", { subdivisionPosition: [1, 2] }, { counted: 20, agreeing: 0 })], RUN),
+    ).toBeNull();
     expect(toolFinding([finding("tempoCeiling", {})], RUN)).toBeNull();
+  });
+
+  it("a finding without its counts (an older payload) is not said", () => {
+    expect(toolFinding([finding("drift", { meanDeviationMs: 40 }, null)], RUN)).toBeNull();
+    expect(toolFinding([finding("beatPositionBias", { beatPosition: 3, meanDeviationMs: 40 }, null)], RUN)).toBeNull();
+    expect(toolFinding([finding("subdivisionWeak", { subdivisionPosition: [1, 2], onsets: 48, hits: 16 }, null)], RUN)).toBeNull();
+    expect(toolFinding([finding("tempoCeiling", { bpmBand: [100, 140] }, null)], RUN)).toBeNull();
+  });
+
+  it("counts that contradict themselves are not said", () => {
+    // More notes on the side named than on the beat; a third bigger than a third.
+    expect(
+      toolFinding([finding("beatPositionBias", { beatPosition: 3, meanDeviationMs: 40 }, { counted: 8, agreeing: 9 })], RUN),
+    ).toBeNull();
+    expect(toolFinding([finding("drift", { meanDeviationMs: 40 }, { counted: 30, agreeing: 11 })], RUN)).toBeNull();
+    // A higher band no wider than the lower one.
+    expect(
+      toolFinding(
+        [
+          finding(
+            "tempoCeiling",
+            { bpmBand: [100, 110] },
+            { lowBpm: [100, 104], highBpm: [110, 112], lowNotes: 9, highNotes: 9, lowSpreadMs: 12, highSpreadMs: 12 },
+          ),
+        ],
+        RUN,
+      ),
+    ).toBeNull();
   });
 
   it("Songs' kinds never make a tools' sentence", () => {

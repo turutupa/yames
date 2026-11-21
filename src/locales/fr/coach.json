@@ -26,12 +26,12 @@
     "sessionScore": "Score de la séance {{score}} · {{word}}",
     "openRuns": "Ouvrir Passages d'outils dans Progrès",
     "finding": {
-      "beatEarly": "Le temps {{beat}} de la mesure est arrivé en moyenne {{ms}} ms en avance, en décalage avec les autres temps.",
-      "beatLate": "Le temps {{beat}} de la mesure est arrivé en moyenne {{ms}} ms en retard, en décalage avec les autres temps.",
-      "subdivision": "Aucune note n'a été détectée sur la position « {{position}} » pour {{missed}} temps sur {{total}}.",
-      "ceiling": "Ton timing a tenu à {{holds}} BPM et a glissé à {{breaks}} BPM.",
-      "driftEarly": "Sur le dernier tiers du passage, tu jouais {{ms}} ms plus tôt que sur le premier tiers.",
-      "driftLate": "Sur le dernier tiers du passage, tu jouais {{ms}} ms plus tard que sur le premier tiers.",
+      "beatEarly": "Sur le temps {{beat}} de la mesure, tes notes sont arrivées en moyenne {{ms}} ms plus tôt que sur les autres temps : {{agreeing}} des {{notes}} notes de ce temps sont arrivées plus tôt que cette moyenne.",
+      "beatLate": "Sur le temps {{beat}} de la mesure, tes notes sont arrivées en moyenne {{ms}} ms plus tard que sur les autres temps : {{agreeing}} des {{notes}} notes de ce temps sont arrivées plus tard que cette moyenne.",
+      "subdivision": "Sur {{missed}} des {{total}} temps où tu jouais, aucune note n'est tombée sur la position « {{position}} ».",
+      "ceiling": "À {{low}} BPM, au moins la moitié de tes {{lowNotes}} notes sont tombées à moins de {{lowMs}} ms de leur place habituelle par rapport au clic ; à {{high}} BPM, au moins la moitié de tes {{highNotes}} notes en étaient à {{highMs}} ms ou plus.",
+      "driftEarly": "Sur un passage de {{notes}} notes, les {{third}} dernières sont tombées en moyenne {{ms}} ms plus tôt par rapport au clic que les {{third}} premières.",
+      "driftLate": "Sur un passage de {{notes}} notes, les {{third}} dernières sont tombées en moyenne {{ms}} ms plus tard par rapport au clic que les {{third}} premières.",
       "position": {
         "2": {
           "0": "croche sur le temps",

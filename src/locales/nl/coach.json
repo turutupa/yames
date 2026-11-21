@@ -26,12 +26,12 @@
     "sessionScore": "Sessiescore {{score}} · {{word}}",
     "openRuns": "Open Toolruns bij Voortgang",
     "finding": {
-      "beatEarly": "Beat {{beat}} van de maat kwam gemiddeld {{ms}} ms te vroeg, afwijkend van de andere beats.",
-      "beatLate": "Beat {{beat}} van de maat kwam gemiddeld {{ms}} ms te laat, afwijkend van de andere beats.",
-      "subdivision": "Op de positie ‘{{position}}’ is bij {{missed}} van de {{total}} beats geen noot gehoord.",
-      "ceiling": "Je timing hield stand op {{holds}} BPM en gleed weg op {{breaks}} BPM.",
-      "driftEarly": "In het laatste derde van de run speelde je {{ms}} ms eerder dan in het eerste derde.",
-      "driftLate": "In het laatste derde van de run speelde je {{ms}} ms later dan in het eerste derde.",
+      "beatEarly": "Op beat {{beat}} van de maat kwamen je noten gemiddeld {{ms}} ms vroeger dan op de andere beats: {{agreeing}} van de {{notes}} noten op die beat kwamen vroeger dan dat gemiddelde.",
+      "beatLate": "Op beat {{beat}} van de maat kwamen je noten gemiddeld {{ms}} ms later dan op de andere beats: {{agreeing}} van de {{notes}} noten op die beat kwamen later dan dat gemiddelde.",
+      "subdivision": "Bij {{missed}} van de {{total}} beats waarin je speelde, viel er geen noot op de positie ‘{{position}}’.",
+      "ceiling": "Bij {{low}} BPM viel minstens de helft van je {{lowNotes}} noten binnen {{lowMs}} ms van hun gebruikelijke plek ten opzichte van de klik; bij {{high}} BPM lag minstens de helft van je {{highNotes}} noten {{highMs}} ms of meer ervan af.",
+      "driftEarly": "Over een stuk van {{notes}} noten vielen de laatste {{third}} noten gemiddeld {{ms}} ms eerder ten opzichte van de klik dan de eerste {{third}} noten.",
+      "driftLate": "Over een stuk van {{notes}} noten vielen de laatste {{third}} noten gemiddeld {{ms}} ms later ten opzichte van de klik dan de eerste {{third}} noten.",
       "position": {
         "2": {
           "0": "achtste op de beat",

@@ -26,12 +26,12 @@
     "sessionScore": "這次練習得分 {{score}} · {{word}}",
     "openRuns": "在「進度」中開啟工具紀錄",
     "finding": {
-      "beatEarly": "小節第 {{beat}} 拍平均偏早 {{ms}} ms，與其他拍不一致。",
-      "beatLate": "小節第 {{beat}} 拍平均偏晚 {{ms}} ms，與其他拍不一致。",
-      "subdivision": "{{total}} 拍中有 {{missed}} 拍，在{{position}}的位置沒有偵測到音符。",
-      "ceiling": "節奏在 {{holds}} BPM 能穩住，在 {{breaks}} BPM 開始亂。",
-      "driftEarly": "這段演奏的最後三分之一，比最初三分之一偏早 {{ms}} ms。",
-      "driftLate": "這段演奏的最後三分之一，比最初三分之一偏晚 {{ms}} ms。",
+      "beatEarly": "小節第 {{beat}} 拍的音符，平均比其他拍的音符早 {{ms}} ms。這一拍的 {{notes}} 個音符中，有 {{agreeing}} 個比這個平均值早。",
+      "beatLate": "小節第 {{beat}} 拍的音符，平均比其他拍的音符晚 {{ms}} ms。這一拍的 {{notes}} 個音符中，有 {{agreeing}} 個比這個平均值晚。",
+      "subdivision": "在你彈奏的 {{total}} 拍中，有 {{missed}} 拍在{{position}}的位置沒有音符。",
+      "ceiling": "在 {{low}} BPM 時，你的 {{lowNotes}} 個音符中至少有一半落在相對節拍器通常位置 {{lowMs}} ms 以內；在 {{high}} BPM 時，{{highNotes}} 個音符中至少有一半偏離該位置 {{highMs}} ms 或更多。",
+      "driftEarly": "在一段 {{notes}} 個音符中，最後 {{third}} 個音符相對節拍器平均比最初 {{third}} 個音符早 {{ms}} ms。",
+      "driftLate": "在一段 {{notes}} 個音符中，最後 {{third}} 個音符相對節拍器平均比最初 {{third}} 個音符晚 {{ms}} ms。",
       "position": {
         "2": {
           "0": "拍頭的八分音符",

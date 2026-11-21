@@ -56,7 +56,17 @@ export function freePlayFinding(kind: (typeof FINDING_KINDS)[number]): Finding {
         : kind === "tempoCeiling"
           ? { ...base, onsets: 20, hits: 20, spreadMs: 45, bpmBand: [100, 140], referenceBpm: 100 }
           : { ...base, onsets: 60, hits: 60, meanDeviationMs: 40, deviationBeats: 0.08, referenceBpm: 120 };
-  return { kind, noteIds: [], severity: 0.8, evidence };
+  // What each sentence counted (c5c2b M3): `findings.rs`'s `FreePlayCounts`.
+  const none = { counted: 0, agreeing: 0, lowNotes: 0, highNotes: 0, lowSpreadMs: 0, highSpreadMs: 0 };
+  const freePlay =
+    kind === "subdivisionWeak"
+      ? { ...none, counted: 48, agreeing: 32 }
+      : kind === "beatPositionBias"
+        ? { ...none, counted: 16, agreeing: 16 }
+        : kind === "tempoCeiling"
+          ? { ...none, lowBpm: [100, 108], highBpm: [112, 116], lowNotes: 36, highNotes: 24, lowSpreadMs: 2, highSpreadMs: 30 }
+          : { ...none, counted: 60, agreeing: 20 };
+  return { kind, noteIds: [], severity: 0.8, evidence: { ...evidence, freePlay } as Finding["evidence"] };
 }
 
 export function inputFailOption(): boolean {

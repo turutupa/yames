@@ -26,12 +26,12 @@
     "sessionScore": "Session-Score {{score}} · {{word}}",
     "openRuns": "Tool-Läufe unter Fortschritt öffnen",
     "finding": {
-      "beatEarly": "Schlag {{beat}} des Takts kam im Schnitt {{ms}} ms zu früh, abweichend von den anderen Schlägen des Takts.",
-      "beatLate": "Schlag {{beat}} des Takts kam im Schnitt {{ms}} ms zu spät, abweichend von den anderen Schlägen des Takts.",
-      "subdivision": "Auf der Position „{{position}}“ wurde in {{missed}} von {{total}} Schlägen keine Note erkannt.",
-      "ceiling": "Dein Timing hielt bei {{holds}} BPM und rutschte bei {{breaks}} BPM.",
-      "driftEarly": "Im letzten Drittel des Laufs hast du {{ms}} ms früher gespielt als im ersten Drittel.",
-      "driftLate": "Im letzten Drittel des Laufs hast du {{ms}} ms später gespielt als im ersten Drittel.",
+      "beatEarly": "Auf Schlag {{beat}} des Takts kamen deine Noten im Schnitt {{ms}} ms früher als auf den anderen Schlägen: {{agreeing}} der {{notes}} Noten auf diesem Schlag kamen früher als dieser Durchschnitt.",
+      "beatLate": "Auf Schlag {{beat}} des Takts kamen deine Noten im Schnitt {{ms}} ms später als auf den anderen Schlägen: {{agreeing}} der {{notes}} Noten auf diesem Schlag kamen später als dieser Durchschnitt.",
+      "subdivision": "Auf {{missed}} der {{total}} Schläge, in denen du gespielt hast, landete keine Note auf der Position „{{position}}“.",
+      "ceiling": "Bei {{low}} BPM lag mindestens die Hälfte deiner {{lowNotes}} Noten innerhalb von {{lowMs}} ms um ihre übliche Lage zum Klick; bei {{high}} BPM lag mindestens die Hälfte deiner {{highNotes}} Noten {{highMs}} ms oder mehr davon entfernt.",
+      "driftEarly": "Über eine Strecke von {{notes}} Noten lagen die letzten {{third}} Noten im Schnitt {{ms}} ms früher zum Klick als die ersten {{third}} Noten.",
+      "driftLate": "Über eine Strecke von {{notes}} Noten lagen die letzten {{third}} Noten im Schnitt {{ms}} ms später zum Klick als die ersten {{third}} Noten.",
       "position": {
         "2": {
           "0": "Achtel auf dem Schlag",

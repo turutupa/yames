@@ -26,12 +26,12 @@
     "sessionScore": "Ocena sesji {{score}} · {{word}}",
     "openRuns": "Otwórz Przebiegi narzędzi w Postępach",
     "finding": {
-      "beatEarly": "Uderzenie {{beat}} taktu wypadło średnio {{ms}} ms za wcześnie, odstając od pozostałych uderzeń.",
-      "beatLate": "Uderzenie {{beat}} taktu wypadło średnio {{ms}} ms za późno, odstając od pozostałych uderzeń.",
-      "subdivision": "Żadna nuta nie padła na pozycji „{{position}}” w {{missed}} z {{total}} uderzeń.",
-      "ceiling": "Twój rytm trzyma się w {{holds}} BPM i rozjeżdża w {{breaks}} BPM.",
-      "driftEarly": "W ostatniej trzeciej części przebiegu wchodzisz o {{ms}} ms wcześniej niż w pierwszej trzeciej części.",
-      "driftLate": "W ostatniej trzeciej części przebiegu wchodzisz o {{ms}} ms później niż w pierwszej trzeciej części.",
+      "beatEarly": "Na uderzeniu {{beat}} taktu Twoje nuty wypadły średnio o {{ms}} ms wcześniej niż nuty na pozostałych uderzeniach: {{agreeing}} z {{notes}} nut na tym uderzeniu wypadło wcześniej niż ta średnia.",
+      "beatLate": "Na uderzeniu {{beat}} taktu Twoje nuty wypadły średnio o {{ms}} ms później niż nuty na pozostałych uderzeniach: {{agreeing}} z {{notes}} nut na tym uderzeniu wypadło później niż ta średnia.",
+      "subdivision": "W {{missed}} z {{total}} uderzeń, w których grały jakieś nuty, żadna nuta nie padła na pozycji „{{position}}”.",
+      "ceiling": "W tempie {{low}} BPM co najmniej połowa z Twoich {{lowNotes}} nut padła w granicach {{lowMs}} ms od miejsca, w którym Twoje nuty zwykle padają względem metronomu; w tempie {{high}} BPM co najmniej połowa z {{highNotes}} nut była od niego oddalona o {{highMs}} ms lub więcej.",
+      "driftEarly": "Na odcinku {{notes}} nut ostatnie {{third}} nut padło średnio o {{ms}} ms wcześniej względem metronomu niż pierwsze {{third}} nut.",
+      "driftLate": "Na odcinku {{notes}} nut ostatnie {{third}} nut padło średnio o {{ms}} ms później względem metronomu niż pierwsze {{third}} nut.",
       "position": {
         "2": {
           "0": "ósemka na uderzeniu",
