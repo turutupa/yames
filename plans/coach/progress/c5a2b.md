@@ -25,4 +25,11 @@ Logs in /tmp/coach-c5a2b/. Before the merge: the six touched vitest files 211 pa
 
 - tsc pass (coach-c5a2b-tsc2); build pass (coach-c5a2b-build).
 - vitest full: 50054 passed, 11 skipped; the known `TabStage.render.test.tsx` cannot load (`vitest.log`).
-- Layout `songs-coach`, `songs-review`, `songs`, `today-line`, `short-window`, `phone-learning`, `songs-camera`: 481 passed, 1 failed (`pw.log`): `phone-learning` "phone-session-ready, Tab view: the footer is one row after a Watch at 360px" (335 against 332 px), the same Session-screen case that failed under load in c5a2's run and passed alone; re-run alone it failed again, 336 against 332 px (`pw2.log`, 5 others passed). This leg touches no Session screen; the same case on `coach` untouched (main checkout, 5801115d): job coach-c5a2b-pw3-oncoach.
+- Layout `songs-coach`, `songs-review`, `songs`, `today-line`, `short-window`, `phone-learning`, `songs-camera`: 481 passed, 1 failed (`pw.log`): `phone-learning` "phone-session-ready, Tab view: the footer is one row after a Watch at 360px" (335 against 332 px), the same Session-screen case that failed under load in c5a2's run and passed alone; re-run alone it failed again, 336 against 332 px (`pw2.log`, 5 others passed). This leg touches no Session screen; the same case on `coach` untouched (main checkout, 5801115d) fails identically, 336 against 332 px (`pw3-oncoach.log`): not this leg's.
+
+## Owed
+
+- The `phone-learning` 360px footer case fails on `coach` itself (a phone Session footer, not this leg's).
+- Finding 6 left by the review's own call (the due line can appear a moment after Today draws).
+- The full layout suite (c5a2's account) is still not run.
+
