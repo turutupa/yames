@@ -77,6 +77,8 @@ export interface Shot {
     offMix?: string[];
     /** My exercises as stored (`myExercises`): `{ recipe, addedAt }` rows. */
     myExercises?: unknown[];
+    /** t2e: recipe keys added to today (`myExercises.today`, stamped with today's day). */
+    chosenToday?: string[];
     /** Paths unsubscribed from (`session.unsubscribed`), on top of what the seed says. */
     unsubscribed?: string[];
     /** On a result, answer "Was this grade fair?" before the photograph. */
@@ -528,6 +530,12 @@ export interface Shot {
  * `docs/style.css` and `docs/site.js` carry the same ratio — they must agree
  * or the cards jump as the images load.
  */
+/**
+ * Mock 17's recipe key (`recipeKey`), written out so the harness loads no
+ * generator; `src/session/chosenToday.test.ts` holds it equal (t2e).
+ */
+export const MOCK_17_KEY = "v1-box-a-minorpentatonic-s61-f5-eighths-3b-upandback";
+
 export const SHOTS: Shot[] = [
   {
     id: "metronome",
@@ -1891,6 +1899,52 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // "Add to today" (t2e): mock 17's box added to today. On Paths its row says
+  // "Take off today" and the chromatic one "Add to today"; Today plays it after
+  // the warm-up as "Your exercise".
+  {
+    id: "paths-mine-today",
+    suffix: "paths-mine-today",
+    window: "main",
+    session: {
+      seed: "returning",
+      stop: "paths",
+      myExercises: [
+        {
+          recipe: { v: 1, shape: "box", root: "A", scale: "minorPentatonic", position: 5, subdivision: "eighths", bars: 3, direction: "upAndBack" },
+          addedAt: 1_794_000_000_000,
+        },
+        {
+          recipe: { v: 1, shape: "chromatic", position: 5, subdivision: "eighths", bars: 6, direction: "up" },
+          addedAt: 1_793_900_000_000,
+        },
+      ],
+      chosenToday: [MOCK_17_KEY],
+    },
+    width: 1440,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-mine",
+    suffix: "today-mine",
+    window: "main",
+    session: {
+      seed: "returning",
+      minutes: 15,
+      stop: "today",
+      myExercises: [
+        {
+          recipe: { v: 1, shape: "box", root: "A", scale: "minorPentatonic", position: 5, subdivision: "eighths", bars: 3, direction: "upAndBack" },
+          addedAt: 1_794_000_000_000,
+        },
+      ],
+      chosenToday: [MOCK_17_KEY],
+    },
+    width: 1440,
+    height: 900,
+    settleMs: 300,
+  },
   // What a Path builds on (plans/paths/NEW_PATHS.md, "UI spec for
   // prerequisites"): Shred for a new player, "Builds on" and "Start with
   // Alternate Picking first"; then Subscribe pressed, and the offer.
@@ -2382,7 +2436,7 @@ for (const id of PHONE_LEARNING_SCENES) {
 // `tests/layout/session-variant-text.spec.ts` (session-variant-e is in the list
 // above since the band's slider became thumb-sized, card #93). Today back after
 // a break on a phone: its header and line read together (hd1).
-for (const id of ["session-variant-runway", "step-line", "today-back"]) {
+for (const id of ["session-variant-runway", "step-line", "today-back", "today-mine", "paths-mine-today"]) {
   const desktop = SHOTS.find((s) => s.id === id);
   if (desktop) SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
 }

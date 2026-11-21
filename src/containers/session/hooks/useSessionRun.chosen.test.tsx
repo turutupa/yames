@@ -42,7 +42,8 @@ async function mount(stored: unknown) {
   setInvokeResponse("list_exercise_ceilings", []);
   await installSettings({ "session.grading": "on", ...(stored === undefined ? {} : { [CHOSEN_TODAY_KEY]: stored }) });
   const props: SessionRunInput = {
-    view: "today",
+    // As the custom test does: the shell's view once a Session is asked for.
+    view: "session",
     setView: vi.fn(),
     isPlaying: false,
     beat: null,

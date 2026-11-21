@@ -20,7 +20,8 @@ import {
 } from "./chosenToday";
 import { MY_EXERCISES_KEY, loadMyExercises, resetMyExercisesForTest, updateMyExercises } from "./myExercises";
 import { dayKey } from "./swap";
-import { buildCustomExercise, customPathDoc } from "../paths/custom";
+import { buildCustomExercise, customPathDoc, recipeKey } from "../paths/custom";
+import { MOCK_17_KEY } from "../shots/scenarios";
 import type { Recipe } from "../paths/custom";
 
 const NOW = new Date(2026, 10, 21, 15, 0).getTime();
@@ -131,6 +132,10 @@ describe("the runner's one custom document", () => {
     if (!built.ok) throw new Error(`does not build: ${JSON.stringify(built.why)}`);
     return customPathDoc(built.exercise);
   };
+
+  it("the scenes' written-out key is mock 17's recipe key", () => {
+    expect(recipeKey(A)).toBe(MOCK_17_KEY);
+  });
 
   it("holds every chosen Exercise once, under one Path and Step", () => {
     expect(customDocOf([])).toBeNull();
