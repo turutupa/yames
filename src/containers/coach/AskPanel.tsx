@@ -28,6 +28,14 @@ type AskPanelProps = {
   /** Where the player is, built by the host from the coach's context. */
   lookingAt: AskLookingAt | null;
   onClose: () => void;
+  /**
+   * Where inside a screen the player is, when it has places of its own (Paths:
+   * the list, a Path, a Step). Not a new screen, so no divider; but the tools'
+   * chips are chosen for it (pol2 item 13: a Step page opened with Ask open
+   * kept the list's chips). A string, so the shell's per-beat render passes
+   * the same value and the panel does not render.
+   */
+  place?: string;
 };
 
 /**
@@ -46,7 +54,7 @@ type AskPanelProps = {
  * re-rendering at every beat does not render it (it is not mounted at all
  * while a Take runs).
  */
-export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelProps) {
+export const AskPanel = memo(function AskPanel({ lookingAt, onClose, place = "" }: AskPanelProps) {
   const { t } = useTranslation();
   const { turns, focusPending, about, tab } = useAskState();
   const titleId = useId();
@@ -112,7 +120,7 @@ export const AskPanel = memo(function AskPanel({ lookingAt, onClose }: AskPanelP
     tab === "notebook" ? (
       <Notebook />
     ) : (
-      <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} lookingKey={lookingKey} />
+      <AskConversation turns={turns} inputRef={inputRef} onTyping={setTyping} lookingKey={`${lookingKey ?? ""}#${place}`} />
     );
 
   if (IS_MOBILE) {

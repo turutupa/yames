@@ -220,6 +220,28 @@ describe("the panel", () => {
     expect(row()).not.toContain("One click a beat");
     __setAskToolsForTests(null, null);
   });
+
+  it("the chips are chosen again when Paths opens another page with Ask open, and not on a render that moves nothing (pol2 item 13)", () => {
+    let at: { pathId: string | null; stepId: string | null } = { pathId: null, stepId: null };
+    let reads = 0;
+    const host = fakeHost({ view: "paths" }, { pathsAt: () => ((reads += 1), at) });
+    __setAskToolsForTests(host, toolCtx({ screen: "paths" }));
+    openAsk();
+    const looking = { text: "Paths", key: "paths" };
+    const onClose = () => {};
+    const { rerender } = render(<AskPanel lookingAt={looking} onClose={onClose} place="list" />);
+    const first = reads;
+    expect(first).toBeGreaterThan(0);
+    // The shell's render at a beat: the same props, nothing chosen again.
+    rerender(<AskPanel lookingAt={looking} onClose={onClose} place="list" />);
+    expect(reads).toBe(first);
+    // The player opens a Step page: same screen (no divider), new chips.
+    at = { pathId: "alternate-picking", stepId: "ap-1" };
+    rerender(<AskPanel lookingAt={looking} onClose={onClose} place="step:alternate-picking/ap-1" />);
+    expect(reads).toBeGreaterThan(first);
+    expect(getAskState().turns.filter((t) => t.kind === "divider")).toEqual([]);
+    __setAskToolsForTests(null, null);
+  });
 });
 
 describe("the chip row's own button (leg chip1b: review M1, L4)", () => {
