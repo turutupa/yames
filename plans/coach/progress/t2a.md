@@ -64,6 +64,19 @@ An `arpeggio` recipe plays the same notes picked.
 - Time to build one recipe (node on the DGX, 300 built recipes timed alone): median 4.1 ms, p90 15.8 ms (two
   generator passes and the validator). A refusal before the build is under a millisecond.
 
+## Gates (logs under `/tmp/coach-t2a/`)
+
+- tsc: pass (job coach-t2a-tsc-2).
+- vitest `src/paths/custom.test.ts`: 13 passed. Full `npm run test`: 31,116 tests passed, 415 of 416 files; the one
+  file is the known `TabStage.render.test.tsx` (symlink), plus one "Timeout calling onTaskUpdate" under load
+  (`vitest.log`).
+- `npm run build`: pass.
+- `npm run paths -- check`: exit 0, unchanged; no diff under `src/paths/packs/`.
+- `node scripts/rust-test.mjs --test path_exercises`: 12 passed, the new custom test among them (`rust-test.mjs`
+  `--lib` is what `npm run test:rust` runs, and it does not run this harness).
+- `npm run test:rust` (`--lib`): 1,220 passed, 1 failed: `harmony::worker::tests::lapped_by_more_than_the_whole_ring_it_still_gives_up`
+  ("waited 20s for the worker to end") under load; re-run alone it passes. This leg changes no `src-tauri/src` file.
+
 ## For t2b and t2c
 
 - `buildCustomExercise(recipe) -> { ok: true, exercise, summary } | { ok: false, why }`; store the recipe, not the

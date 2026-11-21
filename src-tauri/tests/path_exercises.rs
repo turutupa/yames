@@ -166,22 +166,22 @@ fn every_custom_exercise_is_scorable_and_a_dropped_note_is_seen() {
     assert!(rows.len() > 100, "only {} custom schedules", rows.len());
     for (index, row) in rows.iter().enumerate() {
         let name = format!("{}/{}", row.path, row.exercise);
-        let report = report(row, &played(row, 2.0, 500 + index as u64));
+        let right = report(row, &played(row, 2.0, 500 + index as u64));
         assert_eq!(
-            hits(&report),
+            hits(&right),
             row.schedule.onsets.len(),
             "{name}: all written notes played, all should be hits"
         );
-        assert_eq!(report.extras.len(), 0, "{name}: nothing extra was played");
+        assert_eq!(right.extras.len(), 0, "{name}: nothing extra was played");
         assert!(
-            report.hit_completeness > 0.99,
+            right.hit_completeness > 0.99,
             "{name}: hit completeness {}",
-            report.hit_completeness
+            right.hit_completeness
         );
         assert!(
-            report.interval_consistency >= 0.85,
+            right.interval_consistency >= 0.85,
             "{name}: evenness {} at 2 ms of jitter should clear the 0.85 bar",
-            report.interval_consistency
+            right.interval_consistency
         );
         assert!(
             row.schedule.onsets.iter().all(|o| !o.soft),
