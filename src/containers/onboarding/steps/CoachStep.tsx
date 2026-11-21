@@ -1,8 +1,10 @@
 /**
  * W4 — Practice coach opt-in (ONBOARDING_PLAN §3 W4, decisions 3 and 5).
  *
- * Three choices, all of them honest:
- *   Timing feedback only  — no download, and still a complete product.
+ * One question since leg c6a (DESIGN 8): "Should the coach also answer in
+ * its own words?" Three choices, all of them honest:
+ *   Off                   — no download: the line, the note, the tools and
+ *                           answers from the player's Takes and Paths.
  *   Standard brain        — Qwen3-4B, the floor tier.
  *   Studio brain          — Qwen3-8B, greyed below 16 GB with the reason.
  *
@@ -104,21 +106,18 @@ export function CoachStep(_props: WizardStepProps) {
     if (recommendation) setStaged((s) => s ?? recommendation.tier);
   }, [recommendation]);
 
-  // Decision 3: timing-only users are still offered W5/W6 as an opt-in.
-  const [tryListening, setTryListening] = useState(
-    () => machineContext.tryListening === true,
-  );
-
-  // W5 already ran on this run (it comes first since the MVP reorder).
-  const inputAsked = machineContext.visited.includes("audio-input");
+  // "Try the listening feature anyway" left this step (leg c6a, judgement
+  // call 29): it asked for an input and eight beats, a microphone push in the
+  // coach's step. W5 runs before this step on every run, so it has no other
+  // home; `tryListening` is recorded false.
 
   const gb = memoryGb(coach.systemMemoryMb);
   const options: Option[] = facts
     ? [
         {
           tier: "off",
-          titleKey: "onboarding.coach.timing.title",
-          descKey: "onboarding.coach.timing.desc",
+          titleKey: "onboarding.coach.off.title",
+          descKey: "onboarding.coach.off.desc",
           disabledReason: null,
         },
         {
@@ -145,7 +144,7 @@ export function CoachStep(_props: WizardStepProps) {
     if (!staged) return;
     setMachineContext({
       coachTier: staged,
-      tryListening: staged === "off" ? tryListening : false,
+      tryListening: false,
     });
     setBrainTier(staged);
     if (staged === "off") return;
@@ -163,7 +162,6 @@ export function CoachStep(_props: WizardStepProps) {
     startDownload(staged);
   }, [
     staged,
-    tryListening,
     setMachineContext,
     setBrainTier,
     startDownload,
@@ -185,12 +183,14 @@ export function CoachStep(_props: WizardStepProps) {
       <h2 className="onboarding-step-title" id="onboarding-title">
         {t("onboarding.coach.title")}
       </h2>
-      {/* Two lines on what it does, then the privacy line — one block so the
-          step's 12px rhythm does not spread three short paragraphs over half
-          the card at the 480x780 minimum window. */}
+      {/* One question (DESIGN 8; leg c6a): what the coach does, the question,
+          what works without a model, then the privacy line — one block so the
+          step's 12px rhythm does not spread short paragraphs over half the
+          card at the 480x780 minimum window. */}
       <div className="onboarding-coach-intro">
         <p className="onboarding-step-subtitle">{t("onboarding.coach.what1")}</p>
-        <p className="onboarding-step-subtitle">{t("onboarding.coach.what2")}</p>
+        <p className="onboarding-coach-question" data-testid="coach-question">{t("onboarding.coach.question")}</p>
+        <p className="onboarding-step-subtitle">{t("onboarding.coach.withoutModel")}</p>
         <p className="onboarding-coach-privacy">{t("onboarding.coach.privacy")}</p>
       </div>
 
@@ -235,28 +235,6 @@ export function CoachStep(_props: WizardStepProps) {
         <p className="onboarding-coach-reason" data-testid="coach-recommendation-reason">
           {t(recommendation.reasonKey, { gb: gb ?? 0 })}
         </p>
-      )}
-
-      {/* Decision 3: the listening steps stay on offer for timing-only users
-          — the timing score is the part that works without any model. Since
-          the MVP reorder W5 runs before this step on every run, so a player
-          who has already been through it is not offered it a second time. */}
-      {staged === "off" && !inputAsked && (
-        <label className="onboarding-coach-try" data-testid="coach-try-listening">
-          <input
-            type="checkbox"
-            checked={tryListening}
-            onChange={(e) => setTryListening(e.target.checked)}
-          />
-          <span>
-            <span className="onboarding-coach-try-label">
-              {t("onboarding.coach.tryListening.label")}
-            </span>
-            <span className="onboarding-coach-try-hint">
-              {t("onboarding.coach.tryListening.hint")}
-            </span>
-          </span>
-        </label>
       )}
 
       {pending && !alreadyHere && (

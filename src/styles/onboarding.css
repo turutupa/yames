@@ -718,34 +718,11 @@
   font-style: italic;
 }
 
-.onboarding-coach-try {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.onboarding-coach-try input {
-  margin-top: 2px;
-  accent-color: var(--accent);
-}
-
-.onboarding-coach-try-label,
-.onboarding-coach-try-hint {
-  display: block;
-  font-size: 0.75rem;
-}
-
-.onboarding-coach-try-label {
+/* The step's one question (leg c6a). */
+.onboarding-coach-question {
+  margin: 0;
   font-weight: 600;
   color: var(--text-primary);
-}
-
-.onboarding-coach-try-hint {
-  color: var(--text-secondary);
 }
 
 /* The background download, as a hairline above the footer. It is informative

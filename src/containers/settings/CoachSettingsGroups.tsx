@@ -66,8 +66,13 @@ function languageName(code: string, lang: string): string {
 }
 
 function listOf(names: readonly string[], lang: string): string {
+  // `Intl.ListFormat` is in every webview Yames ships in; the project's TS lib predates it.
+  const ListFormat = (Intl as unknown as {
+    ListFormat?: new (lang: string, o: { style: string; type: string }) => { format(xs: readonly string[]): string };
+  }).ListFormat;
   try {
-    return new Intl.ListFormat(lang, { style: "long", type: "conjunction" }).format(names);
+    if (ListFormat) return new ListFormat(lang, { style: "long", type: "conjunction" }).format(names);
+    return names.join(", ");
   } catch {
     return names.join(", ");
   }
