@@ -15,6 +15,7 @@ import {
   outcomeCountsTowardCleanTempo,
   heldCleanTempo,
   isTakeIdMarkedNotFair,
+  lastRaisedOutcome,
   shownCleanTempoOf,
   shownCleanTempoTakeOf,
   type PlayerProgress,
@@ -210,5 +211,31 @@ describe("nf1b L2: the edge recap's 'before' is read when the recap shows", () =
   it("an edge with no Take before it in the Session: the value it settled with", () => {
     expect(cleanBeforeOutcome(progress(rows(), 85), [edgeFirst, edgeNext], edgeFirst)).toBe(85);
     expect(cleanBeforeOutcome(progress([], null), [outcome("x", 60, null, null)], outcome("x", 60, null, null))).toBeNull();
+  });
+});
+
+describe("nf1c L2: the recap's headline and coach line read 'before' now", () => {
+  // A at 85 raised the shown 80; B at 83 settled with 'before' 85 (frozen).
+  const a = outcome("A", 85, 85, 80);
+  const b = outcome("B", 83, 83, 85);
+  const outcomes = [a, b];
+  const rows = (fair?: "no") => [
+    raised("eighty", 10, 80),
+    fair ? mark(raised("A", 30, 85), fair) : raised("A", 30, 85),
+    held("B", 40, 83),
+  ];
+
+  it("A kept: A is what raised it, B did not", () => {
+    expect(lastRaisedOutcome(progress(rows(), 85), outcomes)).toBe(a);
+  });
+
+  it("A marked not fair: B raised the shown tempo, over the 80 read now (not the frozen 85)", () => {
+    const p = progress(rows("no"), 85);
+    expect(shownCleanTempoOf(p, PATH.id, EX.id)).toBe(83);
+    expect(lastRaisedOutcome(p, outcomes)).toBe(b);
+  });
+
+  it("only among the outcomes asked about (the coach line's own Exercise)", () => {
+    expect(lastRaisedOutcome(progress(rows("no"), 85), outcomes, [a])).toBeUndefined();
   });
 });

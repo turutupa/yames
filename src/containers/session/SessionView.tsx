@@ -74,7 +74,7 @@ import { loopTitleLine } from "../../coach/loopLine";
 import { exerciseWords, plannedPurpose } from "../../session/exerciseWords";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { roleKey } from "./todayPlan";
-import { cleanBeforeOutcome, factsOf, outcomeCountsTowardCleanTempo } from "../../session/progress";
+import { cleanBeforeOutcome, factsOf, lastRaisedOutcome, outcomeCountsTowardCleanTempo } from "../../session/progress";
 import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
@@ -1854,14 +1854,8 @@ function RecapScreen({ session }: { session: SessionRun }) {
   const minutes = Math.max(1, Math.round(session.playedMs / 60_000));
   const streak = totalsFrom(session.progress.takes, session.paths).streak;
   // The best news first: a clean tempo that rose, then a pass, then the time put in.
-  const raised = [...run.outcomes]
-    .reverse()
-    .find(
-      (o) =>
-        o.grade.cleanBpm !== null &&
-        (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore) &&
-        outcomeCountsTowardCleanTempo(session.progress, o.takeId),
-    );
+  // "Rose" against the "before" read now (nf1c L2).
+  const raised = lastRaisedOutcome(session.progress, run.outcomes);
   // Decided once, as the recap opens: an answer given on a result earlier in
   // the Session means no question here, and an answer given here keeps its
   // thanks on screen rather than taking the question away.

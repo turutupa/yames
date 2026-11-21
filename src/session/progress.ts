@@ -299,6 +299,26 @@ export function cleanBeforeOutcome(
   return before;
 }
 
+/**
+ * The latest outcome of `among` (default: all of `outcomes`) that raised the
+ * clean tempo the app shows: clean, still counting
+ * (`outcomeCountsTowardCleanTempo`) and over the "before" read now
+ * (`cleanBeforeOutcome`), so a Take the player marked not fair since neither
+ * raises it nor stands as the tempo a later Take had to clear (nf1c L2). The
+ * recap's headline and its coach line read this.
+ */
+export function lastRaisedOutcome(
+  progress: PlayerProgress,
+  outcomes: readonly TakeOutcome[],
+  among: readonly TakeOutcome[] = outcomes,
+): TakeOutcome | undefined {
+  return [...among].reverse().find((o) => {
+    if (o.grade.cleanBpm === null || !outcomeCountsTowardCleanTempo(progress, o.takeId)) return false;
+    const before = cleanBeforeOutcome(progress, outcomes, o);
+    return before === null || o.grade.cleanBpm > before;
+  });
+}
+
 /** Takes on one Exercise, newest first. Ungraded ones included. */
 export function takesOf(
   progress: PlayerProgress,

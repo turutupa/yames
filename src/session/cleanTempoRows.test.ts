@@ -7,7 +7,7 @@
  * TypeScript. `counts` is the answer both must give.
  */
 import fs from "node:fs";
-import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { PathTakeRow } from "../ipc";
 import { CLEAN_TEMPO_MIN_BARS } from "./grade";
@@ -15,7 +15,8 @@ import { countsTowardCleanTempo } from "./progress";
 
 type Row = { id: string; bars: number; caught: boolean; passed: boolean; factsJson: string; counts: boolean };
 const fixture = JSON.parse(
-  fs.readFileSync(path.join(process.cwd(), "src-tauri/fixtures/clean_tempo_rows.json"), "utf8"),
+  // From this file, not the working directory (nf1c L3), as Rust's `include_str!` does.
+  fs.readFileSync(fileURLToPath(new URL("../../src-tauri/fixtures/clean_tempo_rows.json", import.meta.url)), "utf8"),
 ) as { minBars: number; rows: Row[] };
 
 /** `serde_json::from_str(&facts).unwrap_or(Value::Null)`, as `list_path_takes` hands a row over. */
@@ -57,22 +58,31 @@ describe("the long view and the app agree on every shared row", () => {
  * clean tempo, on both settle paths, while what is stored (`newClean`, the
  * clean tempo handed to `savePathTake`) is decided against the ceiling.
  * Reverting either `cleanBefore:` to the ceiling fails here.
+ *
+ * A tripwire, not a behaviour test (nf1b review L4): it cannot see swapped
+ * ids or a stale `progress`. A failure means "look", not "bug". The source's
+ * whitespace is collapsed first so a reformat does not trip it, and only
+ * `cleanBefore:` values that are calls are read, so a type or a comment does not.
  */
 describe("useSessionRun: 'before' is the shown tempo, what is stored is the ceiling's", () => {
-  const source = fs.readFileSync(path.join(process.cwd(), "src/containers/session/hooks/useSessionRun.ts"), "utf8");
+  const source = fs
+    .readFileSync(
+      fileURLToPath(new URL("../containers/session/hooks/useSessionRun.ts", import.meta.url)),
+      "utf8",
+    )
+    .replace(/\s+/g, " ")
+    .replace(/\( /g, "(")
+    .replace(/ \)/g, ")");
 
   it("both outcomes quote the shown clean tempo as 'before'", () => {
-    const quoted = source.match(/cleanBefore: [^,\n]+/g) ?? [];
-    expect(quoted).toEqual([
-      "cleanBefore: shownCleanTempoOf(progress",
-      "cleanBefore: shownCleanTempoOf(progress",
-    ]);
+    const quoted = [...source.matchAll(/cleanBefore: ?([A-Za-z_$][\w$]*)\(progress/g)].map((m) => m[1]);
+    expect(quoted).toEqual(["shownCleanTempoOf", "shownCleanTempoOf"]);
   });
 
   it("whether the Take raised it, and what is saved with it, read the ceiling", () => {
     expect(source).toMatch(/const cleanBefore = cleanTempoOf\(progress, path\.id, exercise\.id\);/);
-    expect(source).toMatch(/const raised =\s+grade\.cleanBpm !== null && \(cleanBefore === null \|\| grade\.cleanBpm > cleanBefore\);/);
-    expect(source).toMatch(/newClean: raised,/);
+    expect(source).toMatch(/const raised = \(?grade\.cleanBpm !== null && \(cleanBefore === null \|\| grade\.cleanBpm > cleanBefore\)\)?;/);
+    expect(source).toMatch(/newClean: raised[,}\s]/);
     expect(source).toMatch(/const cleanBpm = raised \? grade\.cleanBpm : null;/);
   });
 });
