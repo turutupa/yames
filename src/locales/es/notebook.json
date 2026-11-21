@@ -95,6 +95,17 @@
       "on": "Sí",
       "asked": "Solo cuando pregunto",
       "unreadable": "No se pudo leer tu elección esta vez; al pulsar una se guarda."
+    },
+    "reminder": {
+      "label": "Recordatorio de práctica",
+      "hint": "Hoy lo menciona a partir de esta hora en estos días, si aún no has practicado. No hay ninguna notificación.",
+      "off": "No",
+      "on": "Sí",
+      "time": "Hora",
+      "days": "Días",
+      "quiet": "Hoy ha dejado de mencionarlo: pasaron tres días de recordatorio sin ninguna sesión. Vuelve a hacerlo después de tu próxima sesión.",
+      "unreadable": "No se pudo leer tu recordatorio esta vez, así que Hoy no lo menciona; al pulsar No o Sí se guarda.",
+      "line": "Tu recordatorio: guitarra a las {{time}}."
     }
   }
 }

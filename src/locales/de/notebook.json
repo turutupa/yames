@@ -95,6 +95,17 @@
       "on": "An",
       "asked": "Nur wenn ich frage",
       "unreadable": "Deine Auswahl konnte diesmal nicht gelesen werden; ein Klick speichert sie."
+    },
+    "reminder": {
+      "label": "Übungserinnerung",
+      "hint": "Heute erwähnt sie nach dieser Uhrzeit an diesen Tagen, wenn du noch nicht geübt hast. Es gibt keine Benachrichtigung.",
+      "off": "Aus",
+      "on": "An",
+      "time": "Uhrzeit",
+      "days": "Tage",
+      "quiet": "Heute erwähnt sie nicht mehr: Drei Erinnerungstage vergingen ohne Session. Nach deiner nächsten Session geht es wieder los.",
+      "unreadable": "Deine Erinnerung konnte diesmal nicht gelesen werden, deshalb erwähnt Heute sie nicht; ein Klick auf Aus oder An speichert sie.",
+      "line": "Deine Erinnerung: Gitarre um {{time}}."
     }
   }
 }

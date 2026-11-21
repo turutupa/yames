@@ -95,6 +95,17 @@
       "on": "Attivi",
       "asked": "Solo quando chiedo",
       "unreadable": "Stavolta la tua scelta non si è potuta leggere; premerne una la salva."
+    },
+    "reminder": {
+      "label": "Promemoria di pratica",
+      "hint": "Oggi lo menziona dopo quest'ora, in questi giorni, se non ti sei ancora esercitato. Non c'è nessuna notifica.",
+      "off": "Disattivato",
+      "on": "Attivo",
+      "time": "Ora",
+      "days": "Giorni",
+      "quiet": "Oggi ha smesso di menzionarlo: sono passati tre giorni di promemoria senza una sessione. Ricomincia dopo la tua prossima sessione.",
+      "unreadable": "Stavolta il tuo promemoria non si è potuto leggere, quindi Oggi non lo menziona; premere Disattivato o Attivo lo salva.",
+      "line": "Il tuo promemoria: chitarra alle {{time}}."
     }
   }
 }

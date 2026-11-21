@@ -225,13 +225,13 @@ describe("the values in memory and the store", () => {
 
   it("a player who never opened the coach: the load reads defaults and writes nothing", async () => {
     const got = await loadCoachStored();
-    expect(got).toEqual({ suggestions: "on", cards: {}, goal: null, suppressed: {} });
+    expect(got).toEqual({ suggestions: "on", cards: {}, goal: null, suppressed: {}, reminder: REMINDER_OFF });
     expect(coachStoredLoaded()).toBe(true);
     expect(saves).toEqual([]);
   });
 
   it("stored nulls read back as no choice, and are not rewritten", async () => {
-    for (const key of ["coach.suggestions", "coach.cards", "coach.goal", "coach.suppressed"]) disk.set(key, null);
+    for (const key of ["coach.suggestions", "coach.cards", "coach.goal", "coach.suppressed", "coach.reminder"]) disk.set(key, null);
     expect(await loadCoachStored()).toEqual(COACH_STORED_DEFAULTS);
     expect(saves).toEqual([]);
   });

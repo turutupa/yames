@@ -95,6 +95,17 @@
       "on": "Aan",
       "asked": "Alleen als ik vraag",
       "unreadable": "Je keuze kon nu niet worden gelezen; als je er een indrukt, wordt die opgeslagen."
+    },
+    "reminder": {
+      "label": "Oefenherinnering",
+      "hint": "Vandaag noemt hem na dit tijdstip op deze dagen, als je nog niet hebt geoefend. Er is geen melding.",
+      "off": "Uit",
+      "on": "Aan",
+      "time": "Tijd",
+      "days": "Dagen",
+      "quiet": "Vandaag noemt hem niet meer: drie herinneringsdagen gingen voorbij zonder sessie. Na je volgende sessie begint het weer.",
+      "unreadable": "Je herinnering kon nu niet worden gelezen, dus Vandaag noemt hem niet; als je Uit of Aan indrukt, wordt hij opgeslagen.",
+      "line": "Je herinnering: gitaar om {{time}}."
     }
   }
 }

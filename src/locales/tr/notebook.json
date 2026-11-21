@@ -95,6 +95,17 @@
       "on": "Açık",
       "asked": "Yalnızca ben sorunca",
       "unreadable": "Seçimin bu sefer okunamadı; birine basmak onu kaydeder."
+    },
+    "reminder": {
+      "label": "Çalışma hatırlatıcısı",
+      "hint": "Bugün, henüz çalışmadıysan seçili günlerde bu saatten sonra bunu gösterir. Bildirim yok.",
+      "off": "Kapalı",
+      "on": "Açık",
+      "time": "Saat",
+      "days": "Günler",
+      "quiet": "Bugün artık bunu göstermiyor: üç hatırlatıcı günü oturum olmadan geçti. Bir sonraki oturumundan sonra yeniden başlar.",
+      "unreadable": "Hatırlatıcın bu sefer okunamadı, bu yüzden Bugün onu göstermiyor; Kapalı ya da Açık'a basmak onu kaydeder.",
+      "line": "Hatırlatıcın: gitar, saat {{time}}."
     }
   }
 }
