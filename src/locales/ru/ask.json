@@ -57,6 +57,8 @@
         "ungraded": "You're playing without grading, so there are no measurements to answer questions about your Takes from."
       },
       "tooShort": "Take {{take}} stopped after {{bars}} bar, too few to judge.",
+      "tooShort_few": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
+      "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
       "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too few to judge.",
       "slip": {
         "none": "No bar slipped in Take {{take}}: every bar that could be judged held.",
@@ -83,6 +85,8 @@
         "below": "Take {{take}} did count, as a Take below the pass mark at {{bpm}} BPM.",
         "notCaught": "I didn't measure Take {{take}}: I heard {{heard}} of {{expected}} notes, too few to grade, so it doesn't count against you.",
         "tooShort": "Take {{take}} stopped after {{bars}} bar, too short to judge, so it doesn't count either way.",
+        "tooShort_few": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
+        "tooShort_many": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
         "tooShort_other": "Take {{take}} stopped after {{bars}} bars, too short to judge, so it doesn't count either way.",
         "notClean": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and the longest run in Take {{take}} was {{held}}.",
         "notCleanPlain": "It didn't move your clean tempo: that takes {{need}} clean bars in a row, and Take {{take}} didn't have them.",
