@@ -1,0 +1,5 @@
+{
+  "lng": "ko",
+  "words": ["어떻게", "어떻게요", "왜", "뭐", "무엇", "무엇인가요", "무엇인지", "뭐예요", "뭔가요", "어떤", "어디", "제", "내", "저", "나", "좀", "수", "있나요", "해야", "하나요", "하면", "하는", "할까요", "되나요", "그리고", "이", "그", "더", "때", "알려주세요"],
+  "notes": "Whole common question words and particles-as-words (how, why, what, which, I/my, a bit, can, should, do-it forms, please tell me). Doubtful: 수 and 때 (single-syllable, but only dropped when they stand alone as a word, never as content), 더 (more, could in rare cases be wanted as in 더 빠르게; it is a whole word so only dropped alone). Content words like 코드, 연습, 박자, 줄, 손가락 are not listed."
+}

@@ -1,0 +1,24 @@
+{
+  "lng": "ru",
+  "notes": "Six questions chosen from the English ones. Unsure: Russian players mix loanwords (легато, пауэр-аккорд, палм-мьют) and Russian terms (переменный штрих, параллельный минор); I used the loanwords for palm mute and power chord. `none` are questions the Paths do not answer.",
+  "questions": [
+    { "q": "как играть восьмые ровно переменным штрихом", "expect": ["alternate-picking/even-eighths", "rhythm-foundations/eighths", "alternate-picking/other-strings"] },
+    { "q": "у меня питч-оффы получаются тихими, как сделать их громче", "expect": ["legato/first-pulls", "legato/hammer-and-pull", "shred/legato-one"] },
+    { "q": "как считать триоли?", "expect": ["rhythm-foundations/triplets", "metal-rhythm/triplets-and-bursts"] },
+    { "q": "что такое пауэр-аккорд", "expect": ["metal-rhythm/power-chords"] },
+    { "q": "что такое параллельный минор тональности", "expect": ["scales-and-modes/relative-minor", "scales-and-modes/minor-second-key", "chords-in-a-key/minor-key"] },
+    { "q": "как быстрее переключаться между аккордами", "expect": ["first-chords/a-minor", "first-chords/c-major", "first-chords/g-major", "first-chords/d-major", "first-chords/a-and-e"] }
+  ],
+  "none": [
+    "как настроить гитару",
+    "какие струны мне купить",
+    "какой комбоусилитель выбрать",
+    "какая завтра погода",
+    "расскажи анекдот",
+    "сколько стоит новая гитара",
+    "как поменять струны на акустике",
+    "как экспортировать мои данные",
+    "как отрегулировать анкер грифа",
+    "посоветуй педаль дисторшна"
+  ]
+}
