@@ -64,7 +64,7 @@ export function choicePrefix(catalogue: ToolCatalogue, cards: readonly EvalCard[
   const lines: string[] = [
     "Reply with one JSON object for the player's message:",
     '{"tool":NAME,"args":{...}} to do one tool below (names in the player\'s words, numbers as digits)',
-    ...(cards.length > 0 ? ['{"card":ID} when a card below answers it'] : []),
+    ...(cards.length > 0 ? ['{"card":ID,"args":{...}} when a card below answers it'] : []),
     '{"answer":"which"} if it could mean two different things',
     '{"answer":"yours"} for recording, deleting, grading, grades, microphone, devices, the model, unfollowing: the player\'s own',
     '{"answer":"none"} for anything else',
@@ -78,9 +78,22 @@ export function choicePrefix(catalogue: ToolCatalogue, cards: readonly EvalCard[
   }
   if (cards.length > 0) {
     lines.push("", "Cards:");
-    for (const card of cards) lines.push(notes ? `${card.id}: ${card.note}` : card.id);
+    for (const card of cards) lines.push(cardLine(card, notes));
   }
   return lines.join("\n");
+}
+
+/**
+ * One card in the prefix (leg c3b1b): its id, its arguments as a tool's are
+ * written (the `take` every last-Take card carries has one value, "last",
+ * and is left out), and its note to the first stop. A card that declares no
+ * arguments is its id and note, as before.
+ */
+function cardLine(card: EvalCard, notes: boolean): string {
+  const shown = (card.args ?? []).filter((f) => !(f.name === "take" && f.type.kind === "enum" && f.type.values.length === 1));
+  const signature = card.args === undefined ? card.id : `${card.id}(${shown.map(argText).join(", ")})`;
+  if (!notes) return signature;
+  return `${signature}: ${card.args === undefined ? card.note : shortNote(card.note)}`;
 }
 
 /** What the context says: plain facts, already in the player's language where they are titles. */
