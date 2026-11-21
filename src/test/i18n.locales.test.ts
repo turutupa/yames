@@ -33,6 +33,8 @@ const NAMESPACES = [
   // screen's strings arriving in the file the coach card already uses is how
   // two people editing two features end up in one diff.
   "coachBlocks",
+  // The coach's tools in Ask: receipts, proposals, choices, "that one is yours" (leg t1b1).
+  "coachTools",
   "common",
   "drill",
   "jam",

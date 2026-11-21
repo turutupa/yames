@@ -309,6 +309,160 @@
   text-align: center;
 }
 
+/* ── The tools in the thread (leg t1b1; DESIGN 13, 3.6; mock 16) ─────────
+ * A receipt is quiet: a check, one line, its way back as a small tonal
+ * button, the source. A proposal is an outlined card: what will happen, one
+ * tonal button with a verb, "Not now". Choices and "show me" are neutral
+ * outline chips, two balanced lines at most. Theme tokens only; no coach
+ * colour here (the glyph in the head has it); nothing solid. */
+.ask-tool {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.ask-receipt-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.ask-tool-mark {
+  flex: none;
+  margin-top: 4px;
+  color: var(--text-secondary);
+}
+.ask-receipt-text {
+  flex: 1 1 160px;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-primary);
+}
+.ask-receipt-text[aria-busy="true"] {
+  color: var(--text-secondary);
+}
+.ask-tool-btn {
+  flex: none;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font: 600 14px/1.25 inherit;
+  text-align: center;
+  text-wrap: balance;
+  cursor: pointer;
+}
+.ask-tool-quiet {
+  min-height: 36px;
+  padding: 7px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 500 14px/1.25 inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+:root[data-theme-group="light"] .ask-panel .ask-tool-quiet {
+  color: var(--text-secondary);
+}
+.ask-tool-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.ask-tool-source.coach-block-source {
+  margin: 0;
+}
+.ask-proposal {
+  padding: 12px 14px;
+  border: 1px solid var(--ask-line);
+  border-radius: 12px;
+}
+.ask-proposal-line {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ask-proposal-fact {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.ask-proposal-plan {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.ask-proposal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+.ask-proposal[data-state="dismissed"] .ask-proposal-line {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.ask-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ask-empty .ask-chips {
+  margin-top: 12px;
+}
+.ask-empty-tools {
+  margin-top: 14px;
+}
+.ask-chip-row {
+  flex: none;
+  padding: 0 12px 8px;
+}
+/* A question chip's shape (DESIGN 3.6): neutral 1 px outline, ink label. */
+.ask-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  max-width: 100%;
+  padding: 6px 14px;
+  border: 1px solid var(--ask-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-primary);
+  font: 600 14px/1.25 inherit;
+  text-align: left;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .ask-chip:hover {
+    border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
+  }
+}
+.ask-chip:focus-visible,
+.ask-tool-btn:focus-visible,
+.ask-tool-quiet:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+/* A thumb's 44 px on a phone (the sheet). */
+.ask-sheet :is(.ask-chip, .ask-tool-btn, .ask-tool-quiet) {
+  min-height: 44px;
+}
+/* "Show me": the control the player asked about, marked for a moment. */
+[data-coach-point] {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 10px;
+  transition: outline-color 0.3s;
+}
+
 /* ── The text box ────────────────────────────────────────────────────── */
 .ask-compose {
   flex: none;
