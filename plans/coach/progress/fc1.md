@@ -33,6 +33,19 @@ each overlay (1064 to 1029 strings per language).
 `check first-chords`: 0 errors, 0 `cue.refused` (was 14), 5 `variant.rewritten` (the unchanged how-to
 lines of `warmup-intermediate.major-walk`). Longest new cue: nl 47 characters.
 
+## The one test that changed
+
+`src/paths/rewrites.test.ts` "lists the cues a variant cannot say" needed First Chords to have a refusal
+(`refused.length > 0`), so it failed once there were none. It now checks the shipped pack lists none, puts
+the old "Arrive at each new fret by its click." back on small-barre by hand, and expects that exact
+refusal with its reason (as the file's other tests inject a line).
+
+## Gates
+
+`npm run paths -- check` all sixteen ok, 0 errors, 0 `cue.refused` in every Path (`/tmp/coach-fc1/check.log`);
+tsc ok; build ok; vitest 47770 passed, 1 failed (the rewrites test above, then fixed: `rewrites.test.ts` 5
+passed alone) plus the known `TabStage.render.test.tsx` load failure (`/tmp/coach-fc1/vitest.log`).
+
 ## For the next leg
 
 `ARRIVE` / `ARRIVE_EARLY` are still used on Exercises without variants; any Exercise given variants later
