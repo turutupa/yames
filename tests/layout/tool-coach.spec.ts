@@ -305,7 +305,7 @@ for (const theme of THEMES) {
       await expect(note.locator('[data-testid="tool-coach-said"]')).toBeVisible();
       await expect(note.locator('[data-testid="tool-coach-score"]')).toBeVisible();
       if (IN_ENGLISH) {
-        await expect(finding).toHaveText("No note landed on the off-beat eighth on 32 of the 48 beats you played through.");
+        await expect(finding).toHaveText("No note landed on the off-beat eighth on 32 of the 48 beats where it was counted.");
         await expect(note.locator('[data-testid="tool-coach-said"]')).toContainText("Even spacing through most of that run");
       }
       // The sentence is the headline: above the report's own line, inside the note.

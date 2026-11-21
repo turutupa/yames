@@ -5,6 +5,7 @@ import "../../i18n";
 import { ToolCoach, toolCoachView } from "./ToolCoach";
 import type { FeedMessage, SessionReport } from "../../types";
 import { mockListen } from "../../test/mocks";
+import { notifySettingsChange } from "../../ipc";
 
 afterEach(cleanup);
 
@@ -183,7 +184,7 @@ describe("ToolCoach: the run's measured finding (C5)", () => {
       freePlay: { counted: 60, agreeing: 20, lowNotes: 0, highNotes: 0, lowSpreadMs: 0, highSpreadMs: 0 },
     },
   };
-  const DRIFT_TEXT = "Over a stretch of 60 notes, the last 20 landed 40 ms later against the click than the first 20, on average.";
+  const DRIFT_TEXT = "Over a stretch of 60 notes on the click, the last 20 landed 40 ms later against the click than the first 20, on average.";
   /** A segment-end; `endMs` is the segment's own wall-clock end (default: now). */
   const segmentEnded = (findings: unknown[] | undefined, playedMs = 30_000, endMs = Date.now()) => {
     const calls = mockListen.mock.calls.filter(([event]) => event === "practice-segment-ended");
@@ -254,6 +255,32 @@ describe("ToolCoach: the run's measured finding (C5)", () => {
     segmentEnded(undefined);
     rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
     segmentEnded([DRIFT]);
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.getByTestId("tool-coach-finding").textContent).toBe(DRIFT_TEXT);
+  });
+
+  it("a settings change mid-run, whose close is silent, clears an earlier segment's finding (review L-2)", async () => {
+    // Segment A closes on a pause with a drift; the player plays on, changes
+    // the tempo while the click runs (segment B closes with no event) and
+    // stops without another note: no segment closes at the stop.
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    segmentEnded([DRIFT]);
+    await act(async () => {
+      await notifySettingsChange();
+    });
+    rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
+    expect(screen.queryByTestId("tool-coach-finding")).toBeNull();
+  });
+
+  it("a settings change after the run stopped leaves the stopped run's finding (review L-2)", async () => {
+    const { rerender } = render(<ToolCoach {...base} isPlaying messages={[]} />);
+    await flush();
+    rerender(<ToolCoach {...base} isPlaying={false} messages={[]} />);
+    segmentEnded([DRIFT]);
+    await act(async () => {
+      await notifySettingsChange();
+    });
     rerender(<ToolCoach {...base} isPlaying={false} messages={run(Date.now() + 5)} />);
     expect(screen.getByTestId("tool-coach-finding").textContent).toBe(DRIFT_TEXT);
   });

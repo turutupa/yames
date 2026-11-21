@@ -754,9 +754,28 @@ export async function getEvaluationState(): Promise<boolean> {
  *
  * Safe to call when no evaluation is running (the analyzer's flag
  * is cleared on `start_evaluation`).
+ *
+ * Because that close is silent, whoever keeps a segment's findings learns
+ * of it here (`onSettingsChangeNotified`), in this window, before the
+ * command is sent (c5c2b review L-2).
  */
 export async function notifySettingsChange(): Promise<void> {
+  for (const cb of [...settingsChangeListeners]) cb();
   return invoke("notify_settings_change");
+}
+
+const settingsChangeListeners = new Set<() => void>();
+
+/**
+ * Called, in this window, each time `notifySettingsChange` is sent: the
+ * open segment is about to close with no `practice-segment-ended`.
+ * Returns the unsubscribe.
+ */
+export function onSettingsChangeNotified(cb: () => void): () => void {
+  settingsChangeListeners.add(cb);
+  return () => {
+    settingsChangeListeners.delete(cb);
+  };
 }
 
 /**

@@ -1820,6 +1820,10 @@ fn free_subdivision(beats: &[FreePlayBeat]) -> Option<Finding> {
     // One tick per position per beat, so a bucket's count is a count of
     // beats: the beats played through on which the click sounded it.
     let mut buckets: Vec<Tally> = vec![Tally::default(); 6];
+    // The click's beat length over every tick a bucket counted, hits and
+    // misses alike: a bucket's `Tally::beat_ms` sees only its hits, and a
+    // position never played has none (c5c2b review L-3).
+    let mut tick_ms = [(0.0f64, 0u32); 6];
     for beat in beats.chunk_by(|a, b| a.beat_index == b.beat_index) {
         if !beat.iter().any(|b| b.hit) {
             continue;
@@ -1829,6 +1833,8 @@ fn free_subdivision(beats: &[FreePlayBeat]) -> Option<Finding> {
                 continue;
             }
             let position = usize::from(b.sub_index);
+            tick_ms[position].0 += b.beat_ms();
+            tick_ms[position].1 += 1;
             if b.hit {
                 buckets[position].hit(0.0, b.beat_ms());
             } else {
@@ -1858,7 +1864,8 @@ fn free_subdivision(beats: &[FreePlayBeat]) -> Option<Finding> {
         return None;
     }
     let tally = buckets[worst_at];
-    let reference = 60_000.0 / tally.beat_ms().max(1.0);
+    let (ms_sum, ms_n) = tick_ms[worst_at];
+    let reference = 60_000.0 / (ms_sum / f64::from(ms_n.max(1))).max(1.0);
 
     Some(Finding {
         kind: FindingKind::SubdivisionWeak,
@@ -3155,6 +3162,23 @@ mod tests {
         let counts = weak.evidence.free_play.expect("counts");
         assert_eq!(weak.evidence.subdivision_position, Some((1, 2)));
         assert_eq!((counts.counted, counts.agreeing), (30, 10));
+    }
+
+    #[test]
+    fn a_position_never_played_still_names_the_clicks_tempo() {
+        // c5c2b review L-3. The off-beat is never played on 24 beats of an
+        // eighth click at 120: its bucket has no hit, so a tempo read from
+        // the hits alone was 60000 / 1 BPM on the wire.
+        let mut beats = Vec::new();
+        for i in 0..24u32 {
+            beats.push(free_beat(i, 0, 2, 120.0, 0.0, "good"));
+            beats.push(free_beat(i, 1, 2, 120.0, 0.0, "miss"));
+        }
+        let found = analyze_free_play(&beats);
+        let weak = found.iter().find(|f| f.kind == FindingKind::SubdivisionWeak).expect("a dropped off-beat");
+        assert_eq!(weak.evidence.subdivision_position, Some((1, 2)));
+        let bpm = weak.evidence.reference_bpm.expect("a tempo");
+        assert!((bpm - 120.0).abs() < 0.5, "{bpm}");
     }
 
     #[test]

@@ -28,7 +28,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { FeedChip, FeedMessage, SessionReport } from "../../types";
 import type { Finding } from "../../songs/types";
-import { onPracticeSegmentEnded } from "../../ipc";
+import { onPracticeSegmentEnded, onSettingsChangeNotified } from "../../ipc";
 import { toolFinding, toolFindingText } from "../../coach/toolFinding";
 import { SystemStatusChip } from "../../components/SystemStatusChip";
 import { bandForScore } from "../../coach/reportStats";
@@ -267,6 +267,17 @@ function useRunFindings(listenOn: boolean, isPlaying: boolean): RunFindings | nu
       setPublished(latest.current);
     }
   }, [isPlaying]);
+  // A settings change mid-run closes the open segment with no event (Signal
+  // A): its findings never arrive, so an earlier segment's are no longer the
+  // run's last and are dropped (c5c2b review L-2). Stopped, it closes
+  // nothing, and the stopped run's note stays.
+  useEffect(
+    () =>
+      onSettingsChangeNotified(() => {
+        if (playing.current) latest.current = null;
+      }),
+    [],
+  );
   useEffect(() => {
     if (!listenOn) return;
     let live = true;
