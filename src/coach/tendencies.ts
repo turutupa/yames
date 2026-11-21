@@ -25,12 +25,12 @@
  * Notebook opens), never in a render or per beat.
  */
 import type { PathTakeRow } from "../ipc";
-import { barLengthTicks } from "../paths/format";
 import type { CueTrigger, Exercise, PathDoc } from "../paths/format";
 import { placeTriggers } from "../paths/cues";
 import { findExercise } from "../session/packs";
 import { factsOf, isUngradedTake, leanOf, sessionKeyOf } from "../session/progress";
 import { withVariant } from "../session/take";
+import { totalsFrom } from "../session/totals";
 import { biasThresholdMs } from "./takeNote";
 import { isSuppressed, type Suppressed } from "./store";
 
@@ -345,14 +345,6 @@ function tempoPlayedLines(window: readonly PathTakeRow[], paths: readonly PathDo
   return out.sort((a, b) => b.to - a.to);
 }
 
-/** A Take's own length in seconds, from its bars and tempo (as Progress counts minutes). */
-function secondsOf(take: PathTakeRow, paths: readonly PathDoc[] | undefined): number {
-  if (take.bpm <= 0 || take.bars <= 0) return 0;
-  const path = paths?.find((p) => p.id === take.pathId);
-  const meter = (path && findExercise(path, take.exerciseId)?.exercise.meter) ?? { numerator: 4, denominator: 4 };
-  return (take.bars * (barLengthTicks(meter) / 960) * 60) / take.bpm;
-}
-
 /**
  * Minutes played per Session, the newer half of the newest Sessions against
  * the older half. The minutes are the Takes' own length, counted as Progress
@@ -374,7 +366,7 @@ function minutesLine(played: readonly PathTakeRow[], paths: readonly PathDoc[] |
   const newer = sessions.slice(0, half);
   const older = sessions.slice(sessions.length - half);
   const minutes = (group: typeof sessions) =>
-    Math.round(mean(group.map((s) => s.takes.reduce((n, t) => n + secondsOf(t, paths), 0))) / 60);
+    Math.round(mean(group.map((s) => totalsFrom(s.takes, paths ?? []).seconds)) / 60);
   const now = minutes(newer);
   const then = minutes(older);
   const takes = [...newer, ...older].flatMap((s) => s.takes);

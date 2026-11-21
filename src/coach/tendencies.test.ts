@@ -12,7 +12,7 @@ import type { TakeFacts } from "../session/progress";
 import { notebookFrom } from "./notebook";
 import { COACH_STORED_DEFAULTS } from "./store";
 import { MIN_SESSIONS, MIN_TAKES, TAKES_WINDOW, tendencies, type NoticedLine } from "./tendencies";
-import { totalsFrom } from "../containers/session/ProgressView";
+import { totalsFrom } from "../session/totals";
 
 const DAY = 86_400_000;
 const HOUR = 3_600_000;
