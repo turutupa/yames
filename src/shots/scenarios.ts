@@ -70,6 +70,8 @@ export interface Shot {
     focus?: string;
     /** Paths switched out of the daily mix (`session.offMix`). */
     offMix?: string[];
+    /** My exercises as stored (`myExercises`): `{ recipe, addedAt }` rows. */
+    myExercises?: unknown[];
     /** Paths unsubscribed from (`session.unsubscribed`), on top of what the seed says. */
     unsubscribed?: string[];
     /** On a result, answer "Was this grade fair?" before the photograph. */
@@ -1840,6 +1842,30 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // My exercises (t2b): two custom Exercises after the Paths, mock 17's box and a
+  // chromatic line. `paths` (none stored) is the empty case.
+  {
+    id: "paths-mine",
+    suffix: "paths-mine",
+    window: "main",
+    session: {
+      seed: "returning",
+      stop: "paths",
+      myExercises: [
+        {
+          recipe: { v: 1, shape: "box", root: "A", scale: "minorPentatonic", position: 5, subdivision: "eighths", bars: 3, direction: "upAndBack" },
+          addedAt: 1_794_000_000_000,
+        },
+        {
+          recipe: { v: 1, shape: "chromatic", position: 5, subdivision: "eighths", bars: 6, direction: "up" },
+          addedAt: 1_793_900_000_000,
+        },
+      ],
+    },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
   // What a Path builds on (plans/paths/NEW_PATHS.md, "UI spec for
   // prerequisites"): Shred for a new player, "Builds on" and "Start with
   // Alternate Picking first"; then Subscribe pressed, and the offer.
@@ -2309,6 +2335,7 @@ export const PHONE_LEARNING_SCENES = [
   "coach-after-loop",
   "progress-ungraded",
   "paths",
+  "paths-mine",
   "path-alternate",
   "path-unmet",
   "path-offer",
