@@ -56,6 +56,7 @@ type Stored = {
   ago?: number;
   exerciseId?: string;
   pathId?: string;
+  variantSeed?: number;
 };
 
 /** A stored Take of the tune, as `useSessionRun` keeps one. */
@@ -87,8 +88,31 @@ function stored(s: Stored): PathTakeRow {
     passed: verdict === "passed",
     facts,
     ...(s.pathId ? { pathId: s.pathId } : {}),
+    ...(s.variantSeed === undefined ? {} : { variantSeed: s.variantSeed }),
   });
 }
+
+/** The tune with two variants (the same notes here; what matters is which one a Take was on). */
+const VARIED: Exercise = {
+  ...TUNE,
+  variation: {
+    dimensions: ["position"],
+    pooled: ["position"],
+    notPooled: [],
+    variants: ["a", "b"].map((id) => ({
+      id,
+      label: id,
+      params: { position: id },
+      tab: TUNE.tab,
+      position: TUNE.position,
+      crossing: TUNE.crossing,
+      notes: TUNE.notes,
+      rests: TUNE.rests,
+      backing: TUNE.backing,
+      computed: TUNE.computed,
+    })),
+  } as unknown as NonNullable<Exercise["variation"]>,
+};
 
 /** A fixture Take with these stored Takes before it (newest first), on the tune's Path. */
 function withHistory(shape: Parameters<typeof fixture>[0], history: PathTakeRow[], over: Partial<CoachContext> = {}) {
@@ -185,6 +209,34 @@ describe("what changed since the last Take", () => {
     expect(keys(c)).toEqual(["changed.first"]);
   });
 
+  it("a Take on another variant is never the one before: passed over, and counted (int1b)", () => {
+    // This Take is on variant b (seed 3 of two variants); the newest Take before it was on a.
+    const history = [stored({ variantSeed: 0, bpm: 100, even: 0.82, ago: 1 }), stored({ variantSeed: 1, bpm: 80, even: 0.7, ago: 2 })];
+    const c = card(whatChanged(withHistory({ exercise: VARIED }, history, { exercise: VARIED, variantSeed: 3 }).ctx));
+    expect(c.lines.map(said)).toContain("ask.card.changed.metric.even(take=2,before=70,now=90)");
+    expect(c.lines.map(said)[0]).toBe("ask.card.changed.tempo(take=2,before=80,bpm=90)");
+    expect(text(c)).not.toMatch(/100|82%/);
+    expect(english(c.lines[c.lines.length - 1])).toBe("I left out 1 Take played on another version of this Exercise.");
+  });
+
+  it("only Takes on other variants before it: says so, never 'no measured Take of this Exercise'", () => {
+    const history = [stored({ variantSeed: 0, ago: 1 }), stored({ variantSeed: 0, ago: 2 })];
+    const c = card(whatChanged(withHistory({ exercise: VARIED }, history, { exercise: VARIED, variantSeed: 1 }).ctx));
+    expect(keys(c)).toEqual(["changed.noneAlike", "history.otherNotes"]);
+    expect(text(c)).toBe(
+      "I have no measured Take of this version of the Exercise before Take 2 that I can compare it with. I left out 2 Takes played on other versions of this Exercise.",
+    );
+  });
+
+  it("no Path and the Take not stored yet: says it isn't saved, never 'no Take'", () => {
+    const f = withHistory({}, [stored({})]);
+    const ctx = { ...f.ctx, path: undefined };
+    for (const out of [whatChanged(ctx), improving(ctx)]) {
+      expect(isCard(out)).toBe(false);
+      expect(said((out as NoCard).line)).toBe("ask.card.notNow.notSaved(take=2)");
+    }
+  });
+
   it("this Take not caught: its reason, nothing compared", () => {
     const c = card(whatChanged(withHistory({ verdict: "notCaught", noCatchReason: "nothingHeard", heard: 0 }, [stored({})]).ctx));
     expect(keys(c)).toEqual(["count.notCaught.nothingHeard"]);
@@ -212,10 +264,10 @@ describe("am I improving", () => {
     expect(c.lines.map(said)).toEqual([
       "ask.card.improving.window(count=4,from=70,to=90)",
       "ask.card.improving.clean(count=2,bpm=90)",
-      "ask.card.improving.even(count=4,first=80,last=90,best=90)",
+      "ask.card.improving.even(count=4,first=80,firstBpm=70,last=90,lastBpm=90,best=90,bestBpm=90)",
     ]);
     expect(text(c)).toBe(
-      "In your last 4 measured Takes of this Exercise, the tempo went from 70 BPM in the oldest to 90 BPM in the newest. 2 of them earned a clean tempo; the fastest was 90 BPM. Evenness, in the 4 of them that kept it: 80% in the oldest, 90% in the newest, 90% at best.",
+      "In your last 4 measured Takes of this Exercise, the tempo went from 70 BPM in the oldest to 90 BPM in the newest. 2 of them earned a clean tempo; the fastest was 90 BPM. Evenness, in the 4 of them that kept it: 80% in the oldest of those, at 70 BPM; 90% in the newest of those, at 90 BPM; 90% at best, at 90 BPM.",
     );
     expect(c.source).toEqual({ kind: "measured" });
   });
@@ -232,7 +284,7 @@ describe("am I improving", () => {
     expect(c.lines.map(said)).toEqual([
       "ask.card.improving.window(count=3,from=80,to=90)",
       "ask.card.improving.clean(count=1,bpm=90)",
-      "ask.card.improving.even(count=3,first=80,last=90,best=90)",
+      "ask.card.improving.even(count=3,first=80,firstBpm=80,last=90,lastBpm=90,best=90,bestBpm=90)",
       "ask.card.history.leftOut(count=1)",
     ]);
     expect(text(c)).not.toMatch(/120|99%/);
@@ -246,10 +298,37 @@ describe("am I improving", () => {
     expect(text(c)).not.toMatch(/120|99%/);
   });
 
-  it("a stored Take that cannot say whether it earned a clean tempo: no count of them is said", () => {
+  it("a stored Take that cannot say whether it earned a clean tempo: no count of them, and the card says it can't count them", () => {
     const history = [stored({ verdict: "passed", even: 0.9 }), stored({ ago: 2, counts: false }), stored({ ago: 3, counts: false })];
     const c = card(improving(withHistory({}, history).ctx));
-    expect(keys(c).some((k) => k.startsWith("improving.clean"))).toBe(false);
+    expect(keys(c).filter((k) => k.startsWith("improving.clean"))).toEqual(["improving.cleanUnknown"]);
+  });
+
+  it("evenness at two tempos: each figure with its own Take's tempo, and the oldest of those is not the window's oldest (int1b)", () => {
+    // Newest first: 120 BPM at 71%, 110 BPM on notes heard (no evenness), a 60 BPM Take at 96%; the oldest, at 50, kept none.
+    const heard = { metric: "notesHeard", value: 0.9, min: 0.95 };
+    const history = [
+      stored({ bpm: 120, even: 0.71, counts: false, ago: 1 }),
+      stored({ bpm: 110, headline: heard, ago: 2 }),
+      stored({ bpm: 60, even: 0.96, counts: false, ago: 3 }),
+      stored({ bpm: 50, headline: heard, ago: 4 }),
+    ];
+    const c = card(improving(withHistory({}, history).ctx));
+    expect(c.lines.map(said)).toContain("ask.card.improving.even(count=2,first=96,firstBpm=60,last=71,lastBpm=120,best=96,bestBpm=60)");
+    expect(text(c)).toContain("96% in the oldest of those, at 60 BPM; 71% in the newest of those, at 120 BPM; 96% at best, at 60 BPM.");
+  });
+
+  it("the window holds the last Take's variant only, and says how many Takes on other variants it left out (int1b)", () => {
+    const history = [
+      stored({ variantSeed: 1, bpm: 90, even: 0.9, counts: false, ago: 1 }),
+      stored({ variantSeed: 0, bpm: 140, even: 0.99, counts: false, ago: 2 }),
+      stored({ variantSeed: 1, bpm: 85, even: 0.86, counts: false, ago: 3 }),
+      stored({ variantSeed: 3, bpm: 80, even: 0.8, counts: false, ago: 4 }),
+    ];
+    const c = card(improving(withHistory({ exercise: VARIED }, history, { exercise: VARIED, variantSeed: 1 }).ctx));
+    expect(said(c.lines[0])).toBe("ask.card.improving.window(count=3,from=80,to=90)");
+    expect(text(c)).not.toMatch(/140|99%/);
+    expect(english(c.lines[c.lines.length - 1])).toBe("I left out 1 Take played on another version of this Exercise.");
   });
 
   it("none earned one: says none", () => {
@@ -320,6 +399,24 @@ describe("what the score is made of", () => {
     expect(card(scoreMadeOf({ ...ctx, exercise: stamina })).lines.map(said)).toContain("ask.card.made.check.hold(bar=75,over=4)");
   });
 
+  it("a check with no words is still counted in the intro, and said as one (int1b)", () => {
+    const { ctx } = fixture({});
+    const rests: Exercise = {
+      ...TUNE,
+      notGraded: [...TUNE.notGraded.filter((n) => n !== "notesWritten"), "notesWritten"],
+      passBars: [{ metric: "timingEvenness", min: 0.85, overBars: 4 }, { metric: "restsKept", min: 0.9, overBars: 4 } as unknown as Exercise["passBars"][number]],
+    };
+    const c = card(scoreMadeOf({ ...ctx, exercise: rests }));
+    expect(c.lines.map(said).slice(0, 3)).toEqual(["ask.card.made.intro(count=2)", "ask.card.made.check.even(bar=85,over=4)", "ask.card.made.unnamed(count=1)"]);
+    expect(english(c.lines[2])).toBe("1 of them is a check I can't describe yet.");
+  });
+
+  it("the clean-tempo sentence says a Take must pass, and moves it only when faster (int1b)", () => {
+    const { ctx } = fixture({});
+    const l = card(scoreMadeOf(ctx)).lines.find((x) => x.key === "ask.card.made.clean")!;
+    expect(english(l)).toBe("A Take that passes, with 8 clean bars in a row, earns a clean tempo at its own tempo, and moves your clean tempo up when it is faster.");
+  });
+
   it("no tempo it is passed at: no tempo line", () => {
     const { ctx } = fixture({});
     const open: Exercise = { ...TUNE, tempo: { ...TUNE.tempo, passAtBpm: null } };
@@ -339,7 +436,7 @@ describe("how far the pass mark is", () => {
     const { ctx, exercise } = fixture({ failOn: "timingEvenness", slipped: [0, 4] });
     const c = card(passMarkDistance(ctx));
     const got = c.lines.map(said);
-    expect(got[0]).toBe("ask.card.distance.short.even(take=2,value=79,bar=85,over=4,gap=6)");
+    expect(got[0]).toBe("ask.card.distance.short.even(take=2,value=79,bar=85,over=4,count=6)");
     expect(got).toContain("ask.card.distance.met.heard(take=2,value=100,bar=95,over=4)");
     expect(got).toContain("ask.card.distance.met.extras(take=2,value=0,bar=2,over=4)");
     expect(got[got.length - 1]).toBe(`ask.card.distance.tempo(take=2,bpm=90,passAt=${exercise.tempo.passAtBpm})`);
@@ -353,11 +450,32 @@ describe("how far the pass mark is", () => {
     expect(keys(card(passMarkDistance({ ...ctx, exercise: easy })))).not.toContain("distance.tempo");
   });
 
-  it("short by less than the rounding shows: '< 1', never '0 points short'", () => {
+  it("short by less than the rounding shows: 'less than a point short', never '85%, < 1 points short of 85%' (int1b)", () => {
     const f = fixture({ failOn: "timingEvenness", slipped: [0, 4] });
     const checks = f.outcome.grade.checks.map((c) => (c.metric === "timingEvenness" ? { ...c, value: 0.846, met: false } : c));
     const ctx = { ...f.ctx, lastTake: { ...f.outcome, grade: { ...f.outcome.grade, checks } } };
-    expect(said(card(passMarkDistance(ctx)).lines[0])).toBe("ask.card.distance.short.even(take=2,value=85,bar=85,over=4,gap=< 1)");
+    const c = card(passMarkDistance(ctx));
+    expect(said(c.lines[0])).toBe("ask.card.distance.under.even(take=2,bar=85)");
+    expect(english(c.lines[0])).toBe("Even in Take 2: less than a point short of the pass mark of 85%.");
+  });
+
+  it("short by one point: '1 point', never '1 points' (int1b)", () => {
+    const f = fixture({ failOn: "timingEvenness", slipped: [0, 4] });
+    const checks = f.outcome.grade.checks.map((c) => (c.metric === "timingEvenness" ? { ...c, value: 0.84, met: false } : c));
+    const ctx = { ...f.ctx, lastTake: { ...f.outcome, grade: { ...f.outcome.grade, checks } } };
+    expect(english(card(passMarkDistance(ctx)).lines[0])).toBe("Even: 84% in Take 2, 1 point short of the pass mark of 85%.");
+  });
+
+  it("a check the cards have no words for is counted and said, never skipped (int1b)", () => {
+    const f = fixture({});
+    const checks = [...f.outcome.grade.checks, { metric: "restsKept", value: 0.5, min: 0.9, met: false } as unknown as (typeof f.outcome.grade.checks)[number]];
+    const ctx = { ...f.ctx, lastTake: { ...f.outcome, grade: { ...f.outcome.grade, checks } } };
+    const c = card(passMarkDistance(ctx));
+    expect(c.lines.map(said)).toContain("ask.card.distance.unnamed(take=2,count=1)");
+    // Only unnamed checks: never "I didn't measure any check".
+    const only = { ...f.ctx, lastTake: { ...f.outcome, grade: { ...f.outcome.grade, checks: [checks[checks.length - 1]] } } };
+    expect(keys(card(passMarkDistance(only)))).not.toContain("distance.none");
+    expect(keys(card(passMarkDistance(only)))).toContain("distance.unnamed");
   });
 
   it("extra notes over the ceiling: how many more than it allows", () => {

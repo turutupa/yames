@@ -552,6 +552,48 @@ function pathIdOf(ctx: CoachContext, outcome: TakeOutcome): string | null {
   return ctx.path?.id ?? storedRow(ctx, outcome)?.pathId ?? null;
 }
 
+/**
+ * Which of the Exercise's variants a seed plays, as `withVariant` picks it (the
+ * seed modulo the variant count); null: the Exercise as written, or one with no
+ * variants. `takesOf` keeps one id for every variant, so the history cards
+ * compare a Take only with Takes on the same notes (review c2b1b, item 1).
+ */
+function variantIndex(exercise: Exercise, seed: number | null | undefined): number | null {
+  const n = exercise.variation?.variants?.length ?? 0;
+  if (n === 0 || seed === null || seed === undefined) return null;
+  return ((seed % n) + n) % n;
+}
+
+/**
+ * The stored Takes of the last Take's Exercise that the history cards may read,
+ * newest first: on the same variant as it (`variantIndex`), with how many of the
+ * measured ones were on another variant (each card says it left those out).
+ * Null: no Path to read a history from.
+ */
+function historyOf(ctx: CoachContext, outcome: TakeOutcome): { rows: PathTakeRow[]; otherNotes: PathTakeRow[] } | null {
+  const pathId = pathIdOf(ctx, outcome);
+  const base = ctx.exercise;
+  if (!pathId || !base) return null;
+  const mine = variantIndex(base, seedOfTake(ctx, outcome));
+  const rows: PathTakeRow[] = [];
+  const otherNotes: PathTakeRow[] = [];
+  for (const row of takesOf(ctx.progress, pathId, outcome.exerciseId)) {
+    if (variantIndex(base, row.variantSeed) === mine) rows.push(row);
+    else otherNotes.push(row);
+  }
+  return { rows, otherNotes };
+}
+
+/** The "I left out N Takes played on another version of this Exercise" line, when there were any. */
+function otherNotesLine(count: number): Line[] {
+  return count > 0 ? [line("ask.card.history.otherNotes", { count })] : [];
+}
+
+/** The card's answer when the Take has no Path to read its history from: it is not saved yet. */
+function notSavedYet(outcome: TakeOutcome): NoCard {
+  return { line: line("ask.card.notNow.notSaved", { take: outcome.takeNumber }) };
+}
+
 /** What a check is called in a card, as a literal key suffix; null: a metric the cards have no words for. */
 type CheckKind = "even" | "heard" | "extras" | "accents" | "notes" | "hold";
 
@@ -590,6 +632,14 @@ const SHORT_KEY: Readonly<Record<CheckKind, string>> = {
   accents: "ask.card.distance.short.accents",
   notes: "ask.card.distance.short.notes",
   hold: "ask.card.distance.short.hold",
+};
+/** Short by less than one point, as the rounding shows it (extra notes are whole, so never). */
+const UNDER_KEY: Readonly<Record<Exclude<CheckKind, "extras">, string>> = {
+  even: "ask.card.distance.under.even",
+  heard: "ask.card.distance.under.heard",
+  accents: "ask.card.distance.under.accents",
+  notes: "ask.card.distance.under.notes",
+  hold: "ask.card.distance.under.hold",
 };
 const MET_KEY: Readonly<Record<CheckKind, string>> = {
   even: "ask.card.distance.met.even",
@@ -637,6 +687,11 @@ function overBarsOf(exercise: Exercise, metric: string, index: number): number |
   return exercise.passBars.find((b) => b.metric === metric)?.overBars ?? null;
 }
 
+/** The "N of them are checks I can't describe yet" line, when there were any. */
+function unnamedLine(count: number): Line[] {
+  return count > 0 ? [line("ask.card.made.unnamed", { count })] : [];
+}
+
 /** The "I left out N Takes you marked not fair" line, when there were any. */
 function leftOutLine(count: number): Line[] {
   return count > 0 ? [line("ask.card.history.leftOut", { count })] : [];
@@ -667,11 +722,11 @@ export function whatChanged(ctx: CoachContext): FactCard | NoCard {
   if (own && markedNotFair(own)) {
     return { shape, lines: [line("ask.card.changed.thisUnfair", { take })], source: APP };
   }
-  const pathId = pathIdOf(ctx, outcome);
-  if (!pathId) return noTake();
+  const history = historyOf(ctx, outcome);
+  if (!history) return notSavedYet(outcome);
   let leftOut = 0;
   let before: PathTakeRow | null = null;
-  for (const row of takesOf(ctx.progress, pathId, outcome.exerciseId)) {
+  for (const row of history.rows) {
     if (row.id === outcome.takeId || !measuredRow(row)) continue;
     if (markedNotFair(row)) {
       leftOut += 1;
@@ -680,10 +735,19 @@ export function whatChanged(ctx: CoachContext): FactCard | NoCard {
     before = row;
     break;
   }
+  // Takes on another variant passed over on the way to `before` (all of them when there is none).
+  const startedAt = before?.startedAt ?? Number.NEGATIVE_INFINITY;
+  const otherNotes = history.otherNotes.filter((r) => r.id !== outcome.takeId && measuredRow(r) && r.startedAt > startedAt).length;
   if (!before) {
-    // "No measured Take before it" would be false beside Takes left out as not fair: say those were all there is.
-    const first = leftOut > 0 ? line("ask.card.changed.onlyUnfair", { take }) : line("ask.card.changed.first", { take });
-    return { shape, lines: [first, ...leftOutLine(leftOut)], source: APP };
+    // "No measured Take before it" would be false beside Takes left out as not fair, or
+    // played on other notes: say those were all there is.
+    const first =
+      otherNotes > 0
+        ? line("ask.card.changed.noneAlike", { take })
+        : leftOut > 0
+          ? line("ask.card.changed.onlyUnfair", { take })
+          : line("ask.card.changed.first", { take });
+    return { shape, lines: [first, ...leftOutLine(leftOut), ...otherNotesLine(otherNotes)], source: APP };
   }
   const lines: Line[] = [
     before.bpm === outcome.bpm
@@ -713,7 +777,7 @@ export function whatChanged(ctx: CoachContext): FactCard | NoCard {
       { take },
     ),
   );
-  lines.push(...leftOutLine(leftOut));
+  lines.push(...leftOutLine(leftOut), ...otherNotesLine(otherNotes));
   return { shape, lines, source: measured(outcome) };
 }
 
@@ -759,15 +823,17 @@ export function improving(ctx: CoachContext): FactCard | NoCard {
   if (!here) return noTake();
   const { outcome, exercise } = here;
   const shape: CardShape = "improving";
-  const pathId = pathIdOf(ctx, outcome);
-  if (!pathId) return noTake();
-  const measuredRows = takesOf(ctx.progress, pathId, outcome.exerciseId).filter(measuredRow);
+  const history = historyOf(ctx, outcome);
+  if (!history) return notSavedYet(outcome);
+  // One variant's Takes: another key or position is other notes (review c2b1b, item 1).
+  const measuredRows = history.rows.filter(measuredRow);
   const window = measuredRows.filter((r) => !markedNotFair(r));
   const leftOut = measuredRows.length - window.length;
+  const leftOutLines = [...leftOutLine(leftOut), ...otherNotesLine(history.otherNotes.filter(measuredRow).length)];
   if (window.length < IMPROVING_MIN_TAKES) {
     return {
       shape,
-      lines: [line("ask.card.improving.tooFew", { count: window.length, need: IMPROVING_MIN_TAKES }), ...leftOutLine(leftOut)],
+      lines: [line("ask.card.improving.tooFew", { count: window.length, need: IMPROVING_MIN_TAKES }), ...leftOutLines],
       source: APP,
     };
   }
@@ -780,8 +846,10 @@ export function improving(ctx: CoachContext): FactCard | NoCard {
       : line("ask.card.improving.window", { count: window.length, from: oldest.bpm, to: newest.bpm }),
   ];
   const clean = window.map(earnedClean);
-  // A row that cannot say whether it earned one: no count is said rather than a wrong one.
-  if (!clean.includes(null)) {
+  // A row that cannot say whether it earned one: no count is said rather than a
+  // wrong one, and the card says it can't count them (review c2b1b, item 6).
+  if (clean.includes(null)) lines.push(line("ask.card.improving.cleanUnknown"));
+  else {
     const earned = window.filter((_r, i) => clean[i] === true);
     lines.push(
       earned.length === 0
@@ -789,14 +857,32 @@ export function improving(ctx: CoachContext): FactCard | NoCard {
         : line("ask.card.improving.clean", { count: earned.length, bpm: Math.max(...earned.map((r) => r.bpm)) }),
     );
   }
-  const even = window.map((r) => evennessOfRow(r, exercise)).filter((v): v is number => v !== null);
+  // Each figure with its own Take's tempo: two numbers at two tempos are never
+  // read as one change, and "the oldest of those" is never the window's oldest
+  // by mistake (review c2b1b, item 2).
+  const even = window
+    .map((r) => ({ value: evennessOfRow(r, exercise), bpm: r.bpm }))
+    .filter((e): e is { value: number; bpm: number } => e.value !== null);
   if (even.length >= 2) {
-    // `even` keeps the window's order: [0] the newest, the last the oldest.
-    lines.push(line("ask.card.improving.even", { count: even.length, first: even[even.length - 1], last: even[0], best: Math.max(...even) }));
+    // `even` keeps the window's order: [0] the newest, the last the oldest; the best, the newest of its ties.
+    const first = even[even.length - 1];
+    const last = even[0];
+    const best = even.reduce((b, e) => (e.value > b.value ? e : b), even[0]);
+    lines.push(
+      line("ask.card.improving.even", {
+        count: even.length,
+        first: first.value,
+        firstBpm: first.bpm,
+        last: last.value,
+        lastBpm: last.bpm,
+        best: best.value,
+        bestBpm: best.bpm,
+      }),
+    );
   } else {
     lines.push(line("ask.card.improving.evenNone"));
   }
-  lines.push(...leftOutLine(leftOut));
+  lines.push(...leftOutLines);
   return { shape, lines, source: { kind: "measured" } };
 }
 
@@ -825,13 +911,21 @@ export function scoreMadeOf(ctx: CoachContext): FactCard | NoCard {
     return { shape, lines: [line(key)], source };
   }
   const checks: Line[] = [];
+  // A check with no words here (`checkKind` null: rests kept, scale notes, ...) is still a
+  // check: counted and said as one, never dropped from the count (review c2b1b, item 5).
+  let unnamed = 0;
   exercise.passBars.forEach((bar, i) => {
     const kind = namedCheck(bar.metric, exercise);
     const mark = displayBar(bar);
+    if (checkKind(bar.metric) === null || (kind && mark === null)) {
+      unnamed += 1;
+      return;
+    }
     if (!kind || mark === null) return;
     checks.push(line(MADE_KEY[kind], { bar: mark, over: overBarsOf(exercise, bar.metric, i) ?? bar.overBars }));
   });
-  const lines: Line[] = checks.length > 0 ? [line("ask.card.made.intro", { count: checks.length }), ...checks] : [];
+  const total = checks.length + unnamed;
+  const lines: Line[] = total > 0 ? [line("ask.card.made.intro", { count: total }), ...checks, ...unnamedLine(unnamed)] : [];
   lines.push(line("ask.card.made.clean", { need: CLEAN_TEMPO_MIN_BARS }));
   if (exercise.tempo.passAtBpm !== null) lines.push(line("ask.card.made.tempo", { passAt: exercise.tempo.passAtBpm }));
   for (const id of exercise.notGraded) {
@@ -864,7 +958,14 @@ export function passMarkDistance(ctx: CoachContext): FactCard | NoCard {
   const short: Line[] = [];
   const met: Line[] = [];
   let notMeasured = 0;
+  // A check the cards have no words for: counted and said, never skipped, so
+  // no "none measured" line argues with a Take that was measured (review c2b1b, item 5).
+  let unnamed = 0;
   outcome.grade.checks.forEach((c, i) => {
+    if (checkKind(c.metric) === null) {
+      unnamed += 1;
+      return;
+    }
     const kind = namedCheck(c.metric, exercise);
     if (!kind) return;
     const value = displayValue(c);
@@ -876,13 +977,17 @@ export function passMarkDistance(ctx: CoachContext): FactCard | NoCard {
     const over = overBarsOf(exercise, c.metric, i) ?? 0;
     if (c.met) met.push(line(MET_KEY[kind], { take, value, bar: mark, over }));
     else {
-      // Short of it by less than the rounding shows (84.6% against 85%): "< 1", never "0 short".
       const gap = kind === "extras" ? value - mark : mark - value;
-      short.push(line(SHORT_KEY[kind], { take, value, bar: mark, over, gap: gap >= 1 ? gap : "< 1" }));
+      // Short of it by less than the rounding shows (84.6% against 85%): "just under",
+      // never "85%, < 1 points short of 85%" (review c2b1b, item 6). Extra notes are whole.
+      if (kind !== "extras" && gap < 1) short.push(line(UNDER_KEY[kind], { take, bar: mark }));
+      else if (kind === "extras") short.push(line(SHORT_KEY[kind], { take, value, bar: mark, over, gap }));
+      else short.push(line(SHORT_KEY[kind], { take, value, bar: mark, over, count: gap }));
     }
   });
   const lines: Line[] = [...short, ...met];
   if (notMeasured > 0) lines.push(line("ask.card.distance.unmeasured", { take, count: notMeasured }));
+  if (unnamed > 0) lines.push(line("ask.card.distance.unnamed", { take, count: unnamed }));
   const passAt = exercise.tempo.passAtBpm;
   if (passAt !== null && outcome.bpm < passAt) lines.push(line("ask.card.distance.tempo", { take, bpm: outcome.bpm, passAt }));
   if (lines.length === 0) lines.push(line("ask.card.distance.none", { take }));

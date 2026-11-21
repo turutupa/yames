@@ -142,16 +142,20 @@
       },
       "notNow": {
         "noTake": "There's no Take of this Exercise to answer from yet.",
+        "notSaved": "Take {{take}} isn't saved yet, so I can't read the Takes before it.",
         "ungraded": "You're playing without grading, so I didn't measure anything to answer that from."
       },
       "history": {
         "leftOut": "I left out {{count}} Take you marked as not fair.",
-        "leftOut_other": "I left out {{count}} Takes you marked as not fair."
+        "leftOut_other": "I left out {{count}} Takes you marked as not fair.",
+        "otherNotes": "I left out {{count}} Take played on another version of this Exercise.",
+        "otherNotes_other": "I left out {{count}} Takes played on other versions of this Exercise."
       },
       "changed": {
         "first": "I have no measured Take of this Exercise before Take {{take}}, so there is nothing to compare it with.",
         "onlyUnfair": "The only measured Takes of this Exercise before Take {{take}} are ones you marked as not fair, so I don't compare it with them.",
         "thisUnfair": "You marked Take {{take}}'s grade as not fair, so I don't compare it with other Takes.",
+        "noneAlike": "I have no measured Take of this version of the Exercise before Take {{take}} that I can compare it with.",
         "sameTempo": "Take {{take}} and the last measured Take before it were both at {{bpm}} BPM.",
         "tempo": "The last measured Take before Take {{take}} was at {{before}} BPM; Take {{take}} was at {{bpm}} BPM.",
         "metric": {
@@ -180,8 +184,9 @@
         "clean": "{{count}} of them earned a clean tempo, at {{bpm}} BPM.",
         "clean_other": "{{count}} of them earned a clean tempo; the fastest was {{bpm}} BPM.",
         "cleanNone": "None of them earned a clean tempo.",
-        "even": "Evenness, in the {{count}} of them that kept it: {{first}}% in the oldest, {{last}}% in the newest, {{best}}% at best.",
-        "even_other": "Evenness, in the {{count}} of them that kept it: {{first}}% in the oldest, {{last}}% in the newest, {{best}}% at best.",
+        "cleanUnknown": "I can't count the clean tempos they earned: some of them didn't keep whether they earned one.",
+        "even": "Evenness, in the {{count}} of them that kept it: {{first}}% in the oldest of those, at {{firstBpm}} BPM; {{last}}% in the newest of those, at {{lastBpm}} BPM; {{best}}% at best, at {{bestBpm}} BPM.",
+        "even_other": "Evenness, in the {{count}} of them that kept it: {{first}}% in the oldest of those, at {{firstBpm}} BPM; {{last}}% in the newest of those, at {{lastBpm}} BPM; {{best}}% at best, at {{bestBpm}} BPM.",
         "evenNone": "Fewer than two of them kept an evenness figure, so I don't compare it."
       },
       "made": {
@@ -195,7 +200,9 @@
           "notes": "Right notes: at least {{bar}}% of the notes I can pitch are the written ones.",
           "hold": "Evenness held to the end: at least {{bar}}% over the last bars of the stretch judged."
         },
-        "clean": "A Take moves your clean tempo when it has {{need}} clean bars in a row.",
+        "unnamed": "{{count}} of them is a check I can't describe yet.",
+        "unnamed_other": "{{count}} of them are checks I can't describe yet.",
+        "clean": "A Take that passes, with {{need}} clean bars in a row, earns a clean tempo at its own tempo, and moves your clean tempo up when it is faster.",
         "tempo": "A clean Take at {{passAt}} BPM or faster passes the Exercise.",
         "ungraded": {
           "selfChecked": "This Exercise is one you check yourself: the app doesn't grade it, so there is no score to break down.",
@@ -219,13 +226,27 @@
       },
       "distance": {
         "short": {
-          "even": "Even: {{value}}% in Take {{take}}, {{gap}} points short of the pass mark of {{bar}}%.",
-          "heard": "Notes heard: {{value}}% in Take {{take}}, {{gap}} points short of the pass mark of {{bar}}%.",
+          "even": "Even: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
+          "even_other": "Even: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
+          "heard": "Notes heard: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
+          "heard_other": "Notes heard: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
           "extras": "Extra notes: {{value}} in Take {{take}}, {{gap}} more than the pass mark allows ({{bar}} or fewer in {{over}} bars).",
-          "accents": "Accents landed: {{value}}% in Take {{take}}, {{gap}} points short of the pass mark of {{bar}}%.",
-          "notes": "Right notes: {{value}}% in Take {{take}}, {{gap}} points short of the pass mark of {{bar}}%.",
-          "hold": "Evenness held to the end: {{value}}% in Take {{take}}, {{gap}} points short of the pass mark of {{bar}}%."
+          "accents": "Accents landed: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
+          "accents_other": "Accents landed: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
+          "notes": "Right notes: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
+          "notes_other": "Right notes: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%.",
+          "hold": "Evenness held to the end: {{value}}% in Take {{take}}, {{count}} point short of the pass mark of {{bar}}%.",
+          "hold_other": "Evenness held to the end: {{value}}% in Take {{take}}, {{count}} points short of the pass mark of {{bar}}%."
         },
+        "under": {
+          "even": "Even in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
+          "heard": "Notes heard in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
+          "accents": "Accents landed in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
+          "notes": "Right notes in Take {{take}}: less than a point short of the pass mark of {{bar}}%.",
+          "hold": "Evenness held to the end in Take {{take}}: less than a point short of the pass mark of {{bar}}%."
+        },
+        "unnamed": "The pass mark also has {{count}} check I can't describe yet, so I can't say how Take {{take}} did on it.",
+        "unnamed_other": "The pass mark also has {{count}} checks I can't describe yet, so I can't say how Take {{take}} did on them.",
         "met": {
           "even": "Even: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%.",
           "heard": "Notes heard: {{value}}% in Take {{take}}, which meets the pass mark of {{bar}}%.",
