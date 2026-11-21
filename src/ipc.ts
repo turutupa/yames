@@ -1938,6 +1938,15 @@ export async function queryAttempts(query: AttemptQuery): Promise<Attempt[]> {
   return invoke<Attempt[]>("query_attempts", { query });
 }
 
+/**
+ * When each Songs attempt at or after `since` (ms) started, every song at
+ * once, oldest first: only the start of each (the practice reminder's read,
+ * rem2c). Rejects when the store is unavailable, rather than answering empty.
+ */
+export async function listAttemptTimesSince(since: number): Promise<number[]> {
+  return invoke<number[]>("list_attempt_times_since", { since });
+}
+
 // ---------------------------------------------------------------------------
 // The download is caught (W19, `plans/SONGS.md` S0.9)
 //

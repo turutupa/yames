@@ -36,12 +36,15 @@ import {
   loadCoachStored,
   readCards,
   readGoal,
+  readReminder,
   readSuggestions,
   readSuppressed,
+  REMINDER_OFF,
   resetCoachStored,
   saveCardAsked,
   saveCardDismissed,
   saveGoal,
+  saveReminder,
   saveSuggestions,
   saveSuppressed,
   saveUnsuppressed,
@@ -55,7 +58,7 @@ import {
 const DAY = 86_400_000;
 const NOW = Date.UTC(2026, 10, 20, 12);
 const MALFORMED: unknown[] = [undefined, null, 0, 1, true, "", "nonsense", [], [1, 2], {}, { a: 1 }, NaN];
-const READ = { suggestions: "read", cards: "read", goal: "read", suppressed: "read" } as const;
+const READ = { suggestions: "read", cards: "read", goal: "read", suppressed: "read", reminder: "read" } as const;
 
 beforeEach(() => {
   disk.clear();
@@ -182,11 +185,11 @@ describe("the rules of DESIGN 6.6", () => {
   });
 
   it("the states as the store has them: loading until the load, unreadable after a failed read", async () => {
-    expect(coachKeyStates()).toEqual({ suggestions: "loading", cards: "loading", goal: "loading", suppressed: "loading" });
+    expect(coachKeyStates()).toEqual({ suggestions: "loading", cards: "loading", goal: "loading", suppressed: "loading", reminder: "loading" });
     expect(cardMayShow(coachStored(), "weekly", NOW, coachKeyStates())).toBe(false);
     failLoad = "coach.suggestions";
     await loadCoachStored();
-    expect(coachKeyStates()).toEqual({ suggestions: "unreadable", cards: "read", goal: "read", suppressed: "read" });
+    expect(coachKeyStates()).toEqual({ suggestions: "unreadable", cards: "read", goal: "read", suppressed: "read", reminder: "read" });
     // The same object until something changes (a `useSyncExternalStore` snapshot).
     expect(coachKeyStates()).toBe(coachKeyStates());
     expect(cardMayShow(coachStored(), "weekly", NOW, coachKeyStates())).toBe(false);
@@ -222,13 +225,13 @@ describe("the values in memory and the store", () => {
 
   it("a player who never opened the coach: the load reads defaults and writes nothing", async () => {
     const got = await loadCoachStored();
-    expect(got).toEqual({ suggestions: "on", cards: {}, goal: null, suppressed: {} });
+    expect(got).toEqual({ suggestions: "on", cards: {}, goal: null, suppressed: {}, reminder: REMINDER_OFF });
     expect(coachStoredLoaded()).toBe(true);
     expect(saves).toEqual([]);
   });
 
   it("stored nulls read back as no choice, and are not rewritten", async () => {
-    for (const key of ["coach.suggestions", "coach.cards", "coach.goal", "coach.suppressed"]) disk.set(key, null);
+    for (const key of ["coach.suggestions", "coach.cards", "coach.goal", "coach.suppressed", "coach.reminder"]) disk.set(key, null);
     expect(await loadCoachStored()).toEqual(COACH_STORED_DEFAULTS);
     expect(saves).toEqual([]);
   });
@@ -468,7 +471,13 @@ describe("the values in memory and the store", () => {
     disk.set("coach.goal", "Join a band");
     disk.set("coach.suppressed", "x");
     await loadCoachStored();
-    expect(coachKeyStates()).toEqual({ suggestions: "unreadable", cards: "unreadable", goal: "unreadable", suppressed: "unreadable" });
+    expect(coachKeyStates()).toEqual({
+      suggestions: "unreadable",
+      cards: "unreadable",
+      goal: "unreadable",
+      suppressed: "unreadable",
+      reminder: "read",
+    });
     expect(coachGoalKnown()).toBe(false);
     expect(saveGoal("Play in a band", NOW)).toBeNull();
     expect(saveCardDismissed("weekly", NOW)).toBe("notRead");
@@ -561,5 +570,120 @@ describe("the values in memory and the store", () => {
     off();
     saveSuggestions("on");
     expect(heard).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("coach.reminder (leg rem2)", () => {
+  const ALL = [0, 1, 2, 3, 4, 5, 6];
+  const MALFORMED_REMINDERS: unknown[] = [
+    ...MALFORMED,
+    { on: "yes", time: "18:00", days: ALL },
+    { on: true, time: "6pm", days: ALL },
+    { on: true, time: "24:00", days: ALL },
+    { on: true, time: "18:60", days: ALL },
+    { on: true, time: "8:00", days: ALL },
+    { on: true, time: 1800, days: ALL },
+    { on: true, time: "18:00" },
+    { on: true, time: "18:00", days: "weekdays" },
+    { on: true, time: "18:00", days: [7] },
+    { on: true, time: "18:00", days: [-1] },
+    { on: true, time: "18:00", days: [1.5] },
+    { on: true, time: "18:00", days: ["1"] },
+    { time: "18:00", days: ALL },
+  ];
+
+  it.each(MALFORMED_REMINDERS.map((raw) => [JSON.stringify(raw) ?? String(raw), raw]))(
+    "reads %s as off and never throws",
+    (_name, raw) => {
+      expect(readReminder(raw)).toEqual(REMINDER_OFF);
+    },
+  );
+
+  it("off by default: 18:00 and all seven days are what the first On fills", () => {
+    expect(COACH_STORED_DEFAULTS.reminder).toEqual({ on: false, time: "18:00", days: ALL, since: null });
+  });
+
+  it("reads a valid value; repeated days once, in order; a bad `since` as null", () => {
+    expect(readReminder({ on: true, time: "07:30", days: [5, 1, 1], since: NOW })).toEqual({
+      on: true,
+      time: "07:30",
+      days: [1, 5],
+      since: NOW,
+    });
+    expect(readReminder({ on: true, time: "23:59", days: [], since: "x" })).toEqual({
+      on: true,
+      time: "23:59",
+      days: [],
+      since: null,
+    });
+  });
+
+  it("nothing is written at the load, with or without a value", async () => {
+    disk.set("coach.reminder", { on: true, time: "18:00", days: [1], since: NOW });
+    await loadCoachStored();
+    expect(coachStored().reminder).toEqual({ on: true, time: "18:00", days: [1], since: NOW });
+    expect(coachKeyStates().reminder).toBe("read");
+    expect(saves).toEqual([]);
+  });
+
+  it("a value this build does not read is unreadable, reads as off, and is not rewritten at the load", async () => {
+    disk.set("coach.reminder", { on: true, time: "18:00", days: "weekdays", tone: "soft" });
+    await loadCoachStored();
+    expect(coachKeyStates().reminder).toBe("unreadable");
+    expect(coachStored().reminder.on).toBe(false);
+    expect(saves).toEqual([]);
+    // The row's press is the whole value: it saves, keeping the field this build does not know.
+    expect(saveReminder({ on: true, time: "18:00", days: ALL }, NOW)).not.toBeNull();
+    expect(disk.get("coach.reminder")).toEqual({ on: true, time: "18:00", days: ALL, since: NOW, tone: "soft" });
+    expect(coachKeyStates().reminder).toBe("read");
+  });
+
+  it("a failed read is unreadable and reads as off", async () => {
+    failLoad = "coach.reminder";
+    await loadCoachStored();
+    expect(coachKeyStates().reminder).toBe("unreadable");
+    expect(coachStored().reminder).toEqual(REMINDER_OFF);
+  });
+
+  it("is refused before the load: the row waits for it", () => {
+    expect(saveReminder({ on: true, time: "18:00", days: ALL }, NOW)).toBeNull();
+    expect(saves).toEqual([]);
+  });
+
+  it("On dates the press, changes while on keep that date, Off clears it", async () => {
+    await loadCoachStored();
+    expect(saveReminder({ on: true, time: "18:00", days: ALL }, NOW)?.since).toBe(NOW);
+    expect(saveReminder({ on: true, time: "19:15", days: [1, 3] }, NOW + DAY)).toEqual({
+      on: true,
+      time: "19:15",
+      days: [1, 3],
+      since: NOW,
+    });
+    expect(saveReminder({ on: false, time: "19:15", days: [1, 3] }, NOW + 2 * DAY)?.since).toBeNull();
+    // Off keeps the time and days, so the next On comes back to them.
+    expect(disk.get("coach.reminder")).toEqual({ on: false, time: "19:15", days: [1, 3], since: null });
+    expect(saveReminder({ on: true, time: "19:15", days: [1, 3] }, NOW + 3 * DAY)?.since).toBe(NOW + 3 * DAY);
+    expect(await coachPressSettled("reminder")).toBe("saved");
+  });
+
+  it("writes nothing for a press that changes nothing or is not a reminder", async () => {
+    await loadCoachStored();
+    expect(saveReminder({ on: false, time: "18:00", days: ALL }, NOW)).toBeNull();
+    expect(saveReminder({ on: true, time: "25:00", days: ALL }, NOW)).toBeNull();
+    expect(saveReminder({ on: true, time: "18:00", days: [9] }, NOW)).toBeNull();
+    expect(saves).toEqual([]);
+  });
+
+  it("a failed save says notSaved", async () => {
+    await loadCoachStored();
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      failSave = "coach.reminder";
+      saveReminder({ on: true, time: "18:00", days: ALL }, NOW);
+      expect(await coachPressSettled("reminder")).toBe("notSaved");
+      expect(coachStored().reminder.on).toBe(true);
+    } finally {
+      quiet.mockRestore();
+    }
   });
 });

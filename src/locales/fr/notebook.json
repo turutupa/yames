@@ -95,6 +95,22 @@
       "on": "Activées",
       "asked": "Seulement quand je demande",
       "unreadable": "Ton choix n'a pas pu être lu cette fois ; en appuyer sur un l'enregistre."
+    },
+    "reminder": {
+      "label": "Rappel de pratique",
+      "hint": "« Aujourd'hui » le mentionne après cette heure, ces jours-là, si aucune pratique n'a été sauvegardée aujourd'hui. Il n'y a aucune notification.",
+      "off": "Désactivé",
+      "on": "Activé",
+      "time": "Heure",
+      "days": "Jours",
+      "quiet": "« Aujourd'hui » a cessé de le mentionner : trois jours de rappel sont passés sans pratique sauvegardée. Il reprend après ta prochaine pratique sauvegardée.",
+      "noDays": "Aucun jour n'est choisi, donc « Aujourd'hui » ne le mentionne pas.",
+      "unreadable": "Ton rappel n'a pas pu être lu cette fois, donc « Aujourd'hui » ne le mentionne pas ; appuyer sur Désactivé ou Activé l'enregistre.",
+      "line": "Ton rappel : pratique à {{time}}.",
+      "lineGuitar": "Ton rappel : guitare à {{time}}.",
+      "lineBass": "Ton rappel : basse à {{time}}.",
+      "lineDrums": "Ton rappel : batterie à {{time}}.",
+      "linePiano": "Ton rappel : piano à {{time}}."
     }
   }
 }

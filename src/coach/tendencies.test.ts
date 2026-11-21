@@ -12,7 +12,7 @@ import type { TakeFacts } from "../session/progress";
 import { notebookFrom } from "./notebook";
 import { COACH_STORED_DEFAULTS, type CoachKeyState, type CoachKeyStates } from "./store";
 
-const statesAll = (s: CoachKeyState): CoachKeyStates => ({ suggestions: s, cards: s, goal: s, suppressed: s });
+const statesAll = (s: CoachKeyState): CoachKeyStates => ({ suggestions: s, cards: s, goal: s, suppressed: s, reminder: s });
 const READ = statesAll("read");
 import { MIN_SESSIONS, MIN_TAKES, TAKES_WINDOW, tendencies, type NoticedLine } from "./tendencies";
 import { totalsFrom } from "../session/totals";
