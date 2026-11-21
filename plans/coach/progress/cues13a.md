@@ -31,9 +31,47 @@ Note `long-chains.chain-four` can produce `openString`.
 - [x] Step 1: read; dump `/tmp/coach-cues13a/sweep-picking-dump.txt` (75 Exercises, tabs, triggers).
 - [x] Step 2: Beginner and Intermediate Steps 6 to 9 and the warm-ups written; `check`: 0 errors,
   0 `cue.refused`, none of my cues rewritten for a variant (`/tmp/coach-cues13a/gc5.log`).
-- [ ] Step 3: proof-read.
+- [x] Step 3: proof-read (below); `check` after the fixes: 0 errors, 0 refused (`gc6.log`).
 - [ ] Step 4: translations.
 - [ ] Step 5: gates.
+
+## The proof-read (two separate sonnet readers: Beginner; Intermediate Steps 6 to 9 and warm-ups)
+
+32 objections (`/tmp/coach-cues13a/proof-sweep-picking/objections-{a,b}.md`), 31 taken, 1 answered.
+Taken (was -> now): two-string-push heard "Let the pick rest on the second string first." (ambiguous)
+-> "Let each of the two notes sound in turn." · picked-turn stringChange duplicated heard -> "Turn at
+each end without a pause." · minor-mid general (two ideas) -> "Use one finger per note, no rolling." ·
+minor-high general "or slide" (two options) -> "Reach the little finger to fret 17." ·
+sweep-then-scale / lick-to-bend lastBars "Hold ... its full two beats" (length is not measured, and
+duplicated afterHeld) -> "Land the last A right on beat one." / "Land the bend's note right on beat
+one." · lick-to-bend stringChange "the pull-off" (two in the tab) -> "after the second pull-off" ·
+triad-pair late/early "its beat" -> "Pull off to fret 10 on beats two and four." / "Wait for beats two
+and four to pull off." · minor-inversions general duplicated shift -> "Know where the next shape sits
+before you go."; lastBars "the fret-8 shape ... the first" (ambiguous) -> "Keep the last shape as even
+as the first." · major-inversions general "Say E, G, C" (not hands or count; four shapes) -> "Start
+each new shape on its lowest note." · dm-inversions heard "At fret 10, press only the string being
+picked." (read as ringing strings; fret 10 is also a slide target) -> the stock heard cue ·
+band-three general duplicated late -> "Play two loops of each chord with the band."; early "the
+band's beat" against "the click" elsewhere -> the stock early cue · minor-cadence shift "a fret or
+two" (Dm to E moves three on the B string) -> "Keep each shape close to the last one." · first-etude
+general duplicated afterHeld -> "Play two loops of each shape, then the long A." · am-four, g-four,
+am-e-shape heard "Press fret N only on the string being picked" duplicated the general's roll -> the
+stock heard cue · c-five heard "the D string after the slide" (the note after it is fret 15 on the
+A string) -> "Slide all the way to fret 15 and press." · g-five general duplicated early ("the rest")
+-> "Turn at the bottom with the pick alone." · em-five shift duplicated the general -> "Land the hand
+at fret 12 as the slide ends." · tap-octave general (three actions) -> "Pull off to fret 12 right
+after the tap." · a-and-e shift "as each chord starts" contradicted lastBars (move in the rest) ->
+"Move the index two frets between the chords." · am-two-shapes shift duplicated the general -> "Jump
+back down on the last note."; its lastBars then duplicated that -> "Keep the fret-12 loop as even as
+the first." · am-dm shift "Look at the new fret" (no rest, not hands) -> the stock shift cue ·
+am-f-c-g lastBars duplicated the general -> "Be back on fret 12 as the loop starts again." ·
+turn-in-the-middle general "Sing the top note" (not hands or count) -> "Start each new shape right on
+beat one." · the two first warm-ups' lastBars duplicated heard -> "Keep the end as even as the start."
+
+Answered, not changed:
+- *big-round heard "Sound every note of the sweep, one by one." overlaps its general "Keep every note
+  separate, however easy."*: the general is the warm-up's how-to (tempo), heard is the order at a
+  missed note; the reader called it weak, not wrong. Kept.
 
 ## For cues13b (read before writing)
 

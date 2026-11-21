@@ -67,7 +67,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
   // Step 1: triads
   "triads.two-string-push": [
     g("Push through both strings in one motion.", 0),
-    c("heard", "Let the pick rest on the second string first.", 0),
+    c("heard", "Let each of the two notes sound in turn.", 0),
     c("extras", "Keep the third triplet silent every time.", 2),
     c("late", "Put the first of the two notes on the click."),
     c("early", "Wait for the click before each push and pull."),
@@ -81,7 +81,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("early", SWEEP_EARLY),
     c("stringChange", OWN_MOMENT),
     c("shift", "Move only the fingers whose notes change.", 1),
-    c("lastBars", "Keep the last sweeps as even as the first."),
+    c("lastBars", SEPARATE_TO_END),
   ],
   "triads.four-chords-rock": [
     g("Move the fingers during each bar's last note.", 0),
@@ -99,7 +99,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("extras", TOP_THREE),
     c("late", "Put fret 14 on the G string on each click."),
     c("early", "Wait for the click before each fret 14."),
-    c("stringChange", "Make each turn as small as the sweep."),
+    c("stringChange", "Turn at each end without a pause."),
   ],
 
   // Step 2: turnaround
@@ -112,7 +112,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("stringChange", "Turn at the G string without a pause.", 0),
   ],
   "turnaround.minor-mid": [
-    g("One finger per note; the little finger hammers.", 0),
+    g("Use one finger per note, no rolling.", 0),
     c("heard", EACH_ARRIVES),
     c("extras", TOP_THREE),
     c("late", TOP_HAMMER),
@@ -120,7 +120,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("stringChange", OWN_MOMENT),
   ],
   "turnaround.minor-high": [
-    g("Reach the little finger to fret 17, or slide.", 0),
+    g("Reach the little finger to fret 17.", 0),
     c("heard", EACH_ARRIVES),
     c("extras", TOP_THREE),
     c("late", TOP_HAMMER),
@@ -137,7 +137,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("early", "Wait for beat two before the hammer."),
     c("afterHeld", "Count the held A and both rests, then go."),
     c("stringChange", "Pick the B string as the last pull-off ends.", 0),
-    c("lastBars", "Hold the last A its full two beats."),
+    c("lastBars", "Land the last A right on beat one."),
   ],
   "phrases.lick-to-bend": [
     g("Roll the index across fret 5, one string each.", 0),
@@ -146,32 +146,32 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("late", "Put the hammer to fret 8 right on beat two."),
     c("early", "Wait for beat two before the hammer."),
     c("afterHeld", "Count the bend's two beats and the rests."),
-    c("stringChange", "Pick the G string right after the pull-off."),
-    c("lastBars", "Hold the bend for its full two beats.", 1),
+    c("stringChange", "Pick the G string after the second pull-off."),
+    c("lastBars", "Land the bend's note right on beat one.", 1),
   ],
   "phrases.triad-pair": [
     g("One shape up, the other down, one per beat.", 0),
     c("heard", EACH_ARRIVES),
     c("extras", TOP_THREE),
-    c("late", "Put the pull-off to 10 right on its beat."),
-    c("early", "Wait for its beat before the pull-off to 10."),
+    c("late", "Pull off to fret 10 on beats two and four."),
+    c("early", "Wait for beats two and four to pull off."),
     c("stringChange", OWN_MOMENT),
   ],
   "phrases.pickup-sweep": [g("Aim the sextuplet at the next downbeat.", 1)],
 
   // Step 4: qualities
   "qualities.minor-inversions": [
-    g("Be on the new shape before each bar starts.", 0),
+    g("Know where the next shape sits before you go.", 0),
     c("heard", EACH_ARRIVES),
     c("extras", TOP_THREE),
     c("late", NEW_SHAPE_LATE),
     c("early", SWEEP_EARLY),
     c("shift", MOVE_ON_LAST),
     c("stringChange", OWN_MOMENT),
-    c("lastBars", "Keep the fret-8 shape as even as the first."),
+    c("lastBars", "Keep the last shape as even as the first."),
   ],
   "qualities.major-inversions": [
-    g("Say E, G, C as each new shape starts.", 0),
+    g("Start each new shape on its lowest note.", 0),
     c("heard", EACH_ARRIVES),
     c("extras", TOP_THREE),
     c("late", NEW_SHAPE_LATE),
@@ -182,7 +182,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
   ],
   "qualities.dm-inversions": [
     g("Play two loops of each shape, then move.", 0),
-    c("heard", "At fret 10, press only the string being picked.", 0),
+    c("heard", EACH_ARRIVES),
     c("extras", TOP_THREE),
     c("late", NEW_SHAPE_LATE),
     c("early", SWEEP_EARLY),
@@ -193,11 +193,11 @@ export const SWEEP_PICKING_CUES: CueBook = {
 
   // Step 5: first-solo
   "first-solo.band-three": [
-    g("Land each chord's first note with the band.", 0),
+    g("Play two loops of each chord with the band.", 0),
     c("heard", EACH_ARRIVES),
     c("extras", TOP_THREE),
     c("late", NEW_SHAPE_LATE),
-    c("early", "Wait for the band's beat before each sweep."),
+    c("early", SWEEP_EARLY),
     c("shift", MOVE_ON_LAST),
     c("stringChange", OWN_MOMENT),
     c("lastBars", LAST_AS_FIRST),
@@ -208,12 +208,12 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("extras", TOP_THREE),
     c("late", NEW_SHAPE_LATE),
     c("early", SWEEP_EARLY),
-    c("shift", "Reach for the nearest shape, a fret or two.", 0),
+    c("shift", "Keep each shape close to the last one.", 0),
     c("stringChange", OWN_MOMENT),
     c("lastBars", "Land the last A minor right on the click."),
   ],
   "first-solo.first-etude": [
-    g("Give the held high A its full three beats.", 1),
+    g("Play two loops of each shape, then the long A.", 0),
     c("heard", "Hammer the high A firmly and let it ring.", 0),
     c("extras", TOP_THREE),
     c("late", NEW_SHAPE_LATE),
@@ -237,7 +237,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
   ],
   "four-strings.am-four": [
     g("Roll fret 14 from the D string to the G.", 0),
-    c("heard", "Press fret 14 only on the string being picked.", 0),
+    c("heard", EACH_ARRIVES),
     c("extras", FOUR_ONLY),
     c("late", TOP_HAMMER),
     c("early", TURN_EARLY),
@@ -245,7 +245,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
   ],
   "four-strings.g-four": [
     g("Roll fret 12 over three strings, one by one.", 0),
-    c("heard", "Press fret 12 only on the string being picked.", 0),
+    c("heard", EACH_ARRIVES),
     c("extras", FOUR_ONLY),
     c("late", TOP_HAMMER),
     c("early", TURN_EARLY),
@@ -273,7 +273,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
   ],
   "five-strings.c-five": [
     g("Slide the little finger from fret 10 to 15.", 0),
-    c("heard", "Pick the D string firmly after the slide."),
+    c("heard", "Slide all the way to fret 15 and press.", 0),
     c("extras", FIVE_ONLY),
     c("late", "Put the slide's start right on the click."),
     c("early", TOP_THREE_EARLY),
@@ -281,7 +281,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("stringChange", OWN_MOMENT),
   ],
   "five-strings.g-five": [
-    g("Use the two-note rest to reset the hand.", 0),
+    g("Turn at the bottom with the pick alone.", 0),
     c("heard", EACH_ARRIVES),
     c("extras", FIVE_ONLY),
     c("late", LOOP_A_LATE),
@@ -294,14 +294,14 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("extras", FIVE_ONLY),
     c("late", LOOP_A_LATE),
     c("early", "Wait for beat three to arrive at fret 12."),
-    c("shift", "Move the hand with the slide to fret 12.", 0),
+    c("shift", "Land the hand at fret 12 as the slide ends.", 0),
     c("stringChange", OWN_MOMENT),
   ],
 
   // Step 8: five-e-shape
   "five-e-shape.am-e-shape": [
     g("Roll fret 5 so one note sounds at a time.", 0),
-    c("heard", "Press fret 5 only on the string being picked.", 0),
+    c("heard", EACH_ARRIVES),
     c("extras", FIVE_ONLY),
     c("late", LOOP_A_LATE),
     c("early", REST_EARLY),
@@ -316,7 +316,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("stringChange", OWN_MOMENT),
   ],
   "five-e-shape.tap-octave": [
-    g("Tap 17, pull off to 12, sweep back down.", 0),
+    g("Pull off to fret 12 right after the tap.", 0),
     c("heard", "Tap fret 17 firmly enough to hear it."),
     c("extras", FIVE_ONLY),
     c("late", TAP_LATE),
@@ -337,7 +337,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("extras", FIVE_ONLY),
     c("late", NEW_SHAPE_LATE),
     c("early", SWEEP_EARLY),
-    c("shift", "Move the index two frets as each chord starts."),
+    c("shift", "Move the index two frets between the chords."),
     c("stringChange", OWN_MOMENT),
     c("lastBars", "Use the rest to get back to fret 12.", 0),
   ],
@@ -349,9 +349,9 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("extras", FIVE_ONLY),
     c("late", NEW_SHAPE_LATE),
     c("early", SWEEP_EARLY),
-    c("shift", "Jump up during the rest, back on the last note.", 0),
+    c("shift", "Jump back down on the last note.", 0),
     c("stringChange", OWN_MOMENT),
-    c("lastBars", "Head back down to fret 5 from the last note."),
+    c("lastBars", "Keep the fret-12 loop as even as the first."),
   ],
   "moving-shapes.am-dm": [
     g("Make the seven-fret move in one throw.", 0),
@@ -359,7 +359,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("extras", FIVE_ONLY),
     c("late", NEW_SHAPE_LATE),
     c("early", SWEEP_EARLY),
-    c("shift", "Look at the new fret before you move."),
+    c("shift", MOVE_ON_LAST),
     c("stringChange", OWN_MOMENT),
     c("lastBars", "Slide the top note from fret 5 to 10 and back.", 0),
   ],
@@ -371,10 +371,10 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("early", SWEEP_EARLY),
     c("shift", "Move in the rest, or on the last note.", 0),
     c("stringChange", OWN_MOMENT),
-    c("lastBars", "Use the G's rest to get back to A minor."),
+    c("lastBars", "Be back on fret 12 as the loop starts again."),
   ],
   "moving-shapes.turn-in-the-middle": [
-    g("Sing the top note of each shape as you go.", 0),
+    g("Start each new shape right on beat one."),
     c("heard", EACH_ARRIVES),
     c("extras", FOUR_ONLY),
     c("late", TOP_HAMMER),
@@ -392,7 +392,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("early", SWEEP_EARLY),
     c("shift", MOVE_AT_START, 1),
     c("stringChange", OWN_MOMENT),
-    c("lastBars", SEPARATE_TO_END),
+    c("lastBars", END_AS_START),
   ],
   "warmup-intermediate.progression-of-the-day": [
     g("Keep your place by ear, not by counting.", 1),
@@ -401,7 +401,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("early", SWEEP_EARLY),
     c("shift", MOVE_AT_START),
     c("stringChange", OWN_MOMENT),
-    c("lastBars", SEPARATE_TO_END),
+    c("lastBars", END_AS_START),
   ],
   "warmup-advanced.big-round": [
     g("Keep every note separate, however easy.", 1),

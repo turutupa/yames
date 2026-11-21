@@ -62,7 +62,7 @@
           "coachLine": "Timing only: I time the notes and say if one went missing or rang on as an extra. Whether it was one push or two strokes is yours to keep honest.",
           "cues": [
             {"when":"even","say":"Push through both strings in one motion.","more":0,"general":true},
-            {"when":"heard","say":"Let the pick rest on the second string first.","more":0},
+            {"when":"heard","say":"Let each of the two notes sound in turn.","more":0},
             {"when":"extras","say":"Keep the third triplet silent every time.","more":2},
             {"when":"late","say":"Put the first of the two notes on the click."},
             {"when":"early","say":"Wait for the click before each push and pull."},
@@ -334,7 +334,7 @@
             {"when":"early","say":"Wait for the click before each sweep."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
             {"when":"shift","say":"Move only the fingers whose notes change.","more":1},
-            {"when":"lastBars","say":"Keep the last sweeps as even as the first."}
+            {"when":"lastBars","say":"Keep every note separate right to the end."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -1306,7 +1306,7 @@
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Put fret 14 on the G string on each click."},
             {"when":"early","say":"Wait for the click before each fret 14."},
-            {"when":"stringChange","say":"Make each turn as small as the sweep."}
+            {"when":"stringChange","say":"Turn at each end without a pause."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -1559,7 +1559,7 @@
           ],
           "coachLine": "Same bar as the last one. If it slips, the stretch is the place to look.",
           "cues": [
-            {"when":"even","say":"One finger per note; the little finger hammers.","more":0,"general":true},
+            {"when":"even","say":"Use one finger per note, no rolling.","more":0,"general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Hammer the top note on beats two and four."},
@@ -1677,7 +1677,7 @@
           ],
           "coachLine": "A clean turn on this shape is a real milestone. Check it on a recording too.",
           "cues": [
-            {"when":"even","say":"Reach the little finger to fret 17, or slide.","more":0,"general":true},
+            {"when":"even","say":"Reach the little finger to fret 17.","more":0,"general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Hammer the top note on beats two and four."},
@@ -1821,7 +1821,7 @@
             {"when":"early","say":"Wait for beat two before the hammer."},
             {"when":"afterHeld","say":"Count the held A and both rests, then go."},
             {"when":"stringChange","say":"Pick the B string as the last pull-off ends.","more":0},
-            {"when":"lastBars","say":"Hold the last A its full two beats."}
+            {"when":"lastBars","say":"Land the last A right on beat one."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -1947,8 +1947,8 @@
             {"when":"late","say":"Put the hammer to fret 8 right on beat two."},
             {"when":"early","say":"Wait for beat two before the hammer."},
             {"when":"afterHeld","say":"Count the bend's two beats and the rests."},
-            {"when":"stringChange","say":"Pick the G string right after the pull-off."},
-            {"when":"lastBars","say":"Hold the bend for its full two beats.","more":1}
+            {"when":"stringChange","say":"Pick the G string after the second pull-off."},
+            {"when":"lastBars","say":"Land the bend's note right on beat one.","more":1}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -2073,8 +2073,8 @@
             {"when":"even","say":"One shape up, the other down, one per beat.","more":0,"general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
-            {"when":"late","say":"Put the pull-off to 10 right on its beat."},
-            {"when":"early","say":"Wait for its beat before the pull-off to 10."},
+            {"when":"late","say":"Pull off to fret 10 on beats two and four."},
+            {"when":"early","say":"Wait for beats two and four to pull off."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."}
           ],
           "grading": "graded",
@@ -2314,14 +2314,14 @@
           ],
           "coachLine": "A shift is where notes go missing. If they do, look at the bar lines first.",
           "cues": [
-            {"when":"even","say":"Be on the new shape before each bar starts.","more":0,"general":true},
+            {"when":"even","say":"Know where the next shape sits before you go.","more":0,"general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
             {"when":"shift","say":"Move to the next shape on each bar's last note."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
-            {"when":"lastBars","say":"Keep the fret-8 shape as even as the first."}
+            {"when":"lastBars","say":"Keep the last shape as even as the first."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -2470,7 +2470,7 @@
           ],
           "coachLine": "When this is as even as the minor one, the qualities are yours.",
           "cues": [
-            {"when":"even","say":"Say E, G, C as each new shape starts.","more":0,"general":true},
+            {"when":"even","say":"Start each new shape on its lowest note.","more":0,"general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
@@ -2627,7 +2627,7 @@
           "coachLine": "A shift is where notes go missing. If one does, I'll count it, and the bar line is where to look.",
           "cues": [
             {"when":"even","say":"Play two loops of each shape, then move.","more":0,"general":true},
-            {"when":"heard","say":"At fret 10, press only the string being picked.","more":0},
+            {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
@@ -2799,11 +2799,11 @@
           ],
           "coachLine": "Band in the room, so use direct input if you want these numbers to mean something.",
           "cues": [
-            {"when":"even","say":"Land each chord's first note with the band.","more":0,"general":true},
+            {"when":"even","say":"Play two loops of each chord with the band.","more":0,"general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
-            {"when":"early","say":"Wait for the band's beat before each sweep."},
+            {"when":"early","say":"Wait for the click before each sweep."},
             {"when":"shift","say":"Move to the next shape on each bar's last note."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
             {"when":"lastBars","say":"Keep the last chord as even as the first."}
@@ -2964,7 +2964,7 @@
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
-            {"when":"shift","say":"Reach for the nearest shape, a fret or two.","more":0},
+            {"when":"shift","say":"Keep each shape close to the last one.","more":0},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
             {"when":"lastBars","say":"Land the last A minor right on the click."}
           ],
@@ -3119,7 +3119,7 @@
           ],
           "coachLine": "I report the timing of the sweeps and whether the held note arrived. How it sings is up to you.",
           "cues": [
-            {"when":"even","say":"Give the held high A its full three beats.","more":1,"general":true},
+            {"when":"even","say":"Play two loops of each shape, then the long A.","more":0,"general":true},
             {"when":"heard","say":"Hammer the high A firmly and let it ring.","more":0},
             {"when":"extras","say":"Keep the pick on the top three strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
@@ -3414,7 +3414,7 @@
           "coachLine": "This shape tends to ring on the G and D strings. A recording shows it better than I can.",
           "cues": [
             {"when":"even","say":"Roll fret 14 from the D string to the G.","more":0,"general":true},
-            {"when":"heard","say":"Press fret 14 only on the string being picked.","more":0},
+            {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top four strings only."},
             {"when":"late","say":"Hammer the top note on beats two and four."},
             {"when":"early","say":"Wait for the top note's beat before the hammer."},
@@ -3536,7 +3536,7 @@
           "coachLine": "If a stuck finger lets two notes ring together, I may not catch it. A recording will.",
           "cues": [
             {"when":"even","say":"Roll fret 12 over three strings, one by one.","more":0,"general":true},
-            {"when":"heard","say":"Press fret 12 only on the string being picked.","more":0},
+            {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top four strings only."},
             {"when":"late","say":"Hammer the top note on beats two and four."},
             {"when":"early","say":"Wait for the top note's beat before the hammer."},
@@ -3966,7 +3966,7 @@
           "coachLine": "The same bar as Am. Compare the takes.",
           "cues": [
             {"when":"even","say":"Slide the little finger from fret 10 to 15.","more":0,"general":true},
-            {"when":"heard","say":"Pick the D string firmly after the slide."},
+            {"when":"heard","say":"Slide all the way to fret 15 and press.","more":0},
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Put the slide's start right on the click."},
             {"when":"early","say":"Wait for beat three before the top hammer."},
@@ -4085,7 +4085,7 @@
           ],
           "coachLine": "A rest at the end of each loop makes these notes easier to tell apart too.",
           "cues": [
-            {"when":"even","say":"Use the two-note rest to reset the hand.","more":0,"general":true},
+            {"when":"even","say":"Turn at the bottom with the pick alone.","more":0,"general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Start each loop on the A string on the click."},
@@ -4210,7 +4210,7 @@
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Start each loop on the A string on the click."},
             {"when":"early","say":"Wait for beat three to arrive at fret 12."},
-            {"when":"shift","say":"Move the hand with the slide to fret 12.","more":0},
+            {"when":"shift","say":"Land the hand at fret 12 as the slide ends.","more":0},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."}
           ],
           "grading": "graded",
@@ -4344,7 +4344,7 @@
           "coachLine": "Up to the graded rungs I report evenness and notes heard. The rest at the bottom is where you listen for a ringing string.",
           "cues": [
             {"when":"even","say":"Roll fret 5 so one note sounds at a time.","more":0,"general":true},
-            {"when":"heard","say":"Press fret 5 only on the string being picked.","more":0},
+            {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Start each loop on the A string on the click."},
             {"when":"early","say":"Wait out the rest before the next loop."},
@@ -4583,7 +4583,7 @@
           ],
           "coachLine": "The tap counts as a note that has to be heard, so tap firmly. The pull-off after it costs nothing if I miss it.",
           "cues": [
-            {"when":"even","say":"Tap 17, pull off to 12, sweep back down.","more":0,"general":true},
+            {"when":"even","say":"Pull off to fret 12 right after the tap.","more":0,"general":true},
             {"when":"heard","say":"Tap fret 17 firmly enough to hear it."},
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Put the tap right on beat three."},
@@ -4826,7 +4826,7 @@
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
-            {"when":"shift","say":"Move the index two frets as each chord starts."},
+            {"when":"shift","say":"Move the index two frets between the chords."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
             {"when":"lastBars","say":"Use the rest to get back to fret 12.","more":0}
           ],
@@ -4976,9 +4976,9 @@
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
-            {"when":"shift","say":"Jump up during the rest, back on the last note.","more":0},
+            {"when":"shift","say":"Jump back down on the last note.","more":0},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
-            {"when":"lastBars","say":"Head back down to fret 5 from the last note."}
+            {"when":"lastBars","say":"Keep the fret-12 loop as even as the first."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -5109,7 +5109,7 @@
             {"when":"extras","say":"Keep the pick on the top five strings only."},
             {"when":"late","say":"Land each new shape's first note on the click."},
             {"when":"early","say":"Wait for the click before each sweep."},
-            {"when":"shift","say":"Look at the new fret before you move."},
+            {"when":"shift","say":"Move to the next shape on each bar's last note."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
             {"when":"lastBars","say":"Slide the top note from fret 5 to 10 and back.","more":0}
           ],
@@ -5242,7 +5242,7 @@
             {"when":"early","say":"Wait for the click before each sweep."},
             {"when":"shift","say":"Move in the rest, or on the last note.","more":0},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
-            {"when":"lastBars","say":"Use the G's rest to get back to A minor."}
+            {"when":"lastBars","say":"Be back on fret 12 as the loop starts again."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -5391,7 +5391,7 @@
           ],
           "coachLine": "At these speeds the app grades only the slow rungs. Your ear has to decide about the fast ones.",
           "cues": [
-            {"when":"even","say":"Sing the top note of each shape as you go.","more":0,"general":true},
+            {"when":"even","say":"Start each new shape right on beat one.","general":true},
             {"when":"heard","say":"Press each note fully as the pick gets there."},
             {"when":"extras","say":"Keep the pick on the top four strings only."},
             {"when":"late","say":"Hammer the top note on beats two and four."},
@@ -26480,7 +26480,7 @@
             {"when":"early","say":"Wait for the click before each sweep."},
             {"when":"shift","say":"Be in place before each bar starts.","more":1},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
-            {"when":"lastBars","say":"Keep every note separate right to the end."}
+            {"when":"lastBars","say":"Keep the end as even as the start."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -27508,7 +27508,7 @@
             {"when":"early","say":"Wait for the click before each sweep."},
             {"when":"shift","say":"Be in place before each bar starts."},
             {"when":"stringChange","say":"Slow the hand so each string gets its moment."},
-            {"when":"lastBars","say":"Keep every note separate right to the end."}
+            {"when":"lastBars","say":"Keep the end as even as the start."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
