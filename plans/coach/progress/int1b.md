@@ -31,5 +31,15 @@ Worktree `/home/dgx-delgado/yames-coach-int1`, branch `coach-int1`, logs `/tmp/c
 
 ## State
 
-- Code and English: committed. Fourteen locales: in progress (sonnet helpers; spec `/tmp/coach-int1b/i18n-spec.md`).
-- Gates: to run after the locales.
+- Code, English and the fourteen locales: committed (sonnet helpers, spec `/tmp/coach-int1b/i18n-spec.md`).
+  ko says 버전 and de Version for "version of this Exercise" (the others: a variant word).
+
+## Gates
+
+- `npx tsc --noEmit`: pass (`coach-int1b-tsc`).
+- `npm run test`: 49917 passed, 11 skipped, 449 of 450 files; the one failed file is the known
+  `TabStage.render.test.tsx`; one vitest RPC timeout ("onTaskUpdate") under load (`coach-int1b-test`).
+- `npm run build`: pass (`coach-int1b-build`).
+- Layout, six named specs: `coach-int1b-pw-2` 56 passed, 3 timed out in the first worker batch while the
+  full vitest run and the build ran beside it; those two specs re-run alone (`coach-int1b-pw-3`, 4 workers):
+  23 of 23 passed. (`coach-int1b-pw`, run while the helpers edited locale JSON under the dev server: void.)
