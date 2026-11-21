@@ -23,6 +23,7 @@ import {
 import type { BarCheck } from "../../session/grade";
 import { EDGE_MINUTES, planSession } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
+import { chosenNotPlayed } from "../../session/chosenToday";
 import {
   blockState,
   currentStep,
@@ -1868,11 +1869,14 @@ function RecapScreen({ session }: { session: SessionRun }) {
   );
   const tomorrow = planSession({
     minutes: session.minutes,
-    now: Date.now(),
+    // The plan's clock, the one today's chosen parts were read by (t2eb, review L9).
+    now: session.planClock,
     paths: session.today.paths,
     progress: session.progress,
     ...(session.today.focusedPath ? { focused: true } : {}),
     ungraded: session.grading === "off",
+    // The exercises the player added to today, less those this Session played (t2eb, M1).
+    chosen: chosenNotPlayed(session.chosenToday, run.outcomes),
   });
   const origin = session.origin;
   const lastExercise = [...steps].reverse().find((s) => s.kind === "exercise");

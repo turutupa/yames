@@ -186,7 +186,8 @@
         "shape": "Eso no es algo que la app pueda hacer.",
         "proposal": "Eso ha cambiado desde entonces, así que no se hizo nada. Vuelve a preguntar.",
         "cap": "Sigues {{cap}} rutas, el máximo posible. Deja una primero en su página.",
-        "loopBackwards": "El compás {{to}} va antes que el compás {{from}}. Nombra primero el primer compás."
+        "loopBackwards": "El compás {{to}} va antes que el compás {{from}}. Nombra primero el primer compás.",
+        "loopOwn": "Por ahora la repetición solo toca un ejercicio de una ruta, y este es uno de tus propios ejercicios."
       },
       "failed": "Eso no funcionó, y no se cambió nada.",
       "make": {

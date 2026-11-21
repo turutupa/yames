@@ -67,6 +67,16 @@ import type { Exercise, PathDoc, Step } from "../../../paths/format";
 import { FIRST_PATH_ID, findExercise, isRunnable, loadAllPacks } from "../../../session/packs";
 // The id alone: `paths/custom.ts` would bring the generator into the runner.
 import { MY_EXERCISES_PATH_ID as CUSTOM_PATH_ID } from "../../../session/myExercises";
+// Light too: today's chosen keys and the one custom document; the parts are built outside.
+import {
+  NO_CHOSEN_PARTS,
+  chosenForToday,
+  chosenKeysOn,
+  chosenNotPlayed,
+  customDocOf,
+  useChosenTodayStored,
+} from "../../../session/chosenToday";
+import type { ChosenParts } from "../../../session/chosenToday";
 import { gradeTake } from "../../../session/grade";
 import type { BarCheck, TakeGrade } from "../../../session/grade";
 import { measureTake } from "../../../session/takeMeasures";
@@ -155,6 +165,7 @@ import {
   swapOptions,
   swapsIn,
   withScope,
+  dayKey,
 } from "../../../session/swap";
 import {
   FOCUS_KEY,
@@ -421,6 +432,14 @@ export function useSessionRun(input: SessionRunInput) {
   const [paths, setPaths] = useState<PathDoc[]>([]);
   /** The document of the custom Exercise last played (`playExercise`), or null. */
   const [customPath, setCustomPath] = useState<PathDoc | null>(null);
+  /**
+   * The player's exercises chosen for today, built outside the runner
+   * (`ChosenTodayParts`, which holds the generator) and handed in through
+   * `actions.setChosenParts` (t2e). Every stored key's, whatever its day: today's
+   * are picked from them by the plan's own day below.
+   */
+  const [chosenBuilt, setChosenBuilt] = useState<ChosenParts>(NO_CHOSEN_PARTS);
+  const chosenStored = useChosenTodayStored();
   const { i18n } = useTranslation();
   const packLanguage = i18n.resolvedLanguage ?? i18n.language ?? "en";
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
@@ -480,6 +499,19 @@ export function useSessionRun(input: SessionRunInput) {
   const [live, setLive] = useState<LiveTake>(NO_LIVE);
   // Stamped once a view opens, so a plan does not rebuild on every second.
   const [planClock, setPlanClock] = useState(() => Date.now());
+  /**
+   * The one clock "today" is read by (t2eb, review M4): the plan's. Moves it to
+   * now when the day has turned (same day: left as it is, no new plan) and
+   * returns now. A press on Paths writes today's choice by it, and every move
+   * between the learning screens calls it, so Today, Paths and the runner
+   * agree on the day. A Session already running keeps its plan: that lives in
+   * the run, which never re-plans.
+   */
+  const todayNow = useCallback((): number => {
+    const now = Date.now();
+    setPlanClock((prev) => (dayKey(prev) === dayKey(now) ? prev : now));
+    return now;
+  }, []);
   /** Today's swaps as kept (`session/swap.ts`); undefined until the store has answered. */
   const [swapStored, setSwapStored] = useState<SwapMemory | null | undefined>(undefined);
   /** Today's focus, "mix" or one Path (`focus.ts`), and the Paths switched out of the mix. */
@@ -621,6 +653,11 @@ export function useSessionRun(input: SessionRunInput) {
       .then((saved) => setOffMix(readOffMix(saved)))
       .catch(() => {});
   }, [wantsLearning, refresh]);
+  // Moving between the learning screens (Today to Paths and back) reads the
+  // day again: one clock for all of them across midnight (t2eb, review M4).
+  useEffect(() => {
+    if (wantsLearning) todayNow();
+  }, [view, wantsLearning, todayNow]);
 
   // The packs, in the language on screen: loaded with the learning side, and
   // again when the language changes. Ids and notes are the same in every
@@ -707,6 +744,14 @@ export function useSessionRun(input: SessionRunInput) {
     () => ({ paths: myPaths, allPaths: paths, progress, now: planClock }),
     [myPaths, paths, progress, planClock],
   );
+  // The exercises the player added to today (t2e), on the plan's own day: the
+  // same list goes to every plan below, so Today, the coach's preview, "5 more
+  // minutes" and the recap never disagree.
+  const chosenToday = useMemo(
+    () => chosenForToday(chosenBuilt, chosenKeysOn(chosenStored, planClock)),
+    [chosenBuilt, chosenStored, planClock],
+  );
+  const chosen = chosenToday.parts;
   const basePlan: SessionPlan = useMemo(
     () =>
       planSession({
@@ -717,8 +762,9 @@ export function useSessionRun(input: SessionRunInput) {
         avoid: avoidSet(swapMemory),
         ungraded: grading === "off",
         ...(today.focusedPath ? { focused: true } : {}),
+        chosen,
       }),
-    [minutes, planClock, today, progress, swapMemory, grading],
+    [minutes, planClock, today, progress, swapMemory, grading, chosen],
   );
   // Swaps belong to the plan they were made in: another focus, another plan.
   const todaySwaps = useMemo(() => swapsIn(swapMemory, todayFocus), [swapMemory, todayFocus]);
@@ -743,10 +789,11 @@ export function useSessionRun(input: SessionRunInput) {
         avoid: avoidSet(swapMemory),
         ungraded: grading === "off",
         ...(next.focusedPath ? { focused: true } : {}),
+        chosen,
       });
       return applySwaps(base, swapsIn(swapMemory, next.focus), swapContext);
     },
-    [today, myPaths, offMix, minutes, planClock, progress, swapMemory, grading, swapContext],
+    [today, myPaths, offMix, minutes, planClock, progress, swapMemory, grading, swapContext, chosen],
   );
 
   /** What Today's row `index` can be swapped for (owner, 2026-11-18). */
@@ -811,8 +858,14 @@ export function useSessionRun(input: SessionRunInput) {
   // --- what is on the stage ------------------------------------------------
   const step = currentStep(run);
   // A custom Exercise (My exercises) is played from a one-Step document of its
-  // own, held here for the Session it was started for; never in `paths`.
-  const runPaths = useMemo(() => (customPath ? [...paths, customPath] : paths), [paths, customPath]);
+  // own, held here for the Session it was started for; never in `paths`. The
+  // last one played and every one built for today's choice share one document
+  // (`customDocOf`), whatever the day, so a part already in a Session keeps
+  // resolving after midnight.
+  const runPaths = useMemo(() => {
+    const custom = customDocOf([...(customPath ? [customPath] : []), ...chosenBuilt.parts.map((p) => p.path)]);
+    return custom ? [...paths, custom] : paths;
+  }, [paths, customPath, chosenBuilt]);
   const current = useMemo(() => exerciseOf(step, runPaths), [step, runPaths]);
 
   const take: TakePlan | null = useMemo(() => {
@@ -2346,6 +2399,8 @@ export function useSessionRun(input: SessionRunInput) {
           progress,
           ungraded: gradingRef.current === "off",
           ...(today.focusedPath ? { focused: true } : {}),
+          // Never a part this Session already played (t2eb, review M1).
+          chosen: chosenNotPlayed(chosen, state.outcomes),
         });
     if (!next || next.steps.length === 0) return;
     dispatch({ type: "close" });
@@ -2353,7 +2408,7 @@ export function useSessionRun(input: SessionRunInput) {
     begin(next, { untimed: state.untimed });
     origin.current = from;
     if (restoredTo.current) snapshot.current = restoredTo.current;
-  }, [begin, today, progress]);
+  }, [begin, today, progress, chosen]);
 
   /** Leave the recap for a screen of the player's choosing: where it began, or Progress. */
   const closeTo = useCallback(
@@ -2498,6 +2553,19 @@ export function useSessionRun(input: SessionRunInput) {
     [paths, progress],
   );
 
+  /**
+   * Today's chosen exercises, built outside (t2e): `ChosenTodayParts` hands
+   * them in when the choice, the list or the language changes. Nothing chosen,
+   * twice: the same state, no render.
+   */
+  const setChosenParts = useCallback((next: ChosenParts) => {
+    setChosenBuilt((prev) =>
+      next.parts.length === 0 && next.unbuiltKeys.length === 0 && prev.parts.length === 0 && prev.unbuiltKeys.length === 0
+        ? prev
+        : next,
+    );
+  }, []);
+
   const stayInSession = useCallback(() => setLeaveAsked(false), []);
   useEffect(() => {
     if (run.phase === "idle") setLeaveAsked(false);
@@ -2538,6 +2606,14 @@ export function useSessionRun(input: SessionRunInput) {
     myPaths,
     /** What Today plans from: the mix or one Path (`focus.ts`). */
     today,
+    /**
+     * The player's exercises in today's plans (t2e), and how many chosen for
+     * today could not be built (left out; Today says so).
+     */
+    chosenToday: chosen,
+    chosenUnbuilt: chosenToday.unbuilt,
+    /** The clock today's plan is read by: Paths reads today's choice by it too (t2eb, M4). */
+    planClock,
     todayFocus,
     setTodayFocus,
     /** The Paths switched out of the daily mix. */
@@ -2597,6 +2673,8 @@ export function useSessionRun(input: SessionRunInput) {
       confirmSwap,
       undoSwap,
       playExercise,
+      setChosenParts,
+      todayNow,
       chooseStep,
       chooseLevel,
       go,

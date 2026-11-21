@@ -33,7 +33,9 @@ export type RoleWord =
   | "yourTurn"
   | "finisher"
   | "jam"
-  | "drill";
+  | "drill"
+  /** One of the player's own exercises, added to today (t2e). */
+  | "mine";
 
 /** Every role a row can name, for the locale tests. */
 export const ROLE_WORDS: readonly RoleWord[] = [
@@ -50,6 +52,7 @@ export const ROLE_WORDS: readonly RoleWord[] = [
   "finisher",
   "jam",
   "drill",
+  "mine",
 ];
 
 /** Reasons that start something the player has not played. */
@@ -59,6 +62,8 @@ const NEW_CODES = new Set(["firstEver", "newExercise", "newStep"]);
 export function roleOf(step: PlanStep): RoleWord {
   switch (step.kind) {
     case "exercise":
+      // Added by the player (t2e): its own word, whatever its tempo's reason.
+      if (step.context?.code === "chosenToday") return "mine";
       switch (step.role) {
         case "focus":
         case "next":
@@ -171,7 +176,12 @@ export function shortReason(step: PlanStep, earlier: readonly PlanStep[] = []): 
 /** Whose turn it is, without the Path's name (the meta line has it). */
 export function shortContext(context: Reason): Line {
   const full = reasonLine(context);
-  if (context.code === "focusTurn" || context.code === "keepWarm" || context.code === "focusChosen") {
+  if (
+    context.code === "focusTurn" ||
+    context.code === "keepWarm" ||
+    context.code === "focusChosen" ||
+    context.code === "chosenToday"
+  ) {
     return { key: full.key.replace(/^session\.why\./, "session.today.context."), values: full.values };
   }
   return full;

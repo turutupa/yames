@@ -120,8 +120,15 @@
         "yourTurn": "당신 차례 · 확인 없음",
         "finisher": "마무리 · 채점 없음",
         "jam": "잼 · 채점 없음",
-        "drill": "템포 램프"
+        "drill": "템포 램프",
+        "mine": "내 과제"
       },
+      "chosenLeftOut": "직접 추가한 과제 {{count}}개가 {{minutes}}분 안에 들어가지 않았어요. 시간을 늘리거나 내 과제에서 하나를 빼 주세요.",
+      "chosenLeftOut_other": "직접 추가한 과제 {{count}}개가 {{minutes}}분 안에 들어가지 않았어요. 시간을 늘리거나 내 과제에서 하나를 빼 주세요.",
+      "chosenLeftOutGraded": "직접 추가한 과제 {{count}}개가 들어가지 않았어요. 세션에서는 과제를 최대 {{max}}개 하는데, 오늘은 코스가 그중 {{taken}}개를 쓰고 있어요. 시간을 늘려도 자리가 생기지 않으니 내 과제에서 하나를 빼 주세요.",
+      "chosenLeftOutGraded_other": "직접 추가한 과제 {{count}}개가 들어가지 않았어요. 세션에서는 과제를 최대 {{max}}개 하는데, 오늘은 코스가 그중 {{taken}}개를 쓰고 있어요. 시간을 늘려도 자리가 생기지 않으니 내 과제에서 하나를 빼 주세요.",
+      "chosenUnbuilt":"오늘 추가한 과제 {{count}}개는 더 이상 만들 수 없어서 빠졌어요.",
+      "chosenUnbuilt_other": "오늘 추가한 과제 {{count}}개는 더 이상 만들 수 없어서 빠졌어요.",
       "reason": {
         "firstEver": "첫 과제예요. 클릭에 딱 맞추세요. 속도는 나중에.",
         "newExercise": "처음 하는 과제예요. 천천히, 깔끔하게.",
@@ -155,7 +162,8 @@
         "keepWarmYesterday": "감 유지, 마지막 연주는 어제.",
         "keepWarmToday": "감 유지, 오늘 이미 연주했어요.",
         "keepWarmNew": "첫 맛보기.",
-        "focusChosen": "고른 대로, 오늘은 이 경로만."
+        "focusChosen": "고른 대로, 오늘은 이 경로만.",
+        "chosenToday": "오늘 직접 추가했어요."
       },
       "from": "{{path}} · {{level}} · {{step}}단계",
       "fromNoLevel": "{{path}} · {{step}}단계",
@@ -265,6 +273,7 @@
       "newFromSibling": "새 연습입니다. {{sibling}}의 클린 템포 {{clean}} BPM의 약 80%인 {{bpm}} BPM에서 시작합니다.",
       "newFromSiblingNoClean": "새 연습입니다. {{sibling}}에서의 테이크를 바탕으로 정한 {{bpm}} BPM에서 시작합니다.",
       "focusChosen": "오늘은 {{path}}을(를) 골랐으니 세션 전체가 여기서 나옵니다.",
+      "chosenToday": "직접 만든 과제 중 하나로, 오늘 세션에 직접 추가했어요.",
       "playedUngraded": "지난번 그대로: {{bpm}} BPM."
     },
     "bar": {
@@ -470,7 +479,15 @@
       "undoFull": "내 과제가 가득 찼어요(50). 그래서 실행 취소로는 이 과제를 되돌릴 수 없어요.",
       "undoAlready": "그 과제는 이미 내 과제에 다시 들어 있어요.",
       "cantBuild": "이 과제는 더 이상 만들 수 없어요. 이 버전의 Yames는 더 이상 만들지 않아요. 삭제하기 전까지 여기에 남아요.",
-      "howTo": "적힌 대로, 클릭에 맞춰 연주하세요."
+      "howTo": "적힌 대로, 클릭에 맞춰 연주하세요.",
+      "addToday": "오늘에 추가",
+      "addTodayLabel": "{{what}}을(를) 오늘 세션에 추가",
+      "takeOffToday": "오늘에서 빼기",
+      "takeOffTodayLabel": "{{what}}을(를) 오늘 세션에서 빼기",
+      "inToday": "오늘 세션에 들어 있어요",
+      "addedToday": "오늘 세션의 워밍업 뒤에 추가했어요.",
+      "takenOffToday": "오늘 세션에서 뺐어요.",
+      "todayFull": "오늘에는 이미 내 과제가 {{max}}개 들어 있어요. 더는 넣을 수 없어요. 세션에서는 과제를 최대 {{graded}}개 하고, 한 자리는 코스를 위해 비워 두거든요. 먼저 하나를 빼 주세요."
     },
     "paths": {
       "title": "코스",

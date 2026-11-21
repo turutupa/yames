@@ -126,8 +126,18 @@
         "yourTurn": "Sua vez · não verificado",
         "finisher": "Para fechar · sem nota",
         "jam": "Jam · sem nota",
-        "drill": "Rampa de tempo"
+        "drill": "Rampa de tempo",
+        "mine": "Seu exercício"
       },
+      "chosenLeftOut": "{{count}} exercício que você adicionou não coube em {{minutes}} minutos. Escolha mais minutos ou tire-o em Meus exercícios.",
+      "chosenLeftOut_many": "{{count}} exercícios que você adicionou não couberam em {{minutes}} minutos. Escolha mais minutos ou tire algum em Meus exercícios.",
+      "chosenLeftOut_other": "{{count}} exercícios que você adicionou não couberam em {{minutes}} minutos. Escolha mais minutos ou tire algum em Meus exercícios.",
+      "chosenLeftOutGraded": "{{count}} exercício que você adicionou não coube: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire-o em Meus exercícios.",
+      "chosenLeftOutGraded_many": "{{count}} exercícios que você adicionou não couberam: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire algum em Meus exercícios.",
+      "chosenLeftOutGraded_other": "{{count}} exercícios que você adicionou não couberam: uma sessão toca no máximo {{max}} exercícios, e suas Trilhas ocupam {{taken}} deles hoje. Mais minutos não abrem espaço; tire algum em Meus exercícios.",
+      "chosenUnbuilt": "{{count}} exercício que você adicionou para hoje não pode mais ser montado, então fica de fora.",
+      "chosenUnbuilt_many": "{{count}} exercícios que você adicionou para hoje não podem mais ser montados, então ficam de fora.",
+      "chosenUnbuilt_other": "{{count}} exercícios que você adicionou para hoje não podem mais ser montados, então ficam de fora.",
       "reason": {
         "firstEver": "Seu primeiro. Fique em cima do clique; a velocidade vem depois.",
         "newExercise": "Novo para você. Vá devagar e mantenha limpo.",
@@ -161,7 +171,8 @@
         "keepWarmYesterday": "Para não esfriar, tocado ontem.",
         "keepWarmToday": "Para não esfriar, já tocado hoje.",
         "keepWarmNew": "Uma primeira provada.",
-        "focusChosen": "Hoje só esta trilha, como você escolheu."
+        "focusChosen": "Hoje só esta trilha, como você escolheu.",
+        "chosenToday": "Você o adicionou para hoje."
       },
       "from": "{{path}} · {{level}} · Etapa {{step}}",
       "fromNoLevel": "{{path}} · Etapa {{step}}",
@@ -271,6 +282,7 @@
       "newFromSibling": "Novo. Começa em {{bpm}} BPM, cerca de 80% do seu tempo limpo de {{clean}} BPM em {{sibling}}.",
       "newFromSiblingNoClean": "Novo. Começa em {{bpm}} BPM, calculado a partir dos seus takes em {{sibling}}.",
       "focusChosen": "Você escolheu {{path}} para hoje, então a sessão inteira vem dele.",
+      "chosenToday": "Um dos seus próprios exercícios, adicionado por você à sessão de hoje.",
       "playedUngraded": "De onde você parou: {{bpm}} BPM."
     },
     "bar": {
@@ -482,7 +494,15 @@
       "undoFull": "Meus exercícios está cheio (50), então Desfazer não pode colocar este de volta.",
       "undoAlready": "Este já voltou para Meus exercícios.",
       "cantBuild": "Este não pode mais ser montado: esta versão do Yames não o gera mais. Ele fica aqui até você removê-lo.",
-      "howTo": "Toque como está escrito, com o click."
+      "howTo": "Toque como está escrito, com o click.",
+      "addToday": "Adicionar a hoje",
+      "addTodayLabel": "Adicionar {{what}} à sessão de hoje",
+      "takeOffToday": "Tirar de hoje",
+      "takeOffTodayLabel": "Tirar {{what}} da sessão de hoje",
+      "inToday": "Na sessão de hoje",
+      "addedToday": "Adicionado à sessão de hoje, depois do aquecimento.",
+      "takenOffToday": "Tirado da sessão de hoje.",
+      "todayFull": "Hoje já tem {{max}} dos seus exercícios, o máximo permitido: uma sessão toca no máximo {{graded}} exercícios avaliados, e uma vaga fica reservada para suas Trilhas. Tire um primeiro."
     },
     "paths": {
       "title": "Trilhas",

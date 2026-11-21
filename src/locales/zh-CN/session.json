@@ -120,8 +120,15 @@
         "yourTurn": "轮到你 · 不检查",
         "finisher": "收尾 · 不打分",
         "jam": "即兴伴奏 · 不打分",
-        "drill": "速度爬坡"
+        "drill": "速度爬坡",
+        "mine": "我的练习"
       },
+      "chosenLeftOut": "你添加的 {{count}} 个练习没能放进 {{minutes}} 分钟里。请选更长的时间，或在我的练习里移除一个。",
+      "chosenLeftOut_other": "你添加的 {{count}} 个练习没能放进 {{minutes}} 分钟里。请选更长的时间，或在我的练习里移除一个。",
+      "chosenLeftOutGraded": "你添加的 {{count}} 个练习没能放进去：一次练习最多 {{max}} 个练习，而今天你的路线已占了 {{taken}} 个。增加时间也腾不出位置；请在我的练习里移除一个。",
+      "chosenLeftOutGraded_other": "你添加的 {{count}} 个练习没能放进去：一次练习最多 {{max}} 个练习，而今天你的路线已占了 {{taken}} 个。增加时间也腾不出位置；请在我的练习里移除一个。",
+      "chosenUnbuilt": "你为今天添加的 {{count}} 个练习已无法再生成，所以没有放进去。",
+      "chosenUnbuilt_other": "你为今天添加的 {{count}} 个练习已无法再生成，所以没有放进去。",
       "reason": {
         "firstEver": "你的第一个。先稳稳踩在节拍上，速度以后再说。",
         "newExercise": "这个对你是新的。慢一点，弹干净。",
@@ -155,7 +162,8 @@
         "keepWarmYesterday": "保持手感，上次是昨天。",
         "keepWarmToday": "保持手感，今天已经练过。",
         "keepWarmNew": "先尝个鲜。",
-        "focusChosen": "按你的选择，今天只练这条路线。"
+        "focusChosen": "按你的选择，今天只练这条路线。",
+        "chosenToday": "这是你为今天添加的。"
       },
       "from": "{{path}} · {{level}} · 第 {{step}} 步",
       "fromNoLevel": "{{path}} · 第 {{step}} 步",
@@ -265,6 +273,7 @@
       "newFromSibling": "新练习。从 {{bpm}} BPM 开始，约为你在“{{sibling}}”上干净速度 {{clean}} BPM 的 80%。",
       "newFromSiblingNoClean": "新练习。从 {{bpm}} BPM 开始，根据你在“{{sibling}}”上的练习推算而来。",
       "focusChosen": "今天你选了{{path}}，整节练习都从这里来。",
+      "chosenToday": "你自己的练习之一，由你加进了今天这次练习。",
       "playedUngraded": "从你上次停下的地方：{{bpm}} BPM。"
     },
     "bar": {
@@ -470,7 +479,15 @@
       "undoFull": "我的练习已满（50），所以撤销无法把这个放回去。",
       "undoAlready": "这个练习已经回到我的练习里了。",
       "cantBuild": "这个练习已无法再生成：当前版本的 Yames 不再提供它。在你移除之前，它会一直留在这里。",
-      "howTo": "照谱弹，跟着节拍器。"
+      "howTo": "照谱弹，跟着节拍器。",
+      "addToday": "加入今天",
+      "addTodayLabel": "把{{what}}加入今天这次练习",
+      "takeOffToday": "移出今天",
+      "takeOffTodayLabel": "把{{what}}移出今天这次练习",
+      "inToday": "在今天这次练习里",
+      "addedToday": "已加入今天这次练习，排在热身之后。",
+      "takenOffToday": "已移出今天这次练习。",
+      "todayFull": "今天已经放了 {{max}} 个你的练习，这是上限：一次练习最多练 {{graded}} 个计分的练习，并且会留一个位置给你的路线。请先移出一个。"
     },
     "paths": {
       "title": "路线",

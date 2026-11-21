@@ -98,6 +98,8 @@ export function refOf(step: PlanStep): SwapRef | null {
 
 /** Graded Exercises and the warm-up can be swapped; the band, a ramp and "your turn" cannot. */
 export function canSwap(step: PlanStep): boolean {
+  // One the player added to today (t2e) is taken off where it was added, not swapped.
+  if (step.kind === "exercise" && step.context?.code === "chosenToday") return false;
   return refOf(step) !== null;
 }
 

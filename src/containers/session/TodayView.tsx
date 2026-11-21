@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { PLAN_MINUTES } from "../../session/planner";
+import { MAX_GRADED, PLAN_MINUTES } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import { reasonLine } from "../../session/coachWords";
 import { FIRST_PATH_ID } from "../../session/packs";
@@ -508,6 +508,26 @@ export function TodayView({
           {steps.length > 0 && !endInView && (
             <div className="session-plan-more" aria-hidden="true" data-testid="today-more">
               {t("session.today.moreBelow")}
+            </div>
+          )}
+          {/* What the player added to today and is not in the plan, said, never dropped in silence (t2e). */}
+          {((plan.chosenLeftOut ?? 0) > 0 || session.chosenUnbuilt > 0) && (
+            <div className="session-footnote" data-testid="today-chosen-left-out">
+              {(plan.chosenLeftOut ?? 0) > 0 && (
+                <span className="session-why">
+                  {/* The true reason: more minutes help, or the Session's cap that they do not change (t2eb, M3). */}
+                  {plan.chosenLeftOutWhy === "graded"
+                    ? t("session.today.chosenLeftOutGraded", {
+                        count: plan.chosenLeftOut,
+                        max: MAX_GRADED,
+                        taken: plan.chosenPathPlaces ?? 0,
+                      })
+                    : t("session.today.chosenLeftOut", { count: plan.chosenLeftOut, minutes: plan.minutes })}
+                </span>
+              )}
+              {session.chosenUnbuilt > 0 && (
+                <span className="session-why">{t("session.today.chosenUnbuilt", { count: session.chosenUnbuilt })}</span>
+              )}
             </div>
           )}
           {(plan.skipped ?? []).length > 0 && (

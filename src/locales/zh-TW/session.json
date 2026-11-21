@@ -120,8 +120,15 @@
         "yourTurn": "輪到你 · 不檢查",
         "finisher": "收尾 · 不評分",
         "jam": "即興伴奏 · 不評分",
-        "drill": "速度爬坡"
+        "drill": "速度爬坡",
+        "mine": "我的練習"
       },
+      "chosenLeftOut": "你加入的 {{count}} 個練習沒能放進 {{minutes}} 分鐘裡。請選更長的時間，或在我的練習裡移除一個。",
+      "chosenLeftOut_other": "你加入的 {{count}} 個練習沒能放進 {{minutes}} 分鐘裡。請選更長的時間，或在我的練習裡移除一個。",
+      "chosenLeftOutGraded": "你加入的 {{count}} 個練習沒能放進去：一次練習最多 {{max}} 個練習，而今天你的路線已佔了 {{taken}} 個。增加時間也騰不出位置；請在我的練習裡移除一個。",
+      "chosenLeftOutGraded_other": "你加入的 {{count}} 個練習沒能放進去：一次練習最多 {{max}} 個練習，而今天你的路線已佔了 {{taken}} 個。增加時間也騰不出位置；請在我的練習裡移除一個。",
+      "chosenUnbuilt": "你為今天加入的 {{count}} 個練習已無法再產生，所以沒有放進去。",
+      "chosenUnbuilt_other": "你為今天加入的 {{count}} 個練習已無法再產生，所以沒有放進去。",
       "reason": {
         "firstEver": "你的第一個。先穩穩踩在節拍上，速度以後再說。",
         "newExercise": "這個對你是新的。慢一點，彈乾淨。",
@@ -155,7 +162,8 @@
         "keepWarmYesterday": "保持手感，上次是昨天。",
         "keepWarmToday": "保持手感，今天已經練過。",
         "keepWarmNew": "先嚐個鮮。",
-        "focusChosen": "依你的選擇，今天只練這條路線。"
+        "focusChosen": "依你的選擇，今天只練這條路線。",
+        "chosenToday": "這是你為今天加入的。"
       },
       "from": "{{path}} · {{level}} · 第 {{step}} 步",
       "fromNoLevel": "{{path}} · 第 {{step}} 步",
@@ -265,6 +273,7 @@
       "newFromSibling": "新練習。從 {{bpm}} BPM 開始，約為你在「{{sibling}}」上乾淨速度 {{clean}} BPM 的 80%。",
       "newFromSiblingNoClean": "新練習。從 {{bpm}} BPM 開始，根據你在「{{sibling}}」上的練習推算而來。",
       "focusChosen": "今天你選了{{path}}，整節練習都從這裡來。",
+      "chosenToday": "你自己的練習之一，由你加進了今天這次練習。",
       "playedUngraded": "從你上次停下的地方：{{bpm}} BPM。"
     },
     "bar": {
@@ -470,7 +479,15 @@
       "undoFull": "我的練習已滿（50），所以復原無法把這個放回去。",
       "undoAlready": "這個練習已經回到我的練習裡了。",
       "cantBuild": "這個練習已無法再產生：目前版本的 Yames 不再提供它。在你移除之前，它會一直留在這裡。",
-      "howTo": "照譜彈，跟著節拍器。"
+      "howTo": "照譜彈，跟著節拍器。",
+      "addToday": "加入今天",
+      "addTodayLabel": "把{{what}}加入今天這次練習",
+      "takeOffToday": "移出今天",
+      "takeOffTodayLabel": "把{{what}}移出今天這次練習",
+      "inToday": "在今天這次練習裡",
+      "addedToday": "已加入今天這次練習，排在熱身之後。",
+      "takenOffToday": "已移出今天這次練習。",
+      "todayFull": "今天已經放了 {{max}} 個你的練習，這是上限：一次練習最多練 {{graded}} 個計分的練習，並且會留一個位置給你的路線。請先移出一個。"
     },
     "paths": {
       "title": "路線",

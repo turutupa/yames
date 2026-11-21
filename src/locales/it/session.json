@@ -126,8 +126,18 @@
         "yourTurn": "Tocca a te · non controllato",
         "finisher": "Per chiudere · senza voto",
         "jam": "Jam · senza voto",
-        "drill": "Rampa di tempo"
+        "drill": "Rampa di tempo",
+        "mine": "Il tuo esercizio"
       },
+      "chosenLeftOut": "{{count}} esercizio che hai aggiunto non è entrato in {{minutes}} minuti. Scegli più minuti, o toglilo da I miei esercizi.",
+      "chosenLeftOut_many": "{{count}} esercizi che hai aggiunto non sono entrati in {{minutes}} minuti. Scegli più minuti, o togline uno da I miei esercizi.",
+      "chosenLeftOut_other": "{{count}} esercizi che hai aggiunto non sono entrati in {{minutes}} minuti. Scegli più minuti, o togline uno da I miei esercizi.",
+      "chosenLeftOutGraded": "{{count}} esercizio che hai aggiunto non è entrato: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; toglilo da I miei esercizi.",
+      "chosenLeftOutGraded_many": "{{count}} esercizi che hai aggiunto non sono entrati: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; togline uno da I miei esercizi.",
+      "chosenLeftOutGraded_other": "{{count}} esercizi che hai aggiunto non sono entrati: una sessione riproduce al massimo {{max}} esercizi, e i tuoi percorsi ne occupano {{taken}} oggi. Più minuti non faranno spazio; togline uno da I miei esercizi.",
+      "chosenUnbuilt": "{{count}} esercizio che hai aggiunto per oggi non si può più costruire, quindi resta fuori.",
+      "chosenUnbuilt_many": "{{count}} esercizi che hai aggiunto per oggi non si possono più costruire, quindi restano fuori.",
+      "chosenUnbuilt_other": "{{count}} esercizi che hai aggiunto per oggi non si possono più costruire, quindi restano fuori.",
       "reason": {
         "firstEver": "Il tuo primo. Stai preciso sul click; la velocità arriva dopo.",
         "newExercise": "Nuovo per te. Vai piano e tienilo pulito.",
@@ -161,7 +171,8 @@
         "keepWarmYesterday": "Per tenerlo caldo, suonato ieri.",
         "keepWarmToday": "Per tenerlo caldo, già suonato oggi.",
         "keepWarmNew": "Un primo assaggio.",
-        "focusChosen": "Oggi solo questo percorso, come hai scelto."
+        "focusChosen": "Oggi solo questo percorso, come hai scelto.",
+        "chosenToday": "L'hai aggiunto per oggi."
       },
       "from": "{{path}} · {{level}} · Tappa {{step}}",
       "fromNoLevel": "{{path}} · Tappa {{step}}",
@@ -271,6 +282,7 @@
       "newFromSibling": "Nuovo. Parte da {{bpm}} BPM, circa l’80% del tuo tempo pulito di {{clean}} BPM su {{sibling}}.",
       "newFromSiblingNoClean": "Nuovo. Parte da {{bpm}} BPM, calcolati dai tuoi take su {{sibling}}.",
       "focusChosen": "Hai scelto {{path}} per oggi, quindi tutta la sessione viene da lì.",
+      "chosenToday": "Uno dei tuoi esercizi, aggiunto da te alla sessione di oggi.",
       "playedUngraded": "Dove l'hai lasciato: {{bpm}} BPM."
     },
     "bar": {
@@ -482,7 +494,15 @@
       "undoFull": "I miei esercizi è pieno (50), quindi Annulla non può rimettere questo.",
       "undoAlready": "Questo è già tornato in I miei esercizi.",
       "cantBuild": "Questo non si può più costruire: questa versione di Yames non lo crea più. Resta qui finché non lo rimuovi.",
-      "howTo": "Suonalo come scritto, con il click."
+      "howTo": "Suonalo come scritto, con il click.",
+      "addToday": "Aggiungi a oggi",
+      "addTodayLabel": "Aggiungi {{what}} alla sessione di oggi",
+      "takeOffToday": "Togli da oggi",
+      "takeOffTodayLabel": "Togli {{what}} dalla sessione di oggi",
+      "inToday": "Nella sessione di oggi",
+      "addedToday": "Aggiunto alla sessione di oggi, dopo il riscaldamento.",
+      "takenOffToday": "Tolto dalla sessione di oggi.",
+      "todayFull": "Oggi contiene già {{max}} dei tuoi esercizi, il massimo consentito: una sessione ne riproduce al massimo {{graded}}, e un posto resta riservato ai tuoi percorsi. Togline uno prima."
     },
     "paths": {
       "title": "Percorsi",

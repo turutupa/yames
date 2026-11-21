@@ -186,7 +186,8 @@
         "shape": "Aplikacja nie potrafi tego zrobić.",
         "proposal": "Od tamtej pory coś się zmieniło, więc nic nie zrobiono. Zapytaj jeszcze raz.",
         "cap": "Śledzisz {{cap}} ścieżek, czyli maksimum. Najpierw porzuć jedną na jej stronie.",
-        "loopBackwards": "Takt {{to}} jest przed taktem {{from}}. Najpierw podaj pierwszy takt."
+        "loopBackwards": "Takt {{to}} jest przed taktem {{from}}. Najpierw podaj pierwszy takt.",
+        "loopOwn": "Pętla na razie gra tylko ćwiczenie ze Ścieżki, a to jest jedno z twoich własnych ćwiczeń."
       },
       "failed": "To się nie udało i nic nie zostało zmienione.",
       "make": {

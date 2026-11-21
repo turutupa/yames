@@ -186,7 +186,8 @@
         "shape": "Ứng dụng không làm được việc đó.",
         "proposal": "Việc đó đã thay đổi từ lúc ấy, nên chưa làm gì. Hãy hỏi lại.",
         "cap": "Bạn đang theo {{cap}} lộ trình, nhiều nhất có thể. Hãy bỏ một lộ trình ở trang của nó trước.",
-        "loopBackwards": "Ô nhịp {{to}} đứng trước ô nhịp {{from}}. Hãy nói ô nhịp đầu trước."
+        "loopBackwards": "Ô nhịp {{to}} đứng trước ô nhịp {{from}}. Hãy nói ô nhịp đầu trước.",
+        "loopOwn": "Hiện vòng lặp chỉ chơi được một bài từ Lộ trình, còn đây là một bài của riêng bạn."
       },
       "failed": "Không được, và chưa có gì bị thay đổi.",
       "make": {

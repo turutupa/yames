@@ -120,8 +120,15 @@
         "yourTurn": "あなたの番・判定なし",
         "finisher": "締めくくり・採点なし",
         "jam": "ジャム・採点なし",
-        "drill": "テンポランプ"
+        "drill": "テンポランプ",
+        "mine": "自作の課題"
       },
+      "chosenLeftOut": "追加した課題 {{count}} 件が {{minutes}} 分に収まりませんでした。時間を増やすか、自作の課題で外してください。",
+      "chosenLeftOut_other": "追加した課題 {{count}} 件が {{minutes}} 分に収まりませんでした。時間を増やすか、自作の課題で外してください。",
+      "chosenLeftOutGraded": "追加した課題 {{count}} 件が収まりませんでした。セッションで行う課題は最大 {{max}} 件で、今日はコースがそのうち {{taken}} 件を使っています。時間を増やしても空きはできません。自作の課題で外してください。",
+      "chosenLeftOutGraded_other": "追加した課題 {{count}} 件が収まりませんでした。セッションで行う課題は最大 {{max}} 件で、今日はコースがそのうち {{taken}} 件を使っています。時間を増やしても空きはできません。自作の課題で外してください。",
+      "chosenUnbuilt":"今日に追加した課題 {{count}} 件はもう作れないため、含まれていません。",
+      "chosenUnbuilt_other": "今日に追加した課題 {{count}} 件はもう作れないため、含まれていません。",
       "reason": {
         "firstEver": "はじめての課題。クリックにぴったり合わせて。速さはあとから。",
         "newExercise": "はじめての課題です。ゆっくり、きれいに。",
@@ -155,7 +162,8 @@
         "keepWarmYesterday": "感覚を保つため、最後は昨日。",
         "keepWarmToday": "感覚を保つため、今日すでに弾きました。",
         "keepWarmNew": "まずはお試し。",
-        "focusChosen": "選んだとおり、今日はこのコースだけ。"
+        "focusChosen": "選んだとおり、今日はこのコースだけ。",
+        "chosenToday": "今日に追加した課題です。"
       },
       "from": "{{path}} · {{level}} · ステップ {{step}}",
       "fromNoLevel": "{{path}} · ステップ {{step}}",
@@ -265,6 +273,7 @@
       "newFromSibling": "新しい課題です。{{sibling}}のクリーンなテンポ{{clean}} BPMの約80%、{{bpm}} BPMから始めます。",
       "newFromSiblingNoClean": "新しい課題です。{{sibling}}でのテイクから割り出した{{bpm}} BPMから始めます。",
       "focusChosen": "今日は{{path}}を選んだので、セッションはすべてそこから組まれます。",
+      "chosenToday": "自作の課題の 1 つで、あなたが今日のセッションに追加しました。",
       "playedUngraded": "前回の続きから：{{bpm}} BPM。"
     },
     "bar": {
@@ -470,7 +479,15 @@
       "undoFull": "自作の課題がいっぱいです(50)。そのため、元に戻すではこの課題を戻せません。",
       "undoAlready": "その課題はすでに自作の課題に戻っています。",
       "cantBuild": "この課題はもう作れません。このバージョンの Yames では作れなくなりました。削除するまでここに残ります。",
-      "howTo": "書かれたとおりに、クリックに合わせて弾きます。"
+      "howTo": "書かれたとおりに、クリックに合わせて弾きます。",
+      "addToday": "今日に追加",
+      "addTodayLabel": "{{what}} を今日のセッションに追加",
+      "takeOffToday": "今日から外す",
+      "takeOffTodayLabel": "{{what}} を今日のセッションから外す",
+      "inToday": "今日のセッションに入っています",
+      "addedToday": "今日のセッションのウォームアップの後に追加しました。",
+      "takenOffToday": "今日のセッションから外しました。",
+      "todayFull": "今日はすでに自作の課題が {{max}} 件入っていて、これが上限です。セッションで行う課題は最大 {{graded}} 件で、1 件分はコース用に空けてあります。先に 1 件外してください。"
     },
     "paths": {
       "title": "コース",

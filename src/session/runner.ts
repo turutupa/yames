@@ -696,6 +696,8 @@ export function loopOffer(
   if (state.phase !== "ready" && state.phase !== "result") return null;
   const step = currentStep(state);
   if (step?.kind !== "exercise" || !exercise) return null;
+  // No loop is offered on the player's own exercise: it could not start (t2eb, review M5).
+  if (step.pathId === OWN_EXERCISES_PATH_ID) return null;
   const mine = stepOutcomes(state);
   const last = mine[mine.length - 1];
   if (!last) return null;
@@ -744,9 +746,18 @@ function loopStepOf(
  * - `backwards`: the last bar asked is before the first;
  * - `acrossRounds`: the two bars fall in different rounds of the pattern
  *   (bars 4 and 5 of a four-bar tune are its last bar and its first again);
- * - `oneBar`: a range of bars on an Exercise one bar long (lb1b L2).
+ * - `oneBar`: a range of bars on an Exercise one bar long (lb1b L2);
+ * - `ownExercise`: the step is one of the player's own exercises (My
+ *   exercises), which the Session cannot loop yet (t2eb, review M5).
  */
-export type LoopRefusal = "notHere" | "outsideTune" | "backwards" | "acrossRounds" | "oneBar";
+export type LoopRefusal = "notHere" | "outsideTune" | "backwards" | "acrossRounds" | "oneBar" | "ownExercise";
+
+/**
+ * The Path id every one of the player's own exercises is played under
+ * (`MY_EXERCISES_PATH_ID` / `CUSTOM_PATH_ID`; a test holds them equal). Named
+ * here so this pure module imports neither the store nor the generator.
+ */
+export const OWN_EXERCISES_PATH_ID = "my-exercises";
 
 /**
  * The door behind `loop_bars` (leg lb1): the loop `loopOffer` would build,
@@ -770,6 +781,7 @@ export function loopAt(
   if (state.phase !== "ready" && state.phase !== "result") return { refused: "notHere" };
   const step = currentStep(state);
   if (step?.kind !== "exercise" || !exercise) return { refused: "notHere" };
+  if (step.pathId === OWN_EXERCISES_PATH_ID) return { refused: "ownExercise" };
   if (!Number.isInteger(fromBar) || !Number.isInteger(toBar)) return { refused: "outsideTune" };
   if (toBar < fromBar) return { refused: "backwards" };
   if (fromBar < 1 || toBar > Math.max(1, exercise.bars)) return { refused: "outsideTune" };

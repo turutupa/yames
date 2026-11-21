@@ -149,6 +149,7 @@ import { useSessionRun } from "../session/hooks/useSessionRun";
 import { startSessionInput } from "../../session/inputStart";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
 import { TodayView } from "../session/TodayView";
+import { ChosenTodayParts } from "../session/ChosenTodayParts";
 import { SessionView } from "../session/SessionView";
 import { LeaveSessionDialog } from "../session/LeaveSessionDialog";
 import { PathsView } from "../session/PathsView";
@@ -2308,6 +2309,8 @@ export function MainWindow() {
 
   return (
     <>
+    {/* Today's chosen exercises, built outside the runner and handed in (t2e). Memoised: no per-beat render. */}
+    <ChosenTodayParts onParts={sessionRun.actions.setChosenParts} />
     <ZenTransition isActive={isFullscreen} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
       <FullscreenView
         state={state}
