@@ -1,0 +1,72 @@
+{
+  "help": {
+    "entry": {
+      "screen": {
+        "today": "Aujourd'hui construit ta séance à partir des parcours que tu suis, et Commencer la lance. Choisis combien de minutes tu as et, si tu suis plus d'un parcours, si aujourd'hui les mélange ou s'en tient à un seul. Chaque ligne dit pourquoi elle est dans le plan ; Échanger la remplace par un autre exercice, et appuyer sur une ligne lance la séance à cet endroit.",
+        "paths": "Parcours liste tous les parcours, groupés en Les bases, Comment marche l'harmonie, Technique et Styles ; rien n'est verrouillé, tu peux donc commencer n'importe quelle étape. Chaque carte montre où tu en es, et son interrupteur met le parcours dans ton mélange du jour ou le laisse de côté. Mes exercices, ceux que tu as faits dans Demander, sont tout en bas.",
+        "path": "La page d'un parcours montre où tu en es, avec le bouton qui continue à partir de là, et les étapes dans l'ordre. Niveau choisit l'endroit d'où Aujourd'hui te fait partir, et S'abonner met le parcours dans le plan d'Aujourd'hui, jusqu'à quatre parcours à la fois. Le volet en dessous dit ce que ce parcours peut mesurer et ce qu'il ne peut pas.",
+        "step": "La page d'une étape liste ses exercices avec leurs tempos et leurs seuils ; Jouer ça en joue un, et Trouver ma limite fait monter son tempo une fois que tu l'as joué. Réussis la plupart des exercices notés et l'étape est faite, ou Valider l'étape essaie chacun de ceux que tu n'as pas encore réussis en une seule prise. Notes de technique dit pourquoi l'étape est là et comment la jouer.",
+        "sessionReady": "Voici l'exercice avant sa prise : le tempo, le seuil et la note du coach sur ce qu'il faut essayer. Plus lent et Plus vite changent le tempo, Voir allume les notes dans l'ordre sans rien noter, et après une prise qui a glissé à un endroit, un bouton boucle cette mesure ou ces deux mesures à un tempo plus lent, sans note. Le gros bouton lance la prise.",
+        "sessionTake": "Une prise est en cours : le décompte, puis les notes que tu joues sur la grille à mesure qu'elles arrivent. La vue est verrouillée pendant qu'elle dure, et Terminer la prise l'arrête. Demander se rouvre quand la prise est finie.",
+        "sessionResult": "Voici comment la prise s'est passée : le chiffre qui a décidé, si elle a atteint le seuil et, mesure par mesure, où elle a tenu ou glissé. Le gros bouton rejoue ou passe à la suite, et la ligne en dessous change le tempo ou boucle une mesure. Demander peut t'en dire plus sur cette prise.",
+        "sessionTimed": "Cette partie de la séance se joue contre la montre et n'est pas notée : un échauffement, un jam, une rampe, un final ou ton tour. Lance-la, et elle passe à la suite toute seule quand son temps est écoulé ; Pause, Recommencer et Passer sont là pendant qu'elle tourne.",
+        "sessionRecap": "La séance est finie : ce que tu as joué, ce qui a bougé et quand un exercice revient. D'ici tu peux jouer 5 minutes de plus, revenir où tu étais ou ouvrir Progrès.",
+        "progress": "Progrès, c'est ce qui a été mesuré dans ton jeu : les minutes en prises, les séances, ta série de jours et le tempo propre de chaque parcours au fil du temps. Sur un ordinateur, Passages d'outils, en dessous, garde chaque passage où le coach a écouté dans les outils.",
+        "tools": "Outils réunit le Métronome, Setlist, Rampe, Jam et Morceaux. Utilise-les quand tu veux ; ce que tu y joues reste à toi et ne fait rien avancer dans tes parcours.",
+        "metronome": "Le Métronome est un clic sur lequel jouer. Règle le tempo (ou tape-le), la mesure, la subdivision, les accents et le son, et enregistre un réglage comme préréglage. Avec Écouter activé, le coach écoute pendant que tu joues.",
+        "drill": "Rampe fait monter le tempo pendant que tu joues, écrite comme une phrase que tu modifies : tempo de départ et tempo cible, à quelle vitesse il monte et sur combien de mesures. Linéaire monte régulièrement, Zigzag monte et redescend, et Adaptatif monte ou baisse le tempo selon ta façon de jouer.",
+        "setlist": "Une setlist est une routine que tu construis toi-même : des étapes jouées dans l'ordre, chacune avec son tempo, sa mesure et sa durée. Chaque étape dit quand elle passe à la suite et comment elle passe la main à la suivante ; Commencer joue la liste.",
+        "jam": "Jam est un groupe qui joue une forme pendant que tu joues dessus, et il n'est jamais noté. Choisis une ambiance, le feeling, la forme et les accords ; les outils d'entraînement peuvent retirer le groupe pour quelques mesures, alterner des mesures avec toi ou monter le tempo à chaque passage.",
+        "songs": "Morceaux ouvre un fichier Guitar Pro ou MusicXML et montre sa tablature, garde le tempo et te suit. Choisis ta partie, les mesures et la vitesse, boucle un passage et règle qui tu entends. Le fichier reste sur cet appareil.",
+        "settings": "Paramètres réunit les choix de l'appli : Général, Pratique (dont le fait que ton jeu soit noté ou non), Périphériques pour l'entrée audio, Coach, Apparence, les outils, Morceaux, Raccourcis et plus. Demander n'y est pas ouvert.",
+        "modelSelector": "Le modèle du coach choisit si un modèle de langage tourne sur cet ordinateur : Désactivé laisse le coach à ses propres règles, et Standard ou Studio est un modèle qui demande d'abord un Téléchargement. Rien n'est téléchargé ni chargé tant que tu n'appuies pas. Avec un modèle chargé, une question tapée à laquelle rien d'autre ici ne répond reçoit une réponse dans ses propres mots, marquée comme conseil général.",
+        "ask": "Demander répond aux questions sur cet écran, tes prises et tes parcours, d'après ce que l'appli a mesuré et ce que disent les parcours ; une puce pose une question en un appui. Les commandes tapées comme « plus lent » ou « ouvrir Progrès » sont exécutées, ou proposées en un appui. L'onglet Carnet garde ce que le coach a remarqué et ton objectif."
+      },
+      "word": {
+        "take": "Une prise est un passage d'un exercice dans une séance, du décompte jusqu'à la fin. Une prise notée est mesurée et peut atteindre le seuil ; une prise trop courte pour être jugée ne compte ni pour ni contre. Dans Jam et Morceaux, une prise est un enregistrement de ton jeu, et elle n'est pas notée.",
+        "step": "Une étape est un palier d'un parcours, avec quelques exercices et des notes sur pourquoi elle est là. Elle est faite quand tu réussis la plupart de ses exercices notés, ou en la validant.",
+        "level": "Ton Niveau dans un parcours, Débutant, Intermédiaire ou Avancé, fixe l'étape d'où Aujourd'hui te fait partir. Aujourd'hui saute les étapes en dessous, mais tu peux toujours les jouer.",
+        "rung": "Un cran est un pas de tempo d'un exercice. Plus vite et Plus lent bougent d'un cran, et atteindre le seuil laisse le plan te monter au suivant.",
+        "passMark": "Un seuil est ce qu'une prise doit atteindre pour être réussie, par exemple la régularité du tempo ou le nombre de notes entendues. Chaque exercice montre ses propres seuils, et une prise ne les remplit que lorsqu'elle les atteint tous.",
+        "cleanTempo": "Ton tempo propre sur un exercice est le tempo le plus rapide auquel tu as atteint le seuil sur huit mesures de suite. Les prises que tu as marquées comme non équitables n'y comptent pas.",
+        "review": "Une révision ramène un exercice que tu as réussi, un jour plus tard puis après 3, 7, 14 et 30 jours, pour deux prises qui le gardent frais. S'il a glissé, il revient plus tôt et un cran plus lent.",
+        "parked": "Un exercice est mis de côté quand trois séances de suite n'ont apporté aucun nouveau tempo propre. Il se repose quelques jours puis revient frais.",
+        "benchmark": "Un benchmark est la même prise du même exercice aux jours 1, 7, 14 et 21 après ton abonnement à un parcours, pour que tu entendes le changement. Aujourd'hui le met dans le plan quand il est dû.",
+        "grading": "Noté veut dire que l'appli écoute par ton entrée et mesure ton tempo et tes notes par rapport au seuil. Non noté, ou Juste jouer, te donne le clic et le visuel sans rien mesurer ; ces prises comptent comme de la pratique, mais seules les prises notées font avancer ton tempo propre et tes étapes. Paramètres, Pratique le choisit, et une séance peut le demander.",
+        "notFair": "Après un résultat serré, tu peux dire que la note n'était pas équitable. La note est gardée telle que mesurée, avec ta réponse à côté, et cette prise cesse de compter pour le tempo propre que montre l'appli. Réponds Oui plus tard et elle compte de nouveau.",
+        "listen": "Écouter est l'interrupteur de la barre des outils qui laisse le coach écouter ton jeu là. Il reste éteint tant que tu ne l'allumes pas ; quand tu l'éteins, le passage est gardé dans Passages d'outils.",
+        "toolRuns": "Passages d'outils, dans Progrès, liste chaque passage où le coach a écouté dans les outils et dans les séances, du plus récent au plus ancien. Il n'existe que sur ordinateur.",
+        "myExercises": "Mes exercices sont des exercices que tu as faits toi-même, listés au bas de Parcours. Ils n'appartiennent à aucun parcours et ne font rien réussir. Tu en fais un dans Demander en tapant ce que tu veux, comme une gamme et une position, puis en appuyant sur Add it.",
+        "notebook": "Le Carnet est le deuxième onglet de Demander. Il montre ce que le coach a remarqué sur au moins cinq de tes prises enregistrées, te laisse écarter une ligne pendant 30 jours et garde ton objectif dans tes propres mots. Rien dedans n'est écrit par un modèle.",
+        "variant": "Certains exercices existent en variantes : la même compétence dans une autre tonalité ou une autre forme. La séance en choisit une, et ses propres mots remplacent ceux de l'exercice quand elle en a.",
+        "countIn": "Le décompte est la mesure de clics avant que tu commences à jouer, pour que tu entres à temps. Il ne fait pas partie de ce qui est noté.",
+        "loop": "Une boucle joue une mesure ou deux de l'exercice en rond, lentement, jusqu'à ce que tu l'arrêtes. Rien dans une boucle n'est noté ni gardé.",
+        "testOut": "Valider l'étape joue une prise au tempo de réussite de chaque exercice d'une étape que tu n'as pas encore réussi. Réussis-en assez et l'étape est faite.",
+        "warmUp": "Un échauffement ouvre une séance et un final la ferme. Les deux se jouent contre la montre et ne sont pas notés."
+      }
+    },
+    "tuning": {
+      "none": "L'appli n'a pas encore d'accordeur, donc je n'ai pas vérifié ton accordage et je ne peux pas t'aider là-dessus ici."
+    },
+    "search": {
+      "from": "Le passage le plus proche dans tes parcours, tiré de « {{step}} » dans {{path}} :"
+    },
+    "ui": {
+      "chip": "À quoi sert cet écran ?",
+      "placeholder": "Cherche dans tes parcours ou touche une question",
+      "empty": {
+        "local": "Tape une question et l'appli répond d'après tes prises, tes parcours et sa propre aide, sans avoir besoin d'un modèle. Ou touche une question ci-dessous.",
+        "phone": "Tape une question et l'appli répond d'après tes prises, tes parcours et sa propre aide. Ou touche une question ci-dessous."
+      },
+      "reply": {
+        "local": "Rien dans tes prises, tes parcours ou l'aide de l'appli ne répond à ça. Avec un modèle activé, choisi au bas de ce panneau, elle pourrait répondre dans ses propres mots.",
+        "phone": "Rien dans tes prises, tes parcours ou l'aide de l'appli ne répond à ça."
+      },
+      "footer": {
+        "local": "Réponses tirées de tes prises et de tes parcours. Rien de ce que tu tapes ne quitte cet ordinateur.",
+        "phone": "Réponses tirées de tes prises et de tes parcours. Rien de ce que tu tapes ne quitte ce téléphone.",
+        "model": "Réponses tirées de tes prises et de tes parcours, et dans ses propres mots par le modèle de cet ordinateur. Rien de ce que tu tapes ne le quitte."
+      }
+    }
+  }
+}

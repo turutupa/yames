@@ -1,0 +1,72 @@
+{
+  "help": {
+    "entry": {
+      "screen": {
+        "today": "Vandaag bouwt je sessie uit de leerpaden die je volgt, en Starten begint hem. Kies hoeveel minuten je hebt en, als je meer dan één leerpad volgt, of vandaag ze mengt of bij één blijft. Elke rij zegt waarom hij in het plan staat; Wisselen ruilt hem voor een andere oefening, en op een rij drukken start de sessie daar.",
+        "paths": "Leerpaden toont alle leerpaden, gegroepeerd in Basis, Hoe harmonie werkt, Techniek en Stijlen; niets is vergrendeld, dus je kunt elke stap beginnen. Elke kaart laat zien waar je bent, en de schakelaar zet het leerpad in je dagelijkse mix of laat het erbuiten. Mijn oefeningen, die je in Vraag hebt gemaakt, staan onderaan.",
+        "path": "De pagina van een leerpad laat zien waar je erin bent, met de knop die vanaf daar verdergaat, en de stappen op volgorde. Niveau kiest waar Vandaag je laat beginnen, en Abonneren zet het leerpad in het plan van Vandaag, tot vier leerpaden tegelijk. Het uitklapveld eronder zegt wat dit leerpad wel en niet kan meten.",
+        "step": "De pagina van een stap toont zijn oefeningen met hun tempo's en latten; Speel dit speelt er één, en Mijn grens vinden verhoogt het tempo zodra je hem hebt gespeeld. Haal de meeste beoordeelde oefeningen en de stap is klaar, of Uittesten probeert elke oefening die je nog niet hebt gehaald in één take. Techniekaantekeningen zegt waarom de stap er is en hoe je hem speelt.",
+        "sessionReady": "Dit is de oefening vóór zijn take: het tempo, de lat en de notitie van de coach over wat je kunt proberen. Langzamer en Sneller veranderen het tempo, Bekijk laat de noten op volgorde oplichten zonder iets te beoordelen, en na een take die op één plek wegglipte, herhaalt een knop die maat of twee op een lager tempo, zonder beoordeling. De grote knop start de take.",
+        "sessionTake": "Er loopt een take: de inteller, dan de noten die je speelt tegen het raster, zodra ze binnenkomen. De weergave is vergrendeld zolang hij loopt, en Take beëindigen stopt hem. Vraag gaat weer open als de take voorbij is.",
+        "sessionResult": "Zo ging de take: het getal dat besliste, of hij de lat haalde en, maat voor maat, waar hij hield of wegglipte. De grote knop doet het nog eens of gaat verder, en de rij eronder verandert het tempo of loopt een maat. Vraag kan je meer over deze take vertellen.",
+        "sessionTimed": "Dit deel van de sessie loopt tegen de klok en wordt niet beoordeeld: een warming-up, een jam, een tempo-opbouw, een afsluiter of jouw beurt. Start hem, en hij gaat zelf verder als de tijd om is; Pauze, Opnieuw en Overslaan zijn er zolang hij loopt.",
+        "sessionRecap": "De sessie is klaar: wat je speelde, wat er verschoof en wanneer een oefening terugkomt. Vanaf hier kun je nog 5 minuten spelen, teruggaan naar waar je was of Voortgang openen.",
+        "progress": "Voortgang is wat er van je spel is gemeten: minuten in takes, sessies, je reeks dagen en het schone tempo van elk leerpad door de tijd. Op een computer bewaart Toolruns eronder elk stuk waarin de coach in de tools heeft geluisterd.",
+        "tools": "Tools bevat Metronoom, Setlist, Tempotraining, Jam en Nummers. Gebruik ze wanneer je wilt; wat je erin speelt blijft van jou en verschuift niets in je leerpaden.",
+        "metronome": "De Metronoom is een klik om bij te spelen. Stel het tempo in (of tik het), de maatsoort, de onderverdeling, de accenten en het geluid, en bewaar een opstelling als preset. Met Luister aan luistert de coach terwijl je speelt.",
+        "drill": "Tempotraining verhoogt het tempo terwijl je speelt, geschreven als een zin die je bewerkt: begin- en doeltempo, hoe snel het stijgt en over hoeveel maten. Lineair stijgt gelijkmatig, Zigzag stijgt en valt terug, en Adaptief verhoogt of verlaagt het tempo op basis van hoe je speelt.",
+        "setlist": "Een setlist is een routine die je zelf bouwt: stappen die op volgorde worden gespeeld, elk met eigen tempo, maatsoort en lengte. Elke stap zegt wanneer hij doorgaat en hoe hij overdraagt aan de volgende; Starten speelt de lijst.",
+        "jam": "Jam is een band die een vorm speelt terwijl jij erboven speelt, en hij wordt nooit beoordeeld. Kies een sfeer, de feel, de vorm en de akkoorden; de oefentools kunnen de band een paar maten laten wegvallen, maten met je afwisselen of het tempo elke ronde verhogen.",
+        "songs": "Nummers opent een Guitar Pro- of MusicXML-bestand en toont de tab, houdt de tijd bij en volgt waar je bent. Kies je partij, de maten en de snelheid, loop een stuk en stel in wie je hoort. Het bestand blijft op dit apparaat.",
+        "settings": "Instellingen bevat de keuzes van de app: Algemeen, Oefenen (inclusief of je spel wordt beoordeeld), Apparaten voor de audio-ingang, Oefencoach, Weergave, de tools, Nummers, Sneltoetsen en meer. Vraag is daar niet open.",
+        "modelSelector": "Het coachmodel kiest of er een taalmodel op deze computer draait: Uit houdt de coach bij zijn eigen regels, en Standaard of Studio is een model dat eerst een Download nodig heeft. Er wordt niets gedownload of geladen tot je drukt. Met een geladen model krijgt een getypte vraag waar hier niets anders antwoord op geeft een antwoord in eigen woorden, gemarkeerd als algemeen advies.",
+        "ask": "Vraag beantwoordt vragen over dit scherm, je takes en je leerpaden, uit wat de app heeft gemeten en wat de leerpaden zeggen; een chip stelt een vraag met één druk. Getypte opdrachten zoals “langzamer” of “open Voortgang” worden uitgevoerd, of aangeboden voor één druk. Het tabblad Notitieboek bewaart wat de coach heeft opgemerkt en je doel."
+      },
+      "word": {
+        "take": "Een take is één keer een oefening spelen in een sessie, van de inteller tot het einde. Een beoordeelde take wordt gemeten en kan de lat halen; een take die te kort is om te beoordelen telt in geen van beide richtingen. In Jam en Nummers is een take een opname van jou terwijl je speelt, en hij wordt niet beoordeeld.",
+        "step": "Een stap is één fase van een leerpad, met een paar oefeningen en notities over waarom hij er is. Hij is klaar als je de meeste van zijn beoordeelde oefeningen haalt, of door uit te testen.",
+        "level": "Je Niveau in een leerpad, Beginner, Gemiddeld of Gevorderd, bepaalt de stap waar Vandaag je laat beginnen. Stappen eronder slaat Vandaag over, maar je kunt ze nog steeds spelen.",
+        "rung": "Een trede is één tempostap van een oefening. Sneller en Langzamer gaan één trede, en als je de lat haalt, kan het plan je naar de volgende brengen.",
+        "passMark": "De lat is wat een take moet halen om te slagen, bijvoorbeeld hoe gelijkmatig de timing is of hoeveel van de noten te horen zijn. Elke oefening toont zijn eigen latten, en een take haalt ze alleen als hij elke lat haalt.",
+        "cleanTempo": "Je schone tempo bij een oefening is het snelste tempo waarop je de lat haalde over acht maten achter elkaar. Takes die je als niet eerlijk hebt gemarkeerd, tellen daar niet voor mee.",
+        "review": "Een herhaling brengt een oefening die je haalde terug, een dag later en dan na 3, 7, 14 en 30 dagen, voor twee takes om hem fris te houden. Als hij weggleed, komt hij eerder terug en één trede langzamer.",
+        "parked": "Een oefening staat op pauze als drie sessies achter elkaar geen nieuw schoon tempo opleverden. Hij rust een paar dagen en komt dan fris terug.",
+        "benchmark": "Een benchmark is dezelfde take van dezelfde oefening op dag 1, 7, 14 en 21 nadat je je op een leerpad hebt geabonneerd, zodat je de verandering kunt horen. Vandaag zet hem in het plan als er een aan de beurt is.",
+        "grading": "Beoordeeld betekent dat de app via je ingang luistert en je timing en noten meet aan de lat. Niet beoordeeld, of Gewoon spelen, geeft je de klik en het beeld zonder iets te meten; die takes tellen als oefenen, maar alleen beoordeelde takes verschuiven je schone tempo en je stappen. Instellingen, Oefenen kiest het, en een sessie kan ernaar vragen.",
+        "notFair": "Na een nipt resultaat kun je zeggen dat de beoordeling niet eerlijk was. De beoordeling blijft zoals gemeten, met je antwoord ernaast, en die take telt niet meer mee voor het schone tempo dat de app toont. Antwoord later Ja en hij telt weer mee.",
+        "listen": "Luister is de schakelaar in de balk van de tools waarmee de coach daar naar je spel luistert. Hij blijft uit tot je hem aanzet; als je hem uitzet, wordt de run bewaard in Toolruns.",
+        "toolRuns": "Toolruns, onder Voortgang, toont elk stuk waarin de coach heeft geluisterd in de tools en in sessies, de nieuwste eerst. Het bestaat alleen op een computer.",
+        "myExercises": "Mijn oefeningen zijn oefeningen die je zelf hebt gemaakt, onderaan Leerpaden getoond. Ze horen bij geen enkel leerpad en halen niets. Je maakt er een in Vraag door te typen wat je wilt, zoals een toonladder en een positie, en op Add it te drukken.",
+        "notebook": "Het Notitieboek is het tweede tabblad van Vraag. Het toont wat de coach heeft opgemerkt in minstens vijf van je bewaarde takes, laat je een regel 30 dagen weglaten en bewaart je doel in je eigen woorden. Niets erin is door een model geschreven.",
+        "variant": "Sommige oefeningen komen in varianten: dezelfde vaardigheid in een andere toonsoort of vorm. De sessie kiest er één, en zijn eigen woorden vervangen die van de oefening waar hij ze heeft.",
+        "countIn": "De inteller is de maat klikken voordat je begint te spelen, zodat je op tijd instapt. Hij hoort niet bij wat beoordeeld wordt.",
+        "loop": "Een loop speelt een maat of twee van de oefening steeds opnieuw, langzaam, tot je hem stopt. Niets in een loop wordt beoordeeld of bewaard.",
+        "testOut": "Uittesten speelt één take op het slaagtempo van elke oefening in een stap die je nog niet hebt gehaald. Haal er genoeg en de stap is klaar.",
+        "warmUp": "Een warming-up opent een sessie en een afsluiter sluit hem. Beide lopen tegen de klok en worden niet beoordeeld."
+      }
+    },
+    "tuning": {
+      "none": "De app heeft nog geen stemapparaat, dus ik heb je stemming niet gecontroleerd en kan je er hier niet mee helpen."
+    },
+    "search": {
+      "from": "De dichtstbijzijnde passage in je leerpaden, uit “{{step}}” in {{path}}:"
+    },
+    "ui": {
+      "chip": "Waar dient dit scherm voor?",
+      "placeholder": "Zoek in je leerpaden of tik op een vraag",
+      "empty": {
+        "local": "Typ een vraag en de app antwoordt uit je takes, je leerpaden en zijn eigen help, zonder model. Of tik hieronder op een vraag.",
+        "phone": "Typ een vraag en de app antwoordt uit je takes, je leerpaden en zijn eigen help. Of tik hieronder op een vraag."
+      },
+      "reply": {
+        "local": "Niets in je takes, je leerpaden of de help van de app beantwoordt dat. Met een model aan, onderaan dit paneel gekozen, kan het in eigen woorden antwoorden.",
+        "phone": "Niets in je takes, je leerpaden of de help van de app beantwoordt dat."
+      },
+      "footer": {
+        "local": "Antwoorden uit je takes en leerpaden. Niets wat je typt verlaat deze computer.",
+        "phone": "Antwoorden uit je takes en leerpaden. Niets wat je typt verlaat deze telefoon.",
+        "model": "Antwoorden uit je takes en leerpaden, en in eigen woorden van het model op deze computer. Niets wat je typt verlaat die."
+      }
+    }
+  }
+}

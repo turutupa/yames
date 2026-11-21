@@ -31,14 +31,10 @@
     "empty": {
       "title": "Cosa vuoi sapere?",
       "model": "Chiedi di questa schermata, dei tuoi take o dei tuoi percorsi. Il modello su questo computer risponde con parole sue, come consiglio generale.",
-      "loading": "Il modello che hai scelto si sta preparando. Quando è pronto, puoi chiedere di questa schermata, dei tuoi take o dei tuoi percorsi.",
-      "noModel": "Le domande scritte richiedono un modello su questo computer, e nessuno è attivo. Scegline uno qui sotto per chiedere di questa schermata, dei tuoi take o dei tuoi percorsi.",
-      "phone": "Le domande scritte richiedono un modello, e i telefoni non ne eseguono ancora uno."
+      "loading": "Il modello che hai scelto si sta preparando. Quando è pronto, puoi chiedere di questa schermata, dei tuoi take o dei tuoi percorsi."
     },
     "reply": {
-      "noModel": "Nessun modello è attivo, quindi le domande scritte non hanno ancora risposta. Scegline uno in fondo a questo pannello.",
       "gettingReady": "Il modello si sta ancora preparando. Chiedi di nuovo tra un attimo.",
-      "phone": "I telefoni non eseguono ancora un modello, quindi qui le domande scritte non hanno risposta.",
       "nothing": "Questa volta non è arrivata nessuna risposta."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "Come ho capito la tua domanda. Non succede nulla finché non premi."
     },
     "footer": {
-      "choice": "Risposte dalle tue take e dai tuoi percorsi, con l'aiuto del modello su questo computer. Niente ne esce.",
-      "model": "Risposta del modello su questo computer. Niente di ciò che scrivi ne esce.",
-      "local": "Niente di ciò che scrivi qui lascia questo computer.",
-      "phone": "Niente di ciò che scrivi qui lascia questo telefono."
+      "choice": "Risposte dalle tue take e dai tuoi percorsi, con l'aiuto del modello su questo computer. Niente ne esce."
     },
     "card": {
       "chips": "Sul tuo ultimo take:",

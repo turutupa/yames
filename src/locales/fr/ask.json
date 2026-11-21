@@ -31,14 +31,10 @@
     "empty": {
       "title": "Que veux-tu savoir ?",
       "model": "Demande à propos de cet écran, de tes prises ou de tes parcours. Le modèle de cet ordinateur répond avec ses propres mots, comme un conseil général.",
-      "loading": "Le modèle que tu as choisi se prépare. Dès qu'il est prêt, tu peux poser tes questions sur cet écran, tes prises ou tes parcours.",
-      "noModel": "Les questions écrites demandent un modèle sur cet ordinateur, et aucun n'est activé. Choisis-en un ci-dessous pour demander à propos de cet écran, de tes prises ou de tes parcours.",
-      "phone": "Les questions écrites demandent un modèle, et les téléphones n'en font pas encore tourner."
+      "loading": "Le modèle que tu as choisi se prépare. Dès qu'il est prêt, tu peux poser tes questions sur cet écran, tes prises ou tes parcours."
     },
     "reply": {
-      "noModel": "Aucun modèle n'est activé, donc les questions écrites n'ont pas encore de réponse. Choisis-en un au bas de ce panneau.",
       "gettingReady": "Le modèle se prépare encore. Pose ta question de nouveau dans un instant.",
-      "phone": "Les téléphones ne font pas encore tourner de modèle, donc les questions écrites n'ont pas de réponse ici.",
       "nothing": "Aucune réponse n'est revenue cette fois."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "Ma lecture de ta question. Rien ne se passe tant que tu n'appuies pas."
     },
     "footer": {
-      "choice": "Réponses tirées de tes prises et de tes parcours, avec l'aide du modèle de cet ordinateur. Rien n'en sort.",
-      "model": "Réponse du modèle de cet ordinateur. Rien de ce que tu écris n'en sort.",
-      "local": "Rien de ce que tu écris ici ne quitte cet ordinateur.",
-      "phone": "Rien de ce que tu écris ici ne quitte ce téléphone."
+      "choice": "Réponses tirées de tes prises et de tes parcours, avec l'aide du modèle de cet ordinateur. Rien n'en sort."
     },
     "card": {
       "chips": "À propos de ta dernière prise :",

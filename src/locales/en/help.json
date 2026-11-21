@@ -39,7 +39,7 @@
         "myExercises": "My exercises are exercises you made yourself, listed at the bottom of Paths. They belong to no Path and pass nothing. You make one in Ask by typing what you want, such as a scale and a position, and pressing Add it.",
         "notebook": "The Notebook is Ask's second tab. It shows what the coach noticed across at least five of your stored Takes, lets you leave a line out for 30 days, and keeps your goal in your own words. Nothing in it is written by a model.",
         "variant": "Some Exercises come in variants: the same skill in another key or another shape. The Session chooses one, and its own words replace the Exercise's where it has them.",
-        "countIn": "The count-in is the bar of clicks before you start playing, so you come in on time. It is not part of what is graded.",
+        "countIn": "The count-in is one bar of clicks before you start playing, so you come in on time. It is not part of what is graded.",
         "loop": "A loop plays a bar or two of the Exercise round and round, slowly, until you stop it. Nothing in a loop is graded or kept.",
         "testOut": "Test out plays one Take at the pass tempo of each Exercise in a Step you haven't passed yet. Pass enough of them and the Step is done.",
         "warmUp": "A warm-up opens a Session and a finisher closes it. Both run against the clock and are not graded."

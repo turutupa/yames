@@ -31,14 +31,10 @@
     "empty": {
       "title": "What do you want to know?",
       "model": "Ask about this screen, your Takes or your Paths. The model on this computer answers in its own words, as general advice.",
-      "loading": "The model you chose is getting ready. Once it is, you can ask about this screen, your Takes or your Paths.",
-      "noModel": "Typed questions need a model on this computer, and none is on. Choose one below to ask about this screen, your Takes or your Paths.",
-      "phone": "Typed questions need a model, and phones don't run one yet."
+      "loading": "The model you chose is getting ready. Once it is, you can ask about this screen, your Takes or your Paths."
     },
     "reply": {
-      "noModel": "No model is on, so typed questions can't be answered yet. Choose one at the foot of this panel.",
       "gettingReady": "The model is still getting ready. Ask again in a moment.",
-      "phone": "Phones don't run a model yet, so typed questions can't be answered here.",
       "nothing": "No answer came back this time."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "My reading of what you asked. Nothing happens until you press."
     },
     "footer": {
-      "choice": "Answers from your Takes and Paths, with help from the model on this computer. Nothing leaves it.",
-      "model": "Answered by the model on this computer. Nothing you type leaves it.",
-      "local": "Nothing you type here leaves this computer.",
-      "phone": "Nothing you type here leaves this phone."
+      "choice": "Answers from your Takes and Paths, with help from the model on this computer. Nothing leaves it."
     },
     "card": {
       "chips": "About your last Take:",

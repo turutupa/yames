@@ -31,14 +31,10 @@
     "empty": {
       "title": "Bạn muốn biết điều gì?",
       "model": "Hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn. Mô hình trên máy tính này trả lời bằng lời của chính nó, như lời khuyên chung.",
-      "loading": "Mô hình bạn chọn đang được chuẩn bị. Khi xong, bạn có thể hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn.",
-      "noModel": "Câu hỏi gõ vào cần một mô hình trên máy tính này, và hiện chưa bật mô hình nào. Chọn một mô hình bên dưới để hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn.",
-      "phone": "Câu hỏi gõ vào cần một mô hình, và điện thoại chưa chạy được mô hình."
+      "loading": "Mô hình bạn chọn đang được chuẩn bị. Khi xong, bạn có thể hỏi về màn hình này, các lượt của bạn hoặc các lộ trình của bạn."
     },
     "reply": {
-      "noModel": "Chưa bật mô hình nào, nên chưa thể trả lời câu hỏi gõ vào. Hãy chọn một mô hình ở cuối bảng này.",
       "gettingReady": "Mô hình vẫn đang được chuẩn bị. Hãy hỏi lại sau một lát.",
-      "phone": "Điện thoại chưa chạy được mô hình, nên ở đây chưa thể trả lời câu hỏi gõ vào.",
       "nothing": "Lần này không có câu trả lời nào trả về."
     },
     "model": {
@@ -48,10 +44,7 @@
       "reading": "Đây là cách tôi hiểu câu hỏi của bạn. Sẽ không có gì xảy ra cho đến khi bạn bấm."
     },
     "footer": {
-      "choice": "Trả lời từ các lượt và lộ trình của bạn, với sự trợ giúp của mô hình trên máy tính này. Không gì rời khỏi máy.",
-      "model": "Do mô hình trên máy tính này trả lời. Những gì bạn gõ không rời khỏi máy.",
-      "local": "Những gì bạn gõ ở đây không rời khỏi máy tính này.",
-      "phone": "Những gì bạn gõ ở đây không rời khỏi điện thoại này."
+      "choice": "Trả lời từ các lượt và lộ trình của bạn, với sự trợ giúp của mô hình trên máy tính này. Không gì rời khỏi máy."
     },
     "card": {
       "chips": "Về lượt gần nhất của bạn:",
