@@ -181,7 +181,8 @@
     "forget_heard_take",
     "hear_take",
     "heard_take",
-    "stop_hear_take"
+    "stop_hear_take",
+    "list_attempt_times_since"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -363,7 +364,8 @@
     "forget_heard_take",
     "hear_take",
     "heard_take",
-    "stop_hear_take"
+    "stop_hear_take",
+    "list_attempt_times_since"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -602,7 +604,8 @@
     "forgetHeardTake",
     "hearTake",
     "heardTake",
-    "stopHearTake"
+    "stopHearTake",
+    "listAttemptTimesSince"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
