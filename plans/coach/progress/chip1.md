@@ -62,6 +62,24 @@ Then the receipt stays as a plain line.
   the field still ends up on the entry, and the test checks table and entries agree.
 - Strings: none new (the receipt and Undo strings exist).
 
-## Gates
+## Gates (job logs under `~/scratch/jobq/<id>-coach-chip1-<what>.log`)
 
-See the report section at the end (filled in as they run).
+- tsc: pass (`tsc3`, after the last code change).
+- vitest full (`vitest`, job 307): 48252 passed; only `TabStage.render.test.tsx` (known, symlink). After
+  the last fix: `src/coach/tools` + `src/containers/coach` pass (`vt4`).
+- `npm run build`: pass (`build2`, after the last change).
+- Layout: `ask`, `ask-typed`, `short-window`, `coach-session`, `smooth` pass (`pw1`, `/tmp/coach-chip1/pw1.log`)
+  except `smooth.spec.ts:173` "Ask commits nothing during a running Take" (a 212 ms long task under load;
+  passes re-run alone, `smooth`). `ask-tools` failed in `pw1` on a real bug (a stale read right after the
+  press retired the new Undo; fixed in `2485f8be`), then 18/18 pass (`pw2`). Full suite owed.
+- Pictures (`/tmp/coach-chip1/shots/`): `ember-tools-chip-receipt-1024.png` (Metronome, "Tempo 120 → 115
+  BPM · Undo"), `ember-tools-chip-receipt-session-1024.png` (Session, "Tempo 80 → 70 BPM · Undo"), and the
+  1440 / neon / manuscript variants; the proposal scenes (`*-tools-proposal-*`) now show a typed "slower".
+
+## For the next leg
+
+- c3b2a (the model): a model's call must go through `runCoachTool` (proposal), never `pressCoachChip`;
+  `chipPress.test.ts` fails if anything but `askTools.ts` and the runner names `pressCoachChip(`.
+- A host subscription would let the Undo go the moment the tempo dial moves with the panel open (today it
+  goes at the next panel open / screen / phase move, or is refused at the press).
+- c2b1c: `AskPanel.tsx` hunks here are the import line and the chip row's `onClick` only.
