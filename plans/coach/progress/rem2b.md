@@ -34,6 +34,14 @@ attempt of every song is read, without onsets, once per read). The quiet note's 
 - L9: Off/On is `role="group"` named "Practice reminder". Test "the Off/On pair is a group ...".
 - L10: positive controls added; a cleared time writes nothing; unknown fields of a valid value kept.
 
+## Merge and gates
+
+`merge(coach): into coach-rem2` merged clean (TodayView: the reminder above Today's line, the Songs due
+passage in the line; the manifest kept both). After the merge: tsc 0; `npm run build` 0; `npm run test`
+461 of 462 files, 50335 passed, 10 skipped, the one failure the known TabStage.render symlink
+(job log `/home/dgx-delgado/scratch/jobq/919-coach-rem2b-test.log`); layout `reminder today-line
+settings short-window` 135 passed.
+
 ## Left
 
 - L6 (a press over an unreadable value writes a whole value): documented and consistent with Suggestions.
