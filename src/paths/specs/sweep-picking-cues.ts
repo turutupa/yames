@@ -71,6 +71,13 @@ const LAST_TWO_BEATS = "Count the last note's two beats, then go round.";
 const TOP_NOTE_LATE = "Put the top note on beats two and four.";
 const TOP_NOTE_EARLY = "Wait for beats two and four to reach the top.";
 const REST_MOVE = "Use the two-note rests to move.";
+// cues13b: Advanced.
+const ONE_PER_STRING = "Pick each string once each way, no more.";
+const THREE_TO_TWO = "Keep three even notes to every two clicks.";
+const TWO_LOOPS_EACH = "Play two loops of each, then move on the click.";
+const HELD_E_COUNT = "Count the held E's two beats, then go round.";
+const HELD_E_LAND = "Land the held E right on beat three.";
+const SWAP_ONE = "Swap one bar for your own, then record it.";
 
 export const SWEEP_PICKING_CUES: CueBook = {
   // ── Beginner ──────────────────────────────────────────────────────────
@@ -455,7 +462,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("late", "Start each new loop right on beat one."),
     c("early", "Wait for beat one before each new loop."),
     c("shift", MOVE_AT_START),
-    c("stringChange", "Keep three even notes to every two clicks.", 0),
+    c("stringChange", THREE_TO_TWO, 0),
     c("lastBars", "Run the last loop straight into the first."),
   ],
 
@@ -524,7 +531,7 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("lastBars", "Keep the last pass as even as the first."),
   ],
   "minor-progressions.minor-two-five-one": [
-    g("Play two loops of each, then move on the click.", 0),
+    g(TWO_LOOPS_EACH, 0),
     c("heard", EACH_ARRIVES),
     c("extras", IN_USE),
     c("late", SWEEP_LATE),
@@ -598,5 +605,211 @@ export const SWEEP_PICKING_CUES: CueBook = {
     c("stringChange", OWN_MOMENT),
     c("lastBars", "Hammer the high A right on beat three.", 0),
   ],
-  "over-the-progression.your-chorus": [g("Swap one bar for your own, then record it.", 0)],
+  "over-the-progression.your-chorus": [g(SWAP_ONE, 0)],
+
+  // ── Advanced ──────────────────────────────────────────────────────────
+
+  // Step 15: six-strings
+  "six-strings.minor-six": [
+    g("Hammer on the low E and on the top string.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", ONE_PER_STRING),
+    c("late", SWEEP_LATE),
+    c("early", REST_EARLY),
+    c("stringChange", OWN_MOMENT),
+  ],
+  "six-strings.major-six": [
+    g("Turn at the bottom with the pick alone.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", ONE_PER_STRING),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", "Keep the hand in one place for the whole loop."),
+    c("stringChange", OWN_MOMENT),
+  ],
+  "six-strings.six-string-links": [
+    g("Keep the link moving: no stop between passes.", 1),
+    c("heard", LINK_HEARD),
+    c("extras", IN_USE),
+    c("late", LINK_LATE),
+    c("early", LINK_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", THREE_TO_TWO, 0),
+    c("lastBars", END_AS_START),
+  ],
+
+  // Step 16: six-string-changes
+  "six-string-changes.minor-into-major": [
+    g("Start the major bar on the note you ended on.", 1),
+    c("heard", EACH_ARRIVES),
+    c("extras", ONE_PER_STRING),
+    c("late", NEW_SHAPE_LATE),
+    c("early", REST_EARLY),
+    c("shift", "Drop the index two frets for the top string.", 2),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Use the last rest to get back to the start."),
+  ],
+  "six-string-changes.four-chords-six": [
+    g("Leave the first chord early for the long move.", 1),
+    c("heard", AFTER_JUMP),
+    c("extras", ONE_PER_STRING),
+    c("late", NEW_SHAPE_LATE),
+    c("early", REST_EARLY),
+    c("shift", "Move in the rest at the end of each bar."),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Drop back to the first shape in the last rest.", 3),
+  ],
+  "six-string-changes.big-meets-small": [
+    g("Join the big shape to the small one, no gap."),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", "Move down one fret as the pick skips a string.", 3),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Rest one full beat before going round.", 2),
+  ],
+
+  // Step 17: fast-shifts
+  "fast-shifts.octave-jump": [
+    g("Make the jump in the time of one note."),
+    c("heard", AFTER_JUMP, 0),
+    c("extras", IN_USE),
+    c("late", "Land the first note after the jump on the click."),
+    c("early", SWEEP_EARLY),
+    c("shift", "Look at where you land before you jump.", 0),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Jump back down on the last note."),
+  ],
+  "fast-shifts.inversion-runs": [g("Learn each beat alone, then join them up.", 0)],
+  "fast-shifts.big-shape-jumps": [
+    g("Switch from three to four notes per click.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", "Put the first sixteenth right on the click."),
+    c("early", "Wait for the click before the sixteenths."),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Keep the sixteenths even to the last note."),
+  ],
+
+  // Step 18: neoclassical
+  "neoclassical.diminished-resolves": [
+    g("Move the whole shape up three frets, same notes.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", TOP_THREE),
+    c("late", TOP_HAMMER),
+    c("early", TURN_EARLY),
+    c("shift", MOVE_ON_LAST),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Land the last A minor right on the click.", 1),
+  ],
+  "neoclassical.i-iv-dim-i": [
+    g(TWO_LOOPS_EACH, 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", TOP_HAMMER),
+    c("early", TURN_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", LAST_AS_FIRST),
+  ],
+  "neoclassical.diminished-ladder": [
+    g("Climb three frets at a time, same shape.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_ON_LAST),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Keep the highest shape as even as the first."),
+  ],
+  "neoclassical.walking-triads": [
+    g("Keep your place by the chord names on the tab."),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_ON_LAST),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Keep the last shape as even as the first."),
+  ],
+  "neoclassical.linked-phrase": [
+    g("Link into E major with the pull-off, no pick.", 0),
+    c("heard", LINK_HEARD),
+    c("extras", FIVE_ONLY),
+    c("late", LOOP_A_LATE),
+    c("early", SWEEP_EARLY),
+    c("afterHeld", "Count the held A and both rests, then go.", 0),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Land the last A right on beat one."),
+  ],
+
+  // Step 19: advanced-etude
+  "advanced-etude.part-one": [
+    g("Play the big shapes and small ones as one line."),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", "Move one fret as the pick skips the D string.", 3),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", "Climb three frets on beat three, then go round.", 3),
+  ],
+  "advanced-etude.part-two": [
+    g("Count the beat of rest before the last sweep."),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", REST_EARLY),
+    c("afterHeld", HELD_E_COUNT, 3),
+    c("shift", "Move the index down three frets for A minor.", 1),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", HELD_E_LAND, 3),
+  ],
+  "advanced-etude.both-parts": [
+    g("Practise the join in the middle alone first.", 1),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", NEW_SHAPE_LATE),
+    c("early", SWEEP_EARLY),
+    c("afterHeld", HELD_E_COUNT, 2),
+    c("shift", "Move up one fret at the join in the middle.", 1),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", HELD_E_LAND),
+  ],
+  "advanced-etude.with-the-band": [
+    g("Start at a tempo where you can look up.", 0),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", "Lock the first note of each shape to the band.", 1),
+    c("early", SWEEP_EARLY),
+    c("afterHeld", HELD_E_COUNT),
+    c("shift", MOVE_ON_LAST),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", HELD_E_LAND),
+  ],
+
+  // Step 20: over-a-heavy-band
+  "over-a-heavy-band.band-big-chain": [
+    g("Lock the first note of each loop to the kick.", 1),
+    c("heard", EACH_ARRIVES),
+    c("extras", IN_USE),
+    c("late", SWEEP_LATE),
+    c("early", SWEEP_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", OWN_MOMENT),
+    c("lastBars", END_AS_START),
+  ],
+  "over-a-heavy-band.band-six-links": [
+    g("Keep three even notes across every two beats.", 1),
+    c("heard", LINK_HEARD),
+    c("extras", IN_USE),
+    c("late", LINK_LATE),
+    c("early", LINK_EARLY),
+    c("shift", MOVE_AT_START),
+    c("stringChange", CROSS_AFTER_LINK),
+    c("lastBars", END_AS_START),
+  ],
+  "over-a-heavy-band.your-solo": [g(SWAP_ONE, 0)],
 };
