@@ -186,7 +186,8 @@
         "shape": "That isn't something the app can do.",
         "proposal": "That has changed since, so nothing was done. Ask again.",
         "cap": "You follow {{cap}} Paths, the most there can be. Leave one on its page first.",
-        "loopBackwards": "Bar {{to}} comes before bar {{from}}. Name the first bar first."
+        "loopBackwards": "Bar {{to}} comes before bar {{from}}. Name the first bar first.",
+        "loopOwn": "A loop plays only an Exercise from a Path for now, and this one is one of your own exercises."
       },
       "failed": "That didn't work, and nothing was changed.",
       "make": {

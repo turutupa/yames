@@ -14,6 +14,7 @@ import {
 } from "./planner";
 import type { ChosenExercise, PlannerInput, SessionPlan } from "./planner";
 import { MY_EXERCISES_PATH_ID } from "./myExercises";
+import { CHOSEN_TODAY_MAX } from "./chosenToday";
 import { ALT, DAY, NOW, SWEEP, passed, progress, state, take } from "./testKit";
 import type { PlayerProgress } from "./progress";
 
@@ -158,14 +159,64 @@ describe("with chosen exercises", () => {
     expect(lead(plan).exerciseId).toBe(lead(base).exerciseId);
   });
 
-  it("five minutes: the chosen one is the Session, a second is counted as left out", () => {
+  it("five minutes on a Path: the lead keeps its place, the chosen ones are left out for the minutes (t2eb M3)", () => {
     const p = progress({ takes: [passed(ALT.steps[0].exercises[0].id, 60)] });
+    const base = planSession({ minutes: 5, now: NOW, paths: [ALT], progress: p });
     const plan = planSession({ minutes: 5, now: NOW, paths: [ALT], progress: p, chosen: CHOSEN.slice(0, 2) });
-    expect(plan.steps.map((s) => [s.id, s.minutes])).toEqual([["mine-1", 5]]);
-    expect(plan.chosenLeftOut).toBe(1);
-    // The Path that gave its time says so, as any Path with nothing today.
-    expect(plan.skipped?.map((s) => s.pathId)).toEqual([ALT.id]);
-    expect(plan.focusPathId).toBeNull();
+    expect(plan.steps).toEqual(base.steps);
+    expect(plan.chosenLeftOut).toBe(2);
+    expect(plan.chosenLeftOutWhy).toBe("minutes");
+    expect(plan.focusPathId).toBe(base.focusPathId);
+  });
+
+  it("the lead is never dropped, at any length, in any fixture (one rule, t2eb M3)", () => {
+    for (const { name, input } of fixtures()) {
+      const base = planSession(input);
+      const lead = base.steps.find((s) => s.id === "focus");
+      if (!lead || lead.kind !== "exercise") continue;
+      for (let n = 1; n <= CHOSEN.length; n += 1) {
+        const plan = planSession({ ...input, chosen: CHOSEN.slice(0, n) });
+        const kept = plan.steps.find((s) => s.id === "focus");
+        expect(kept && kept.kind === "exercise" && kept.exerciseId, `${name}, ${n}`).toBe(lead.exerciseId);
+        expect(kept!.minutes, `${name}, ${n}`).toBeGreaterThanOrEqual(MIN_BLOCK_MINUTES);
+      }
+    }
+  });
+
+  it("the limit Add to today shows is what can be planned beside a Path: all of them fit at twenty minutes", () => {
+    expect(CHOSEN_TODAY_MAX).toBe(MAX_GRADED - 1);
+    const p = progress({ takes: [passed(ALT.steps[0].exercises[0].id, 60)] });
+    const plan = planSession({ minutes: 20, now: NOW, paths: [ALT], progress: p, chosen: CHOSEN.slice(0, CHOSEN_TODAY_MAX) });
+    expect(mine(plan)).toHaveLength(CHOSEN_TODAY_MAX);
+    expect(plan.chosenLeftOut).toBeUndefined();
+    // And with a Path, never more than that, whatever is asked.
+    for (const { name, input } of fixtures()) {
+      if (input.paths.length === 0) continue;
+      expect(mine(planSession({ ...input, chosen: CHOSEN })).length, name).toBeLessThanOrEqual(CHOSEN_TODAY_MAX);
+    }
+  });
+
+  it("the reason said is the true one: 'minutes' only when more minutes fit more, 'graded' when they never do", () => {
+    const seen = new Set<string>();
+    for (const { name, input } of fixtures()) {
+      for (let n = 1; n <= CHOSEN_TODAY_MAX; n += 1) {
+        const plan = planSession({ ...input, chosen: CHOSEN.slice(0, n) });
+        const label = `${name}, ${n} chosen`;
+        expect(plan.chosenLeftOutWhy !== undefined, label).toBe(plan.chosenLeftOut !== undefined);
+        if (!plan.chosenLeftOutWhy) continue;
+        seen.add(plan.chosenLeftOutWhy);
+        const more = PLAN_MINUTES.filter((m) => m > input.minutes).map(
+          (minutes) => mine(planSession({ ...input, minutes, chosen: CHOSEN.slice(0, n) })).length,
+        );
+        if (plan.chosenLeftOutWhy === "minutes") {
+          expect(Math.max(...more), label).toBeGreaterThan(mine(plan).length);
+        } else {
+          for (const fits of more) expect(fits, label).toBeLessThanOrEqual(mine(plan).length);
+          expect(plan.chosenPathPlaces, label).toBe(MAX_GRADED - mine(plan).length);
+        }
+      }
+    }
+    expect([...seen].sort()).toEqual(["graded", "minutes"]);
   });
 
   it("the same exercise twice is one block", () => {

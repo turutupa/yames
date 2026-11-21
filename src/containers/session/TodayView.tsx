@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { PLAN_MINUTES } from "../../session/planner";
+import { MAX_GRADED, PLAN_MINUTES } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import { reasonLine } from "../../session/coachWords";
 import { FIRST_PATH_ID } from "../../session/packs";
@@ -515,7 +515,14 @@ export function TodayView({
             <div className="session-footnote" data-testid="today-chosen-left-out">
               {(plan.chosenLeftOut ?? 0) > 0 && (
                 <span className="session-why">
-                  {t("session.today.chosenLeftOut", { count: plan.chosenLeftOut, minutes: plan.minutes })}
+                  {/* The true reason: more minutes help, or the Session's cap that they do not change (t2eb, M3). */}
+                  {plan.chosenLeftOutWhy === "graded"
+                    ? t("session.today.chosenLeftOutGraded", {
+                        count: plan.chosenLeftOut,
+                        max: MAX_GRADED,
+                        taken: plan.chosenPathPlaces ?? 0,
+                      })
+                    : t("session.today.chosenLeftOut", { count: plan.chosenLeftOut, minutes: plan.minutes })}
                 </span>
               )}
               {session.chosenUnbuilt > 0 && (

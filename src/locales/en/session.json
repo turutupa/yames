@@ -125,6 +125,8 @@
       },
       "chosenLeftOut": "{{count}} exercise you added didn't fit in {{minutes}} minutes. Choose more minutes, or take one off in My exercises.",
       "chosenLeftOut_other": "{{count}} exercises you added didn't fit in {{minutes}} minutes. Choose more minutes, or take one off in My exercises.",
+      "chosenLeftOutGraded": "{{count}} exercise you added didn't fit: a Session plays {{max}} exercises at most, and your Paths have {{taken}} of them today. More minutes won't make room; take one off in My exercises.",
+      "chosenLeftOutGraded_other": "{{count}} exercises you added didn't fit: a Session plays {{max}} exercises at most, and your Paths have {{taken}} of them today. More minutes won't make room; take one off in My exercises.",
       "chosenUnbuilt": "{{count}} exercise you added for today can't be built any more, so it's left out.",
       "chosenUnbuilt_other": "{{count}} exercises you added for today can't be built any more, so they're left out.",
       "reason": {
@@ -485,7 +487,7 @@
       "inToday": "In today's Session",
       "addedToday": "Added to today's Session, after the warm-up.",
       "takenOffToday": "Taken off today's Session.",
-      "todayFull": "Today already holds {{max}} of your exercises, the most it takes. Take one off first."
+      "todayFull": "Today already holds {{max}} of your exercises, the most it takes: a Session plays {{graded}} exercises at most, and one place is kept for your Paths. Take one off first."
     },
     "paths": {
       "title": "Paths",

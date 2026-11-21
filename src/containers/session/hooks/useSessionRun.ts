@@ -72,6 +72,7 @@ import {
   NO_CHOSEN_PARTS,
   chosenForToday,
   chosenKeysOn,
+  chosenNotPlayed,
   customDocOf,
   useChosenTodayStored,
 } from "../../../session/chosenToday";
@@ -164,6 +165,7 @@ import {
   swapOptions,
   swapsIn,
   withScope,
+  dayKey,
 } from "../../../session/swap";
 import {
   FOCUS_KEY,
@@ -497,6 +499,19 @@ export function useSessionRun(input: SessionRunInput) {
   const [live, setLive] = useState<LiveTake>(NO_LIVE);
   // Stamped once a view opens, so a plan does not rebuild on every second.
   const [planClock, setPlanClock] = useState(() => Date.now());
+  /**
+   * The one clock "today" is read by (t2eb, review M4): the plan's. Moves it to
+   * now when the day has turned (same day: left as it is, no new plan) and
+   * returns now. A press on Paths writes today's choice by it, and every move
+   * between the learning screens calls it, so Today, Paths and the runner
+   * agree on the day. A Session already running keeps its plan: that lives in
+   * the run, which never re-plans.
+   */
+  const todayNow = useCallback((): number => {
+    const now = Date.now();
+    setPlanClock((prev) => (dayKey(prev) === dayKey(now) ? prev : now));
+    return now;
+  }, []);
   /** Today's swaps as kept (`session/swap.ts`); undefined until the store has answered. */
   const [swapStored, setSwapStored] = useState<SwapMemory | null | undefined>(undefined);
   /** Today's focus, "mix" or one Path (`focus.ts`), and the Paths switched out of the mix. */
@@ -638,6 +653,11 @@ export function useSessionRun(input: SessionRunInput) {
       .then((saved) => setOffMix(readOffMix(saved)))
       .catch(() => {});
   }, [wantsLearning, refresh]);
+  // Moving between the learning screens (Today to Paths and back) reads the
+  // day again: one clock for all of them across midnight (t2eb, review M4).
+  useEffect(() => {
+    if (wantsLearning) todayNow();
+  }, [view, wantsLearning, todayNow]);
 
   // The packs, in the language on screen: loaded with the learning side, and
   // again when the language changes. Ids and notes are the same in every
@@ -2379,7 +2399,8 @@ export function useSessionRun(input: SessionRunInput) {
           progress,
           ungraded: gradingRef.current === "off",
           ...(today.focusedPath ? { focused: true } : {}),
-          chosen,
+          // Never a part this Session already played (t2eb, review M1).
+          chosen: chosenNotPlayed(chosen, state.outcomes),
         });
     if (!next || next.steps.length === 0) return;
     dispatch({ type: "close" });
@@ -2591,6 +2612,8 @@ export function useSessionRun(input: SessionRunInput) {
      */
     chosenToday: chosen,
     chosenUnbuilt: chosenToday.unbuilt,
+    /** The clock today's plan is read by: Paths reads today's choice by it too (t2eb, M4). */
+    planClock,
     todayFocus,
     setTodayFocus,
     /** The Paths switched out of the daily mix. */
@@ -2651,6 +2674,7 @@ export function useSessionRun(input: SessionRunInput) {
       undoSwap,
       playExercise,
       setChosenParts,
+      todayNow,
       chooseStep,
       chooseLevel,
       go,

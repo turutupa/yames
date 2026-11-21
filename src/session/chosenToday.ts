@@ -28,8 +28,16 @@ import { dayKey } from "./swap";
 import { MY_EXERCISES_PATH_ID, queueMyExercisesWrite } from "./myExercises";
 
 export const CHOSEN_TODAY_KEY = "myExercises.today";
-/** The most parts a day can hold; the planner fits what the minutes allow. */
-export const CHOSEN_TODAY_MAX = 4;
+/**
+ * The most parts a day can hold: what a Session can ever plan beside the
+ * player's Paths (t2eb, review M3). A Session plays at most `MAX_GRADED` (4)
+ * graded Exercises and always keeps one for the lead from the player's Paths
+ * (`withChosen` never drops it), so three is the most that can ever be planned
+ * while the player has a Path. The planner fits what the minutes allow, and
+ * Today says why when one did not fit. `planner.chosen.test.ts` holds this
+ * equal to `MAX_GRADED - 1` (this file does not import the planner).
+ */
+export const CHOSEN_TODAY_MAX = 3;
 
 export type StoredChosenToday = { day: string; keys: string[] };
 
@@ -122,6 +130,41 @@ export function updateChosenToday(
 export function withKey(keys: readonly string[], key: string): string[] | null {
   if (keys.includes(key) || keys.length >= CHOSEN_TODAY_MAX) return null;
   return [...keys, key];
+}
+
+/**
+ * How many of today's keys count toward `CHOSEN_TODAY_MAX`: only those whose
+ * exercise is on the list (`onList`, recipe keys). A removed exercise's key
+ * stays stored for the Remove's Undo but never fills a place (t2eb, review M2).
+ */
+export function keysOnList(keys: readonly string[], onList: ReadonlySet<string>): number {
+  return keys.filter((k) => onList.has(k)).length;
+}
+
+/**
+ * "Add to today" (the press): `key` at the end. Already there, or today holds
+ * `CHOSEN_TODAY_MAX` exercises on the list: unchanged. When the stored keys
+ * are at the cap only because of removed exercises' keys, those are dropped to
+ * make room: a press is the only thing that drops one.
+ */
+export function withKeyOnList(keys: readonly string[], key: string, onList: ReadonlySet<string>): string[] | null {
+  if (keys.includes(key) || keysOnList(keys, onList) >= CHOSEN_TODAY_MAX) return null;
+  const base = keys.length >= CHOSEN_TODAY_MAX ? keys.filter((k) => onList.has(k)) : keys;
+  return [...base, key];
+}
+
+/**
+ * The chosen parts still to play after this Session: those not played in it
+ * (`played`, the Session's outcomes' Exercise ids). "5 more minutes" and the
+ * recap's next Session never serve again a part just played; one the Session
+ * ended before is still offered (t2eb, review M1).
+ */
+export function chosenNotPlayed<T extends { exercise: { id: string } }>(
+  chosen: readonly T[],
+  played: ReadonlyArray<{ exerciseId: string }>,
+): T[] {
+  const ids = new Set(played.map((o) => o.exerciseId));
+  return chosen.filter((c) => !ids.has(c.exercise.id));
 }
 
 /** Take `key` off today, or put it back at `at` (an Undo). Not there / already there: unchanged. */

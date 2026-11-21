@@ -290,6 +290,15 @@ export type SessionPlan = {
    * fit in the minutes, counted. Absent when every one fit, or none was chosen.
    */
   chosenLeftOut?: number;
+  /**
+   * Why `chosenLeftOut` did not fit, for Today to say the true reason (t2eb,
+   * review M3): `minutes`, more minutes would make room; `graded`, the
+   * Session's cap of `MAX_GRADED` graded Exercises, which more minutes do not
+   * change. Present exactly when `chosenLeftOut` is.
+   */
+  chosenLeftOutWhy?: "minutes" | "graded";
+  /** With `graded`: how many of the `MAX_GRADED` places today's Path blocks keep (the warm-up slot's and the lead's). */
+  chosenPathPlaces?: number;
 };
 
 /** One of the player's own exercises, chosen for today: its one-Step document and the Exercise. */
@@ -984,16 +993,20 @@ export const CHOSEN_MINUTES = 3;
  * - The total stays the minutes chosen. The planner's own blocks make room
  *   from the end: the last block goes first, then the one before it, up to
  *   the lead (the focus block); then the lead shrinks, never under
- *   `MIN_BLOCK_MINUTES`; only when that is still not enough does the lead go
- *   too. Minutes freed beyond what the chosen blocks need go back to the lead,
- *   or, when it went, to the last chosen block.
+ *   `MIN_BLOCK_MINUTES`. The lead is never dropped (t2eb, review M3: one rule
+ *   at every length; the Path work the player follows keeps its place, and the
+ *   limit "Add to today" shows, `CHOSEN_TODAY_MAX`, is what can be planned
+ *   beside it). Minutes freed beyond what the chosen blocks need go back to
+ *   the lead, or, with no lead (no Paths), to the last chosen block.
  * - A Session still holds at most `MAX_GRADED` graded Exercises: the planner's
  *   blocks go from the end until the chosen ones fit beside the warm-up slot
  *   and the lead.
- * - As many as fit: at most the minutes after the warm-up over
- *   `CHOSEN_MINUTES`, and at most `MAX_GRADED` less the warm-up slot's and the
- *   lead's Exercise. Those that do not fit are counted in `chosenLeftOut`, for
- *   Today to say so; never dropped in silence.
+ * - As many as fit: at most the minutes after the warm-up and the lead's
+ *   `MIN_BLOCK_MINUTES` over `CHOSEN_MINUTES`, and at most `MAX_GRADED` less
+ *   the warm-up slot's and the lead's Exercise. Those that do not fit are
+ *   counted in `chosenLeftOut`, with the reason that bound (`chosenLeftOutWhy`:
+ *   the minutes, or the graded cap that more minutes do not change), for Today
+ *   to say so; never dropped in silence.
  * - The tempo is the one `tempoFor` gives any Exercise from its own Takes
  *   (eased after a break, like the rest); the context says the player chose
  *   it. A Path's blocks that went say why in `skipped`, as any Path with
@@ -1019,12 +1032,20 @@ function withChosen(plan: SessionPlan, input: PlannerInput, chosenIn: readonly C
   const leadAt = Math.max(0, rest.findIndex((s) => s.id === "focus"));
   const lead = rest[leadAt];
   const leadGraded = lead && lead.kind === "exercise" ? 1 : 0;
-  const fit = Math.max(
-    0,
-    Math.min(chosen.length, Math.floor(budget / CHOSEN_MINUTES), MAX_GRADED - gradedOf(warm) - leadGraded),
-  );
+  // The lead keeps at least a block's minutes (it is never dropped).
+  const reserve = lead ? MIN_BLOCK_MINUTES : 0;
+  const byMinutes = Math.max(0, Math.floor((budget - reserve) / CHOSEN_MINUTES));
+  const pathPlaces = gradedOf(warm) + leadGraded;
+  const byGraded = Math.max(0, MAX_GRADED - pathPlaces);
+  const fit = Math.min(chosen.length, byMinutes, byGraded);
   const leftOut = chosen.length - fit;
-  if (fit === 0) return leftOut > 0 ? { ...plan, chosenLeftOut: leftOut } : plan;
+  // More minutes help only when the minutes, not the graded cap, are what bound.
+  const why = byMinutes < byGraded ? "minutes" : "graded";
+  const leftOutOf: Partial<SessionPlan> =
+    leftOut > 0
+      ? { chosenLeftOut: leftOut, chosenLeftOutWhy: why, ...(why === "graded" ? { chosenPathPlaces: pathPlaces } : {}) }
+      : {};
+  if (fit === 0) return leftOut > 0 ? { ...plan, ...leftOutOf } : plan;
 
   const need = fit * CHOSEN_MINUTES;
   let freed = empty ? budget : 0;
@@ -1037,17 +1058,11 @@ function withChosen(plan: SessionPlan, input: PlannerInput, chosenIn: readonly C
     dropped.add(i);
     freed += rest[i].minutes;
   }
-  let leadMinutes = lead && !dropped.has(leadAt) ? lead.minutes : 0;
+  let leadMinutes = lead ? lead.minutes : 0;
   if (lead && freed < need) {
-    const give = Math.max(0, leadMinutes - MIN_BLOCK_MINUTES);
-    if (freed + give >= need) {
-      leadMinutes -= need - freed;
-      freed = need;
-    } else {
-      dropped.add(leadAt);
-      freed += leadMinutes;
-      leadMinutes = 0;
-    }
+    // `fit` left the lead at least `MIN_BLOCK_MINUTES`: it shrinks, it never goes.
+    leadMinutes -= need - freed;
+    freed = need;
   }
   const extra = freed - need;
   const leadKept = lead !== undefined && !dropped.has(leadAt);
@@ -1074,7 +1089,7 @@ function withChosen(plan: SessionPlan, input: PlannerInput, chosenIn: readonly C
     steps,
     focusPathId: focusHere ? plan.focusPathId : null,
     skipped: skippedOf(paths, steps, progress, now),
-    ...(leftOut > 0 ? { chosenLeftOut: leftOut } : {}),
+    ...leftOutOf,
   };
 }
 
