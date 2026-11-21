@@ -192,7 +192,7 @@
             "Five-plus minutes locked in. Want me to call out anything specific?",
             "Long stretch — pause if you want, I'm here.",
             "Solid run going. Want me to listen for anything in particular?",
-            "Been in this a while. Take a breath if you need one.",
+            "Been in this a while. A short pause is fine if you want one.",
             "Quiet so far. Tell me what you're working on and I'll watch for it.",
             "Nothing to call out yet. What do you want me to listen for?",
             "Steady pocket. Keep going, or switch gears if you're ready."
@@ -208,45 +208,45 @@
             "Quiet session so far. Pick a target if you want sharper feedback."
           ],
           "correction": [
-            "Heads up — you've been in this a while. Take 10 if your hands need it.",
-            "Five-plus minutes continuous. Check in with your body before you push more.",
-            "Sustained session — stretch your fingers, then come back.",
-            "Hands tired? Take a 60-second pause before the next pass.",
+            "Heads up — you've been in this a while. Take 10 if you want it.",
+            "Five-plus minutes continuous. Want a short break before you push more?",
+            "Sustained session — a short break is fine here, then come back.",
+            "Want a 60-second pause before the next pass?",
             "Long stretch without a pause. A short break is an option before you continue.",
-            "Time for a quick break. Cold hands play sloppy.",
-            "Pause and stretch. Two minutes off keeps the next twenty solid.",
-            "Sustained run — give the hands a rest before pushing further."
+            "Long run without a pause. A quick break is an option.",
+            "Pause here if you like. Two minutes off, then pick it back up.",
+            "Sustained run — take a short rest before pushing further."
           ]
         },
         "fatigue": {
           "encouragement": [
             "Accuracy's been sliding the last few minutes. Take a beat.",
-            "Hands tightening up? Quick stretch — come back fresh.",
-            "Quality's drifting. Pause, breathe, return.",
-            "Hands working harder than they should. Brief rest, then back in.",
+            "Accuracy's dipping at this tempo. Quick pause, then come back.",
+            "Quality's drifting. Pause, reset, return.",
+            "Misses are up at the same tempo. Brief rest, then back in.",
             "You've been going a while — drop the instrument for 60 seconds.",
-            "Body's getting heavier than the music. Quick break.",
-            "Fingers stiffening up? Shake them out, then come back.",
-            "Time for a short pause — fresh hands play cleaner."
+            "Scores slipping at one tempo. Quick break?",
+            "Want a short break? Then come back at the same tempo.",
+            "A short pause is fine here — then pick it back up."
           ],
           "neutral": [
-            "Accuracy declined over the last 3 minutes at constant BPM — likely fatigue.",
+            "Accuracy declined over the last 3 minutes at constant BPM. A break is an option.",
             "Score trending down without tempo change. Take a rest.",
             "Sustained accuracy drop at the same BPM — call it a rest cycle.",
-            "Same tempo, falling accuracy. Hands are getting tired.",
-            "Quality's slipping but the tempo hasn't changed — that's fatigue.",
+            "Same tempo, falling accuracy. A short rest is an option.",
+            "Quality's slipping but the tempo hasn't changed. Want a pause?",
             "Misses climbing while the click stays the same. Time for a pause.",
-            "Three-minute slide at one tempo. Rest the hands.",
-            "Steady BPM, sliding accuracy — your hands are telling you something."
+            "Three-minute slide at one tempo. Take a short rest.",
+            "Steady BPM, sliding accuracy — a good moment for a break."
           ],
           "correction": [
-            "Fatigue showing — stop now, 90 seconds off, then come back.",
-            "You're past your peak window. Rest before quality drops further.",
-            "Take the rest. Tired playing teaches the hands sloppy habits.",
+            "Accuracy keeps dropping — stop now, 90 seconds off, then come back.",
+            "Scores are below your peak this session. Rest before they drop further.",
+            "Take the rest. The last few minutes scored lower than the first.",
             "Stop, stand up, walk around for a minute. Then come back.",
             "Quality's been dropping for minutes. Real rest — 90 seconds minimum.",
-            "Hands are done for now. Pause, shake them out, hydrate.",
-            "Pushing past tired locks in mistakes. Stop and recover.",
+            "Scores keep falling at this tempo. Pause, then re-check.",
+            "Misses keep climbing at one tempo. Stop and take a break.",
             "Set the instrument down. Two minutes off, then re-evaluate."
           ]
         },
@@ -399,8 +399,8 @@
           "neutral": [
             "Score's dropping past the {staminaMinutes}-minute mark again — take 30 seconds, then come back at the same BPM.",
             "Past the {staminaMinutes}-minute mark your accuracy tends to slide. Brief rest, then back in.",
-            "You tend to fade around minute {staminaMinutes}. Take a break and return fresh.",
-            "Stamina wall around minute {staminaMinutes} — a short rest now saves quality later."
+            "Your accuracy tends to fade around minute {staminaMinutes}. Take a break, then return.",
+            "Your scores usually dip around minute {staminaMinutes} — a short rest now is an option."
           ]
         },
         "ramp_complete": {
@@ -676,21 +676,21 @@
           "encouragement": [
             "Hits are slipping at the same tempo. Sticks down a moment, then come back.",
             "Quality's drifting — get off the throne for 60 seconds.",
-            "Forearms talking to you? Brief pause, then back in.",
-            "Sticks feeling heavy? Set them down, stretch, then return.",
-            "Grip getting tight? Step away from the kit for a minute.",
+            "Hits drifting at the same tempo. Brief pause, then back in.",
+            "Want a break? Set the sticks down, then return.",
+            "Misses are up at this tempo. Step away from the kit for a minute.",
             "Accuracy's sliding — quick break, then continue.",
-            "Hands working harder than they should. Brief rest.",
-            "Take the sticks down for a moment — let the arms reset."
+            "Accuracy's dipping at one tempo. Brief rest.",
+            "Sticks down for a moment if you want, then start again."
           ],
           "correction": [
-            "Fatigue's showing — stop now, drop the sticks, 90 seconds rest. Tired drumming locks in sloppy timing.",
-            "You're past peak — sticks down, walk a lap, then re-evaluate.",
+            "Accuracy keeps falling at this tempo. Stop now, sticks down, 90 seconds rest.",
+            "Scores are below your peak — sticks down, walk a lap, then re-evaluate.",
             "Hits keep slipping at this tempo. 90 seconds off, hydrate, return.",
             "Misses are climbing at one tempo. Stop, sticks down, two minutes off.",
-            "Push past this and you'll hurt yourself. Real rest now.",
+            "Stop if anything hurts. Either way, a real rest now.",
             "Stop drumming. Walk away from the kit for a couple of minutes.",
-            "Sticks down. Forearms first, then hands, then return when loose.",
+            "Sticks down. Two minutes off, then return when you're ready.",
             "Hard stop. Two minutes off and a drink of water before you come back."
           ]
         },
@@ -712,7 +712,7 @@
             "Five-plus minutes in. Want me to call out the kick, the hat, or both?",
             "You've been deep in the pocket. Tell me what you want next.",
             "Solid run on the kit. Anything you want sharper feedback on?",
-            "Been at it a while. Want me listening for kick, snare, or limb sync?",
+            "Been at it a while. Anything specific you want me listening for?",
             "Pocket's been steady. What's the focus from here?",
             "Long groove going — pick a target and I'll lean into it.",
             "Five-plus minutes. Tell me where you want the next note of feedback."
@@ -728,10 +728,10 @@
         },
         "stamina": {
           "neutral": [
-            "Around minute {staminaMinutes} your hands tighten up. Drop the BPM 5 ticks and rebuild.",
-            "Past the {staminaMinutes}-minute mark the limbs start to drift. Short break, then back at it.",
+            "Around minute {staminaMinutes} your accuracy tends to dip. Drop the BPM 5 ticks and rebuild.",
+            "Past the {staminaMinutes}-minute mark your hits start to drift. Short break, then back at it.",
             "Your scores on the kit dip around minute {staminaMinutes}. A short rest, then return.",
-            "You tend to lose the kick lock around minute {staminaMinutes}. Take a breather."
+            "Your timing on the kit tends to slip around minute {staminaMinutes}. Take a short break."
           ]
         },
         "bias_only": {
@@ -946,24 +946,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Picking arm tightening up? Shake it out, then back in.",
+            "Accuracy dipping at one tempo. Short pause, then back in.",
             "Accuracy's been slipping for a few minutes. Quick pause, then come back in.",
             "Misses creeping in at this tempo — set the guitar down for 60 seconds.",
-            "Long run at one tempo. Breathe, then resume.",
-            "Pick attack getting harder than it needs to be. Brief rest.",
-            "Grip tightening on the neck? Loosen up, then play.",
-            "Forearm working too hard — shake out and continue.",
+            "Long run at one tempo. Pause, then resume.",
+            "Misses are up at this tempo. Brief rest.",
+            "Want a short break? Then play on.",
+            "Scores sliding at one tempo — short pause, then continue.",
             "A 30-second break is an option, then back to it."
           ],
           "correction": [
             "Accuracy has been dropping at the same tempo — stop, guitar down 90 seconds, then check it again.",
             "Scores are below your peak — guitar down for a minute, then back in.",
-            "Stop before the tendons start complaining. 90 seconds off the strings.",
+            "Accuracy keeps falling at this tempo. 90 seconds off the strings.",
             "Misses keep rising at this tempo. Set the guitar down, two minutes off.",
             "Real rest — guitar on the stand, walk around for a bit.",
-            "Picking arm is done for now. 90 seconds minimum, then re-check.",
-            "Stop here. Two minutes away from the guitar, then come back fresh.",
-            "Push past this and you'll buy yourself an injury. Hard stop."
+            "Scores are still falling. 90 seconds minimum, then re-check.",
+            "Stop here. Two minutes away from the guitar, then come back to it.",
+            "Hard stop here. Stop any time something hurts."
           ]
         },
         "tempo_milestone": {
@@ -1001,9 +1001,9 @@
         "stamina": {
           "neutral": [
             "Past the {staminaMinutes}-minute mark your timing at this tempo tends to slip. A short break, then resume.",
-            "Around minute {staminaMinutes} the pick attack starts to drift. Quick break, then back in.",
-            "Stamina wall at minute {staminaMinutes} — right hand tightens. Rest 30 seconds.",
-            "You tend to lose edge on the picking around minute {staminaMinutes}. Short rest, then return."
+            "Around minute {staminaMinutes} your timing starts to drift. Quick break, then back in.",
+            "Your scores dip at minute {staminaMinutes}. Rest 30 seconds if you want.",
+            "Notes start landing off the click around minute {staminaMinutes}. Short rest, then return."
           ]
         },
         "bias_only": {
@@ -1218,24 +1218,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Strumming arm tightening up? Shake it out, then back in.",
+            "Strums drifting at one tempo. Short pause, then back in.",
             "Accuracy's sliding at this tempo. Quick break, then come back in.",
             "Misses creeping into the strum — guitar down for 60 seconds.",
-            "Been strumming at one tempo a while. Breathe, then continue.",
-            "Strum getting heavier than it needs to be. Brief rest.",
-            "Grip tightening on the neck? Loosen up, then play.",
-            "Forearm working too hard — shake out and continue.",
+            "Been strumming at one tempo a while. Pause, then continue.",
+            "Misses are up at this tempo. Brief rest.",
+            "Want a short break? Then play on.",
+            "Scores sliding at one tempo — short pause, then continue.",
             "Take 30 seconds if you want them, then back to it."
           ],
           "correction": [
-            "Fatigue's showing in the strum — stop, 90 seconds off the strings.",
+            "Strums keep slipping at this tempo — stop, 90 seconds off the strings.",
             "Scores are below your peak — set the guitar down for a minute, then return.",
-            "Tired strumming buries the dynamics. Stop, rest, restart.",
-            "Strumming arm is straining. Set the guitar down, stretch the forearm, two minutes off.",
+            "Scores keep dropping at one tempo. Stop, rest, restart.",
+            "Misses keep rising at this tempo. Set the guitar down, two minutes off.",
             "Real rest — guitar on the stand, walk around for a bit.",
-            "Strumming hand is done. 90 seconds minimum, then re-check.",
+            "Accuracy is still falling. 90 seconds minimum, then re-check.",
             "Hard stop. Two minutes off, then continue when you're ready.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "Stop here for a real break. Stop sooner if anything hurts."
           ]
         },
         "tempo_milestone": {
@@ -1272,10 +1272,10 @@
         },
         "stamina": {
           "neutral": [
-            "Your fretting pressure rises around minute {staminaMinutes}. Rest 30 seconds and re-approach.",
-            "Around minute {staminaMinutes} the strumming arm tightens. Brief break, then back in.",
+            "Your scores dip around minute {staminaMinutes}. Rest 30 seconds and re-approach.",
+            "Around minute {staminaMinutes} the strums start to drift. Brief break, then back in.",
             "Past the {staminaMinutes}-minute mark your accuracy tends to slip. Short rest, then resume.",
-            "Fatigue shows at minute {staminaMinutes} on the acoustic. Take a breather."
+            "Accuracy dips at minute {staminaMinutes} on the acoustic. Take a short break."
           ]
         },
         "bias_only": {
@@ -1438,7 +1438,7 @@
             "Right hand's dragging. Play with the click; don't wait for the kick to land.",
             "Lift the plucking finger sooner — meet the click on the front of the note.",
             "Each note's landing late. Aim for the front edge of every click.",
-            "Push from the forearm — the finger's getting heavy.",
+            "Notes are landing late. Start each pluck a touch sooner.",
             "Drop the tempo a bit and play with more lift. The drag clears.",
             "Imagine the click is a hair earlier than it is, and meet that.",
             "Stop, take a breath, then come in pushing slightly forward."
@@ -1489,24 +1489,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Plucking fingers tightening up? Quick stretch — back in.",
-            "Forearm starting to lock? Bass down for 60 seconds.",
+            "Notes drifting at one tempo. Quick pause — back in.",
+            "Misses are up at this tempo. Bass down for 60 seconds.",
             "Notes are slipping at the same tempo. Brief break, then come back in.",
-            "Fretting hand getting heavy? Take a moment, then continue.",
-            "Right hand feels tight? Shake it out, then resume.",
-            "Long run at one tempo. Breathe, then continue.",
-            "Forearm working too hard. Quick rest.",
+            "Want a moment? Take it, then continue.",
+            "Accuracy's sliding at one tempo. Short pause, then resume.",
+            "Long run at one tempo. Short pause, then continue.",
+            "Scores dipping at this tempo. Quick rest.",
             "Take 30 seconds if you want them, then back to it."
           ],
           "correction": [
-            "Fatigue's showing in the attack — stop, 90 seconds off, then re-check.",
-            "You're past peak — bass down, stretch, then back in.",
-            "Stop now. Tired plucking teaches the hand a sloppy attack.",
-            "Right hand is straining. Set the bass down, stretch the forearm, two minutes off.",
+            "Accuracy keeps dropping at this tempo — stop, 90 seconds off, then re-check.",
+            "Scores are below your peak — bass down for a minute, then back in.",
+            "Stop now. Misses keep climbing at the same tempo.",
+            "Misses keep rising at one tempo. Set the bass down, two minutes off.",
             "Real rest — bass on the stand, walk around for a bit.",
-            "Plucking hand is done. 90 seconds minimum, then re-check.",
+            "Accuracy is still falling. 90 seconds minimum, then re-check.",
             "Hard stop. Two minutes off the bass before continuing.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "Take a real break now, and stop if anything hurts."
           ]
         },
         "tempo_milestone": {
@@ -1543,10 +1543,10 @@
         },
         "stamina": {
           "neutral": [
-            "Stamina wall at minute {staminaMinutes} — your groove loosens. Short break, then back in.",
-            "Around minute {staminaMinutes} the plucking hand starts to fatigue. Rest and return.",
+            "Your groove starts to slip at minute {staminaMinutes}. Short break, then back in.",
+            "Around minute {staminaMinutes} your accuracy starts to dip. Rest and return.",
             "Past the {staminaMinutes}-minute mark the bass lock starts to slip. Brief rest, then resume.",
-            "You tend to fade around minute {staminaMinutes}. Take 30 seconds, come back clean."
+            "Your scores tend to fade around minute {staminaMinutes}. Take 30 seconds, come back clean."
           ]
         },
         "bias_only": {
@@ -1712,7 +1712,7 @@
             "Drop the tempo and play with more lift. The drag clears when it feels easy.",
             "Imagine the click is a hair earlier than it is, and meet that.",
             "Stop, take a breath, then come in pushing slightly forward.",
-            "The fingers are getting heavy. Lighten your touch and let them float."
+            "Notes are landing behind the click. Lighten your touch and aim earlier."
           ]
         },
         "personal_best_streak": {
@@ -1760,24 +1760,24 @@
         },
         "fatigue": {
           "encouragement": [
-            "Accuracy's slipping at this tempo. Lift the hands, breathe, then back in.",
-            "Forearms feeling locked? Pause, drop the hands, breathe.",
+            "Accuracy's slipping at this tempo. Short pause, then back in.",
+            "Want a short pause? Step away from the keys for a moment.",
             "Misses creeping in at this tempo — 60 seconds off the keys.",
-            "Fingers feeling heavy? Quick stretch, then resume.",
-            "Hands working harder than they should. Brief rest.",
-            "Been at the keys a while. Breathe, then play.",
+            "Notes drifting at one tempo. Quick pause, then resume.",
+            "Misses are up at this tempo. Brief rest.",
+            "Been at the keys a while. Short pause, then play.",
             "A 30-second break is an option, then back to it.",
-            "Accuracy's sliding at one tempo. Pause, hands in your lap, breathe."
+            "Accuracy's sliding at one tempo. Pause for a moment, then play on."
           ],
           "correction": [
-            "Fatigue's showing in the touch — stop, hands down 90 seconds.",
-            "You're past peak — get off the bench, shake it out, then return.",
+            "Accuracy keeps dropping at this tempo — stop, 90 seconds off the keys.",
+            "Scores are below your peak — get off the bench for a minute, then return.",
             "Scores keep dropping at this tempo. Stop, rest, restart.",
-            "Misses keep rising at one tempo. Hands off the keys, two minutes off.",
-            "Real rest — stand up, walk around, come back fresh.",
-            "Hands are done for now. 90 seconds minimum, then re-check.",
+            "Misses keep rising at one tempo. Two minutes away from the keys.",
+            "Real rest — stand up, walk around, then come back.",
+            "Accuracy is still falling. 90 seconds minimum, then re-check.",
             "Hard stop. Two minutes off the keys before continuing.",
-            "Push past this and you'll buy yourself an injury. Stop and recover."
+            "Take a real break now, and stop if anything hurts."
           ]
         },
         "tempo_milestone": {
@@ -1795,10 +1795,10 @@
         "check_in": {
           "neutral": [
             "Long stretch at the keys — piece, exercise, something specific?",
-            "Five-plus minutes in. Want me to call out the left hand, right hand, or both?",
+            "Five-plus minutes in. Anything in the piece you want feedback on?",
             "You've been locked in. Tell me what you want feedback on.",
             "Solid run going. Want sharper feedback on a specific passage?",
-            "Been at it a while. Left hand? Right hand? Voicings? Tell me where to listen.",
+            "Been at it a while. A passage? A tempo? Tell me where to listen.",
             "Pocket's been steady. Pick a target if you want closer feedback.",
             "Long stretch at the keys. Anything you want me to flag?",
             "You've been deep in it. Tell me what to listen for next."
@@ -1814,10 +1814,10 @@
         },
         "stamina": {
           "neutral": [
-            "Your scores at this tempo slip around minute {staminaMinutes}. Breathe, come back clean.",
+            "Your scores at this tempo slip around minute {staminaMinutes}. Pause, come back clean.",
             "Around minute {staminaMinutes} the misses start to creep in. Brief rest, then resume.",
-            "Past the {staminaMinutes}-minute mark the touch gets heavier. Short break, then back at the keys.",
-            "Fatigue in the hands shows around minute {staminaMinutes}. Rest, then return."
+            "Past the {staminaMinutes}-minute mark your timing gets less even. Short break, then back at the keys.",
+            "Your scores dip around minute {staminaMinutes}. Rest, then return."
           ]
         },
         "bias_only": {

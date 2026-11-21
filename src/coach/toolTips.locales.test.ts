@@ -219,6 +219,24 @@ const LINT: [string, RegExp][] = [
   ["threshold called a bar", /(?<!\b(across|per|in|within|through|over|of|each|every) )\b(the|your) bar\b(?! (line|by bar))/i],
 ];
 
+/**
+ * The body's state, said anywhere as a fact or a cause (leg tc2): the app
+ * measures timing against the click, not fatigue, stiffness, strain or pain.
+ * "Stop if anything hurts" is the one way a line may mention pain.
+ */
+const BODY_STATE =
+  /\b(tired|tiring|fatigue[ds]?|fatigue's|sore|aches?|aching|cramp\w*|stiff(en\w*)?|injur\w*|tendons?|strain(s|ed|ing)?|stamina)\b|\bgetting heavy\b|\bfeel(s|ing)? (heavy|tight|locked)\b|\bworking (too hard|harder than)\b|\bpast (your )?peak\b|(?<!\b(anything|something) )\bhurt(s|ing)?\b/i;
+/**
+ * The slots that fire on time played or on accuracy falling at one tempo
+ * (fatigue, check_in, stamina) offer a break and say what was measured; they
+ * do not mention the body at all, not even as an instruction ("shake it out",
+ * "breathe", "come back fresh"). "Long stretch" is time; the guitar's neck is
+ * not the player's.
+ */
+const BREAK_SCENARIO = /^(fatigue|check_in|stamina)$/;
+const BODY_WORD =
+  /\b(hands?|fingers?|wrists?|arms?|forearms?|shoulders?|limbs?|grip\w*|body|breath\w*|breathe|relax\w*|loose\w*|tight\w*|tense|shake|fresh|recover\w*|heav(y|ier)|pressure|touch|attack|(your|lower|upper) back|you (tend to )?fade)\b|(?<!\b(long|quiet|solid|steady|uninterrupted|clean|this|that|a) )\bstretch(es|ing)?\b|(?<!\b(on|up|down|along|across|off) the )\bneck\b(?! (pickup|position))/i;
+
 /** A pitch word in a line about timing ("a half-step earlier"). */
 const PITCH_WORD = /\bhalf[- ]steps?\b|\bwhole[- ]steps?\b|\bsemitones?\b/i;
 const TIMING_SCENARIO = /^(rushing|dragging|rushing_trend|dragging_trend|bias_only|oscillating|grid_lost|grid_discontinuity|pace_coaching|ic_placement_drift|ic_spacing_drift|accuracy_drop|recovery)$/;
@@ -226,8 +244,10 @@ const TIMING_SCENARIO = /^(rushing|dragging|rushing_trend|dragging_trend|bias_on
 const GUITAR_WORD = /\bpick(ing)? attack\b|\bpick hand\b|\bstrum/i;
 
 // Empty since leg tc1 (2026-11-21), which reworded the 42 lines this lint and
-// the second readers caught (plans/coach/progress/tc1.md). A new hit is a line
-// to reword, not a line to list here.
+// the second readers caught (plans/coach/progress/tc1.md); leg tc2 widened it
+// to BODY_STATE and the break slots' BODY_WORD and reworded the 98 lines those
+// caught (plans/coach/progress/tc2.md). A new hit is a line to reword, not a
+// line to list here.
 const LINT_KNOWN: string[] = [];
 
 describe("toolTips: the English honesty lint", () => {
@@ -239,6 +259,8 @@ describe("toolTips: the English honesty lint", () => {
         if (LINT.some(([, re]) => re.test(s))) return true;
         // catalog.<vocabulary>.<scenario>... and <overlay>.generic.<scenario>...
         const [, vocabulary, scenario] = p.split(".");
+        if (BODY_STATE.test(s)) return true;
+        if (BREAK_SCENARIO.test(scenario) && BODY_WORD.test(s)) return true;
         if (TIMING_SCENARIO.test(scenario) && PITCH_WORD.test(s)) return true;
         return vocabulary === "generic" && GUITAR_WORD.test(s);
       })
