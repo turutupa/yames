@@ -11,7 +11,7 @@ import type { MainView } from "../../containers/main-window/MainHeader";
 import type { PathsAt } from "../../containers/main-window/hooks/usePathsPlace";
 import type { PathDoc } from "../../paths/format";
 import type { CoachContext } from "../context";
-import { HOST_MEMBERS, notWiredHost, type CoachToolHost } from "./host";
+import { HOST_MEMBERS, notWiredHost, type CoachToolHost, type Sounding } from "./host";
 
 export type HostCall = { member: keyof CoachToolHost; args: unknown[] };
 
@@ -22,6 +22,8 @@ export type FakeHost = CoachToolHost & {
   changes: () => HostCall[];
   /** The view and the Paths place now. */
   where: () => { view: MainView; at: PathsAt };
+  /** Something starts (or stops) playing, as the transport would. */
+  play: (sounding: Sounding | null) => void;
 };
 
 /** The members that only read. */
@@ -42,31 +44,50 @@ const READS = new Set<keyof CoachToolHost>([
   "presets",
   "clickSubdivision",
   "safeSetting",
+  "safeSettingOptions",
   "goal",
+  "sounding",
+  "nudges",
 ]);
 
 export function fakeHost(
-  start: { view?: MainView; at?: PathsAt; paths?: readonly PathDoc[]; session?: boolean } = {},
+  start: {
+    view?: MainView;
+    /** The mode under Settings (left out: the view). */
+    mode?: MainView;
+    at?: PathsAt;
+    paths?: readonly PathDoc[];
+    session?: boolean;
+    sounding?: Sounding | null;
+  } = {},
   overrides: Partial<CoachToolHost> = {},
 ): FakeHost {
   let view: MainView = start.view ?? "today";
+  // The mode playing (`useTabRouting`): under Settings, the one it covers.
+  let mode: MainView = start.mode ?? view;
   let at: PathsAt = start.at ?? { pathId: null, stepId: null };
+  let sounding: Sounding | null = start.sounding ?? null;
   const calls: HostCall[] = [];
+  // As the app's own view switch: Settings stops nothing, another mode stops what plays.
+  const show = (next: MainView) => {
+    if (next !== "settings") {
+      if (next !== mode) sounding = null;
+      mode = next;
+    }
+    view = next;
+  };
   const base: CoachToolHost = {
     ...notWiredHost(),
     view: () => view,
     pathsAt: () => at,
     paths: () => start.paths ?? [],
     sessionActive: () => start.session ?? false,
-    setView: (next) => {
-      view = next;
-    },
+    sounding: (target) => (target !== undefined && (target === "settings" || target === mode) ? null : sounding),
+    setView: show,
     movePaths: (next) => {
       at = next;
     },
-    openSettingsSection: () => {
-      view = "settings";
-    },
+    openSettingsSection: () => show("settings"),
     ...overrides,
   };
   const recorded = {} as Record<keyof CoachToolHost, unknown>;
@@ -81,6 +102,9 @@ export function fakeHost(
     calls,
     changes: () => calls.filter((call) => !READS.has(call.member)),
     where: () => ({ view, at }),
+    play: (next: Sounding | null) => {
+      sounding = next;
+    },
   });
 }
 

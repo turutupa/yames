@@ -40,6 +40,7 @@
 import type { CoachContext } from "../context";
 import type { ResolvedBlock } from "../blocks/resolve";
 import type { CoachToolHost } from "./host";
+import type { SessionPlan } from "../../session/planner";
 
 // ---------------------------------------------------------------------------
 // Arguments
@@ -123,7 +124,11 @@ export type ToolDone = {
   ok: true;
   /** What the app did, from what it actually did. */
   receipt: Line;
-  /** The call that puts the app back where it was. Every `go` that changed something has one. */
+  /**
+   * The call that puts the app back where it was. Every `go` that changed
+   * something has one. Hand back this very object to `runCoachUndo`: the
+   * runner remembers the undos it handed out and runs each once.
+   */
   undo?: ToolCall;
   /** What a `read` tool shows, resolved against the app's own data. */
   blocks?: readonly ResolvedBlock[];
@@ -134,10 +139,11 @@ export type ToolResult = ToolDone | Refusal;
 /**
  * What a `confirm` tool would do, shown before it does it.
  *
- * Plain data the UI draws (`line`), plus what the tool resolved (`resolved`),
- * which only the runner hands back to the tool's `commit`. A proposal is
- * minted by `runCoachTool` and accepted once by `confirmCoachTool`; one built
- * by hand, or confirmed twice, does nothing.
+ * Plain data the UI draws (`line`). What the tool resolved stays inside the
+ * runner, which alone hands it back to the tool's `commit`: nothing a caller
+ * does to this object can change what the press does. A proposal is minted
+ * by `runCoachTool` and accepted once by `confirmCoachTool`; one built by
+ * hand, or confirmed twice, does nothing.
  */
 export type Proposal = {
   readonly tool: string;
@@ -145,17 +151,27 @@ export type Proposal = {
   readonly args: ToolArgs;
   /** Exactly what will happen, as a line ("Start today at part 3: …"). */
   readonly line: Line;
-  /** What the tool resolved, for its `commit`. Not for the UI. */
-  readonly resolved: unknown;
+  /** Today's plan as it would be (`set_minutes`, `set_focus`): drawn under the proposal. */
+  readonly plan?: SessionPlan;
+  /**
+   * Confirmed, this cannot be undone from the receipt (`follow_path`: leaving
+   * a Path is the player's, never a tool). The UI says so before the press.
+   */
+  readonly noUndo?: true;
 };
 
 export type Proposed = { ok: true; proposal: Proposal };
 
-/** What `runCoachTool` returns: a result, or (for a `confirm` tool) a proposal. */
+/**
+ * What `runCoachTool` returns: a result, or a proposal (a `confirm` tool, or
+ * a `go` tool that would stop something sounding).
+ */
 export type RunOutcome = ToolResult | Proposed;
 
 /** What a `confirm` tool's `propose` returns. */
-export type ProposeResult<R = unknown> = { ok: true; line: Line; resolved: R } | Refusal;
+export type ProposeResult<R = unknown> =
+  | { ok: true; line: Line; resolved: R; plan?: SessionPlan; noUndo?: true }
+  | Refusal;
 
 // ---------------------------------------------------------------------------
 // Tools
@@ -176,6 +192,13 @@ export type ToolSpec = {
   args: ArgSpec;
   /** What it does, in one line. */
   note: string;
+  /**
+   * It changes the screen (or opens a Session), and the app stops a playing
+   * click, band or song when it does. A `go` tool marked so is not "at once"
+   * while something sounds: the runner returns a proposal that says what
+   * stops. A `confirm` tool's proposal names what stops.
+   */
+  leaves?: true;
 };
 
 type ToolFunctions = {

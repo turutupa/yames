@@ -9,9 +9,11 @@ import { describe, expect, it } from "vitest";
 import type { MainView } from "../../containers/main-window/MainHeader";
 import { fakeHost, toolCtx } from "./fakeHost";
 import { GO_TO_SCREENS } from "./go";
-import { runCoachTool, runCoachUndo } from "./run";
+import type { CoachToolHost } from "./host";
+import { COACH_TOOLS } from "./registry";
+import { checkCall, runCoachTool, runCoachUndo } from "./run";
 import { TEST_PATHS, runIn } from "./testPaths";
-import type { RunOutcome, ToolCall, ToolResult } from "./types";
+import type { RunOutcome, ToolArgs, ToolCall, ToolResult } from "./types";
 
 function done(outcome: RunOutcome): Extract<ToolResult, { ok: true }> {
   if (!outcome.ok || "proposal" in outcome) throw new Error(`expected a receipt, got ${JSON.stringify(outcome)}`);
@@ -256,31 +258,50 @@ describe("return_to, the undo", () => {
     expect(host.changes()).toEqual([]);
   });
 
+  it("made up by a caller, it is not an undo the runner handed out: refused, nothing moves", () => {
+    const host = fakeHost({ paths: TEST_PATHS, view: "today" });
+    expect(runCoachUndo({ tool: "return_to", args: { screen: "paths", path: "legato" } }, host, toolCtx())).toMatchObject({
+      ok: false,
+      why: "refused",
+      detail: "not a live undo",
+    });
+    expect(host.changes()).toEqual([]);
+  });
+
+  /** The tool itself, as the runner runs an undo it issued: its own checks, under test. */
+  function returnTo(args: ToolArgs, host: CoachToolHost, ctx = toolCtx()): ToolResult {
+    const checked = checkCall({ tool: "return_to", args }, COACH_TOOLS, "app");
+    if (!checked.ok) return checked;
+    const tool = checked.call.tool;
+    if (tool.kind === "confirm" || !tool.when(ctx)) return { ok: false, why: "notNow", line: { key: "notNow", values: {} } };
+    return tool.run(checked.call.args, host, ctx);
+  }
+
   it("drops a place that no longer exists, to the deepest that does", () => {
     const host = fakeHost({ paths: TEST_PATHS, view: "today" });
-    runCoachUndo({ tool: "return_to", args: { screen: "paths", path: "legato", step: "gone" } }, host, toolCtx());
+    returnTo({ screen: "paths", path: "legato", step: "gone" }, host);
     expect(host.where()).toEqual({ view: "paths", at: { pathId: "legato", stepId: null } });
-    runCoachUndo({ tool: "return_to", args: { screen: "paths", path: "gone" } }, host, toolCtx());
+    returnTo({ screen: "paths", path: "gone" }, host);
     expect(host.where().at).toEqual({ pathId: null, stepId: null });
   });
 
   it("back to a Session that has ended: not now", () => {
     const host = fakeHost({ view: "settings", session: false });
-    const out = runCoachUndo({ tool: "return_to", args: { screen: "session" } }, host, toolCtx());
+    const out = returnTo({ screen: "session" }, host);
     expect(out.ok).toBe(false);
     expect(host.changes()).toEqual([]);
   });
 
   it("never walks out of a Session the player is in", () => {
     const host = fakeHost({ view: "session", session: true });
-    const out = runCoachUndo({ tool: "return_to", args: { screen: "today" } }, host, toolCtx({ screen: "session", run: runIn("ready") }));
+    const out = returnTo({ screen: "today" }, host, toolCtx({ screen: "session", run: runIn("ready") }));
     expect(out.ok).toBe(false);
     expect(host.changes()).toEqual([]);
   });
 
   it("not during a Take", () => {
     const host = fakeHost({ view: "settings", session: true });
-    const out = runCoachUndo({ tool: "return_to", args: { screen: "session" } }, host, toolCtx({ screen: "session", run: runIn("playing") }));
+    const out = returnTo({ screen: "session" }, host, toolCtx({ screen: "session", run: runIn("playing") }));
     expect(out.ok).toBe(false);
     expect(host.changes()).toEqual([]);
   });

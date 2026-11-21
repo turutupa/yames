@@ -18,7 +18,11 @@
  */
 
 import { GO_TOOLS } from "./go";
+import { PRACTICE_TOOLS } from "./practice";
 import { READ_TOOLS } from "./read";
+import { TODAY_TOOLS } from "./today";
+import { PLAY_TOOLS } from "./play";
+import { SETTINGS_TOOLS } from "./settings";
 import type { CoachTool, ToolCatalogue, ToolSpec } from "./types";
 
 export type * from "./types";
@@ -34,7 +38,14 @@ export {
 } from "./types";
 
 /** Every tool, in the order a "what can you do" list would show them. */
-export const COACH_TOOLS: readonly CoachTool[] = [...GO_TOOLS, ...READ_TOOLS];
+export const COACH_TOOLS: readonly CoachTool[] = [
+  ...GO_TOOLS,
+  ...READ_TOOLS,
+  ...PRACTICE_TOOLS,
+  ...TODAY_TOOLS,
+  ...PLAY_TOOLS,
+  ...SETTINGS_TOOLS,
+];
 
 /** The catalogue's version: bumped when a change is not backwards compatible. */
 export const TOOL_CATALOGUE_VERSION = 1;
