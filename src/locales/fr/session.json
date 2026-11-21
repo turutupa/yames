@@ -94,8 +94,8 @@
         },
         "samePlace": "Aujourd'hui, au même endroit.",
         "songDue": {
-          "one": "La mesure {{bar}} de {{song}} est prévue aujourd'hui.",
-          "range": "Les mesures {{from}} à {{to}} de {{song}} sont prévues aujourd'hui."
+          "one": "La mesure {{bar}} de {{song}} est à reprendre.",
+          "range": "Les mesures {{from}} à {{to}} de {{song}} sont à reprendre."
         }
       },
       "whatsIn": "Ce qu'il y a dedans, et pourquoi",

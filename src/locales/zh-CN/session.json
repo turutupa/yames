@@ -89,8 +89,8 @@
         },
         "samePlace": "今天还是从同一个地方开始。",
         "songDue": {
-          "one": "{{song}} 第 {{bar}} 小节定在今天回来练习。",
-          "range": "{{song}} 第 {{from}}–{{to}} 小节定在今天回来练习。"
+          "one": "{{song}} 第 {{bar}} 小节该回来练习了。",
+          "range": "{{song}} 第 {{from}}–{{to}} 小节该回来练习了。"
         }
       },
       "whatsIn": "练什么，为什么",

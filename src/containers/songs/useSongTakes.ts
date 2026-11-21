@@ -324,6 +324,22 @@ export function useSongTakes({
    * the switch goes off, or another song — or another tab — takes the stage.
    */
   const armed = view === "songs" && enabled && available !== false;
+
+  /**
+   * Review c5a2 finding 2: EVERY pass start ends the last take's claim on the
+   * review, recorded or not. Clearing only when a pass is recorded left pass
+   * A's take standing after the switch went off, and the review of pass B then
+   * worked out "% right notes" from A's audio. `passRef` counts pass starts so
+   * a stop's take that lands after the next pass began is not handed to it.
+   * Nothing here starts, stops or files a recording.
+   */
+  const passRef = useRef(0);
+  useEffect(() => {
+    if (!isPlaying) return;
+    passRef.current += 1;
+    setLastTake(undefined);
+  }, [isPlaying]);
+
   useEffect(() => {
     if (armed && isPlaying && !countingIn && !recordingRef.current) {
       const id = songId;
@@ -371,6 +387,7 @@ export function useSongTakes({
     if (recordingRef.current && (!isPlaying || !armed || recordingSongRef.current !== songId)) {
       const wasFor = recordingSongRef.current;
       const offset = offsetRef.current;
+      const pass = passRef.current;
       recordingRef.current = false;
       recordingSongRef.current = null;
       startedAt.current = null;
@@ -396,7 +413,8 @@ export function useSongTakes({
           // just played off the top of the list.
           if (take.jamId !== songIdRef.current) return;
           setTakes((prev) => sortTakes([take, ...prev]));
-          if (wasFor)
+          // The review's ear only while no later pass has begun (finding 2).
+          if (wasFor && passRef.current === pass)
             setLastTake({
               takeId: take.id,
               jamId: wasFor,

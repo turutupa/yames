@@ -9,7 +9,8 @@
  * counted again here.
  *
  * - **Extra notes**: always measured. No pass mark on a song, so the mark is a
- *   check for none and no mark at all for some: a song has no "not met".
+ *   check for none (when something was heard at all) and no mark at all for
+ *   some: a song has no "not met".
  * - **Right notes**: only when the ear listened back (`pitch`), of the notes it
  *   could pitch. With none it could pitch the item is left out: none of the
  *   Session's "couldn't tell" reasons is known here, and a wrong reason is
@@ -18,10 +19,16 @@
 import type { FactItem } from "../../../coach/takeNote";
 import type { NoteVerdict } from "../../../songs/types";
 
-export function songFacts(facts: { extraCount: number }, pitch?: readonly NoteVerdict[]): FactItem[] {
+export function songFacts(facts: { extraCount: number; hits: number }, pitch?: readonly NoteVerdict[]): FactItem[] {
   const items: FactItem[] = [
     facts.extraCount === 0
-      ? { kind: "extras", mark: "check", line: { key: "session.note.fact.noExtras", values: {} } }
+      ? {
+          kind: "extras",
+          // No check on a pass where nothing was heard (review c5a2 finding
+          // 5): "no extras" from a silent guitar is no achievement.
+          mark: facts.hits > 0 ? "check" : "none",
+          line: { key: "session.note.fact.noExtras", values: {} },
+        }
       : { kind: "extras", mark: "none", line: { key: "session.note.fact.extras", values: { count: facts.extraCount } } },
   ];
   if (pitch && pitch.length > 0) {

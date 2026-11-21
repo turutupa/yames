@@ -99,8 +99,8 @@
         },
         "samePlace": "Dziś zaczynamy w tym samym miejscu.",
         "songDue": {
-          "one": "Na dziś zaplanowany jest takt {{bar}} utworu {{song}}.",
-          "range": "Na dziś zaplanowane są takty {{from}}–{{to}} utworu {{song}}."
+          "one": "Takt {{bar}} utworu {{song}} czeka na powtórkę.",
+          "range": "Takty {{from}}–{{to}} utworu {{song}} czekają na powtórkę."
         }
       },
       "whatsIn": "Co w niej jest i dlaczego",

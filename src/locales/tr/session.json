@@ -89,8 +89,8 @@
         },
         "samePlace": "Bugün aynı yerden.",
         "songDue": {
-          "one": "{{song}} şarkısının {{bar}}. ölçüsü bugün için planlı.",
-          "range": "{{song}} şarkısının {{from}}–{{to}}. ölçüleri bugün için planlı."
+          "one": "{{song}} şarkısının {{bar}}. ölçüsü tekrar çalınmayı bekliyor.",
+          "range": "{{song}} şarkısının {{from}}–{{to}}. ölçüleri tekrar çalınmayı bekliyor."
         }
       },
       "whatsIn": "İçinde ne var, neden",

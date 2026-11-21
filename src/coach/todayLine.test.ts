@@ -285,13 +285,13 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
     "a Songs passage due: one more sentence after the Path's line",
     input({ songDue: { song: "Wish You Were Here", from: 17, to: 24 } }),
     "slipped",
-    `${tune.title}: bar 1 of the tune slipped on 2 of 3 rounds yesterday. Today starts there. Bars 17 to 24 of Wish You Were Here are due today.`,
+    `${tune.title}: bar 1 of the tune slipped on 2 of 3 rounds yesterday. Today starts there. Bars 17 to 24 of Wish You Were Here are due.`,
   ],
   [
     "a Songs passage of one bar due",
     input({ songDue: { song: "Blackbird", from: 9, to: 9 } }),
     "slipped",
-    `${tune.title}: bar 1 of the tune slipped on 2 of 3 rounds yesterday. Today starts there. Bar 9 of Blackbird is due today.`,
+    `${tune.title}: bar 1 of the tune slipped on 2 of 3 rounds yesterday. Today starts there. Bar 9 of Blackbird is due.`,
   ],
   [
     "a Songs passage due and no Path line: the passage alone",
@@ -300,7 +300,7 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
       songDue: { song: "Blackbird", from: 9, to: 12 },
     }),
     "songDue",
-    "Bars 9 to 12 of Blackbird are due today.",
+    "Bars 9 to 12 of Blackbird are due.",
   ],
   [
     "a Songs passage due after a back line",
@@ -312,7 +312,7 @@ const TABLE: Array<[string, TodayLineInput, string | null, string | null]> = [
       songDue: { song: "Blackbird", from: 1, to: 4 },
     }),
     "back",
-    `Last Session, ${tune.title}: 79% even at 90 BPM. Today starts at 85 BPM. Bars 1 to 4 of Blackbird are due today.`,
+    `Last Session, ${tune.title}: 79% even at 90 BPM. Today starts at 85 BPM. Bars 1 to 4 of Blackbird are due.`,
   ],
   [
     "a Songs passage due on the first day: not said",

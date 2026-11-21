@@ -89,8 +89,8 @@
         },
         "samePlace": "Vandaag op dezelfde plek.",
         "songDue": {
-          "one": "Maat {{bar}} van {{song}} staat vandaag op de planning.",
-          "range": "Maten {{from}} tot {{to}} van {{song}} staan vandaag op de planning."
+          "one": "Maat {{bar}} van {{song}} is weer aan de beurt.",
+          "range": "Maten {{from}} tot {{to}} van {{song}} zijn weer aan de beurt."
         }
       },
       "whatsIn": "Wat erin zit, en waarom",

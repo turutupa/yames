@@ -89,8 +89,8 @@
         },
         "samePlace": "Hôm nay bắt đầu đúng chỗ đó.",
         "songDue": {
-          "one": "Ô nhịp {{bar}} của {{song}} đến hạn hôm nay.",
-          "range": "Ô nhịp {{from}}–{{to}} của {{song}} đến hạn hôm nay."
+          "one": "Ô nhịp {{bar}} của {{song}} đã đến lúc tập lại.",
+          "range": "Các ô nhịp {{from}}–{{to}} của {{song}} đã đến lúc tập lại."
         }
       },
       "whatsIn": "Có gì trong buổi tập, và vì sao",

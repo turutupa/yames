@@ -94,8 +94,8 @@
         },
         "samePlace": "Hoje começa no mesmo ponto.",
         "songDue": {
-          "one": "O compasso {{bar}} de {{song}} é para hoje.",
-          "range": "Os compassos {{from}} a {{to}} de {{song}} são para hoje."
+          "one": "O compasso {{bar}} de {{song}} está pendente.",
+          "range": "Os compassos {{from}} a {{to}} de {{song}} estão pendentes."
         }
       },
       "whatsIn": "O que tem nela, e por quê",

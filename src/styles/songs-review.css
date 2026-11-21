@@ -71,13 +71,6 @@
   font-size: 16px;
 }
 
-/* A verdict is one sentence and reads as one, so it is allowed the room the
-   body's blocks are not — the body's excerpt is a drawing and wants to stay
-   narrow, this is prose. */
-.songs-review-said .coach-block-sentence {
-  font-size: 13.5px;
-}
-
 .songs-review-title {
   margin: 0;
   font-size: 16px;

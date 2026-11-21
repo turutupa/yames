@@ -153,14 +153,21 @@ describe("songFacts", () => {
   });
 
   it("is extras alone without the ear", () => {
-    expect(songFacts({ extraCount: 0 })).toEqual([
+    expect(songFacts({ extraCount: 0, hits: 8 })).toEqual([
       { kind: "extras", mark: "check", line: { key: "session.note.fact.noExtras", values: {} } },
     ]);
-    expect(songFacts({ extraCount: 2 })[0]).toMatchObject({ mark: "none", line: { values: { count: 2 } } });
+    expect(songFacts({ extraCount: 2, hits: 8 })[0]).toMatchObject({ mark: "none", line: { values: { count: 2 } } });
+  });
+
+  // Review c5a2 finding 5: a silent guitar has no extras, and no praise either.
+  it("no check for 'no extras' on a pass where nothing was heard", () => {
+    expect(songFacts({ extraCount: 0, hits: 0 })).toEqual([
+      { kind: "extras", mark: "none", line: { key: "session.note.fact.noExtras", values: {} } },
+    ]);
   });
 
   it("adds right notes of those it could pitch, never a cross", () => {
-    const facts = songFacts({ extraCount: 0 }, [
+    const facts = songFacts({ extraCount: 0, hits: 8 }, [
       verdict("right"),
       verdict("right"),
       verdict("right"),
@@ -176,6 +183,6 @@ describe("songFacts", () => {
   });
 
   it("leaves right notes out when it could pitch none (no reason it cannot give)", () => {
-    expect(songFacts({ extraCount: 0 }, [verdict("notAssessed"), verdict("unheard")])).toHaveLength(1);
+    expect(songFacts({ extraCount: 0, hits: 8 }, [verdict("notAssessed"), verdict("unheard")])).toHaveLength(1);
   });
 });

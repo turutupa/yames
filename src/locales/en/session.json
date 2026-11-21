@@ -89,8 +89,8 @@
         },
         "samePlace": "Same place today.",
         "songDue": {
-          "one": "Bar {{bar}} of {{song}} is due today.",
-          "range": "Bars {{from}} to {{to}} of {{song}} are due today."
+          "one": "Bar {{bar}} of {{song}} is due.",
+          "range": "Bars {{from}} to {{to}} of {{song}} are due."
         }
       },
       "whatsIn": "What's in it, and why",

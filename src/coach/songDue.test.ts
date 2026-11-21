@@ -8,6 +8,8 @@ import { readSongDue } from "../containers/session/hooks/useSongDue";
 import { getScore, listDue, listScores } from "../ipc";
 import type { ScoreDue, ScoreSummary } from "../ipc";
 import type { SongScore } from "../songs/types";
+import { songDueNow } from "../songs/due";
+import type { SongDue } from "../songs/due";
 
 vi.mock("../ipc", () => ({
   listDue: vi.fn(),
@@ -83,6 +85,55 @@ describe("which passage", () => {
   it("nothing from no answer", () => {
     expect(duePassagesOn(null, library, TODAY)).toEqual([]);
   });
+
+  it("names the passage Songs opens: one order for both (review c5a2 finding 3c)", () => {
+    // Two passages of one song due on one day, in store order 9..12 first.
+    const rows = [due("a", 9, 12, TODAY - 2), due("a", 1, 4, TODAY - 2)];
+    const first = duePassagesOn(rows, library, TODAY)[0];
+    const items: SongDue[] = rows.map((r) => ({ scoreId: r.scoreId, startBar: r.rangeStartBar, endBar: r.rangeEndBar, dueDay: r.dueDay }));
+    const opened = songDueNow(items, "a", TODAY);
+    expect([opened?.startBar, opened?.endBar]).toEqual([first.rangeStartBar, first.rangeEndBar]);
+    expect(opened?.startBar).toBe(1);
+  });
+});
+
+/**
+ * Review c5a2 finding 1: the passage named is often one that came due days
+ * ago, so no locale may say its day is today ("scheduled for today", "今日が
+ * 予定日", "prévue aujourd'hui"). The word for "today" in each language.
+ */
+const TODAY_WORDS: Record<string, RegExp> = {
+  en: /\btoday\b/i,
+  es: /\bhoy\b/i,
+  "pt-BR": /\bhoje\b/i,
+  fr: /aujourd/i,
+  it: /\boggi\b/i,
+  de: /\bheute\b/i,
+  nl: /\bvandaag\b/i,
+  pl: /\bdzi(ś|siaj)\b/i,
+  ru: /сегодня/i,
+  tr: /bugün/i,
+  ja: /今日|本日/,
+  ko: /오늘/,
+  "zh-CN": /今天|今日/,
+  "zh-TW": /今天|今日/,
+  vi: /hôm nay/i,
+};
+type SessionPack = { session: { today: { line: { songDue: { one: string; range: string } } } } };
+const SESSION_PACKS = import.meta.glob("../locales/*/session.json", { eager: true, import: "default" }) as Record<string, SessionPack>;
+
+describe("the due sentence never says the day was today, in any locale", () => {
+  const packs = Object.entries(SESSION_PACKS).map(([path, pack]) => [path.split("/")[2], pack] as const);
+
+  it("covers all fifteen locales", () => {
+    expect(packs.map(([lng]) => lng).sort()).toEqual(Object.keys(TODAY_WORDS).sort());
+  });
+
+  it.each(packs)("%s", (lng, pack) => {
+    const { one, range } = pack.session.today.line.songDue;
+    expect(one).not.toMatch(TODAY_WORDS[lng]);
+    expect(range).not.toMatch(TODAY_WORDS[lng]);
+  });
 });
 
 describe("in printed bars, as printedBarsOf counts them", () => {
@@ -139,6 +190,23 @@ describe("reading it once, from the store", () => {
     vi.mocked(listDue).mockResolvedValue([due("a", 1, 2, TODAY + 1)]);
     expect(await readSongDue(TODAY)).toBeNull();
     expect(listScores).not.toHaveBeenCalled();
+  });
+
+  it("a passage that came due days ago is still said (review c5a2 finding 1)", async () => {
+    vi.mocked(listDue).mockResolvedValue([due("a", 1, 2, TODAY - 5)]);
+    vi.mocked(listScores).mockResolvedValue([summary("a", "A")]);
+    vi.mocked(getScore).mockImplementation((id) => Promise.resolve(score(id, "A")));
+    expect(await readSongDue(TODAY)).toEqual({ song: "A", from: 2, to: 3 });
+  });
+
+  it("a passage running past the score as it is now is skipped, and the next tried (finding 4)", async () => {
+    // The score has 11 played bars (0..10): bars 9..11 end past it.
+    vi.mocked(listDue).mockResolvedValue([due("a", 9, 11, TODAY - 4), due("b", 1, 2, TODAY - 1)]);
+    vi.mocked(listScores).mockResolvedValue([summary("a", "A"), summary("b", "B")]);
+    vi.mocked(getScore).mockImplementation((id) => Promise.resolve(score(id, id.toUpperCase())));
+    expect(await readSongDue(TODAY)).toEqual({ song: "B", from: 2, to: 3 });
+    vi.mocked(listDue).mockResolvedValue([due("a", 8, 10, TODAY - 4)]);
+    expect(await readSongDue(TODAY)).toEqual({ song: "A", from: 5, to: 7 });
   });
 
   it("a build without the store says nothing", async () => {

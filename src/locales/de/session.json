@@ -89,8 +89,8 @@
         },
         "samePlace": "Heute an derselben Stelle.",
         "songDue": {
-          "one": "Takt {{bar}} von {{song}} ist heute dran.",
-          "range": "Takte {{from}} bis {{to}} von {{song}} sind heute dran."
+          "one": "Takt {{bar}} von {{song}} ist wieder dran.",
+          "range": "Takte {{from}} bis {{to}} von {{song}} sind wieder dran."
         }
       },
       "whatsIn": "Was drin ist, und warum",

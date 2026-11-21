@@ -26,6 +26,9 @@ export async function readSongDue(today: number = dayOf()): Promise<DuePassage |
     const summary = byId.get(row.scoreId);
     // A song since deleted (or one whose score will not come back) is skipped.
     if (!score || !summary) continue;
+    // A passage that runs past the score as it is now (the song re-imported
+    // shorter): `printedBarNumber` would make up a bar number for it. Skipped.
+    if (Math.max(row.rangeStartBar, row.rangeEndBar) >= score.bars.length) continue;
     return { song: summary.name ?? score.title ?? summary.title, ...printedPassage(score, row.rangeStartBar, row.rangeEndBar) };
   }
   return null;
