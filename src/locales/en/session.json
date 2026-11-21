@@ -452,7 +452,7 @@
         "upAndBack": "up and back down"
       },
       "line": "{{shape}}: {{direction}}. {{bars}}.",
-      "bars_one": "{{count}} bar",
+      "bars": "{{count}} bar",
       "bars_other": "{{count}} bars",
       "remove": "Remove",
       "removeLabel": "Remove {{what}} from My exercises",

@@ -436,6 +436,31 @@
       "heard": "自由演奏時你在 {{key}}，主要用了 {{chords}}。",
       "heardKey": "自由演奏時你在 {{key}}。"
     },
+    "myExercises": {
+      "title": "我的練習",
+      "intro": "你自己做的練習。它們不屬於任何路線，也不計入通過。",
+      "shape": {
+        "box": "{{root}} {{scale}}，第 {{position}} 琴格的音階框",
+        "threePerString": "{{root}} {{scale}}，從第 {{position}} 琴格起每弦三個音",
+        "arpeggio": "{{chord}} 琶音，從第 {{position}} 琴格起",
+        "oneString": "{{root}} {{scale}}，沿第 {{string}} 弦從第 {{position}} 琴格起",
+        "chromatic": "半音階，一指一格，從第 {{position}} 琴格起"
+      },
+      "direction": {
+        "up": "上行",
+        "down": "下行",
+        "upAndBack": "上行再下行"
+      },
+      "line": "{{shape}}：{{direction}}。{{bars}}。",
+      "bars": "{{count}} 小節",
+      "bars_other": "{{count}} 小節",
+      "remove": "移除",
+      "removeLabel": "從我的練習中移除{{what}}",
+      "removed": "已從我的練習中移除。",
+      "undo": "復原",
+      "cantBuild": "這個練習已無法再產生：目前版本的 Yames 不再提供它。在你移除之前，它會一直留在這裡。",
+      "howTo": "照譜彈，跟著節拍器。"
+    },
     "paths": {
       "title": "路線",
       "intro": "選一個目標。沒有任何鎖定：你可以從任意一步開始，也可以隨時改主意。",
