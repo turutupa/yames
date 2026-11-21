@@ -33,7 +33,7 @@ const SHORT_PAIR = "Pick both short notes after each long one.";
 const LONG_ON = "Put each beat's long note on the click.";
 const LONG_FULL = "Wait the full eighth before the 'and'.";
 const A_HEARD = "Pick the 'a' after each hole.";
-const A_LATE = "Play the 'a' late, just before the next beat.";
+const A_LATE = "Wait out the hole, then play the 'a'.";
 const NO_234 = "Leave '2', '3' and '4' silent.";
 const THREE_WAIT = "Wait out '3' before its 'e'.";
 const HEARD_ALL = "Pick every written note, right to the end.";
@@ -45,8 +45,11 @@ const SILENT_2 = "Leave the 'and' and 'a' of '2' silent.";
 const C_LOW_E = "Play C on the low E string at fret eight.";
 const BOTH_HEARD = "Pick every note of both lines.";
 const BOTH_EXTRAS = "Leave the rests silent in both lines.";
-const LOOK_NEXT = "Look at the next string during each rest.";
-const HIGH_D_LAND = "Land the high D on '4' and let it ring.";
+const LOOK_NEXT = "Keep the pick close as you cross strings.";
+const HIGH_D_LAND = "Land the high D right on '4'.";
+const HELD_A_LAND = "Land the held A right on '4'.";
+const LINE_FIRST = "Put each line's first note on the click.";
+const ROOT_JUMP = "Jump from the root to the stab in one move.";
 const WELL_UNDER = "Start well under your clean tempo.";
 const ARRIVE = "Arrive on the new note as each bar starts.";
 const STAB_BOTH = "Catch both strings with every stab.";
@@ -150,7 +153,7 @@ export const FUNK_LINES_CUES: CueBook = {
   ],
   "holes-mixed.two-notes": [
     g("Play every 'a' at fret five, the rest at seven.", 0),
-    c("heard", "Press fret five fully for each 'a'."),
+    c("heard", "Pick every 'a', the G at fret five."),
     c("extras", "Leave '3' and the 'and' of '2' silent."),
     c("notes", "Lift the third finger off for every 'a'.", 1),
     c("late", "Keep the pick swinging as the note changes.", 2),
@@ -195,18 +198,18 @@ export const FUNK_LINES_CUES: CueBook = {
     c("early", WAIT_REST),
     c("afterHeld", "Count the held A's beat, then the low A."),
     c("stringChange", "Cross to the A string on the 'a' of '2'."),
-    c("lastBars", "Land the held A on '4' and let it ring.", 0),
+    c("lastBars", HELD_A_LAND, 0),
   ],
   "first-lines.both-lines": [
     g("Breathe on the held A, then start the answer.", 1),
     c("heard", BOTH_HEARD),
     c("extras", BOTH_EXTRAS),
     c("notes", "Start the answer on the low A, fret five."),
-    c("late", ONE_THREE),
+    c("late", LINE_FIRST),
     c("early", WAIT_REST),
     c("afterHeld", "Count the held A's beat, then play it again.", 1),
     c("stringChange", LOOK_NEXT),
-    c("lastBars", "Land the last A on '4' and let it ring."),
+    c("lastBars", HELD_A_LAND),
   ],
 
   // Step 5: lines in a second key
@@ -237,7 +240,7 @@ export const FUNK_LINES_CUES: CueBook = {
     c("heard", BOTH_HEARD),
     c("extras", BOTH_EXTRAS),
     c("notes", "Start the answer on the low D, fret five."),
-    c("late", "Put each line's first note on the click."),
+    c("late", LINE_FIRST),
     c("early", WAIT_REST),
     c("afterHeld", "Count the held D's beat, then play it again.", 1),
     c("stringChange", LOOK_NEXT),
@@ -271,7 +274,7 @@ export const FUNK_LINES_CUES: CueBook = {
     c("late", "Put each stab right on '2' and '4'."),
     c("early", STAB_EARLY),
     c("afterHeld", ROOT_BEAT),
-    c("stringChange", "Jump from the low A to the stab in one move."),
+    c("stringChange", ROOT_JUMP),
   ],
   "stabs.stab-offbeat": [
     g("Count '1 and, (2) and': stab on every 'and'.", 0),
@@ -292,7 +295,7 @@ export const FUNK_LINES_CUES: CueBook = {
 
   // Step 7: a line and a stab
   "line-and-stab.call-and-stab": [
-    g("Count '1 (e) and a', then stab on the 'and'.", 0),
+    g("Count '1 (e) and a', stab on the 'and' of '2'.", 0),
     c("heard", LOW_FIRM),
     c("extras", AND_24_ONLY),
     c("late", STAB_LATE24),
@@ -327,7 +330,7 @@ export const FUNK_LINES_CUES: CueBook = {
     c("late", "Put each root right on the click."),
     c("early", STAB_EARLY),
     c("afterHeld", ROOT_BEAT),
-    c("stringChange", "Play both roots with the first finger.", 2),
+    c("stringChange", ROOT_JUMP),
     c("lastBars", "Count '1 and, (2) and' to the last stab."),
   ],
   "second-pair.bm-line-stab": [
@@ -362,7 +365,7 @@ export const FUNK_LINES_CUES: CueBook = {
     c("heard", OCT_BOTH),
     c("extras", "Leave '2' and '3' silent; play their 'and'."),
     c("late", "Put the octave on '1' right on the click."),
-    c("early", "Wait out '2' and '3' in full."),
+    c("early", "Wait out the rests on '2' and '3'."),
     c("afterHeld", "Count the held octave's beat, then start again."),
     c("shift", "Slide up three frets on the 'and' of '3'."),
     c("stringChange", CROSS3),
@@ -377,12 +380,12 @@ export const FUNK_LINES_CUES: CueBook = {
     c("stringChange", CROSS3, 0),
   ],
   "octaves.octave-line": [
-    g("Move the shape in the rests after each 'e'.", 1),
+    g("Move to each new shape in the two rests.", 1),
     c("heard", OCT_BOTH),
     c("extras", E_24_ONLY),
     c("late", ONE_THREE),
     c("early", TWO_WAIT),
-    c("shift", "Move two frets in the rest before '1' and '3'.", 1),
+    c("shift", "Slide two frets up, then two back, in the rests.", 1),
     c("stringChange", SHAPE_OVER, 0),
     c("lastBars", SECOND_HALF),
   ],
@@ -444,7 +447,7 @@ export const FUNK_LINES_CUES: CueBook = {
   ],
   "displaced-shapes.slide-and-stab": [
     g("Keep the first finger flat across fret five.", 2),
-    c("heard", "Pick every note as firmly as the stabs."),
+    c("heard", "Pick the single notes as well as the stabs."),
     c("extras", THIRD_SILENT),
     c("late", "Put the two stabs right on '4' and its 'e'.", 0),
     c("early", WAIT_REST),
@@ -456,7 +459,7 @@ export const FUNK_LINES_CUES: CueBook = {
   // Step 12: the sixth
   "the-sixth.sixth": [
     g(F_SHARP, 0),
-    c("heard", "Pick every note of the answer."),
+    c("heard", BOTH_HEARD),
     c("extras", SILENT_2),
     c("notes", "Play D on the A string at fret five.", 0),
     c("late", ONE_THREE),
@@ -470,7 +473,7 @@ export const FUNK_LINES_CUES: CueBook = {
     c("heard", "Hammer hard enough to hear the note."),
     c("extras", "Leave the sixteenth after each hammer silent."),
     c("notes", "Hammer with the third finger at fret seven.", 0),
-    c("late", "Put each picked note right where you count it."),
+    c("late", ON_124),
     c("early", WAIT_REST),
     c("stringChange", "Cross to the A string on '3'."),
   ],
@@ -484,7 +487,7 @@ export const FUNK_LINES_CUES: CueBook = {
     c("afterHeld", "Count the held D's beat, then start again."),
     c("shift", "Shift one fret as each new chord starts."),
     c("stringChange", LOOK_NEXT),
-    c("lastBars", "Land the held D on '4' and let it ring."),
+    c("lastBars", "Land the held D right on '4'."),
   ],
 
   // Step 13: the pocket
@@ -517,7 +520,7 @@ export const FUNK_LINES_CUES: CueBook = {
 
   // Step 14: the long form
   "long-form.bm-octaves": [
-    g("Change octave in the two rests after each 'e'.", 1),
+    g("Change octave in the rest before each new chord.", 1),
     c("heard", OCT_BOTH),
     c("extras", REST_QUIET),
     c("late", ONE_THREE),

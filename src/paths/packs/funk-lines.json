@@ -548,7 +548,7 @@
             {"when":"extras","say":"Leave the 'and' of every beat silent."},
             {"when":"notes","say":"Three beats on fret seven, the last on five."},
             {"when":"late","say":"Put the first note of each beat on the click."},
-            {"when":"early","say":"Play the 'a' late, just before the next beat.","more":1}
+            {"when":"early","say":"Wait out the hole, then play the 'a'.","more":1}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -940,7 +940,7 @@
           "coachLine": "Twelve notes a bar: eight A and four G. Each one is timed against where it is written, and the pitches are checked after the take.",
           "cues": [
             {"when":"even","say":"Play every 'a' at fret five, the rest at seven.","more":0,"general":true},
-            {"when":"heard","say":"Press fret five fully for each 'a'."},
+            {"when":"heard","say":"Pick every 'a', the G at fret five."},
             {"when":"extras","say":"Leave '3' and the 'and' of '2' silent."},
             {"when":"notes","say":"Lift the third finger off for every 'a'.","more":1},
             {"when":"late","say":"Keep the pick swinging as the note changes.","more":2},
@@ -1508,7 +1508,7 @@
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"afterHeld","say":"Count the held A's beat, then the low A."},
             {"when":"stringChange","say":"Cross to the A string on the 'a' of '2'."},
-            {"when":"lastBars","say":"Land the held A on '4' and let it ring.","more":0}
+            {"when":"lastBars","say":"Land the held A right on '4'.","more":0}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -1648,11 +1648,11 @@
             {"when":"heard","say":"Pick every note of both lines."},
             {"when":"extras","say":"Leave the rests silent in both lines."},
             {"when":"notes","say":"Start the answer on the low A, fret five."},
-            {"when":"late","say":"Put '1' and '3' right on the click."},
+            {"when":"late","say":"Put each line's first note on the click."},
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"afterHeld","say":"Count the held A's beat, then play it again.","more":1},
-            {"when":"stringChange","say":"Look at the next string during each rest."},
-            {"when":"lastBars","say":"Land the last A on '4' and let it ring."}
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Land the held A right on '4'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -1992,7 +1992,7 @@
             {"when":"early","say":"Wait out '3' before its 'e'.","more":1},
             {"when":"afterHeld","say":"Count the high D's beat, then the low D."},
             {"when":"stringChange","say":"Cross to the D string on the 'e' of '3'."},
-            {"when":"lastBars","say":"Land the high D on '4' and let it ring.","more":2}
+            {"when":"lastBars","say":"Land the high D right on '4'.","more":2}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -2138,8 +2138,8 @@
             {"when":"late","say":"Put each line's first note on the click."},
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"afterHeld","say":"Count the held D's beat, then play it again.","more":1},
-            {"when":"stringChange","say":"Look at the next string during each rest."},
-            {"when":"lastBars","say":"Land the high D on '4' and let it ring.","more":2}
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Land the high D right on '4'.","more":2}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -2314,7 +2314,7 @@
             {"when":"late","say":"Place each figure's first note on its count."},
             {"when":"early","say":"Wait out '2' in full before '3'."},
             {"when":"afterHeld","say":"Count the low A's beat, then start again."},
-            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
             {"when":"lastBars","say":"Hold the low A on '4' for its whole beat.","more":2}
           ],
           "grading": "graded",
@@ -2509,7 +2509,7 @@
             {"when":"late","say":"Put each stab right on '2' and '4'."},
             {"when":"early","say":"Wait for the click before each stab."},
             {"when":"afterHeld","say":"Count the root's full beat, then stab."},
-            {"when":"stringChange","say":"Jump from the low A to the stab in one move."}
+            {"when":"stringChange","say":"Jump from the root to the stab in one move."}
           ],
           "grading": "graded",
           "feedback": "livePerNote",
@@ -2857,7 +2857,7 @@
           ],
           "coachLine": "I time every attack, low notes and stabs alike. Pitch is not checked when stabs are in the line.",
           "cues": [
-            {"when":"even","say":"Count '1 (e) and a', then stab on the 'and'.","more":0,"general":true},
+            {"when":"even","say":"Count '1 (e) and a', stab on the 'and' of '2'.","more":0,"general":true},
             {"when":"heard","say":"Pick every low note as firmly as the stabs."},
             {"when":"extras","say":"Play only the 'and' of '2' and of '4'."},
             {"when":"late","say":"Put the stabs right on the 'and' of '2' and '4'."},
@@ -3255,7 +3255,7 @@
             {"when":"late","say":"Put each root right on the click."},
             {"when":"early","say":"Wait for the click before each stab."},
             {"when":"afterHeld","say":"Count the root's full beat, then stab."},
-            {"when":"stringChange","say":"Play both roots with the first finger.","more":2},
+            {"when":"stringChange","say":"Jump from the root to the stab in one move."},
             {"when":"lastBars","say":"Count '1 and, (2) and' to the last stab."}
           ],
           "grading": "graded",
@@ -4086,7 +4086,7 @@
             {"when":"heard","say":"Strike both strings of every octave."},
             {"when":"extras","say":"Leave '2' and '3' silent; play their 'and'."},
             {"when":"late","say":"Put the octave on '1' right on the click."},
-            {"when":"early","say":"Wait out '2' and '3' in full."},
+            {"when":"early","say":"Wait out the rests on '2' and '3'."},
             {"when":"afterHeld","say":"Count the held octave's beat, then start again."},
             {"when":"shift","say":"Slide up three frets on the 'and' of '3'."},
             {"when":"stringChange","say":"Keep the stroke small across the three strings."},
@@ -4331,12 +4331,12 @@
           ],
           "coachLine": "Band on. I time every attack against it.",
           "cues": [
-            {"when":"even","say":"Move the shape in the rests after each 'e'.","more":1,"general":true},
+            {"when":"even","say":"Move to each new shape in the two rests.","more":1,"general":true},
             {"when":"heard","say":"Strike both strings of every octave."},
             {"when":"extras","say":"Play only the 'e' of '2' and of '4'."},
             {"when":"late","say":"Put '1' and '3' right on the click."},
             {"when":"early","say":"Wait out '2' before its 'e'."},
-            {"when":"shift","say":"Move two frets in the rest before '1' and '3'.","more":1},
+            {"when":"shift","say":"Slide two frets up, then two back, in the rests.","more":1},
             {"when":"stringChange","say":"Keep the shape as it moves a string over.","more":0},
             {"when":"lastBars","say":"Keep the second half as even as the first."}
           ],
@@ -4759,7 +4759,7 @@
             {"when":"late","say":"Put '1' and '3' right on the click."},
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"afterHeld","say":"Count the low A's beat, then start again."},
-            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
             {"when":"lastBars","say":"Land the held low A on '4'.","more":1}
           ],
           "grading": "graded",
@@ -5167,7 +5167,7 @@
           "coachLine": "Band on. This is the Step's test piece: every attack is timed against the band. Pitch is not checked when stabs are in the line.",
           "cues": [
             {"when":"even","say":"Keep the first finger flat across fret five.","more":2,"general":true},
-            {"when":"heard","say":"Pick every note as firmly as the stabs."},
+            {"when":"heard","say":"Pick the single notes as well as the stabs."},
             {"when":"extras","say":"Leave the third sixteenth of each figure silent."},
             {"when":"late","say":"Put the two stabs right on '4' and its 'e'.","more":0},
             {"when":"early","say":"Wait out each rest before the next note."},
@@ -5323,13 +5323,13 @@
           "coachLine": "I time the notes and check them after the take. F# is the one I'm listening for.",
           "cues": [
             {"when":"even","say":"Play F sharp at the D string's fret four.","more":0,"general":true},
-            {"when":"heard","say":"Pick every note of the answer."},
+            {"when":"heard","say":"Pick every note of both lines."},
             {"when":"extras","say":"Leave the 'and' and 'a' of '2' silent."},
             {"when":"notes","say":"Play D on the A string at fret five.","more":0},
             {"when":"late","say":"Put '1' and '3' right on the click."},
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"shift","say":"Move back one fret as the answer starts.","more":1},
-            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
             {"when":"lastBars","say":"Keep the answer as even as the first line."}
           ],
           "grading": "graded",
@@ -5469,7 +5469,7 @@
             {"when":"heard","say":"Hammer hard enough to hear the note."},
             {"when":"extras","say":"Leave the sixteenth after each hammer silent."},
             {"when":"notes","say":"Hammer with the third finger at fret seven.","more":0},
-            {"when":"late","say":"Put each picked note right where you count it."},
+            {"when":"late","say":"Put '1', '2' and '4' right on the click."},
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"stringChange","say":"Cross to the A string on '3'."}
           ],
@@ -5599,8 +5599,8 @@
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"afterHeld","say":"Count the held D's beat, then start again."},
             {"when":"shift","say":"Shift one fret as each new chord starts."},
-            {"when":"stringChange","say":"Look at the next string during each rest."},
-            {"when":"lastBars","say":"Land the held D on '4' and let it ring."}
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
+            {"when":"lastBars","say":"Land the held D right on '4'."}
           ],
           "grading": "graded",
           "feedback": "afterTake",
@@ -5794,7 +5794,7 @@
             {"when":"late","say":"Put each '1' right on the click."},
             {"when":"early","say":"Wait out each rest before the next note."},
             {"when":"shift","say":"Reach back to fret four for the F sharp.","more":0},
-            {"when":"stringChange","say":"Look at the next string during each rest.","more":1},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings.","more":1},
             {"when":"lastBars","say":"Walk up D, E, F sharp, G in even eighths."}
           ],
           "grading": "graded",
@@ -6234,7 +6234,7 @@
           ],
           "coachLine": "Band on. An octave is one attack: every one is timed against the band and counted, and so are the four single notes. Pitch is not checked when octaves are in the line.",
           "cues": [
-            {"when":"even","say":"Change octave in the two rests after each 'e'.","more":1,"general":true},
+            {"when":"even","say":"Change octave in the rest before each new chord.","more":1,"general":true},
             {"when":"heard","say":"Strike both strings of every octave."},
             {"when":"extras","say":"Keep the pick off the strings in the rests."},
             {"when":"late","say":"Put '1' and '3' right on the click."},
@@ -6580,7 +6580,7 @@
             {"when":"extras","say":"Keep the pick off the strings in the rests."},
             {"when":"late","say":"Put each '1' right on the click."},
             {"when":"early","say":"Wait for '1' before the first octave.","more":2},
-            {"when":"stringChange","say":"Look at the next string during each rest."},
+            {"when":"stringChange","say":"Keep the pick close as you cross strings."},
             {"when":"lastBars","say":"Walk down to the start in even eighths."}
           ],
           "grading": "graded",
@@ -7240,7 +7240,7 @@
                   {"when":"extras","say":"Keep the pick off the strings in the rests."},
                   {"when":"late","say":"Put each '1' right on the click."},
                   {"when":"early","say":"Wait for '1' before the first octave.","more":1},
-                  {"when":"stringChange","say":"Look at the next string during each rest."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross strings."},
                   {"when":"lastBars","say":"Walk down to the start in even eighths."}
                 ]
               },
@@ -7451,7 +7451,7 @@
                   {"when":"extras","say":"Keep the pick off the strings in the rests."},
                   {"when":"late","say":"Put each '1' right on the click."},
                   {"when":"early","say":"Wait for '1' before the first octave.","more":1},
-                  {"when":"stringChange","say":"Look at the next string during each rest."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross strings."},
                   {"when":"lastBars","say":"Walk down to the start in even eighths."}
                 ]
               },
@@ -7662,7 +7662,7 @@
                   {"when":"extras","say":"Keep the pick off the strings in the rests."},
                   {"when":"late","say":"Put each '1' right on the click."},
                   {"when":"early","say":"Wait for '1' before the first octave.","more":1},
-                  {"when":"stringChange","say":"Look at the next string during each rest."},
+                  {"when":"stringChange","say":"Keep the pick close as you cross strings."},
                   {"when":"lastBars","say":"Walk down to the start in even eighths."}
                 ]
               }
@@ -8497,7 +8497,7 @@
             {"when":"even","say":"Start well under your clean tempo.","more":0,"general":true},
             {"when":"heard","say":"Pick the 'a' after each hole."},
             {"when":"late","say":"Put the first note of each beat on the click."},
-            {"when":"early","say":"Play the 'a' late, just before the next beat."},
+            {"when":"early","say":"Wait out the hole, then play the 'a'."},
             {"when":"shift","say":"Arrive on the new note as each bar starts."},
             {"when":"lastBars","say":"Keep counting '1 e (and) a' to the top note."}
           ],
