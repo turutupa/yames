@@ -576,6 +576,34 @@
                   "description": "How many days from now to bring it up again."
                 }
               }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "chord",
+                "shape"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "pinShape"
+                  ],
+                  "description": "Pin one grip of a chord to the Jam screen."
+                },
+                "chord": {
+                  "$ref": "#/$defs/chordName",
+                  "description": "The chord, as the app writes it."
+                },
+                "shape": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 29,
+                  "description": "Which of its grips, counted from 0, as a chordShape block counts them."
+                }
+              }
             }
           ],
           "description": "What the button does."

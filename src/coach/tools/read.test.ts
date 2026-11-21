@@ -10,6 +10,7 @@ import { fakeHost, toolCtx } from "./fakeHost";
 import { runCoachTool } from "./run";
 import { runIn } from "./testPaths";
 import type { RunOutcome } from "./types";
+import { createJam } from "../../jam/jams";
 
 function result(outcome: RunOutcome) {
   if ("proposal" in outcome) throw new Error("a read tool proposed");
@@ -66,6 +67,20 @@ describe("show_chord", () => {
   ])("%s", (_, args, why) => {
     const out = result(runCoachTool({ tool: "show_chord", args }, fakeHost(), toolCtx()));
     expect(out.ok === false && out.why).toBe(why);
+  });
+
+  it("on the Jam screen the grip carries 'Pin this shape', and drawing it changes nothing (leg c5a1)", () => {
+    const host = fakeHost();
+    const onJam = toolCtx({ jam: { jam: createJam("Slow rock", { key: "Am" }) } });
+    const out = result(runCoachTool({ tool: "show_chord", args: { chord: "Am7", shape: 2 } }, host, onJam));
+    expect(out.ok && out.blocks?.map((b) => b.type)).toEqual(["chordShape", "action"]);
+    expect(out.ok && out.blocks?.[1]).toMatchObject({ type: "action", action: { kind: "pinShape", chord: "Am7", shape: 1 }, label: { key: "coachBlocks.action.pinShape" } });
+    expect(host.changes()).toEqual([]);
+    // anywhere else, the grip alone; and a shape past the last is still not found on Jam
+    const off = result(runCoachTool({ tool: "show_chord", args: { chord: "Am7", shape: 2 } }, fakeHost(), toolCtx()));
+    expect(off.ok && off.blocks?.map((b) => b.type)).toEqual(["chordShape"]);
+    const far = result(runCoachTool({ tool: "show_chord", args: { chord: "Am7", shape: 30 } }, fakeHost(), onJam));
+    expect(far.ok === false && far.why).toBe("notFound");
   });
 });
 

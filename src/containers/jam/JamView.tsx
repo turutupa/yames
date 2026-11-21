@@ -64,7 +64,7 @@ const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
 const INTENSITIES: JamIntensity[] = ["soft", "normal", "loud"];
 
 /** Which neck a player has, if any. Horns and voices get the chords only. */
-function neckFor(instrument: string): Instrument | null {
+export function neckFor(instrument: string): Instrument | null {
   if (instrument === "bass") return "bass";
   if (instrument === "electric-guitar" || instrument === "acoustic-guitar") return "guitar";
   return null;

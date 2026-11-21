@@ -432,6 +432,12 @@ function resolveAction(
       return action.days === 1
         ? { label: { key: "coachBlocks.action.comeBack.tomorrow", values: {} } }
         : { label: { key: "coachBlocks.action.comeBack.inDays", values: { days: action.days } } };
+
+    case "pinShape":
+      // The grip itself is found at the press, on the player's neck then
+      // (`containers/coach/pinShape.ts`); a name the theory cannot read goes now.
+      if (!parseChordName(action.chord)) return { reason: "unknownChord", detail: `"${action.chord}" is not a chord` };
+      return { label: { key: "coachBlocks.action.pinShape", values: { chord: action.chord, shape: action.shape + 1 } } };
   }
 }
 

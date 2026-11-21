@@ -452,6 +452,22 @@ export const CATALOGUE: CatalogueSpec = {
                   },
                 ],
               },
+              {
+                name: "pinShape",
+                note: "Pin one grip of a chord to the Jam screen.",
+                fields: [
+                  {
+                    name: "chord",
+                    type: { kind: "chordName" },
+                    note: "The chord, as the app writes it.",
+                  },
+                  {
+                    name: "shape",
+                    type: { kind: "integer", min: 0, max: MAX_SHAPE_INDEX },
+                    note: "Which of its grips, counted from 0, as a chordShape block counts them.",
+                  },
+                ],
+              },
             ],
           },
         },

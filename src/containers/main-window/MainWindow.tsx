@@ -58,7 +58,7 @@ import {
 } from "../../ipc";
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
-import { noteAskLoad } from "../coach/askTools";
+import { askTakeNow, noteAskLoad } from "../coach/askTools";
 import { useCoachToolHost } from "../coach/useCoachToolHost";
 import { loadPresetAfterReRead } from "../coach/coachPresetLoad";
 import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
@@ -89,7 +89,8 @@ import { WhatsNewModal } from "../onboarding/whats-new/WhatsNewModal";
 import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
-import { JamView } from "../jam/JamView";
+import { JamView, neckFor } from "../jam/JamView";
+import { registerJamPin } from "../coach/pinShape";
 import { SongsView } from "../songs/SongsView";
 import { useScheduleLeavesWithSong } from "../songs/useScheduleLeavesWithSong";
 import { useSongsDue } from "../songs/review/useSongsDue";
@@ -709,6 +710,21 @@ export function MainWindow() {
   const heardShown = useMemo(
     () => (jamHear && heardJam ? heardLine(heardLive, displayTransposition(heardJam.transposition ?? "concert")) : null),
     [jamHear, heardJam, heardLive],
+  );
+
+  // "Pin this shape" from Ask (leg c5a1): the chord sheet's own edit, behind a
+  // press, read at the press (the door reads the latest of these, never a beat).
+  const pinDoor = useRef({ view, jam: jamSession.jam, editJam: jamSession.editJam, instrument });
+  pinDoor.current = { view, jam: jamSession.jam, editJam: jamSession.editJam, instrument };
+  useEffect(
+    () =>
+      registerJamPin({
+        jamOnScreen: () => (pinDoor.current.view === "jam" ? (pinDoor.current.jam ?? null) : null),
+        neck: () => neckFor(pinDoor.current.instrument),
+        takeNow: askTakeNow,
+        setPin: (pin) => pinDoor.current.editJam({ pinnedShape: pin }),
+      }),
+    [],
   );
 
   // The tours (O6, card #50). "Show me around" walks Today, Paths, a Session

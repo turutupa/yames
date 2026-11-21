@@ -10,9 +10,11 @@
  * everywhere. Theme tokens only; no solid button, no coach colour (that is
  * the glyph's, in the head); text wraps.
  */
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { CoachBlocks } from "../../coach/blocks/CoachBlocks";
+import type { CoachAction } from "../../coach/blocks/types";
+import { pinRecord, pinsVersion, pinUndoLive, pressPinShape, pressPinUndo, subscribePins, type PinRecord } from "./pinShape";
 import type { SessionPlan } from "../../session/planner";
 import type { ToolChoice } from "../../coach/tools/types";
 import { MakeExercisePreview } from "./MakeExercisePreview";
@@ -80,10 +82,67 @@ function useUndoClock(undo: UndoState | null): number {
   return now;
 }
 
+/**
+ * "Pin this shape" on a grip drawn on the Jam screen (leg c5a1): the block's
+ * button until it is pressed, then its receipt with Undo (`pinShape.ts`). A
+ * refusal leaves the button and says why under it.
+ */
+function usePin(id: string, blocks: ToolBody & { kind: "receipt" }) {
+  useSyncExternalStore(subscribePins, pinsVersion, pinsVersion);
+  const record = pinRecord(id);
+  const pinnable = !!blocks.blocks?.some((b) => b.type === "action" && b.action.kind === "pinShape");
+  const shown = record && record.state !== "refused" ? blocks.blocks?.filter((b) => !(b.type === "action" && b.action.kind === "pinShape")) : blocks.blocks;
+  const onAction = pinnable
+    ? (action: CoachAction) => {
+        if (action.kind === "pinShape") pressPinShape(id, action);
+      }
+    : undefined;
+  return { record, shown, onAction };
+}
+
+function PinReceipt({ id, record }: { id: string; record: PinRecord }) {
+  const { t } = useTranslation();
+  const until = record.state === "live" ? record.until : null;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (until === null) return;
+    const left = until - Date.now();
+    if (left <= 0) return;
+    const timer = window.setTimeout(() => setNow(Date.now()), left + 20);
+    return () => window.clearTimeout(timer);
+  }, [until]);
+  if (record.state === "refused") {
+    return (
+      <p className="ask-tool-note" data-testid="ask-pin-refused">
+        {lineText(t, record.note)}
+      </p>
+    );
+  }
+  const live = pinUndoLive(record, Math.max(now, Date.now()));
+  return (
+    <div className="ask-receipt-row ask-pin" data-testid="ask-pin-receipt" data-state={record.state}>
+      <Mark kind="done" />
+      <p className="ask-receipt-text">{lineText(t, record.receipt)}</p>
+      {live && (
+        <button type="button" className="btn-tonal ask-tool-btn ask-undo" onClick={onePress(() => pressPinUndo(id))} onKeyDown={noKeyRepeat} onKeyUp={noKeyRepeat} data-testid="ask-pin-undo">
+          {t("coachTools.undo.generic")}
+        </button>
+      )}
+      {record.state !== "live" && (
+        <p className="ask-tool-note" data-testid="ask-pin-note">
+          {record.state === "done" ? `${t("coachTools.ui.undone")} ` : ""}
+          {lineText(t, record.note)}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Receipt({ id, body }: { id: string; body: ToolBody & { kind: "receipt" } }) {
   const { t } = useTranslation();
   const { undo } = body;
   const now = useUndoClock(undo);
+  const pin = usePin(id, body);
   // An add's Undo waits for the store to say it kept the add (review t2c, finding 4).
   const live = undoLive(undo, Math.max(now, Date.now())) && !(body.settling && laterDecidesUndo(undo));
   return (
@@ -109,7 +168,8 @@ function Receipt({ id, body }: { id: string; body: ToolBody & { kind: "receipt" 
           {lineText(t, undo.note)}
         </p>
       )}
-      {body.blocks && body.blocks.length > 0 && <CoachBlocks className="ask-tool-blocks" blocks={body.blocks} />}
+      {pin.shown && pin.shown.length > 0 && <CoachBlocks className="ask-tool-blocks" blocks={pin.shown} onAction={pin.onAction} />}
+      {pin.record && <PinReceipt id={id} record={pin.record} />}
       {body.next && body.next.length > 0 && !body.settling && <Choices choices={body.next} testId="ask-receipt-next" />}
       <Source words={t("coachTools.source.did")} />
     </div>
