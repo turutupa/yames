@@ -15,8 +15,29 @@ Cues: `src/paths/specs/know-the-neck-cues.ts`, attached with `withCues` in `know
 - [x] Level 3 (Advanced: five-boxes, boxes-second-key, arpeggios, the-changes, changes-in-g, warm-up
   two-boxes-up), 18 Exercises (`dca29513`).
 - [x] Proof-read (below): three sonnet readers, one per Level, 36 objections, 31 taken, 5 answered (`fbafd7a2`).
-- [ ] Translations: four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW), 212 sentences.
-- [ ] Gates.
+- [x] Translations (`2384c30b`): four sonnet helpers (de fr es it · nl pl pt-BR ru · tr vi ja · ko zh-CN zh-TW),
+  212 sentences each, each file checked again by me with `check_i18n.py` (problems 0 in all fourteen). One fix
+  after: es "Rasga C" (a strum) for "Roll C once" -> "Arpegia C". Merged: every overlay 1212 of 1212, 0 errors
+  (`/tmp/coach-cues4/merge.log`).
+- [x] Gates (below).
+
+## Gates
+
+- `npm run paths -- check` (every pack): 16 Paths ok, 0 errors (`/tmp/coach-cues4/check-all.log`).
+- `npx tsc --noEmit`: clean (`/tmp/coach-cues4/tsc.log`).
+- `npm run test`: 405 of 406 files, 26,186 of 26,186 tests passed (`/tmp/coach-cues4/vitest.log`); the one file is
+  the known worktree-only `TabStage.render.test.tsx`.
+- `npm run build`: ok (`/tmp/coach-cues4/build.log`).
+- No Rust file changed; no layout run (the orchestrator's).
+
+## Longest cue per language, and what wants a native read
+
+en 48 · de 48 · es 48 · fr 48 · it 48 · nl 48 · pl 48 · pt-BR 48 · ru 48 · tr 48 · vi 45 · ko 32 · ja 30 · zh-CN 23 ·
+zh-TW 23. Read first: "Roll C once" (near-triads lastBars) in every language (pl "Przeciągnij", ru "Разыграйте"
+are loose); the "key note" word where the overlay had none (vi "chủ âm", tr "ana nota", ru "главная нота", nl
+"grondtoon", the same word as root); zh-TW mixes 指型 and 形狀 for shape as its overlay does; zh writes 降 E / 升 F
+in two cues where its overlay prose writes Eb / F#; fr says "position" for box; de, fr and it drop a final period
+in a few cues to fit.
 
 ## Refusals and rewordings
 
