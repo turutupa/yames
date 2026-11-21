@@ -74,8 +74,12 @@
           "notes": "上次练习，{{exercise}}：{{bpm}} BPM 时音准 {{value}}%。",
           "plain": "上次练习结束在 {{exercise}}，{{bpm}} BPM。"
         },
-        "backRungs": "今天比原本低一档开始。",
-        "backRungs_other": "今天比原本低 {{count}} 档开始。",
+        "backAgo": "那是 {{count}} 天前。",
+        "backAgo_other": "那是 {{count}} 天前。",
+        "backAway": "你上次练习是 {{count}} 天前。",
+        "backAway_other": "你上次练习是 {{count}} 天前。",
+        "backStartsAt": "今天从 {{bpm}} BPM 开始。",
+        "backStartsAtOther": "今天 {{exercise}} 从 {{bpm}} BPM 开始。",
         "ungraded": {
           "today": "今天早些时候弹了 {{count}} 分钟，最后一遍是 {{exercise}}，{{bpm}} BPM。",
           "today_other": "今天早些时候弹了 {{count}} 分钟，最后一遍是 {{exercise}}，{{bpm}} BPM。",
@@ -270,7 +274,7 @@
       "endTake": "结束这一遍",
       "goAgain": "再来一遍，{{bpm}} BPM",
       "next": "下一个：{{title}}",
-      "finish": "看看结果",
+      "finish": "结束这次练习",
       "done": "完成",
       "slower": "慢一点",
       "faster": "快一点",
