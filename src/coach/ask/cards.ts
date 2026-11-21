@@ -36,7 +36,7 @@ import type { Exercise } from "../../paths/format";
 import { NOT_GRADED } from "../../paths/metrics";
 import { displayBar, displayValue, metricKey } from "../../session/coachWords";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
-import { factsOf, leanOf, takesOf } from "../../session/progress";
+import { factsOf, isMarkedNotFair, leanOf, takesOf } from "../../session/progress";
 import type { TakeOutcome, UngradedWhy } from "../../session/runner";
 import { withVariant } from "../../session/take";
 import type { PathTakeRow } from "../../ipc";
@@ -528,12 +528,11 @@ export function whyNotCounted(ctx: CoachContext, what: "take" | AskableMetric = 
 /**
  * The player marked this Take's grade as not fair. The one place the history
  * cards ask: such a Take is left out of every number they quote or count, and
- * the card says how many it left out. Leg nf1 adds the same rule to
- * `session/progress.ts` (`isMarkedNotFair`); once both are merged this
- * should call that one.
+ * the card says how many it left out. The rule is the app's one rule,
+ * `isMarkedNotFair` in `session/progress.ts` (int1).
  */
 export function markedNotFair(row: PathTakeRow): boolean {
-  return factsOf(row).fair === "no";
+  return isMarkedNotFair(row);
 }
 
 /** A stored Take that was graded and measured: heard, long enough, and not played ungraded. */
@@ -542,7 +541,13 @@ function measuredRow(row: PathTakeRow): boolean {
   return row.caught && f.ungraded === undefined && (f.verdict === "passed" || f.verdict === "belowBar");
 }
 
-/** The Path the Take belongs to: the context's, else the stored row's. Null: no history can be read. */
+/**
+ * The Path the Take belongs to: the context's, else the stored row's. Null: no history can be read.
+ * The history cards read `takesOf(progress, pathId, exerciseId)` alone, so a pack Exercise's
+ * history never holds a Take of the player's own exercises (`CUSTOM_PATH_ID`), as `tendencies.ts`
+ * keeps them out (int1); a Take of an own exercise is compared with that same recipe's Takes only
+ * (its id is the recipe's key, `paths/custom.ts` `recipeKey`).
+ */
 function pathIdOf(ctx: CoachContext, outcome: TakeOutcome): string | null {
   return ctx.path?.id ?? storedRow(ctx, outcome)?.pathId ?? null;
 }

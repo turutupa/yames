@@ -14,6 +14,8 @@ import type { CoachContext } from "../context";
 import type { Line } from "../tools/types";
 import { improving, isCard, markedNotFair, passMarkDistance, scoreMadeOf, whatChanged, type FactCard, type NoCard } from "./cards";
 import { BPM, fixture, said, TUNE } from "./cardFixtures";
+import { CUSTOM_PATH_ID } from "../../paths/custom";
+import { isMarkedNotFair } from "../../session/progress";
 import { cardsHere, runFactCard } from "./intents";
 
 /** English, as i18next would say it: the bare key is the singular, `_other` the rest. */
@@ -53,6 +55,7 @@ type Stored = {
   newClean?: boolean;
   ago?: number;
   exerciseId?: string;
+  pathId?: string;
 };
 
 /** A stored Take of the tune, as `useSessionRun` keeps one. */
@@ -83,6 +86,7 @@ function stored(s: Stored): PathTakeRow {
     caught: verdict !== "notCaught",
     passed: verdict === "passed",
     facts,
+    ...(s.pathId ? { pathId: s.pathId } : {}),
   });
 }
 
@@ -176,6 +180,11 @@ describe("what changed since the last Take", () => {
     expect(keys(c)).toEqual(["changed.first"]);
   });
 
+  it("a Take of the player's own exercises is never the one before (int1)", () => {
+    const c = card(whatChanged(withHistory({}, [stored({ pathId: CUSTOM_PATH_ID, bpm: 60, verdict: "passed" })]).ctx));
+    expect(keys(c)).toEqual(["changed.first"]);
+  });
+
   it("this Take not caught: its reason, nothing compared", () => {
     const c = card(whatChanged(withHistory({ verdict: "notCaught", noCatchReason: "nothingHeard", heard: 0 }, [stored({})]).ctx));
     expect(keys(c)).toEqual(["count.notCaught.nothingHeard"]);
@@ -226,6 +235,14 @@ describe("am I improving", () => {
       "ask.card.improving.even(count=3,first=80,last=90,best=90)",
       "ask.card.history.leftOut(count=1)",
     ]);
+    expect(text(c)).not.toMatch(/120|99%/);
+  });
+
+  it("Takes of the player's own exercises are not in the window, nor counted as left out (int1)", () => {
+    const own = (ago: number) => stored({ pathId: CUSTOM_PATH_ID, bpm: 120, even: 0.99, verdict: "passed", counts: true, ago });
+    const history = [own(1), stored({ bpm: 90, even: 0.9, verdict: "passed", counts: true, ago: 2 }), own(3), stored({ bpm: 80, even: 0.8, counts: false, ago: 4 })];
+    const c = card(improving(withHistory({}, history).ctx));
+    expect(c.lines.map(said)).toEqual(["ask.card.improving.tooFew(count=2,need=3)"]);
     expect(text(c)).not.toMatch(/120|99%/);
   });
 
@@ -387,5 +404,9 @@ describe("the four cards and an ungraded player", () => {
     expect(markedNotFair(stored({ fair: "no" }))).toBe(true);
     expect(markedNotFair(stored({ fair: "yes" }))).toBe(false);
     expect(markedNotFair(stored({}))).toBe(false);
+    // The app's one rule (int1): the cards read Progress's own reading, row for row.
+    for (const r of [stored({ fair: "no" }), stored({ fair: "yes" }), stored({})]) {
+      expect(markedNotFair(r)).toBe(isMarkedNotFair(r));
+    }
   });
 });
