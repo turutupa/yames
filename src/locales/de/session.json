@@ -867,6 +867,13 @@
       "question": "Hat irgendein Schlag mit einem Aufschlag begonnen?",
       "yes": "Ja",
       "no": "Nein"
+    },
+    "keys": {
+      "noTakeYet": "Noch kein Take, also habe ich nichts, worauf ich mich stützen kann.",
+      "ungradedLast": "Dein letzter Take wurde nicht bewertet, also habe ich darin nichts gemessen.",
+      "lastBelow": "Letzter Take: unter der Messlatte bei {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }

@@ -867,6 +867,13 @@
       "question": "有没有哪一拍是上拨开始的？",
       "yes": "有",
       "no": "没有"
+    },
+    "keys": {
+      "noTakeYet": "还没有练过一遍，所以我没有可依据的内容。",
+      "ungradedLast": "你上一遍没有评分，所以我什么也没测量。",
+      "lastBelow": "上一遍：{{bpm}} BPM 时没有达到及格线。",
+      "whatNext": "{{action}}。{{why}}",
+      "whatNextAlone": "{{action}}。"
     }
   }
 }

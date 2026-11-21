@@ -171,6 +171,10 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
   "session-pause": { where: ["session"], does: ["session togglePause"] },
   "session-restart": { where: ["session"], does: ["session restart"] },
   "session-watch": { where: ["session"], does: ["session watch"] },
+  // The coach's keys (leg c1b2b): a Session's, though their ids carry no prefix.
+  "ask-explain-last": { where: ["session"], does: ["session explainLast"] },
+  "ask-what-next": { where: ["session"], does: ["session whatNext"] },
+  "accept-suggestion": { where: ["session"], does: ["session acceptSuggestion"] },
   // Settings is a layer: closing it returns to the mode it covered.
   settings: {
     ...Object.fromEntries(without("settings").map((w) => [w, ["setView settings"]])),
@@ -265,6 +269,9 @@ async function observe(action: HotkeyAction, where: Where, state: AppState = STA
         "togglePause",
         "restart",
         "watch",
+        "explainLast",
+        "whatNext",
+        "acceptSuggestion",
       ]) as never,
       forceWebviewFocus: () => Promise.resolve(),
     }),

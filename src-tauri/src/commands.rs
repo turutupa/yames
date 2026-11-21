@@ -3887,13 +3887,20 @@ pub async fn tts_speak(
     dim_state: State<'_, SharedTtsDim>,
     engine_state: State<'_, EngineState>,
     text: String,
+    dim: Option<bool>,
 ) -> Result<(), String> {
+    // `dim: false` (the Session's boundary voice) skips both halves of the
+    // dim below; omitted, as every other caller does, it dims as before.
+    let dims = crate::tts::speak_dims(dim);
     // Interrupt any in-flight speech BEFORE we dim — a duplicate dim
     // entry from a rapid-fire click would still be counted on
     // dim_exit, leaving the metronome stuck quiet. Cancelling here
     // also covers the per-voice-preview click pattern the user asked
     // for: clicking another voice should stop the current one.
-    crate::tts::cancel_active_speech(tts_active.inner());
+    // The generation this speak owns, taken under the cancel's own lock:
+    // a `tts_stop` from here on (even during the device wait below)
+    // cancels this speak.
+    let my_gen = crate::tts::cancel_active_speech(tts_active.inner());
 
     // Dim metronome volume during speech (temporary, not persisted).
     //
@@ -3907,7 +3914,7 @@ pub async fn tts_speak(
     // symmetric `dim_exit` below only triggers a restore when the
     // counter drains to zero. Pure helpers live in `tts.rs` so the
     // invariants are unit-tested.
-    {
+    if dims {
         let mut dim = dim_state.lock().unwrap();
         // Hold the state lock across the read-then-conditional-write so
         // a concurrent `set_volume` (e.g. the user dragging the volume
@@ -3983,7 +3990,7 @@ pub async fn tts_speak(
             return Err("the audio output device is not available, so there is                         nowhere for the coach to speak"
                 .to_string());
         }
-        crate::tts::speak_standalone(&snapshot, &text_owned, &tts_active_arc, || {
+        crate::tts::speak_standalone(&snapshot, &text_owned, &tts_active_arc, my_gen, || {
             let _ = app_handle_for_emit.emit("tts-speech-started", ());
         })
     })
@@ -4008,7 +4015,7 @@ pub async fn tts_speak(
     // greeting+tip doesn't stomp on the user-visible value mid-speech.
     // Same dim-then-state lock order as the entry block above keeps the
     // capture/restore symmetrical and consistent.
-    {
+    if dims {
         let mut dim = dim_state.lock().unwrap();
         if let Some(orig) = crate::tts::dim_exit(&mut dim) {
             state.lock().unwrap().volume = orig;
@@ -4022,9 +4029,15 @@ pub async fn tts_speak(
 /// path so clicking a second voice cuts off the first one's audio
 /// instead of queueing behind it. Idempotent — a no-op when nothing
 /// is currently speaking.
+///
+/// Sync on purpose: the generation bump runs in IPC arrival order, so a
+/// stop sent just before a speak (the Settings preview sends both in one
+/// tick) can never land after the speak's own cancel and silence it. Only
+/// the kill of Piper (a `taskkill` process on Windows) leaves the main
+/// thread, on a detached thread of its own.
 #[tauri::command]
 pub fn tts_stop(tts_active: State<'_, SharedTtsActive>) {
-    crate::tts::cancel_active_speech(tts_active.inner());
+    crate::tts::cancel_active_speech_deferred_kill(tts_active.inner());
 }
 
 #[tauri::command]

@@ -92,6 +92,15 @@ export function isLearnTab(tab: string): tab is LearnTab {
   return (LEARN_TABS as readonly string[]).includes(tab);
 }
 
+/**
+ * A running Session is on screen, or Settings opened over one ("Check my
+ * sound"): either way the player has not left it. The window keeps its rail
+ * away on it, and the coach's voice does not cut and forget its order.
+ */
+export function sessionIsTheView(view: MainView, mode: AppTab): boolean {
+  return view === "session" || (view === "settings" && mode === "session");
+}
+
 export interface UseTabRoutingArgs {
   isPlaying: boolean;
   speedRampActive: boolean;

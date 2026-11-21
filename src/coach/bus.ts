@@ -57,6 +57,12 @@ export type CoachEvent =
       takes: number;
       /** A warm-up, jam or drill (`timedReady`) rather than an Exercise (`ready`). */
       timed: boolean;
+      /**
+       * Go again (`again`: the button, R, "Up to N", the Take for the eyes):
+       * this ready screen goes straight into the count-in, so nothing is said
+       * on it (DESIGN section 8, Voice). Absent otherwise.
+       */
+      straight?: true;
     })
   /** A Take began (count-in included). From here until its result, the coach is quiet. */
   | (Stamp & { type: "takeStarted"; stepIndex: number; bpm: number; takeNumber: number })

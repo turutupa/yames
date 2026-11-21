@@ -124,6 +124,13 @@ interface ActionDispatcherArgs {
     restart?: () => void;
     /** Before a Take, on the neck: the order lit at the tempo, or stop (the Watch button). */
     watch?: () => void;
+    /**
+     * The coach's keys (leg c1b2b): one line in the coach's slot, or the one
+     * suggestion on screen pressed. Each does nothing while a Take runs.
+     */
+    explainLast?: () => void;
+    whatNext?: () => void;
+    acceptSuggestion?: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -322,6 +329,15 @@ export function useActionDispatcher({
           case "session-watch":
             sessionActions?.watch?.();
             break;
+          case "ask-explain-last":
+            sessionActions?.explainLast?.();
+            break;
+          case "ask-what-next":
+            sessionActions?.whatNext?.();
+            break;
+          case "accept-suggestion":
+            sessionActions?.acceptSuggestion?.();
+            break;
           case "session-exit":
             // Whatever is open over the Session closes first, on its own key
             // handler; Escape only leaves once nothing is.
@@ -332,7 +348,14 @@ export function useActionDispatcher({
         return;
       }
       // Outside a Session these keys mean nothing, and nothing else reads them.
-      if (actionId.startsWith("session-")) return;
+      // The coach's keys too: they answer about a Session's Takes (hotkeys.ts, `onlyIn`).
+      if (
+        actionId.startsWith("session-") ||
+        actionId === "ask-explain-last" ||
+        actionId === "ask-what-next" ||
+        actionId === "accept-suggestion"
+      )
+        return;
 
       /**
        * On a jam, the groove owns the meter.

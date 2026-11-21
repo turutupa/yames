@@ -888,6 +888,13 @@
       "question": "¿Algún pulso empezó con la púa hacia arriba?",
       "yes": "Sí",
       "no": "No"
+    },
+    "keys": {
+      "noTakeYet": "Aún no hay toma, así que no tengo nada en lo que basarme.",
+      "ungradedLast": "Tu última toma no se evaluó, así que no medí nada en ella.",
+      "lastBelow": "Última toma: por debajo del listón a {{bpm}} BPM.",
+      "whatNext": "{{action}}. {{why}}",
+      "whatNextAlone": "{{action}}."
     }
   }
 }
