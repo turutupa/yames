@@ -52,8 +52,15 @@ function shortNote(note: string): string {
   return (cut > 0 ? note.slice(0, cut) : note).trim();
 }
 
-/** The static head. A pure function of the catalogue and the cards. */
-export function choicePrefix(catalogue: ToolCatalogue, cards: readonly EvalCard[]): string {
+/**
+ * The static head. A pure function of the catalogue and the cards.
+ *
+ * `notes: false` is the eval's "plain prompt" arm (leg c3b2m, TOOLS 3.5 way
+ * (b)): each tool and card by its name and arguments only, without its line.
+ * The app always sends the default.
+ */
+export function choicePrefix(catalogue: ToolCatalogue, cards: readonly EvalCard[], opts: { notes?: boolean } = {}): string {
+  const notes = opts.notes !== false;
   const lines: string[] = [
     "Reply with one JSON object for the player's message:",
     '{"tool":NAME,"args":{...}} to do one tool below (names in the player\'s words, numbers as digits)',
@@ -66,11 +73,12 @@ export function choicePrefix(catalogue: ToolCatalogue, cards: readonly EvalCard[
   ];
   for (const tool of catalogue.tools) {
     if (tool.audience !== "player") continue;
-    lines.push(`${tool.name}(${tool.args.map(argText).join(", ")}): ${shortNote(tool.note)}`);
+    const signature = `${tool.name}(${tool.args.map(argText).join(", ")})`;
+    lines.push(notes ? `${signature}: ${shortNote(tool.note)}` : signature);
   }
   if (cards.length > 0) {
     lines.push("", "Cards:");
-    for (const card of cards) lines.push(`${card.id}: ${card.note}`);
+    for (const card of cards) lines.push(notes ? `${card.id}: ${card.note}` : card.id);
   }
   return lines.join("\n");
 }

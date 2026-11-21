@@ -167,15 +167,26 @@ export type AskRequestJson = {
   prefix: string;
   context: string;
   question: string;
-  grammar: string;
+  /** Absent in the "no grammar" arm: the model's raw answer, parsed strictly. */
+  grammar?: string;
   deadlineMs: number;
 };
+
+/**
+ * The eval's arms (TOOLS 3.5; leg c3b2m added `none` and `names`):
+ * - `grammar`: `situation` (the tools possible here: as the app ships),
+ *   `full` (every player tool), `none` (no grammar at all);
+ * - `prompt`: `notes` (each tool's line: as the app ships), `names` (names
+ *   and arguments only).
+ */
+export type EvalGrammarArm = "situation" | "full" | "none";
+export type EvalPromptArm = "notes" | "names";
 
 /** One request per item, as `coach::AskRequest` reads it (plus the item's id). */
 export function askRequestFor(
   item: EvalItem,
   paths: readonly PathDoc[],
-  opts: { generationId: number; deadlineMs: number; grammar: "situation" | "full" },
+  opts: { generationId: number; deadlineMs: number; grammar: EvalGrammarArm; prompt?: EvalPromptArm },
 ): AskRequestJson {
   const catalogue = toolCatalogue(COACH_TOOLS);
   const facts = choiceFactsFor(item.situation, item.lang, paths);
@@ -185,12 +196,24 @@ export function askRequestFor(
     id: item.id,
     generationId: opts.generationId,
     mode: "choice",
-    prefix: choicePrefix(catalogue, EVAL_CARDS),
+    prefix: choicePrefix(catalogue, EVAL_CARDS, { notes: opts.prompt !== "names" }),
     context: choiceContext(facts),
     question: item.text.trim(),
-    grammar: choiceGrammar(catalogue, EVAL_CARDS, opts.grammar === "situation" ? { possible } : undefined),
+    ...(opts.grammar === "none" ? {} : { grammar: choiceGrammar(catalogue, EVAL_CARDS, opts.grammar === "situation" ? { possible } : undefined) }),
     deadlineMs: opts.deadlineMs,
   };
+}
+
+/**
+ * The chain as the app would run it (`rules-first`: the typed-command router
+ * and search answer, the model only where they said `none`), or the reverse
+ * (`model-first`: the model's answer stands unless it said `none` or gave no
+ * answer, then the rules). `usedModel` says whose answer it is, for the time.
+ */
+export type ChainOrder = "rules-first" | "model-first";
+export function chainAnswer(order: ChainOrder, rules: EngineAnswer, model: EngineAnswer): { answer: EngineAnswer; usedModel: boolean } {
+  if (order === "rules-first") return rules.kind === "none" ? { answer: model, usedModel: true } : { answer: rules, usedModel: false };
+  return model.kind === "none" || model.kind === "noAnswer" ? { answer: rules, usedModel: false } : { answer: model, usedModel: true };
 }
 
 /** One outcome line the Rust bin writes. */
@@ -238,6 +261,8 @@ export type ItemScore = {
   right: boolean;
   noAnswer: NoAnswerStatus | null;
   ms?: number;
+  /** The model's outcome said its prefix was already decoded. */
+  prefixCached?: boolean;
 };
 
 function argsEqual(a: ToolArgs, b: ToolArgs): boolean {
@@ -269,7 +294,7 @@ const describeAnswer = (a: EngineAnswer): string => {
   }
 };
 
-export function scoreItem(item: EvalItem, answer: EngineAnswer, paths: readonly PathDoc[], ms?: number): ItemScore {
+export function scoreItem(item: EvalItem, answer: EngineAnswer, paths: readonly PathDoc[], ms?: number, prefixCached?: boolean): ItemScore {
   const { expect } = item;
   const got = answer.kind === "call" ? effectOf(answer.call, item.situation, item.lang, paths) : null;
   // A call the runner turns into "Which one?" asked; one it refuses did nothing.
@@ -318,6 +343,7 @@ export function scoreItem(item: EvalItem, answer: EngineAnswer, paths: readonly 
     right,
     noAnswer: answer.kind === "noAnswer" ? answer.status : null,
     ...(ms !== undefined ? { ms } : {}),
+    ...(prefixCached !== undefined ? { prefixCached } : {}),
   };
 }
 
@@ -338,6 +364,11 @@ export type Summary = {
   cardsRight: number;
   right: number;
   noAnswer: number;
+  /** No answers by status (only the statuses seen). */
+  noAnswerBy: Partial<Record<NoAnswerStatus, number>>;
+  /** Items whose outcome said the prefix was cached, of those that said either way. */
+  prefixCached: number;
+  prefixKnown: number;
   medianMs: number | null;
   p90Ms: number | null;
 };
@@ -351,6 +382,8 @@ export function summarize(lang: string, items: readonly EvalItem[], scores: read
   const byId = new Map(items.map((i) => [i.id, i]));
   const count = (f: (s: ItemScore, i: EvalItem) => boolean) => scores.filter((s) => f(s, byId.get(s.id)!)).length;
   const times = scores.map((s) => s.ms).filter((x): x is number => typeof x === "number").sort((a, b) => a - b);
+  const noAnswerBy: Partial<Record<NoAnswerStatus, number>> = {};
+  for (const s of scores) if (s.noAnswer) noAnswerBy[s.noAnswer] = (noAnswerBy[s.noAnswer] ?? 0) + 1;
   return {
     lang,
     n: scores.length,
@@ -368,6 +401,9 @@ export function summarize(lang: string, items: readonly EvalItem[], scores: read
     cardsRight: count((s, i) => i.expect.kind === "card" && s.right),
     right: count((s) => s.right),
     noAnswer: count((s) => s.noAnswer !== null),
+    noAnswerBy,
+    prefixCached: count((s) => s.prefixCached === true),
+    prefixKnown: count((s) => s.prefixCached !== undefined),
     medianMs: quantile(times, 0.5),
     p90Ms: quantile(times, 0.9),
   };
@@ -378,13 +414,62 @@ const pct = (a: number, b: number) => (b === 0 ? "-" : `${Math.round((100 * a) /
 /** The summary table, in Markdown. */
 export function summaryMarkdown(title: string, rows: readonly Summary[], note: string): string {
   const head =
-    "| lang | n | right | right tool | right args | wrong actions | asked (which) | yours | none | cards | no answer | median ms | p90 ms |\n" +
-    "|---|---|---|---|---|---|---|---|---|---|---|---|---|";
+    "| lang | n | right | right tool | right args | wrong actions | asked (which) | yours | none | cards | no answer | median ms | p90 ms | prefix cached |\n" +
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|";
+  const by = (r: Summary) => {
+    const parts = Object.entries(r.noAnswerBy ?? {}).map(([k, v]) => `${k} ${v}`);
+    return parts.length > 0 ? `${r.noAnswer} (${parts.join(", ")})` : `${r.noAnswer}`;
+  };
   const body = rows.map(
     (r) =>
-      `| ${r.lang} | ${r.n} | ${pct(r.right, r.n)} | ${r.rightTool}/${r.calls} (${pct(r.rightTool, r.calls)}) | ${r.rightArgs}/${r.calls} (${pct(r.rightArgs, r.calls)}) | ${r.wrongActions} (${pct(r.wrongActions, r.n)}) | ${r.asked}/${r.which} | ${r.yoursRight}/${r.yours} | ${r.noneRight}/${r.none} | ${r.cardsRight}/${r.cards} | ${r.noAnswer} | ${r.medianMs ?? "-"} | ${r.p90Ms ?? "-"} |`,
+      `| ${r.lang} | ${r.n} | ${pct(r.right, r.n)} | ${r.rightTool}/${r.calls} (${pct(r.rightTool, r.calls)}) | ${r.rightArgs}/${r.calls} (${pct(r.rightArgs, r.calls)}) | ${r.wrongActions} (${pct(r.wrongActions, r.n)}) | ${r.asked}/${r.which} | ${r.yoursRight}/${r.yours} | ${r.noneRight}/${r.none} | ${r.cardsRight}/${r.cards} | ${by(r)} | ${r.medianMs ?? "-"} | ${r.p90Ms ?? "-"} | ${r.prefixKnown ? `${r.prefixCached}/${r.prefixKnown}` : "-"} |`,
   );
   return `# ${title}\n\n${note}\n\n${head}\n${body.join("\n")}\n`;
+}
+
+/** What an answer was, coarsely: the tool's name, or the kind. The key errors are grouped by. */
+function answerKind(described: string): string {
+  const [kind, name] = described.split(" ");
+  return kind === "call" || kind === "card" || kind === "noAnswer" ? `${kind} ${name}` : kind;
+}
+
+export type CommonError = { expected: string; got: string; count: number; examples: Array<{ id: string; text: string; expect: string; got: string }> };
+
+/**
+ * The most common errors (leg c3b2m): wrong answers grouped by (what was
+ * expected, what came back) at the tool or kind level, most frequent first,
+ * each with up to `perGroup` plain examples (the sentence, the expected and
+ * the chosen answer in full). Wrong actions come before harmless misses of
+ * the same count.
+ */
+export function commonErrors(items: readonly EvalItem[], scores: readonly ItemScore[], top = 10, perGroup = 3): CommonError[] {
+  const byId = new Map(items.map((i) => [i.id, i]));
+  const groups = new Map<string, CommonError & { wrong: number }>();
+  for (const s of scores) {
+    if (s.right) continue;
+    const expected = answerKind(s.expect);
+    const got = answerKind(s.got);
+    const key = `${expected} -> ${got}`;
+    const g = groups.get(key) ?? { expected, got, count: 0, wrong: 0, examples: [] };
+    g.count++;
+    if (s.wrongAction) g.wrong++;
+    if (g.examples.length < perGroup) g.examples.push({ id: s.id, text: byId.get(s.id)?.text ?? "", expect: s.expect, got: s.got });
+    groups.set(key, g);
+  }
+  return [...groups.values()]
+    .sort((a, b) => b.count - a.count || b.wrong - a.wrong || `${a.expected}${a.got}`.localeCompare(`${b.expected}${b.got}`))
+    .slice(0, top)
+    .map((g) => ({ expected: g.expected, got: g.got, count: g.count, examples: g.examples }));
+}
+
+/** `commonErrors` as Markdown. */
+export function errorsMarkdown(title: string, errors: readonly CommonError[]): string {
+  const lines = [`# ${title}: the most common errors`, ""];
+  errors.forEach((e, i) => {
+    lines.push(`${i + 1}. **expected ${e.expected}, chose ${e.got}** (${e.count})`);
+    for (const x of e.examples) lines.push(`   - ${x.id} "${x.text}": expected \`${x.expect}\`, chose \`${x.got}\``);
+  });
+  return `${lines.join("\n")}\n`;
 }
 
 /** The never-list's items (for the harness's own checks). */
