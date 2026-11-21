@@ -70,9 +70,23 @@ export function hearBackOffer(facts: HearBackFacts): HearBar | null {
 /** Where the hear-back is: idle, the player's bar, or the demo of it. */
 export type HearStage = "off" | "yours" | "demo" | "stopped";
 
-/** The chip's words in each stage (`session.note.chip.*`). Nothing in them praises or judges. */
-export function hearBackLabel(stage: HearStage, bar: number): Line {
-  if (stage === "yours") return { key: "session.note.chip.hearYours", values: { bar } };
-  if (stage === "demo") return { key: "session.note.chip.hearDemo", values: { bar } };
-  return { key: "session.note.chip.hearBack", values: { bar } };
+/**
+ * The chip's words in each stage (`session.note.chip.*`). Nothing in them
+ * praises or judges. Each names the bar it plays (c5b2 review L1): the
+ * player's half a played bar, the demo half the tune's own bar. When the two
+ * are one number (the first round) the short words stand; when they differ,
+ * the words say which is which, so "Bar 3 of the tune" on the note and
+ * "your bar 7" on the chip under it do not read as two places.
+ */
+export function hearBackLabel(stage: HearStage, bar: HearBar): Line {
+  const same = bar.played === bar.pattern;
+  if (stage === "yours") return { key: "session.note.chip.hearYours", values: { bar: bar.played } };
+  if (stage === "demo") {
+    return same
+      ? { key: "session.note.chip.hearDemo", values: { bar: bar.pattern } }
+      : { key: "session.note.chip.hearDemoTune", values: { tune: bar.pattern } };
+  }
+  return same
+    ? { key: "session.note.chip.hearBack", values: { bar: bar.played } }
+    : { key: "session.note.chip.hearBackTune", values: { played: bar.played, tune: bar.pattern } };
 }

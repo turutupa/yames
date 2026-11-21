@@ -4,7 +4,9 @@
  * at the Take's tempo. The engine half is c5b1 (`hearTake` and its slot); this
  * is the sequence, every send through the Session's one engine queue.
  *
- * 1. **The press**: the voice's line is cut (`setVoiceHearing`) and the input
+ * 1. **The press**: the engine is asked whether it still holds the Take
+ *    (`heardTake`; not held: the chip goes, nothing is cut, c5b2b), then
+ *    the voice's line is cut (`setVoiceHearing`) and the input
  *    is gated as the listen demo gates it (`setListenDemo(true, ...)`), so the
  *    speakers are never heard as the player; then `hearTake(serial, N, N)`.
  * 2. **The player's bar ends** (`take-playback-ended` for that generation, or
@@ -84,8 +86,8 @@ export type HearBackControl = {
   /** What the engine said about this result's Take; null before it has answered. */
   held: HeldTake | null;
   stage: HearStage;
-  /** The played bar being heard, while it is. */
-  bar: number | null;
+  /** The bar being heard (the played bar and the tune's bar it is a round of), while it is. */
+  bar: HearBar | null;
   /** It has the engine (or has not let it go yet): the Session ignores the transport. */
   active: boolean;
   /** The chip: start for this bar, or stop what is playing. */
@@ -93,7 +95,7 @@ export type HearBackControl = {
   stop: (options?: { tail?: boolean }) => void;
 };
 
-type Shown = { stage: HearStage; bar: number | null };
+type Shown = { stage: HearStage; bar: HearBar | null };
 const OFF: Shown = { stage: "off", bar: null };
 
 export function useHearBack(input: HearBackInput): HearBackControl {
@@ -115,7 +117,7 @@ export function useHearBack(input: HearBackInput): HearBackControl {
   const bound = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [held, setHeld] = useState<{ takeId: string; serial: number; held: HeldTake } | null>(null);
 
-  const show = useCallback((stage: HearStage, bar: number | null) => {
+  const show = useCallback((stage: HearStage, bar: HearBar | null) => {
     stageRef.current = stage;
     setNow({ stage, bar });
   }, []);
@@ -169,7 +171,7 @@ export function useHearBack(input: HearBackInput): HearBackControl {
     (mine: number, g: number, bar: HearBar) => {
       if (generation.current !== mine || stageRef.current !== "yours" || engineGen.current !== g) return;
       clearBound();
-      show("demo", bar.played);
+      show("demo", bar);
       const { take, instrument, lineup, bandVolume } = latest.current;
       if (!take) return stop();
       const demo = buildListenDemo(take, { instrument, lineup, bandVolume, bars: { from: bar.pattern, to: bar.pattern } });
@@ -223,16 +225,32 @@ export function useHearBack(input: HearBackInput): HearBackControl {
       const at = stageRef.current;
       if (at === "yours" || at === "demo") return stop();
       if (at !== "off") return;
-      const { serial: asked, take, phase: where } = latest.current;
+      const { serial: asked, take, phase: where, takeId: forTake } = latest.current;
       if (asked === null || !take || where !== "result") return;
+      /** The engine has let this Take's audio go: the chip goes with it (absent, never disabled). */
+      const gone = () => {
+        if (forTake !== null) setHeld({ takeId: forTake, serial: asked, held: { held: false, bars: 0 } });
+      };
       const mine = ++generation.current;
       cutByStart.current = false;
-      show("yours", bar.played);
-      setVoiceHearing(true);
+      show("yours", bar);
       // The longest the gate needs before the player's bar's own length is known.
       const guess = buildListenDemo(take, { bars: { from: bar.pattern, to: bar.pattern } }).lengthMs;
       void latest.current.enqueue(async () => {
         if (generation.current !== mine) return;
+        // Still held? Asked before anything is cut or gated (review L2): a Take
+        // the engine let go since the result (the input stopped, a device
+        // changed) takes the chip away and leaves the coach's line alone.
+        const still = await heardTake(asked).catch(() => null);
+        if (still && !still.held) {
+          gone();
+          if (generation.current === mine) show("off", null);
+          return;
+        }
+        if (generation.current !== mine) return;
+        // The voice is cut here, before `hearTake` is sent, so no line can
+        // sound over the player's bar; only once the engine says it holds it.
+        setVoiceHearing(true);
         try {
           await setListenDemo(true, { lengthMs: 2 * guess + YOURS_GUESS_MS }).catch((err) => {
             console.warn("[yames] the engine was not told the bar is playing back", err);
@@ -250,6 +268,8 @@ export function useHearBack(input: HearBackInput): HearBackControl {
           // Refused (not held any more, the click running): nothing to hear.
           console.warn("[yames] the bar could not be played back", err);
           if (generation.current !== mine) return;
+          // Let go between the question and the ask: the chip goes all the same.
+          gone();
           await liftGate(false);
           setVoiceHearing(false);
           if (generation.current === mine) show("off", null);

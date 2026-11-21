@@ -25,6 +25,16 @@ const PHONE = { width: 390, height: 844 };
 const HEARD = { hearBack: "1" };
 const CHIP = '[data-testid="coach-hear-back"]';
 
+/** The chip at rest: "Hear bar N: ..." when the played bar is the tune's, "Hear your bar N, then the demo of bar M" when not (c5b2b, L1). */
+const AT_REST = /^(?:Hear bar (\d+): yours, then the demo|Hear your bar (\d+), then the demo of bar (\d+))$/;
+
+/** The played bar and the tune's bar the chip at rest names. */
+function barsOf(text: string): { played: number; tune: number } {
+  const m = AT_REST.exec(text);
+  if (!m) return { played: NaN, tune: NaN };
+  return m[1] ? { played: Number(m[1]), tune: Number(m[1]) } : { played: Number(m[2]), tune: Number(m[3]) };
+}
+
 async function hearLog(page: Page): Promise<string[]> {
   return page.evaluate(() => [...((window as unknown as { __yamesHearBack?: string[] }).__yamesHearBack ?? [])]);
 }
@@ -47,7 +57,7 @@ test("the chip on a graded result: first in the note, its bar named, inside the 
   await openShot(page, "session-between", WIDE, "ember", HEARD);
   const chip = page.locator(CHIP);
   await expect(chip).toBeVisible({ timeout: 30_000 });
-  await expect(chip).toHaveText(/^Hear bar \d+: yours, then the demo$/);
+  await expect(chip).toHaveText(AT_REST);
   await expect(page.locator('[data-testid="coach-note"] .coach-chips > .coach-chip').first()).toHaveAttribute(
     "data-testid",
     "coach-hear-back",
@@ -63,15 +73,20 @@ test("one press: the player's bar, then the demo, in the safe order", async ({ p
   await openShot(page, "session-between", WIDE, "ember", HEARD);
   const chip = page.locator(CHIP);
   await expect(chip).toBeVisible({ timeout: 30_000 });
-  const bar = Number(/bar (\d+)/.exec((await chip.textContent()) ?? "")?.[1]);
+  const rest = (await chip.textContent()) ?? "";
+  const { played: bar, tune } = barsOf(rest);
   expect(bar).toBeGreaterThan(0);
+  expect(tune).toBeGreaterThan(0);
   await page.evaluate(() => {
     (window as unknown as { __yamesHearBack?: string[] }).__yamesHearBack = [];
   });
   await chip.click();
+  // Each label names the bar it plays: the player's bar, then the tune's.
   await expect(chip).toHaveText(`Yours: bar ${bar} · Stop`);
-  await expect(chip).toHaveText(`Demo: bar ${bar} · Stop`, { timeout: 10_000 });
-  await expect(chip).toHaveText(`Hear bar ${bar}: yours, then the demo`, { timeout: 30_000 });
+  await expect(chip).toHaveText(bar === tune ? `Demo: bar ${tune} · Stop` : `Demo: bar ${tune} of the tune · Stop`, {
+    timeout: 10_000,
+  });
+  await expect(chip).toHaveText(rest, { timeout: 30_000 });
   const log = await hearLog(page);
   test.info().annotations.push({ type: "hear-back order", description: log.join(" > ") });
   // For the review: the order as logged, beside the pictures.
@@ -98,7 +113,7 @@ test("a second press stops it during the player's bar, and nothing of the demo i
   await chip.click();
   await expect(chip).toHaveText(/^Yours: bar \d+ · Stop$/);
   await chip.click();
-  await expect(chip).toHaveText(/^Hear bar \d+: yours, then the demo$/);
+  await expect(chip).toHaveText(AT_REST);
   // Past the bar's own length: had it gone on, the demo would have started by now.
   await page.waitForTimeout(1_800);
   const log = await hearLog(page);

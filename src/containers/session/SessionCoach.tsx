@@ -279,7 +279,7 @@ export function ResultNote({ session, outcome, howTo }: { session: SessionRun; o
       ? [
           {
             kind: "play",
-            label: noteText(t, hearBackLabel(hear.stage, hear.bar ?? hearBar.played)),
+            label: noteText(t, hearBackLabel(hear.stage, hear.bar ?? hearBar)),
             onClick: () => hear.toggle(hearBar),
             testId: "coach-hear-back",
           },

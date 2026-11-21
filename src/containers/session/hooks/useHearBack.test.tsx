@@ -5,7 +5,18 @@ const calls: string[] = [];
 const ended: { take: ((g?: number) => void) | null; jam: (() => void) | null } = { take: null, jam: null };
 const answers = { hear: null as null | (() => Promise<{ generation: number; lengthMs: number }>), held: { held: true, bars: 12 } };
 
-vi.mock("../../../ipc", () => ({
+/** `setVoiceHearing` as called, with how many engine calls had been made by then. */
+const voice: { on: boolean; after: number }[] = [];
+vi.mock("../../../coach/voice", () => ({
+  setVoiceHearing: vi.fn((on: boolean) => {
+    voice.push({ on, after: calls.length });
+  }),
+}));
+
+vi.mock("../../../ipc", async () => {
+  // The real gate: `setPlaying(true)` tells it a Start is on its way, as `ipc.ts` does.
+  const gate = await import("../../../soundGate");
+  return {
   hearTake: vi.fn((serial: number, from: number, to: number) => {
     calls.push(`hearTake(${serial},${from},${to})`);
     return answers.hear ? answers.hear() : Promise.resolve({ generation: 5, lengthMs: 1200 });
@@ -24,6 +35,8 @@ vi.mock("../../../ipc", () => ({
   }),
   setPlaying: vi.fn((on: boolean) => {
     calls.push(`setPlaying(${on})`);
+    // As the real one: the Start is sent, then the sound gate hears of it.
+    if (on) gate.soundStarting();
     return Promise.resolve();
   }),
   loadSong: vi.fn(() => {
@@ -54,7 +67,8 @@ vi.mock("../../../ipc", () => ({
       if (ended.jam === cb) ended.jam = null;
     });
   }),
-}));
+  };
+});
 
 import { useHearBack } from "./useHearBack";
 import type { HearBackInput } from "./useHearBack";
@@ -100,6 +114,7 @@ function setup(over: Partial<HearBackInput> = {}) {
 
 beforeEach(() => {
   calls.length = 0;
+  voice.length = 0;
   ended.take = null;
   ended.jam = null;
   answers.hear = null;
@@ -130,14 +145,14 @@ describe("useHearBack", () => {
     calls.length = 0;
     act(() => result.current.toggle(BAR));
     expect(result.current.stage).toBe("yours");
-    expect(result.current.bar).toBe(7);
+    expect(result.current.bar).toEqual(BAR);
     await flush();
-    expect(calls).toEqual(["gate(on)", "hearTake(41,7,7)", "gate(on)"]);
+    expect(calls).toEqual(["heardTake(41)", "gate(on)", "hearTake(41,7,7)", "gate(on)"]);
     act(() => ended.take?.(5));
     expect(result.current.stage).toBe("demo");
     await flush();
     expect(onTakeOff).toHaveBeenCalledTimes(1);
-    expect(calls.slice(3)).toEqual([
+    expect(calls.slice(4)).toEqual([
       "stopHearTake(5)",
       "clearScoreSchedule",
       "loadSong",
@@ -149,7 +164,7 @@ describe("useHearBack", () => {
     rerender({ ...base, isPlaying: true });
     act(() => ended.jam?.());
     await flush();
-    expect(calls.slice(9)).toEqual(["setPlaying(false)", "clearSong", "gate(off)"]);
+    expect(calls.slice(10)).toEqual(["setPlaying(false)", "clearSong", "gate(off)"]);
     // Off only once the engine agrees it is silent.
     expect(result.current.stage).toBe("stopped");
     expect(result.current.active).toBe(true);
@@ -187,16 +202,16 @@ describe("useHearBack", () => {
     calls.length = 0;
     act(() => result.current.toggle(BAR));
     // The press's sends have reached `hearTake`, which has not answered yet.
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 5; i += 1) {
       await act(async () => {
         await new Promise((r) => setTimeout(r, 0));
       });
     }
-    expect(calls).toEqual(["gate(on)", "hearTake(41,7,7)"]);
+    expect(calls).toEqual(["heardTake(41)", "gate(on)", "hearTake(41,7,7)"]);
     act(() => result.current.toggle(BAR));
     resolve({ generation: 9, lengthMs: 1000 });
     await flush();
-    expect(calls).toEqual(["gate(on)", "hearTake(41,7,7)", "stopHearTake(9)", "gate(off)"]);
+    expect(calls).toEqual(["heardTake(41)", "gate(on)", "hearTake(41,7,7)", "stopHearTake(9)", "gate(off)"]);
   });
 
   it("a Start during the player's bar stops it, and nothing of ours starts after", async () => {
@@ -232,8 +247,12 @@ describe("useHearBack", () => {
     await flush();
     act(() => result.current.toggle(BAR));
     await flush();
+    calls.length = 0;
     act(() => ended.take?.(5));
     await flush();
+    // The mocked `setPlaying(true)` called the sound gate, as the real one does.
+    expect(calls).toContain("setPlaying(true)");
+    expect(calls).not.toContain("setPlaying(false)");
     expect(result.current.stage).toBe("demo");
   });
 
@@ -263,15 +282,47 @@ describe("useHearBack", () => {
     expect(calls).toEqual(["stopHearTake(5)", "gate(off,now)"]);
   });
 
-  it("a refusal from the engine leaves nothing on and the input open", async () => {
+  it("a refusal from the engine leaves nothing on and the input open, and the chip goes", async () => {
     answers.hear = () => Promise.reject("not held");
     const { result, flush } = setup();
     await flush();
     calls.length = 0;
     act(() => result.current.toggle(BAR));
     await flush();
-    expect(calls).toEqual(["gate(on)", "hearTake(41,7,7)", "gate(off,now)"]);
+    expect(calls).toEqual(["heardTake(41)", "gate(on)", "hearTake(41,7,7)", "gate(off,now)"]);
     expect(result.current.stage).toBe("off");
+    expect(voice.map((v) => v.on)).toEqual([true, false]);
+    // Absent, never disabled: the chip's selector reads this.
+    expect(result.current.held).toEqual({ held: false, bars: 0 });
+  });
+
+  it("the audio let go since the result: the chip goes, nothing is sent, the coach's line is not cut", async () => {
+    const { result, flush } = setup();
+    await flush();
+    expect(result.current.held).toEqual({ held: true, bars: 12 });
+    // The input stopped after the result was drawn: the engine forgot the Take.
+    answers.held = { held: false, bars: 0 };
+    calls.length = 0;
+    act(() => result.current.toggle(BAR));
+    await flush();
+    expect(calls).toEqual(["heardTake(41)"]);
+    expect(voice).toEqual([]);
+    expect(result.current.stage).toBe("off");
+    expect(result.current.held).toEqual({ held: false, bars: 0 });
+  });
+
+  it("the coach's line is cut once the engine holds the bar, and before the bar is asked for", async () => {
+    const { result, flush } = setup();
+    await flush();
+    calls.length = 0;
+    act(() => result.current.toggle(BAR));
+    // Nothing cut at the press itself: the engine has not answered yet.
+    expect(voice).toEqual([]);
+    await flush();
+    expect(voice[0].on).toBe(true);
+    // Cut after `heardTake` answered held, before `hearTake` was sent.
+    expect(calls.slice(0, voice[0].after)).toEqual(["heardTake(41)"]);
+    expect(calls.indexOf("hearTake(41,7,7)")).toBeGreaterThanOrEqual(voice[0].after);
   });
 
   it("a second press before anything was sent sends nothing but the gate's end", async () => {

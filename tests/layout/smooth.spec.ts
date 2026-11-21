@@ -178,7 +178,9 @@ test("hear-back: the player's bar plays without a commit per frame, and a Take h
     rendersOf(s, "CoachNote"),
     `CoachNote rendered ${rendersOf(s, "CoachNote")} times while it played, ${rendersOf(quiet, "CoachNote")} quiet`,
   ).toBeLessThanOrEqual(rendersOf(quiet, "CoachNote") + 2);
-  await expect(chip).toHaveText(/^Hear bar \d+: yours, then the demo$/, { timeout: 30_000 });
+  await expect(chip).toHaveText(/^(?:Hear bar \d+: yours, then the demo|Hear your bar \d+, then the demo of bar \d+)$/, {
+    timeout: 30_000,
+  });
 
   await openShot(page, "session-playing", WIDE, "ember", { hearBack: "1" });
   await takeRunning(page);

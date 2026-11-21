@@ -5,6 +5,7 @@ import type { StripCell, TakeNote } from "./takeNote";
 import { buildListenDemo, LISTEN_COUNT_IN_BARS } from "../session/listenDemo";
 import { buildTake } from "../session/take";
 import { ALT } from "../session/testKit";
+import en from "../locales/en/session.json";
 
 /** A four-bar pattern played three rounds: twelve bars, the strip's cells numbered 1 to 12. */
 function strip(missed: number[], spotBars: number[]): StripCell[] {
@@ -87,12 +88,38 @@ describe("hearBackOffer: when the chip is there", () => {
   });
 });
 
-describe("hearBackLabel: the chip's words", () => {
-  it("names the bar in each stage", () => {
-    expect(hearBackLabel("off", 7)).toEqual({ key: "session.note.chip.hearBack", values: { bar: 7 } });
-    expect(hearBackLabel("stopped", 7)).toEqual({ key: "session.note.chip.hearBack", values: { bar: 7 } });
-    expect(hearBackLabel("yours", 7)).toEqual({ key: "session.note.chip.hearYours", values: { bar: 7 } });
-    expect(hearBackLabel("demo", 7)).toEqual({ key: "session.note.chip.hearDemo", values: { bar: 7 } });
+describe("hearBackLabel: each label names the bar it plays (a four-bar pattern, three rounds)", () => {
+  it("pattern bar 3 slipped in round 2: your bar 7, the demo of the tune's bar 3", () => {
+    const bar = hearBarOf(note({ cells: strip([7], [3]) }));
+    expect(bar).toEqual({ played: 7, pattern: 3 });
+    if (!bar) return;
+    expect(hearBackLabel("off", bar)).toEqual({
+      key: "session.note.chip.hearBackTune",
+      values: { played: 7, tune: 3 },
+    });
+    expect(hearBackLabel("stopped", bar)).toEqual({
+      key: "session.note.chip.hearBackTune",
+      values: { played: 7, tune: 3 },
+    });
+    expect(hearBackLabel("yours", bar)).toEqual({ key: "session.note.chip.hearYours", values: { bar: 7 } });
+    expect(hearBackLabel("demo", bar)).toEqual({ key: "session.note.chip.hearDemoTune", values: { tune: 3 } });
+  });
+  it("pattern bar 3 slipped in round 1: one number, the short words", () => {
+    const bar = hearBarOf(note({ cells: strip([3], [3]) }));
+    expect(bar).toEqual({ played: 3, pattern: 3 });
+    if (!bar) return;
+    expect(hearBackLabel("off", bar)).toEqual({ key: "session.note.chip.hearBack", values: { bar: 3 } });
+    expect(hearBackLabel("yours", bar)).toEqual({ key: "session.note.chip.hearYours", values: { bar: 3 } });
+    expect(hearBackLabel("demo", bar)).toEqual({ key: "session.note.chip.hearDemo", values: { bar: 3 } });
+  });
+  it("the English says which bar is the player's and which the tune's", () => {
+    const chip = (en as unknown as { session: { note: { chip: Record<string, string> } } }).session.note.chip;
+    const fill = (s: string, v: Record<string, number>) => s.replace(/\{\{(\w+)\}\}/g, (_m, k: string) => String(v[k]));
+    expect(fill(chip.hearBackTune, { played: 7, tune: 3 })).toBe("Hear your bar 7, then the demo of bar 3");
+    expect(fill(chip.hearYours, { bar: 7 })).toBe("Yours: bar 7 · Stop");
+    expect(fill(chip.hearDemoTune, { tune: 3 })).toBe("Demo: bar 3 of the tune · Stop");
+    expect(fill(chip.hearBack, { bar: 3 })).toBe("Hear bar 3: yours, then the demo");
+    expect(fill(chip.hearDemo, { bar: 3 })).toBe("Demo: bar 3 · Stop");
   });
 });
 
