@@ -25,6 +25,7 @@
       "loadPreset": "已載入{{preset}}",
       "loadingPreset": "正在載入{{preset}}…",
       "presetGone": "{{preset}}已不存在，所以沒有載入任何內容",
+      "presetFailed": "{{preset}}沒有完整載入，部分設定可能沒有改變",
       "loadAsked": "Yames 先問了你未儲存的變更。你回答之前不會載入任何內容。",
       "clickSubdivision": "每拍點擊數：{{to}}",
       "setSetting": "{{key}}：{{to}}",

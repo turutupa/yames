@@ -128,9 +128,14 @@ const loadPreset = defineConfirmTool<Loaded>({
     if (!presets.some((preset) => preset.id === id)) return gone("the preset is not there any more");
     // The app re-reads the store before it applies the preset: the receipt waits for that
     // (review t1a2b, B). Until then it says the app is loading it; then "Loaded", or gone.
-    let settle: (ok: boolean) => void = () => {};
+    let settle: (ok: boolean | "failed") => void = () => {};
     const later = new Promise<Line>((resolve) => {
-      settle = (ok) => resolve(line(ok ? "coachTools.receipt.loadPreset" : "coachTools.receipt.presetGone", { preset: name }));
+      settle = (ok) =>
+        resolve(
+          line(ok === "failed" ? "coachTools.receipt.presetFailed" : ok ? "coachTools.receipt.loadPreset" : "coachTools.receipt.presetGone", {
+            preset: name,
+          }),
+        );
     });
     const outcome = host.loadPreset(id, (ok) => settle(ok));
     if (outcome !== "done") return loaded("load_preset", outcome, line("coachTools.receipt.loadPreset", { preset: name }), { preset: name });

@@ -157,6 +157,22 @@ describe("the panel", () => {
     expect(container.querySelector(".btn-primary")).toBeNull();
     __setAskToolsForTests(null, null);
   });
+
+  it("the chips are chosen again when a turn is written in place: after the proposal's press, the subdivision chip offers the other value", () => {
+    let now = 1;
+    const host = fakeHost({ view: "beat" }, { clickSubdivision: () => now as 1, setClickSubdivision: (s) => ((now = s), "done") });
+    __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
+    openAsk();
+    const { container } = render(<AskPanel lookingAt={{ text: "Metronome", key: "beat" }} onClose={() => {}} />);
+    act(() => fireEvent.click(within(screen.getByTestId("ask-empty")).getByRole("button", { name: "Two clicks a beat" })));
+    const row = () => [...container.querySelectorAll(".ask-chip-row [data-testid=ask-tool-chips] button")].map((b) => b.textContent);
+    expect(row()).toContain("Two clicks a beat");
+    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
+    expect(now).toBe(2);
+    expect(row()).toContain("One click a beat");
+    expect(row()).not.toContain("Two clicks a beat");
+    __setAskToolsForTests(null, null);
+  });
 });
 
 describe("answering", () => {

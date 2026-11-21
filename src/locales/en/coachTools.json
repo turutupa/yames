@@ -25,6 +25,7 @@
       "loadPreset": "Loaded {{preset}}",
       "loadingPreset": "Loading {{preset}}…",
       "presetGone": "{{preset}} is gone, so nothing was loaded",
+      "presetFailed": "{{preset}} didn't load fully: some of its settings may not have changed",
       "loadAsked": "Yames asked about your unsaved changes first. Nothing is loaded until you answer.",
       "clickSubdivision": "Clicks per beat: {{to}}",
       "setSetting": "{{key}}: {{to}}",

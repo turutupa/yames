@@ -25,6 +25,7 @@
       "loadPreset": "{{preset}}を読み込みました",
       "loadingPreset": "{{preset}}を読み込み中…",
       "presetGone": "{{preset}}は見つからないため、何も読み込んでいません",
+      "presetFailed": "{{preset}}を最後まで読み込めませんでした。一部の設定は変わっていないかもしれません",
       "loadAsked": "Yamesが先に未保存の変更について確認しました。答えるまで何も読み込まれません。",
       "clickSubdivision": "1拍あたりのクリック：{{to}}",
       "setSetting": "{{key}}：{{to}}",

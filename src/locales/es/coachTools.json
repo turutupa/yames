@@ -25,6 +25,7 @@
       "loadPreset": "Cargado: {{preset}}",
       "loadingPreset": "Cargando {{preset}}…",
       "presetGone": "{{preset}} ya no existe, así que no se cargó nada",
+      "presetFailed": "{{preset}} no se cargó del todo: puede que algunos de sus ajustes no hayan cambiado",
       "loadAsked": "Yames preguntó primero por tus cambios sin guardar. No se carga nada hasta que respondas.",
       "clickSubdivision": "Clics por pulso: {{to}}",
       "setSetting": "{{key}}: {{to}}",

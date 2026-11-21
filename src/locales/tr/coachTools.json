@@ -25,6 +25,7 @@
       "loadPreset": "Yüklendi: {{preset}}",
       "loadingPreset": "Yükleniyor: {{preset}}…",
       "presetGone": "{{preset}} artık yok, bu yüzden hiçbir şey yüklenmedi",
+      "presetFailed": "{{preset}} tam olarak yüklenemedi: bazı ayarları değişmemiş olabilir",
       "loadAsked": "Yames önce kaydedilmemiş değişikliklerini sordu. Sen cevaplayana kadar hiçbir şey yüklenmez.",
       "clickSubdivision": "Vuruş başına tık: {{to}}",
       "setSetting": "{{key}}: {{to}}",

@@ -25,6 +25,7 @@
       "loadPreset": "{{preset}} chargé",
       "loadingPreset": "Chargement de {{preset}}…",
       "presetGone": "{{preset}} n'existe plus, rien n'a été chargé",
+      "presetFailed": "{{preset}} n'a pas été chargé entièrement : certains réglages n'ont peut-être pas changé",
       "loadAsked": "Yames t'a d'abord posé la question de tes changements non enregistrés. Rien n'est chargé tant que tu n'as pas répondu.",
       "clickSubdivision": "Clics par temps : {{to}}",
       "setSetting": "{{key}} : {{to}}",

@@ -141,6 +141,8 @@ function ProposalCard({ id, body }: { id: string; body: ToolBody & { kind: "prop
             {t("coachTools.ui.notNow")}
           </button>
         </div>
+      ) : state === "expired" ? (
+        <p className="ask-tool-note" data-testid="ask-proposal-expired">{t("coachTools.why.refused.proposal")}</p>
       ) : (
         <p className="ask-tool-note" data-testid="ask-proposal-dismissed">{t("coachTools.ui.leftAsIs")}</p>
       )}

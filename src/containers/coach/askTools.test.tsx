@@ -9,13 +9,14 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fakeHost, toolCtx, type FakeHost } from "../../coach/tools/fakeHost";
-import { ALT } from "../../coach/tools/testPaths";
+import { ALT, runIn } from "../../coach/tools/testPaths";
+import type { SessionPlan } from "../../session/planner";
 import type { CoachContext } from "../../coach/context";
 import type { Subdivision } from "../../types";
 import { bannedClaimsIn } from "../../paths/honesty";
 import en from "../../locales/en/coachTools.json";
 import i18n from "../../i18n";
-import { __resetAskStoreForTests, getAskState, useAskState } from "./askStore";
+import { __resetAskStoreForTests, getAskState, releaseHeldAsk, setAskTakeGate, updateAskTurn, useAskState } from "./askStore";
 import {
   UNDO_MS,
   __setAskToolsForTests,
@@ -153,6 +154,49 @@ describe("a receipt", () => {
     expect(screen.getByTestId("ask-receipt")).toHaveTextContent("Warm up 80 is gone, so nothing was loaded");
   });
 
+  it("a preset that did not take is said not to have loaded fully, never Loaded", async () => {
+    let report: ((ok: boolean | "failed") => void) | undefined;
+    use(fakeHost({ view: "beat" }, { presets: () => [{ id: "p1", name: "Warm up 80" }], loadPreset: (_id, applied) => ((report = applied), "done") }), toolCtx({ screen: "beat" }));
+    render(<Thread />);
+    act(() => void runAskCall({ tool: "load_preset", args: { preset: "warm" } }, ""));
+    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
+    await act(async () => {
+      report?.("failed");
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("ask-receipt")).toHaveTextContent("Warm up 80 didn't load fully");
+    expect(screen.getByTestId("ask-receipt")).not.toHaveTextContent("Loaded");
+  });
+
+  it("a late answer held through a Take is applied to the turn as it is when released: a change made meanwhile is kept", async () => {
+    let report: ((ok: boolean) => void) | undefined;
+    use(fakeHost({ view: "beat" }, { presets: () => [{ id: "p1", name: "Warm up 80" }], loadPreset: (_id, applied) => ((report = applied), "done") }), toolCtx({ screen: "beat" }));
+    render(<Thread />);
+    act(() => void runAskCall({ tool: "load_preset", args: { preset: "warm" } }, ""));
+    act(() => fireEvent.click(screen.getByTestId("ask-proposal-go")));
+    const id = getAskState().turns[0].id;
+    let taking = true;
+    setAskTakeGate(() => taking);
+    await act(async () => {
+      report?.(true);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    // Held: still loading. Meanwhile something else writes the same turn.
+    expect(screen.getByTestId("ask-receipt")).toHaveTextContent("Loading Warm up 80…");
+    const before = lastBody();
+    if (before.kind !== "receipt") throw new Error("no receipt");
+    act(() => updateAskTurn(id, { id, kind: "tool", body: { ...before, blocks: [] } }));
+    taking = false;
+    act(() => releaseHeldAsk());
+    const after = lastBody();
+    if (after.kind !== "receipt") throw new Error("no receipt");
+    expect(after.settling).toBe(false);
+    expect(after.blocks).toEqual([]);
+    expect(screen.getByTestId("ask-receipt")).not.toHaveTextContent("Loading");
+  });
+
   it("a load the unsaved-work question holds is worded truthfully, never Loaded", () => {
     use(fakeHost({ view: "beat" }, { jams: () => [{ id: "j1", name: "Funk vamp" }], loadJam: () => "asked" }), toolCtx({ screen: "beat" }));
     render(<Thread />);
@@ -218,6 +262,50 @@ describe("a proposal", () => {
     expect(body.proposal.noUndo).toBe(true);
     expect(screen.getByTestId("ask-proposal-noundo")).toHaveTextContent(t("coachTools.ui.noUndo"));
     expect(screen.queryByTestId("ask-proposal-stops")).toBeNull();
+  });
+
+  it("does not outlive its screen: start_today proposed on Today in silence, then the Metronome with the click sounding: the press starts nothing, no button is left", () => {
+    const plan = {
+      minutes: 15,
+      mood: "returning",
+      daysAway: 1,
+      steps: [{ kind: "metronome", id: "warm", title: "Warm up", bpm: 60, subdivision: 2, minutes: 3 }],
+    } as unknown as SessionPlan;
+    const host = use(fakeHost({ view: "today", paths: [ALT] }, { plan: () => plan, startToday: () => "done" }));
+    render(<Thread />);
+    act(() => void runAskCall({ tool: "start_today", args: {} }, "Start today's Session"));
+    expect(screen.getByTestId("ask-proposal-go")).toBeInTheDocument();
+    expect(screen.queryByTestId("ask-proposal-stops")).toBeNull();
+    // The player goes to the Metronome by hand and starts the click.
+    host.setView("beat");
+    host.play("click");
+    __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
+    act(() => noteAskToolView("beat"));
+    expect(screen.queryByTestId("ask-proposal-go")).toBeNull();
+    expect(screen.getByTestId("ask-proposal-expired")).toHaveTextContent(t("coachTools.why.refused.proposal"));
+    const id = getAskState().turns.find((x) => x.kind === "tool")!.id;
+    act(() => pressProposal(id));
+    expect(host.calls.some((c) => c.member === "startToday")).toBe(false);
+    expect(host.sounding()).toBe("click");
+  });
+
+  it("a view note on its own screen leaves it open; in a Session, the step moving on retires it", () => {
+    const steady = ALT.steps.flatMap((s) => s.exercises).find((e) => e.id === "ap-1-a")!;
+    const host = use(
+      fakeHost({ view: "session", session: true }, { nudges: () => ({ slower: true, faster: true }), nudgeTempo: () => "done" }),
+      toolCtx({ screen: "session", run: { ...runIn("ready"), bpm: 70 }, exercise: steady }),
+    );
+    render(<Thread />);
+    act(() => void runAskCall({ tool: "set_tempo", args: { direction: "slower" } }, ""));
+    expect(screen.getByTestId("ask-proposal-go")).toBeInTheDocument();
+    act(() => noteAskToolView("session", 0));
+    expect(screen.getByTestId("ask-proposal-go")).toBeInTheDocument();
+    act(() => noteAskToolView("session", 1));
+    expect(screen.queryByTestId("ask-proposal-go")).toBeNull();
+    expect(screen.getByTestId("ask-proposal-expired")).toBeInTheDocument();
+    act(() => pressProposal(getAskState().turns[0].id));
+    expect(host.where().view).toBe("session");
+    expect(host.changes()).toEqual([]);
   });
 
   it("not now drops it for good", () => {

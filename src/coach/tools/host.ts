@@ -196,11 +196,13 @@ export type CoachToolHost = {
    * `CoachActionHost.loadPreset`, behind the unsaved-work gate. The app re-reads
    * the presets at the press before it applies one, which takes a moment:
    * `applied` hears how that went (true: applied; false: the preset was gone,
-   * or the store could not be read, and nothing was applied). Leg t1b1, so a
-   * receipt never says "Loaded" for a preset deleted while its proposal sat in
-   * the panel (review t1a2b, B).
+   * or the store could not be read, and nothing was applied; "failed": applying
+   * it failed in a way the app saw). Heard once the preset has been applied, not
+   * when the re-read found it. Leg t1b1, so a receipt never says "Loaded" for a
+   * preset deleted while its proposal sat in the panel (review t1a2b, B), nor
+   * one that did not take (review t1b1, N2).
    */
-  loadPreset: (presetId: string, applied?: (ok: boolean) => void) => LoadOutcome;
+  loadPreset: (presetId: string, applied?: (ok: boolean | "failed") => void) => LoadOutcome;
   /** The click's subdivision now. */
   clickSubdivision: () => Subdivision | NotWired;
   /** `CoachActionHost.setClickSubdivision`. */

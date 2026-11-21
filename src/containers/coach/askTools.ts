@@ -60,7 +60,16 @@ export type ToolBody =
       blocks?: readonly ResolvedBlock[];
       undo: UndoState | null;
     }
-  | { kind: "proposal"; proposal: Proposal; state: "open" | "dismissed" }
+  | {
+      kind: "proposal";
+      proposal: Proposal;
+      /** open: pressable. dismissed: "Not now". expired: the screen (or the Session's step) it was made on is gone. */
+      state: "open" | "dismissed" | "expired";
+      /** The screen it was made on (null: unknown, so any view change retires it). */
+      view?: MainView | null;
+      /** The Session's step it was made on, or null outside a Session. */
+      step?: number | null;
+    }
   | { kind: "refusal"; line: Line; choices: readonly ToolChoice[] }
   | { kind: "yours"; item: NeverItem };
 
@@ -130,18 +139,22 @@ function undoOf(result: ToolResult & { ok: true }, host: CoachToolHost, now: num
     return { call, label: line("coachTools.undo.returnTo", { screen }), kind: "go", view: goTarget(result.receipt), until: null, state: "live" };
   }
   // The receipt of a confirmed change is written where it was made: the host's view.
-  let view: MainView | null = null;
-  try {
-    view = host.view();
-  } catch {
-    view = null;
-  }
-  return { call, label: line("coachTools.undo.generic"), kind: "confirm", view, until: now + UNDO_MS, state: "live" };
+  return { call, label: line("coachTools.undo.generic"), kind: "confirm", view: viewOf(host), until: now + UNDO_MS, state: "live" };
 }
 
-function bodyOf(outcome: RunOutcome, host: CoachToolHost): ToolBody {
+function viewOf(host: CoachToolHost): MainView | null {
+  try {
+    return host.view();
+  } catch {
+    return null;
+  }
+}
+
+function bodyOf(outcome: RunOutcome, host: CoachToolHost, ctx: CoachContext): ToolBody {
   if (!outcome.ok) return { kind: "refusal", line: outcome.line, choices: outcome.choices ?? [] };
-  if ("proposal" in outcome) return { kind: "proposal", proposal: outcome.proposal, state: "open" };
+  if ("proposal" in outcome) {
+    return { kind: "proposal", proposal: outcome.proposal, state: "open", view: viewOf(host), step: ctx.run?.stepIndex ?? null };
+  }
   return {
     kind: "receipt",
     receipt: outcome.receipt,
@@ -155,9 +168,11 @@ function bodyOf(outcome: RunOutcome, host: CoachToolHost): ToolBody {
 function followLater(id: string, outcome: RunOutcome): void {
   if (!outcome.ok || "proposal" in outcome || !outcome.later) return;
   void outcome.later.then((settled) => {
-    const turn = turnOf(id);
-    if (!turn || turn.body.kind !== "receipt") return;
-    settleAskTurn(id, { ...turn, body: { ...turn.body, receipt: settled, settling: false } });
+    // Only the settled line, applied to the turn as it is when written (it may be
+    // held through a Take, and the turn may have changed meanwhile).
+    settleAskTurn(id, (turn) =>
+      turn.kind === "tool" && turn.body.kind === "receipt" ? { ...turn, body: { ...turn.body, receipt: settled, settling: false } } : null,
+    );
   });
 }
 
@@ -189,7 +204,7 @@ export function runAskCall(call: ToolCall, said: string): string {
     return id;
   }
   const outcome = runCoachTool(call, at.host, at.ctx);
-  appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host) });
+  appendAskTurn({ id, kind: "tool", body: bodyOf(outcome, at.host, at.ctx) });
   followLater(id, outcome);
   return id;
 }
@@ -204,7 +219,7 @@ export function pressProposal(id: string): void {
     return;
   }
   const result = confirmCoachTool(turn.body.proposal, at.host, at.ctx);
-  setBody(id, bodyOf(result, at.host));
+  setBody(id, bodyOf(result, at.host, at.ctx));
   followLater(id, result);
 }
 
@@ -250,11 +265,27 @@ export function pressUndo(id: string): void {
  * The view changed. A way back is good only on the screen its receipt left the
  * player on, and an Undo only on the screen it was issued on: anywhere else
  * neither is offered any more (the runner would refuse a confirmed change's
- * Undo there anyway). Called by the host when the view changes, never per beat.
+ * Undo there anyway). An open proposal does not outlive the screen it was made
+ * on, nor (in a Session) the step: it is dismissed through the runner and its
+ * card says that has changed, so no live button is left whose "what stops" was
+ * written for another moment (review t1b1 S1). Called by the host when the view
+ * or the Session's step changes (`step` given: the step now, null outside a
+ * Session; omitted: not known), never per beat.
  */
-export function noteAskToolView(view: MainView): void {
+export function noteAskToolView(view: MainView, step?: number | null): void {
   for (const turn of getAskState().turns) {
-    if (turn.kind !== "tool" || turn.body.kind !== "receipt") continue;
+    if (turn.kind !== "tool") continue;
+    if (turn.body.kind === "proposal") {
+      const body = turn.body;
+      if (body.state !== "open") continue;
+      const viewMoved = body.view == null || body.view !== view;
+      const stepMoved = step !== undefined && body.step != null && step !== body.step;
+      if (!viewMoved && !stepMoved) continue;
+      dismissProposal(body.proposal);
+      setBody(turn.id, { ...body, state: "expired" });
+      continue;
+    }
+    if (turn.body.kind !== "receipt") continue;
     const undo = turn.body.undo;
     if (!undo || undo.state !== "live" || undo.view === null || undo.view === view) continue;
     setBody(turn.id, { ...turn.body, undo: { ...undo, state: "gone" } });

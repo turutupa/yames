@@ -99,12 +99,14 @@ export function useAskHost(input: AskHostInput): { panel: CoachPanel; lookingAt:
 
   const { session, view, isPlaying } = input;
 
-  // A receipt's way back is good on its own screen only: say when the screen changes.
-  useEffect(() => {
-    noteAskToolView(view);
-  }, [view]);
   const run = session.run;
   const inSession = view === "session";
+  // A receipt's way back is good on its own screen only, and an open proposal on
+  // its own screen and Session step only: say when either changes.
+  const step = inSession && run.phase !== "idle" ? run.stepIndex : null;
+  useEffect(() => {
+    noteAskToolView(view, step);
+  }, [view, step]);
   useAskSessionRules({
     inSession,
     takeRunning: run.phase === "playing" || run.phase === "listening",

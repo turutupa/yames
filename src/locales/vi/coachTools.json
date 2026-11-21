@@ -25,6 +25,7 @@
       "loadPreset": "Đã tải {{preset}}",
       "loadingPreset": "Đang tải {{preset}}…",
       "presetGone": "{{preset}} không còn nữa, nên chưa tải gì",
+      "presetFailed": "{{preset}} chưa tải hết: một số cài đặt có thể chưa thay đổi",
       "loadAsked": "Yames đã hỏi về các thay đổi chưa lưu của bạn trước. Chưa tải gì cho đến khi bạn trả lời.",
       "clickSubdivision": "Số tiếng click mỗi phách: {{to}}",
       "setSetting": "{{key}}: {{to}}",

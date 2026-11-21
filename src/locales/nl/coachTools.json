@@ -25,6 +25,7 @@
       "loadPreset": "{{preset}} geladen",
       "loadingPreset": "{{preset}} laden…",
       "presetGone": "{{preset}} bestaat niet meer, dus er is niets geladen",
+      "presetFailed": "{{preset}} is niet helemaal geladen: sommige instellingen zijn misschien niet veranderd",
       "loadAsked": "Yames vroeg eerst naar je niet-opgeslagen wijzigingen. Er wordt niets geladen tot je antwoordt.",
       "clickSubdivision": "Kliks per tel: {{to}}",
       "setSetting": "{{key}}: {{to}}",

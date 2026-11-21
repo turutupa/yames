@@ -171,8 +171,9 @@ function AskConversation({
   }, [turns]);
 
   // The tools' chips for where the player is (leg t1b1): chosen when the screen or
-  // the thread changes, never per beat (the panel renders from its store alone).
-  const chips = useMemo(() => askToolChips(), [lookingKey, turns.length]);
+  // the thread is written (a turn updated in place too: a proposal's press changes
+  // what the chips may offer), never per beat (the panel renders from its store alone).
+  const chips = useMemo(() => askToolChips(), [lookingKey, turns]);
   const chipRow =
     chips.length > 0 ? (
       <div className="ask-chips" data-testid="ask-tool-chips">

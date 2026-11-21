@@ -59,6 +59,7 @@ import {
 import { AskPanel } from "../coach/AskPanel";
 import { askShownOn, useAskHost } from "../coach/useAskHost";
 import { useCoachToolHost } from "../coach/useCoachToolHost";
+import { loadPresetAfterReRead } from "../coach/coachPresetLoad";
 import { askCoach, closeAsk, getAskState, useAskState } from "../coach/askStore";
 import { ToolCoach } from "../coach/ToolCoach";
 import { revealToolRuns } from "../coach/ToolRuns";
@@ -1726,7 +1727,9 @@ export function MainWindow() {
   // preset applied its BPM and nothing else. `presetBeatGroups` maps 0 to
   // [4] and `presetFreeMode` turns that preset into FREE mode (same rule
   // as the Rust store migration); the try/catch contains the rest.
-  const handleLoadPreset = useCallback(async (preset: Preset) => {
+  // Resolves true when every step was applied (the coach's receipt reads it).
+  const handleLoadPreset = useCallback(async (preset: Preset): Promise<boolean> => {
+    let allApplied = true;
     const steps: Array<[string, () => Promise<unknown>]> = [
       ["bpm", () => setBpm(preset.bpm)],
       ["subdivision", () => setSubdivision(preset.subdivision as Subdivision)],
@@ -1753,6 +1756,7 @@ export function MainWindow() {
       try {
         await run();
       } catch (err) {
+        allApplied = false;
         coachDebug("loadPreset.step-failed", { preset: preset.id, step: name, err });
       }
     }
@@ -1762,6 +1766,7 @@ export function MainWindow() {
     // left loaded goes on writing its table to the engine.
     setlistSession.closeSetlist();
     closeJamRef.current();
+    return allApplied;
   }, [setView, setlistSession.closeSetlist]);
 
   // The coach's tools (legs t1a1, t1a2): one host, built once and read
@@ -1796,14 +1801,8 @@ export function MainWindow() {
       guarded(() => {
         ran = true;
         // Re-read at the press: a preset deleted since the coach proposed it is not applied,
-        // and the receipt hears which it was (`applied`).
-        void listPresets()
-          .then((list) => {
-            const fresh = list.find((p) => p.id === preset.id);
-            if (fresh) void handleLoadPreset(fresh);
-            applied?.(fresh !== undefined);
-          })
-          .catch(() => applied?.(false));
+        // and the receipt hears which it was (`applied`), once the preset has been applied.
+        void loadPresetAfterReRead(preset.id, listPresets, handleLoadPreset, applied);
       });
       return ran ? "done" : "asked";
     },

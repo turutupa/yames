@@ -42,6 +42,7 @@ import type { MainView } from "../main-window/MainHeader";
 import type { PathsPlace } from "../main-window/hooks/usePathsPlace";
 import type { PracticeView } from "../session/highway/runwayModel";
 import type { SessionRun } from "../session/hooks/useSessionRun";
+import type { PresetApplied } from "./coachPresetLoad";
 
 /** The safe settings the window holds (the rest are the Session's, or the hook's own: the language). */
 export type CoachToolSettingsInput = {
@@ -88,10 +89,11 @@ export type CoachToolHostInput = {
   /**
    * `handleLoadPreset` behind the unsaved-work gate, the preset re-read from
    * the store first (one deleted since is not applied): `"asked"` when the
-   * gate's question opened instead. `applied` hears the re-read's result
-   * (true: applied; false: gone or unreadable, nothing applied).
+   * gate's question opened instead. `applied` hears how it went once the
+   * preset has been applied (`coachPresetLoad.ts`): true: every step applied;
+   * false: gone or unreadable, nothing applied; "failed": a step failed.
    */
-  loadPreset: (preset: Preset, applied?: (ok: boolean) => void) => "done" | "asked";
+  loadPreset: (preset: Preset, applied?: (ok: PresetApplied) => void) => "done" | "asked";
   settings: CoachToolSettingsInput;
   /** The saved presets (the `list_presets` IPC). A test passes its own. */
   listPresets?: () => Promise<Preset[]>;

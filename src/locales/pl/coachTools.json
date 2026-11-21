@@ -25,6 +25,7 @@
       "loadPreset": "Wczytano: {{preset}}",
       "loadingPreset": "Wczytywanie: {{preset}}…",
       "presetGone": "{{preset}} już nie istnieje, więc nic nie wczytano",
+      "presetFailed": "{{preset}}: nie wczytano wszystkiego, niektóre ustawienia mogły się nie zmienić",
       "loadAsked": "Yames najpierw zapytał o Twoje niezapisane zmiany. Nic nie zostanie wczytane, dopóki nie odpowiesz.",
       "clickSubdivision": "Kliknięć na uderzenie: {{to}}",
       "setSetting": "{{key}}: {{to}}",
