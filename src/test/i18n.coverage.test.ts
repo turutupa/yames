@@ -85,8 +85,13 @@ describe("locale key coverage", () => {
   const keys = englishKeys();
   const { exact, prefixes } = callSites();
 
+  // Namespaces read whole as data rather than key by key: the tools' tip
+  // catalogue is handed to `pickTemplate` as one tree (`templateCatalog.ts`).
+  const readWhole = ["toolTips."];
+
   const used = (key: string) => {
     if (exact.has(key)) return true;
+    if (readWhole.some((p) => key.startsWith(p))) return true;
     for (const suffix of PLURAL_SUFFIXES) {
       if (key.endsWith(suffix) && exact.has(key.slice(0, -suffix.length))) return true;
     }

@@ -49,6 +49,11 @@ const NAMESPACES = [
   "settings",
   "shell",
   "songs",
+  // The tools' tip catalogue (leg c5c3): data, not t() keys. `templateCatalog.ts`
+  // reads the whole file and fills its `{name}` slots itself; the slot-by-slot
+  // parity (variants, placeholders, sections still pending) is
+  // `src/coach/toolTips.locales.test.ts`.
+  "toolTips",
   "zen",
 ];
 
