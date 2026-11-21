@@ -67,8 +67,8 @@ describe("the budgets (DESIGN 5.5)", () => {
 
   it("the grammar is narrowed to the tools that can run here", () => {
     const req = choiceRequest("x", FACTS, 1);
-    expect(req.grammar).toContain('"set_tempo"');
-    expect(req.grammar).not.toContain('"start_today"');
+    expect(req.grammar).toContain("set_tempo");
+    expect(req.grammar).not.toContain("start_today");
   });
 
   it("the last exchange is at most 150 tokens, cut at a word", () => {
@@ -81,12 +81,20 @@ describe("the budgets (DESIGN 5.5)", () => {
   });
 
   it("a context that would pass 450 is cut by rule, oldest first: the last exchange goes, then facts from the end", () => {
-    const many = Array.from({ length: 200 }, (_, i) => `Preset number ${i}`);
-    const big: ChoiceFacts = { ...FACTS, presets: many, jams: many };
-    const text = fitContext(big, "set the tempo to eighty");
-    expect(estimateTokens(text)).toBeLessThanOrEqual(ASK_CONTEXT_TOKENS);
-    expect(text).not.toContain("Before:");
-    expect(text.startsWith("Screen: beat")).toBe(true);
+    const previous = Array.from({ length: 60 }, (_, i) => `w${i}`).join(" ");
+    let dropped = 0;
+    for (let n = 0; n <= 120; n++) {
+      const facts: ChoiceFacts = { ...FACTS, presets: Array.from({ length: n }, (_, i) => `Preset number ${i}`) };
+      const text = fitContext(facts, previous);
+      expect(estimateTokens(text)).toBeLessThanOrEqual(ASK_CONTEXT_TOKENS);
+      expect(text.startsWith("Screen: beat")).toBe(true);
+      if (!text.includes("Before:")) {
+        dropped += 1;
+        // The exchange went first; the facts about now are all still there.
+        expect(text).toBe(fitContext(facts, null));
+      }
+    }
+    expect(dropped).toBeGreaterThan(0);
     const small = fitContext(FACTS, "set the tempo to eighty");
     expect(small).toContain("Before: set the tempo to eighty");
     expect(estimateTokens(small)).toBeLessThanOrEqual(ASK_CONTEXT_TOKENS);

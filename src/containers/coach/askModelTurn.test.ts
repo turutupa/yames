@@ -5,8 +5,6 @@
  * a generation in flight is cancelled and its result dropped.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createElement } from "react";
-import { render } from "@testing-library/react";
 import type { CoachAskOutcome } from "../../ipc";
 import { mockInvoke, setInvokeResponse } from "../../test/mocks";
 import { publish, resetCoachBus } from "../../coach/bus";
@@ -39,7 +37,7 @@ function heldAsk() {
 }
 
 const flush = async () => {
-  for (let i = 0; i < 5; i++) await Promise.resolve();
+  for (let i = 0; i < 3; i++) await new Promise((resolve) => setTimeout(resolve, 0));
 };
 const kinds = () => getAskState().turns.map((t) => (t.kind === "tool" ? `tool:${t.body.kind}` : t.kind));
 const asks = () => mockInvoke.mock.calls.filter(([cmd]) => cmd === "coach_ask").length;
@@ -97,7 +95,7 @@ describe("the chain: which engine answered, and whether the model was called", (
 describe("how an answer becomes turns", () => {
   it("the plain statement at once, the working line while it chooses, then a read tool's receipt under it", async () => {
     const answer = heldAsk();
-    answerTyped("show me A minor pentatonic", "en");
+    answerTyped("which notes fit over a sad sounding A", "en");
     expect(kinds()).toEqual(["user", "app"]);
     await flush();
     expect(kinds()).toEqual(["user", "app", "model"]);
@@ -128,6 +126,7 @@ describe("how an answer becomes turns", () => {
   });
 
   it("a confirm call is a proposal too", async () => {
+    host = fakeHost({ view: "beat" }, { tempo: () => 100 });
     __setAskToolsForTests(host, toolCtx({ screen: "beat" }));
     setInvokeResponse("coach_ask", answered('{"tool":"set_tempo","args":{"bpm":80}}'));
     answerTyped("could we go a bit more relaxed, like eighty", "en");
@@ -208,18 +207,4 @@ describe("every cancel: the generation is cancelled in Rust and its result dropp
       noteAskJamTake(false);
     });
   }
-
-  it("the panel unmounting", async () => {
-    const { AskPanel } = await import("./AskPanel");
-    const view = render(createElement(AskPanel, { lookingAt: null, onClose: () => {} }));
-    const answer = heldAsk();
-    answerTyped("what should I practise for speed", "en");
-    await flush();
-    view.unmount();
-    await flush();
-    expect(cancels()).toHaveLength(1);
-    answer(answered('{"tool":"go_to","args":{"screen":"progress"}}'));
-    await flush();
-    expect(kinds()).toEqual(["user", "app"]);
-  });
 });

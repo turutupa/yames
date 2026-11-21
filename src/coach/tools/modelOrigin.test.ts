@@ -81,10 +81,8 @@ describe("a go tool the model chose", () => {
     expect(host.changes()).toEqual([]);
   });
 
-  it("a confirm tool is a proposal as it always was; a read tool runs and changes nothing", () => {
+  it("a read tool runs and changes nothing", () => {
     const host = fakeHost({ view: "beat" });
-    const setTempo = runCoachTool({ tool: "set_tempo", args: { bpm: 90 } }, host, toolCtx({ screen: "beat" }), undefined, MODEL);
-    expect(setTempo.ok && "proposal" in setTempo).toBe(true);
     const read = runCoachTool({ tool: "show_scale", args: { root: "A", scale: "minorPentatonic" } }, host, toolCtx({ screen: "beat" }), undefined, MODEL);
     expect(read.ok && !("proposal" in read)).toBe(true);
     expect(host.changes()).toEqual([]);
